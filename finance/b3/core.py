@@ -13,8 +13,7 @@ class MarginSimulatorB3:
         self.hostname_api_margin_simulator_b3 = hostname_api_margin_simulator_b3
 
     @property
-    def access_token(self, method='GET', key_header='header', int_max_retrieves=1000,
-                     int_status_code_ok=200, int_status_code_iteration=400, bl_verify=False,
+    def access_token(self, method='GET', bl_verify=False,
                      bl_str_dict_params=False, app='/api/oauth/token'):
         '''
         DOCSTRING: ACCESS TOKEN TO GRANT ACCESS TO MARGIN SIMULATOR B3
@@ -41,16 +40,6 @@ class MarginSimulatorB3:
         # looping while status code not a 2xx response
         resp_req = request(method=method, url=self.hostname_api_margin_simulator_b3 + app,
                            headers=dict_headers, params=dict_params, verify=bl_verify)
-        print(resp_req.status_code)
-        # while (int_status_code_iteration != int_status_code_ok) and (
-        #     i <= int_max_retrieves):
-        #     try:
-        #         resp_req = request(method=method, url=self.hostname_api_margin_simulator_b3 + app,
-        #                         headers=dict_headers, params=dict_params, verify=bl_verify)
-        #     except:
-        #         continue
-        #     int_status_code_iteration = resp_req.status_code
-        #     i += 1
         # raises exception when not a 2xx response
         resp_req.raise_for_status()
         # getting authheader
