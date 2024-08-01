@@ -1,0 +1,453 @@
+# COLLECTING UP2DATA B3 INFORMATION - ROOT URL: https://arquivos.b3.com.br/Web/Consolidated
+
+import pandas as pd
+from requests import request
+from zipfile import ZipFile
+from stpstone.settings.global_slots import YAML_B3
+from stpstone.opening_config.setup import iniciating_logging
+from stpstone.loggs.create_logs import CreateLog
+from stpstone.microsoft_apps.teams.teams_integration import TeamsConn
+from stpstone.cals.handling_dates import DatesBR
+from stpstone.handling_data.json import JsonFiles
+from stpstone.handling_data.object import HandlingObjects
+from stpstone.handling_data.lists import HandlingLists
+from stpstone.directories_files_manag.managing_ff import DirFilesManagement
+from stpstone.cals.handling_dates import DatesBR
+from stpstone.handling_data.lists import StrHandler
+from stpstone.handling_data.xml import XMLFiles
+from stpstone.loggs.db_logs import DBLogs
+
+
+class UP2DATAB3:
+
+    def daily_trades_secondary_market(self, wd_bef=1, 
+                                      bl_change_date_type=False, str_sep=';', 
+                                      str_decimal=',', 
+                                      url_daily_trades='https://arquivos.b3.com.br/apinegocios/tickercsv/{}/', 
+                                      bl_verify=False, bl_io_interpreting=False, 
+                                      str_input_date_format='AAAA-MM-DD', 
+                                      col_data_ref='DataReferencia', 
+                                      col_instrumento='CodigoInstrumento', 
+                                      col_acao_atualizada='AcaoAtualizacao', col_pu='PrecoNegocio', 
+                                      col_qtd_negociada='QuantidadeNegociada', 
+                                      col_horario_fechamento='HoraFechamento', 
+                                      col_cod_id_negocio='CodigoIdentificadorNegocio', 
+                                      col_tipo_sessao_pregao='TipoSessaoPregao', 
+                                      col_data_negocio='DataNegocio', 
+                                      col_participante_comprador='CodigoParticipanteComprador', 
+                                      col_participante_vendedor='CodigoParticipanteVendedor', 
+                                      col_create_asset='ASSET', value_nan='N/A'):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # reference date
+        date_ref = DatesBR().sub_working_days(DatesBR().curr_date, wd_bef).strftime('%Y-%m-%d')
+        # requesting daily trades
+        file_daily_trades = DirFilesManagement().get_zip_from_web_in_memory(
+            url_daily_trades.format(date_ref), 
+            bl_io_interpreting=bl_io_interpreting,
+            bl_verify=bl_verify)
+        # importing to pandas dataframe
+        reader = pd.read_csv(file_daily_trades,
+                             sep=str_sep, decimal=str_decimal)
+        df_daily_trades = pd.DataFrame(reader)
+        # substituindo valores nulos
+        df_daily_trades.fillna(value_nan, inplace=True)
+        # changing columns types
+        df_daily_trades = df_daily_trades.astype({
+            col_data_ref: str,
+            col_instrumento: str,
+            col_acao_atualizada: int,
+            col_pu: float,
+            col_qtd_negociada: int,
+            col_horario_fechamento: int,
+            col_cod_id_negocio: int,
+            col_tipo_sessao_pregao: int,
+            col_data_negocio: str,
+            col_participante_comprador: int,
+            col_participante_vendedor: int
+        }, errors='ignore')
+        if bl_change_date_type == True:
+            for col_ in [col_data_negocio, col_data_ref]:
+                df_daily_trades[col_] = [DatesBR().str_dates_to_datetime(x, str_input_date_format) 
+                                        for x in df_daily_trades[col_].tolist()]
+        # column asset
+        df_daily_trades[col_create_asset] = [row[col_instrumento][:3] for _, row in 
+                                             df_daily_trades.iterrows()]
+        # adding logging
+        df_daily_trades = DBLogs().audit_log(
+            df_daily_trades, 
+            DatesBR().utc_from_dt(
+                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+            ), 
+            DatesBR().utc_log_ts
+        )
+        # returning dataframe
+        return df_daily_trades
+
+    @property
+    def instruments_register_raw(self, method_request='GET', key_token='token',
+                                 key_ticker_symbol='TckrSymb'):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # api consulta lotes padrão xp
+        url_token = YAML_B3['up2data_b3']['request_token'].format(
+            DatesBR().curr_date)
+        url_lotes_padrao_b3 = YAML_B3['up2data_b3']['access_api']
+        # coletando token para consulta da API da B3
+        token_api_b3 = \
+            HandlingObjects().literal_eval_data(
+                request(method_request, url_token).text)[key_token]
+        print('TOKEN IRR: {}'.format(token_api_b3))
+        url_lotes_padrao_b3 = str(url_lotes_padrao_b3).format(token_api_b3)
+        print('URL LOTE PADRAO B3: {}'.format(url_lotes_padrao_b3))
+        response_api_b3_lote_padrao = request(
+            method_request, url_lotes_padrao_b3.format(token_api_b3)).text
+        print('RESPONSE API B3 LOTE PADRAO: {}'.format(response_api_b3_lote_padrao))
+        # tratando dados provindos da API
+        list_response_api_b3 = response_api_b3_lote_padrao.split('\r\n')
+        list_cabecalho_reponse_api_b3 = list_response_api_b3[0].split(';')
+        list_response_api_b3 = list_response_api_b3[1:]
+        dict_dados_cadastrais_b3 = dict()
+        for row in list_response_api_b3:
+            list_row = row.split(';')
+            try:
+                dict_dados_cadastrais_b3[list_row[list_cabecalho_reponse_api_b3.index(
+                    key_ticker_symbol)]] = dict(zip(list_cabecalho_reponse_api_b3, list_row))
+            except:
+                pass
+        # criando dataframe à partir do dicionário de interesse
+        df_instruments_register_b3_raw = pd.DataFrame(
+            list(dict_dados_cadastrais_b3.values()))
+        # changing column types
+        list_cols_df = list(df_instruments_register_b3_raw.columns)
+        df_instruments_register_b3_raw = df_instruments_register_b3_raw.astype(
+            dict(zip(list_cols_df, [str] * len(list_cols_df))))
+        # adding logging
+        df_instruments_register_b3_raw = DBLogs().audit_log(
+            df_instruments_register_b3_raw, 
+            DatesBR().utc_from_dt(DatesBR().curr_date), 
+            DatesBR().utc_log_ts
+        )
+        # retornando dicionário com dados cadastrais de instrumentos negociados na b3
+        return df_instruments_register_b3_raw
+
+    @property
+    def security_category_name(self, dict_export=dict(), key_ticker='TckrSymb',
+                               col_security_category_name='SctyCtgyNm',
+                               col_market_name='MktNm',
+                               list_markets_classified=list(),
+                               bl_return_markets_not_classified=False):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # fetch in memory instruments register of assets traded in b3 exchange
+        df_instruments_register_b3_raw = self.instruments_register_raw
+        print('*** REIGSTER B3 RAW ***')
+        print(df_instruments_register_b3_raw)
+        # creating dictionary with instruments according to each type of market
+        for security_division, col_ in [
+            ('securities_by_category_name', col_security_category_name),
+                ('securities_by_market_name', col_market_name)]:
+            for market, list_source_names in YAML_B3['up2data_b3'][security_division].items():
+                #   validating wheter the market is already in the exporting dictionary and extending
+                #       or creating a new list
+                if market not in dict_export:
+                    dict_export[market] = HandlingLists().remove_duplicates(
+                        df_instruments_register_b3_raw[
+                            df_instruments_register_b3_raw[col_].isin(
+                                list_source_names)][key_ticker].tolist())
+                else:
+                    dict_export[market].extend(HandlingLists().remove_duplicates(
+                        df_instruments_register_b3_raw[
+                            df_instruments_register_b3_raw[col_].isin(
+                                list_source_names)][key_ticker].tolist()))
+                list_markets_classified.extend(list_source_names)
+        # defining markets not classified, if is user's will
+        if bl_return_markets_not_classified == True:
+            return HandlingLists().remove_duplicates(
+                df_instruments_register_b3_raw[
+                    ~df_instruments_register_b3_raw[col_security_category_name].isin(
+                        list_markets_classified)][col_security_category_name].tolist())
+        else:
+            #   returing dictionary with tickers accordingly to the market type which participates
+            return dict_export
+
+    def loan_balace(self, wd_bef=1, url='https://arquivos.b3.com.br/tabelas/table/LoanBalance/{}/{}', 
+                    method='GET', key_pg_count='pageCount', key_valores='values', 
+                    list_cols_lb_b3=['RptDt', 'TckrSymb', 'Asst', 'QtyCtrctsDay', 'QtyShrDay', 
+                                     'DnrMinRate', 'DnrAvrgRate', 'DnrMaxRate', 'TakrMinRate', 
+                                     'TakrAvrgRate', 'TakrMaxRate', 'MktNm'], 
+                    list_dicts=list()):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # reference date
+        data_ref_lb_b3 = DatesBR().sub_working_days_before(
+            DatesBR().curr_date, wd_bef).strftime('%Y-%m-%d')
+        # payload
+        dict_payload = {}
+        # headers
+        dict_headers = {
+            'authority': 'arquivos.b3.com.br',
+            'accept': '*/*',
+            'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+            'cookie': 'OptanonAlertBoxClosed=2023-03-24T13:33:20.482Z; _ga_T6D1M7G116=GS1.1.1684332031.17.0.1684332031.60.0.0; _tt_enable_cookie=1; _ttp=-3ewIEHyq8lWLAqJVQ6O6T5fGqv; _ga_X5KRPBP7ZE=GS1.3.1690829338.5.1.1690829690.60.0.0; _ga_0W7NXV5699=GS1.1.1695259533.1.0.1695259540.0.0.0; lumClientId=FF8080818A6B1B5C018ABCE5D291602D; lumMonUid=l_QNKA5sbq-l9hkDYeDpkuHl5Qvn8pSA; _ga_F2HQZ24Y48=GS1.1.1695386295.1.1.1695386413.36.0.0; visid_incap_2246223=zCpOWadTSVqdEX/oNXZmLb0vl2UAAAAAQUIPAAAAAAArXUd3AyxcF+G4fbInAZ/+; _gcl_au=1.1.1328610258.1704896955; _gcl_aw=GCL.1709150038.CjwKCAiA0PuuBhBsEiwAS7fsNTm-phWyGfd21MQsHApfiDnWpzvVnpH-JCKFzGOxLwGYnYogLKSlFBoCQXQQAvD_BwE; _ga_5E2DT9ZLVR=GS1.1.1709150038.3.1.1709150112.60.0.0; _ga_CNJN5WQC5G=GS1.1.1709239346.20.0.1709239476.0.0.0; _ga_CRYYSCYF12=GS1.1.1709825617.2.1.1709825617.60.0.0; _ga_FTT9L7SR7B=GS1.1.1709827350.1.1.1709829244.54.0.0; nlbi_2246223=LPzcM1dvj3Qj9PJY9OkOmwAAAAAHcT0kwIANYP4of6jRlfTo; incap_ses_1239_2246223=V2rbSa8xMQgKwd16LtExEbuC+WUAAAAA6Bx9qzgrW2qvO8fGb1s7Ug==; dtCookie=v_4_srv_33_sn_B96EE88FC773C73EDD967E7FE8D41023_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_0_rcs-3Acss_0; _gid=GA1.3.971339064.1710850908; _clck=v6volp%7C2%7Cfk7%7C0%7C1232; auth0=; TS0171d45d=011d592ce15f7772eec4672b5224a65a3ed9ad68450822231fe43032d6783dbc2d826bb431969fefc876b99ec27a5a6eacbd316945; _ga_SS7FXRTPP3=GS1.1.1710850908.138.1.1710852407.59.0.0; _ga=GA1.3.154973072.1679664794; OptanonConsent=isGpcEnabled=0&datestamp=Tue+Mar+19+2024+09%3A46%3A47+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A1%2CC0001%3A1%2CC0004%3A1%2CC0002%3A1&geolocation=%3B&AwaitingReconsent=false; _clsk=hrfzvd%7C1710852408467%7C8%7C1%7Cb.clarity.ms%2Fcollect; incap_ses_1239_2246223=9YpWOoNjqRP6zeF6LtExEfGI+WUAAAAASCaRRjwRJW3uB4oCgh0+dg==; nlbi_2246223=fL1wUKg2iFtTP+KU9OkOmwAAAABL1G2EaiPMxRnkbfBf01Ql; visid_incap_2246223=WX+mv0j8SJ2ikziYIwjLooCG+WUAAAAAQUIPAAAAAAD1iQw5sjPBQa6Xku7lrpeD; auth0=',
+            'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'x-elastica_gw': '3.116.0'
+        }
+        # retrieving loan balance b3
+        resp_req = request(method, url.format(data_ref_lb_b3, 1), headers=dict_headers, 
+                           data=dict_payload)
+        # raise error when status code is different from 2xx
+        resp_req.raise_for_status()
+        # storying current json in memory
+        json_lb_b3 = resp_req.json()
+        # verificando o número de páginas a serem consultadas
+        int_pgs_lb_b3 = json_lb_b3[key_pg_count]
+        # loopando em torno das páginas de interesse
+        for i in range(1, int_pgs_lb_b3 + 1):
+            #   retrieving loan balance b3
+            resp_req = request(method, url.format(data_ref_lb_b3, i), headers=dict_headers, 
+                               data=dict_payload)
+            #   raise error when status code is different from 2xx
+            resp_req.raise_for_status()
+            #   storying current json in memory
+            json_lb_b3 = resp_req.json()
+            #   looping within available values
+            for list_ in json_lb_b3[key_valores]:
+                #   appending to serialized list
+                list_dicts.append(
+                    dict(zip(list_cols_lb_b3, list_))
+                )
+        # builiding dataframe
+        df_lb_b3 = pd.DataFrame(list_dicts)
+        # dropping duplicates
+        df_lb_b3.drop_duplicates(inplace=True)
+        # changing column types
+        df_lb_b3 = df_lb_b3.astype({
+            list_cols_lb_b3[0]: str,
+            list_cols_lb_b3[1]: str,
+            list_cols_lb_b3[2]: str,
+            list_cols_lb_b3[3]: float,
+            list_cols_lb_b3[4]: float,
+            list_cols_lb_b3[5]: float,
+            list_cols_lb_b3[6]: float,
+            list_cols_lb_b3[7]: float,
+            list_cols_lb_b3[8]: float,
+            list_cols_lb_b3[9]: float,
+            list_cols_lb_b3[10]: float,
+            list_cols_lb_b3[11]: str
+        })
+        df_lb_b3[list_cols_lb_b3[0]] = [DatesBR().timestamp_separator_string_to_datetime(d) 
+                                        for d in df_lb_b3[list_cols_lb_b3[0]]]
+        # sorting dataframe
+        df_lb_b3.sort_values([
+            list_cols_lb_b3[0],
+            list_cols_lb_b3[1],
+            list_cols_lb_b3[2],
+            list_cols_lb_b3[-1]
+        ], ascending=[False, True, True, True], inplace=True)
+        # adding logging
+        df_lb_b3 = DBLogs().audit_log(
+            df_lb_b3, 
+            DatesBR().utc_from_dt(
+                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+            ), 
+            DatesBR().utc_log_ts
+        )
+        # returning dataframe
+        return df_lb_b3
+
+    def lending_open_position(self, wd_bef=1, url='https://arquivos.b3.com.br/tabelas/table/LendingOpenPosition/{}/{}', 
+                              method='GET', key_pg_count='pageCount', key_valores='values', 
+                              list_cols_lop_b3=['RptDt', 'TckrSymb', 'Asst', 'BalQty', 'TradAvrgPric', 'PricFctr', 'BalVal'], 
+                              list_dicts=list()):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # reference date
+        data_ref_lb_b3 = DatesBR().sub_working_days_before(
+            DatesBR().curr_date, wd_bef).strftime('%Y-%m-%d')
+        # payload
+        dict_payload = {}
+        # headers
+        dict_headers = {
+            'authority': 'arquivos.b3.com.br',
+            'accept': '*/*',
+            'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+            'cookie': 'OptanonAlertBoxClosed=2023-03-24T13:33:20.482Z; _ga_T6D1M7G116=GS1.1.1684332031.17.0.1684332031.60.0.0; _tt_enable_cookie=1; _ttp=-3ewIEHyq8lWLAqJVQ6O6T5fGqv; _ga_X5KRPBP7ZE=GS1.3.1690829338.5.1.1690829690.60.0.0; _ga_0W7NXV5699=GS1.1.1695259533.1.0.1695259540.0.0.0; lumClientId=FF8080818A6B1B5C018ABCE5D291602D; lumMonUid=l_QNKA5sbq-l9hkDYeDpkuHl5Qvn8pSA; _ga_F2HQZ24Y48=GS1.1.1695386295.1.1.1695386413.36.0.0; visid_incap_2246223=zCpOWadTSVqdEX/oNXZmLb0vl2UAAAAAQUIPAAAAAAArXUd3AyxcF+G4fbInAZ/+; _gcl_au=1.1.1328610258.1704896955; _gcl_aw=GCL.1709150038.CjwKCAiA0PuuBhBsEiwAS7fsNTm-phWyGfd21MQsHApfiDnWpzvVnpH-JCKFzGOxLwGYnYogLKSlFBoCQXQQAvD_BwE; _ga_5E2DT9ZLVR=GS1.1.1709150038.3.1.1709150112.60.0.0; _ga_CNJN5WQC5G=GS1.1.1709239346.20.0.1709239476.0.0.0; _ga_CRYYSCYF12=GS1.1.1709825617.2.1.1709825617.60.0.0; _ga_FTT9L7SR7B=GS1.1.1709827350.1.1.1709829244.54.0.0; nlbi_2246223=LPzcM1dvj3Qj9PJY9OkOmwAAAAAHcT0kwIANYP4of6jRlfTo; incap_ses_1239_2246223=V2rbSa8xMQgKwd16LtExEbuC+WUAAAAA6Bx9qzgrW2qvO8fGb1s7Ug==; dtCookie=v_4_srv_33_sn_B96EE88FC773C73EDD967E7FE8D41023_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_0_rcs-3Acss_0; _gid=GA1.3.971339064.1710850908; _clck=v6volp%7C2%7Cfk7%7C0%7C1232; auth0=; TS0171d45d=011d592ce15f7772eec4672b5224a65a3ed9ad68450822231fe43032d6783dbc2d826bb431969fefc876b99ec27a5a6eacbd316945; _ga_SS7FXRTPP3=GS1.1.1710850908.138.1.1710852407.59.0.0; _ga=GA1.3.154973072.1679664794; OptanonConsent=isGpcEnabled=0&datestamp=Tue+Mar+19+2024+09%3A46%3A47+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A1%2CC0001%3A1%2CC0004%3A1%2CC0002%3A1&geolocation=%3B&AwaitingReconsent=false; _clsk=hrfzvd%7C1710852408467%7C8%7C1%7Cb.clarity.ms%2Fcollect; incap_ses_1239_2246223=9YpWOoNjqRP6zeF6LtExEfGI+WUAAAAASCaRRjwRJW3uB4oCgh0+dg==; nlbi_2246223=fL1wUKg2iFtTP+KU9OkOmwAAAABL1G2EaiPMxRnkbfBf01Ql; visid_incap_2246223=WX+mv0j8SJ2ikziYIwjLooCG+WUAAAAAQUIPAAAAAAD1iQw5sjPBQa6Xku7lrpeD; auth0=',
+            'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'x-elastica_gw': '3.116.0'
+        }
+        # retrieving loan balance b3
+        resp_req = request(method, url.format(data_ref_lb_b3, 1), headers=dict_headers, 
+                           data=dict_payload)
+        # raise error when status code is different from 2xx
+        resp_req.raise_for_status()
+        # storying current json in memory
+        json_lb_b3 = resp_req.json()
+        # verificando o número de páginas a serem consultadas
+        int_pgs_lb_b3 = json_lb_b3[key_pg_count]
+        # loopando em torno das páginas de interesse
+        for i in range(1, int_pgs_lb_b3 + 1):
+            #   retrieving loan balance b3
+            resp_req = request(method, url.format(data_ref_lb_b3, i), headers=dict_headers, 
+                               data=dict_payload)
+            #   raise error when status code is different from 2xx
+            resp_req.raise_for_status()
+            #   storying current json in memory
+            json_lb_b3 = resp_req.json()
+            #   looping within available values
+            for list_ in json_lb_b3[key_valores]:
+                #   appending to serialized list
+                list_dicts.append(
+                    dict(zip(list_cols_lop_b3, list_))
+                )
+        # builiding dataframe
+        df_lop_b3 = pd.DataFrame(list_dicts)
+        # dropping duplicates
+        df_lop_b3.drop_duplicates(inplace=True)
+        # changing column types
+        df_lop_b3 = df_lop_b3.astype({
+            list_cols_lop_b3[0]: str,
+            list_cols_lop_b3[1]: str,
+            list_cols_lop_b3[2]: str,
+            list_cols_lop_b3[3]: float,
+            list_cols_lop_b3[4]: float,
+            list_cols_lop_b3[5]: float,
+            list_cols_lop_b3[6]: float
+        })
+        df_lop_b3[list_cols_lop_b3[0]] = [DatesBR().timestamp_separator_string_to_datetime(d) 
+                                        for d in df_lop_b3[list_cols_lop_b3[0]]]
+        # sorting dataframe
+        df_lop_b3.sort_values([
+            list_cols_lop_b3[0],
+            list_cols_lop_b3[1],
+            list_cols_lop_b3[2],
+            list_cols_lop_b3[-1]
+        ], ascending=[False, True, True, True], inplace=True)
+        # adding logging
+        df_lop_b3 = DBLogs().audit_log(
+            df_lop_b3, 
+            DatesBR().utc_from_dt(
+                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+            ), 
+            DatesBR().utc_log_ts
+        )
+        # returning dataframe
+        return df_lop_b3
+    
+    @property
+    def bond_issuers_accepted_warranty_b3(self, url_banks_brazil='http://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv', 
+        url_bond_issuers_warranty_b3='https://www.b3.com.br/data/files/86/34/44/30/407E971089F29C97AC094EA8/Emissores%20Aceitos%20-%20Titulos%20Privados.zip', 
+        bl_io_interpreting=False, col_issuers='ISSUERS', col_ispb='ISPB', col_numero_cod='NUMERO_CODIGO', 
+        col_nome_extenso='NOME_EXTENSO', col_fr_total='FRTotal',
+        dict_replace_str_name= {
+            'S/A': '',
+            'S.A.': '', 
+            'S.A': '',
+            ' SA': '',
+            'LTDA.': '',
+            'LTDA': '',
+            '(BRASIL)': '', 
+            'Brasil S.A.': '',
+            'BRASIL S A': '',
+            'DE INVESTIMENTO': '', 
+            'DE INVEST. ': '', 
+            'BCO': 'BANCO', 
+            'J.P.MORGAN': 'J.P. MORGAN', 
+            'CHINA BRASIL': 'CHINA'
+        }):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # importing to memory banks currently operating domestically
+        reader = pd.read_csv(url_banks_brazil)
+        df_banks_operating_domestically = pd.DataFrame(reader)
+        # change column names
+        df_banks_operating_domestically.rename(columns=dict(zip(
+            df_banks_operating_domestically.columns, 
+            [StrHandler().remove_diacritics(str(x).upper()) for x in 
+                df_banks_operating_domestically.columns])), inplace=True)
+        # defining list of columns
+        list_cols = df_banks_operating_domestically.columns
+        # change columns types
+        df_banks_operating_domestically.fillna(0, inplace=True)
+        df_banks_operating_domestically = df_banks_operating_domestically.astype({
+            col_ispb: int,
+            col_numero_cod: int
+        })
+        df_banks_operating_domestically = df_banks_operating_domestically.astype({
+            col_ispb: str,
+            col_numero_cod: str,
+            col_nome_extenso: str, 
+            col_fr_total: float
+        })
+        # dealing with complete names from financial institutions
+        df_banks_operating_domestically[col_nome_extenso] = [StrHandler().remove_diacritics(
+            StrHandler().replace_all(str(x).upper(), dict_replace_str_name).strip()) 
+            for x in df_banks_operating_domestically[col_nome_extenso].tolist()]
+        # importing to memory banks accepted as warranty in b3 exchange stock market
+        list_unziped_files = DirFilesManagement().get_zip_from_web_in_memory(
+            url_bond_issuers_warranty_b3, 
+            bl_io_interpreting=bl_io_interpreting)
+        if type(list_unziped_files) != list:
+            list_unziped_files = [list_unziped_files]
+        # looping through files in .zip and uploading to dataframe
+        for nome_arquivo_xlsx in list_unziped_files:
+            #   importing to dataframe
+            reader = pd.read_excel(nome_arquivo_xlsx, encoding='utf-8')
+            df_ = pd.DataFrame(reader)
+            #   changing format to list of dictionaries
+            list_banks_warranty_b3 = df_[list(df_.columns)[0]].tolist()
+        # removing duplicates
+        list_banks_warranty_b3 = HandlingLists().remove_duplicates(
+            list_banks_warranty_b3)
+        list_banks_warranty_b3 = [str(x).upper() for x in list_banks_warranty_b3]
+        # creating dataframe with banks accepted as warranty in b3 clearing
+        df_banks_accepted_warranty_b3 = pd.DataFrame([{col_issuers: bank} for bank in 
+            list_banks_warranty_b3])
+        df_banks_accepted_warranty_b3.sort_values([col_issuers], ascending=[True], inplace=True)
+        # dealing with complete names from financial institutions
+        df_banks_accepted_warranty_b3[col_issuers] = [StrHandler().remove_diacritics(
+            StrHandler().replace_all(str(x).upper(), dict_replace_str_name).strip()) 
+            for x in df_banks_accepted_warranty_b3[col_issuers].tolist()]
+        # limiting banks accepted as warranty in b3 clearing
+        df_banks_acc_warr = df_banks_operating_domestically[df_banks_operating_domestically[
+            col_nome_extenso].isin(df_banks_accepted_warranty_b3[col_issuers])]
+        # limitating columns of interest
+        df_banks_acc_warr = df_banks_acc_warr[list_cols]
+        # adding logging
+        df_instruments_register_b3_raw = DBLogs().audit_log(
+            df_instruments_register_b3_raw, 
+            DatesBR().utc_from_dt(DatesBR().curr_date), 
+            DatesBR().utc_log_ts
+        )
+        # returning dataframe of inner join
+        return df_banks_acc_warr

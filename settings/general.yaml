@@ -1,0 +1,12 @@
+### MAIN SETTINGS
+
+# requests
+requests:
+  successful_conn: 200
+  unsuccesful_conn: 404
+
+# audit log cols for storage banks
+audit_log_cols:
+  url: 'URL'
+  last_update: 'LAST_UPDATE'
+  log_timestamp: 'LOG_TIMESTAMP'

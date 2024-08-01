@@ -1,0 +1,338 @@
+### HARDCODES FROM B3 SOURCES
+
+# taxas br
+txs_td_b3:
+  custodia: 0.003
+  administracao: 0
+
+# fatores primitivos de risco b3 - arquivos de pregão
+fatores_primitivos_risco_b3:
+  du_anteriores: 1
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=FP{}.zip'
+  bl_io_interpreting: False
+  bl_verify: False
+  caractere_split_instancias_linha: ';'
+  cols_fatores_primitivos_b3: ['TIPO', 'ID_FPR', 'NOME_FPR', 'FORMATO_VARIACAO', 'ID_GRUPO_FPR',
+    'ID_CAMARA_INDICADOR', 'ID_INSTRUMENTO_INDICADOR', 'ORIGEM_INSTURMENTO_INDICADOR', 'BASE',
+    'BASE_INTERPOLACAO', 'CRITERIO_CAPITALIZACAO']
+  variacao_fatores_primitivos:
+    tipo:
+      1: 'PERCENTUAL'
+      2: 'BASIS_POINTS'
+    origem_instrumento:
+      4: 'ISINI'
+      8: 'SYMBOL'
+      H: 'CLEARINGHOUSE'
+    criterio_capitalizacao:
+      0: 'EXPONENCIAL'
+      1: 'LINEAR'
+      2: 'PRECO'
+  col_incluir_nome_formato_variacao: 'NOME_FORMATO_VARIACAO'
+  col_incluir_nome_origem_instrumento: 'NOME_ORIGEM_INSTRUMENTO'
+  col_incluir_criterio_capitalizacao: 'NOME_CRITERIO_CAPITALIZACAO'
+  valor_na_substituir: -1
+  fprs_curvas: ['2962', '2945', '2944', '2946']
+  fprs_spots: ['2906', '2924', '2925', '2901', '2902', '2934']
+  dict_fprs:
+    2902: 'ACC_IPCA'
+    2901: 'ACC_IGPM'
+    2946: 'C_IGP'
+    2944: 'CIPCA'
+    2945: 'CUPOM'
+    2906: 'DOLAR'
+    2924: 'IDI'
+    2925: 'IGP'
+    2962: 'PRE'
+    2934: 'PRTIP'
+  tipos_fprs:
+    ID_FPR: ['2962', '2906', '2945', '2924', '2944', '2925', '2946', '2901', '2902', '2934']
+    TIPO_FPR: ['Curva', 'Spot', 'Curva', 'Spot', 'Curva', 'Spot', 'Curva', 'Spot', 'Spot', 'Spot']
+  col_tipo: 'TIPO'
+  col_id_fpr: 'ID_FPR'
+
+# securities volatility - b3
+securities_volatility_b3:
+  vols_calc_per: [1, 3, 6, 12]
+  cols_names:
+    ticker: 'code'
+    company_name: 'tradingName'
+    serie: 'serie'
+    pg_num: 'PAGE_NUM'
+    total_pgs: 'TOTAL_PAGES'
+    date_ref: 'DATE_REF'
+    std: 'standardDeviation{}'
+    ann_vol: 'annualizedVolatility{}'
+    url: 'URL'
+  pages:
+    set_1:
+      url: 'https://sistemaswebb3-listados.b3.com.br/securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOj{}sInBhZ2VTaXplIjoiMjAifQ=='
+      hashes: ['E', 'I', 'M', 'Q', 'U', 'Y']
+    set_2:
+      url: 'https://sistemaswebb3-listados.b3.com.br/securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOjE{}LCJwYWdlU2l6ZSI6IjIwIn0='
+      hashes: ['w', 'x', 'y', 'z', 0, 1, 2, 3, 4, 5]
+    set_3:
+      url: 'https://sistemaswebb3-listados.b3.com.br/securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOjI{}LCJwYWdlU2l6ZSI6IjIwIn0='
+      hashes: ['w', 'x', 'y', 'z']
+
+# options exercise dates
+options_exercise_dates:
+  bl_verify: False
+  url: 'https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/calendario-de-negociacao/vencimentos/calendario-de-vencimentos-de-opcoes-sobre-acoes-e-indices/'
+  key_month: 'mes'
+  key_day: 'dia'
+  key_details: 'detalhe'
+  key_request_date: 'REQUEST_DATE'
+
+# trading hours
+trading_hours_b3:
+  stocks:
+    bl_verify: False
+    url: 'https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/'
+  futures:
+    bl_verify: False
+    url_pmi_idx: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/'
+    url_int_rts: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/'
+    url_commodities: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/'
+    url_crypto: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/'
+    url_forex: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/'
+    url_otc: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/otc/'
+    url_opf: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/'
+    num_cols_pmi_idx: 8
+    num_cols_int_rts: 8
+    num_cols_commodities: 3
+    num_cols_crypto: 7
+    num_cols_forex: 8
+    num_cols_otc: 3
+    num_cols_opf: 3
+
+# theoretical portfolios b3
+theor_port_b3:
+  bl_verify: False
+  url_ibov: 'https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQk9WIiwic2VnbWVudCI6IjEifQ=='
+  url_ibrx100: 'https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlhYIiwic2VnbWVudCI6IjEifQ=='
+  url_ibrx50: 'https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlhMIiwic2VnbWVudCI6IjEifQ=='
+  url_ibra: 'https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlJBIiwic2VnbWVudCI6IjEifQ=='
+  key_code: 'cod'
+  key_asset: 'asset'
+  key_type: 'type'
+  key_part: 'part'
+  key_theor_qty: 'theoricalQty'
+  col_ticker: 'TICKER'
+  col_asset: 'ASSET'
+  col_type: 'TYPE'
+  col_pct: 'PCT'
+  col_theor_qty: 'THEORETICAL_QTY'
+
+# financial indicators - b3
+financial_indicators:
+  url: 'https://sistemaswebb3-derivativos.b3.com.br/financialIndicatorsProxy/FinancialIndicators/GetFinancialIndicators/eyJsYW5ndWFnZSI6InB0LWJyIn0='
+  col_si_code: 'securityIdentificationCode'
+  col_desc: 'description'
+  col_grp_desc: 'groupDescription'
+  col_value: 'value'
+  col_rate: 'rate'
+  col_last_up: 'lastUpdate'
+  float_pct_dif_cdi_selic: 0.1
+  int_si_code_cdi: 9800334
+  int_si_code_selic: 9800656
+
+# daily liquidity limits
+daily_liquidity_limits:
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=LD{}.zip'
+  bl_io_interpreting: False
+  bl_verify: False
+  col_market: 'MARKET'
+  col_instrument_origin: 'INSTRUMENT_ORIGIN'
+  col_isin: 'ISIN'
+  col_symbol: 'SYMBOL'
+  col_dll: 'DLL'
+
+# securities tradable
+securities_tradable:
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=SecurityList{}.zip'
+  bl_io_interpreting: False
+  bl_verify: False
+
+# price_report
+price_report:
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=PR{}.zip'
+  bl_io_interpreting: False
+  bl_verify: False
+  col_currency: 'Currency'
+  tags: 
+    PricRpt: ['Dt', 'TckrSymb', 'Id', 'Prtry', 'MktIdrCd', 'TradQty', 
+      'OpnIntrst', 'FinInstrmQty', 'OscnPctg', 'NtlFinVol', 'IntlFinVol', 
+      'BestBidPric', 'BestAskPric', 'FrstPric', 'MinPric', 'MaxPric', 
+      'TradAvrgPric', 'LastPric', 'VartnPts', 'MaxTradLmt', 'MinTradLmt']
+  attrb_currency: 'Ccy'
+
+# options traded b3
+options_traded_b3:
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=IN{}.zip'
+  bl_io_interpreting: False
+  bl_verify: False
+  placeholder_num_re: '\d*'
+  dt_input_format: 'YYYY-MM-DD'
+  tags:
+    OptnOnEqtsInf: ['ISIN', 'DstrbtnId', 'CFICd', 'MktIdrCd', 'AllcnRndLot', 'PricFctr', 
+      'ExrcPric', 'OptnStyle', 'XprtnDt', 'OptnTp', 'TradgStartDt', 'TradgCcy', 'TckrSymb']
+    OptnOnSpotAndFutrsInf: ['ISIN', 'ExrcPric', 'ExrcStyle', 'XprtnDt', 'XprtnCd', 'OptnTp',
+      'CtrctMltplr', 'AsstQtnQty', 'AllcnRndLot', 'CFICd', 'TradgStartDt', 'TradgEndDt', 
+      'OpngPosLmtDt', 'TradgCcy', 'WdrwlDays', 'WrkgDays', 'ClnrDays', 'TckrSymb']
+  keys:
+    close: 'Close'
+    iao_tm: 'iao_tm'
+    moneyness: 'moneyness'
+    spot: 'Spot'
+    close_spot: 'CLOSE_SPOT'
+    close_opt: 'CLOSE_OPT'
+    cd_exp: 'CalendarDaysToExp'
+    k: 'ExrcPric'
+    opt_type: 'OptnTp'
+    isin: 'ISIN'
+    xpr_dt: 'XprtnDt'
+    ticker: 'TckrSymb'
+    imp_vol: 'IMP_VOL'
+    delta: 'DELTA'
+    risk_free: 'risk_free'
+    days_maturity_ratio: 'DAYS_MATURITY_RATIO'
+
+# cenários de risco - tipo spot
+cenarios_risco_tipo_spot:
+  bl_io_interpreting: False
+  bl_verify: False  
+  sep_instancias: ';'
+  tipo_curva: 
+    du_anteriores: 1
+    url: 'https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip'
+    timeout: 1500
+  cols_cenarios_tipo_curvas: ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO', 
+    'DIAS_HOLDING_PERIOD', 'VALOR_PHI_1', 'VALOR_PHI_2']
+  col_criar_nome_tipo_cenario: 'NOME_TIPO_CENARIO'
+  fill_na_padrao: -1
+  orient_df: 'records'
+  variaveis_tipo_cenarios_curvas:
+    1: 'ENVELOPE'
+    2: 'COERENTE'
+    3: 'ZIG ZAG'
+  col_tipo: 'TIPO'
+  col_phi_2: 'VALOR_PHI_2'
+  col_id_cenario: 'ID_CENARIO'
+  int_inf_range_cenarios: 1
+  int_sup_range_cenarios: 529
+
+# trading report b3
+trading_report:
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=PR{}.zip'
+  du_anteriores: 1
+  bl_io_interpreting: False
+  bl_verify: False 
+
+# margens teóricas b3
+margens_teoricas_maximas_b3:
+  limite_inferior_horario_atualizacao_mtm_du_atual: '{} 21:00:00'
+  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=MT{}.zip'
+  bl_io_interpreting: False
+  bl_verify: False
+  key_compra: 'compra'
+  key_venda: 'venda'
+  key_margem_b3_d2: 'margem_b3_d2'
+  key_desagio_b3_d2: 'desagio_b3_d2'
+  col_incluir_ticker: 'TICKER'
+  col_incluir_desagio_b3_c: 'DESAGIO_B3_COMPRA'
+  col_incluir_desagio_b3_v: 'DESAGIO_B3_VENDA'
+  col_incluir_desagio_b3_max_c_v: 'DESAGIO_B3_MAX_C_V'
+  col_incluir_margem_b3_c: 'MARGEM_B3_COMPRA'
+  col_incluir_margem_b3_v: 'MARGEM_B3_VENDA'
+  col_incluir_margem_b3_max_c_v: 'MARGEM_B3_MAX_C_V'
+  col_incluir_margem_b3_compra_d_mais_n: 'MARGEM_B3_COMPRA_D_'
+  col_incluir_margem_b3_venda_d_mais_n: 'MARGEM_B3_VENDA_D_'
+  col_incluir_desagio_b3_compra_d_mais_n: 'DESAGIO_B3_COMPRA_D_'
+  col_incluir_desagio_b3_venda_d_mais_n: 'DESAGIO_B3_VENDA_D_'
+  col_incluir_preco_fechamento: 'PRECO_FECHAMENTO'
+  key_instrumentos: 'INSTRUMENT'
+  key_desagio_compra: 'compra'
+  key_desagio_venda: 'venda'
+  key_preco_referencia: 'preco_referencia'
+
+# ativos aceitos como garantia b3
+collateral_acc_spot_bov_b3:
+  col_incluir_ticker: 'TICKER'
+  col_incluir_isin: 'ISIN'
+  col_incluir_limite_quantidade: 'LIMITE_QUANTIDADES'
+  key_isin: 'isin'
+  key_limite_qtd: 'limite_quantidades'
+  url_raiz_documentos_b3: 'https://www.b3.com.br/'
+  url: 'https://www.b3.com.br/pt_br/produtos-e-servicos/compensacao-e-liquidacao/clearing/administracao-de-riscos/garantias/limites-de-renda-variavel/'
+  data_files_collateral_acc_spot_bov_b3: 'data/files'
+  xpath_url_acoes_units_etfs_aceitos_garantia_b3: '//*[@id="panel1a"]/ul/li[2]/a/@href'
+  plan_acoes_bdrs_etfs_units: 'Ações, BDRs, ETFs e Units'
+  plan_adrs: 'ADR'
+
+# cenários de risco - tipo curva
+cenarios_risco_tipo_curva:
+  bl_io_interpreting: False
+  bl_verify: False  
+  sep_instancias: ';'
+  tipo_curva:
+    du_anteriores: 1
+    url: 'https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoCurva{}.zip'
+    timeout: 1500
+  cols_cenarios_tipo_curvas: ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO', 
+    'DIAS_HOLDING_PERIOD', 'DIAS_CORRIDOS_VERTICE', 'DIAS_SAQUE_VERTICE', 'VALOR_PHI_1', 
+    'VALOR_PHI_2']
+  fill_na_padrao: -1
+  orient_df: 'records'
+  col_tipo: 'TIPO'
+  col_phi_2: 'VALOR_PHI_2'
+  col_id_cenario: 'ID_CENARIO'
+  int_inf_range_cenarios: 1
+  int_sup_range_cenarios: 529
+
+# up2data b3
+up2data_b3:
+  method_req: 'GET'
+  request_token: 'https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={}'
+  access_api: 'https://arquivos.b3.com.br/api/download/?token={}'
+  securities_by_category_name:
+    stocks: ['SHARES', 'UNITS', 'UNIT']
+    receipts: ['WARRANTS', 'WARRANT', 'RIGHTS', 'RECEIPTS']
+    forwards: ['COMMON EQUITIES FORWARD', 'FORWARD RATE AGREEMENT']
+    bdrs: ['BDR']
+    etfs: ['ETF EQUITIES', 'ETF FOREIGN INDEX', 'FIXED INCOME TRADABLE INSTRUMENTS', 
+      'ETF PRIMARY MARKET', 'GROSS SETTLEMENT', 'FIXED INCOME TRADABLE INSTRUMENT T1']
+    futures: ['FUTURE', 'ROLLOVER', 'STOCK FUTURE', 'FORW/FUT GOLD']
+    options_equities: ['OPTION ON EQUITIES']
+    options_index: ['OPTION ON INDEX']
+    funds: ['FUNDS']
+    indexes: ['INDEX']
+  securities_by_market_name:
+    futures: ['FUTURE', 'SPOT']
+    options_bmf: ['OPTIONS ON FUTURE', 'OPTIONS ON SPOT']
+  daily_trades: 'https://arquivos.b3.com.br/apinegocios/tickercsv/{}/'
+  derivatives: 'https://arquivos.b3.com.br/tabelas/DerivativesOpenPosition/{}?lang=pt'
+  instruments: 'https://arquivos.b3.com.br/tabelas/InstrumentsConsolidated/{}?lang=pt'
+  bl_io_interpreting: False
+  bl_verify: False
+
+# maturity futures B3
+maturities_b3:
+  WIN:
+    week_day_number: 3
+    month_day: 15
+  IND:
+    week_day_number: 3
+    month_day: 15
+  CCM:
+    month_day: 15
+  ICF:
+    delta_subtract_working_days: 6
+
+# bov trading volume
+bov_trading_volume:
+  bl_verify: False
+  url: https://bvmf.bmfbovespa.com.br/sig/FormConsultaNegociacoes.asp?strTipoResumo=RES_NEGOCIACOES&strSocEmissora=B3SA&strDtReferencia={}/{}&strIdioma=P&intCodNivel=1&intCodCtrl=100
+  col_deals: NUM_DEALS
+  col_volume: VOLUME_BRL
+  col_time_period: 'MONTH_YEAR'
+  col_market: 'MARKET'

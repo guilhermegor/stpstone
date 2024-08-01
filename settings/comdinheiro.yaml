@@ -1,0 +1,23 @@
+### HARDCODES FROM COMDINHEIRO
+
+# comdinheiro
+#   Cálculo do índice de negociabilidade
+#   Método 1: A fórmula é:  100 * sqrt(n/N * v/V)
+#   Método 2: A fórmula é:  100 * raiz cúbica[(n/N) * (v/V)^2]
+#   n: número de negócios com o papel entre as datas inicial e final
+#   N: número de negócios com todos os papéis à vista entre as datas inicial e final
+#   v: Volume negociado com o papel entre as datas inicial e final
+#   V: Volume negociado com todos os papéis à vista entre as datas inicial e final
+#   marcacao: CLXC34
+comdinheiro:
+  metodo_calc_indice_neg: 2
+  lotes_padrao:
+    acoes: 100
+    brds: 10
+  tipos_para_suposta_classe_acoes:
+    bdrs: ['DRN', 'DR3']
+    etfs: ['CI']
+  nomes_nao_etfs: ['ABC BRASIL', 'FDC', 'FIP', 'FDO', 'FUNDES', 'FIA', 'FUNRES', 'FISET', 'FIQ', 
+    'FINAM', 'FINOR']
+  str_remove:
+    futuros: 'FUT'

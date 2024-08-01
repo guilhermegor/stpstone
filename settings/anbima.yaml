@@ -1,0 +1,83 @@
+### HARDCODES FROM ANBIMA
+
+# anbima statistics
+anbima_stats:
+  bl_verify: False
+  url_price_indexes: 'https://www.anbima.com.br/pt_br/informar/estatisticas/precos-e-indices/projecao-de-inflacao-gp-m.htm'
+  data_hat_l12m: 'LTM'
+  data_hat_mp1: 'MP1'
+  data_hat_mp2: 'MP2'
+  col_ipca_eft: 'IPCA_EFETIVO'
+  col_pmi_eft: 'INFLACAO_EFETIVA'
+  col_igpm_eft: 'IGPM_EFETIVO'
+  col_pmi_core: 'PMI_CORE'
+  col_period_prediction: 'PERIODO_HAT'
+  col_expirtation_dt: 'DATA_VALIDADE'
+  col_dt: 'DATA'
+  col_month_collection: 'MES_COLETA'
+  col_month_proj: 'MES_PROJECAO'
+  col_proj: 'PROJECAO'
+  col_request_date: 'REQUEST_DATE'
+  dt_fillna: '31/12/2000'
+
+# anbima dev endpoints
+hosts_anbima_dev_ex_fundos:
+  sandbox: 'https://api-sandbox.anbima.com.br/feed/precos-indices/v1'
+  producao: 'https://api.anbima.com.br/feed/precos-indices/v1'
+hosts_anbima_dev_fundos:
+  sandbox: 'https://api-sandbox.anbima.com.br/feed/fundos/v1'
+  producao: 'https://api.anbima.com.br/feed/fundos/v1'
+apps_anbima_dev:
+  debentures:
+    curvas-credito: '/debentures/curvas-credito'
+    mercado-secundario: '/debentures/mercado-secundario'
+    projecoes: '/debentures/projecoes'
+  indices:
+    carteira-teorica-ida: '/indices/carteira-teorica-ida'
+    carteira-teorica-ihfa: '/indices/carteira-teorica-ihfa'
+    carteira-teorica-ima: '/indices/carteira-teorica-ima'
+    resultados-ida-fechado: '/indices/resultados-ida-fechado'
+    resultados-idka: '/indices/resultados-idka'
+    resultados-ihfa-fechado: '/indices/resultados-ihfa-fechado'
+    resultados-ima: '/indices/resultados-ima'
+    resultados-intradiarios-ima: '/indices/resultados-intradiarios-ima'
+  indices+:
+    carteira-teorica-ida: '/indices-mais/carteira-teorica-ida'
+    carteira-teorica-ihfa: '/indices-mais/carteira-teorica-ihfa'
+    carteira-teorica-ima: '/indices-mais/carteira-teorica-ima'
+    pu-intradiario: '/indices-mais/pu-intradiario'
+    resultados-ida: '/indices-mais/resultados-ida'
+    resultados-idka: '/indices-mais/resultados-idka'
+    resultados-ihfa: '/indices-mais/resultados-ihfa'
+    resultados-ima: '/indices-mais/resultados-ima'
+    resultados-intradiarios-ima: '/indices-mais/resultados-intradiarios-ima'
+  titulos-publicos:
+    curva-intradiaria: '/titulos-publicos/curva-intradiaria'
+    curva-juros: '/titulos-publicos/curvas-juros'
+    difusao-taxas: '/titulos-publicos/difusao-taxas'
+    estimativa-selic: '/titulos-publicos/estimativa-selic'
+    mercado-secundario-tpf: '/titulos-publicos/mercado-secundario-TPF'
+    projecoes: '/titulos-publicos/projecoes'
+    pu-intradiario: '/titulos-publicos/pu-intradiario'
+    vna: '/titulos-publicos/vna'
+  cri-cra:
+    mercado-secundario: '/cri-cra/mercado-secundario'
+    projecoes: '/cri-cra/projecoes'
+  fundos:
+    fundos-lista: '/fundos'
+    consulta-dados: '/fundos/{}'
+    serie-historica: '/fundos/{}/serie-historica'
+    notas-explicativas: '/fundos/{}/notas-explicativas'
+
+# secondary market prices
+sec_mkt_prcs:
+  br_treasuries:
+    url: 'https://www.anbima.com.br/informacoes/merc-sec/arqs/ms{}.txt'
+    bl_verify: False
+  corporate_bonds:
+    url: 'https://www.anbima.com.br/informacoes/merc-sec-debentures/arqs/db{}.txt'
+    bl_verify: False
+  ima:
+    method: 'GET'
+    url: https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt
+    bl_verify: False

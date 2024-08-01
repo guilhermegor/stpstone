@@ -1,0 +1,48 @@
+###   HARDCODES FROM GLOBAL RATES.COM
+
+general:
+  col_rate: 'RATE'
+
+libor_rates:
+  bl_verify: False
+  url: https://www.global-rates.com/en/interest-rates/libor/
+
+euribor_rates:
+  bl_verify: False
+  url: https://www.global-rates.com/en/interest-rates/euribor/
+
+central_banks_rates:
+  bl_verify: False
+  url: https://www.global-rates.com/en/interest-rates/central-banks/
+  rate_outlook_desc: 
+    fa-circle-down: DOWNWARD
+    fa-circle-up: UPWARD
+  col_direction: DIRECTION
+
+ester:
+  bl_verify: False
+  url: https://www.global-rates.com/en/interest-rates/ester/
+
+sonia:
+  bl_verify: False
+  url: https://www.global-rates.com/en/interest-rates/sonia/
+
+sofr:
+  bl_verify: False
+  url: https://www.global-rates.com/en/interest-rates/sofr/
+
+usa_cpi:
+  bl_verify: False
+  url: https://www.global-rates.com/en/inflation/cpi/4/united-states/
+
+uk_cpi:
+  bl_verify: False
+  url: https://www.global-rates.com/en/inflation/cpi/60/united-kingdom/
+
+can_cpi:
+  bl_verify: False
+  url: hhttps://www.global-rates.com/en/inflation/cpi/37/canada/
+
+eur_cpi:
+  bl_verify: False
+  url: https://www.global-rates.com/en/inflation/hicp/3/europe/

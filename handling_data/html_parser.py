@@ -1,0 +1,296 @@
+### HANDLING HTML TEXT ###
+
+import logging
+import json
+from requests import HTTPError, request
+from bs4 import BeautifulSoup
+from lxml import html
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+
+class HtmlHndler:
+
+    def html_bs_parser(self, url, bl_verify=True,
+                       method='GET', parser='html.parser'):
+        '''
+        DOCSTRING: HTML PARSER THROUGH BEAUTIFULSOUP
+        INPUTS: HTML TEXT
+        OUTPUTS: SOUP
+        '''
+        try:
+            html_status_invest = request(method, url, verify=bl_verify).content
+            return BeautifulSoup(html_status_invest, parser)
+        except HTTPError as e:
+            return 'HTTP Error: {}'.format(e)
+
+    def html_lxml_parser(self, url, method='GET', bl_verify=True):
+        '''
+        DOCSTRING: HTML PARSER FOR LXML PURPOSES
+        INPUTS: URL, METHOD (GET AS DEFAULT) AND BOOLEAN VERIFY (TRUE AS DEFAULT)
+        OUTPUTS: DOCUMENT WITH HTML CONTENT
+        '''
+        page = request(method, url, verify=bl_verify)
+        return html.fromstring(page.content)
+
+    def html_lxml_xpath(self, html_content, str_xpath):
+        '''
+        DOCSTRING: XPATH TO HANDLE LXML PARSER
+        INPUTS: HTML CONTENT AND STRING XPATH
+        OUTPUTS: XPATH CONTENT
+        '''
+        return html_content.xpath(str_xpath)
+
+    def html_to_txt(self, html_):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        soup = BeautifulSoup(html_, features='lxml')
+        return soup(html_)
+
+    def parse_html_to_string(self, html_, parsing_lib='html.parser', list_=list(),
+                             list_tr_html=list(), dict_=dict(), dict_fill_blanks_td=dict(),
+                             str_body_html='',
+                             join_td_character='|', td_size_ajust_character=' '):
+        '''
+        DOCSTRING: PARSE HTML BODY
+        INPUTS: HTML
+        OUTPUTS: STRING
+        '''
+        # creating a parseable object
+        obj_soup = BeautifulSoup(html_, parsing_lib)
+        html_parsed_raw = obj_soup.get_text()
+        # creating a raw parsed html body
+        list_body_html = html_parsed_raw.split('\n')
+        # looping through tables and periods in the raw parsed html body
+        for str_ in list_body_html:
+            #   append to tr, provided the value is different from empty, what is an indicative of
+            #       line scape
+            if str_ != '':
+                list_.append(str_)
+            else:
+                if len(list_) > 0:
+                    list_tr_html.append(list_)
+                list_ = list()
+            #   add tr to the list, without reseting the intermediary list, provided it is the
+            #       last instance of list body html
+            if (str_ == list_body_html[-1]) and (len(list_) > 0):
+                list_tr_html.append(list_)
+        # looping through each tr to find the maximum td length
+        for i in range(len(list_tr_html)):
+            #   if tr length is greater than 1 its a sign of a row from a table, otherwise its is
+            #   considered a period from a phrase
+            if len(list_tr_html[i]) > 1:
+                dict_[i] = {j: len(list_tr_html[i][j])
+                            for j in range(len(list_tr_html[i]))}
+        # build dictionary with blank spaces, aiming to reach columns of same size
+        for _, dict_j in dict_.items():
+            for j, _ in dict_j.items():
+                dict_fill_blanks_td[j] = max([dict_[i][j]
+                                              for i in list(dict_.keys()) if i in dict_ and j in
+                                              dict_[i]])
+        # joining td's with a separator
+        for i in range(len(list_tr_html)):
+            #   filling blanks to construct columns of the same size
+            str_body_html += join_td_character.join([list_tr_html[i][j]
+                                                     + td_size_ajust_character *
+                                                     (dict_fill_blanks_td[j] -
+                                                      len(list_tr_html[i][j]))
+                                                     for j in range(len(list_tr_html[i]))])
+            #   adding line scapes
+            try:
+                if len(list_tr_html[i]) == len(list_tr_html[i + 1]):
+                    str_body_html += '\n'
+                else:
+                    str_body_html += 2 * '\n'
+            except IndexError:
+                continue
+        # returning html body parsed
+        return str_body_html
+
+
+class SeleniumWD:
+
+    def selenium_web_driver(self, url, webdriver_path, webdriver_port,
+                            time_wait_page_load=10, bl_open_minimized=False):
+        '''
+        REFERENCES: https://www.udemy.com/course/selenium-webdriver-with-python3/, 
+            https://chromedriver.chromium.org/downloads
+        DOCSTRING: SELENIUM WEB DRIVER FOR WEB BROWSER TESTS
+        INPUTS: URL AND WEBDRIVER PATH
+        OUTPUTS: TUPLE WEB DRIVER AND DICT WITH NETWORK CONDITIONS (LATENY, DOWLOAD THROUGHPUT,
+            UPLOAD THROUGHPUT, OFFLINE, WHICH IS A BOOLEAN)
+        '''
+        # setting preferences
+        d = DesiredCapabilities.CHROME
+        d['goog:loggingPrefs'] = {'performance': 'ALL'}
+        # instantiate the browser command
+        driver = webdriver.Chrome(
+            executable_path=webdriver_path, port=webdriver_port)
+        # open minimized
+        if bl_open_minimized == True:
+            driver.minimize_window()
+        # open the provided url
+        driver.get(url)
+        driver.implicitly_wait(time_wait_page_load)
+        # return driver for webbrowser tests
+        return driver
+
+    def process_log(driver, log):
+        '''
+        DOCSTRING: COLLECT NETWORK ACTIVITY
+        INPUTS: DRIVER, LOG
+        OUTPUTS: OBJECT
+        '''
+        log = json.loads(log['message'])['message']
+        if ('Network.response' in log['method'] and 'params' in log.keys()):
+            body = driver.execute_cdp_cmd('Network.getResponseBody', {'requestId': log[
+                'params']['requestId']})
+            print(json.dumps(body, indent=4, sort_keys=True))
+            return log['params']
+
+    def get_browser_log_entries(self, driver):
+        '''
+        REFERENCES: https://stackoverflow.com/questions/20907180/getting-console-log-output-from-chrome-with-selenium-python-api-bindings
+        DOCSTRING: GET LOGGING SELENIUM RESPONSE FROM WEBDRIVER
+        INPUTS: DRIVER
+        OUPUTS: BROWSER LOG ENTRIES (LIST)
+        '''
+        loglevels = {'NOTSET': 0, 'DEBUG': 10, 'INFO': 20,
+                     'WARNING': 30, 'ERROR': 40, 'SEVERE': 40, 'CRITICAL': 50}
+
+        # initialise a logger
+        browserlog = logging.getLogger("chrome")
+        # get browser logs
+        slurped_logs = driver.get_log('browser')
+        for entry in slurped_logs:
+            # convert broswer log to python log format
+            rec = browserlog.makeRecord("%s.%s" % (browserlog.name, entry['source']), loglevels.get(
+                entry['level']), '.', 0, entry['message'], None, None)
+            # log using original timestamp.. us -> ms
+            rec.created = entry['timestamp'] / 1000
+            try:
+                # add browser log to python log
+                browserlog.handle(rec)
+            except:
+                print(entry)
+        # and return logs incase you want them
+        return slurped_logs
+
+    def process_browser_log_entry(self, entry):
+        '''
+        REFERENCES: https://stackoverflow.com/questions/52633697/selenium-python-how-to-capture-network-traffics-response
+        INPUTS: ENTRY
+        OUTPUTS: STRING
+        '''
+        # process json from entry
+        response = json.loads(entry['message'])['message']
+        # return messge
+        return response
+
+    def get_network_traffic(self, driver):
+        '''
+        REFERENCES: https://stackoverflow.com/questions/52633697/selenium-python-how-to-capture-network-traffics-response
+        INPUTS:
+        OUTPUTS:
+        '''
+        # get browser log
+        browser_log = driver.get_log('performance')
+        # getting events
+        list_events = [self.process_browser_log_entry(
+            entry) for entry in browser_log]
+        list_events = [
+            event for event in list_events if 'Network.response' in event['method']]
+        # returning data
+        return list_events
+
+    def selenium_find_element(self, web_driver, str_element_interest, selector_type='XPATH'):
+        '''
+        DOCSTRING: FINDING ELEMENT IN HTML BY SELECTOR TYPE
+        INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
+            BROWSERS), STRING WITH THE ELEMENT OF INTEREST (IDENTIFIER TO SELECTOR),
+            SELECTOR TYPE(CLAS_NAME, CSS_SELECTOR, ID, LINK_TEXT, NAME,
+            PARTIAL_LINK_TEXT, TAG_NAME AND XPATH, THE FORMER AS DEFAULT)
+        OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
+        '''
+        try:
+            return web_driver.find_element(getattr(By, selector_type),
+                                           str_element_interest)
+        except AttributeError:
+            raise Exception('Attribute, difined in selector type, not available in find element, ' +
+                            'please consider revisiting these argument')
+
+    def selenium_find_elements(self, web_driver, str_xpath):
+        '''
+        DOCSTRING: FINDING ELEMENTS IN HTML BY XPATH
+        INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
+            BROWSERS) AND XPATH
+        OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
+        '''
+        try:
+            return web_driver.find_elements_by_xpath(str_xpath)
+        except AttributeError:
+            raise Exception('Attribute, difined in selector type, not available in find element, ' +
+                            'please consider revisiting these argument')
+
+    def selenium_fill_input(self, web_element, str_input):
+        '''
+        DOCSTRING: FILLING INPUT BOXES IN HTML
+        INPUTS: WEB ELEMENT AND STRING TO INPUT
+        OUTPUTS: STATUS OF ACCOMPLISHMENT
+        '''
+        try:
+            web_element.send_keys(str_input)
+            return 'OK'
+        except:
+            raise Exception(
+                'Web element error, please consider revisiting this parameter')
+
+    def selenium_element_is_enabled(self, str_xpath):
+        '''
+        REFERENCES: https://github.com/clemfromspace/scrapy-selenium
+        DOCSTRING: CHECK WHETHER WEB ELEMENT IS ENABLED OR NOT
+        INPUTS: STR XPATH
+        OUTPUTS: BOOLEAN
+        '''
+        return ec.element_to_be_clickable((By.XPATH, str_xpath))
+
+    def selenium_wait_until_element_loaded(self, webdriver, str_xpath, delay=10):
+        '''
+        REFERENCES: https://stackoverflow.com/questions/26566799/wait-until-page-is-loaded-with-selenium-webdriver-for-python
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        return WebDriverWait(webdriver, delay).until(self.selenium_element_is_enabled(str_xpath))
+
+
+class HtmlBuilder:
+
+    def tag(self, name, *content, cls=None, **attrs):
+        '''
+        REFERENCES: - FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.
+        DOCSTRINGS: HTML TAG CONSTRUCTOR
+        INPUTS: *ARGUMENTS, AND **ATTRIBUTES, BESIDE A CLS WORKAROUND SINCE CLASS IS A SPECIAL 
+            WORD FOR PYTHON
+        OUTPUTS: STRING
+        '''
+        # defining tag & method
+        if cls is not None:
+            attrs['class'] = cls
+        if attrs:
+            attr_str = ''.join(' {}="{}"'.format(attr, value) for attr, value
+                               in sorted(attrs.items()))
+        else:
+            attr_str = ''
+        # defining element
+        if content:
+            return '\n'.join('<{}{}>{}</{}>'.format(name, attr_str, c,
+                                                    name) for c in content)
+        else:
+            return '<{}{} />'.format(name, attr_str)

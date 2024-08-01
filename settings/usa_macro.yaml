@@ -1,0 +1,6 @@
+### HARDCODES FOR USA MACRO
+
+non_farm_payroll:
+  bl_verify: False
+  url: https://tradingeconomics.com/united-states/non-farm-payrolls
+  req_method: GET
