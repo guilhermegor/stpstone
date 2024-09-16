@@ -944,130 +944,7 @@ class Greeks(BlackScholesMerton):
                 * float(dict_['corr_t']) / float(psi_r) for dict_ in dicts_opts].sum()
 
 
-class EuropeanOptions(Greeks):
-
-    @lru_cache()
-    def implied_volatility(self, s, k, r, t, sigma, q, b, cp0, opt_type, 
-                           method='bisection',
-                           tolerance=1E-3, epsilon=1, max_iter=1000, orig_vol=0.5,
-                           list_bounds=[(0, 2)]):
-        '''
-        REFERENCES: https://www.youtube.com/watch?v=Jpy3iCsijIU, 
-            https://www.option-price.com/documentation.php#impliedvolatility
-        DOCSTRING: CALCULATING THE IMPLIED VOLATILITY FOR A GIVEN
-        INPUTS: OPTION CALL OR PUT, TOLERANCE, EPSILON, MAX ITERATIONS, ORIGINAL VOL
-        OUTPUTS: IMPLIED VOLATILITY AND MAX ITERATION HITTED BOOLEAN, ALL ENCAPSULED IN A TUPLE
-        '''
-        # initial parameters
-        s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
-            s, k, r, t, sigma, q, b, cp0, opt_type)
-        count = 0
-        if method == 'newton_raphson':
-            # iterating until the error is meaningless
-            while epsilon > tolerance:
-                # passing parameters
-                count += 1
-                flag_max_iter_hitten = False
-                if count == 1:
-                    imp_vol = orig_vol
-                # preventing infinite loop
-                if count >= max_iter:
-                    flag_max_iter_hitten = True
-                    break
-                # calculating the difference betwwen call prize, by the implied vol and call price
-                dif_calc_market = self.general_opt_price(s, k, r, t, imp_vol, q, b, opt_type) \
-                    - cp0
-                # newthon-hampson-model to check whether the zero of the function has been spoted
-                #   working with a tolerance to assume the zero of the function has been found
-                # if self.vega(s, k, r, t, imp_vol, q, b) != 0:
-                try:
-                    imp_vol = -dif_calc_market / \
-                        self.vega(s, k, r, t, imp_vol, q, b) + imp_vol
-                except RuntimeWarning:
-                    return imp_vol, flag_max_iter_hitten
-                # else:
-                #     raise Exception("Vega musn't be zero")
-                epsilon = abs((imp_vol - orig_vol) / imp_vol)
-            # returning implied volatility and maximum iterations hitten
-            return imp_vol, flag_max_iter_hitten
-        elif method == 'bisection':
-            float_high = 5
-            float_low = 0
-            while (float_high - float_low) > epsilon:
-                if self.general_opt_price(s, k, r, t, float(float_high + float_low) / 2.0, q, 
-                                          b, opt_type) > cp0:
-                    float_high = float(float_high + float_low) / 2.0
-                else: 
-                    float_low = float(float_high + float_low) / 2.0
-            return (float_high + float_low) / 2
-        elif method == 'fsolve':
-            # defining a non-linear function as the difference of the theoratical price (Black
-            #   & Scholes) and the fair price
-            def func_non_linear(sigma): return np.power(
-                self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
-            # print(func_non_linear(orig_vol))
-            # returning the least sigma for the cost function
-            return fsolve(func_non_linear, orig_vol)
-        elif method == 'scipy_optimize_minimize':
-            # defining a non-linear function as the difference of the theoratical price (Black
-            #   & Scholes) and the fair price
-            def func_non_linear(sigma): return np.power(
-                self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
-            # print(func_non_linear(orig_vol))
-            # returning the least sigma for the cost function
-            return minimize(func_non_linear, orig_vol, method='CG')
-        elif method == 'differential_evolution':
-            # defining a non-linear function as the difference of the theoratical price (Black
-            #   & Scholes) and the fair price
-            def func_non_linear(sigma): return np.power(
-                self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
-            # print(func_non_linear(orig_vol))
-            # returning the least sigma for the cost function
-            return NonLinearEquations().differential_evolution(func_non_linear, list_bounds)
-        else:
-            raise Exception('Method to return the root of the non-linear equation is not '
-                            + 'recognized, please revisit the parameter')
-
-    def moneyness(self, s, k, r, t, sigma, q):
-        '''
-        REFERENCES: MERCADO DE OPÇÕES, CONCEITOS E ESTRATÉGIAS / AUTOR: LUIZ MAURÍCIO DA SILVA /
-            PGS. 74, 75, 76, 77, 78
-        DOCSTRING: MEASURES WHETER THE OPTION WILL BE EXERCISED OR NOT TRANSLATED IN A PERCENTUAL
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE) AND
-            SIGMA (VOLATILITY OF UNDERLYING ASSET)
-        OUTPUTS: PERCENTAGE
-        '''
-        # initial parameters
-        s, k, r, t, sigma, q = self.set_parameters(s, k, r, t, sigma, q)
-        # returning moneyness
-        return (self.d1(s, k, r, t, sigma, q)
-                + self.d2(s, k, r, t, sigma, q)) / 2
-
-    def iaotm(self, s, k, r, t, sigma, opt_type, pct_moneyness_atm=0.05):
-        '''
-        DOCSTRING: ITM / ATM / OTM - OPTIONS PREDICT OF EXERCISING
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION TYPE AND PERCENTAGE OF ATM
-            (STANDARD VALUE OF 5%)
-        OUTPUTS: ITM/ATM/OTM
-        '''
-        # initial parameters
-        s, k, r, t, sigma, q = self.set_parameters(
-            s, k, r, t, sigma, q, opt_type)
-        # determining iaotm
-        if abs(self.moneyness(s, k, r, t, sigma)) < pct_moneyness_atm:
-            return 'ATM'
-        elif (self.moneyness(s, k, r, t, sigma) < pct_moneyness_atm and
-              opt_type == 'call') or (self.moneyness(s, k, r, t, sigma) >
-                                       pct_moneyness_atm and opt_type == 'put'):
-            return 'OTM'
-        elif (self.moneyness(s, k, r, t, sigma) > pct_moneyness_atm and
-              opt_type == 'call') or (self.moneyness(s, k, r, t, sigma) <
-                                       pct_moneyness_atm and opt_type == 'put'):
-            return 'ITM'
-        else:
-            raise Exception(
-                'Please revisit your inputs, request did not return appropriate values')
+class IterativeMethods(Greeks):
 
     def binomial_pricing_model(self, s, k, r, t, n, u, d, opt_type, h_upper=None, h_lower=None):
         '''
@@ -1273,6 +1150,133 @@ class EuropeanOptions(Greeks):
                     (pu * array_cp[j + 1] + pd * array_cp[j])
         # returning the no-arbitrage price at node 0
         return array_cp[0]
+
+
+class EuropeanOptions(IterativeMethods):
+
+    @lru_cache()
+    def implied_volatility(self, s, k, r, t, sigma, q, b, cp0, opt_type, 
+                           method='fsolve',
+                           tolerance=1E-3, epsilon=1, max_iter=1000, orig_vol=0.5,
+                           list_bounds=[(0, 2)]):
+        '''
+        REFERENCES: https://www.youtube.com/watch?v=Jpy3iCsijIU, 
+            https://www.option-price.com/documentation.php#impliedvolatility
+        DOCSTRING: CALCULATING THE IMPLIED VOLATILITY FOR A GIVEN
+        INPUTS: OPTION CALL OR PUT, TOLERANCE, EPSILON, MAX ITERATIONS, ORIGINAL VOL
+        OUTPUTS: IMPLIED VOLATILITY AND MAX ITERATION HITTED BOOLEAN, ALL ENCAPSULED IN A TUPLE
+        '''
+        # initial parameters
+        s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
+            s, k, r, t, sigma, q, b, cp0, opt_type)
+        count = 0
+        if method == 'newton_raphson':
+            # iterating until the error is meaningless
+            while epsilon > tolerance:
+                # passing parameters
+                count += 1
+                flag_max_iter_hitten = False
+                if count == 1:
+                    imp_vol = orig_vol
+                # preventing infinite loop
+                if count >= max_iter:
+                    flag_max_iter_hitten = True
+                    break
+                # calculating the difference betwwen call prize, by the implied vol and call price
+                dif_calc_market = self.general_opt_price(s, k, r, t, imp_vol, q, b, opt_type) \
+                    - cp0
+                # newthon-hampson-model to check whether the zero of the function has been spoted
+                #   working with a tolerance to assume the zero of the function has been found
+                # if self.vega(s, k, r, t, imp_vol, q, b) != 0:
+                try:
+                    imp_vol = -dif_calc_market / \
+                        self.vega(s, k, r, t, imp_vol, q, b) + imp_vol
+                except RuntimeWarning:
+                    return imp_vol, flag_max_iter_hitten
+                # else:
+                #     raise Exception("Vega musn't be zero")
+                epsilon = abs((imp_vol - orig_vol) / imp_vol)
+            # returning implied volatility and maximum iterations hitten
+            return imp_vol, flag_max_iter_hitten
+        elif method == 'bisection':
+            float_high = 5
+            float_low = 0
+            while (float_high - float_low) > epsilon:
+                if self.general_opt_price(s, k, r, t, float(float_high + float_low) / 2.0, q, 
+                                          b, opt_type) > cp0:
+                    float_high = float(float_high + float_low) / 2.0
+                else: 
+                    float_low = float(float_high + float_low) / 2.0
+            return (float_high + float_low) / 2
+        elif method == 'fsolve':
+            # defining a non-linear function as the difference of the theoratical price (Black
+            #   & Scholes) and the fair price
+            def func_non_linear(sigma): return np.power(
+                self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
+            # print(func_non_linear(orig_vol))
+            # returning the least sigma for the cost function
+            return fsolve(func_non_linear, orig_vol)
+        elif method == 'scipy_optimize_minimize':
+            # defining a non-linear function as the difference of the theoratical price (Black
+            #   & Scholes) and the fair price
+            def func_non_linear(sigma): return np.power(
+                self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
+            # print(func_non_linear(orig_vol))
+            # returning the least sigma for the cost function
+            return minimize(func_non_linear, orig_vol, method='CG')
+        elif method == 'differential_evolution':
+            # defining a non-linear function as the difference of the theoratical price (Black
+            #   & Scholes) and the fair price
+            def func_non_linear(sigma): return np.power(
+                self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
+            # print(func_non_linear(orig_vol))
+            # returning the least sigma for the cost function
+            return NonLinearEquations().differential_evolution(func_non_linear, list_bounds)
+        else:
+            raise Exception('Method to return the root of the non-linear equation is not '
+                            + 'recognized, please revisit the parameter')
+
+    def moneyness(self, s, k, r, t, sigma, q):
+        '''
+        REFERENCES: MERCADO DE OPÇÕES, CONCEITOS E ESTRATÉGIAS / AUTOR: LUIZ MAURÍCIO DA SILVA /
+            PGS. 74, 75, 76, 77, 78
+        DOCSTRING: MEASURES WHETER THE OPTION WILL BE EXERCISED OR NOT TRANSLATED IN A PERCENTUAL
+        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE) AND
+            SIGMA (VOLATILITY OF UNDERLYING ASSET)
+        OUTPUTS: PERCENTAGE
+        '''
+        # initial parameters
+        s, k, r, t, sigma, q = self.set_parameters(s, k, r, t, sigma, q)
+        # returning moneyness
+        return (self.d1(s, k, r, t, sigma, q)
+                + self.d2(s, k, r, t, sigma, q)) / 2
+
+    def iaotm(self, s, k, r, t, sigma, opt_type, pct_moneyness_atm=0.05):
+        '''
+        DOCSTRING: ITM / ATM / OTM - OPTIONS PREDICT OF EXERCISING
+        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE),
+            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION TYPE AND PERCENTAGE OF ATM
+            (STANDARD VALUE OF 5%)
+        OUTPUTS: ITM/ATM/OTM
+        '''
+        # initial parameters
+        s, k, r, t, sigma, q = self.set_parameters(
+            s, k, r, t, sigma, q, opt_type)
+        # determining iaotm
+        if abs(self.moneyness(s, k, r, t, sigma)) < pct_moneyness_atm:
+            return 'ATM'
+        elif (self.moneyness(s, k, r, t, sigma) < pct_moneyness_atm and
+              opt_type == 'call') or (self.moneyness(s, k, r, t, sigma) >
+                                       pct_moneyness_atm and opt_type == 'put'):
+            return 'OTM'
+        elif (self.moneyness(s, k, r, t, sigma) > pct_moneyness_atm and
+              opt_type == 'call') or (self.moneyness(s, k, r, t, sigma) <
+                                       pct_moneyness_atm and opt_type == 'put'):
+            return 'ITM'
+        else:
+            raise Exception(
+                'Please revisit your inputs, request did not return appropriate values')
+
 
 # print(BlackScholesMerton(50, 45, 0.02, 80 / 365, 0.3).call_price())
 # # output: 6.021277654922962
