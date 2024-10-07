@@ -338,7 +338,7 @@ class Markowitz:
         '''
         return (float(mu) - float(float_rf)) / float(sigma)
 
-    def sigma_portfolio(self, array_weights, array_returns, int_wdy=252):
+    def sigma_portfolio(self, array_weights, array_returns):
         '''
         DOCSTRING:
         INPUTS:
@@ -347,8 +347,7 @@ class Markowitz:
         # covariance between stocks
         array_cov = np.cov(array_returns)
         # returning portfolio standard deviation
-        return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights))) * np.sqrt(
-            int_wdy)
+        return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
     def random_weights(self, n_assets):
         '''
@@ -359,7 +358,7 @@ class Markowitz:
         k = np.random.rand(n_assets)
         return k / sum(k)
 
-    def random_portfolio(self, array_returns, float_rf, int_wdy=252):
+    def random_portfolio(self, array_returns, float_rf):
         '''
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
@@ -376,7 +375,7 @@ class Markowitz:
         array_sigmas = self.sigma_portfolio(
             array_weights, array_r)
         # portfolio expected return
-        array_mus = float((array_weights * array_returns) * int_wdy)
+        array_mus = float((array_weights * array_returns))
         # sharpes ratio
         array_sharpes = self.sharpe_ratio(array_mus, array_sigmas, float_rf)
         # changing type of array weights to transform into one value
@@ -385,7 +384,7 @@ class Markowitz:
         return array_mus, array_sigmas, array_sharpes, array_weights
 
     def optimal_portfolios(self, array_returns, n_attempts=100,
-                           bl_progress_printing_opt=False, int_wdy=252):
+                           bl_progress_printing_opt=False):
         '''
         DOCSTRING: WEIGHTS RETURNS AND SIGMA FOR EFFICIENT FRONTIER
         INPUTS: MATRIX OF ASSETS' RETURNS
@@ -413,9 +412,9 @@ class Markowitz:
                            for mu in mus]
         # calculating risk and return for efficient frontier
         array_returns = [opt.blas.dot(
-            pbar, x) * int_wdy for x in list_portfolios]
+            pbar, x) for x in list_portfolios]
         array_sigmas = [np.sqrt(opt.blas.dot(
-            x, S * x)) * np.sqrt(int_wdy) for x in list_portfolios]
+            x, S * x)) for x in list_portfolios]
         # calculate the second degree polynomial of the frontier curve
         m1 = np.polyfit(array_returns, array_sigmas, 2)
         x1 = np.sqrt(m1[2] / m1[0])
