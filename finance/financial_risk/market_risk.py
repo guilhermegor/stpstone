@@ -454,8 +454,10 @@ class Markowitz:
         df_porf = pd.DataFrame({'mu': array_mus, 'sigma': array_sigmas, 'weights': array_weights})
         # Output the results
         return df_eff, df_porf
+    
     def plot_risk_return_portfolio(self, array_weights, array_mus, array_sigmas,
                                    array_sharpes, array_eff_risks, array_eff_returns,
+                                   bl_debug_mode=False,
                                    title_text='Markowitz Risk x Return Portfolios',
                                    yaxis_title='Return (%)', xaxis_title='Risk (%)'):
         '''
@@ -470,12 +472,13 @@ class Markowitz:
         OUTPUTS: PLOT
         '''
         # maximum sharpe portfolio
-        print('### MAXIMUM SHARPE PORTFOLIO ###')
-        print('SHARPES ARGMAX: {}'.format(array_sharpes.argmax()))
-        print('WEIGHTS: {}'.format(array_weights[array_sharpes.argmax()]))
-        print('RISK: {}'.format(array_sigmas[array_sharpes.argmax()]))
-        print('RETURN: {}'.format(array_mus[array_sharpes.argmax()]))
-        print('SHARPE: {}'.format(array_sharpes[array_sharpes.argmax()]))
+        if bl_debug_mode == True:
+            print('### MAXIMUM SHARPE PORTFOLIO ###')
+            print('SHARPES ARGMAX: {}'.format(array_sharpes.argmax()))
+            print('WEIGHTS: {}'.format(array_weights[array_sharpes.argmax()]))
+            print('RISK: {}'.format(array_sigmas[array_sharpes.argmax()]))
+            print('RETURN: {}'.format(array_mus[array_sharpes.argmax()]))
+            print('SHARPE: {}'.format(array_sharpes[array_sharpes.argmax()]))
         # ploting data
         data = [
             go.Scatter(
