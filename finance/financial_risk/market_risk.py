@@ -1,17 +1,16 @@
 ### HANDLING RISK OF ASSETS TRADED IN EXCHANGE MARKETS ###
 
 import math
-import sys
 import numpy as np
+import pandas as pd
 import cvxopt as opt
 import plotly.graph_objs as go
-sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python\Packages')
-from stpstone.machine_learning.prob_distributions import NormalDistribution
-from stpstone.machine_learning.linear_algebra import LinearAlgebra
-from stpstone.handling_data.json_format import JsonFiles
+from stpstone.quantitative_methods.prob_distributions import NormalDistribution
+from stpstone.quantitative_methods.linear_algebra import LinearAlgebra
+from stpstone.handling_data.json import JsonFiles
 from stpstone.finance.spot.stocks import ValuingStocks
-from stpstone.handling_data.handling_lists import HandlingLists
-from stpstone.handling_data.handling_numbers import NumHandler
+from stpstone.handling_data.lists import HandlingLists
+from stpstone.handling_data.numbers import NumHandler
 
 
 class MarketRiskManagement:
@@ -249,7 +248,7 @@ class MarketRiskManagement:
         # max drawdown should be positive
         return abs(max_drawdown)
 
-    def ewma(self, list_daily_returns, working_days_year=252, accuracy=0.01):
+    def ewma(self, list_daily_returns, int_wdy=252, accuracy=0.01):
         '''
         REFERENCES: https://www.investopedia.com/articles/07/ewma.asp
         DOCSTRING: EXPONENTIALLY WEIGHTED MOVING AVERAGE
@@ -295,9 +294,9 @@ class MarketRiskManagement:
             'variance_ewma_daily': sum(ewma_daily_contributions_list),
             'std_ewma_daily': math.sqrt(sum(ewma_daily_contributions_list)),
             'variance_ewma_yearly': (math.sqrt(sum(
-                ewma_daily_contributions_list)) * math.sqrt(working_days_year)) ** 2,
+                ewma_daily_contributions_list)) * math.sqrt(int_wdy)) ** 2,
             'std_ewma_yearly': math.sqrt(sum(
-                ewma_daily_contributions_list)) * math.sqrt(working_days_year)
+                ewma_daily_contributions_list)) * math.sqrt(int_wdy)
         }
         return JsonFiles().send_json(dict_message)
 
@@ -331,25 +330,25 @@ class Markowitz:
     OUTPUTS: -
     '''
 
-    def sharpe_ratio(self, mu, sigma, float_risk_free_rate):
+    def sharpe_ratio(self, mu, sigma, float_rf):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        return (float(mu) - float(float_risk_free_rate)) / float(sigma)
+        return (float(mu) - float(float_rf)) / float(sigma)
 
-    def sigma_portfolio(self, array_weights, matrix_assets_returns, working_days_year=252):
+    def sigma_portfolio(self, array_weights, array_returns, int_wdy=252):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
         # covariance between stocks
-        matrix_cov = np.cov(matrix_assets_returns)
+        array_cov = np.cov(array_returns)
         # returning portfolio standard deviation
-        return np.sqrt(np.dot(array_weights.T, np.dot(matrix_cov, array_weights))) * np.sqrt(
-            working_days_year)
+        return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights))) * np.sqrt(
+            int_wdy)
 
     def random_weights(self, n_assets):
         '''
@@ -360,35 +359,33 @@ class Markowitz:
         k = np.random.rand(n_assets)
         return k / sum(k)
 
-    def random_portfolios(self, matrix_assets_returns, float_risk_free_rate, working_days_year=252):
+    def random_portfolio(self, array_returns, float_rf, int_wdy=252):
         '''
-        DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FRO A RANDOM PORTFOLIO
+        DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
         OUTPUTS: TUP OF FLOATS
         '''
         # adjusting variables' types
-        matrix_assets_returns = np.asmatrix(matrix_assets_returns)
-        float_risk_free_rate = float(float_risk_free_rate)
+        array_r = np.asmatrix(array_returns)
+        float_rf = float(float_rf)
         # random wieghts for the current portfolio
-        array_weights = self.random_weights(matrix_assets_returns.shape[0])
+        array_weights = self.random_weights(array_r.shape[0])
         # mean returns for assets
-        array_returns = np.asmatrix(np.mean(matrix_assets_returns, axis=1))
+        array_returns = np.asmatrix(np.mean(array_r, axis=1))
         # portfolio standard deviation
-        sigma = self.sigma_portfolio(
-            array_weights, matrix_assets_returns)
+        array_sigmas = self.sigma_portfolio(
+            array_weights, array_r)
         # portfolio expected return
-        mu = float(
-            (array_weights * array_returns) * working_days_year)
-        # array_sharpes ration
-        sharpe_ratio_portfolio = self.sharpe_ratio(mu, sigma,
-                                                   float_risk_free_rate)
-        # changin type of array weight to transform in one value
+        array_mus = float((array_weights * array_returns) * int_wdy)
+        # sharpes ratio
+        array_sharpes = self.sharpe_ratio(array_mus, array_sigmas, float_rf)
+        # changing type of array weights to transform into one value
         array_weights = ' '.join([str(x) for x in array_weights])
         # returning portfolio infos
-        return mu, sigma, sharpe_ratio_portfolio, array_weights
+        return array_mus, array_sigmas, array_sharpes, array_weights
 
-    def optimal_portfolios(self, matrix_assets_returns, n_attempts=100,
-                           bl_progress_printing_opt=False, working_days_year=252):
+    def optimal_portfolios(self, array_returns, n_attempts=100,
+                           bl_progress_printing_opt=False, int_wdy=252):
         '''
         DOCSTRING: WEIGHTS RETURNS AND SIGMA FOR EFFICIENT FRONTIER
         INPUTS: MATRIX OF ASSETS' RETURNS
@@ -397,15 +394,15 @@ class Markowitz:
         # turn on/off progress printing
         opt.solvers.options['show_progress'] = bl_progress_printing_opt
         # configuring data types
-        matrix_assets_returns = np.asmatrix(matrix_assets_returns)
-        # definig the number of list_portfolios
-        n = matrix_assets_returns.shape[0]
+        array_returns = np.asmatrix(array_returns)
+        # definig the number of portfolios to be created
+        n = array_returns.shape[0]
         # calculating first attempt for mu in each portfolio
         mus = [10.0 ** (5.0 * float(t / n_attempts) - 1.0)
                for t in range(n_attempts)]
         # convert to cvxopt matrices
-        S = opt.matrix(np.cov(matrix_assets_returns))
-        pbar = opt.matrix(np.mean(matrix_assets_returns, axis=1))
+        S = opt.matrix(np.cov(array_returns))
+        pbar = opt.matrix(np.mean(array_returns, axis=1))
         # create constraint matrices
         G = -opt.matrix(np.eye(n))   # negative n x n identity matrix
         h = opt.matrix(0.0, (n, 1))
@@ -415,71 +412,56 @@ class Markowitz:
         list_portfolios = [opt.solvers.qp(mu * S, -pbar, G, h, A, b)['x']
                            for mu in mus]
         # calculating risk and return for efficient frontier
-        array_assets_returns = [opt.blas.dot(
-            pbar, x) * working_days_year for x in list_portfolios]
+        array_returns = [opt.blas.dot(
+            pbar, x) * int_wdy for x in list_portfolios]
         array_sigmas = [np.sqrt(opt.blas.dot(
-            x, S * x)) * np.sqrt(working_days_year) for x in list_portfolios]
+            x, S * x)) * np.sqrt(int_wdy) for x in list_portfolios]
         # calculate the second degree polynomial of the frontier curve
-        m1 = np.polyfit(array_assets_returns, array_sigmas, 2)
+        m1 = np.polyfit(array_returns, array_sigmas, 2)
         x1 = np.sqrt(m1[2] / m1[0])
         # calculate the optimal portfolio
         wt = opt.solvers.qp(opt.matrix(x1 * S), -pbar, G, h, A, b)['x']
         # returning weights, returns, and sigma from efficient frontier
-        return np.asarray(wt), array_assets_returns, array_sigmas
+        return np.asarray(wt), array_returns, array_sigmas
 
-    def plot_mean_return_std_portfolios(self, array_mus, array_sigmas,
-                                        array_sharpes,
-                                        title_text='Média e Desvio Padrão dos Retornos para os '
-                                        + 'Portfólios Gerados',
-                                        yaxis_title='Média Retorno (%)',
-                                        xaxis_title='Desvio Padrão (%)'):
+    def eff_frontier(self, array_eff_risks, array_eff_returns, array_weights, array_mus, array_sigmas,
+                       col_sigma='sigma', col_mu='mu', col_w='weights', list_ser=list()):
         '''
-        DOCSTRING: MARKOWITZ'S EFFICIENT FRONTIER PLOT
-        INPUTS: ARRAYS OF SIGMA, MU AND SHARPE FROM PORTFOLIOS
-        OUTPUTS: -
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
         '''
-        # ploting data
-        data = [
-            go.Scatter(
-                x=array_sigmas.flatten(),
-                y=array_mus.flatten(),
-                mode='markers',
-                marker=dict(
-                    color=array_sharpes.flatten(),
-                    showscale=True,
-                    cmax=array_sharpes.flatten().max(),
-                    cmin=0,
-                )
-            )
-        ]
-        # configuring title data
-        dict_title = {
-            'text': title_text,
-            'xanchor': 'center',
-            'yanchor': 'top',
-            'y': 0.95,
-            'x': 0.5
-        }
-        # launch figure with plotly
-        fig = go.Figure(data=data)
-        # update layout
-        fig.update_layout(
-            title=dict_title,
-            xaxis_rangeslider_visible=False, width=1280, height=720,
-            xaxis_showgrid=True, xaxis_gridwidth=1, xaxis_gridcolor='#E8E8E8',
-            yaxis_showgrid=True, yaxis_gridwidth=1, yaxis_gridcolor='#E8E8E8',
-            yaxis_title=yaxis_title,
-            xaxis_title=xaxis_title,
-            plot_bgcolor='rgba(0,0,0,0)'
-        )
-        # display plot
-        fig.show()
-
+        # Convert string-based array_weights to a 2D array by splitting the values
+        array_weights_2d = np.array([list(map(float, row.split())) for row in array_weights])
+        # Initialize empty lists for the efficient weights, returns, and risks
+        array_eff_weights = []
+        # Iterate over the efficient returns and risks
+        for _, eff_risk in zip(array_eff_returns, array_eff_risks):
+            # Find the indices in sigmas that correspond to the current risk using np.isclose
+            list_idx_sigma = np.where(np.isclose(array_sigmas, eff_risk, atol=1e-2))
+            # get the highest return for the given datasets
+            idx_mu = np.argmax(array_mus[list_idx_sigma])
+            # Get the index from mus
+            array_eff_weights.append(array_weights_2d[idx_mu])
+        # Convert to numpy array for final output if needed
+        array_eff_weights = np.array(array_eff_weights)
+        # Create a DataFrame
+        columns = [f'weight_{i}' for i in range(array_eff_weights.shape[1])]
+        df_eff = pd.DataFrame(array_eff_weights, columns=columns)
+        df_eff['mu'] = array_eff_returns
+        df_eff['sigma'] = array_eff_risks
+        # create a pandas dataframe with returns, weights and mus from the original porfolios
+        df_porf = pd.DataFrame({'mu': array_mus, 'sigma': array_sigmas, 'weights': array_weights})
+        # Output the results
+        return df_eff, df_porf
     def plot_risk_return_portfolio(self, array_weights, array_mus, array_sigmas,
                                    array_sharpes, array_eff_risks, array_eff_returns,
-                                   title_text='Markowitz Risco x Retorno dos Portfólios Gerados',
-                                   yaxis_title='Retorno (%)', xaxis_title='Risco (%)'):
+                                   title_text='Markowitz Risk x Return Portfolios',
+                                   yaxis_title='Return (%)', xaxis_title='Risk (%)'):
         '''
+        REFERENCES: https://plotly.com/python/reference/layout/, 
+            https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html, 
+            https://plotly.com/python/builtin-colorscales/
         DOCSTRING: PLOT MARKOWITZ'S EFFICIENT FRONTIER FOR PORTFOLIO MANAGEMENT
         INPUTS: ARRAY WEIGHTS, ARRAY MUS (MEAN RETURNS FOR EACH GIVEN PORTFOLIO, BASED ON EXPCTED 
             RETURNS FOR EACH SECURITY, GIVEN ITS WEIGHT ON THE SYNTHETIC PORTFOLIO), ARRAY OF SHARPES, 
@@ -489,6 +471,7 @@ class Markowitz:
         '''
         # maximum sharpe portfolio
         print('### MAXIMUM SHARPE PORTFOLIO ###')
+        print('SHARPES ARGMAX: {}'.format(array_sharpes.argmax()))
         print('WEIGHTS: {}'.format(array_weights[array_sharpes.argmax()]))
         print('RISK: {}'.format(array_sigmas[array_sharpes.argmax()]))
         print('RETURN: {}'.format(array_mus[array_sharpes.argmax()]))
@@ -501,15 +484,31 @@ class Markowitz:
                 mode='markers',
                 marker=dict(
                     color=array_sharpes.flatten(),
+                    colorscale='Viridis',
                     showscale=True,
                     cmax=array_sharpes.flatten().max(),
                     cmin=0,
-                )
+                    colorbar=dict(
+                        title='Sharpe Ratios'
+                    )
+                ),
+            # define the hovertemplate to include weights
+            hovertemplate=(
+                'Risco: %{x:.2f}<br>' +
+                'Retorno: %{y:.2f}<br>' +
+                'Sharpe: %{marker.color:.2f}<br>' +
+                'Pesos: %{customdata}<extra></extra>'
+            ),
+            # weights data for hovertemplate
+            customdata=array_weights,
+                name='Portfolios'
             ),
             go.Scatter(
                 x=array_eff_risks,
                 y=array_eff_returns,
-                mode='lines+markers',
+                mode='lines+markers', 
+                line=dict(color='red', width=2),
+                name='Efficient Frontier'
             ),
         ]
         # configuring title data
@@ -520,7 +519,14 @@ class Markowitz:
             'y': 0.95,
             'x': 0.5
         }
-        # launch figure with plotly
+        dict_leg = {
+            'orientation': 'h', 
+            'yanchor': 'bottom',
+            'y': -0.2,
+            'xanchor': 'center', 
+            'x': 0.5
+        }
+        # launching figure with plotly
         fig = go.Figure(data=data)
         # update layout
         fig.update_layout(
@@ -528,9 +534,9 @@ class Markowitz:
             xaxis_rangeslider_visible=False, width=1280, height=720,
             xaxis_showgrid=True, xaxis_gridwidth=1, xaxis_gridcolor='#E8E8E8',
             yaxis_showgrid=True, yaxis_gridwidth=1, yaxis_gridcolor='#E8E8E8',
-            yaxis_title=yaxis_title,
-            xaxis_title=xaxis_title,
-            plot_bgcolor='rgba(0,0,0,0)'
+            yaxis_title=yaxis_title, xaxis_title=xaxis_title,
+            legend=dict_leg,
+            plot_bgcolor='rgba(0,0,0,0)',
         )
         # display plot
         fig.show()

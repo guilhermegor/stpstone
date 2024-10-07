@@ -1,0 +1,8 @@
+### CONFIG FOR MICROSOFT APPS
+
+# sensitivity labels
+sensitivity_labels_office:
+  public: 'e6a9157b-bcf3-4eac-b03e-7cf007ba9fdf'
+  internal: 'd5bef5af-bbc1-4d24-bb43-47a55a90f763'
+  confidential: 'f33522dc-133a-44f0-ba7f-cdd6f493ffbd'
+  restricted: '69878aea-41a3-47a7-b03f-1211df6e7785'

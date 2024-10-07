@@ -3,8 +3,11 @@
 
 import os
 import pandas as pd
-from openpyxl import load_workbook
+from stpstone.settings.global_slots import YAML_MICROSOFT_APPS
 from stpstone.cals.handling_dates import DatesBR
+from stpstone.directories_files_manag.managing_ff import DirFilesManagement
+from stpstone.loggs.create_logs import CreateLog
+from stpstone.microsoft_apps.excel.handlingxl import DealingExcel
 
 
 class DealingPd:
@@ -12,61 +15,64 @@ class DealingPd:
     DOCSTRING: COMMON FUNCTIONS TO DEAL WITH DATA IMPORT TO PANDAS DATAFRAMES OR TIMESERIES
     '''
 
-    def append_df_to_Excel(self, filename, df, sheet_name='Sheet1', startrow=None,
-                           truncate_sheet=False, bl_header=False, bl_index=0,
-                           **to_Excel_kwargs):
+    def append_df_to_Excel(self, filename, list_tup_df_sheet_name, bl_header=True, bl_index=0, 
+        mode='w', label_sensitivity='internal', bl_set_sensitivity_label=False, bl_debug_mode=False):
         '''
-        Append a DataFrame [df] to existing Excel file [filename]
-        into [sheet_name] Sheet.
-        If [filename] doesn't exist, then this function will create it.
-        Parameters:
-        filename : File path or existing ExcelWriter
-                    (Example: '/path/to/file.xlsx')
-        df : dataframe to save to workbook
-        sheet_name : Name of sheet which will contain DataFrame.
-                    (default: 'Sheet1')
-        startrow : upper left cell row to dump data frame.
-                    Per default (startrow=None) calculate the last row
-                    in the existing DF and write to the next row...
-        truncate_sheet : truncate (remove and recreate) [sheet_name]
-                        before writing DataFrame to Excel file
-        to_Excel_kwargs : arguments which will be passed to `DataFrame.to_Excel()`
-                            [can be dictionary]
-        header : Y/N
-        Returns: None
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
         '''
-        # ignore [engine] parameter if it was passed
-        if 'engine' in to_Excel_kwargs:
-            to_Excel_kwargs.pop('engine')
-        writer = pd.ExcelWriter(filename, engine='openpyxl')
-        try:
-            # try to open an existing workbook
-            writer.book = load_workbook(filename)
-            # get the last row in the existing Excel sheet
-            # if it was not specified explicitly
-            if startrow is None and sheet_name in writer.book.sheetnames:
-                startrow = writer.book[sheet_name].max_row
-            # truncate sheet
-            if truncate_sheet and sheet_name in writer.book.sheetnames:
-                # index of [sheet_name] sheet
-                idx = writer.book.sheetnames.index(sheet_name)
-                # remove [sheet_name]
-                writer.book.remove(writer.book.worksheets[idx])
-                # create an empty sheet [sheet_name] using old index
-                writer.book.create_sheet(sheet_name, idx)
-            # copy existing sheets
-            writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
-        except FileNotFoundError:
-            # file does not exist yet, we will create it
-            pass
-        if startrow is None:
-            startrow = 0
-        # write out the new sheet
-        df.to_excel(writer, sheet_name, startrow=startrow,
-                    header=bl_header, index=bl_index)
-        # save the workbook
-        writer.save()
+        # debug mode
+        if bl_debug_mode == True:
+            print('LIST_TUP_DF_SHEET_NAME: {}'.format(list_tup_df_sheet_name))
+            print('FILENAME: {}'.format(filename))
+            print('MODE: {}'.format(mode))
+            print('BL_INDEX: {}'.format(bl_index))
+        # write excel
+        with pd.ExcelWriter(filename, engine='xlsxwriter', mode=mode) as writer:
+            for df, sheet_name in list_tup_df_sheet_name:
+                # checking df
+                if df.empty == True: continue
+                # removing indexes
+                if bl_index == 0:
+                    df.reset_index(drop=True, inplace=True)
+                    # df = df.style.hide_index()
+                df.to_excel(writer, sheet_name, index=bl_index, header=bl_header)
+        # setting label
+        if bl_set_sensitivity_label == True:
+            DealingExcel().xlsx_sensitivity_label(filename, YAML_MICROSOFT_APPS[
+                'sensitivity_labels_office'], 
+                label_sensitivity.capitalize())
 
+    def export_xl(self, logger, nome_completo_xlsx_exportacao, list_tup_df_sheet_name, 
+        range_colunas='A:CC', bl_adjust_layout=False, bl_debug_mode=False):
+        '''
+        DOCSTRING: EXPORTANDO DAFRAME PARA EXCEL
+        INPUTS: LOGGER, NOME COMPLETO XLSX DE EXPOTAÇÃO, DATAFRAME DE EXPORTAÇÃO, NOME DA PLANILHA, 
+            RANGE DE COLUNAS, BOOLEAN AUTOAJUSTE (DEFAULT)
+        OUTPUTS: BOOLEAN
+        '''
+        #   exportando dataframe para excel
+        DealingPd().append_df_to_Excel(
+            nome_completo_xlsx_exportacao, list_tup_df_sheet_name, bl_header=True, bl_index=0, 
+            bl_debug_mode=bl_debug_mode)
+        #   validando se o arquivo foi exportado com sucesso
+        blame_exportacao_xlsx = DirFilesManagement().object_exists(
+            nome_completo_xlsx_exportacao)
+        if blame_exportacao_xlsx == 'NOK':
+            CreateLog().warnings(logger, 'Arquivo não salvo na rede: {}'.format(
+                nome_completo_xlsx_exportacao))
+            raise Exception('Arquivo {} não salvo na rede, favor validar'.format(
+                nome_completo_xlsx_exportacao))
+        else:
+            if bl_adjust_layout == True:
+                for _, plan_nome in list_tup_df_sheet_name:
+                    #   corrigindo formato do xlsx exportado, e aplicando um autofit nas colunas 
+                    #       de interesse
+                    xla, wb = self.open_xl(nome_completo_xlsx_exportacao)
+                    self.autofit_range_columns(plan_nome, range_colunas, xla, wb)
+                    self.close_wb(wb)
+        return blame_exportacao_xlsx
     def json_to_excel(self, json_path_name, xlsx_path_name):
         '''
         DOCSTRING: EXPORT JSON FILE TO EXCEL XLSX
