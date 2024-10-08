@@ -349,16 +349,68 @@ class Markowitz:
         # returning portfolio standard deviation
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
-    def random_weights(self, n_assets):
+    def random_weights(self, int_n_assets, bl_constraints=False, list_min_w=None, 
+                       bl_valid_weights=False):
         '''
-        DOCSTRING:
+        DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
         INPUTS:
+            - INT_N_ASSETS: THE NUMBER OF ASSETS IN THE PORTFOLIO
+            - BL_CONSTRAINTS: BOOLEAN FLAG TO APPLY CONSTRAINTS OR NOT
+            - MIN_INVEST_PER_ASSET: A LIST OF MINIMUM WEIGHTS/INVESTMENTS FOR EACH ASSET
         OUTPUTS:
+            - A LIST OF WEIGHTS FOR THE ASSETS THAT SATISFY THE GIVEN CONSTRAINTS, 
+                WHERE SUM OF WEIGHTS = 1
         '''
-        k = np.random.rand(n_assets)
-        return k / sum(k)
+        # check wheter the constraints are enabled
+        if bl_constraints == True:
+            #   sanity check for constraints
+            if list_min_w is None:
+                raise ValueError('MIN_INVEST_PER_ASSET MUST BE PROVIDED AS A LIST WHEN '
+                                 + 'CONSTRAINTS ARE ENABLED.')
+            if any(isinstance(x, str) for x in list_min_w):
+                raise ValueError('MIN_INVEST_PER_ASSET MUST BE A LIST OF NUMBERS.')
+            if len(list_min_w) != int_n_assets:
+                raise ValueError('THE LENGTH OF MIN_INVEST_PER_ASSET MUST MATCH THE '
+                                 + 'NUMBER OF ASSETS.')
+            if any(x < 0 for x in list_min_w):
+                raise ValueError('MIN_INVEST_PER_ASSET MUST BE POSITIVE.')
+            if any(x > 1 for x in list_min_w):
+                raise ValueError('MIN_INVEST_PER_ASSET MUST BE BELOW 1.0')
+            #   initializing weights
+            bl_valid_weights = False
+            array_w = np.zeros(int_n_assets)
+            #   recursive call to get valid weights
+            while not bl_valid_weights:
+                #   loop within the number of assets
+                for i in range(int_n_assets):
+                    float_weight = np.random.uniform(0, 1)
+                    if float_weight < list_min_w[i]:
+                        array_w[i] = 0
+                    else:
+                        array_w[i] = float_weight
+                #   normalize only if the total weight is non-zero
+                total_weight = np.sum(array_w)
+                if total_weight > 0:
+                    array_w /= total_weight  
+                #   sanity checks for weights:
+                #       1 - all weights must be non-negative
+                #       2 - sum must be equal to 1
+                #       3 - the minimum must be respected
+                #       4 - all weights must be non-zero
+                bl_valid_weights = (
+                    np.all(array_w >= 0) 
+                    and np.isclose(np.sum(array_w), 1) 
+                    and all([array_w[i] >= list_min_w[i] for i in range(len(list_min_w))]) 
+                    and np.any(array_w > 0)
+                )
+            return np.unique(array_w)
+        else:
+            # If no constraints are applied, return standard random weights
+            k = np.random.rand(int_n_assets)
+            return np.unique(k / sum(k))
 
-    def random_portfolio(self, array_returns, float_rf):
+    def random_portfolio(self, array_returns, float_rf, bl_constraints=False, list_min_w=None, 
+                         int_wdy=252):
         '''
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
@@ -368,14 +420,13 @@ class Markowitz:
         array_r = np.asmatrix(array_returns)
         float_rf = float(float_rf)
         # random wieghts for the current portfolio
-        array_weights = self.random_weights(array_r.shape[0])
+        array_weights = self.random_weights(array_r.shape[0], bl_constraints, list_min_w)
         # mean returns for assets
         array_returns = np.asmatrix(np.mean(array_r, axis=1))
         # portfolio standard deviation
-        array_sigmas = self.sigma_portfolio(
-            array_weights, array_r)
+        array_sigmas = self.sigma_portfolio(array_weights, array_r) * np.sqrt(int_wdy)
         # portfolio expected return
-        array_mus = float((array_weights * array_returns))
+        array_mus = float(array_weights * array_returns) * int_wdy
         # sharpes ratio
         array_sharpes = self.sharpe_ratio(array_mus, array_sigmas, float_rf)
         # changing type of array weights to transform into one value
@@ -383,8 +434,8 @@ class Markowitz:
         # returning portfolio infos
         return array_mus, array_sigmas, array_sharpes, array_weights
 
-    def optimal_portfolios(self, array_returns, n_attempts=100,
-                           bl_progress_printing_opt=False):
+    def optimal_portfolios(self, array_returns, n_attempts=1000,
+                           bl_progress_printing_opt=False, int_wdy=252):
         '''
         DOCSTRING: WEIGHTS RETURNS AND SIGMA FOR EFFICIENT FRONTIER
         INPUTS: MATRIX OF ASSETS' RETURNS
@@ -403,7 +454,8 @@ class Markowitz:
         S = opt.matrix(np.cov(array_returns))
         pbar = opt.matrix(np.mean(array_returns, axis=1))
         # create constraint matrices
-        G = -opt.matrix(np.eye(n))   # negative n x n identity matrix
+        #   negative n x n identity matrix
+        G = -opt.matrix(np.eye(n))
         h = opt.matrix(0.0, (n, 1))
         A = opt.matrix(1.0, (1, n))
         b = opt.matrix(1.0)
@@ -412,9 +464,9 @@ class Markowitz:
                            for mu in mus]
         # calculating risk and return for efficient frontier
         array_returns = [opt.blas.dot(
-            pbar, x) for x in list_portfolios]
+            pbar, x) * int_wdy for x in list_portfolios]
         array_sigmas = [np.sqrt(opt.blas.dot(
-            x, S * x)) for x in list_portfolios]
+            x, S * x)) * np.sqrt(int_wdy) for x in list_portfolios]
         # calculate the second degree polynomial of the frontier curve
         m1 = np.polyfit(array_returns, array_sigmas, 2)
         x1 = np.sqrt(m1[2] / m1[0])
@@ -424,39 +476,48 @@ class Markowitz:
         return np.asarray(wt), array_returns, array_sigmas
 
     def eff_frontier(self, array_eff_risks, array_eff_returns, array_weights, array_mus, array_sigmas,
-                       col_sigma='sigma', col_mu='mu', col_w='weights', list_ser=list()):
+                       col_sigma='sigma', col_mu='mu', col_w='weights', array_eff_weights=list(), 
+                       atol=1e-2, int_pace_atol=5):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        # Convert string-based array_weights to a 2D array by splitting the values
+        # convert string-based array_weights to a 2D array by splitting the values
         array_weights_2d = np.array([list(map(float, row.split())) for row in array_weights])
-        # Initialize empty lists for the efficient weights, returns, and risks
-        array_eff_weights = []
-        # Iterate over the efficient returns and risks
+        # iterate over the efficient returns and risks
         for _, eff_risk in zip(array_eff_returns, array_eff_risks):
-            # Find the indices in sigmas that correspond to the current risk using np.isclose
-            list_idx_sigma = np.where(np.isclose(array_sigmas, eff_risk, atol=1e-2))
-            # get the highest return for the given datasets
-            idx_mu = np.argmax(array_mus[list_idx_sigma])
-            # Get the index from mus
-            array_eff_weights.append(array_weights_2d[idx_mu])
-        # Convert to numpy array for final output if needed
+            while True:
+                try:
+                    #   find the indices in sigmas that correspond to the current risk using 
+                    #       np.isclose
+                    list_idx_sigma = np.where(np.isclose(array_sigmas, eff_risk, atol=atol))
+                    #   get the highest return for the given datasets
+                    idx_mu = np.argmax(array_mus[list_idx_sigma])
+                    # print(eff_risk, list_idx_sigma, array_mus[list_idx_sigma], idx_mu)
+                    # raise Exception('BREAK')
+                    #   get the index from mus and append weights
+                    array_eff_weights.append(array_weights_2d[idx_mu])
+                    #   in case of no error break the loop
+                    break
+                except ValueError:
+                    atol *= int_pace_atol
+        # convert to numpy array for final output if needed
         array_eff_weights = np.array(array_eff_weights)
-        # Create a DataFrame
+        # create a dataframe
         columns = [f'weight_{i}' for i in range(array_eff_weights.shape[1])]
         df_eff = pd.DataFrame(array_eff_weights, columns=columns)
-        df_eff['mu'] = array_eff_returns
-        df_eff['sigma'] = array_eff_risks
+        df_eff[col_mu] = array_eff_returns
+        df_eff[col_sigma] = array_eff_risks
         # create a pandas dataframe with returns, weights and mus from the original porfolios
-        df_porf = pd.DataFrame({'mu': array_mus, 'sigma': array_sigmas, 'weights': array_weights})
-        # Output the results
+        df_porf = pd.DataFrame({col_mu: array_mus, col_sigma: array_sigmas, col_w: array_weights})
+        # output the results
         return df_eff, df_porf
     
     def plot_risk_return_portfolio(self, array_weights, array_mus, array_sigmas,
-                                   array_sharpes, array_eff_risks, array_eff_returns,
-                                   bl_debug_mode=False,
+                                   array_sharpes, array_eff_risks, array_eff_returns, 
+                                   array_eff_weights,
+                                   bl_debug_mode=False, complete_path_save_fig=None,
                                    title_text='Markowitz Risk x Return Portfolios',
                                    yaxis_title='Return (%)', xaxis_title='Risk (%)'):
         '''
@@ -494,15 +555,15 @@ class Markowitz:
                         title='Sharpe Ratios'
                     )
                 ),
-            # define the hovertemplate to include weights
-            hovertemplate=(
-                'Risco: %{x:.2f}<br>' +
-                'Retorno: %{y:.2f}<br>' +
-                'Sharpe: %{marker.color:.2f}<br>' +
-                'Pesos: %{customdata}<extra></extra>'
-            ),
-            # weights data for hovertemplate
-            customdata=array_weights,
+                #   define the hovertemplate to include weights
+                hovertemplate=(
+                    'Risk: %{x:.2f}<br>' +
+                    'Return: %{y:.2f}<br>' +
+                    'Sharpe: %{marker.color:.2f}<br>' +
+                    'Weight: %{customdata}<extra></extra>'
+                ),
+                #   weights data for hovertemplate
+                customdata=array_weights,
                 name='Portfolios'
             ),
             go.Scatter(
@@ -510,7 +571,13 @@ class Markowitz:
                 y=array_eff_returns,
                 mode='lines+markers', 
                 line=dict(color='red', width=2),
-                name='Efficient Frontier'
+                name='Efficient Frontier',
+                hovertemplate=(
+                    'Risk: %{x:.2f}<br>' +
+                    'Return: %{y:.2f}<br>' +
+                    'Weight: %{customdata}<extra></extra>'
+                ),
+                customdata=array_eff_weights
             ),
         ]
         # configuring title data
@@ -521,6 +588,7 @@ class Markowitz:
             'y': 0.95,
             'x': 0.5
         }
+        # legend
         dict_leg = {
             'orientation': 'h', 
             'yanchor': 'bottom',
@@ -540,5 +608,15 @@ class Markowitz:
             legend=dict_leg,
             plot_bgcolor='rgba(0,0,0,0)',
         )
+        # save plot, if is user's interest
+        if complete_path_save_fig is not None:
+            fig_extension = complete_path_save_fig.split('.')[-1]
+            fig.write_image(
+                complete_path_save_fig, 
+                format=fig_extension, 
+                scale=2, 
+                width=1280, 
+                height=720
+            )
         # display plot
         fig.show()
