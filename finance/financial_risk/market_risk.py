@@ -350,7 +350,7 @@ class Markowitz:
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
     def random_weights(self, int_n_assets, bl_constraints=False, list_min_w=None, 
-                       bl_valid_weights=False, i=0, nth_try=100):
+                       bl_valid_weights=False, i_attempts=0, nth_try=100):
         '''
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
         INPUTS:
@@ -382,9 +382,9 @@ class Markowitz:
             #   recursive call to get valid weights
             while not bl_valid_weights:
                 #   increment the try counter
-                self.try_counter += 1
+                i_attempts += 1
                 #   check if it's the nth try
-                if self.try_counter % nth_try == 0:
+                if i_attempts % nth_try == 0:
                     # Return a weight array with one asset having weight 1.0 and others 0
                     array_w = np.zeros(int_n_assets)
                     str_chosen_asset = np.random.randint(0, int_n_assets)
@@ -406,14 +406,6 @@ class Markowitz:
                 #       2 - sum must be equal to 1
                 #       3 - the minimum must be respected
                 #       4 - all weights must be non-zero
-                print('ARRAY W PASSAGEM: {}'.format(array_w))
-                print(
-                    np.all(array_w >= 0),
-                    np.isclose(np.sum(array_w), 1),
-                    all([array_w[i] >= list_min_w[i] for i in range(len(list_min_w))]),
-                    np.any(array_w > 0)
-                )
-                print(bl_valid_weights)
                 bl_valid_weights = (
                     np.all(array_w >= 0) 
                     and np.isclose(np.sum(array_w), 1) 
