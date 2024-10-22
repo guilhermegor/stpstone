@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import cvxopt as opt
 import plotly.graph_objs as go
+from itertools import combinations
 from stpstone.quantitative_methods.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.linear_algebra import LinearAlgebra
 from stpstone.handling_data.json import JsonFiles
@@ -349,8 +350,9 @@ class Markowitz:
         # returning portfolio standard deviation
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
-    def random_weights(self, int_n_assets, bl_constraints=False, list_min_w=None, 
-                       bl_valid_weights=False, i_attempts=0, nth_try=100):
+    def random_weights(self, int_n_assets, bl_constraints=False, bl_multiplier=False, 
+                       array_min_w=None, bl_valid_weights=False, i_attempts=0, nth_try=100, 
+                       float_atol_sum=1e-4, float_atol_w=10000.0):
         '''
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
         INPUTS:
@@ -364,18 +366,20 @@ class Markowitz:
         # check wheter the constraints are enabled
         if bl_constraints == True:
             #   sanity check for constraints
-            if list_min_w is None:
+            if array_min_w is None:
                 raise ValueError('MIN_INVEST_PER_ASSET MUST BE PROVIDED AS A LIST WHEN '
                                  + 'CONSTRAINTS ARE ENABLED.')
-            if any(isinstance(x, str) for x in list_min_w):
+            if any(isinstance(x, str) for x in array_min_w):
                 raise ValueError('MIN_INVEST_PER_ASSET MUST BE A LIST OF NUMBERS.')
-            if len(list_min_w) != int_n_assets:
+            if len(array_min_w) != int_n_assets:
                 raise ValueError('THE LENGTH OF MIN_INVEST_PER_ASSET MUST MATCH THE '
                                  + 'NUMBER OF ASSETS.')
-            if any(x < 0 for x in list_min_w):
+            if any(x < 0 for x in array_min_w):
                 raise ValueError('MIN_INVEST_PER_ASSET MUST BE POSITIVE.')
-            if any(x > 1 for x in list_min_w):
+            if any(x > 1 for x in array_min_w):
                 raise ValueError('MIN_INVEST_PER_ASSET MUST BE BELOW 1.0')
+            if any(x == 0 for x in array_min_w):
+                raise ValueError('EVERY MIN_INVEST_PER_ASSET MUST BE GREATER THAN 0.')
             #   initializing weights
             bl_valid_weights = False
             array_w = np.zeros(int_n_assets)
@@ -383,42 +387,100 @@ class Markowitz:
             while not bl_valid_weights:
                 #   increment the try counter
                 i_attempts += 1
-                #   check if it's the nth try
-                if i_attempts % nth_try == 0:
+                # print('I ATTEMPT: ' + str(i_attempts))
+                #   reseting variables
+                array_w = np.zeros(int_n_assets)
+                # print('ARRAY_W: {}'.format(array_w))
+                #   if multiplier is enabled, build a list of possible indexes combinations in 
+                #       order to sum 1.0 or less
+                if bl_multiplier == True:
+                    list_tup = [
+                        tuple(array_min_w.index(x) for x in comb) 
+                        for r in range(2, int_n_assets + 1) 
+                        for comb in combinations(array_min_w, r) 
+                        if sum(comb) <= 1.0
+                    ]
+                    list_tup.extend([
+                        tuple([array_min_w.index(x)]) for x in array_min_w
+                    ])
+                    # print('LIST TUP: {}'.format(list_tup))
+                    list_tup = list_tup[np.random.randint(0, len(list_tup))]
+                    list_i = list(list_tup)
+                else:
+                    list_i = list(range(int_n_assets))
+                np.random.shuffle(list_i)
+                #   check if it's the nth try or all the assets combinations would be greater than 
+                #       one
+                if \
+                    (i_attempts >= nth_try)\
+                    or (all([sum(comb) >= 1.0 for r in range(2, int_n_assets + 1) for comb in
+                              combinations(array_min_w, r)])):
                     # Return a weight array with one asset having weight 1.0 and others 0
                     array_w = np.zeros(int_n_assets)
                     str_chosen_asset = np.random.randint(0, int_n_assets)
                     array_w[str_chosen_asset] = 1.0
                     return array_w
-                #   loop within the number of assets
-                for i in range(int_n_assets):
-                    float_weight = np.random.uniform(0, 1)
-                    if float_weight < list_min_w[i]:
+                for i in list_i:
+                    #   randomly building a float weight
+                    float_upper_tol = max(
+                        float_atol_w * (1.0 - sum(array_w)), 
+                        1.0
+                    )
+                    #   building the float weight with any given value above the minimum or a 
+                    #       multiple of the minimum
+                    if bl_multiplier == True:
+                        int_max_mult = max(
+                            int((1.0 - sum(array_w)) // array_min_w[i]), 
+                            1
+                        )
+                        int_rand_mult = np.random.randint(0, int_max_mult + 1)
+                        float_weight = float(int_rand_mult * array_min_w[i])
+                        # print('ARRAY_MIN_W I: {}'.format(array_min_w[i]))
+                        # print('INT MAX MULT: {}'.format(int_max_mult))
+                        # print('INT RAND MULT: {}'.format(int_rand_mult))
+                        # print('FLOAT WEIGHT: {}'.format(float_weight))
+                    else:
+                        float_upper_tol = max(
+                            float_atol_w * (1.0 - sum(array_w)), 
+                            1.0
+                        )
+                        random_integer = np.random.randint(
+                            0,
+                            float_upper_tol
+                        )
+                        float_weight = float(random_integer) / float_upper_tol
+                    #   check if the weight is greater than the minimum
+                    if float_weight < array_min_w[i]:
                         array_w[i] = 0
                     else:
                         array_w[i] = float_weight
-                #   normalize only if the total weight is non-zero
-                total_weight = np.sum(array_w)
-                if total_weight > 0:
-                    array_w /= total_weight  
+                #   normalize only if the total weight is non-zero, if multiplier is unabled
+                if (bl_multiplier == False) or (np.count_nonzero(array_w) == 1):
+                    total_weight = np.sum(array_w)
+                    if total_weight > 0:
+                        array_w /= total_weight
                 #   sanity checks for weights:
                 #       1 - all weights must be non-negative
                 #       2 - sum must be equal to 1
-                #       3 - the minimum must be respected
-                #       4 - all weights must be non-zero
+                #       3 - the minimum must be respected, or zero for a given asset
+                #       4 - some weight must be positive
                 bl_valid_weights = (
                     np.all(array_w >= 0) 
-                    and np.isclose(np.sum(array_w), 1) 
-                    and all([array_w[i] >= list_min_w[i] for i in range(len(list_min_w))]) 
+                    and np.isclose(np.sum(array_w), 1, atol=float_atol_sum) 
+                    and all([
+                        (array_w[i] >= array_min_w[i]) \
+                            or (array_w[i] == 0)
+                        for i in range(int_n_assets)
+                    ]) 
                     and np.any(array_w > 0)
                 )
-            return np.unique(array_w)
+            return array_w
         else:
             # If no constraints are applied, return standard random weights
             k = np.random.rand(int_n_assets)
-            return np.unique(k / sum(k))
+            return k / sum(k)
 
-    def random_portfolio(self, array_returns, float_rf, bl_constraints=False, list_min_w=None, 
+    def random_portfolio(self, array_returns, float_rf, bl_constraints=False, array_min_w=None, 
                          int_wdy=252):
         '''
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
@@ -429,7 +491,7 @@ class Markowitz:
         array_r = np.asmatrix(array_returns)
         float_rf = float(float_rf)
         # random wieghts for the current portfolio
-        array_weights = self.random_weights(array_r.shape[0], bl_constraints, list_min_w)
+        array_weights = self.random_weights(array_r.shape[0], bl_constraints, array_min_w)
         # mean returns for assets
         array_returns = np.asmatrix(np.mean(array_r, axis=1))
         # portfolio standard deviation
@@ -484,9 +546,9 @@ class Markowitz:
         # returning weights, returns, and sigma from efficient frontier
         return np.asarray(wt), array_returns, array_sigmas
 
-    def eff_frontier(self, array_eff_risks, array_eff_returns, array_weights, array_mus, array_sigmas,
-                       col_sigma='sigma', col_mu='mu', col_w='weights', array_eff_weights=list(), 
-                       atol=1e-2, int_pace_atol=5):
+    def eff_frontier(self, array_eff_risks, array_eff_returns, array_weights, array_mus, array_sigmas, 
+                     float_rf, col_sigma='sigma', col_mu='mu', col_w='weights', col_sharpe='sharpe',
+                     array_eff_weights=list(), atol=1e-2, int_pace_atol=5):
         '''
         DOCSTRING:
         INPUTS:
@@ -518,6 +580,9 @@ class Markowitz:
         df_eff = pd.DataFrame(array_eff_weights, columns=columns)
         df_eff[col_mu] = array_eff_returns
         df_eff[col_sigma] = array_eff_risks
+        # calculate sharpe as the difference between array_eff_returns and float_rf 
+        #   divided by array_eff_risks
+        df_eff[col_sharpe] = (df_eff[col_mu] - float_rf) / df_eff[col_sigma]
         # create a pandas dataframe with returns, weights and mus from the original porfolios
         df_porf = pd.DataFrame({col_mu: array_mus, col_sigma: array_sigmas, col_w: array_weights})
         # output the results
@@ -525,8 +590,8 @@ class Markowitz:
     
     def plot_risk_return_portfolio(self, array_weights, array_mus, array_sigmas,
                                    array_sharpes, array_eff_risks, array_eff_returns, 
-                                   array_eff_weights,
-                                   bl_debug_mode=False, complete_path_save_fig=None,
+                                   array_eff_weights, bl_debug_mode=False, 
+                                   bl_show_plot=False, complete_path_save_fig=None,
                                    title_text='Markowitz Risk x Return Portfolios',
                                    yaxis_title='Return (%)', xaxis_title='Risk (%)'):
         '''
@@ -628,4 +693,5 @@ class Markowitz:
                 height=720
             )
         # display plot
-        fig.show()
+        if bl_show_plot == True:
+            fig.show()
