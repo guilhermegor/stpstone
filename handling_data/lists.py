@@ -2,11 +2,11 @@
 
 import re
 import bisect
-import random
 import numpy as np
 from heapq import heappush, heappop
 from collections import OrderedDict, Counter
-from itertools import chain, tee, product
+from itertools import chain, tee, product, combinations
+from joblib import Parallel, delayed
 from stpstone.handling_data.json import JsonFiles
 from stpstone.handling_data.str import StrHandler
 from stpstone.handling_data.numbers import NumHandler
@@ -366,17 +366,6 @@ class HandlingLists:
         OUTPUTS:
         '''
         return Counter(list_)
-
-    def random_combination(self, list_, r):
-        '''
-        DOCSTRING: RANDOM COMBINATIONS AMONG A LIST, GIVEN N VALUES FOR A TUPLE
-        INPUTS: LIST, R (NUMBER OF VALUES WITHIN A TUPLE)
-        OUTPUTS: TUPLE
-        '''
-        pool = tuple(list_)
-        n = len(pool)
-        indices = sorted(random.sample(range(n), r))
-        return tuple(pool[i] for i in indices)
 
 
 class PriorityQueue:

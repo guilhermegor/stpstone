@@ -351,8 +351,8 @@ class Markowitz:
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
     def random_weights(self, int_n_assets, bl_constraints=False, bl_multiplier=False, 
-                       array_min_w=None, bl_valid_weights=False, i_attempts=0, nth_try=100, 
-                       float_atol_sum=1e-4, float_atol_w=10000.0):
+                       array_min_w=None, bl_valid_weights=False, nth_try=100, int_prf_assets=5, 
+                       i_attempts=0, float_atol_sum=1e-4, float_atol_w=10000.0):
         '''
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
         INPUTS:
@@ -363,6 +363,8 @@ class Markowitz:
             - A LIST OF WEIGHTS FOR THE ASSETS THAT SATISFY THE GIVEN CONSTRAINTS, 
                 WHERE SUM OF WEIGHTS = 1
         '''
+        # adjusting number of assets within the portfolio
+        int_prf_assets = min(len(array_min_w), int_prf_assets)
         # check wheter the constraints are enabled
         if bl_constraints == True:
             #   sanity check for constraints
@@ -380,46 +382,43 @@ class Markowitz:
                 raise ValueError('MIN_INVEST_PER_ASSET MUST BE BELOW 1.0')
             if any(x == 0 for x in array_min_w):
                 raise ValueError('EVERY MIN_INVEST_PER_ASSET MUST BE GREATER THAN 0.')
-            #   initializing weights
+            #   initializing variables
             bl_valid_weights = False
-            array_w = np.zeros(int_n_assets)
+            list_combs = [
+                comb 
+                for r in range(2, int_prf_assets + 1) 
+                for comb in combinations(array_min_w, r)
+            ]
             #   recursive call to get valid weights
             while not bl_valid_weights:
                 #   increment the try counter
                 i_attempts += 1
-                # print('I ATTEMPT: ' + str(i_attempts))
                 #   reseting variables
                 array_w = np.zeros(int_n_assets)
-                # print('ARRAY_W: {}'.format(array_w))
+                #   check if it's the nth try or all the combinations are greater than one
+                if \
+                    (i_attempts >= nth_try)\
+                    or (all([sum(comb) >= 1.0 for comb in list_combs])):
+                    #   return a weight array with one asset having weight 1.0 and others 0.0
+                    array_w = np.zeros(int_n_assets)
+                    int_idx = np.random.randint(0, int_n_assets)
+                    array_w[int_idx] = 1.0
+                    return array_w
                 #   if multiplier is enabled, build a list of possible indexes combinations in 
                 #       order to sum 1.0 or less
                 if bl_multiplier == True:
+                    #   combinations where sum is less than 1.0
                     list_tup = [
-                        tuple(array_min_w.index(x) for x in comb) 
-                        for r in range(2, int_n_assets + 1) 
-                        for comb in HandlingLists().random_combination(array_min_w, r) 
+                        tuple(np.where(array_min_w == x)[0][0] for x in comb)
+                        for comb in  list_combs
                         if sum(comb) <= 1.0
                     ]
-                    list_tup.extend([
-                        tuple([array_min_w.index(x)]) for x in array_min_w
-                    ])
-                    # print('LIST TUP: {}'.format(list_tup))
-                    list_tup = list_tup[np.random.randint(0, len(list_tup))]
-                    list_i = list(list_tup)
+                    #   flatten list of indexes
+                    list_i = HandlingLists().remove_duplicates(list(sum(list_tup, ())))
                 else:
                     list_i = list(range(int_n_assets))
                 np.random.shuffle(list_i)
-                #   check if it's the nth try or all the assets combinations would be greater than 
-                #       one
-                if \
-                    (i_attempts >= nth_try)\
-                    or (all([sum(comb) >= 1.0 for r in range(2, int_n_assets + 1) for comb in
-                              HandlingLists().random_combination(array_min_w, r)])):
-                    # Return a weight array with one asset having weight 1.0 and others 0
-                    array_w = np.zeros(int_n_assets)
-                    str_chosen_asset = np.random.randint(0, int_n_assets)
-                    array_w[str_chosen_asset] = 1.0
-                    return array_w
+                #   looping through the indexes
                 for i in list_i:
                     #   randomly building a float weight
                     float_upper_tol = max(
@@ -435,10 +434,6 @@ class Markowitz:
                         )
                         int_rand_mult = np.random.randint(0, int_max_mult + 1)
                         float_weight = float(int_rand_mult * array_min_w[i])
-                        # print('ARRAY_MIN_W I: {}'.format(array_min_w[i]))
-                        # print('INT MAX MULT: {}'.format(int_max_mult))
-                        # print('INT RAND MULT: {}'.format(int_rand_mult))
-                        # print('FLOAT WEIGHT: {}'.format(float_weight))
                     else:
                         float_upper_tol = max(
                             float_atol_w * (1.0 - sum(array_w)), 
@@ -454,6 +449,8 @@ class Markowitz:
                         array_w[i] = 0
                     else:
                         array_w[i] = float_weight
+                    #   check if the sum of weights is equal to 1.0 or greater
+                    if sum(array_w) >= 1.0: break
                 #   normalize only if the total weight is non-zero, if multiplier is unabled
                 if (bl_multiplier == False) or (np.count_nonzero(array_w) == 1):
                     total_weight = np.sum(array_w)
