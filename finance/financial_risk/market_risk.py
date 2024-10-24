@@ -351,7 +351,7 @@ class Markowitz:
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
     def random_weights(self, int_n_assets, bl_constraints=False, bl_multiplier=False, 
-                       array_min_w=None, bl_valid_weights=False, nth_try=100, int_prf_assets=5, 
+                       array_min_w=None, nth_try=100, int_prf_assets=5, bl_valid_weights=False, 
                        i_attempts=0, float_atol_sum=1e-4, float_atol_w=10000.0):
         '''
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
