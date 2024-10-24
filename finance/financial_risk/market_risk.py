@@ -351,7 +351,7 @@ class Markowitz:
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
     def random_weights(self, int_n_assets, bl_constraints=False, bl_multiplier=False, 
-                       array_min_w=None, nth_try=100, int_prf_assets=5, bl_valid_weights=False, 
+                       array_min_w=None, nth_try=100, int_idx_val=2, bl_valid_weights=False, 
                        i_attempts=0, float_atol_sum=1e-4, float_atol_w=10000.0):
         '''
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
@@ -364,7 +364,7 @@ class Markowitz:
                 WHERE SUM OF WEIGHTS = 1
         '''
         # adjusting number of assets within the portfolio
-        int_prf_assets = min(len(array_min_w), int_prf_assets)
+        int_idx_val = min(len(array_min_w), int_idx_val)
         # check wheter the constraints are enabled
         if bl_constraints == True:
             #   sanity check for constraints
@@ -386,7 +386,7 @@ class Markowitz:
             bl_valid_weights = False
             list_combs = [
                 comb 
-                for r in range(2, int_prf_assets + 1) 
+                for r in range(2, int_idx_val + 1) 
                 for comb in combinations(array_min_w, r)
             ]
             #   recursive call to get valid weights
@@ -407,14 +407,14 @@ class Markowitz:
                 #   if multiplier is enabled, build a list of possible indexes combinations in 
                 #       order to sum 1.0 or less
                 if bl_multiplier == True:
-                    #   combinations where sum is less than 1.0
-                    list_tup = [
-                        tuple(np.where(array_min_w == x)[0][0] for x in comb)
-                        for comb in  list_combs
+                    #   combinations where sum is less than 1.0 - flatten list
+                    list_i = HandlingLists().remove_duplicates([
+                        idx
+                        for comb in list_combs
+                        for x in comb
+                        for idx in np.where(array_min_w == x)[0]
                         if sum(comb) <= 1.0
-                    ]
-                    #   flatten list of indexes
-                    list_i = HandlingLists().remove_duplicates(list(sum(list_tup, ())))
+                    ])
                 else:
                     list_i = list(range(int_n_assets))
                 np.random.shuffle(list_i)
@@ -470,10 +470,11 @@ class Markowitz:
                         for i in range(int_n_assets)
                     ]) 
                     and np.any(array_w > 0)
+                    and np.all(array_w != 1)
                 )
             return array_w
         else:
-            # If no constraints are applied, return standard random weights
+            # if no constraints are applied, return standard random weights
             k = np.random.rand(int_n_assets)
             return k / sum(k)
 
