@@ -397,7 +397,7 @@ class Markowitz:
                     list_tup = [
                         tuple(array_min_w.index(x) for x in comb) 
                         for r in range(2, int_n_assets + 1) 
-                        for comb in combinations(array_min_w, r) 
+                        for comb in HandlingLists().random_combination(array_min_w, r) 
                         if sum(comb) <= 1.0
                     ]
                     list_tup.extend([
@@ -414,7 +414,7 @@ class Markowitz:
                 if \
                     (i_attempts >= nth_try)\
                     or (all([sum(comb) >= 1.0 for r in range(2, int_n_assets + 1) for comb in
-                              combinations(array_min_w, r)])):
+                              HandlingLists().random_combination(array_min_w, r)])):
                     # Return a weight array with one asset having weight 1.0 and others 0
                     array_w = np.zeros(int_n_assets)
                     str_chosen_asset = np.random.randint(0, int_n_assets)

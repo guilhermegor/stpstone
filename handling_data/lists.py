@@ -2,6 +2,7 @@
 
 import re
 import bisect
+import random
 import numpy as np
 from heapq import heappush, heappop
 from collections import OrderedDict, Counter
@@ -366,6 +367,18 @@ class HandlingLists:
         '''
         return Counter(list_)
 
+    def random_combination(self, list_, r):
+        '''
+        DOCSTRING: RANDOM COMBINATIONS AMONG A LIST, GIVEN N VALUES FOR A TUPLE
+        INPUTS: LIST, R (NUMBER OF VALUES WITHIN A TUPLE)
+        OUTPUTS: TUPLE
+        '''
+        pool = tuple(list_)
+        n = len(pool)
+        indices = sorted(random.sample(range(n), r))
+        return tuple(pool[i] for i in indices)
+
+
 class PriorityQueue:
     '''
     REFERENCES: PYTHON COOKBOOK - DAVID BEASZLEY, BRIAN K. JONES
@@ -394,7 +407,6 @@ class PriorityQueue:
         OUTPUTS: OBJECT
         '''
         return heappop(self._queue)[-1]
-
 
 # sorted_list = [10, 30, 52, 73, 90, 113, 133, 154, 175, 197, 219, 240, 303, 365, 427, 492, 554, 617, 678,
 #                742, 803, 864, 927, 993, 1057, 1118, 1179, 1245, 1310, 1432, 1560, 1811, 2060, 2310, 2563, 3066, 3566]
