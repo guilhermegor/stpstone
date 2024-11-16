@@ -367,6 +367,13 @@ class HandlingLists:
         '''
         return Counter(list_)
 
+    def flatten_list(self, list_):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        return [x for xs in list_ for x in xs]
 
 class PriorityQueue:
     '''

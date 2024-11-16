@@ -17,7 +17,6 @@ class JsonFiles:
         '''
         with open(json_file, "w") as write_file:
             json.dump(message, write_file)
-
         if not os.path.exists(json_file):
             return 'NOK'
         else:
@@ -76,5 +75,4 @@ class JsonFiles:
         '''
         jsonify_message = ast.literal_eval(StrHandler().find_between(
             str(byte_message), "b'", "'"))
-
         return JsonFiles().send_json(jsonify_message)

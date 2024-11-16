@@ -25,16 +25,15 @@ class HandlingDicts:
         '''
         return max(dict_active.items(), key=itemgetter(1))
 
-    def merge_n_dicts(self, *dicts):
+    def merge_n_dicts(self, *dicts, dict_xpt=dict()):
         '''
         DOCSTRING: MERGE DICTIONARIES, FOR PYTHON 3.5+
         INPUTS: DICTIONARIES
         OUTPUTS: DICTIONARY
         '''
-        dict_saida = dict()
         for dict_ in dicts:
-            dict_saida = {**dict_saida, **dict_}
-        return dict_saida
+            dict_xpt = {**dict_xpt, **dict_}
+        return dict_xpt
 
     def cmp(self, x, y):
         '''
@@ -51,8 +50,8 @@ class HandlingDicts:
         REFERENCES: https://stackoverflow.com/questions/1143671/how-to-sort-objects-by-multiple-keys-in-python,
             https://stackoverflow.com/questions/28502774/typeerror-cmp-is-an-invalid-keyword-argument-for-this-function
         DOCSTRING: SORT A LIST OF DICTIONARIES
-        INPUTS: LIST OF DICTS AND LIST OF COLUMNS, IF THERE IS A NEGATIVE (-) SIGN, IT WIL BE ORDERED
-            IN REVERSE
+        INPUTS: LIST OF DICTS AND LIST OF COLUMNS, IF THERE IS A NEGATIVE (-) SIGN ON KEY, 
+            IT WIL BE ORDERED IN REVERSE
         OUTPUTS: LIST OF DICTIONARIES
         '''
         comparers = [
@@ -182,9 +181,9 @@ class HandlingDicts:
         if len(list_data) % len(list_headers) != 0:
             raise ValueError(
                 'The length of list_data is not a multiple of the length of list_headers.')
-        # Iterate over the list_data in chunks equal to the length of list_headers
+        # iterate over the list_data in chunks equal to the length of list_headers
         for i in range(0, len(list_data), len(list_headers)):
-            # Create a dictionary for each chunk
+            # create a dictionary for each chunk
             entry = {list_headers[j]: list_data[i + j] for j in range(len(list_headers))}
             list_dicts.append(entry)
         # returning list of dictionaries

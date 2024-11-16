@@ -394,7 +394,7 @@ class StrHandler:
             str_ = str_.replace(i, j)
         return str_
 
-    def htm_to_txt(self, html_):
+    def html_to_txt(self, html_):
         '''
         DOCSTRING:
         INPUTS:

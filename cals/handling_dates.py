@@ -84,7 +84,7 @@ class DatesBR(BrazilBankCalendar):
         '''
         return isinstance(curr_date, date)
 
-    def str_dates_to_datetime(self, data_str, format='DD/MM/YYYY'):
+    def str_date_to_datetime(self, data_str, format='DD/MM/YYYY'):
         '''
         DOCSTRING: CONVERSÃO DE DATA DE STRING PARA DATETIME.DATE, VISANDO REALIZAR CONTAS COM A MESMA
         INPUTS: DATA STRING NO format DD/MM/YYYY, YYYY-MM-DD, YYMMDD, DDMMYY OU DDMMYYYY

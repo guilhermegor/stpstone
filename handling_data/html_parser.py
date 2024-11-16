@@ -27,14 +27,17 @@ class HtmlHndler:
         except HTTPError as e:
             return 'HTTP Error: {}'.format(e)
 
-    def html_lxml_parser(self, url, method='GET', bl_verify=True):
+    def html_lxml_parser(self, url=None, page=None, method='GET', bl_verify=True):
         '''
         DOCSTRING: HTML PARSER FOR LXML PURPOSES
         INPUTS: URL, METHOD (GET AS DEFAULT) AND BOOLEAN VERIFY (TRUE AS DEFAULT)
         OUTPUTS: DOCUMENT WITH HTML CONTENT
         '''
-        page = request(method, url, verify=bl_verify)
-        return html.fromstring(page.content)
+        if page is None:
+            req_resp = request(method, url, verify=bl_verify)
+            req_resp.raise_for_status()
+            page = req_resp.content
+        return html.fromstring(page)
 
     def html_lxml_xpath(self, html_content, str_xpath):
         '''
@@ -116,7 +119,7 @@ class HtmlHndler:
 
 class SeleniumWD:
 
-    def selenium_web_driver(self, url, webdriver_path, webdriver_port,
+    def selenium_web_driver(self, url, webdriver_path, port=9515,
                             time_wait_page_load=10, bl_open_minimized=False):
         '''
         REFERENCES: https://www.udemy.com/course/selenium-webdriver-with-python3/, 
@@ -131,7 +134,7 @@ class SeleniumWD:
         d['goog:loggingPrefs'] = {'performance': 'ALL'}
         # instantiate the browser command
         driver = webdriver.Chrome(
-            executable_path=webdriver_path, port=webdriver_port)
+            executable_path=webdriver_path, port=port)
         # open minimized
         if bl_open_minimized == True:
             driver.minimize_window()
