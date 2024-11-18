@@ -71,7 +71,7 @@ class UP2DATAB3:
         }, errors='ignore')
         if bl_change_date_type == True:
             for col_ in [col_data_negocio, col_data_ref]:
-                df_daily_trades[col_] = [DatesBR().str_dates_to_datetime(x, str_input_date_format) 
+                df_daily_trades[col_] = [DatesBR().str_date_to_datetime(x, str_input_date_format) 
                                         for x in df_daily_trades[col_].tolist()]
         # column asset
         df_daily_trades[col_create_asset] = [row[col_instrumento][:3] for _, row in 

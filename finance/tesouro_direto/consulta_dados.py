@@ -28,8 +28,8 @@ class ConsultaDadosTesouroDireto:
         if isinstance(data_vencimento, datetime.date) == True:
             data_vencimento = DatesBR().datetime_to_string(data_vencimento)
         # datas de referência para a solicitação
-        data_vencimento = DatesBR().str_dates_to_datetime(data_vencimento)
-        ano_vencimento = DatesBR().str_dates_to_datetime(data_mtm).strftime('%Y')
+        data_vencimento = DatesBR().str_date_to_datetime(data_vencimento)
+        ano_vencimento = DatesBR().str_date_to_datetime(data_mtm).strftime('%Y')
         data_vencimento = data_vencimento.strftime('%d%m%y')
         # requisição de tabela do tesouro direto com o contrato de interesse para o ano de
         #   mtm de referência

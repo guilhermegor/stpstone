@@ -107,7 +107,7 @@ class AnbimaStats:
             YAML_ANBIMA['anbima_stats']['col_dt'], 
             YAML_ANBIMA['anbima_stats']['col_expirtation_dt']
         ]:
-            df_pmi_hat[col_] = [DatesBR().str_dates_to_datetime(x, 'DD/MM/YY') 
+            df_pmi_hat[col_] = [DatesBR().str_date_to_datetime(x, 'DD/MM/YY') 
                                 for x in df_pmi_hat[col_]]
         # sorting dataframe
         df_pmi_hat.sort_values([

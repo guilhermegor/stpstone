@@ -226,7 +226,7 @@ class AnbimaDataFunds(AnbimaDataGen):
         ]:
             df_funds[col_dt].fillna(YAML_ANBIMA['anbima_data_api']['str_dt_fill_na'], inplace=True)
             df_funds[col_dt] = [
-                DatesBR().str_dates_to_datetime(d, YAML_ANBIMA['anbima_data_api']['str_dt_format']) 
+                DatesBR().str_date_to_datetime(d, YAML_ANBIMA['anbima_data_api']['str_dt_format']) 
                 for d in df_funds[col_dt]
             ]
         for col_dt in [
@@ -330,7 +330,7 @@ class AnbimaDataFunds(AnbimaDataGen):
                             and (len(col_) == 10):
                             df_[col_].fillna(YAML_ANBIMA['anbima_data_api']['str_dt_fill_na'], inplace=True)
                             df_[col_] = [
-                                DatesBR().str_dates_to_datetime(d, YAML_ANBIMA['anbima_data_api']['str_dt_format']) 
+                                DatesBR().str_date_to_datetime(d, YAML_ANBIMA['anbima_data_api']['str_dt_format']) 
                                 for d in df_[col_]
                             ]
                         #   timestamp

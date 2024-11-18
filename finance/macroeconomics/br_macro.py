@@ -42,7 +42,7 @@ class Sidra:
                 list_dicts.append({
                     YAML_BR_MACRO['sidra']['st_indicators']['col_pool_name']: str_pool_name,
                     YAML_BR_MACRO['sidra']['st_indicators']['col_release_dt']: \
-                        DatesBR().str_dates_to_datetime(
+                        DatesBR().str_date_to_datetime(
                             StrHandler().get_string_until_substr(el, 'Refer'), 
                             YAML_BR_MACRO['sidra']['st_indicators']['format_input_dt']
                         ),
@@ -210,7 +210,7 @@ class BCB:
         if DatesBR().check_date_datetime_format(data_ref) == True:
             data_ref = DatesBR().datetime_to_string(data_ref, formato_data_saida)
         else:
-            data_ref = DatesBR().datetime_to_string(DatesBR().str_dates_to_datetime(data_ref),
+            data_ref = DatesBR().datetime_to_string(DatesBR().str_date_to_datetime(data_ref),
                                                     formato_data_saida)
         # verifying the consistence of data returned from BCB API; in 11/05/2021 there was a
         #   maintenance causing a temporarily unavailability, due to this problem was created a

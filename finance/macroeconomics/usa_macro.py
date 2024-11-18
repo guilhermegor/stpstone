@@ -26,8 +26,8 @@ class USAMacro:
         '''
         # adjusting variables types
         if date_format == 'dd/mm/yyyy':
-            date_inf = DatesBR().str_dates_to_datetime(date_inf)
-            date_sup = DatesBR().str_dates_to_datetime(date_sup)
+            date_inf = DatesBR().str_date_to_datetime(date_inf)
+            date_sup = DatesBR().str_date_to_datetime(date_sup)
         # query parameters for request: filetype / series id / realtime start / realtime end
         query_params = {
             'series_id': data_source_id,

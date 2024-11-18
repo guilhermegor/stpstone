@@ -657,7 +657,7 @@ class MDB3:
             YAML_B3['financial_indicators']['col_last_up']: str,
         })
         df_fin_ind[YAML_B3['financial_indicators']['col_last_up']] = [
-            DatesBR().str_dates_to_datetime(x, dt_input_fmt) if x is not math.nan else 0 
+            DatesBR().str_date_to_datetime(x, dt_input_fmt) if x is not math.nan else 0 
             for x in df_fin_ind[YAML_B3['financial_indicators']['col_last_up']]
         ]
         for col_ in [
@@ -762,8 +762,8 @@ class MDYFinance:
         '''
         # defining start and end dates
         if input_dates_format != None:
-            start_date = DatesBR().str_dates_to_datetime(start_date, input_dates_format)
-            end_date = DatesBR().str_dates_to_datetime(end_date, input_dates_format)
+            start_date = DatesBR().str_date_to_datetime(start_date, input_dates_format)
+            end_date = DatesBR().str_date_to_datetime(end_date, input_dates_format)
         # dealing with securities tickers
         if (list_securities == None) or (list_securities == []):
             list_securities = []
@@ -870,7 +870,7 @@ class MDInvestingDotCom:
         df_closing_data[col_date] = [StrHandler().get_string_until_substring(str(x), ' ') 
                                      for x in df_closing_data[col_date]]
         # alterando string para tipo de data
-        df_closing_data[col_date] = [DatesBR().str_dates_to_datetime(x, 'AAAA-MM-DD') 
+        df_closing_data[col_date] = [DatesBR().str_date_to_datetime(x, 'AAAA-MM-DD') 
                                      for x in df_closing_data[col_date]]
         # returning data of interest
         return df_closing_data
@@ -1278,9 +1278,9 @@ class MDComDinheiro:
         '''
         # alterando tipo de datas input
         if type(data_inf) == str:
-            data_inf = DatesBR().str_dates_to_datetime(data_inf, formato_data_input)
+            data_inf = DatesBR().str_date_to_datetime(data_inf, formato_data_input)
         if type(data_sup) == str:
-            data_sup = DatesBR().str_dates_to_datetime(data_sup, formato_data_input)
+            data_sup = DatesBR().str_date_to_datetime(data_sup, formato_data_input)
         # lista de papéis no formato da consulta do json da comdinheiro
         list_papeis = '%2B'.join(list_papeis).upper()
         # determinando payload de interesse
@@ -1552,9 +1552,9 @@ class MDComDinheiro:
         '''
         # alterando tipo das datas para date
         if type(data_inf) != date:
-            data_inf = DatesBR().str_dates_to_datetime(data_inf, str_formato_data_input)
+            data_inf = DatesBR().str_date_to_datetime(data_inf, str_formato_data_input)
         if type(data_sup) != date:
-            data_sup = DatesBR().str_dates_to_datetime(data_sup, str_formato_data_input)
+            data_sup = DatesBR().str_date_to_datetime(data_sup, str_formato_data_input)
         # data anterior comdinheiro de referência
         df_ref_cd = DatesBR().sub_working_days(data_sup, du_ant_cd)
         # lista de papéis no formato da consulta do json da comdinheiro

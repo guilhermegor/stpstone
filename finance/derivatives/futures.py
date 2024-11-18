@@ -39,9 +39,9 @@ class NotionalFromPV:
         '''
         # checking wheter the dates are in datetime format
         if DatesBR().check_date_datetime_format(dt_pmi_last) == False:
-            dt_pmi_last = DatesBR().str_dates_to_datetime(dt_pmi_last, str_format_dt_input)
+            dt_pmi_last = DatesBR().str_date_to_datetime(dt_pmi_last, str_format_dt_input)
         if DatesBR().check_date_datetime_format(dt_pmi_follw) == False:
-            dt_pmi_follw = DatesBR().str_dates_to_datetime(dt_pmi_follw, str_format_dt_input)
+            dt_pmi_follw = DatesBR().str_date_to_datetime(dt_pmi_follw, str_format_dt_input)
         # validate wheter following pmi date is superior than the last
         if dt_pmi_last > dt_pmi_follw: raise Exception(
             'Please validate the input of date pmi last and following, the former should be ' \
@@ -74,7 +74,7 @@ class NotionalFromRt:
         '''
         # checking wheter the settlement date is in datetime format
         if DatesBR().check_date_datetime_format(dt_xpt) == False:
-            dt_xpt = DatesBR().str_dates_to_datetime(dt_xpt, str_format_dt_input)
+            dt_xpt = DatesBR().str_date_to_datetime(dt_xpt, str_format_dt_input)
         # reference date
         dt_ref = DatesBR().sub_working_days(DatesBR().curr_date, int_wd_bef)
         # number of days to settlement of contract
@@ -97,7 +97,7 @@ class RtFromPV:
         '''
         # checking wheter the settlement date is in datetime format
         if DatesBR().check_date_datetime_format(dt_xpt) == False:
-            dt_xpt = DatesBR().str_dates_to_datetime(dt_xpt, str_format_dt_input)
+            dt_xpt = DatesBR().str_date_to_datetime(dt_xpt, str_format_dt_input)
         # reference date
         dt_ref = DatesBR().sub_working_days(DatesBR().curr_date, int_wd_bef)
         # number of days to settlement of contract

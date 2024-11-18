@@ -2,7 +2,7 @@
 
 import pandas as pd
 import numpy as np
-from zipfile import ZipFile
+from io import StringIO
 from stpstone.loggs.create_logs import CreateLog
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.directories_files_manag.managing_ff import DirFilesManagement
@@ -14,8 +14,8 @@ class CVMDATA:
         self, 
         str_host_cvm:str='https://dados.cvm.gov.br/dados/',
         logger:object=None,
-        str_dt_error:str='01/01/2100', 
-        str_format_dt_input:str='DD/MM/YYYY',
+        str_dt_error:str='2100-01-01', 
+        str_format_dt_input:str='YYYY-MM-DD',
         int_val_err:int=0,
         dict_fund_class_subclass_register:dict=dict()
     ):
@@ -24,8 +24,9 @@ class CVMDATA:
         self.str_dt_error = str_dt_error
         self.str_format_dt_input = str_format_dt_input
         self.int_val_err = int_val_err
-        self.dict_fund_class_subclass_register = dict_fund_class_subclass_register
+        self.dict_fund_class_subclass_register = self.funds_classes_subclasses_register_raw
 
+    @property
     def funds_register(
         self, 
         str_app:str='FI/CAD/DADOS/cad_fi.csv'
@@ -93,7 +94,7 @@ class CVMDATA:
             'TAXA_PERFM': str,
             'INF_TAXA_PERFM': str,
             'TAXA_ADM': str,
-            'INF_TAXA_ADM': str
+            'INF_TAXA_ADM': str,
             'VL_PATRIM_LIQ': float,
             'DT_PATRIM_LIQ': str,
             'DIRETOR': str,
@@ -102,7 +103,7 @@ class CVMDATA:
             'PF_PJ_GESTOR': str,
             'CPF_CNPJ_GESTOR': str,
             'CNPJ_AUDITOR': str,
-            'AUDITOR': str
+            'AUDITOR': str,
             'CNPJ_CUSTODIANTE': str,
             'CUSTODIANTE': str,
             'CNPJ_CONTROLADOR': str,
@@ -112,15 +113,17 @@ class CVMDATA:
         })
         for col_dt in list_cols_dts:
             df_funds_register[col_dt] = [
-                DatesBR().str_dates_to_datetime(d, self.str_format_dt_input) 
+                DatesBR().str_date_to_datetime(d, self.str_format_dt_input) 
                 for d in df_funds_register[col_dt]
             ]
         # return the dataframe
         return df_funds_register
 
+    @property
     def funds_classes_subclasses_register_raw(
         self, 
-        str_app='FI/CAD/DADOS/registro_fundo_classe.zip'
+        str_app:str='FI/CAD/DADOS/registro_fundo_classe.zip',
+        dict_:dict=dict()
     ):
         '''
         DOCSTRING:
@@ -129,25 +132,18 @@ class CVMDATA:
         '''
         # url
         url = f'{self.str_host_cvm}{str_app}'
-        # csv files on memory
-        zipfile = DirFilesManagement().get_zip_from_web_in_memory(
+        # downloading zip file into memory
+        list_main_zip = DirFilesManagement().get_zip_from_web_in_memory(
             url, 
             bl_io_interpreting=False,
             bl_verify=False
         )
-        # dealing with nested zip file
-        zipfile = ZipFile(zipfile)
-        # iterate through the files in the zip
-        for file_info in zipfile.infolist():
-            #   opennig just csv files
-            if file_info.filename.endswith('.csv'):
-                csv_file = zipfile.open(file_info)
-            else:
-                continue
-            #   appending to dict
-            self.dict_fund_class_subclass_register[file_info.filename] = csv_file
-        # return the dict
-        return self.dict_fund_class_subclass_register
+        # iterate through files in the ZIP
+        for file_info in list_main_zip:
+            #   extracting csv files
+            if file_info.name.endswith('.csv'):
+                dict_[file_info.name] = file_info.read()
+        return dict_
 
     def funds_raw_infos(
         self,
@@ -160,11 +156,15 @@ class CVMDATA:
         INPUTS:
         OUTPUTS:
         '''
-        # getting dataframe with funds 
-        df_ = pd.DataFrame(
-            self.dict_fund_class_subclass_register[key_file_name],
-            sep=';'
-        )
+        # assuming self.dict_fund_class_subclass_register[key_file_name] is a bytes object
+        file_data = self.dict_fund_class_subclass_register[key_file_name]
+        # trying to decode with 'ISO-8859-1' or 'latin1' encoding
+        try:
+            file_data_str = StringIO(file_data.decode('utf-8'))
+        except UnicodeDecodeError:
+            file_data_str = StringIO(file_data.decode('ISO-8859-1'))
+        # reading csv
+        df_ = pd.read_csv(file_data_str, delimiter=';')
         # fill na values
         list_cols = list(df_.columns)
         for col_dt in list_cols_dts:
@@ -175,7 +175,7 @@ class CVMDATA:
         df_ = df_.astype(dict_cols_types)
         for col_dt in list_cols_dts:
             df_[col_dt] = [
-                DatesBR().str_dates_to_datetime(d, self.str_format_dt_input) 
+                DatesBR().str_date_to_datetime(d, self.str_format_dt_input) 
                 for d in df_[col_dt]
             ]
         # return the dataframe
@@ -190,7 +190,7 @@ class CVMDATA:
         '''
         # getting dataframe with funds
         df_funds_classes = self.funds_raw_infos(
-            'fundo_classe.csv',
+            'registro_classe.csv',
             [
                 'Data_Registro',
                 'Data_Constituicao',
@@ -254,7 +254,7 @@ class CVMDATA:
                 'Codigo_CVM': np.int64,
                 'Data_Registro': str,
                 'Data_Constituicao': str,
-                'Tipoo_Fundo': str,
+                'Tipo_Fundo': str,
                 'Denominacao_Social': str,
                 'Data_Cancelamento': str,
                 'Situacao': str,

@@ -58,7 +58,7 @@ class PrecificacaoTD:
         OUTPUTS: INT
         '''
         # convertendo a data str para formato datetime
-        data_negociacao = DatesBR().str_dates_to_datetime(data_negociacao, 'DD/MM/AAAA')
+        data_negociacao = DatesBR().str_date_to_datetime(data_negociacao, 'DD/MM/AAAA')
         data_negociacao = DatesBR().add_working_days(data_negociacao, 1)
         # data de negociação antes da data de divulgação do vna, mo mês corrente
         if date(data_negociacao.year, data_negociacao.month,
@@ -207,7 +207,7 @@ class PrecificacaoTD:
         '''
         # convertendo datas para datetime
         if type(data_vencimento) == str:
-            data_vencimento = DatesBR().str_dates_to_datetime(data_vencimento, 'DD/MM/AAAA')
+            data_vencimento = DatesBR().str_date_to_datetime(data_vencimento, 'DD/MM/AAAA')
         # lista últimos dias do ano entre o intervalo
         list_years = DatesBR().list_years_within_dates(data_referencia, data_vencimento)
         list_last_week_year_day = DatesBR().list_last_days_of_years(list_years)
@@ -226,9 +226,9 @@ class PrecificacaoTD:
         dict_cupons = dict()
         # convertendo datas para datetime
         if type(prim_dia_util) == str:
-            prim_dia_util = DatesBR().str_dates_to_datetime(prim_dia_util, 'DD/MM/AAAA')
+            prim_dia_util = DatesBR().str_date_to_datetime(prim_dia_util, 'DD/MM/AAAA')
         if type(vencimento) == str:
-            vencimento = DatesBR().str_dates_to_datetime(vencimento, 'DD/MM/AAAA')
+            vencimento = DatesBR().str_date_to_datetime(vencimento, 'DD/MM/AAAA')
         vencimento = DatesBR().add_working_days(
             DatesBR().sub_working_days(vencimento, 1), 1)
         # lista últimos dias do ano entre o intervalo
@@ -369,13 +369,13 @@ class PrecificacaoTD:
 #     2026, 1, 2): 3774, datetime.date(2026, 7, 1): 3774, datetime.date(2027, 1, 4): 3774, datetime.date(2027, 7, 1): 3774, datetime.date(2028, 1, 3): 3774, datetime.date(2028, 7, 3): 3774, datetime.date(2029, 1, 2): 3774, datetime.date(2029, 7, 2): 3774, datetime.date(2030, 1, 2): 3774, datetime.date(2030, 7, 1): 3774, datetime.date(2031, 1, 2): 3774}
 
 # int_bzd =\
-#     DatesBR().get_working_days_delta(DatesBR().str_dates_to_datetime('10/08/2020', 'DD/MM/AAAA'),
-#                                      DatesBR().str_dates_to_datetime('04/01/2021', 'DD/MM/AAAA'))
+#     DatesBR().get_working_days_delta(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
+#                                      DatesBR().str_date_to_datetime('04/01/2021', 'DD/MM/AAAA'))
 # print(int_bzd)
-# print(len(DatesBR().list_working_days(DatesBR().str_dates_to_datetime('10/08/2020', 'DD/MM/AAAA'),
-#                                       DatesBR().str_dates_to_datetime('04/01/2021', 'DD/MM/AAAA'))))
-# print(DatesBR().list_working_days(DatesBR().str_dates_to_datetime('10/08/2020', 'DD/MM/AAAA'),
-#                                   DatesBR().str_dates_to_datetime('04/01/2021', 'DD/MM/AAAA')))
+# print(len(DatesBR().list_working_days(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
+#                                       DatesBR().str_date_to_datetime('04/01/2021', 'DD/MM/AAAA'))))
+# print(DatesBR().list_working_days(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
+#                                   DatesBR().str_date_to_datetime('04/01/2021', 'DD/MM/AAAA')))
 # print(PrecificacaoTD().ntn_f(0.06846,
 #                              list(PrecificacaoTD().dus_pagamento_cupons(
 #                                  '10/08/2020',

@@ -137,9 +137,9 @@ class DatesBR(BrazilBankCalendar):
         '''
         # correção format datas
         if type(data_inic) == str:
-            data_inic = DatesBR().str_dates_to_datetime(data_inic, format_datas_input)
+            data_inic = DatesBR().str_date_to_datetime(data_inic, format_datas_input)
         if type(data_fim) == str:
-            data_fim = DatesBR().str_dates_to_datetime(data_fim, format_datas_input)
+            data_fim = DatesBR().str_date_to_datetime(data_fim, format_datas_input)
         # criando data de referência
         ref_date = self.sub_working_days(self.curr_date(), du_ant_ref_date)
         # definindo du_anteriores inf e sup, em relação à data de interesse
@@ -158,9 +158,9 @@ class DatesBR(BrazilBankCalendar):
         '''
         # correção format datas
         if str(type(data_inic)) == "<class 'str'>":
-            data_inic = DatesBR().str_dates_to_datetime(data_inic, format_datas_input)
+            data_inic = DatesBR().str_date_to_datetime(data_inic, format_datas_input)
         if str(type(data_fim)) == "<class 'str'>":
-            data_fim = DatesBR().str_dates_to_datetime(data_fim, format_datas_input)
+            data_fim = DatesBR().str_date_to_datetime(data_fim, format_datas_input)
         # lista de passagem
         list_du = list()
         # * super() just works in its own scope, however list comprehensions create its own scope
@@ -182,9 +182,9 @@ class DatesBR(BrazilBankCalendar):
         '''
         # correção format datas
         if str(type(data_inic)) == "<class 'str'>":
-            data_inic = DatesBR().str_dates_to_datetime(data_inic, format_data)
+            data_inic = DatesBR().str_date_to_datetime(data_inic, format_data)
         if str(type(data_fim)) == "<class 'str'>":
-            data_fim = DatesBR().str_dates_to_datetime(data_fim, format_data)
+            data_fim = DatesBR().str_date_to_datetime(data_fim, format_data)
         # lista de passagem
         list_du = list()
         # appendando dias úteis
@@ -202,9 +202,9 @@ class DatesBR(BrazilBankCalendar):
         '''
         # correção format datas
         if str(type(data_inic)) == "<class 'str'>":
-            data_inic = DatesBR().str_dates_to_datetime(data_inic, 'DD/MM/YYYY')
+            data_inic = DatesBR().str_date_to_datetime(data_inic, 'DD/MM/YYYY')
         if str(type(data_fim)) == "<class 'str'>":
-            data_fim = DatesBR().str_dates_to_datetime(data_fim, 'DD/MM/YYYY')
+            data_fim = DatesBR().str_date_to_datetime(data_fim, 'DD/MM/YYYY')
         # lista de passagem
         list_years = list()
         # appendando dias úteis
@@ -300,7 +300,7 @@ class DatesBR(BrazilBankCalendar):
         '''
         # converting input date to the correct format
         if type(date_) == str:
-            self.str_dates_to_datetime(date_, format)
+            self.str_date_to_datetime(date_, format)
         # defining inputs for the dates range
         year = self.year_number(date_)
         month = self.month_number(date_)
@@ -479,9 +479,9 @@ class DatesBR(BrazilBankCalendar):
         '''
         locale.setlocale(locale.LC_TIME, local_zone)
         if str(type(inf_date)) == "<class 'str'>":
-            inf_date = DatesBR().str_dates_to_datetime(inf_date, 'DD/MM/YYYY')
+            inf_date = DatesBR().str_date_to_datetime(inf_date, 'DD/MM/YYYY')
         if str(type(sup_date)) == "<class 'str'>":
-            sup_date = DatesBR().str_dates_to_datetime(sup_date, 'DD/MM/YYYY')
+            sup_date = DatesBR().str_date_to_datetime(sup_date, 'DD/MM/YYYY')
         return len([d for d in DatesBR().list_calendar_days(inf_date, sup_date) if
                     (d.strftime('%d/%m') in list_holidays_not_considered and
                      not DatesBR().week_name(d) in list_non_bzdays_week or
@@ -507,7 +507,7 @@ class DatesBR(BrazilBankCalendar):
         INPUTS:
         OUTPUTS
         '''
-        return self.str_dates_to_datetime(
+        return self.str_date_to_datetime(
             StrHandler().get_string_until_substr(str_timestamp, substring_datetime), format)
 
     def timestamp_to_datetime(self, timestamp, bl_return_from_utc=False):
@@ -586,59 +586,9 @@ class DatesBR(BrazilBankCalendar):
                 "OCT": "10",
                 "NOV": "11",
                 "DEC": "12",
-                "JAN": "01",
-                "FEV": "02",
-                "MAR": "03",
-                "ABR": "04",
-                "MAI": "05",
-                "JUN": "06",
-                "JUL": "07",
-                "AGO": "08",
-                "SET": "09",
-                "OUT": "10",
-                "NOV": "11",
-                "DEZ": "12",
             }
             month_abbr, year = str_dt.split('/')
             month = month_mapping[month_abbr.upper()]
             return f'{year}-{month}'
         else:
             return datetime.strptime(str_dt, format_input).strftime(format_output)
-
-
-# print(DatesBR().delta_working_hours(
-#     '2020-09-04 08:35:17', '2020-09-08 12:42:33'))
-# # output
-# 14:07:16
-# print(DatesBR().delta_working_hours(
-#     '2020-09-04 17:15:00', '2020-09-08 08:33:17'))
-# # output
-# 01:18:17
-# print(DatesBR().delta_working_hours(
-#     '2020-09-04 17:15:00', '2020-09-04 18:43:33'))
-# # output
-# 00: 45: 00
-# print(DatesBR().delta_working_hours(
-#     '2020-09-04 17:15:33', '2020-09-04 17:18:12'))
-# # output
-# 00:02:39
-# print(DatesBR().delta_working_hours(
-#     '2020-08-11 05:24:32', '2020-09-08 17:18:12'))
-# print(DatesBR().add_holidays_not_considered_anbima('10/08/2020', '05/01/2021'))
-# # output
-# 2
-# # output
-# 220
-# 3
-# print(DatesBR().week_name(DatesBR().str_dates_to_datetime(inf_date, 'DD/MM/YYYY')))
-# inf_date = '02/01/2026'
-# sup_date = '01/07/2026'
-# list_years = DatesBR().list_years_within_dates(inf_date, sup_date)
-# list_last_week_year_day = DatesBR().list_last_days_of_years(list_years)
-# print(DatesBR().list_working_days(inf_date, sup_date))
-# print(DatesBR().get_working_days_delta(DatesBR().str_dates_to_datetime(inf_date, 'DD/MM/YYYY'),
-#                                        DatesBR().str_dates_to_datetime(sup_date, 'DD/MM/YYYY')))
-# print(DatesBR().add_holidays_not_considered_anbima(
-#     inf_date, sup_date, list_last_week_year_day))
-# print(DatesBR().is_holiday(
-#     DatesBR().str_dates_to_datetime('10/02/2027', 'DD/MM/YYYY')))

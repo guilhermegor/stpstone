@@ -249,7 +249,7 @@ class TradingFilesB3:
                         DatesBR().delta_calendar_days(
                             DatesBR().sub_working_days(
                                 DatesBR().curr_date, abs(-wd_bef-1)), 
-                                DatesBR().str_dates_to_datetime(str(dict_[
+                                DatesBR().str_date_to_datetime(str(dict_[
                                         YAML_B3['options_traded_b3']['keys']['xpr_dt']
                                     ]), YAML_B3['options_traded_b3']['dt_input_format']
                             )
@@ -259,7 +259,7 @@ class TradingFilesB3:
                                 DatesBR().delta_calendar_days(
                                 DatesBR().sub_working_days(
                                     DatesBR().curr_date, abs(-wd_bef-1)), 
-                                    DatesBR().str_dates_to_datetime(str(dict_[
+                                    DatesBR().str_date_to_datetime(str(dict_[
                                             YAML_B3['options_traded_b3']['keys']['xpr_dt']
                                         ]), YAML_B3['options_traded_b3']['dt_input_format']
                                     )
@@ -1196,7 +1196,7 @@ class TradingFilesB3:
         # [DatesBR().date_to_datetime(
         #         d, str_time='%H%M%S', format_dt='%Y-%m-%dT%H:%M:%Sz') for d in df_trd_rpt[col_].tolist()]
         for col_ in [col_dt_transacao]:
-            df_trd_rpt[col_] = [DatesBR().str_dates_to_datetime(d, formato_dt) for d in df_trd_rpt[
+            df_trd_rpt[col_] = [DatesBR().str_date_to_datetime(d, formato_dt) for d in df_trd_rpt[
                 col_].tolist()]
         # coletando colunas de interesse
         list_cols = list(df_trd_rpt.columns)
