@@ -31,13 +31,13 @@ class TradingFilesB3:
         url = YAML_B3['price_report'][
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
                                                      wd_bef).strftime('%y%m%d'))
-        # carga para a memória margens teóricas máximas b3
+        # mtm b3 on memry
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             url, bl_io_interpreting=YAML_B3[
                 'price_report']['bl_io_interpreting'],
             bl_verify=YAML_B3['price_report']['bl_verify']
         )
-        # retorno é um novo zip com dois xmls
+        # dealing with nested zip file
         zipfile = ZipFile(zipfile)
         # iterate through the files in the zip
         for file_info in zipfile.infolist():
