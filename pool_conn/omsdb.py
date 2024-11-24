@@ -1,4 +1,4 @@
-# CONNECTION TO OMSDB DATABASE
+### CONNECTION TO OMSDB DATABASE ###
 
 import pandas as pd
 from pyodbc import connect
@@ -25,7 +25,7 @@ class OMSDB:
                 + user_id + ';PWD=' + password
         else:
             raise Exception(
-                'DRIVER SQL NÃO IDENTIFICADO: {}'.format(driver_sql))
+                'DRIVER SQL NOT IDENTIFIED: {}'.format(driver_sql))
         # retrieve connection object to be used in pandas dataframe
         return connect(str_conex, autocommit=True, timeout=timeout)
 

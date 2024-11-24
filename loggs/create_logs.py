@@ -1,7 +1,6 @@
 ### CRIACAO DE LOGS ###
 
 import logging
-import sys
 import os
 import time
 

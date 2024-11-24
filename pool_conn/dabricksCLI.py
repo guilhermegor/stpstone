@@ -1,3 +1,5 @@
+### MODULE TO HANDLE DATABRICKSCLI INTEGRATION ###
+
 import pandas as pd
 from time import sleep
 import os
