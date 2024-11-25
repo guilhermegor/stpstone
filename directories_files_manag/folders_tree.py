@@ -1,4 +1,7 @@
+### FOLDERS TREE GENERATOR ###
+
 import os
+
 
 class FoldersTree:
     def __init__(self, str_path, bl_ignore_dot_folders=False, list_ignored_folders=None):
