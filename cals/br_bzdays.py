@@ -1,4 +1,4 @@
-### CÁLCULO DE DIAS ÚTEIS NO BRASIL ###
+### BRAZILLIAN WORKING DAYS ###
 '''
 github.com/peopledoc/workalendar/blob/master/workalendar/america/brazil.py
 '''

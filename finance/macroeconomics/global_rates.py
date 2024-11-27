@@ -1,8 +1,6 @@
-### COLLECT WORLD GOVERNMENT BONDS DATA
+### COLLECT WORLD GOVERNMENT BONDS DATA ###
 
 import pandas as pd
-from datetime import datetime, timezone
-from bs4 import BeautifulSoup
 from stpstone.settings.global_slots import YAML_GLB_RT
 from stpstone.handling_data.html_parser import HtmlHndler
 from stpstone.handling_data.dicts import HandlingDicts

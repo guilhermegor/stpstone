@@ -5,7 +5,6 @@ from time import sleep
 import os
 import json
 import datetime
-from json import JSONDecodeError
 
 
 class JobsCLI:
@@ -133,13 +132,13 @@ class DbfsCLI:
         sleep(int_seconds_wait)
         try:
             run_state = db_cli.get_run_metadata()
-        except JSONDecodeError:
+        except json.JSONDecodeError:
             print('Unable to fetch metadata from run: {}'.format(db_cli.run_id))
         sleep(int_seconds_wait)
         while run_state['state']['life_cycle_state'] != 'TERMINATED':
             try:
                 run_state = db_cli.get_run_metadata()
-            except JSONDecodeError:
+            except json.JSONDecodeError:
                 print('Unable to fetch metadata from run: {}'.format(db_cli.run_id))
             sleep(int_seconds_wait)
         # status of accomplishment

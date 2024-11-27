@@ -1,7 +1,5 @@
-### ANBIMA DATA
+### ANBIMA DATA ###
 
-import ast
-import json
 import pandas as pd
 from requests import request, exceptions
 from pprint import pprint
