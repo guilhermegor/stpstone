@@ -5,6 +5,7 @@ import ast
 import json
 from stpstone.pool_conn.postgre import PostgreSQL
 from stpstone.handling_data.str import StrHandler
+from typing import List, Dict, Any, Union
 
 
 class JsonFiles:
@@ -76,3 +77,21 @@ class JsonFiles:
         jsonify_message = ast.literal_eval(StrHandler().find_between(
             str(byte_message), "b'", "'"))
         return JsonFiles().send_json(jsonify_message)
+
+    def normalize_json_keys(self, json_:List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        '''
+        DOCSTRING: VALIDATE THAT ALL DICTIONARIES IN THE LIST HAVE THE SAME KEYS. IF THEY DO, 
+            RETURN THE ORIGINAL LIST, OTHERWISE RETURN A NEW LIST WITH EMPTY VALUES FOR MISSING KEYS
+        INPUTS: JSON_DATA (LIST[DICT[STR, ANY]]): A LIST OF DICTIONARIES TO VALIDATE
+        OUTPUTS: LIST
+        '''
+        # determine the set of all keys present in any of the dictionaries
+        list_keys = set()
+        for item in json_:
+            list_keys.update(item.keys())
+        # iterate over each dictionary and add missing keys with a value of 0
+        for item in json_:
+            for key in list_keys:
+                if key not in item:
+                    item[key] = 0
+        return json_

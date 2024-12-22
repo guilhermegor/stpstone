@@ -1,0 +1,22 @@
+### INPUTS FOR INOA
+
+alpha_tools:
+  funds:
+    method: POST
+    app: funds/get_funds
+    key_values: values
+    key_is_active: is_active
+    col_id: id
+    col_name: name
+    col_legal_id: legal_id
+    col_origin: origin
+  quotes:
+    method: POST
+    app: portfolio/get_portfolio_overview_date_range
+    key_funds_ids: fund_ids
+    key_start_dt: start_date
+    key_end_dt: end_date
+    key_items: items
+    col_fund_id: fund_id
+    col_date: date
+    col_status_display: status_display

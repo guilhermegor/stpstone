@@ -351,6 +351,43 @@ class BCB:
         # retrieving foreign exchanges
         return dict_export
 
+    @property
+    def market_macro_expec(self, url='https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?$top=100000&$orderby=Data%20desc&$format=json&$select=Indicador,IndicadorDetalhe,Data,DataReferencia,Media,Mediana,Minimo,Maximo,numeroRespondentes', 
+        col_indicator='Indicador', col_detailed_indicator='IndicadorDetalhe', col_date='Data', col_ref_year='DataReferencia', 
+        col_avg='Media', col_median='Mediana', col_min='Minimo', col_max='Maximo', col_num_answ='numeroRespondentes'):
+        '''
+        DOCSTRING: ANNUAL MARKET EXPECTATIONS FROM THE BRAZILIAN CENTRAL BANK, INCLUDING INDICATORS LIKE GDP 
+            GROWTH AND INFLATION, WITH STATISTICS ON AVERAGE, MEDIAN, MIN, MAX VALUES, AND RESPONDENT COUNT.
+        INPUTS: -
+        OUTPUTS: DATAFRAME
+        '''
+        # request olinda bcb
+        dict_headers = {
+            'accept': 'application/json',
+            'client_id': 'E0Bbo4L19nlx',
+            'access_token': 's56HuH4yFasr',
+            'Cookie': 'BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000X4IrBKiAUyQvbYXXFfX0gne:1dof89mke; TS013694c2=012e4f88b3c6fee6e3a792e5d4f68cb31972d27ba778ec1e05a622b5b87ecf0bda522fe8652f85210b7cbe2b227fe76a647ca3acc6'
+        }
+        resp_req = requests('GET', url, headers=dict_headers)
+        resp_req.raise_for_status()
+        json_bcb_expec = resp_req.json()
+        # load to pandas dataframe
+        df_expec_bcb = pd.DataFrame(json_bcb_expec['value'])
+        # changing columns types
+        df_expec_bcb = df_expec_bcb.astype({
+            col_indicator: str,
+            col_detailed_indicator: str,
+            col_date: str,
+            col_ref_year: int,
+            col_avg: float,
+            col_median: float,
+            col_min: float,
+            col_max: float,
+            col_num_answ: int
+        })
+        # return dataframe
+        return df_expec_bcb
+
 
 class YFinanceMacroBR:
 
@@ -379,7 +416,7 @@ class YFinanceMacroBR:
         } for dict_ in json_brazillian_cpi['attr']]
         # retrieving historical data
         return json_brazillian_cpi
-    
+
     def yforex(self, list_xcg_curr, wd_start_date=2, wd_end_date=0,
                                list_dicts=list()):
         '''
@@ -428,55 +465,3 @@ class YFinanceMacroBR:
         )
         # return dataframe
         return df_xcg
-
-# dict_serie_ipca = self.ipca_in_index_number
-# float_ipca = dict_serie_ipca[list(dict_serie_ipca.keys())[-1]]
-# print(float_ipca)
-# # output
-# {'closing_month': 'outubro 2020', 'indice_number': '5438.1200000000000'}
-
-# print(self.ipca_forecast)
-
-# print(self.ipca_15_in_index_number)
-# output
-# {'closing_month': 'outubro 2020', 'indice_number': '5438.1200000000000'}
-
-# print(self.ipca_15_modification_dates)
-
-# print(self.igpm('28/10/2020', '30/11/2020'))
-# # outputs
-# [{'data': '01/10/2020', 'valor': '3.23'}, {'data': '01/11/2020', 'valor': '3.28'}]
-
-# print(self.selic_daily('01/11/2020', '30/11/2020'))
-# # outputs
-# [{'data': '30/10/2020', 'valor': '0.007469'}, {'data': '03/11/2020', 'valor': '0.007469'}, {'data': '04/11/2020', 'valor': '0.007469'}, {'data': '05/11/2020', 'valor': '0.007469'}, {'data': '06/11/2020', 'valor': '0.007469'}, {'data': '09/11/2020', 'valor': '0.007469'}, {'data': '10/11/2020', 'valor': '0.007469'}, {'data': '11/11/2020', 'valor': '0.007469'}, {'data': '12/11/2020', 'valor': '0.007469'}, {'data': '13/11/2020', 'valor': '0.007469'}, {'data': '16/11/2020',
-#                                                                                                                                                                                                                                                                                                                                                                                                                                                                     'valor': '0.007469'}, {'data': '17/11/2020', 'valor': '0.007469'}, {'data': '18/11/2020', 'valor': '0.007469'}, {'data': '19/11/2020', 'valor': '0.007469'}, {'data': '20/11/2020', 'valor': '0.007469'}, {'data': '23/11/2020', 'valor': '0.007469'}, {'data': '24/11/2020', 'valor': '0.007469'}, {'data': '25/11/2020', 'valor': '0.007469'}, {'data': '26/11/2020', 'valor': '0.007469'}, {'data': '27/11/2020', 'valor': '0.007469'}, {'data': '30/11/2020', 'valor': '0.007469'}]
-
-# print(self.selic_target('01/12/2022', '29/12/2022'))
-# # output
-# [{'data': '01/11/2020', 'valor': '2.00'}, {'data': '02/11/2020', 'valor': '2.00'}, {'data': '03/11/2020', 'valor': '2.00'}, {'data': '04/11/2020', 'valor': '2.00'}, {'data': '05/11/2020', 'valor': '2.00'}, {'data': '06/11/2020', 'valor': '2.00'}, {'data': '07/11/2020', 'valor': '2.00'}, {'data': '08/11/2020', 'valor': '2.00'}, {'data': '09/11/2020', 'valor': '2.00'}, {'data': '10/11/2020', 'valor': '2.00'}, {'data': '11/11/2020', 'valor': '2.00'}, {'data': '12/11/2020', 'valor': '2.00'}, {'data': '13/11/2020', 'valor': '2.00'}, {'data': '14/11/2020', 'valor': '2.00'}, {'data': '15/11/2020', 'valor': '2.00'}, {'data': '16/11/2020', 'valor': '2.00'}, {'data': '17/11/2020', 'valor': '2.00'}, {'data': '18/11/2020', 'valor': '2.00'}, {'data': '19/11/2020', 'valor': '2.00'}, {'data': '20/11/2020', 'valor': '2.00'}, {'data': '21/11/2020', 'valor': '2.00'}, {'data': '22/11/2020', 'valor': '2.00'}, {'data': '23/11/2020', 'valor': '2.00'}, {'data': '24/11/2020', 'valor': '2.00'}, {'data': '25/11/2020', 'valor': '2.00'}, {'data': '26/11/2020', 'valor': '2.00'}, {'data': '27/11/2020', 'valor': '2.00'}, {'data': '28/11/2020', 'valor': '2.00'}, {'data': '29/11/2020', 'valor': '2.00'}, {'data': '30/11/2020', 'valor': '2.00'}]
-
-# print(self.ipca_in_index_number())
-# # output
-# {'closing_month': 'outubro 2020', 'indice_number': '5438.1200000000000'}
-
-# print(self.usd_brl('01/12/2017'))
-# # output
-# {'cotacao_compra': 3.263, 'cotacao_venda': 3.2636, 'timestamp_cotacao': '2017-12-01 13:05:49.223'}
-
-# print(self.selic_daily('10/12/2020', '10/12/2020'))
-
-# # output
-# [{'data': '10/12/2020', 'valor': '0.007469'}]
-
-# print(self.selic_daily('13/02/2021', '13/02/2021'))
-# # output
-# [{'data': '12/02/2021', 'valor': '0.007469'}]
-
-# print(self.usd_brl('05/11/2021'))
-# # output
-# #   {'cotacao_compra': 5.6163, 'cotacao_venda': 5.6163, 'timestamp_cotacao': '20211104'}
-
-# pprint(self.yforex(['USDBRL', 'CADEUR']))
-
-# pprint(self.foreign_exchange_bcb())

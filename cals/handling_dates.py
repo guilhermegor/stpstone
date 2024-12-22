@@ -148,8 +148,7 @@ class DatesBR(BrazilBankCalendar):
         # retornando range de du anteriores
         return range(du_sup, du_inf + 1)
 
-    def list_working_days(self, data_inic, data_fim, format_datas_input=None,
-                          format_datas_saida='%d/%m/%Y'):
+    def list_working_days(self, data_inic, data_fim, format_datas_input=None, format_datas_saida=None):
         '''
         DOCSTRING: DIAS ÚTEIS ENTRE DUAS DATAS, CONSIDERANDO OS FERIADOS BANCÁRIOS NO BRASIL
         INPUTS: DATA DE INÍCIO, DATA FIM EM DATETIME.DATE, STR ('DD/MM/YYYY' OU 'YYYY-MM-DD')
@@ -165,7 +164,7 @@ class DatesBR(BrazilBankCalendar):
         list_du = list()
         # * super() just works in its own scope, however list comprehensions create its own scope
         # * so we have to append an empty list
-        for x in range(int((data_fim - data_inic).days)):
+        for x in range(int((data_fim - data_inic).days) + 1):
             list_du.append(super().find_following_working_day(
                 day=data_inic + timedelta(days=x)))
         if format_datas_saida != None:
@@ -539,7 +538,7 @@ class DatesBR(BrazilBankCalendar):
         OUTPUTS: STRING
         '''
         return DatesBR().curr_date_time().strftime(format)
-    
+
     @property
     def utc_log_ts(self):
         '''
@@ -556,7 +555,7 @@ class DatesBR(BrazilBankCalendar):
         OUTPUTS:
         '''
         return datetime.utcfromtimestamp(date_)
-    
+
     def utc_from_dt(self, date_):
         '''
         DOCSTRING:
@@ -565,7 +564,7 @@ class DatesBR(BrazilBankCalendar):
         '''
         date_ = datetime.combine(date_, datetime.min.time())
         return pytz.utc.localize(date_)
-    
+
     def month_year_string(self, str_dt, format_input='%b/%Y', format_output='%Y-%m', bl_dtbr=True):
         '''
         DOCSTRING:

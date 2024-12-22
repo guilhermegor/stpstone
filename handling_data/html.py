@@ -5,6 +5,7 @@ import json
 from requests import HTTPError, request
 from bs4 import BeautifulSoup
 from lxml import html
+from typing import Optional, Union
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -14,8 +15,8 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class HtmlHndler:
 
-    def html_bs_parser(self, url, bl_verify=True,
-                       method='GET', parser='html.parser'):
+    def html_bs_parser(self, url:str, bl_verify:bool=True,
+                       method:str='GET', parser:str='html.parser') -> Union[BeautifulSoup, str]:
         '''
         DOCSTRING: HTML PARSER THROUGH BEAUTIFULSOUP
         INPUTS: HTML TEXT
@@ -27,7 +28,8 @@ class HtmlHndler:
         except HTTPError as e:
             return 'HTTP Error: {}'.format(e)
 
-    def html_lxml_parser(self, url=None, page=None, method='GET', bl_verify=True):
+    def html_lxml_parser(self, url: Optional[str]=None, page:Optional[bytes]=None,
+                         method:str='GET', bl_verify:bool=True) -> html.HtmlElement:
         '''
         DOCSTRING: HTML PARSER FOR LXML PURPOSES
         INPUTS: URL, METHOD (GET AS DEFAULT) AND BOOLEAN VERIFY (TRUE AS DEFAULT)

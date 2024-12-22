@@ -266,7 +266,7 @@ class StrHandler:
         OUTPUTS:
         '''
         return re.match(regex_match, str_)
-    
+
     def bl_has_numbers(self, str_):
         '''
         DOCSTRING: CHECK WHETER THE STRING HAS NUMBERS
@@ -416,12 +416,14 @@ class StrHandler:
         # return urls list
         return list_urls
 
-
-# print(StrHandler().base64_encode('aC2yaac23', '1bhS45TT'))
-# # output
-# Basic YUMyeWFhYzIzOjFiaFM0NVRU
-# print(StrHandler().alphabetic_range())
-# print(StrHandler().get_string_until_substr(StrHandler().get_string_after_substr(
-#     'ctl00_contentPlaceHolderConteudo_grdDividendo_ctl01', '_grd'), '_'))
-# print(StrHandler().alphabetic_range())
-# print(StrHandler().remove_non_alphanumeric_chars('micro-organismos'))
+    def is_word(self, _value):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS
+        '''
+        try:
+            float(_value)
+            return False
+        except ValueError:
+            return True

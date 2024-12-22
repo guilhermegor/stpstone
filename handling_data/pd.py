@@ -73,6 +73,7 @@ class DealingPd:
                     self.autofit_range_columns(plan_nome, range_colunas, xla, wb)
                     self.close_wb(wb)
         return blame_exportacao_xlsx
+
     def json_to_excel(self, json_path_name, xlsx_path_name):
         '''
         DOCSTRING: EXPORT JSON FILE TO EXCEL XLSX
@@ -169,3 +170,13 @@ class DealingPd:
                 merge_df = merge_df.rename(
                     columns={str(column): str(column)[:-2]})
         return merge_df
+
+    def max_chrs_per_column(df_:pd.DataFrame, dict_:dict=dict()) -> dict:
+        '''
+        DOCSTRING: CALCULATE THE MAXIMUM NUMBER OF CHARACTERS IN A SPECIFIED COLUMN OF A DATAFRAME
+        INPUTS: DATAFRAME
+        OUTPUTS: DICT
+        '''
+        for col_ in list(df_.columns):
+            dict_[col_] = df_[col_].astype(str).str.len().max()
+        return dict_

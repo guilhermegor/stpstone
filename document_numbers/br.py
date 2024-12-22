@@ -3,12 +3,13 @@
 
 from validate_docbr import CNPJ, CPF, CNH, CNS, PIS, TituloEleitoral, RENAVAM
 from requests import request
+from typing import List
 
 
 class DocumentsNumbersBR:
 
-    def __init__(self, array_numbers):
-        self.array_numbers = array_numbers
+    def __init__(self, list_docs:List[str]):
+        self.list_docs = list_docs
 
     def validate(self, doc='CNPJ'):
         '''
@@ -19,26 +20,26 @@ class DocumentsNumbersBR:
         '''
         # determine document of interest
         if doc.upper() == 'CNPJ':
-            class_ = CNPJ
+            class_ = CNPJ()
         elif doc.upper() == 'CPF':
-            class_ = CPF
+            class_ = CPF()
         elif doc.upper() == 'CNS':
-            class_ = CNS
+            class_ = CNS()
         elif doc.upper() == 'PIS':
-            class_ = PIS
+            class_ = PIS()
         elif doc.upper() == 'TITULO_ELEITORAL':
-            class_ = TituloEleitoral
+            class_ = TituloEleitoral()
         elif doc.upper() == 'RENAVAM':
-            class_ = RENAVAM
+            class_ = RENAVAM()
         elif doc.upper() == 'CNH':
-            class_ = CNH
+            class_ = CNH()
         else:
             raise Exception('Type of document provided not identified, please revisit '
                             + 'the variable doc. Given value: {}'.format(doc))
         # return valide/invalid reponse for each given number, provided its nature
-        return class_.validate_list(self.array_numbers)
+        return class_.validate_list(self.list_docs)
 
-    def mask_number(self, doc='CNPJ'):
+    def mask_numbers(self, doc='CNPJ'):
         '''
         DOCSTRING: MASK A LIST OF NUMBERS TO THE DOCUMENT FORMAT OF INTEREST
         INPUTS: DOC NATURE
@@ -48,27 +49,36 @@ class DocumentsNumbersBR:
         list_nums_to_mask = list()
         # determine document of interest
         if doc.upper() == 'CNPJ':
-            class_ = CNPJ
+            class_ = CNPJ()
         elif doc.upper() == 'CPF':
-            class_ = CPF
+            class_ = CPF()
         elif doc.upper() == 'CNS':
-            class_ = CNS
+            class_ = CNS()
         elif doc.upper() == 'PIS':
-            class_ = PIS
+            class_ = PIS()
         elif doc.upper() == 'TITULO_ELEITORAL':
-            class_ = TituloEleitoral
+            class_ = TituloEleitoral()
         elif doc.upper() == 'RENAVAM':
-            class_ = RENAVAM
+            class_ = RENAVAM()
         elif doc.upper() == 'CNH':
-            class_ = CNH
+            class_ = CNH()
         else:
             raise Exception('Type of document provided not identified, please revisit '
                             + 'the variable doc. Given value: {}'.format(doc))
         # iterate through each instance and mask its format, given the nature of interest
-        for num in self.array_numbers:
+        for num in self.list_docs:
             list_nums_to_mask.append(class_.mask(num))
         # return masked value of interest
         return list_nums_to_mask
+
+    @property
+    def unmask_docs(self):
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        return [d.replace('.', '').replace('/', '').replace('-', '') for d in self.list_docs]
 
     @property
     def get_public_info_cnpj(self, url='https://receitaws.com.br/v1/cnpj/{}',
@@ -80,4 +90,4 @@ class DocumentsNumbersBR:
         OUTPUTS: JSON
         '''
         return [request(method, url.format(cnpj_number)).json() for cnpj_number in
-                self.array_numbers]
+                self.list_docs]

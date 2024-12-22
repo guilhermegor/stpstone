@@ -752,7 +752,7 @@ class MDYFinance:
 
     def historical_data_securities_yq(self, start_date, end_date, list_securities=None, 
                                       list_indexes=None, 
-                                      input_dates_format='AAAA-MM-DD', bl_verify=False, 
+                                      input_dates_format='YYYY-MM-DD', bl_verify=False, 
                                       column_ticker='ticker', 
                                       colum_dt_date='dt_date'):
         '''
@@ -790,6 +790,45 @@ class MDYFinance:
         # filling nan values with upper data
         df_yq_data[column_ticker].fillna(method='ffill', inplace=True)
         # retrieving historical data
+        return df_yq_data
+
+    def daily_returns(self, df_yq_data:pd.DataFrame, column_symbol:str='symbol', 
+                      col_ticker:str='ticker', col_close:str='adjclose', 
+                      col_open:str='open', col_date:str='dt_date', 
+                      col_daily_return:str='daily_return', 
+                      str_type_return_calc:str='close_close') -> pd.DataFrame:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # order by ticker/date in ascending order
+        df_yq_data.sort_values(
+            by=[col_ticker, col_date], 
+            ascending=[True, True], 
+            inplace=True
+        )
+        # daily returns grouped by symbol
+        if str_type_return_calc == 'close_close':
+            df_yq_data[col_daily_return] = (
+                df_yq_data.groupby(col_ticker)[col_close]
+                .apply(lambda x: np.log(x / x.shift(1)))
+                .reset_index(0, drop=True)
+            )
+        elif str_type_return_calc == 'open_close':
+            df_yq_data[col_daily_return] = (
+                df_yq_data.groupby(col_ticker).apply(
+                    lambda group: np.log(group[col_open] / group[col_close].shift(1))
+                ).reset_index(level=0, drop=True)
+            )
+        else:
+            raise Exception('Type of return calculation not supported. '
+                            + f'TYPE: {str_type_return_calc}')
+        # optionally reset nulls when switching symbols for clarity
+        df_yq_data.loc[
+            df_yq_data.groupby(level=column_symbol).head(1).index, col_daily_return
+        ] = None
+        # returning dataframe with daily returns
         return df_yq_data
 
 
@@ -870,7 +909,7 @@ class MDInvestingDotCom:
         df_closing_data[col_date] = [StrHandler().get_string_until_substring(str(x), ' ') 
                                      for x in df_closing_data[col_date]]
         # alterando string para tipo de data
-        df_closing_data[col_date] = [DatesBR().str_date_to_datetime(x, 'AAAA-MM-DD') 
+        df_closing_data[col_date] = [DatesBR().str_date_to_datetime(x, 'YYYY-MM-DD') 
                                      for x in df_closing_data[col_date]]
         # returning data of interest
         return df_closing_data
@@ -1270,7 +1309,7 @@ class MDComDinheiro:
         return JsonFiles().send_json(jsonify_message)
 
     def mdtv_cesta_papeis(self, list_papeis, data_inf, data_sup, 
-                          bl_retornar_df=False, formato_data_input='AAAA-MM-DD'):
+                          bl_retornar_df=False, formato_data_input='YYYY-MM-DD'):
         '''
         DOCSTRING:
         INPUTS:
@@ -1537,7 +1576,7 @@ class MDComDinheiro:
         return JsonFiles().send_json(jsonify_message)
     
     def open_ended_funds_infos(self, list_cnpjs, data_inf, data_sup, 
-                               str_formato_data_input='AAAA-MM-DD', 
+                               str_formato_data_input='YYYY-MM-DD', 
                                du_ant_cd=2, list_dicts=list(), 
                                col_classe_anbima='CLASSE_ANBIMA_DO_FUNDO', 
                                col_nome_fundo='NOME_FUNDO', 

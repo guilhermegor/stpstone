@@ -1,11 +1,13 @@
 ### HANDLING RISK OF ASSETS TRADED IN EXCHANGE MARKETS ###
 
 import math
+import datetime
 import numpy as np
 import pandas as pd
 import cvxopt as opt
 import plotly.graph_objs as go
 from itertools import combinations
+from typing import List, Tuple, Optional
 from stpstone.quantitative_methods.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.linear_algebra import LinearAlgebra
 from stpstone.handling_data.json import JsonFiles
@@ -349,6 +351,53 @@ class Markowitz:
         array_cov = np.cov(array_returns)
         # returning portfolio standard deviation
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
+    
+    def min_w_asset(self, df_assets:pd.DataFrame, col_id:str, col_close:str, 
+                    col_dt:datetime.datetime, col_prtf_notional:float, col_min_w:str='min_w', 
+                    col_max_date:str='max_date') \
+                        -> list:
+        '''
+        DOCSTRING: MINIMAL WEIGHT ALLOCATION PER ASSET
+        INPUTS:
+        OUTPUTS:
+        '''
+        df_assets[col_max_date] = df_assets.groupby([col_id])[col_dt].transform('max')
+        df_assets[col_min_w] = df_assets.groupby([
+            col_id, 
+            col_max_date
+        ])[col_close].transform('last') / col_prtf_notional
+        return df_assets
+
+    def returns_min_w_uids(self, df_assets:pd.DataFrame, col_dt:str, col_id:str, 
+                           col_returns:str, col_min_w:str) \
+                            -> Tuple[np.ndarray, np.ndarray, List[str]]:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # filter where returns are not nulls
+        df_assets = df_assets[~df_assets[col_returns].isnull()]
+        # returns per uids
+        array_returns = df_assets.pivot_table(
+            index=col_dt,
+            columns=col_id,
+            values=col_returns
+        ).to_numpy()
+        array_returns = array_returns.T
+        array_returns = np.nan_to_num(array_returns, nan=0.0)
+        # minimum weights per uids
+        array_min_w = np.array(
+            df_assets.groupby(
+                col_id
+            )[col_min_w].unique(),
+            dtype=float
+        )
+        array_min_w = array_min_w.T
+        # list of uids
+        list_uids = HandlingLists().remove_duplicates(df_assets[col_id].to_list())
+        # return arrays of interet
+        return array_returns, array_min_w, list_uids
 
     def random_weights(self, int_n_assets, bl_constraints=False, bl_multiplier=False, 
                        array_min_w=None, nth_try=100, int_idx_val=2, bl_valid_weights=False, 
@@ -478,8 +527,9 @@ class Markowitz:
             k = np.random.rand(int_n_assets)
             return k / sum(k)
 
-    def random_portfolio(self, array_returns, float_rf, bl_constraints=False, array_min_w=None, 
-                         int_wdy=252):
+    def random_portfolio(self, array_returns:np.ndarray, float_rf:float, bl_constraints:bool=False, 
+                         array_min_w:Optional[np.ndarray]=None, int_wdy:int=252) \
+                        -> Tuple[np.ndarray, np.ndarray, np.ndarray, str]:
         '''
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
@@ -503,8 +553,50 @@ class Markowitz:
         # returning portfolio infos
         return array_mus, array_sigmas, array_sharpes, array_weights
 
-    def optimal_portfolios(self, array_returns, n_attempts=1000,
-                           bl_progress_printing_opt=False, int_wdy=252):
+    def random_portfolios(self, df_assets:pd.DataFrame, int_n_portfolios:int, col_id:str, 
+                          col_close:str, col_dt:datetime.datetime, col_returns:str, 
+                          float_prtf_notional:float, col_min_w:str='min_w', float_rf:float=0.0, 
+                          bl_constraints:bool=False, array_min_w:Optional[np.ndarray]=None, 
+                          int_wdy:int=252) -> Tuple[np.ndarray, np.ndarray, np.ndarray, \
+                                                    np.ndarray, np.ndarray, List[str]]:
+        '''
+        DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
+        INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
+        OUTPUTS: TUP OF FLOATS
+        '''
+        # min weights per asset
+        df_yq_data = Markowitz().min_w_asset(df_yq_data, col_id, col_close, col_dt, 
+                                             float_prtf_notional)
+        # arrays of retunrs and minimum weights per asset
+        array_returns, array_min_w, list_uuids = \
+            self.returns_min_w_uids(
+                df_assets,
+                col_dt,
+                col_id,
+                col_returns,
+                col_min_w,
+            )
+        # generating random portfolios
+        array_mus, array_sigmas, array_sharpes, array_weights = \
+            np.column_stack([
+                self.random_portfolio(
+                    array_returns,
+                    float_rf,
+                    bl_constraints,
+                    array_min_w,
+                    int_wdy
+                )
+                for _ in range(int_n_portfolios)
+            ])
+        # altering data types
+        array_mus = array_mus.astype(float)
+        array_sigmas = array_sigmas.astype(float)
+        array_sharpes = array_sharpes.astype(float)
+        return array_mus, array_sigmas, array_sharpes, array_weights, array_returns, list_uuids
+
+    def optimal_portfolios(self, array_returns:np.ndarray, n_attempts:int=1000,
+                           bl_progress_printing_opt:bool=False, int_wdy:int=252) \
+                             -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         '''
         DOCSTRING: WEIGHTS RETURNS AND SIGMA FOR EFFICIENT FRONTIER
         INPUTS: MATRIX OF ASSETS' RETURNS
