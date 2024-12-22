@@ -5,14 +5,14 @@ import os
 import sys
 import investpy
 import math
+import json
 import yfinance as yf
 import pandas as pd
 import numpy as np
 from yahooquery import Ticker
 from requests import request
-from json import loads
-from pprint import pprint
-from datetime import date
+from datetime import date, datetime
+from typing import Tuple, Optional, List, Union
 sys.path.append('\\'.join([d for d in os.path.dirname(
     os.path.realpath(__file__)).split('\\')][:-3]))
 from stpstone.settings.global_slots import YAML_B3
@@ -32,7 +32,13 @@ from stpstone.loggs.db_logs import DBLogs
 
 class TradingVolumeB3:
 
-    def bov_monthly(self, int_year, int_month, list_th=list(), list_td=list()):
+    def bov_monthly(
+            self, 
+            int_year:int, 
+            int_month:int, 
+            list_th:List[str]=list(), 
+            list_td:List[str]=list()
+        ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
         DOCSTRING:
         INPUTS:
@@ -155,7 +161,7 @@ class TradingVolumeB3:
 
 class CalendarB3:
 
-    def bl_weekly_option(self, ticker_opc, int_qtd_letras_min=6):
+    def bl_weekly_option(self, ticker_opc:str, int_min_letters:int=6) -> bool:
         '''
         DOCSTRING: BOOLEAN TO WEEKLY EXPIRING OPTIONS
         INPUTS: TICKER
@@ -163,10 +169,10 @@ class CalendarB3:
         '''
         num_let = sum(c.isalpha() for c in ticker_opc)
         num_let += sum(c.isdigit() for c in ticker_opc[:4])
-        return num_let >= int_qtd_letras_min
+        return num_let >= int_min_letters
 
     @property
-    def options_exercise_dates(self, list_dicts=list()):
+    def options_exercise_dates(self, list_ser:List[dict]=list()) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
@@ -202,9 +208,9 @@ class CalendarB3:
                 str_month
             )
             #   exporting to serialized list
-            list_dicts.extend(list_ser)
+            list_ser.extend(list_ser)
         # exporting serialized list to dataframe
-        df_opt_xcr_dts = pd.DataFrame(list_dicts)
+        df_opt_xcr_dts = pd.DataFrame(list_ser)
         # adding request date
         df_opt_xcr_dts[YAML_B3['options_exercise_dates']['key_request_date'].upper()] = \
             DatesBR().curr_date
@@ -225,7 +231,7 @@ class CalendarB3:
 
 class TradingHoursB3:
 
-    def futures_generic(self, url, int_cols, list_df=list()):
+    def futures_generic(self, url:str, int_cols:int, list_df:List[pd.DataFrame]=list()) -> list:
         '''
         DOCSTRING: TRADING TIMES OF FUTURES REGARDING BRAZILLIAN PMI (IPCA) AND STOCK INDEXES
         INPUTS: -
@@ -239,7 +245,7 @@ class TradingHoursB3:
         # looping within tables
         for _, bs_table in enumerate(bs_html.find_all('table')):
             #   reseting variables
-            list_dicts = list()
+            list_ser = list()
             #   creating headers' list
             #   auxiliary header 1
             list_headers_1 = [
@@ -305,9 +311,9 @@ class TradingHoursB3:
                     for bs_td in bs_row.find_all('td')
                 ]
                 #   appending to serialized list
-                list_dicts.append(dict(zip(list_headers, list_tr_body)))
+                list_ser.append(dict(zip(list_headers, list_tr_body)))
             #   creating dataframe
-            df_ = pd.DataFrame(list_dicts)
+            df_ = pd.DataFrame(list_ser)
             #   appending to list
             list_df.append(df_)
             #   adding logging
@@ -319,7 +325,7 @@ class TradingHoursB3:
         return list_df
 
     @property
-    def futures_pmi_idx(self):
+    def futures_pmi_idx(self) -> list:
         '''
         DOCSTRING:
         INPUTS:
@@ -331,7 +337,7 @@ class TradingHoursB3:
         )
 
     @property
-    def futures_brl_usd_int_rts(self):
+    def futures_brl_usd_int_rts(self) -> list:
         '''
         DOCSTRING:
         INPUTS:
@@ -343,7 +349,7 @@ class TradingHoursB3:
         )
     
     @property
-    def futures_commodities(self):
+    def futures_commodities(self) -> list:
         '''
         DOCSTRING:
         INPUTS:
@@ -355,7 +361,7 @@ class TradingHoursB3:
         )
     
     @property
-    def futures_crypto(self):
+    def futures_crypto(self) -> list:
         '''
         DOCSTRING:
         INPUTS:
@@ -367,7 +373,7 @@ class TradingHoursB3:
         )
     
     @property
-    def futures_forex(self):
+    def futures_forex(self) -> list:
         '''
         DOCSTRING:
         INPUTS:
@@ -379,7 +385,7 @@ class TradingHoursB3:
         )
 
     @property
-    def futures_otc(self):
+    def futures_otc(self) -> list:
         '''
         DOCSTRING:
         INPUTS:
@@ -391,7 +397,7 @@ class TradingHoursB3:
         )
     
     @property
-    def futures_opf_bef_aft_xrc(self):
+    def futures_opf_bef_aft_xrc(self) -> list:
         '''
         DOCSTRING: OPTIONS ON FUTURES - BEFORE AND AFTER EXERCISE
         INPUTS: -
@@ -403,7 +409,7 @@ class TradingHoursB3:
         )
 
     @property
-    def stocks(self, list_df=list()):
+    def stocks(self, list_df:List[pd.DataFrame]=list()) -> list:
         '''
         DOCSTRING: TRADING TIMES OF BRAZILLIAN STOCKS
         INPUTS: -
@@ -417,7 +423,7 @@ class TradingHoursB3:
         # looping within tables
         for i, bs_table in enumerate(bs_html.find_all('table')):
             #   reseting variables
-            list_dicts = list()
+            list_ser = list()
             #   CREATING HEADRERS' LIST
             #   TABLE 0
             if i == 0:
@@ -529,9 +535,9 @@ class TradingHoursB3:
                     for bs_td in bs_row.find_all('td')
                 ]
                 #   appending to serialized list
-                list_dicts.append(dict(zip(list_headers, list_tr_body)))
+                list_ser.append(dict(zip(list_headers, list_tr_body)))
             #   creating dataframe
-            df_ = pd.DataFrame(list_dicts)
+            df_ = pd.DataFrame(list_ser)
             #   appending to list
             list_df.append(df_)
             #   adding logging
@@ -548,7 +554,8 @@ class TradingHoursB3:
 
 class TheorPortfB3:
 
-    def generic_req(self, str_indice, method='GET', float_pct_factor=100.0):
+    def generic_req(self, str_indice:str, method:str='GET', float_pct_factor:float=100.0) \
+        -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
@@ -562,7 +569,7 @@ class TheorPortfB3:
         # requesting json
         json_ibov = resp_req.json()
         # building serialized list
-        list_dicts = [
+        list_ser = [
             {
                 YAML_B3['theor_port_b3']['col_ticker']: dict_[YAML_B3[
                     'theor_port_b3']['key_code']], 
@@ -577,7 +584,7 @@ class TheorPortfB3:
             } for dict_ in json_ibov['results']
         ]
         # defining dataframe
-        df_ = pd.DataFrame(list_dicts)
+        df_ = pd.DataFrame(list_ser)
         # changing data types
         df_ = df_.astype({
             YAML_B3['theor_port_b3']['col_ticker']: str, 
@@ -595,7 +602,7 @@ class TheorPortfB3:
         return df_
     
     @property
-    def ibov(self):
+    def ibov(self) -> pd.DataFrame:
         ''''
         DOCSTRING:
         INPUTS:
@@ -604,7 +611,7 @@ class TheorPortfB3:
         return self.generic_req('ibov')
     
     @property
-    def ibra(self):
+    def ibra(self) -> pd.DataFrame:
         ''''
         DOCSTRING:
         INPUTS:
@@ -613,7 +620,7 @@ class TheorPortfB3:
         return self.generic_req('ibra')
     
     @property
-    def ibrx100(self):
+    def ibrx100(self) -> pd.DataFrame:
         ''''
         DOCSTRING:
         INPUTS:
@@ -622,7 +629,7 @@ class TheorPortfB3:
         return self.generic_req('ibrx100')
     
     @property
-    def ibrx50(self):
+    def ibrx50(self) -> pd.DataFrame:
         ''''
         DOCSTRING:
         INPUTS:
@@ -634,8 +641,8 @@ class TheorPortfB3:
 class MDB3:
 
     @property
-    def financial_indicators_b3(self, method='GET', float_pct_factor=100.0, 
-                                dt_input_fmt='DD/MM/YYYY'):
+    def financial_indicators_b3(self, method:str='GET', float_pct_factor:float=100.0, 
+                                dt_input_fmt:str='DD/MM/YYYY') -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
@@ -688,7 +695,8 @@ class MDB3:
         return df_fin_ind
 
     @property
-    def securities_volatility(self, method='GET', float_pct_factor=100.0, list_dicts=list()):
+    def securities_volatility(self, method:str='GET', float_pct_factor:float=100.0, 
+                              list_ser:List[dict]=list()) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
@@ -719,9 +727,9 @@ class MDB3:
                 ]:
                     list_ = HandlingDicts().add_k_v_serialized_list(list_, k , v)
                 #   extend to serialized list
-                list_dicts.extend(list_)
+                list_ser.extend(list_)
         # adding to pandas dataframe
-        df_sec_vol = pd.DataFrame(list_dicts)
+        df_sec_vol = pd.DataFrame(list_ser)
         # changing column types
         df_sec_vol = df_sec_vol.astype({
             YAML_B3['securities_volatility_b3']['cols_names']['ticker']: str,
@@ -750,27 +758,24 @@ class MDB3:
 
 class MDYFinance:
 
-    def historical_data_securities_yq(self, start_date, end_date, list_securities=None, 
-                                      list_indexes=None, 
-                                      input_dates_format='YYYY-MM-DD', bl_verify=False, 
-                                      column_ticker='ticker', 
-                                      colum_dt_date='dt_date'):
+    def historical_data_securities_yq(self, dt_inf:datetime, dt_sup:datetime, 
+                                      list_securities:Optional[list]=None, 
+                                      list_indexes:Optional[list]=None,
+                                      bl_verify:bool=False, 
+                                      column_ticker:str='ticker', 
+                                      colum_dt_date:str='dt_date') -> pd.DataFrame:
         '''
         DOCSTRING:
         INPTUS:
         OUTPUTS:
         '''
-        # defining start and end dates
-        if input_dates_format != None:
-            start_date = DatesBR().str_date_to_datetime(start_date, input_dates_format)
-            end_date = DatesBR().str_date_to_datetime(end_date, input_dates_format)
-        # dealing with securities tickers
+        # dealing with securities list_tickers
         if (list_securities == None) or (list_securities == []):
             list_securities = []
         else:
             # list_securities = ['{}.SA'.format(str(x).upper()) for x in list_securities]
             list_securities = [str(x).upper() for x in list_securities]
-        # dealing with indexes tickers
+        # dealing with indexes list_tickers
         if (list_indexes == None) or (list_indexes == []):
             list_indexes = []
         else:
@@ -781,7 +786,7 @@ class MDYFinance:
         list_tickers = HandlingLists().remove_duplicates(list_tickers)
         # getting historical data
         list_yq_data = Ticker(list_tickers, verify=bl_verify)
-        df_yq_data = list_yq_data.history(start=start_date, end=end_date)
+        df_yq_data = list_yq_data.history(start=dt_inf, end=dt_sup)
         # index to column - ticker
         df_yq_data[column_ticker] = [str(x[0]).replace('^', '').replace('.SA', '') 
                                      for x in df_yq_data.index]
@@ -834,14 +839,13 @@ class MDYFinance:
 
 class MDInvestingDotCom:
 
-    def ticker_reference_investing_com(self, ticker, host='https://tvc4.investing.com/'
-                                       + '725910b675af9252224ca6069a1e73cc/1631836267/'
-                                       + '1/1/8/symbols?symbol={}', method='GET',
-                                       bl_verify=True, key_ticker='ticker',
-                                       headers={'User-Agent': 'Mozilla/5.0'
-                                                + ' (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                                                + '(KHTML, like Gecko) Chrome/91.0.4472.101 '
-                                                + 'Safari/537.36'}):
+    def ticker_reference_investing_com(
+        self, str_ticker:str, 
+        str_host:str='https://tvc4.investing.com/725910b675af9252224ca6069a1e73cc/1631836267/1/1/8/symbols?symbol={}', 
+        str_method:str='GET', bl_verify=True, key_ticker='ticker', 
+        dict_headers:dict={
+            'User-Agent': 'Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36'
+        }) -> json:
         '''
         DOCSTRING: TICKER REFERENCE FROM INVESTING.COM
         INPUTS: TICKER, HOST (DEFAULT), METHOD (DEFAULT), BOOLEAN VERIFY (DEFAULT), 
@@ -849,24 +853,26 @@ class MDInvestingDotCom:
         OUTPUTS: STRING
         '''
         # collect content from rest
-        # print('*** URL ***')
-        # print(host.format(ticker))
-        content_request = request(method, host.format(
-            ticker), verify=bl_verify, headers=headers).text
+        req_resp = request(
+            str_method, 
+            str_host.format(str_ticker), 
+            verify=bl_verify, 
+            headers=dict_headers
+        )
+        req_resp.raise_for_status()
         # turning to desired format - loading json to memopry
-        jsonify_message = loads(content_request)
+        json_ = req_resp.json()
         # return named ticker form investing.com
-        return jsonify_message[key_ticker]
+        return json_[key_ticker]
 
     def historical_closing_intraday_data_investing_com(
-        self, ticker_reference, from_date_timestamp,
-        to_date_timestamp, type_closing_intraday='D',
-        host='https://tvc4.investing.com/725910b675af9252224ca6069a1e73cc/'
-            + '1631836267/1/1/8/history?symbol={}&resolution={}&from={}&to={}', method='GET',
-        headers={'User-Agent': 'Mozilla/5.0'
-                 + ' (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                 + '(KHTML, like Gecko) Chrome/91.0.4472.101 '
-                 + 'Safari/537.36'}):
+        self, str_ticker_ref:str, dt_inf:datetime,
+        dt_sup:datetime, str_type_closing_intraday:str='D',
+        str_host:str='https://tvc4.investing.com/725910b675af9252224ca6069a1e73cc/'
+            + '1631836267/1/1/8/history?symbol={}&resolution={}&from={}&to={}', str_method:str='GET',
+        dict_headers:dict={
+            'User-Agent': 'Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36'
+        }) -> json:
         '''
         DOCSTRING: HISTORICAL CLOSING/INTRADAY TICKS FROM INVESTING.COM
         INPUTS: TICKER REFERENCE FROM INVESTING.COM, FROM DATE (TIMESTAMP), TO DATE (TIMESTAMP), 
@@ -874,24 +880,36 @@ class MDInvestingDotCom:
         OUTPUTS: JSON
         '''
         # collect content from rest
-        # print(host.format(ticker_reference, type_closing_intraday,
-        #                   from_date_timestamp, to_date_timestamp))
-        content_request = request(method, host.format(ticker_reference, type_closing_intraday,
-                                                      from_date_timestamp, to_date_timestamp),
-                                  headers=headers).text
+        req_resp = request(
+            str_method, 
+            str_host.format(
+                str_ticker_ref, 
+                str_type_closing_intraday,
+                dt_inf.strftime('%Y-%m-%d'), 
+                dt_sup.strftime('%Y-%m-%d')
+            ),
+            headers=dict_headers
+        )
+        req_resp.raise_for_status()
         # turning to desired format - loading json to memory
-        jsonify_message = loads(content_request)
+        json_ = req_resp.json()
         # return named ticker from investing.com
-        return jsonify_message
+        return json_
 
-    def historical_closing_data_yf(self, list_tickers, str_period='max', str_orient='records',
-                                   list_dicts=list(), col_date='Date', col_ticker='Ticker'):
+    def historical_closing_data_yf(
+            self, 
+            list_tickers:List[str], 
+            str_period:str='max',
+            list_ser:List[dict]=list(), 
+            col_date:str='Date', 
+            col_ticker:str='Ticker'
+        ) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS
         '''
-        # looping through tickers and collecting historical data
+        # looping through list_tickers and collecting historical data
         for ticker in list_tickers:
             #   creating yfinance object for the current ticker
             obj_yf = yf.Ticker(ticker)
@@ -902,9 +920,9 @@ class MDInvestingDotCom:
             #   creating column with ticker name
             df_hist_closing_data[col_ticker] = ticker
             #   appending to exporting list of dictionaries, which will be converted into a dataframe
-            list_dicts.extend(df_hist_closing_data.to_dict(orient=str_orient))
+            list_ser.extend(df_hist_closing_data.to_dict(orient='records'))
         # alterando lista de dicionários para dataframe
-        df_closing_data = pd.DataFrame(list_dicts)
+        df_closing_data = pd.DataFrame(list_ser)
         # alterando tipo de coluna de data para string
         df_closing_data[col_date] = [StrHandler().get_string_until_substring(str(x), ' ') 
                                      for x in df_closing_data[col_date]]
@@ -914,93 +932,86 @@ class MDInvestingDotCom:
         # returning data of interest
         return df_closing_data
 
-    def cotacoes_serie_historica(self, tickers, data_inf=DatesBR().sub_working_days(
-            DatesBR().curr_date, -2).strftime('%d/%m/%Y'), data_sup=DatesBR().sub_working_days(
-            DatesBR().curr_date, -1).strftime('%d/%m/%Y'), pais='brazil', classes_ativos='acao'):
+    def close_price_hist(
+            self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime, 
+            str_country:str='brazil', str_assets_class:str='acao', dict_close:dict=dict()
+        ) -> pd.DataFrame:
         '''
-        DOCSTRING: COTAÇÕES HISTÓRICAS DE ATIVOS NEGOCIADOS EM BOLSAS DO MUNDO INTEIRO
+        DOCSTRING: HISTORIC CLOSING PRICES FROM INVESTING.COM
         INPUTS: TICKERS, DATA INFERIOR, DATA SUPERIOR, PAÍS (BRAZIL COMO DEFAULT) COM
             FORMATO DATA 'DD/MM/YYYY'
         OUTPUTS: JSON
         '''
-        # alterando ticker para estar dentro de uma lista
-        if type(tickers) == str:
-            tickers = [tickers]
-        # preenchendo lista de ativos elegíveis para cotação
-        dict_cotacoes_hist = dict()
-        if classes_ativos == 'acao' and type(classes_ativos) == str:
-            for ticker in tickers:
-                json_cotacoes_hist = HandlingObjects().literal_eval_data(
-                    investpy.get_stock_historical_data(ticker, pais, data_inf, data_sup,
+        # filling list of available assets
+        if str_assets_class == 'acao' and type(str_assets_class) == str:
+            for ticker in list_tickers:
+                json_ = HandlingObjects().literal_eval_data(
+                    investpy.get_stock_historical_data(ticker, str_country, dt_inf, dt_sup,
                                                        as_json=True))
-                dict_cotacoes_hist[ticker] = json_cotacoes_hist
+                dict_close[ticker] = json_
         else:
-            if type(classes_ativos) == str:
-                classes_ativos = [classes_ativos]
-                classes_ativos.extend((len(tickers) - 1) * [classes_ativos])
-            dict_depara_ticker_nome = dict()
-            for i in range(len(tickers)):
-                if classes_ativos[i] == 'etf':
-                    for dict_ativo in investpy.get_etfs_dict(pais):
-                        if dict_ativo['symbol'] == tickers[i]:
-                            dict_depara_ticker_nome[tickers[i]
+            if type(str_assets_class) == str:
+                str_assets_class = [str_assets_class]
+                str_assets_class.extend((len(list_tickers) - 1) * [str_assets_class])
+            dict_ticker_name = dict()
+            for i in range(len(list_tickers)):
+                if str_assets_class[i] == 'etf':
+                    for dict_ativo in investpy.get_etfs_dict(str_country):
+                        if dict_ativo['symbol'] == list_tickers[i]:
+                            dict_ticker_name[list_tickers[i]
                                                     ] = dict_ativo['full_name']
                             break
                     else:
-                        dict_depara_ticker_nome[tickers[i]] = \
+                        dict_ticker_name[list_tickers[i]] = \
                             'Ticker não cadastrado no serviço de cotações investing.com'
-                    json_cotacoes_hist = investpy.get_etf_historical_data(
-                        dict_depara_ticker_nome[tickers[i]],
-                        pais, data_inf, data_sup, as_json=True)
-                    dict_cotacoes_hist[tickers[i]] = HandlingObjects().literal_eval_data(
-                        json_cotacoes_hist)
-                elif classes_ativos[i] == 'acao':
-                    json_cotacoes_hist = investpy.get_stock_historical_data(
-                        tickers[i], pais, data_inf, data_sup, as_json=True)
-                    dict_cotacoes_hist[tickers[i]] = HandlingObjects().literal_eval_data(
-                        json_cotacoes_hist)
-        return JsonFiles().send_json(dict_cotacoes_hist)
+                    json_ = investpy.get_etf_historical_data(
+                        dict_ticker_name[list_tickers[i]],
+                        str_country, dt_inf, dt_sup, as_json=True)
+                    dict_close[list_tickers[i]] = HandlingObjects().literal_eval_data(
+                        json_)
+                elif str_assets_class[i] == 'acao':
+                    json_ = investpy.get_stock_historical_data(
+                        list_tickers[i], str_country, dt_inf, dt_sup, as_json=True)
+                    dict_close[list_tickers[i]] = HandlingObjects().literal_eval_data(
+                        json_)
+        return pd.DataFrame(dict_close)
 
-    def cotacoes_dia(self, tickers, data_interesse=DatesBR().sub_working_days(
-            DatesBR().curr_date, -1).strftime('%d/%m/%Y'),
-            data_despejo=DatesBR().curr_date.strftime('%d/%m/%Y'), pais='brazil'):
-        '''
-        DOCSTRING: COTAÇÃO DO DIA DE INTERESSE DE ATIVOS NEGOCIADOS EM BOLSAS DO MUNDO INTEIRO
-        INPUTS: TICKERS, DATA INFERIOR, DATA SUPERIOR, PAÍS (BRAZIL COMO DEFAULT) COM
-            FORMATO DATA 'DD/MM/YYYY'
-        OUTPUTS: JSON
-        '''
-        if type(tickers) == str:
-            tickers = [tickers]
-        dict_cotacoes_hist = dict()
-        for ticker in tickers:
-            json_cotacoes_hist = investpy.get_stock_historical_data(
-                ticker, pais, data_interesse, data_despejo, as_json=True)
-            dict_cotacoes_hist[ticker] = json_cotacoes_hist['historical'][-1]['close']
-        return JsonFiles().send_json(dict_cotacoes_hist)
-
-    def indice_historical_data(self, date_inf, date_sup, indice='Bovespa', conutry='brazil',
-                               format_extraction='json2'):
+    def idx_hist_data(
+            self, 
+            dt_inf:datetime, 
+            dt_sup:datetime, 
+            str_idx:str='Bovespa', 
+            str_country:str='brazil'
+        ) -> pd.DataFrame:
         '''
         DOCSTRING: CLOSING PRICE OF A GIVEN INDICE
         INPUTS: DATE INFERIOR, SUPERIOR, INDICE NAME (DEFAULT BOVESPA), 
             COUNTRY (DEFAULT BRAZIL), FORMAT OF EXTRACTION (DEFAULT JSON2)
         OUTPUTS: DICT WITH CLOSE PRICE
         '''
-        return JsonFiles().send_json(
-            {d['date']: d['close'] for d in HandlingObjects().literal_eval_data(
+        return pd.DataFrame([
+            {d['date']: d['close']} 
+            for d in HandlingObjects().literal_eval_data(
                 investpy.indices.get_index_historical_data(
-                    'Bovespa', 'brazil', date_inf, date_sup, as_json=True))['historical']})
+                    str_idx, str_country, dt_inf, dt_sup, as_json=True
+               ))['historical']
+        ])
 
 
 class MDComDinheiro:
 
-    def __init__(self, user, passw):
+    def __init__(self, user:str, passw:str) -> None:
         self.user = user
         self.passw = passw
 
-    def bmf_historical_close_data(self, contract, maturity_code,
-                                  date_inf, date_sup, format_extraction='json2'):
+    def bmf_historical_close_data(
+            self, 
+            str_ticker:str, 
+            str_maturity_code:str,
+            dt_inf:datetime, 
+            dt_sup:datetime, 
+            str_fmt_extract:str='json2'
+        ) -> json:
         '''
         DOCSTRING: CLOSING PRICE OF BMF CONTRACTS
         INPUTS: USERNAME (COMDINHEIRO), PASSWORD (COMDINHEIRO), CONTRACT CODE, MATURITY CODE, 
@@ -1009,74 +1020,71 @@ class MDComDinheiro:
         OUTPUTS: JSON
         '''
         # applying date format
-        if DatesBR().check_date_datetime_format(date_inf) == True:
-            date_inf = DatesBR().datetime_to_string(date_inf, '%d%m%Y')
-        if DatesBR().check_date_datetime_format(date_sup) == True:
-            date_sup = DatesBR().datetime_to_string(date_sup, '%d%m%Y')
-        # payload - self.user / password / contract name / inferior date / superior date / maturity
+        if DatesBR().check_date_datetime_format(dt_inf) == True:
+            dt_inf = DatesBR().datetime_to_string(dt_inf, '%d%m%Y')
+        if DatesBR().check_date_datetime_format(dt_sup) == True:
+            dt_sup = DatesBR().datetime_to_string(dt_sup, '%d%m%Y')
+        # str_payload - self.user / password / str_ticker name / inferior date / superior date / maturity
         #   code / format
-        payload = str('username={}&password={}&URL=HistoricoCotacaoBMF-{}-{}-{}'
-                      + '-{}-1&format={}').format(self.user, self.passw, contract, date_inf,
-                                                  date_sup, maturity_code, format_extraction)
-        # sending rest response
-        jsonify_message = ComDinheiro().requests_api_cd(payload).text.encode('utf8')
-        jsonify_message = HandlingObjects().literal_eval_data(
-            jsonify_message, "b'", "'").replace(r'\n', '')
-        return jsonify_message
+        str_payload = str(
+            f'username={self.user}&password={self.passw}&URL=HistoricoCotacaoBMF'
+            + f'-{str_ticker}-{dt_inf}-{dt_sup}-{str_maturity_code}-1&format={str_fmt_extract}'
+        )
+        # sending rest resp_req
+        json_ = ComDinheiro().requests_api_cd(str_payload).text.encode('utf8')
+        json_ = HandlingObjects().literal_eval_data(json_, "b'", "'").replace(r'\n', '')
+        return json_
 
-    def indice_neg(self, list_tickers, data_inic, data_fim):
+    def indice_neg(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
         '''
         DOCSTRING: FUNÇÃO PARA TRAZER O ÍNDICE DE NEGOCIABILIDADE DA B3
         INPUTS: ATIVO, DATA INICIAL E DATA FINAL ('DD/MM/AAAA')
         OUTPUTS: JSON COM O VALOR DO ÍNDICE DE NEGOCIABILIDADE NO PERÍODO
         '''
         # definindo variáveis para pool de conexão
-        if type(list_tickers) == list:
-            if len(list_tickers) > 1:
-                str_acoes_consulta = '%2B'.join(list_tickers)
-            else:
-                str_acoes_consulta = ''.join(list_tickers)
-        elif type(list_tickers) == str:
-            str_acoes_consulta = list_tickers
-        data_inic = data_inic.strftime('%d~%m~%Y')
-        data_fim = data_fim.strftime('%d~%m~%Y')
-        payload = 'username={}&password={}&URL=ComparaEmpresas001.php%3F%26d'.format(
+        if len(list_tickers) > 1:
+            str_list_tickers = '%2B'.join(list_tickers)
+        else:
+            str_list_tickers = ''.join(list_tickers)
+        dt_inf = dt_inf.strftime('%d~%m~%Y')
+        dt_sup = dt_sup.strftime('%d~%m~%Y')
+        str_payload = 'username={}&password={}&URL=ComparaEmpresas001.php%3F%26d'.format(
             self.user, self.passw) \
             + 'ata_d%3D31129999%26data_a%3D16%2F06%2F2020%26trailing%3D12%26conv%3DMIXED' \
             + '%26c_c%3Dconsolidado%2520preferencialmente%26moeda%3DMOEDA_ORIGINAL' \
             + '%26m_m%3D1000000000%26n_c%3D2%26f_v%3D1%26' \
             + 'papeis%3D' \
-            + str_acoes_consulta \
+            + str_list_tickers \
             + '%26indic%3DNEGOCIABILIDADE(' \
-            + data_inic \
+            + dt_inf \
             + '%2C' \
-            + data_fim \
+            + dt_sup \
             + '%2C%2C%2C2)' \
             + '%26enviar_email%3D0%26enviar_email_log%3D0%26transpor%3D0%26op01%3D' \
             + 'tabela%26oculta_cabecalho_sup%3D0%26relat_alias_automatico%3' \
             + 'DcMDalias_01&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
-    def infos_setoriais(self, data_pregao):
+    def infos_sectors(self, dt_:datetime) -> json:
         '''
-        DOCSTRING: RETORNA INFORMAÇÕES SETORIAS: TICKER, NOME DA EMPRESA,
+        DOCSTRING: SECTOR INFORMATION REGARDING COMPANIES
         INPUTS: DATA PREGÃO DE INTERESSE
         OUTPUTS: JSON
         '''
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=StockScreenerFull.php%3F%26'.format(
+        str_payload = 'username={}&password={}&URL=StockScreenerFull.php%3F%26'.format(
             self.user, self.passw) \
             + 'relat%3D%26data_analise%3D{}%2F{}%2F{}%26data_dem%3D31%2F12%2F'.format(
-                data_pregao.strftime('%d'), data_pregao.strftime('%m'),
-                data_pregao.strftime('%Y')) \
+                dt_.strftime('%d'), dt_.strftime('%m'),
+                dt_.strftime('%Y')) \
             + '9999%26variaveis%3DTICKER%2BNOME_EMPRESA%2BDATA_REGISTRO%2BSEGMENTO%2BSETOR%' \
             + '2BSUBSETOR%2BSUBSUBSETOR%2BTIPO_BOVESPA({}~{}~{}%2CTODOS%2C%2C)'.format(
-                data_pregao.strftime('%d'), data_pregao.strftime('%m'),
-                data_pregao.strftime('%Y')
+                dt_.strftime('%d'), dt_.strftime('%m'),
+                dt_.strftime('%Y')
             ) \
             + '%26segmento%3Dtodos%26setor%3Dtodos%26filtro%3D' \
             + '%26demonstracao%3Dconsolidado%2520preferencialmente%26tipo_acao%3D' \
@@ -1087,20 +1095,20 @@ class MDComDinheiro:
             + 'primeira_coluna_ticker%3D0%26periodos%3D0%26periodicidade%3Danual%26' \
             + 'formato_data%3D1&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
     @property
-    def infos_eventos_corporativos(self):
+    def corporate_events(self) -> json:
         '''
         DOCSTRING: RETORNA INFORMAÇÕES CORPORATIVAS: DIVULGAÇÃO DE RESULTADOS,
         INPUTS: DATA PREGÃO DE INTERESSE
         OUTPUTS: JSON
         '''
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=StockScreenerFull.php'.format(
+        str_payload = 'username={}&password={}&URL=StockScreenerFull.php'.format(
             self.user, self.passw) \
             + '%3F%26relat%3D%26data_analise%3D18%2F06%2F2020%26data_dem%3D' \
             + '31%2F12%2F9999%26variaveis%3DTICKER%2BDATA_ENTREGA_DEM_PRIM%' \
@@ -1112,66 +1120,66 @@ class MDComDinheiro:
             + 'relat_alias_automatico%3DcMDalias_01%26primeira_coluna_ticker%3D0%26' \
             + 'periodos%3D0%26periodicidade%3Danual%26formato_data%3D1&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
-    def infos_negociacao(self, data_inf, data_sup):
+    def trading_infos(self, dt_inf:datetime, dt_sup:datetime) -> json:
         '''
-        DOCSTRING: RETORNA INFORMAÇÕES SOBRE QUANTIDADE DE NEGÓCIOS, LIQUIDEZ NA BOLSA,
-            VALOR DE MERCADO, NOGICIABILIDADE, PESO NO ÍNDICE IBRX100, BTC PARA O PAPEL,
-            COMPRAS E VENDAS DE FUNDOS
-        INPUTS: DATA PREGÃO DE INTERESSE (INFERIOR E SUPERIOR)
-        OUTPUTS: JSON COM TODAS AS AÇÕES DO IBOVESPA
+        DOCSTRING: RETURN INFORMATION ABOUT THE AMOUNT OF TRADES, LIQUIDITY ON THE STOCK EXCHANGE,
+            MARKET VALUE, TRADING VOLUME, WEIGHT IN THE IBRX100 INDEX, BTC FOR PAPER,
+            PURCHASES AND SALES OF FUNDS, FOR STOCKS IN THE IBOV
+        INPUTS: DATES (INFERIOR AND SUPERIOR)
+        OUTPUTS: JSON
         '''
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=StockScreenerFull.php'.format(
+        str_payload = 'username={}&password={}&URL=StockScreenerFull.php'.format(
             self.user, self.passw) \
             + '%3F%26relat%3D%26data_analise%3D{}%2F{}%2F{}%26data_dem%3D31'.format(
-                data_inf.strftime('%d'), data_inf.strftime(
-                    '%m'), data_inf.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime(
+                    '%m'), dt_inf.strftime('%Y')
             ) \
             + '%2F12%2F9999%26variaveis%3DTICKER%2B' \
             + 'VOLUME_MEDIO({}~{}~{}%2C{}~{}~{}%2C)'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%2BQUANT_NEGOCIOS({}~{}~{}%2C{}~{}~{}%2C%2Cmedia)%2'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + 'BMARKET_VALUE%2B' \
             + '%2BLIQUIDEZ_BOLSA({}~{}~{}%2C{}~{}~{}%2C%2C)%2'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + 'BNEGOCIABILIDADE({}~{}~{}%2C{}~{}~{}%2C%2C%2C2)%2'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + 'BPESO_INDICE(participacao%2CIBRX%2C{}~{}~{}%2C%2C)%2B'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + 'BTC_ALUGUEL_ACOES(TV%2C{}~{}~{}%2C{}~{}~{})%2B'.format(
-                data_inf.strftime('%d'),
-                data_inf.strftime('%m'),
-                data_inf.strftime('%Y'),
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_inf.strftime('%d'),
+                dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'),
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + 'COMPRAS_VENDAS_FUNDOS(final_valor%2C{}~{}~{}%2C%2C0)'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + '%2BPRECO_AJ({}~{}~{}%2C%2C%2CA%2CC)'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + '%2BDY_12M%26' \
             + 'segmento%3Dtodos%26setor%3Dtodos%26filtro%3D%26demonstracao%3D' \
@@ -1183,51 +1191,52 @@ class MDComDinheiro:
             + '0%26periodos%3D0%26periodicidade%3Danual%26formato_data%3D1%26' \
             + 'formato_data%3D1&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
-    def infos_risco(self, data_inf, data_sup):
+    def infos_risco(self, dt_inf:datetime, dt_sup:datetime) -> json:
         '''
-        DOCSTRING: RETORNA INFORMAÇÕES SOBRE VOLATILIDADE 60 MESES ANUALIZADA, VOLATILIADADE
-            MENSAL ANUALIZADA, VOLATILIDADE ANUALIZADA YTD, VAR PARAMÉTRICA, EWMA,
-            BENCHMARK VAR PARAMÉTRICA (EM RELAÇÃO AO IBOVESPA), MÁXIMO DRAWDOWN
-        INPUTS: DATA PREGÃO DE INTERESSE (INFERIOR E SUPERIOR)
-        OUTPUTS: JSON COM TODAS AS AÇÕES DO IBOVESPA
+        DOCSTRING: RETURNS INFORMATION ABOUT 60 MONTHS ANNUALIZED VOLATILITY, VOLATILITY
+            ANNUALIZED MONTHLY, YTD ANNUALIZED VOLATILITY, PARAMETRIC VAR, EWMA,
+            BENCHMARK VAR PARAMETRIC (IN RELATION TO IBOVESPA), MAXIMUM DRAWDOWN 
+            OF STOCKS IN THE IBOV
+        INPUTS: DATES (INFERIOR AND SUPERIOR)
+        OUTPUTS: JSON
         '''
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=StockScreenerFull.php%3F%26'.format(
+        str_payload = 'username={}&password={}&URL=StockScreenerFull.php%3F%26'.format(
             self.user, self.passw) \
             + 'relat%3D%26data_analise%3D{}%2F{}%2F{}%26data_dem%3D31%2F12%2F9999'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + '%26variaveis%3DTICKER%2Bvol_ano_60m%2Bvol_ano_mes_atual%2B' \
             + 'vol_ano_ano_atual%2BVAR_PAR(d%2C{}~{}~{}%2C{}~{}~{}%2C95%2C%2C1)'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%2BVAR_PAR(d%2C{}~{}~{}%2C{}~{}~{}%2C99%2C%2C1)'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%2BEWMA({}~{}~{}%2C{}~{}~{}%2C94%2CB%2C%2C0)%2BBENCHMARK_VAR_PAR('.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + 'd%2C{}~{}~{}%2C{}~{}~{}%2C95%2C%2C1%2CIBOV)%2BMDD'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '(d%2C{}~{}~{}%2C{}~{}~{}%2Cmdd)%26segmento%3Dtodos%26setor%3Dtodos'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%26filtro%3D%26demonstracao%3Dconsolidado%2520preferencialmente%26tipo_acao' \
             + '%3DTodas%26convencao%3DMIXED%26acumular%3D12%26valores_em%3D1%26num_casas%3D2' \
@@ -1237,247 +1246,238 @@ class MDComDinheiro:
             + 'periodos%3D0%26periodicidade%3Danual%26formato_data%3D1%26' \
             + 'formato_data%3D1&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
-    def infos_negociacao_cesta_papeis(self, list_papeis, benchmark, data_inf, data_sup):
+    def trading_volume_securities(self, list_securities:str, str_benchmark:str, dt_inf:datetime, 
+                                  dt_sup:datetime) -> json:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
         # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_papeis).upper()
+        list_securities = '%2B'.join(list_securities).upper()
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=ComparaEmpresas001.php'.format(
+        str_payload = 'username={}&password={}&URL=ComparaEmpresas001.php'.format(
             self.user, self.passw) \
             + '%3F%26data_d%3D31129999%26data_a%3D{}%2F{}%2F{}%26trailing%3D12%26'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + 'conv%3DMIXED%26c_c%3Dconsolidado%2520preferencialmente%26moeda%3D' \
             + 'MOEDA_ORIGINAL%26m_m%3D1000000000%26n_c%3D2%26f_v%3D1%26papeis%3D' \
-            + '{}'.format(list_papeis) \
+            + '{}'.format(list_securities) \
             + '%26indic%3DTICKER%2BVOLUME_MEDIO%' \
             + '28{}~{}~{}%2C{}~{}~{}%2C%29%2BQUANT_NEGOCIOS%28'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '{}~{}~{}%2C{}~{}~{}%2C%2Csoma%29%2B%2BMARKET_VALUE%2BLIQUIDEZ_BOLSA%28'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '{}~{}~{}%2C{}~{}~{}%2C%2C%29%2BNEGOCIABILIDADE%28'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '{}~{}~{}%2C{}~{}~{}%2C%2C%2C2%29%2BPESO_INDICE%28'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + 'participacao%2C{}%2C{}~{}~{}%2C%2C%29%2BBTC_ALUGUEL_ACOES'.format(
-                benchmark, data_sup.strftime('%d'), data_sup.strftime(
-                    '%m'), data_sup.strftime('%Y')
+                str_benchmark, dt_sup.strftime('%d'), dt_sup.strftime(
+                    '%m'), dt_sup.strftime('%Y')
             ) \
             + '%28TA%2C{}~{}~{}%2C{}~{}~{}%29%2BCOMPRAS_VENDAS_FUNDOS%28'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + 'compras_valor%2C{}~{}~{}%2C%2C0%29%2BPRECO_AJ%28'.format(
-                data_sup.strftime('%d'), data_sup.strftime(
-                    '%m'), data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime(
+                    '%m'), dt_sup.strftime('%Y')
             ) \
             + '{}~{}~{}%2C%2C%2CA%2CC%29%2BDY_12M%26enviar_email%3D0%26'.format(
-                data_sup.strftime('%d'), data_sup.strftime(
-                    '%m'), data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime(
+                    '%m'), dt_sup.strftime('%Y')
             ) \
             + 'enviar_email_log%3D0%26transpor%3D0%26op01%3Dtabela%26' \
             + 'oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01&format=json2'
-        # print('PAYLOAD: {}'.format(payload))
+        # print('PAYLOAD: {}'.format(str_payload))
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        # print(response.text)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        # print(resp_req.text)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
-    def mdtv_cesta_papeis(self, list_papeis, data_inf, data_sup, 
-                          bl_retornar_df=False, formato_data_input='YYYY-MM-DD'):
+    def mdtv_list_securities(
+            self, 
+            list_securities:List[str], 
+            dt_inf:datetime, 
+            dt_sup:datetime
+        ) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        # alterando tipo de datas input
-        if type(data_inf) == str:
-            data_inf = DatesBR().str_date_to_datetime(data_inf, formato_data_input)
-        if type(data_sup) == str:
-            data_sup = DatesBR().str_date_to_datetime(data_sup, formato_data_input)
-        # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_papeis).upper()
-        # determinando payload de interesse
-        payload = 'username={}&password={}&URL=ComparaEmpresas001.php%3F%26data_d%'.format(
+        # list of securities with the respective format, in order to be used in payload
+        list_securities = '%2B'.join(list_securities).upper()
+        # payload
+        str_payload = 'username={}&password={}&URL=ComparaEmpresas001.php%3F%26data_d%'.format(
             self.user, self.passw) \
             + '3D31129999%26data_a%3D{}%2F{}%2F{}%26trailing%3D12'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + '%26conv%3DMIXED%26c_c%3Dconsolidado%2520preferencialmente%26moeda%3D' \
             + 'MOEDA_ORIGINAL%26m_m%3D1000000000%26n_c%3D2%26f_v%3D1%26papeis%3D' \
-            + '{}'.format(list_papeis) \
+            + '{}'.format(list_securities) \
             + '%26indic%3DVOLUME_MEDIO%28' \
             + '{}~{}~{}%2C{}~{}~{}%'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '2C%29%26enviar_email%3D0%26enviar_email_log%3D0%26transpor%3D0%26op01%3Dtabela' \
             + '%26oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01%26s' \
             + 'cript%3D&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(str(response.text.encode('utf8')) + "'"), "b'", "''").replace(
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(str(resp_req.text.encode('utf8')) + "'"), "b'", "''").replace(
                 r'\n', '').replace(r' ', ''))
-        # retornar dataframe, caso seja de interesse do usuário
-        if bl_retornar_df == False:
-            return JsonFiles().send_json(jsonify_message)
-        else:
-            df_mdtv = pd.DataFrame(jsonify_message['resposta']['tab-p0']['linha'])
-            return df_mdtv
+        # return dataframe
+        return pd.DataFrame(json_['resposta']['tab-p0']['linha'])
 
-    def infos_risco_cesta_papeis(self, list_papeis, benchmark, data_inf, data_sup):
+    def risk_infos_list_securities(
+            self, 
+            list_securities:List[str], 
+            str_benchmark:str, 
+            dt_inf:datetime, 
+            dt_sup: datetime
+        ) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
         # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_papeis).upper()
+        list_securities = '%2B'.join(list_securities).upper()
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=ComparaEmpresas001.php%3F%26data_d%'.format(
+        str_payload = 'username={}&password={}&URL=ComparaEmpresas001.php%3F%26data_d%'.format(
             self.user, self.passw) \
             + '3D31129999%26data_a%3D{}%2F{}%2F{}%26trailing%3D12'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'),
-                data_sup.strftime('%Y')
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'),
+                dt_sup.strftime('%Y')
             ) \
             + '%26conv%3DMIXED%26c_c%3Dconsolidado%2520preferencialmente%26moeda%3D' \
             + 'MOEDA_ORIGINAL%26m_m%3D1000000000%26n_c%3D2%26f_v%3D1%26papeis%3D' \
-            + '{}'.format(list_papeis) \
+            + '{}'.format(list_securities) \
             + '%26indic%3DTICKER%2Bvol_ano_60m%2B%2Bvol_ano_mes_atual%2Bvol_ano_ano_atual%2BVAR_PAR' \
             + '%28d%2C{}~{}~{}%2C{}~{}~{}%2C95%2C%2C1%29%'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '2BVAR_PAR%28d%2C{}~{}~{}%2C{}~{}~{}%2C99%2C%2C1%29%2BEWMA'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%28{}~{}~{}%2C{}~{}~{}%2C94%2CB%2C%2C0%29%2BBENCHMARK_VAR_PAR'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%28d%2C{}~{}~{}%2C{}~{}~{}%2C95%2C%2C1%2C'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y'), data_sup.strftime('%d'),
-                data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y'), dt_sup.strftime('%d'),
+                dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
-            + '{}%29%2BMDD%28d%2C'.format(benchmark) \
+            + '{}%29%2BMDD%28d%2C'.format(str_benchmark) \
             + '{}~{}~{}%2C26~01~2021%2Cmdd%29%26enviar_email%3D0'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'),
-                data_inf.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'),
+                dt_inf.strftime('%Y')
             ) \
             + '%26enviar_email_log%3D0%26transpor%3D0%26op01%3Dtabela' \
             '%26oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01&format=json2'
         # fetching data
-        response = ComDinheiro().requests_api_cd(payload)
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
-            str(response.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
-        return JsonFiles().send_json(jsonify_message)
+        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        json_ = ast.literal_eval(StrHandler().find_between(
+            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+        return JsonFiles().send_json(json_)
 
-    def stocks_beta(self, list_tickers, data_inf, data_sup):
+    def stocks_beta(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
         '''
         DOCSTRING: BETA OF PROVIDED STOCKS
         INPUTS:  LIST OF TICKER AND INFERIOR AND SUPERIOR DATES
         OUTPUTS: JSON
         '''
         # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_tickers)
+        list_securities = '%2B'.join(list_tickers)
         # applying date format
-        if DatesBR().check_date_datetime_format(data_inf) == True:
-            data_inf = DatesBR().datetime_to_string(data_inf, '%d%m%Y')
-        if DatesBR().check_date_datetime_format(data_sup) == True:
-            data_sup = DatesBR().datetime_to_string(data_sup, '%d%m%Y')
-        # definindo variável para pool de conexão
-        # payload = 'username={}&password={}&URL=HistoricoIndicadoresFundos001.php' \
-        #    + '%3F%26cnpjs%3D{}'.format(list_papeis) \
-        #    + '%26data_ini%3D{}%26data_fim%3D{}'.format(data_inf,data_sup) \
-        #    + '%26indicadores%3Dvalor_cota%26op01%3Dtabela_h%26num_casas%3D2%26enviar_email%3D0' \
-        #    + '%26periodicidade%3Ddiaria%26cabecalho_excel%3Dmodo1%26transpor%3D0%26asc_desc%3Ddesc' \
-        #    + '%26tipo_grafico%3Dlinha%26relat_alias_automatico%3DcMDalias_01&format=json2'
-        payload = 'username={}&password={}&URL=HistoricoIndicadoresFundamentalistas001.php'.format(
-            self.user, self.passw) \
-            + '%3F%26data_ini%3D{}%26data_fim%3D{}'.format(data_inf, data_sup) \
+        dt_inf = DatesBR().datetime_to_string(dt_inf, '%d%m%Y')
+        dt_sup = DatesBR().datetime_to_string(dt_sup, '%d%m%Y')
+        # payload
+        str_payload = \
+            'username={}&password={}&URL=HistoricoIndicadoresFundamentalistas001.php'.format(
+                self.user, self.passw
+            ) \
+            + '%3F%26data_ini%3D{}%26data_fim%3D{}'.format(dt_inf, dt_sup) \
             + '%26trailing%3D12%26conv%3DMIXED%26moeda%3D' \
             + 'BRL%26c_c%3Dconsolidado%26m_m%3D1000000%26n_c%3D2%26f_v%3D1%26papel%3D{}'.format(
-                list_papeis) \
+                list_securities) \
             + '%26indic%3Dret_01d%2Bret_cdi_01d%2Bbeta_06m%2BLC%26periodicidade%3Ddu%26graf_' \
             + 'tab%3Dtabela%26desloc_data_analise%3D1%26flag_transpor%3D0%26c_d%3Dd%26enviar_email' \
             + '%3D0%26enviar_email_log%3D0%26' \
             + 'cabecalho_excel%3Dmodo1%26relat_alias_automatico%3DcMDalias_01&format=json2'
-        #payload = "username={}&password={}&URL=HistoricoIndicadoresFundamentalistas001.php%3F%26data_ini%3D{}%26data_fim%3D{}%26trailing%3D12%26conv%3DMIXED%26moeda%3DBRL%26c_c%3Dconsolidado%26m_m%3D1000000%26n_c%3D2%26f_v%3D1%26papel%3D{}%26indic%3Dret_01d%2Bret_cdi_01d%2Bbeta_06m%2BLC%26periodicidade%3Ddu%26graf_tab%3Dtabela%26desloc_data_analise%3D1%26flag_transpor%3D0%26c_d%3Dd%26enviar_email%3D0%26enviar_email_log%3D0%26cabecalho_excel%3Dmodo1%26relat_alias_automatico%3DcMDalias_01&format=json2".format(data_inf,data_sup,list_papeis)
         # fetching data
-        jsonify_messageOut = ComDinheiro().requests_api_cd(
-            payload).read()  # .text.encode('utf8')
-        #response = ComDinheiro().requests_api_cd(payload)
-        # string_resp = response.read()#.decode('utf8')
-        jsonify_message = ast.literal_eval(str(jsonify_messageOut.decode('utf8').replace(
+        json_ = ComDinheiro().requests_api_cd(
+            str_payload).read()
+        json_ = ast.literal_eval(str(json_.decode('utf8').replace(
             r'\n', '').replace(r' ', '')))
-        return JsonFiles().send_json(jsonify_message)
+        return JsonFiles().send_json(json_)
 
-    def indice_negociabiliade(self, list_tickers, data_inf, data_sup):
+    def tradability_index(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
         '''
         DOCSTRING: 
         INPUTS:
         OUTPUTS:
         '''
         # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_tickers)
+        list_securities = '%2B'.join(list_tickers)
         # applying date format
-        if DatesBR().check_date_datetime_format(data_inf) == True:
-            data_inf = DatesBR().datetime_to_string(data_inf, '%d%m%Y')
-        if DatesBR().check_date_datetime_format(data_sup) == True:
-            data_sup = DatesBR().datetime_to_string(data_sup, '%d%m%Y')
+        dt_inf = DatesBR().datetime_to_string(dt_inf, '%d%m%Y')
+        dt_sup = DatesBR().datetime_to_string(dt_sup, '%d%m%Y')
         # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=ComparaFundos001.php%3F%26datas'.format(
+        str_payload = 'username={}&password={}&URL=ComparaFundos001.php%3F%26datas'.format(
             self.user, self.passw) \
-            + '%3D{}%2F{}%2F{}%26cnpjs'.format(data_sup.strftime('%d'), data_sup.strftime('%m'), 
-                data_sup.strftime('%Y')) \
-            + '%3D{}'.format(list_papeis) \
+            + '%3D{}%2F{}%2F{}%26cnpjs'.format(dt_sup.strftime('%d'), dt_sup.strftime('%m'), 
+                dt_sup.strftime('%Y')) \
+            + '%3D{}'.format(list_securities) \
             + '%26indicadores%3DNEGOCIABILIDADE%28{}~{}~{}%2C{}~{}~{}'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'), data_inf.strftime('%Y'), 
-                data_sup.strftime('%d'), data_sup.strftime('%m'), data_sup.strftime('%Y')) \
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'), dt_inf.strftime('%Y'), 
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'), dt_sup.strftime('%Y')) \
             + '%2C%2C%2C2%29%26num_casas%3D2%26pc%3Dnome_fundo%26flag_transpor%3D0%26enviar_email' \
             + '%3D0%26mostrar_da%3D0%26op01%3Dtabela%26oculta_cabecalho_sup%3D0%26r' \
             + 'elat_alias_automatico%3DcMDalias_01&format=json2'
         # fetching data
-        jsonify_messageOut = ComDinheiro().requests_api_cd(payload).read()#.text.encode('utf8')
-        jsonify_message = ast.literal_eval(str(jsonify_messageOut.decode('utf8').replace(
+        json_ = ComDinheiro().requests_api_cd(str_payload).read()#.text.encode('utf8')
+        json_ = ast.literal_eval(str(json_.decode('utf8').replace(
             r'\n', '').replace(r' ', '')))
         # returning data
-        return JsonFiles().send_json(jsonify_message)
+        return JsonFiles().send_json(json_)
     
-    def open_ended_funds_quotes(self, list_funds, data_inf, data_sup):
+    def open_ended_funds_quotes(self, list_funds:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
         '''
         DOCSTRING: CLOSING PRICE OF FUNDS' SHARE
         INPUTS:  FUNDS CNPJ (list), MATURITY CODE,
@@ -1485,155 +1485,158 @@ class MDComDinheiro:
             AS DATE INFERIOR) AND FORMAT EXTRACTION (JSON AS DEFAULT)
         OUTPUTS: JSON
         '''
-        # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_funds)
+        # list of securities with the format requested to be queried
+        list_securities = '%2B'.join(list_funds)
         # applying date format
-        if DatesBR().check_date_datetime_format(data_inf) == True:
-            data_inf = DatesBR().datetime_to_string(data_inf, '%d%m%Y')
-        if DatesBR().check_date_datetime_format(data_sup) == True:
-            data_sup = DatesBR().datetime_to_string(data_sup, '%d%m%Y')
-        # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=HistoricoIndicadoresFundos001.php'.format(
+        if DatesBR().check_date_datetime_format(dt_inf) == True:
+            dt_inf = DatesBR().datetime_to_string(dt_inf, '%d%m%Y')
+        if DatesBR().check_date_datetime_format(dt_sup) == True:
+            dt_sup = DatesBR().datetime_to_string(dt_sup, '%d%m%Y')
+        # payload
+        str_payload = 'username={}&password={}&URL=HistoricoIndicadoresFundos001.php'.format(
             self.user, self.passw) \
-            + '%3F%26cnpjs%3D{}'.format(list_papeis) \
-            + '%26data_ini%3D{}%26data_fim%3D{}'.format(data_inf, data_sup) \
+            + '%3F%26cnpjs%3D{}'.format(list_securities) \
+            + '%26data_ini%3D{}%26data_fim%3D{}'.format(dt_inf, dt_sup) \
             + '%26indicadores%3Dvalor_cota%26op01%3Dtabela_h%26num_casas%3D2%26enviar_email%3D0' \
             + '%26periodicidade%3Ddiaria%26cabecalho_excel%3Dmodo1%26transpor%3D0%26asc_desc%3Ddesc' \
             + '%26tipo_grafico%3Dlinha%26relat_alias_automatico%3DcMDalias_01&format=json2'
-        # print('PAYLOAD: {}'.format(payload))
         # fetching data
-        jsonify_message = ComDinheiro().requests_api_cd(
-            payload).read()  # .text.encode('utf8')
-        #response = ComDinheiro().requests_api_cd(payload)
-        # string_resp = response.read()#.decode('utf8')
-        jsonify_message = ast.literal_eval(jsonify_message.decode('utf8').replace(r'\n', '').replace(
+        json_ = ComDinheiro().requests_api_cd(
+            str_payload).read()
+        json_ = ast.literal_eval(json_.decode('utf8').replace(r'\n', '').replace(
             r' ', ''))
-        return JsonFiles().send_json(jsonify_message)
+        return JsonFiles().send_json(json_)
 
-    def open_ended_funds_risk_infos(self, list_funds, data_sup):
+    def open_ended_funds_risk_infos(self, list_funds:List[str], dt_sup:datetime) -> json:
         '''
         DOCSTRING: RISK INFOS REGARDING HISTORICAL VOLATILITY AND REDEMPTION
         INPUTS:  FUNDS CNPJ (list), DATE SUPERIOR
         OUTPUTS: JSON
         '''
-        # lista de papéis no formato da consulta do json da comdinheiro
-        list_papeis = '%2B'.join(list_funds)
+        # list of securities with the format requested to be queried
+        list_securities = '%2B'.join(list_funds)
         # applying date format
-        if DatesBR().check_date_datetime_format(data_sup) == True:
-            data_sup = DatesBR().datetime_to_string(data_sup, '%d%m%Y')
-        # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=HistoricoIndicadoresFundos001.php'.format(
+        dt_sup = DatesBR().datetime_to_string(dt_sup, '%d%m%Y')
+        # payload
+        str_payload = 'username={}&password={}&URL=HistoricoIndicadoresFundos001.php'.format(
             self.user, self.passw) \
-            + '%3F%26cnpjs%3D{}'.format(list_papeis) \
-            + '%26data_ini%3D{}%26data_fim%3D{}'.format(data_sup, data_sup) \
+            + '%3F%26cnpjs%3D{}'.format(list_securities) \
+            + '%26data_ini%3D{}%26data_fim%3D{}'.format(dt_sup, dt_sup) \
             + '%26indicadores%3Dprazo_liq_resg%2B' \
             + 'prazo_disp_rec_resgatado%2Bvol_ano_01m%2Bvol_ano_12m%2B' \
             + 'vol_ano_36m%2Bvol_ano_60m%2Bvol_ano_ano_atual%2Bvol_ano_mes_atual%2Bresgate_min%2Btaxa_saida%26op01%3Dtabela_h%26' \
             + 'num_casas%3D2%26enviar_email%3D0%26periodicidade%3Ddiaria%26cabecalho_excel%3Dmodo1%26transpor%3D0%26asc_desc%3D' \
             + 'desc%26tipo_grafico%3Dlinha%26relat_alias_automatico%3DcMDalias_01&format=json2'
-        # print('PAYLOAD: {}'.format(payload))
         # fetching data
-        jsonify_message = ComDinheiro().requests_api_cd(
-            payload).read()  # .text.encode('utf8')
-        #response = ComDinheiro().requests_api_cd(payload)
-        # string_resp = response.read()#.decode('utf8')
-        jsonify_message = ast.literal_eval(jsonify_message.decode('Latin-1').replace(
+        json_ = ComDinheiro().requests_api_cd(
+            str_payload).read()
+        json_ = ast.literal_eval(json_.decode('Latin-1').replace(
             r'\n', '').replace(r' ', ''))
-        return JsonFiles().send_json(jsonify_message)
+        return JsonFiles().send_json(json_)
 
-    def open_ended_funds_sharpe_dd(self, list_cnpjs, data_inf, data_sup):
+    def open_ended_funds_sharpe_dd(
+            self, 
+            list_eins:List[str], 
+            dt_inf:datetime, 
+            dt_sup:datetime
+        ) -> json:
         '''
         DOCSTRING: CÁLCULO DE SHARPE E DROWDOWN POR PERÍODO
         INPUTS:
         OUTPUTS:
         '''
-        # lista de papéis no formato da consulta do json da comdinheiro
-        list_cnpjs = '%2B'.join(list_cnpjs)
-        # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=ComparaFundos001.php%3F%26datas'.format(
+        # list of securities with the format requested to be queried
+        list_eins = '%2B'.join(list_eins)
+        # payload
+        str_payload = 'username={}&password={}&URL=ComparaFundos001.php%3F%26datas'.format(
             self.user, self.passw) \
-            + '%3D{}%2F{}%2F{}%26cnpjs'.format(data_sup.strftime('%d'), data_sup.strftime('%m'), 
-                data_sup.strftime('%Y')) \
-            + '%3D{}'.format(list_cnpjs) \
+            + '%3D{}%2F{}%2F{}%26cnpjs'.format(dt_sup.strftime('%d'), dt_sup.strftime('%m'), 
+                dt_sup.strftime('%Y')) \
+            + '%3D{}'.format(list_eins) \
             + '%26indicadores%3Dnome_fundo%2Bcnpj_fundo%2Bret_12m_aa%2Bpatrimonio~1e6%2B' \
             + 'cotistas%2Bcaptacao~1e6%2Bresgate~1e6%2' \
             + 'Bvol_ano_24m%2Bsharpe_12m%2BMDD%28d%2C{}~{}~{}'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'), data_inf.strftime('%Y')) \
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'), dt_inf.strftime('%Y')) \
             + '%2C{}~{}~{}%2Cmdd%29%'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'), data_sup.strftime('%Y')) \
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'), dt_sup.strftime('%Y')) \
             + '2BMDD%28d%2C{}~{}~{}%'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'), data_inf.strftime('%Y')) \
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'), dt_inf.strftime('%Y')) \
             + '2C{}~{}~{}%2'.format(
-                data_sup.strftime('%d'), data_sup.strftime('%m'), data_sup.strftime('%Y')) \
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'), dt_sup.strftime('%Y')) \
             + 'Ctempo_rec%29%2Bobjetivo%2Bclasse%26num_casas%3D2%26pc%3Dnome_fundo%26f' \
             + 'lag_transpor%3D0%26enviar_email%3D0%26mostrar_da%3D0%26op01%3Dtabela%26' \
             + 'oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01&format=json2'
         # fetching data
-        jsonify_messageOut = ComDinheiro().requests_api_cd(payload).text.encode('utf8')#.read()
-        jsonify_message = ast.literal_eval(str(jsonify_messageOut.decode('utf8').replace(
+        json_ = ComDinheiro().requests_api_cd(str_payload).text.encode('utf8')#.read()
+        json_ = ast.literal_eval(str(json_.decode('utf8').replace(
             r'\n', '').replace(r' ', '')))
         # returning data
-        return JsonFiles().send_json(jsonify_message)
+        return JsonFiles().send_json(json_)
     
-    def open_ended_funds_infos(self, list_cnpjs, data_inf, data_sup, 
-                               str_formato_data_input='YYYY-MM-DD', 
-                               du_ant_cd=2, list_dicts=list(), 
-                               col_classe_anbima='CLASSE_ANBIMA_DO_FUNDO', 
-                               col_nome_fundo='NOME_FUNDO', 
-                               col_like_max_drawdown='MDD*', 
-                               col_mdd_final='MAX_DRAWDOWN', col_cnpj_sem_mascara='CNPJ_SEM_MASCARA', 
-                               col_cnpj='CNPJ_DO_FUNDO'):
+    def open_ended_funds_infos(
+            self, 
+            list_eins:List[str], 
+            dt_inf:datetime, 
+            dt_sup:datetime, 
+            str_fmt_dt_input:str='YYYY-MM-DD', 
+            int_wd_bef:int=2, 
+            list_ser=list(), 
+            col_classe_anbima:str='CLASSE_ANBIMA_DO_FUNDO', 
+            col_nome_fundo:str='NOME_FUNDO', 
+            col_like_max_drawdown:str='MDD*', 
+            col_mdd_final:str='MAX_DRAWDOWN', 
+            col_cnpj_sem_mascara:str='CNPJ_SEM_MASCARA', 
+            col_cnpj:str='CNPJ_DO_FUNDO'
+        ) -> pd.DataFrame:
         '''
         DOCSTRING: FUND'S NAME, CNPJ, CORPORATE NAME, SHARPE WITH A RANGE OF TEMPORAL WINDOWS, 
             MAXIMUM DRAWDOWN (GIVEN A PERIOD OF TIME), ANBIMA'S CLASS, CODE
-        INPUTS: LIST OF CNOJS, DATE INFERIOR AND SUPERIOR
+        INPUTS: LIST OF EINS, DATE INFERIOR AND SUPERIOR
         OUTPUTS: DATAFRAME
         '''
-        # alterando tipo das datas para date
-        if type(data_inf) != date:
-            data_inf = DatesBR().str_date_to_datetime(data_inf, str_formato_data_input)
-        if type(data_sup) != date:
-            data_sup = DatesBR().str_date_to_datetime(data_sup, str_formato_data_input)
-        # data anterior comdinheiro de referência
-        df_ref_cd = DatesBR().sub_working_days(data_sup, du_ant_cd)
-        # lista de papéis no formato da consulta do json da comdinheiro
-        list_cnpjs = '%2B'.join(list_cnpjs)
-        # definindo variável para pool de conexão
-        payload = 'username={}&password={}&URL=ComparaFundos001.php%3F%26'.format(
+        # changing dates format
+        dt_inf = DatesBR().str_date_to_datetime(dt_inf, str_fmt_dt_input)
+        dt_sup = DatesBR().str_date_to_datetime(dt_sup, str_fmt_dt_input)
+        # inferior reference date within comdinheiro
+        dt_ref_cf = DatesBR().sub_working_days(dt_sup, int_wd_bef)
+        # eins with the format requested to be queried
+        list_eins = '%2B'.join(list_eins)
+        # payload
+        str_payload = 'username={}&password={}&URL=ComparaFundos001.php%3F%26'.format(
             self.user, self.passw) \
-            + 'datas%3D{}%2F{}%2F{}%26'.format(df_ref_cd.strftime('%d'), df_ref_cd.strftime('%m'), 
-                df_ref_cd.strftime('%Y')) \
-            + 'cnpjs%3D{}%26'.format(list_cnpjs) \
+            + 'datas%3D{}%2F{}%2F{}%26'.format(dt_ref_cf.strftime('%d'), dt_ref_cf.strftime('%m'), 
+                dt_ref_cf.strftime('%Y')) \
+            + 'cnpjs%3D{}%26'.format(list_eins) \
             + 'indicadores%3Dcnpj_fundo%2Bnome_fundo%2Bsharpe_12m%2Bsharpe_24m%2Bsharpe_' \
             + '36m%2Bsharpe_36m%2Bsharpe_48m%2Bsharpe_60m' \
             + '%2BMDD%28d%2C{}~{}~{}%2C{}~{}~{}%2Cmdd%29'.format(
-                data_inf.strftime('%d'), data_inf.strftime('%m'), data_inf.strftime('%Y'), 
-                data_sup.strftime('%d'), data_sup.strftime('%m'), data_sup.strftime('%Y')
+                dt_inf.strftime('%d'), dt_inf.strftime('%m'), dt_inf.strftime('%Y'), 
+                dt_sup.strftime('%d'), dt_sup.strftime('%m'), dt_sup.strftime('%Y')
             ) \
             + '%2Bclasse_anbima%2Bcodigo_anbima%26num_casas%3D2%26pc%3Dnome_fundo%26flag_transpor' \
             + '%3D0%26enviar_email%3D0%26mostrar_da%3D0%26op01%3Dtabela%26oculta_cabecalho_sup%3D0' \
             + '%26relat_alias_automatico%3DcMDalias_01&format=json3'
         # fetching data
-        json_message = ComDinheiro().requests_api_cd(payload).json()
-        # definindo colunas do dataframe de exportação da cd
+        json_message = ComDinheiro().requests_api_cd(str_payload).json()
+        # cols of exportation
         list_cols = [StrHandler().remove_diacritics(
             StrHandler().latin_characters(str(x))).strip().replace(' ', '_').replace(
-            df_ref_cd.strftime('%d/%m/%Y'), '').upper() for x in list(json_message[
+            dt_ref_cf.strftime('%d/%m/%Y'), '').upper() for x in list(json_message[
                 'tables']['tab0']['lin0'].values())]
-        # definindo lista serializada para importação em dataframe
+        # serialized list of dictionaries
         for index, dict_ in json_message['tables']['tab0'].items():
             if index != 'lin0':
-                list_dicts.append({col_nome: dict_['col{}'.format(i)] for i, 
+                list_ser.append({col_nome: dict_['col{}'.format(i)] for i, 
                                    col_nome in enumerate(list_cols)})
-        # definindo dataframe à partir de lista de dicionários serializados
-        df_infos_fundos_cd = pd.DataFrame(list_dicts)
-        # substituindo valores nulos por zero
+        # serialized list to pandas dataframe
+        df_infos_fundos_cd = pd.DataFrame(list_ser)
+        # replacing null values
         for col_ in list_cols:
             df_infos_fundos_cd[col_] = [str(x).replace('', '0') if len(str(x)) <= 1 
                                         else str(x) for x in df_infos_fundos_cd[col_].tolist()]
             df_infos_fundos_cd[col_] = [str(x).replace(',', '.') for x in df_infos_fundos_cd[
                 col_].tolist()]
-        # alterando tipo de colunas de interesse
+        # changing columns data types
         df_infos_fundos_cd = df_infos_fundos_cd.astype({
             list_cols[0]: str,
             list_cols[1]: str,
@@ -1648,140 +1651,19 @@ class MDComDinheiro:
             list_cols[10]: str,
             list_cols[11]: int
         })
-        # renomeando colunas de interesse
+        # renaming columns of interest
         col_mdd = [x for x in list_cols if StrHandler().match_string_like(
             x, col_like_max_drawdown) == True][0]
         df_infos_fundos_cd.rename(columns={
             col_mdd: col_mdd_final
         }, inplace=True)
-        # retirando caractéres latinos do campo de interesse e mantendo texto em caixa alta
+        # removing diacritics
         for col_ in [col_nome_fundo, col_classe_anbima]:
             df_infos_fundos_cd[col_] = [StrHandler().remove_diacritics(
                 StrHandler().latin_characters(str(x))).upper() 
                 for x in df_infos_fundos_cd[col_].tolist()]
-        # criando coluna com cnpj sem máscara
+        # ein without mask
         df_infos_fundos_cd[col_cnpj_sem_mascara] = DocumentsNumbersBR(
             df_infos_fundos_cd[col_cnpj].tolist()).unmask_number
-        # retornando dataframe de interesse
+        # returning pandas dataframe
         return df_infos_fundos_cd
-
-# print(YFinance().indice_neg(['WEGE3', 'MDIA3', 'BBAS3', 'ITSA4'], DatesBR().sub_working_days(
-#     DatesBR().curr_date, -52), DatesBR().curr_date))
-# print(YFinance().acoes_ibrx100())
-# print(YFinance().infos_setoriais(DatesBR().sub_working_days(
-#     DatesBR().curr_date, -1)))
-# print(YFinance().infos_eventos_corporativos())
-# print(YFinance().infos_negociacao(DatesBR().sub_working_days(
-#     DatesBR().curr_date, -53), DatesBR().sub_working_days(
-#     DatesBR().curr_date, -1)))
-# print(YFinance().infos_risco(DatesBR().sub_working_days(
-#     DatesBR().curr_date, -53), DatesBR().sub_working_days(
-#     DatesBR().curr_date, -1)))
-# print(YFinance().ativos_bov())
-# pprint(YFinance().cotacoes(['PETR4', 'VALE3']))
-# print(YFinance().cotacoes_serie_historica('PETR4', '25/08/2020', '28/08/2020'))
-# print(YFinance().cotacoes_serie_historica(
-#     ['PETR4', 'VALE3'], '25/08/2020', '28/08/2020'))
-
-# pprint(YFinance().cotacoes_serie_historica(['GOOG', 'AMZN', 'TSLA'], pais='United States'))
-# {'AMZN': {'historical': [{'close': 3294.62,
-#                           'currency': 'USD',
-#                           'date': '03/09/2020',
-#                           'high': 3381.5,
-#                           'low': 3111.13,
-#                           'open': 3318.0,
-#                           'volume': 8781754},
-#                          {'close': 3149.84,
-#                           'currency': 'USD',
-#                           'date': '07/09/2020',
-#                           'high': 3250.0,
-#                           'low': 3131.0,
-#                           'open': 3139.59,
-#                           'volume': 6094205}],
-#           'name': 'Amazon.com'},
-#  'GOOG': {'historical': [{'close': 1591.04,
-#                           'currency': 'USD',
-#                           'date': '03/09/2020',
-#                           'high': 1645.11,
-#                           'low': 1547.61,
-#                           'open': 1624.26,
-#                           'volume': 2608568},
-#                          {'close': 1532.39,
-#                           'currency': 'USD',
-#                           'date': '07/09/2020',
-#                           'high': 1562.51,
-#                           'low': 1528.39,
-#                           'open': 1533.01,
-#                           'volume': 2610884}],
-#           'name': 'Alphabet C'},
-#  'TSLA': {'historical': [{'close': 418.32,
-#                           'currency': 'USD',
-#                           'date': '03/09/2020',
-#                           'high': 428.0,
-#                           'low': 372.02,
-#                           'open': 402.81,
-#                           'volume': 110321904},
-#                          {'close': 330.21,
-#                           'currency': 'USD',
-#                           'date': '07/09/2020',
-#                           'high': 368.59,
-#                           'low': 330.01,
-#                           'open': 355.75,
-#                           'volume': 115465688}],
-#           'name': 'Tesla'}}
-
-# pprint(YFinance().cotacoes_serie_historica(
-#     ['GOGL34', 'TSLA34'], classes_ativos=['acao', 'acao']))
-# print(YFinance().cotacoes_serie_historica('BOVA11', classes_ativos='etf'))
-# print(investpy.get_etf_historical_data(
-#     'BOVA11', 'brazil', '08/09/2020', '11/09/2020', as_json=True))
-# print(investpy.get_etf_recent_data('SPY', 'United States', as_json=True))
-# pprint(investpy.get_etf_recent_data('EWZ', 'united states', as_json=True))
-# pprint(investpy.get_etfs_list(country='brazil'))
-# pprint(investpy.get_etfs_overview(country='brazil'))
-# pprint(investpy.get_etfs_dict(country='brazil', as_json=True))
-# pprint(investpy.get_etf_recent_data(
-#     'Ishares Ibovespa', country='brazil', as_json=True))
-# pprint(YFinance().cotacoes_serie_historica(
-#     ['ABEV3', 'QUAL3'], classes_ativos=['acao', 'acao']))
-# print(investpy.get_etf_historical_data(
-#     'Ishares Ibovespa', 'brazil', '08/09/2020', '11/09/2020', as_json=True))
-# pprint(investpy.get_etfs_dict('brazil'))
-
-# pprint(YFinance().cotacoes_serie_historica(['BOVA11', 'ABEV3', 'PETR4'], '08/09/2020',
-#                                          '11/09/2020', pais='brazil',
-#                                          classes_ativos=['etf', 'acao', 'acao']))
-# print(YFinance().cotacoes_serie_historica(['AALR3', 'VALE3']))
-# output
-# {'AALR3': {'name': 'Centro de Imagem Diagnosticos', 'historical': [{'date': '23/11/2020', 'open': 10.86, 'high': 11.05, 'low': 10.67, 'close': 11.03, 'volume': 376200, 'currency': 'BRL'}, {'date': '24/11/2020', 'open': 10.97, 'high': 11.0, 'low': 10.72, 'close': 10.73, 'volume': 477700, 'currency': 'BRL'}]}, 'VALE3': {'name': 'VALE ON', 'historical': [{'date': '23/11/2020', 'open': 68.86, 'high': 71.32, 'low': 68.55, 'close': 71.29, 'volume': 38620700, 'currency': 'BRL'}, {'date': '24/11/2020', 'open': 71.09, 'high': 74.89, 'low': 70.18, 'close': 74.8, 'volume': 49910300, 'currency': 'BRL'}]}}
-# pprint([d['close'] for d in HandlingObjects().literal_eval_data(investpy.get_stock_historical_data(
-#     'AALR3', 'brazil', DatesBR().sub_working_days(
-#         DatesBR().curr_date, 15).strftime('%d/%m/%Y'),
-#     DatesBR().curr_date.strftime('%d/%m/%Y'), as_json=True))['historical']])
-
-# list_papeis = ['GOGL34', 'TSLA34', 'IVVB11', 'XPML11']
-# # IFIX, BDRX, IBRX
-# benchmark = 'IFIX'
-# data_inf = DatesBR().sub_working_days(DatesBR().curr_date, -53)
-# data_sup = DatesBR().sub_working_days(DatesBR().curr_date, -1)
-# print(YFinance().infos_risco_cesta_papeis(list_papeis, benchmark, data_inf, data_sup))
-
-# print(YFinance().bmf_historical_close_data('{}', '{}', 'DOL'))
-
-# print(YFinance().indice_historical_data('04/03/2021', '05/03/2021'))
-# # output
-# {'04/03/2021': 112690.17, '05/03/2021': 115202.23}
-
-# print(investpy.economic_calendar(countries=['brazil'],
-#                                  from_date='01/01/2021', to_date='12/03/2021'))
-
-# print(investpy.stocks.get_stock_information(
-#     'PETR4', country='brazil', as_json=True))
-
-# ticker = YFinance().ticker_reference_investing_com('ENEV3')
-# from_date_timestamp = '0'
-# to_date_timestamp = '1631836346'
-# print(YFinance().historical_closing_intraday_data_investing_com(ticker, from_date_timestamp,
-#                                                               to_date_timestamp))
-# list_tickers = ['PETR4.SA', 'MGLU3.SA']
-# print(pd.DataFrame(YFinance().historical_closing_data_yf(list_tickers)))
