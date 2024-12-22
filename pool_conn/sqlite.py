@@ -1,94 +1,102 @@
 ### CONNECTING TO SQLITE DATABASE ###
 
 import sqlite3
-import json
+from logging import Logger
 import pandas as pd
-from sqlalchemy import create_engine
+from typing import List, Dict, Any, Optional
+from stpstone.cals.handling_dates import DatesBR
+from stpstone.handling_data.json import JsonFiles
+from stpstone.loggs.create_logs import CreateLog
 
 
-class SQLiteDatabase:
+class SQLiteDB:
 
-    def read_sql(self, db_name, query):
+    def __init__(self, db_path:str, table_name:str, 
+        logger:Optional[Logger]=None) -> None:
         '''
-        DOCSTRING: READ SQL QUERY RESULT FROM SQLITE
-        INPUTS: DATABASE NAME AND QUERY TO EXECUTE
-        OUTPUTS: DATAFRAME CONTAINING THE RESULT OF THE QUERY
+        DOCSTRING: INITIALIZES THE CONNECTION TO THE SQLITE DATABASE
+        INPUTS: DB_PATH
+        OUTPUTS: -
         '''
-        # creating connection object
-        conn = create_engine(f'sqlite:///{db_name}')
-        # return sql query result as DataFrame
-        return pd.read_sql(query, con=conn)
+        self.db_path = db_path
+        self.table_name = table_name
+        self.logger = logger
+        self.conn:sqlite3.Connection = sqlite3.connect(self.db_path)
+        self.cursor:sqlite3.Cursor = self.conn.cursor()
 
-    def engine(self, db_name, query, bl_insert_db=False):
+    def _execute(self, str_query:str) -> None:
         '''
-        DOCSTRING: RUN SQL QUERIES FOR SQLITE DATABASE
-        INPUTS: DATABASE NAME AND SQL QUERY
-        OUTPUTS: DATA (IF SELECT QUERY) OR SUCCESS STATUS (FOR NON-SELECT QUERIES)
+        DOCSTRING: RUN QUERY WITH DML ACCESS
+        INPUTS: QUERY
+        OUTPUTS: -
         '''
+        self.cursor.execute(str_query)
+
+    def _read(self, str_query:str, dict_type_cols:Dict[str, Any], 
+        list_cols_dt:Optional[List[str]], str_fmt_dt:Optional[str]) -> pd.DataFrame:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # retrieving dataframe
+        df_ = pd.read_sql_query(str_query, self.conn)
+        # changing data types
+        df_ = df_.astype(dict_type_cols)
+        for col_ in list_cols_dt:
+            df_[col_] = [DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]]
+        # return dataframe
+        return df_
+
+    def _insert(self, json_data:List[Dict[str, Any]]) -> None:
+        '''
+        DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
+        INPUTS: JSON_DATA
+        OUTPUTS: -
+        '''
+        # validate json, in order to have the same keys
+        json_data = JsonFiles().normalize_json_keys(json_data)
+        # sql insert statement
+        list_columns = ', '.join(json_data[0].keys())
+        list_data = ', '.join(['?' for _ in json_data[0]])
+        str_query = f'INSERT OR IGNORE INTO {self.table_name} ' \
+            + f'({list_columns}) VALUES ({list_data})'
         try:
-            # making sqlite connection
-            conn = sqlite3.connect(db_name)
-            cur = conn.cursor()
-            cur.execute(query)
-            # if not an insert query, fetch the results
-            if not bl_insert_db:
-                list_rows = cur.fetchall()
-            else:
-                conn.commit()
-                list_rows = True
-        except sqlite3.Error as e:
-            return f"Error while executing query: {e}"
-        finally:
-            # close database connection
-            if conn:
-                cur.close()
-                conn.close()
-        return list_rows
+            # insert each record
+            for record in json_data:
+                self.cursor.execute(str_query, tuple(record.values()))
+            self.conn.commit()
+            if self.logger is not None:
+                CreateLog().infos(
+                    self.logger, 
+                    f'Succesful commit in db {self.db_path} ' 
+                    + f'/ table {self.table_name}.'
+                )
+        except Exception as e:
+            self.conn.rollback()
+            self._close
+            if self.logger is not None:
+                CreateLog().errors(
+                    self.logger, 
+                    'ERROR WHILE INSERTING DATA\n'
+                    + f'DB_PATH: {self.db_path}\n'
+                    + f'TABLE_NAME: {self.table_name}\n'
+                    + f'JSON_DATA: {json_data}\n'
+                    + f'ERROR_MESSAGE: {e}'
+                )
+            raise Exception(
+                'ERROR WHILE INSERTING DATA\n'
+                + f'DB_PATH: {self.db_path}\n'
+                + f'TABLE_NAME: {self.table_name}\n'
+                + f'JSON_DATA: {json_data}\n'
+                + f'ERROR_MESSAGE: {e}'
+            )
 
-    def insert_data(self, db_name, table_name, from_json=True, json_data_path=None, json_mem=None):
+    @property
+    def _close(self) -> None:
         '''
-        DOCSTRING: INSERT DATA INTO SQLITE (FROM JSON FILE OR MEMORY)
-        INPUTS: DATABASE NAME, TABLE NAME, JSON DATA (FROM FILE OR MEMORY)
-        OUTPUTS: STATUS OF INSERTION
+        DOCSTRING: CLOSES THE CONNECTION TO THE DATABASE
+        INPUTS: -
+        OUTPUTS: -
         '''
-        if from_json:
-            # defining record list from json
-            if json_data_path:
-                with open(json_data_path, 'r') as file:
-                    record_list = json.load(file)
-            elif json_mem:
-                record_list = json_mem
-            else:
-                return 'Error: Neither JSON file path nor in-memory data provided.'
-
-            # create an SQL insert string
-            if isinstance(record_list, list):
-                # get the column names from the first record
-                columns = record_list[0].keys()
-                sql_string = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES "
-
-                # insert data to database
-                values_list = []
-                for record_dict in record_list:
-                    values = [
-                        f"'{str(val).replace('\'', '\'\'')}'" if isinstance(val, str) 
-                        else str(val) 
-                        for val in record_dict.values()
-                    ]
-                    values_list.append(f"({', '.join(values)})")
-                
-                sql_string += ', '.join(values_list) + ';'
-
-            # perform insertion
-            try:
-                conn = sqlite3.connect(db_name)
-                cur = conn.cursor()
-                cur.execute(sql_string)
-                conn.commit()
-                cur.close()
-                conn.close()
-                return 'OK'
-            except sqlite3.Error as e:
-                return f"Error while inserting data: {e}"
-        else:
-            return 'Error: Data insertion was not initiated through JSON.'
+        self.conn.close()
