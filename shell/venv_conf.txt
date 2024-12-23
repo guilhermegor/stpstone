@@ -1,0 +1,31 @@
+(PowerShell)
+
+Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile "./install-pyenv-win.ps1"; &"./install-pyenv-win.ps1"
+echo in case of policy not authorized for the above command, use the following
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+
+(bash)
+
+echo python version local configuration
+poetry config virtualenvs.in-projetct -true
+poetry new nome_projeto
+
+pyenv install 3.9.13
+pyenv versions
+pyenv local 3.9.13
+
+echo venv python libs
+
+poetry init
+poetry env use 3.9.13
+poetry install
+poetry shell
+
+poetry add nome_lib
+
+REM pyenv tutorial
+https://www.youtube.com/watch?v=9LYqtLuD7z4
+
+REM venv tutorial
+https://www.youtube.com/watch?v=KxvKCSwlUv8&t=88s
