@@ -2,7 +2,7 @@
 
 import pandas as pd
 from stpstone.settings.global_slots import YAML_GLB_RT
-from stpstone.handling_data.html_parser import HtmlHndler
+from stpstone.handling_data.html import HtmlHndler
 from stpstone.handling_data.dicts import HandlingDicts
 from stpstone.handling_data.str import StrHandler
 from stpstone.loggs.db_logs import DBLogs

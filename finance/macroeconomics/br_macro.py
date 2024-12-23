@@ -10,7 +10,7 @@ from stpstone.handling_data.object import HandlingObjects
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.numbers import NumHandler
 from stpstone.handling_data.json import JsonFiles
-from stpstone.handling_data.html_parser import HtmlHndler
+from stpstone.handling_data.html import HtmlHndler
 from stpstone.handling_data.str import StrHandler
 from stpstone.loggs.db_logs import DBLogs
 

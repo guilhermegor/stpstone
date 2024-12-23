@@ -4,7 +4,7 @@ import pandas as pd
 from pyodbc import connect
 
 
-class OMSDB:
+class SqlServerDB:
 
     def db_connection(self, driver_sql, server, port, database, user_id, password, timeout=7200):
         '''

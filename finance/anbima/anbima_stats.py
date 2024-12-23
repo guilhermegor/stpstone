@@ -12,7 +12,8 @@ from stpstone.handling_data.object import HandlingObjects
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.document_numbers.br import DocumentsNumbersBR
 from stpstone.handling_data.dicts import HandlingDicts
-from stpstone.handling_data.html_parser import HtmlHndler
+from stpstone.handling_data.html import HtmlHndler
+from stpstone.loggs.db_logs import DBLogs
 
 
 class AnbimaStats:
@@ -100,7 +101,7 @@ class AnbimaStats:
         df_pmi_hat[YAML_ANBIMA['anbima_stats']['col_expirtation_dt']].fillna(
             YAML_ANBIMA['anbima_stats']['dt_fillna'], inplace=True)
         # adding request date
-        df_pmi_hat[YAML_ANBIMA['options_exercise_dates']['col_request_date'].upper()] = \
+        df_pmi_hat[YAML_ANBIMA['anbima_stats']['col_request_date'].upper()] = \
             DatesBR().curr_date
         # altering data types
         for col_ in [
@@ -130,5 +131,11 @@ class AnbimaStats:
             YAML_ANBIMA['anbima_stats']['col_month_proj']: str,
             YAML_ANBIMA['anbima_stats']['col_pmi_eft']: float
         })
+        # creating logg
+        df_pmi_hat = DBLogs().audit_log(
+            df_pmi_hat, 
+            YAML_ANBIMA['anbima_stats']['url_price_indexes'], 
+            DatesBR().curr_date
+        )
         # returning list
         return df_pmi_hat

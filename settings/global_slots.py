@@ -12,7 +12,7 @@ YAML_BR_TRS = reading_yaml(r'{}\br_treasury.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
 YAML_CD = reading_yaml(r'{}\comdinheiro.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
-YAML_GEN = reading_yaml(r'{}\general.yaml'.format(
+YAML_GEN = reading_yaml(r'{}\generic.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
 YAML_WGBD = reading_yaml(r'{}\world_gov_bonds.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))

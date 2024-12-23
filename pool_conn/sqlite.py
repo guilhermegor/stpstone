@@ -11,15 +11,13 @@ from stpstone.loggs.create_logs import CreateLog
 
 class SQLiteDB:
 
-    def __init__(self, db_path:str, table_name:str, 
-        logger:Optional[Logger]=None) -> None:
+    def __init__(self, db_path:str, logger:Optional[Logger]=None) -> None:
         '''
         DOCSTRING: INITIALIZES THE CONNECTION TO THE SQLITE DATABASE
         INPUTS: DB_PATH
         OUTPUTS: -
         '''
         self.db_path = db_path
-        self.table_name = table_name
         self.logger = logger
         self.conn:sqlite3.Connection = sqlite3.connect(self.db_path)
         self.cursor:sqlite3.Cursor = self.conn.cursor()
@@ -48,7 +46,7 @@ class SQLiteDB:
         # return dataframe
         return df_
 
-    def _insert(self, json_data:List[Dict[str, Any]]) -> None:
+    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str) -> None:
         '''
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
         INPUTS: JSON_DATA
@@ -59,7 +57,7 @@ class SQLiteDB:
         # sql insert statement
         list_columns = ', '.join(json_data[0].keys())
         list_data = ', '.join(['?' for _ in json_data[0]])
-        str_query = f'INSERT OR IGNORE INTO {self.table_name} ' \
+        str_query = f'INSERT OR IGNORE INTO {str_table_name} ' \
             + f'({list_columns}) VALUES ({list_data})'
         try:
             # insert each record
@@ -70,7 +68,7 @@ class SQLiteDB:
                 CreateLog().infos(
                     self.logger, 
                     f'Succesful commit in db {self.db_path} ' 
-                    + f'/ table {self.table_name}.'
+                    + f'/ table {str_table_name}.'
                 )
         except Exception as e:
             self.conn.rollback()
@@ -80,14 +78,14 @@ class SQLiteDB:
                     self.logger, 
                     'ERROR WHILE INSERTING DATA\n'
                     + f'DB_PATH: {self.db_path}\n'
-                    + f'TABLE_NAME: {self.table_name}\n'
+                    + f'TABLE_NAME: {str_table_name}\n'
                     + f'JSON_DATA: {json_data}\n'
                     + f'ERROR_MESSAGE: {e}'
                 )
             raise Exception(
                 'ERROR WHILE INSERTING DATA\n'
                 + f'DB_PATH: {self.db_path}\n'
-                + f'TABLE_NAME: {self.table_name}\n'
+                + f'TABLE_NAME: {str_table_name}\n'
                 + f'JSON_DATA: {json_data}\n'
                 + f'ERROR_MESSAGE: {e}'
             )

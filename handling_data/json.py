@@ -3,7 +3,6 @@
 import os
 import ast
 import json
-from stpstone.pool_conn.postgre import PostgreSQL
 from stpstone.handling_data.str import StrHandler
 from typing import List, Dict, Any, Union
 
@@ -59,14 +58,6 @@ class JsonFiles:
         OUTPUTS: JSON IN MEMORY
         '''
         return json.loads(json.dumps(message))
-
-    def postgre_to_json(self, dbname, sql_query):
-        '''
-        DOCSTRING: RETURN A JSON FROM A POSTGRE SQL QUERY
-        INPUTS: DBNAME, SQL QUERY
-        OUTPUTS: JSON
-        '''
-        return json.dumps(PostgreSQL().engine(dbname, sql_query))
 
     def byte_to_json(self, byte_message):
         '''

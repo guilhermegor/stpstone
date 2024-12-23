@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from stpstone.settings.global_slots import YAML_USA_MACRO
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.object import HandlingObjects
-from stpstone.handling_data.html_parser import HtmlHndler
+from stpstone.handling_data.html import HtmlHndler
 from stpstone.handling_data.dicts import HandlingDicts
 from stpstone.loggs.db_logs import DBLogs
 from stpstone.handling_data.str import StrHandler

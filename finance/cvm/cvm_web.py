@@ -8,7 +8,7 @@ from time import sleep
 from lxml import html
 from typing import Tuple
 from random import shuffle
-from stpstone.handling_data.html_parser import HtmlHndler
+from stpstone.handling_data.html import HtmlHndler
 from stpstone.handling_data.dicts import HandlingDicts
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.str import StrHandler
