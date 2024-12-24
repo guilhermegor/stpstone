@@ -128,7 +128,7 @@ class PostgreSQLDB:
     
     def _bkp_db(self, str_backup_dir:str, str_bkp_name:str=None) -> str:
         '''
-        DOCSTRING: BACKUP DATABASE
+        DOCSTRING: BACKUP DATABASE - NEED PG_DUMP TO BE CONFIGURED WITHIN ENVIRONMENT VARIABLES
         INPUTS: 
             - BACKUP_DIR (STR): DIRECTORY WHERE THE BACKUP FILE WILL BE SAVED
         OUTPUTS: STR: PATH TO THE BACKUP FILE, OR AN ERROR MESSAGE.
@@ -147,9 +147,9 @@ class PostgreSQLDB:
                 '-h', self.host,
                 '-p', str(self.port),
                 '-U', self.user,
-                '-F', 'c',  # Custom format
-                '-b',       # Include large objects
-                '-f', backup_file,  # Output file
+                '-F', 'c',  # custom format
+                '-b',       # include large objects
+                '-f', backup_file,  # output file
                 self.dbname
             ]
             subprocess.run(command, check=True, env=env)
