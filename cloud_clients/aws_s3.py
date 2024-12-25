@@ -4,12 +4,21 @@ import boto3
 import sys
 from botocore.exceptions import NoCredentialsError, ClientError, EndpointConnectionError
 from keyring import get_password
+from logging import Logger
+from io import BytesIO
+from typing import Optional, List, Dict, Any
 from stpstone.loggs.create_logs import CreateLog
 
 
 class S3Client:
 
-    def __init__(self, str_default_region='us-west-1', logger=None, bl_debug_mode=False):
+    def __init__(self, str_default_region:str='us-west-1', logger:Optional[Logger]=None, 
+                 bl_debug_mode:bool=False) -> None:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUT:S
+        '''
         self._envs = {
             'aws_access_key_id': get_password('AWS_ACCESS', 'KEY_ID'),
             'aws_secret_access_key': get_password('AWS_ACCESS', 'PASSWORD'),
@@ -32,7 +41,8 @@ class S3Client:
         self.logger = logger
         self.bl_debug_mode = bl_debug_mode
 
-    def handle_error(self, e, action=None, s3_key=None):
+    def handle_error(self, e:Exception, action:Optional[str]=None, s3_key:Optional[str]=None) \
+        -> None:
         '''
         DOCSTRING: GENERIC ERROR HANDLER
         INPUTS: EXCEPTION OBJECT, ACTION (OPTIONAL), S3 KEY (OPTIONAL)
@@ -57,7 +67,7 @@ class S3Client:
         if self.bl_debug_mode:
             print(message)
 
-    def upload_file(self, data, s3_key):
+    def upload_file(self, data:BytesIO, s3_key:str) -> None:
         '''
         DOCSTRING: UPLOAD FILES TO AWS CLOUD
         INPUTS: DATA, S3 KEY
@@ -72,7 +82,7 @@ class S3Client:
         except Exception as e:
             self.handle_error(e, action='uploading a file', s3_key=s3_key)
 
-    def download_file(self, s3_key):
+    def download_file(self, s3_key:str) -> Optional[Dict[str, Any]]:
         '''
         DOCSTRING: DOWNLOAD FILE FROM S3
         INPUTS: S3 KEY
@@ -85,7 +95,7 @@ class S3Client:
         except Exception as e:
             self.handle_error(e, action='downloading a file', s3_key=s3_key)
 
-    def list_object(self, prefix):
+    def list_object(self, prefix:str) -> Optional[List[Dict[str, Any]]]:
         '''
         DOCSTRING: LIST OBJECTS IN S3
         INPUTS: PREFIX
