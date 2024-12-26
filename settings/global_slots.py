@@ -24,3 +24,5 @@ YAML_BR_MACRO = reading_yaml(r'{}\br_macro.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
 YAML_MICROSOFT_APPS = reading_yaml(r'{}\microsoft_apps.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
+YAML_LLMS = reading_yaml(r'{}\llms.yaml'.format(
+    os.path.dirname(os.path.realpath(__file__))))

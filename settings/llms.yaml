@@ -1,0 +1,11 @@
+### LLMS CONFIGURATION INFO ###
+
+# openai
+openai:
+  key_role: role
+  key_type: type
+  key_img_url: image_url
+  key_url: url
+  key_system: system
+  key_content: content
+  value_user: user

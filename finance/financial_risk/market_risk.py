@@ -333,7 +333,7 @@ class Markowitz:
     OUTPUTS: -
     '''
 
-    def sharpe_ratio(self, mu, sigma, float_rf):
+    def sharpe_ratio(self, mu:float, sigma:float, float_rf:float) -> float:
         '''
         DOCSTRING:
         INPUTS:
@@ -341,7 +341,7 @@ class Markowitz:
         '''
         return (float(mu) - float(float_rf)) / float(sigma)
 
-    def sigma_portfolio(self, array_weights, array_returns):
+    def sigma_portfolio(self, array_weights:np.array, array_returns:np.array) -> float:
         '''
         DOCSTRING:
         INPUTS:
@@ -354,8 +354,7 @@ class Markowitz:
     
     def min_w_asset(self, df_assets:pd.DataFrame, col_id:str, col_close:str, 
                     col_dt:datetime.datetime, col_prtf_notional:float, col_min_w:str='min_w', 
-                    col_max_date:str='max_date') \
-                        -> list:
+                    col_max_date:str='max_date') -> pd.DataFrame:
         '''
         DOCSTRING: MINIMAL WEIGHT ALLOCATION PER ASSET
         INPUTS:
@@ -399,9 +398,10 @@ class Markowitz:
         # return arrays of interet
         return array_returns, array_min_w, list_uids
 
-    def random_weights(self, int_n_assets, bl_constraints=False, bl_multiplier=False, 
-                       array_min_w=None, nth_try=100, int_idx_val=2, bl_valid_weights=False, 
-                       i_attempts=0, float_atol_sum=1e-4, float_atol_w=10000.0):
+    def random_weights(self, int_n_assets:int, bl_constraints:bool=False, bl_multiplier:bool=False, 
+                       array_min_w:np.array=None, nth_try:int=100, int_idx_val:int=2, 
+                       bl_valid_weights:bool=False, i_attempts:int=0, 
+                       float_atol_sum:float=1e-4, float_atol_w:float=10000.0) -> np.array:
         '''
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
         INPUTS:
@@ -556,9 +556,9 @@ class Markowitz:
     def random_portfolios(self, df_assets:pd.DataFrame, int_n_portfolios:int, col_id:str, 
                           col_close:str, col_dt:datetime.datetime, col_returns:str, 
                           float_prtf_notional:float, col_min_w:str='min_w', float_rf:float=0.0, 
-                          bl_constraints:bool=False, array_min_w:Optional[np.ndarray]=None, 
-                          int_wdy:int=252) -> Tuple[np.ndarray, np.ndarray, np.ndarray, \
-                                                    np.ndarray, np.ndarray, List[str]]:
+                          bl_constraints:bool=False, int_wdy:int=252) \
+                            -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
+                                     np.ndarray, np.ndarray, List[str]]:
         '''
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
@@ -636,9 +636,11 @@ class Markowitz:
         # returning weights, returns, and sigma from efficient frontier
         return np.asarray(wt), array_returns, array_sigmas
 
-    def eff_frontier(self, array_eff_risks, array_eff_returns, array_weights, array_mus, array_sigmas, 
-                     float_rf, col_sigma='sigma', col_mu='mu', col_w='weights', col_sharpe='sharpe',
-                     array_eff_weights=list(), atol=1e-2, int_pace_atol=5):
+    def eff_frontier(self, array_eff_risks:np.array, array_eff_returns:np.array, 
+                     array_weights:np.array, array_mus:np.array, array_sigmas:np.array, 
+                     float_rf:float, col_sigma:str='sigma', col_mu:str='mu', col_w:str='weights', 
+                     col_sharpe:str='sharpe', array_eff_weights:list=list(), atol:float=1e-2, 
+                     int_pace_atol:int=5) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
         DOCSTRING:
         INPUTS:
@@ -678,12 +680,13 @@ class Markowitz:
         # output the results
         return df_eff, df_porf
     
-    def plot_risk_return_portfolio(self, array_weights, array_mus, array_sigmas,
-                                   array_sharpes, array_eff_risks, array_eff_returns, 
-                                   array_eff_weights, bl_debug_mode=False, 
-                                   bl_show_plot=False, complete_path_save_fig=None,
-                                   title_text='Markowitz Risk x Return Portfolios',
-                                   yaxis_title='Return (%)', xaxis_title='Risk (%)'):
+    def plot_risk_return_portfolio(self, array_weights:np.array, array_mus:np.array, 
+                                   array_sigmas:np.array, array_sharpes:np.array, 
+                                   array_eff_risks:np.array, array_eff_returns:np.array, 
+                                   array_eff_weights:np.array, bl_debug_mode:bool=False, 
+                                   bl_show_plot:bool=False, complete_path_save_fig:Optional[str]=None,
+                                   title_text:str='Markowitz Risk x Return Portfolios',
+                                   yaxis_title:str='Return (%)', xaxis_title:str='Risk (%)') -> None:
         '''
         REFERENCES: https://plotly.com/python/reference/layout/, 
             https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html, 
