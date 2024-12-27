@@ -2,6 +2,7 @@
 
 
 import datetime
+import backoff
 import yfinance as yf
 import pandas as pd
 from requests import request
@@ -145,6 +146,12 @@ class Sidra:
 
 class BCB:
 
+    @backoff.on_exception(
+        backoff.constant,
+        SyntaxError,
+        interval=10,
+        max_tries=20,
+    )
     def sgs_bcb(self, int_sgs_tabel, data_inic, data_fim):
         '''
         REFERENCES: https://dadosabertos.bcb.gov.br/dataset/20542-saldo-da-carteira-de-credito-com-recursos-livres---total/resource/6e2b0c97-afab-4790-b8aa-b9542923cf88
