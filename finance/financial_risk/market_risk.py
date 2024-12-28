@@ -7,13 +7,14 @@ import pandas as pd
 import cvxopt as opt
 import plotly.graph_objs as go
 from itertools import combinations
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict, Any
 from stpstone.quantitative_methods.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.linear_algebra import LinearAlgebra
 from stpstone.handling_data.json import JsonFiles
 from stpstone.finance.spot.stocks import ValuingStocks
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.handling_data.numbers import NumHandler
+from stpstone.finance.b3.search_by_trading import TradingFilesB3
 
 
 class MarketRiskManagement:
@@ -712,6 +713,14 @@ class Markowitz:
         OUTPUTS: PLOT
         '''
         # maximum sharpe portfolio
+        idx_max_sharpe = array_sharpes.argmax()
+        max_sharpe_sigma = array_sigmas[idx_max_sharpe]
+        max_sharpe_mu = array_mus[idx_max_sharpe]
+        # minimum sigma portfolio
+        idx_min_sigma = array_sigmas.argmin()
+        min_sigma_mu = array_mus[idx_min_sigma]
+        min_sigma_sigma = array_sigmas[idx_min_sigma]
+        # maximum sharpe portfolio
         if bl_debug_mode == True:
             print('### MAXIMUM SHARPE PORTFOLIO ###')
             print('SHARPES ARGMAX: {}'.format(array_sharpes.argmax()))
@@ -765,6 +774,24 @@ class Markowitz:
                 ),
                 customdata=array_eff_weights
             ),
+            # add a green star for the minimum sigma portfolio
+            go.Scatter(
+                x=[min_sigma_sigma],
+                y=[min_sigma_mu],
+                mode='markers',
+                marker=dict(size=30, color='green', symbol='star'),
+                name='Min Risk Portfolio',
+                hovertemplate='Risk: %{x:.2f}<br>Return: %{y:.2f}<extra></extra>'
+            ),
+            # add a red star for the maximum sharpe portfolio
+            go.Scatter(
+                x=[max_sharpe_sigma],
+                y=[max_sharpe_mu],
+                mode='markers',
+                marker=dict(size=30, color='blue', symbol='star'),
+                name='Max Sharpe Portfolio',
+                hovertemplate='Risk: %{x:.2f}<br>Return: %{y:.2f}<extra></extra>'
+            )
         ]
         # configuring title data
         dict_title = {
@@ -859,7 +886,7 @@ class Markowitz:
         array_close = np.round(array_close, int_round_close)
         array_notional = np.array(array_close) * np.array(array_eff_quantities)
         return {
-            'list_securities': self.list_securities,
+            'tickers': self.list_securities,
             'argmin_risk': int_argmax_sharpe,
             'eff_weights': array_eff_w,
             'eff_risk': array_eff_risk,
@@ -867,7 +894,8 @@ class Markowitz:
             'eff_sharpe': array_eff_sharpe,
             'eff_quantities': array_eff_quantities,
             'close': array_close,
-            'notional': array_notional
+            'notional': array_notional,
+            'notional_total': array_notional.sum()
         }
 
     def min_sigma(self, array_sharpes:np.ndarray, array_weights:np.ndarray, array_sigmas:np.ndarray, 
@@ -906,7 +934,7 @@ class Markowitz:
         array_close = np.round(array_close, int_round_close)
         array_notional = np.array(array_close) * np.array(array_eff_quantities)
         return {
-            'list_securities': self.list_securities,
+            'tickers': self.list_securities,
             'argmin_risk': int_argmin_risk,
             'eff_weights': array_eff_w,
             'eff_risk': array_eff_risk,
@@ -914,5 +942,28 @@ class Markowitz:
             'eff_sharpe': array_eff_sharpe,
             'eff_quantities': array_eff_quantities,
             'close': array_close,
-            'notional': array_notional
+            'notional': array_notional,
+            'notional_total': array_notional.sum()
         }
+
+    def tickers_correction(self, dict_allocation:Dict[str, Any], list_ser=list()) -> Dict[str, Any]:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        df_trad_sec = TradingFilesB3().tradable_securities
+        for ticker in dict_allocation['tickers']:
+            float_qty_rnd = df_trad_sec[df_trad_sec['Symbol'] == ticker.replace('.SA', '')][
+                'MinOrderQty'].values[0]
+            float_qty_quotient = float(dict_allocation['eff_quantities'][
+                self.list_securities.index(ticker)]) // float_qty_rnd
+            float_qty_remainder = float(dict_allocation['eff_quantities'][
+                self.list_securities.index(ticker)]) % float_qty_rnd
+            list_ser.append({'ticker': ticker.replace('.SA', ''), 'qty': float_qty_quotient})
+            list_ser.append({'ticker': ticker.replace('.SA', '') + 'F', 'qty': float_qty_remainder})
+        df_ = pd.DataFrame(list_ser)
+        df_ = df_[df_['qty'] != 0]
+        df_['close'] = list(dict_allocation['close'])
+        df_['notional'] = df_['qty'] * df_['close']
+        return df_

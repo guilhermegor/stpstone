@@ -21,7 +21,15 @@ from stpstone.loggs.db_logs import DBLogs
 
 class TradingFilesB3:
 
-    def price_report(self, wd_bef=1, bl_debug=False, list_dicts=list()):
+    def __init__(self, int_wd_bef:int=1, str_fillna:str='-1', str_fillna_dt:str='2100-12-31', 
+                 str_fillna_ts:str='2100-12-31 00:00:00', str_fmt_dt:str='YYYY-MM-DD') -> None:
+        self.int_wd_bef = int_wd_bef
+        self.str_fillna = str_fillna
+        self.str_fillna_dt = str_fillna_dt
+        self.str_fillna_ts = str_fillna_ts
+        self.str_fmt_dt = str_fmt_dt
+
+    def price_report(self, bl_debug=False, list_dicts=list()):
         '''
         DOCSTRING:
         INPUTS:
@@ -30,7 +38,7 @@ class TradingFilesB3:
         # price report file .zip
         url = YAML_B3['price_report'][
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
-                                                     wd_bef).strftime('%y%m%d'))
+                                                     self.int_wd_bef).strftime('%y%m%d'))
         # mtm b3 on memry
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             url, bl_io_interpreting=YAML_B3[
@@ -80,13 +88,14 @@ class TradingFilesB3:
             df_pr, 
             url,
             DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+                DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef)
             )
         )
         # returning dataframe
         return df_pr
 
-    def tradable_securities(self, wd_bef=0, list_dicts=list()):
+    @property
+    def tradable_securities(self, list_dicts=list()):
         '''
         DOCSTRING: TRADABLE SECURITIES IN BRAZILLIAN EXCHANGE MARKET
         INPUTS: WORKING DAYS BEFORE
@@ -94,7 +103,7 @@ class TradingFilesB3:
         '''
         # url
         url = YAML_B3['securities_tradable']['url'].format(DatesBR().sub_working_days(
-            DatesBR().curr_date, wd_bef).strftime('%y%m%d'))
+            DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d'))
         # zip to memory
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             url, bl_io_interpreting=YAML_B3[
@@ -116,19 +125,90 @@ class TradingFilesB3:
             #   import to serialized list
             list_dicts.extend(json_trd_sec)
         # appending list serialized to dataframe
-        df_trd_sec = pd.DataFrame(list_dicts)
+        df_ = pd.DataFrame(list_dicts)
+        # filling na, in order to change data types
+        df_.fillna(value={
+            "MaturityDate": self.str_fillna_dt,
+            "IssueDate": self.str_fillna_dt,
+            "SettlDate": self.str_fillna_dt,
+            "SecurityValidityTimestamp": self.str_fillna_ts
+        }, inplace=True)
+        df_.fillna(self.str_fillna, inplace=True)
+        # changing data types
+        df_ = df_.astype({
+            "Symbol": str,
+            "SecurityID": np.int64,
+            "SecurityIDSource": int,
+            "SecurityExchange": str,
+            "NoApplIDs": str,
+            "Product": int,
+            "CFICode": str,
+            "SecurityGroup": str,
+            "SecurityType": str,
+            "SecuritySubType": str,
+            "MaturityMonthYear": str,
+            "MaturityDate": str,
+            "IssueDate": str,
+            "CountryOfIssue": str,
+            "ContractMultiplier": float,
+            "SecurityDesc": str,
+            "ContractSettlMonth": str,
+            "SettlType": str,
+            "SettlDate": str,
+            "MinPriceIncrement": float,
+            "TickSizeDenominator": int,
+            "MinOrderQty": float,
+            "MaxOrderQty": np.int64,
+            "NoInstrAttrib": str,
+            "NoUnderlyings": str,
+            "Currency": str,
+            "SettlCurrency": str,
+            "Asset": str,
+            "SecurityValidityTimestamp": str,
+            "MarketSegmentID": int,
+            "NoLotTypeRules": str,
+            "ImpliedMarketIndicator": int,
+            "MinCrossQty": int,
+            "ClearingHouseID": str,
+            "ISINNumber": str,
+            "MultiLegModel": str,
+            "MultiLegPriceMethod": str,
+            "SecurityStrategyType": str,
+            "NoLegs": str,
+            "NoSharesIssued": str,
+            "GovernanceIndicator": str,
+            "CorporateActionEventID": int,
+            "PriceDivisor": str,
+            "PutOrCall": str,
+            "StrikePrice": str,
+            "StrikeCurrency": str,
+            "ExerciseStyle": str,
+            "SecurityMatchType": str
+        })
+        for col_ in [
+            "MaturityDate",
+            "IssueDate",
+            "SettlDate"
+        ]:
+            df_[col_] = [DatesBR().str_date_to_datetime(d, self.str_fmt_dt) for d in df_[col_]]
+        for col_ in [
+            "SecurityValidityTimestamp"
+        ]:
+            df_[col_] = [DatesBR().timestamp_separator_string_to_datetime(
+                d, substring_datetime=' ', format=self.str_fmt_dt) for d in df_[col_]]
         # adding logging
-        df_trd_sec = DBLogs().audit_log(
-            df_trd_sec, 
+        df_ = DBLogs().audit_log(
+            df_, 
             url,
             DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+                DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef)
             )
         )
         # retornando dataframe de interesse
-        return df_trd_sec
+        return df_
 
-    def daily_liquidity_limits(self, wd_bef=1):
+    @property
+    def daily_liquidity_limits(self):
         '''
         DOCSTRING:
         INPUTS:
@@ -136,7 +216,7 @@ class TradingFilesB3:
         '''
         # url
         url = YAML_B3['daily_liquidity_limits']['url'].format(DatesBR().sub_working_days(
-            DatesBR().curr_date, wd_bef).strftime('%y%m%d'))
+            DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d'))
         # zip to memory
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             url, bl_io_interpreting=YAML_B3[
@@ -173,13 +253,13 @@ class TradingFilesB3:
             df_dll, 
             url,
             DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+                DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef)
             )
         )
         # retornando dataframe de interesse
         return df_dll
 
-    def options_b3(self, wd_bef=0, float_value_error=-1000.0, list_dicts=list(), bl_debug=False, 
+    def options_b3(self, float_value_error=-1000.0, list_dicts=list(), bl_debug=False, 
                    float_days_year=365.0):
         '''
         DOCSTRING:
@@ -187,7 +267,7 @@ class TradingFilesB3:
         OUTPUTS:
         '''
         # raw maximum theoretical margins
-        list_rows_mtm = self.carga_mtm_b3(wd_bef=abs(-wd_bef-1))
+        list_rows_mtm = self.carga_mtm_b3
         # b3 financial indicators
         df_fin_ind = MDB3().financial_indicators_b3
         # risk-free rate
@@ -200,7 +280,7 @@ class TradingFilesB3:
         # options traded in b3 exchange - in zip file
         url = YAML_B3['options_traded_b3'][
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
-                                                     wd_bef).strftime('%y%m%d'))
+                                                     self.int_wd_bef).strftime('%y%m%d'))
         # carga para a memória margens teóricas máximas b3
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             url, bl_io_interpreting=YAML_B3[
@@ -248,7 +328,7 @@ class TradingFilesB3:
                     dict_[YAML_B3['options_traded_b3']['keys']['cd_exp']] = \
                         DatesBR().delta_calendar_days(
                             DatesBR().sub_working_days(
-                                DatesBR().curr_date, abs(-wd_bef-1)), 
+                                DatesBR().curr_date, abs(-self.int_wd_bef-1)), 
                                 DatesBR().str_date_to_datetime(str(dict_[
                                         YAML_B3['options_traded_b3']['keys']['xpr_dt']
                                     ]), YAML_B3['options_traded_b3']['dt_input_format']
@@ -258,7 +338,7 @@ class TradingFilesB3:
                         print('CALENDAR DAYS TO EXPIRATION: {}'.format(
                                 DatesBR().delta_calendar_days(
                                 DatesBR().sub_working_days(
-                                    DatesBR().curr_date, abs(-wd_bef-1)), 
+                                    DatesBR().curr_date, abs(-self.int_wd_bef-1)), 
                                     DatesBR().str_date_to_datetime(str(dict_[
                                             YAML_B3['options_traded_b3']['keys']['xpr_dt']
                                         ]), YAML_B3['options_traded_b3']['dt_input_format']
@@ -372,13 +452,14 @@ class TradingFilesB3:
             df_opt_in, 
             url,
             DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+                DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef)
             )
         )
         # returning dataframe
         return df_opt_in
 
-    def carga_mtm_b3(self, wd_bef=1):
+    @property
+    def carga_mtm_b3(self):
         '''
         DOCSTRING:
         INPUTS:
@@ -387,7 +468,7 @@ class TradingFilesB3:
         # url de exportação do arquivo de margens teóricas máximas b3
         url_mtm = YAML_B3['margens_teoricas_maximas_b3'][
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
-                                                     wd_bef).strftime('%y%m%d'))
+                                                     self.int_wd_bef).strftime('%y%m%d'))
         # carga para a memória margens teóricas máximas b3
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             url_mtm, bl_io_interpreting=YAML_B3[
@@ -412,7 +493,8 @@ class TradingFilesB3:
         # retornando lista de linhas do csv corrente
         return list_rows_mtm
 
-    def mtm_compra_venda(self, wd_bef=1, list_num_desagios_compra=list(),
+    @property
+    def mtm_compra_venda(self, list_num_desagios_compra=list(),
                          list_num_desagios_venda=list(), den_desagios=None, list_exportacao=list(),
                          key_stocks='stocks', key_funds='funds', key_etfs='etfs', key_bdrs='bdrs'):
         '''
@@ -421,7 +503,7 @@ class TradingFilesB3:
         OUTPUTS
         '''
         # carga de margens teóricas máximas crua
-        list_rows_mtm = self.carga_mtm_b3(wd_bef=wd_bef)
+        list_rows_mtm = self.carga_mtm_b3
         # carga de ativos bovespa e bmf por tipo
         dict_ativos_bov_bmf_tipo = UP2DATAB3().security_category_name
         # selecionando apenas lista de ativos de interesse - ações, fiis, etfs, e bdrs
@@ -537,15 +619,16 @@ class TradingFilesB3:
             df_mtm_b3, 
             YAML_B3['margens_teoricas_maximas_b3'][
                 'url'].format(DatesBR().sub_working_days(
-                    DatesBR().curr_date, wd_bef).strftime('%y%m%d')),
+                    DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d')),
             DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+                DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef)
             )
         )
         # retornando deságios b3 de interesse
         return df_mtm_b3
 
-    def fatores_primitivos_risco_b3(self, wd_bef=1):
+    @property
+    def fatores_primitivos_risco_b3(self):
         '''
         DOCSTRING:
         INPUTS:
@@ -553,7 +636,7 @@ class TradingFilesB3:
         '''
         # determinando url de download dos fatores primitivos de risco da b3
         url = YAML_B3['fatores_primitivos_risco_b3']['url'].format(DatesBR().sub_working_days(
-                DatesBR().curr_date, wd_bef).strftime('%y%m%d'))
+                DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d'))
         # carga para a memória do arquivo em zip do anexo
         zipfile_fpr_b3 = DirFilesManagement().get_zip_from_web_in_memory(
             url,
@@ -609,7 +692,7 @@ class TradingFilesB3:
             df_fpr_b3, 
             url,
             DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
+                DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef)
             )
         )
         # retornando dataframe com fatores primitivos de risco b3
@@ -707,7 +790,7 @@ class TradingFilesB3:
         # definindo url com cenários de risco - tipo de curva
         url_cenarios_tipo_curva = YAML_B3['cenarios_risco_tipo_curva']['tipo_curva']['url'].format(
             DatesBR().sub_working_days(DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_curva'][
-                'tipo_curva']['wd_bef']).strftime('%y%m%d'))
+                'tipo_curva']['self.int_wd_bef']).strftime('%y%m%d'))
         # baixando em memória zip com cenário de tipo curva da b3
         list_txts_tipos_curva_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
             url_cenarios_tipo_curva, bl_verify=YAML_B3['cenarios_risco_tipo_curva']['bl_verify'],
@@ -776,7 +859,7 @@ class TradingFilesB3:
         # definindo url com cenários de risco - tipo de curva
         url_cenarios_tipo_spot = YAML_B3['cenarios_risco_tipo_spot']['tipo_curva']['url'].format(
             DatesBR().sub_working_days(DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_spot'][
-                'tipo_curva']['wd_bef']).strftime('%y%m%d'))
+                'tipo_curva']['self.int_wd_bef']).strftime('%y%m%d'))
         # baixando em memória zip com cenário de tipo curva da b3
         list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
             url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'],
@@ -999,7 +1082,7 @@ class TradingFilesB3:
             url_cenarios_tipo_spot = YAML_B3['cenarios_risco_tipo_spot']['tipo_curva'][
                 'url'].format(DatesBR().sub_working_days(
                     DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_spot'][
-                        'tipo_curva']['wd_beferiores']).strftime('%y%m%d'))
+                        'tipo_curva']['self.int_wd_beferiores']).strftime('%y%m%d'))
             # baixando em memória zip com cenário de tipo curva da b3
             list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
                 url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'], 
@@ -1009,7 +1092,7 @@ class TradingFilesB3:
             url_cenarios_tipo_spot = YAML_B3['cenarios_risco_tipo_spot'][
                 'tipo_curva']['url'].format(
             DatesBR().sub_working_days(DatesBR().curr_date, (YAML_B3['cenarios_risco_tipo_spot'][
-                'tipo_curva']['wd_beferiores'] + 1)).strftime('%y%m%d'))
+                'tipo_curva']['self.int_wd_beferiores'] + 1)).strftime('%y%m%d'))
             list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
                 url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'], 
                 bl_io_interpreting=YAML_B3['cenarios_risco_tipo_spot']['bl_io_interpreting'], 
@@ -1063,7 +1146,8 @@ class TradingFilesB3:
         # exportando dataframe de interesse
         return df_cenarios_tipo_spot
 
-    def trading_report(self, wd_bef=1, 
+    @property
+    def trading_report(self, 
         el_pric_rpt='PricRpt', el_trad_dt='TradDt', el_dt='Dt', el_scty_id='SctyId', 
         el_ticker='TckrSymb', el_fin_ins_id='FinInstrmId', el_othr_id='OthrId', el_id='Id', 
         el_tp='Tp', el_pr_try='Prtry', el_plc_of_listg='PlcOfListg', el_mkt_id_rcd='MktIdrCd', 
@@ -1093,10 +1177,10 @@ class TradingFilesB3:
         OUTPUTS:
         '''
         # instruments and its respective market
-        df_trd_sec = self.tradable_securities(wd_bef)
+        df_ = self.tradable_securities(self.int_wd_bef)
         # url to download maximum theoretical margins
         url = YAML_B3['trading_report']['url'].format(DatesBR().sub_working_days(
-            DatesBR().curr_date, wd_bef).strftime('%y%m%d')
+            DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d')
         )
         # import to memory trading report zip
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
@@ -1202,7 +1286,7 @@ class TradingFilesB3:
         list_cols = list(df_trd_rpt.columns)
         # coletando tipo de mercado por ativo
         df_trd_rpt = df_trd_rpt.merge(
-            df_trd_sec, how='left', 
+            df_, how='left', 
             left_on=[col_ticker], 
             right_on=[col_ticker_cd], 
             suffixes=('_', '')

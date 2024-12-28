@@ -5,7 +5,7 @@ from requests import Session
 from urllib3.util import Retry
 
 
-class ReqsSession:
+class ReqSession:
 
     def __init__(self, url:str, int_retries:int=10, int_backoff_factor:int=1, 
                  list_status_forcelist:list=[429, 500, 502, 503, 504]) -> None:
@@ -18,6 +18,7 @@ class ReqsSession:
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
         self.list_status_forcelist = list_status_forcelist
+        self.session = self.configure_session
 
     @property
     def configure_session(self) -> Session:

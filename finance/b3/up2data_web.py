@@ -6,7 +6,6 @@ from zipfile import ZipFile
 from stpstone.settings.global_slots import YAML_B3
 from stpstone.opening_config.setup import iniciating_logging
 from stpstone.loggs.create_logs import CreateLog
-from stpstone.microsoft_apps.teams.teams_integration import TeamsConn
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.json import JsonFiles
 from stpstone.handling_data.object import HandlingObjects
@@ -20,6 +19,61 @@ from stpstone.loggs.db_logs import DBLogs
 
 class UP2DATAB3:
 
+    def __init__(self, int_wd_bef:int=1) -> None:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        self.int_wd_bef = int_wd_bef
+        self.token = self.access_token
+    
+    @property
+    def access_token(self, str_method:str='GET', key_token:int='token') -> str:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        url_token = YAML_B3['up2data_b3']['request_token'].format(
+            DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef))
+        req_resp = request(str_method, url_token)
+        req_resp.raise_for_status()
+        return req_resp.json()[key_token]
+    
+    @property
+    def instruments_register(self, str_method:str='GET', list_ser:list=list()) -> pd.DataFrame:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        # requesting data
+        resp_req = request(str_method, YAML_B3['up2data_b3']['access_api'].format(self.token))
+        resp_req.raise_for_status()
+        str_resp_req = resp_req.text
+        # cleaning response
+        list_resp_req = str_resp_req.split('\n')
+        list_headers = list_resp_req[1].split(';')
+        list_data = list_resp_req[2:]
+        for row in list_data:
+            if len(row) == 0: continue
+            list_row = row.split(';')
+            list_ser.append(dict(zip(list_headers, list_row)))
+        # dataframe from serialized list
+        df_ = pd.DataFrame(list_ser)
+        # changing column types
+        list_cols_df = list(df_.columns)
+        df_ = df_.astype(dict(zip(list_cols_df, [str] * len(list_cols_df))))
+        # adding logging
+        df_ = DBLogs().audit_log(
+            df_, 
+            DatesBR().utc_from_dt(DatesBR().curr_date), 
+            DatesBR().utc_log_ts
+        )
+        # returning instruments register
+        return df_
+    
     def daily_trades_secondary_market(self, wd_bef=1, 
                                       bl_change_date_type=False, str_sep=';', 
                                       str_decimal=',', 
@@ -88,56 +142,6 @@ class UP2DATAB3:
         return df_daily_trades
 
     @property
-    def instruments_register_raw(self, method_request='GET', key_token='token',
-                                 key_ticker_symbol='TckrSymb'):
-        '''
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        '''
-        # api consulta lotes padrão xp
-        url_token = YAML_B3['up2data_b3']['request_token'].format(
-            DatesBR().curr_date)
-        url_lotes_padrao_b3 = YAML_B3['up2data_b3']['access_api']
-        # coletando token para consulta da API da B3
-        token_api_b3 = \
-            HandlingObjects().literal_eval_data(
-                request(method_request, url_token).text)[key_token]
-        print('TOKEN IRR: {}'.format(token_api_b3))
-        url_lotes_padrao_b3 = str(url_lotes_padrao_b3).format(token_api_b3)
-        print('URL LOTE PADRAO B3: {}'.format(url_lotes_padrao_b3))
-        response_api_b3_lote_padrao = request(
-            method_request, url_lotes_padrao_b3.format(token_api_b3)).text
-        print('RESPONSE API B3 LOTE PADRAO: {}'.format(response_api_b3_lote_padrao))
-        # tratando dados provindos da API
-        list_response_api_b3 = response_api_b3_lote_padrao.split('\r\n')
-        list_cabecalho_reponse_api_b3 = list_response_api_b3[0].split(';')
-        list_response_api_b3 = list_response_api_b3[1:]
-        dict_dados_cadastrais_b3 = dict()
-        for row in list_response_api_b3:
-            list_row = row.split(';')
-            try:
-                dict_dados_cadastrais_b3[list_row[list_cabecalho_reponse_api_b3.index(
-                    key_ticker_symbol)]] = dict(zip(list_cabecalho_reponse_api_b3, list_row))
-            except:
-                pass
-        # criando dataframe à partir do dicionário de interesse
-        df_instruments_register_b3_raw = pd.DataFrame(
-            list(dict_dados_cadastrais_b3.values()))
-        # changing column types
-        list_cols_df = list(df_instruments_register_b3_raw.columns)
-        df_instruments_register_b3_raw = df_instruments_register_b3_raw.astype(
-            dict(zip(list_cols_df, [str] * len(list_cols_df))))
-        # adding logging
-        df_instruments_register_b3_raw = DBLogs().audit_log(
-            df_instruments_register_b3_raw, 
-            DatesBR().utc_from_dt(DatesBR().curr_date), 
-            DatesBR().utc_log_ts
-        )
-        # retornando dicionário com dados cadastrais de instrumentos negociados na b3
-        return df_instruments_register_b3_raw
-
-    @property
     def security_category_name(self, dict_export=dict(), key_ticker='TckrSymb',
                                col_security_category_name='SctyCtgyNm',
                                col_market_name='MktNm',
@@ -149,9 +153,9 @@ class UP2DATAB3:
         OUTPUTS:
         '''
         # fetch in memory instruments register of assets traded in b3 exchange
-        df_instruments_register_b3_raw = self.instruments_register_raw
+        df_ = self.instruments_register_raw
         print('*** REIGSTER B3 RAW ***')
-        print(df_instruments_register_b3_raw)
+        print(df_)
         # creating dictionary with instruments according to each type of market
         for security_division, col_ in [
             ('securities_by_category_name', col_security_category_name),
@@ -161,20 +165,20 @@ class UP2DATAB3:
                 #       or creating a new list
                 if market not in dict_export:
                     dict_export[market] = HandlingLists().remove_duplicates(
-                        df_instruments_register_b3_raw[
-                            df_instruments_register_b3_raw[col_].isin(
+                        df_[
+                            df_[col_].isin(
                                 list_source_names)][key_ticker].tolist())
                 else:
                     dict_export[market].extend(HandlingLists().remove_duplicates(
-                        df_instruments_register_b3_raw[
-                            df_instruments_register_b3_raw[col_].isin(
+                        df_[
+                            df_[col_].isin(
                                 list_source_names)][key_ticker].tolist()))
                 list_markets_classified.extend(list_source_names)
         # defining markets not classified, if is user's will
         if bl_return_markets_not_classified == True:
             return HandlingLists().remove_duplicates(
-                df_instruments_register_b3_raw[
-                    ~df_instruments_register_b3_raw[col_security_category_name].isin(
+                df_[
+                    ~df_[col_security_category_name].isin(
                         list_markets_classified)][col_security_category_name].tolist())
         else:
             #   returing dictionary with tickers accordingly to the market type which participates
@@ -444,8 +448,8 @@ class UP2DATAB3:
         # limitating columns of interest
         df_banks_acc_warr = df_banks_acc_warr[list_cols]
         # adding logging
-        df_instruments_register_b3_raw = DBLogs().audit_log(
-            df_instruments_register_b3_raw, 
+        df_ = DBLogs().audit_log(
+            df_, 
             DatesBR().utc_from_dt(DatesBR().curr_date), 
             DatesBR().utc_log_ts
         )
