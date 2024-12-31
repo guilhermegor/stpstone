@@ -133,9 +133,17 @@ class SeleniumWD:
         REFERENCES: 
             1. LIST OF CHROMIUM COMMAND LINE SWITCHES: https://gist.github.com/dodying/34ea4760a699b47825a766051f47d43b
             2. LIST OF USER AGENTS: https://gist.github.com/pzb/b4b6f57144aea7827ae4
-        DOCSTRING:
+        DOCSTRING: SELENIUM INTEGRATION
         INPUTS: 
-        OUTPUTS:
+            - URL:STR
+            - PATH_WEBDRIVER:STR
+            - PORT:INT
+            - USER_AGENT:STR
+            - WAIT_LOAD:INT (SECONDS)
+            - DELAY:INT (SECONDS)
+            - BL OPEN MINIMIZED:BOOLEAN (DEFAULT TRUE)
+            - DICT ARGUMENTS:DICT (DEFAULT NONE)
+        OUTPUTS: NONE
         '''
         self.url = url
         self.path_webdriver = path_webdriver
@@ -159,6 +167,11 @@ class SeleniumWD:
     
     @property
     def get_browser(self) -> WebDriver:
+        '''
+        DOCSTRING: BROWSER INITIATION WITH THE RESPECTIVE WEB DRIVER
+        INPUTS: -
+        OUTPUTS: WEB DRIVER
+        '''
         # setting preferences
         d = DesiredCapabilities.CHROME
         d['goog:loggingPrefs'] = {'performance': 'ALL'}
