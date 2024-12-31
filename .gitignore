@@ -16,3 +16,6 @@ Thumbs.db
 
 # ENV
 .env
+
+# VENV
+.venv

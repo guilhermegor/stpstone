@@ -1,12 +1,12 @@
 ### HANDLING RISK OF ASSETS TRADED IN EXCHANGE MARKETS ###
 
 import math
-import datetime
 import numpy as np
 import pandas as pd
 import cvxopt as opt
 import plotly.graph_objs as go
 from itertools import combinations
+from datetime import datetime
 from typing import List, Tuple, Optional, Dict, Any
 from stpstone.quantitative_methods.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.linear_algebra import LinearAlgebra
@@ -85,7 +85,7 @@ class MarketRiskManagement:
         # return the sum of the different to the power of order
         return np.sum(diff ** order) / len(list_returns)
 
-    def parametric_var(self, std_deviation, t, confidence_level, mu=0, h=252, ro=None,
+    def parametric_var(self, std_deviation, t, confidence_level, float_mu=0, h=252, ro=None,
                        port_financial_value=1000):
         '''
         DOCSTRING: VALUE AT RISK, OR THE STATISTICAL RISK MANAGEMENT TECHINIQUE MEASURING THE
@@ -112,19 +112,19 @@ class MarketRiskManagement:
         return {
             'financial_var': port_financial_value * (std_deviation * np.sqrt(
                 h_corrected) * NormalDistribution().inv_norm(
-                confidence_level) - (t / h) * mu),
+                confidence_level) - (t / h) * float_mu),
             'percentual_var': std_deviation * np.sqrt(
                 h_corrected) * NormalDistribution().inv_norm(
-                confidence_level) - (t / h) * mu,
+                confidence_level) - (t / h) * float_mu,
             'drifted_adjustment_to_var': std_deviation * np.sqrt(
                 h_corrected) * NormalDistribution().inv_norm(
                 confidence_level) - (std_deviation * np.sqrt(
                     h_corrected) * NormalDistribution().inv_norm(
-                    confidence_level) - (t / h) * mu)
+                    confidence_level) - (t / h) * float_mu)
         }
 
     def equity_var(self, std_deviation, t, confidence_level, list_betas,
-                   list_financial_exposures, mu=0, h=252, ro=None):
+                   list_financial_exposures, float_mu=0, h=252, ro=None):
         '''
         DOCSTRING: EQUITY VAR, OR SENSITIVITY OF ITS RISK FACTORS PORTFOLIO
         INPUTS: STANDARD DEVIATION, T (NPER), COFIDENCE LEVEL (1-ALFA, OR SIGNIFICANCE LEVEL),
@@ -138,14 +138,14 @@ class MarketRiskManagement:
         # returning the expected loss of the portfolio regarding a not estressed scenario
         return {
             'financial_var': MarketRiskManagement().parametric_var(
-                std_deviation, t, confidence_level, mu, h, ro)[
+                std_deviation, t, confidence_level, float_mu, h, ro)[
                     'percentual_var'] * beta_portfolio * sum(list_financial_exposures),
             'percentual_var': MarketRiskManagement().parametric_var(
-                std_deviation, t, confidence_level, mu, h, ro)['percentual_var'] * beta_portfolio
+                std_deviation, t, confidence_level, float_mu, h, ro)['percentual_var'] * beta_portfolio
         }
 
     def normal_linear_interest_rate_var(self, confidence_level, array_pv01, array_yields, t, h,
-                                        correl_yields=0, mu=0):
+                                        correl_yields=0, float_mu=0):
         '''
         DOCSTRING: LINEAR RISK CASH FLOW MODEL, OR CASH FLOW MAP, IS THE INTEREST RATE VAR OF
             BONDS, SWAPS AND LOAN PORTFOLIOS THAT CAN BE REPRESENTED AS A SERIES OF CASH FLOWS
@@ -162,13 +162,13 @@ class MarketRiskManagement:
                     cov_mtx[i, j] = correl_yields * \
                         array_yields[i] * array_yields[j]
         cov_mtx = (t / h) * cov_mtx
-        # mu vector
-        mu = np.array([mu] * len(array_pv01))
+        # float_mu vector
+        float_mu = np.array([float_mu] * len(array_pv01))
         # returning the normal linear interest rate var
         return NormalDistribution().inv_norm(confidence_level) * np.sqrt(
             LinearAlgebra().matrix_multiplication(LinearAlgebra().matrix_multiplication(
                 array_pv01, cov_mtx), LinearAlgebra().transpose_matrix(array_pv01))) \
-            + LinearAlgebra().matrix_multiplication(mu, LinearAlgebra().transpose_matrix(
+            + LinearAlgebra().matrix_multiplication(float_mu, LinearAlgebra().transpose_matrix(
                 array_pv01))
 
     def expected_tail_loss(self, nth_lowest=10, port_financial_value=1000,
@@ -325,7 +325,7 @@ class MarketRiskManagement:
         }
 
 
-class Markowitz:
+class MarkowitzEff:
     '''
     REFERENCES: https://www.linkedin.com/pulse/python-aplicado-markowitz-e-teoria-nem-tão-moderna-de-paulo-rodrigues/?originalSubdomain=pt
     DOCSTRING: MARKOWITZ RISK-RETURN PLOT OF RANDOM PORTFOLIOS, AIMING TO FIND THE BEST ALLOCATION 
@@ -334,17 +334,92 @@ class Markowitz:
     OUTPUTS: -
     '''
 
-    def __init__(self, list_securities:List[str], float_prtf_notional:float) -> None:
-        self.list_securities = list_securities
+    def __init__(
+            self, df_mktdata:pd.DataFrame, int_n_portfolios:int, float_prtf_notional:float, 
+            float_rf:float, col_ticker:str='ticker', col_close:str='close', col_dt:datetime='dt_date', 
+            col_returns:str='daily_return', col_last_close:str='last_close', col_min_w:str='min_w', 
+            col_max_date:str='max_date', bl_constraints:bool=True, bl_opt_possb_comb:bool=False, 
+            bl_progress_printing_opt:bool=False, nth_try:str=100, n_attempts_opt_prf:int=10000, 
+            int_wdy:int=252, int_round_close:int=2, path_fig:Optional[str]=None, 
+            bl_debug_mode:bool=True, bl_show_plot:bool=True, bl_non_zero_w_eff:bool=False, 
+            title_text:str='Markowitz Risk x Return Portfolios',
+            yaxis_title:str='Return (%)', xaxis_title:str='Risk (%)'
+        ) -> None:
+        # attributes
         self.float_prtf_notional = float_prtf_notional
+        self.df_mktdata = df_mktdata
+        self.path_fig = path_fig
+        self.int_n_portfolios = int_n_portfolios
+        self.n_attempts_opt_prf = n_attempts_opt_prf
+        self.col_ticker = col_ticker
+        self.col_close = col_close
+        self.col_dt = col_dt
+        self.col_returns = col_returns
+        self.col_min_w = col_min_w
+        self.col_last_close = col_last_close
+        self.col_max_date = col_max_date
+        self.float_rf = float_rf
+        self.bl_constraints = bl_constraints
+        self.bl_opt_possb_comb = bl_opt_possb_comb
+        self.bl_progress_printing_opt = bl_progress_printing_opt
+        self.nth_try = nth_try
+        self.int_wdy = int_wdy
+        self.int_round_close = int_round_close
+        self.bl_debug_mode = bl_debug_mode
+        self.bl_show_plot = bl_show_plot
+        self.bl_non_zero_w_eff = bl_non_zero_w_eff
+        self.title_text = title_text
+        self.yaxis_title = yaxis_title
+        self.xaxis_title = xaxis_title
+        # securities
+        self.list_securities = df_mktdata[self.col_ticker].unique()
+        # last date per asset
+        self.df_mktdata[self.col_max_date] = self.df_mktdata.groupby([
+            self.col_ticker])[self.col_dt].transform('max')
+        # minimum w per asset
+        if self.col_min_w not in self.df_mktdata.columns:
+            self.df_mktdata[self.col_min_w] = self.df_mktdata.groupby([
+                self.col_ticker, 
+                self.col_max_date
+            ])[col_close].transform('last') / self.float_prtf_notional
+        # last closing prices
+        self.df_mktdata[self.col_last_close] = self.df_mktdata.groupby([
+            self.col_ticker, 
+            self.col_max_date
+        ])[col_close].transform('last')
+        self.array_close = np.array([
+            self.df_mktdata[self.df_mktdata[self.col_ticker] == ticker.replace('.SA', '')][
+                self.col_last_close].unique()[0]
+            for ticker in self.list_securities
+        ])
+        # random portfolios
+        self.array_mus, self.array_sigmas, self.array_sharpes, self.array_weights, \
+            self.array_returns, self.list_uuids = \
+                self.random_portfolios(
+                    self.df_mktdata, int_n_portfolios, self.col_ticker, self.col_close, 
+                    self.col_dt, self.col_returns, self.float_prtf_notional, self.col_min_w, 
+                    self.float_rf, self.bl_constraints, self.bl_opt_possb_comb, self.nth_try, 
+                    self.int_wdy
+                )
+        # optimal portfolios
+        self.array_eff_weights, self.array_eff_returns, self.array_eff_risks = \
+            self.optimal_portfolios(
+                self.array_returns, self.n_attempts_opt_prf, self.bl_progress_printing_opt, 
+                self.int_wdy
+            )
+        # efficient frontier
+        self.df_eff, self.df_porf = self.eff_frontier(
+            self.array_eff_risks, self.array_eff_returns, self.array_weights, self.array_mus, 
+            self.array_sigmas, self.float_rf
+        )
 
-    def sharpe_ratio(self, mu:float, sigma:float, float_rf:float) -> float:
+    def sharpe_ratio(self, float_mu:float, float_sigma:float, float_rf:float) -> float:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        return (float(mu) - float(float_rf)) / float(sigma)
+        return (float(float_mu) - float(float_rf)) / float(float_sigma)
 
     def sigma_portfolio(self, array_weights:np.array, array_returns:np.array) -> float:
         '''
@@ -356,25 +431,6 @@ class Markowitz:
         array_cov = np.cov(array_returns)
         # returning portfolio standard deviation
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
-    
-    def min_w_asset(self, df_assets:pd.DataFrame, col_id:str, col_close:str, 
-                    col_dt:datetime.datetime, col_min_w:str='min_w', 
-                    col_max_date:str='max_date', col_last_close:str='last_close') -> pd.DataFrame:
-        '''
-        DOCSTRING: MINIMAL WEIGHT ALLOCATION PER ASSET
-        INPUTS:
-        OUTPUTS:
-        '''
-        df_assets[col_max_date] = df_assets.groupby([col_id])[col_dt].transform('max')
-        df_assets[col_last_close] = df_assets.groupby([
-            col_id, 
-            col_max_date
-        ])[col_close].transform('last')
-        df_assets[col_min_w] = df_assets.groupby([
-            col_id, 
-            col_max_date
-        ])[col_close].transform('last') / self.float_prtf_notional
-        return df_assets
 
     def returns_min_w_uids(self, df_assets:pd.DataFrame, col_dt:str, col_id:str, 
                            col_returns:str, col_min_w:str) \
@@ -407,7 +463,7 @@ class Markowitz:
         # return arrays of interet
         return array_returns, array_min_w, list_uids
 
-    def random_weights(self, int_n_assets:int, bl_constraints:bool=False, bl_multiplier:bool=False, 
+    def random_weights(self, int_n_assets:int, bl_constraints:bool=False, bl_opt_possb_comb:bool=False, 
                        array_min_w:np.array=None, nth_try:int=100, int_idx_val:int=2, 
                        bl_valid_weights:bool=False, i_attempts:int=0, 
                        float_atol_sum:float=1e-4, float_atol_w:float=10000.0) -> np.array:
@@ -464,7 +520,7 @@ class Markowitz:
                     return array_w
                 #   if multiplier is enabled, build a list of possible indexes combinations in 
                 #       order to sum 1.0 or less
-                if bl_multiplier == True:
+                if bl_opt_possb_comb == True:
                     #   combinations where sum is less than 1.0 - flatten list
                     list_i = HandlingLists().remove_duplicates([
                         idx
@@ -485,7 +541,7 @@ class Markowitz:
                     )
                     #   building the float weight with any given value above the minimum or a 
                     #       multiple of the minimum
-                    if bl_multiplier == True:
+                    if bl_opt_possb_comb == True:
                         int_max_mult = max(
                             int((1.0 - sum(array_w)) // array_min_w[i]), 
                             1
@@ -510,7 +566,7 @@ class Markowitz:
                     #   check if the sum of weights is equal to 1.0 or greater
                     if sum(array_w) >= 1.0: break
                 #   normalize only if the total weight is non-zero, if multiplier is unabled
-                if (bl_multiplier == False) or (np.count_nonzero(array_w) == 1):
+                if (bl_opt_possb_comb == False) or (np.count_nonzero(array_w) == 1):
                     total_weight = np.sum(array_w)
                     if total_weight > 0:
                         array_w /= total_weight
@@ -537,7 +593,7 @@ class Markowitz:
             return k / sum(k)
 
     def random_portfolio(self, array_returns:np.ndarray, float_rf:float, bl_constraints:bool=False, 
-                        bl_multiplier:bool=False, array_min_w:Optional[np.ndarray]=None, 
+                        bl_opt_possb_comb:bool=False, array_min_w:Optional[np.ndarray]=None, 
                         nth_try:int=100, int_wdy:int=252) \
                             -> Tuple[np.ndarray, np.ndarray, np.ndarray, str]:
         '''
@@ -549,7 +605,7 @@ class Markowitz:
         array_r = np.asmatrix(array_returns)
         float_rf = float(float_rf)
         # random wieghts for the current portfolio
-        array_weights = self.random_weights(array_r.shape[0], bl_constraints, bl_multiplier, 
+        array_weights = self.random_weights(array_r.shape[0], bl_constraints, bl_opt_possb_comb, 
                                             array_min_w, nth_try)
         # mean returns for assets
         array_returns = np.asmatrix(np.mean(array_r, axis=1))
@@ -565,9 +621,9 @@ class Markowitz:
         return array_mus, array_sigmas, array_sharpes, array_weights
 
     def random_portfolios(self, df_assets:pd.DataFrame, int_n_portfolios:int, col_id:str, 
-                          col_close:str, col_dt:datetime.datetime, col_returns:str, 
+                          col_close:str, col_dt:datetime, col_returns:str, 
                           float_prtf_notional:float, col_min_w:str='min_w', float_rf:float=0.0, 
-                          bl_constraints:bool=False, bl_multiplier:bool=False, 
+                          bl_constraints:bool=False, bl_opt_possb_comb:bool=False, 
                           nth_try:int=100, int_wdy:int=252) \
                             -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
                                      np.ndarray, np.ndarray, List[str]]:
@@ -576,9 +632,6 @@ class Markowitz:
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
         OUTPUTS: TUP OF FLOATS
         '''
-        # min weights per asset
-        df_assets = self.min_w_asset(df_assets, col_id, col_close, col_dt, 
-                                             float_prtf_notional)
         # arrays of retunrs and minimum weights per asset
         array_returns, array_min_w, list_uuids = \
             self.returns_min_w_uids(
@@ -595,7 +648,7 @@ class Markowitz:
                     array_returns,
                     float_rf,
                     bl_constraints,
-                    bl_multiplier,
+                    bl_opt_possb_comb,
                     array_min_w,
                     nth_try,
                     int_wdy
@@ -622,7 +675,7 @@ class Markowitz:
         array_returns = np.asmatrix(array_returns)
         # definig the number of portfolios to be created
         n = array_returns.shape[0]
-        # calculating first attempt for mu in each portfolio
+        # calculating first attempt for float_mu in each portfolio
         mus = [10.0 ** (5.0 * float(t / n_attempts) - 1.0)
                for t in range(n_attempts)]
         # convert to cvxopt matrices
@@ -635,8 +688,8 @@ class Markowitz:
         A = opt.matrix(1.0, (1, n))
         b = opt.matrix(1.0)
         # calculate efficient frontier weights using quadratic programming
-        list_portfolios = [opt.solvers.qp(mu * S, -pbar, G, h, A, b)['x']
-                           for mu in mus]
+        list_portfolios = [opt.solvers.qp(float_mu * S, -pbar, G, h, A, b)['x']
+                           for float_mu in mus]
         # calculating risk and return for efficient frontier
         array_returns = [opt.blas.dot(
             pbar, x) * int_wdy for x in list_portfolios]
@@ -652,9 +705,9 @@ class Markowitz:
 
     def eff_frontier(self, array_eff_risks:np.array, array_eff_returns:np.array, 
                      array_weights:np.array, array_mus:np.array, array_sigmas:np.array, 
-                     float_rf:float, col_sigma:str='sigma', col_mu:str='mu', col_w:str='weights', 
-                     col_sharpe:str='sharpe', array_eff_weights:list=list(), atol:float=1e-2, 
-                     int_pace_atol:int=5) -> Tuple[pd.DataFrame, pd.DataFrame]:
+                     float_rf:float, col_sigma:str='sigma', col_mu:str='float_mu', 
+                     col_w:str='weights', col_sharpe:str='sharpe', array_eff_weights:list=list(), 
+                     atol:float=1e-2, int_pace_atol:int=5) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
         DOCSTRING:
         INPUTS:
@@ -694,13 +747,8 @@ class Markowitz:
         # output the results
         return df_eff, df_porf
     
-    def plot_risk_return_portfolio(self, array_weights:np.array, array_mus:np.array, 
-                                   array_sigmas:np.array, array_sharpes:np.array, 
-                                   array_eff_risks:np.array, array_eff_returns:np.array, 
-                                   array_eff_weights:np.array, bl_debug_mode:bool=False, 
-                                   bl_show_plot:bool=False, complete_path_save_fig:Optional[str]=None,
-                                   title_text:str='Markowitz Risk x Return Portfolios',
-                                   yaxis_title:str='Return (%)', xaxis_title:str='Risk (%)') -> None:
+    @property
+    def plot_risk_return_portfolio(self) -> None:
         '''
         REFERENCES: https://plotly.com/python/reference/layout/, 
             https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html, 
@@ -713,38 +761,38 @@ class Markowitz:
         OUTPUTS: PLOT
         '''
         # maximum sharpe portfolio
-        idx_max_sharpe = array_sharpes.argmax()
-        max_sharpe_sigma = array_sigmas[idx_max_sharpe]
-        max_sharpe_mu = array_mus[idx_max_sharpe]
+        idx_max_sharpe = self.array_sharpes.argmax()
+        max_sharpe_sigma = self.array_sigmas[idx_max_sharpe]
+        max_sharpe_mu = self.array_mus[idx_max_sharpe]
         # minimum sigma portfolio
-        idx_min_sigma = array_sigmas.argmin()
-        min_sigma_mu = array_mus[idx_min_sigma]
-        min_sigma_sigma = array_sigmas[idx_min_sigma]
+        idx_min_sigma = self.array_sigmas.argmin()
+        min_sigma_mu = self.array_mus[idx_min_sigma]
+        min_sigma_sigma = self.array_sigmas[idx_min_sigma]
         # maximum sharpe portfolio
-        if bl_debug_mode == True:
+        if self.bl_debug_mode == True:
             print('### MAXIMUM SHARPE PORTFOLIO ###')
-            print('SHARPES ARGMAX: {}'.format(array_sharpes.argmax()))
-            print('WEIGHTS: {}'.format(array_weights[array_sharpes.argmax()]))
-            print('RISK: {}'.format(array_sigmas[array_sharpes.argmax()]))
-            print('RETURN: {}'.format(array_mus[array_sharpes.argmax()]))
-            print('SHARPE: {}'.format(array_sharpes[array_sharpes.argmax()]))
+            print('SHARPES ARGMAX: {}'.format(self.array_sharpes.argmax()))
+            print('WEIGHTS: {}'.format(self.array_weights[self.array_sharpes.argmax()]))
+            print('RISK: {}'.format(self.array_sigmas[self.array_sharpes.argmax()]))
+            print('RETURN: {}'.format(self.array_mus[self.array_sharpes.argmax()]))
+            print('SHARPE: {}'.format(self.array_sharpes[self.array_sharpes.argmax()]))
         # prepare customdata for scatter plot
         customdata_portfolios = np.array([
-            [weights, ', '.join(self.list_securities)] for weights in array_weights
+            [weights, ', '.join(self.list_securities)] for weights in self.array_weights
         ], dtype=object)
         # Ppepare the subtitle with the list of securities
         subtitle_text = 'List of securities: ' + ', '.join(self.list_securities)
         # ploting data
         data = [
             go.Scatter(
-                x=array_sigmas.flatten(),
-                y=array_mus.flatten(),
+                x=self.array_sigmas.flatten(),
+                y=self.array_mus.flatten(),
                 mode='markers',
                 marker=dict(
-                    color=array_sharpes.flatten(),
+                    color=self.array_sharpes.flatten(),
                     colorscale='Viridis',
                     showscale=True,
-                    cmax=array_sharpes.flatten().max(),
+                    cmax=self.array_sharpes.flatten().max(),
                     cmin=0,
                     colorbar=dict(
                         title='Sharpe Ratios'
@@ -762,8 +810,8 @@ class Markowitz:
                 name='Portfolios'
             ),
             go.Scatter(
-                x=array_eff_risks,
-                y=array_eff_returns,
+                x=self.array_eff_risks,
+                y=self.array_eff_returns,
                 mode='lines+markers', 
                 line=dict(color='red', width=2),
                 name='Efficient Frontier',
@@ -772,7 +820,7 @@ class Markowitz:
                     'Return: %{y:.2f}<br>' +
                     'Weight: %{customdata}<extra></extra>'
                 ),
-                customdata=array_eff_weights
+                customdata=self.array_eff_weights
             ),
             # add a green star for the minimum sigma portfolio
             go.Scatter(
@@ -795,7 +843,7 @@ class Markowitz:
         ]
         # configuring title data
         dict_title = {
-            'text': title_text,
+            'text': self.title_text,
             'xanchor': 'center',
             'yanchor': 'top',
             'y': 0.95,
@@ -832,27 +880,26 @@ class Markowitz:
             xaxis_rangeslider_visible=False, width=1280, height=720,
             xaxis_showgrid=True, xaxis_gridwidth=1, xaxis_gridcolor='#E8E8E8',
             yaxis_showgrid=True, yaxis_gridwidth=1, yaxis_gridcolor='#E8E8E8',
-            yaxis_title=yaxis_title, xaxis_title=xaxis_title,
+            yaxis_title=self.yaxis_title, xaxis_title=self.xaxis_title,
             legend=dict_leg,
             plot_bgcolor='rgba(0,0,0,0)',
         )
         # save plot, if is user's interest
-        if complete_path_save_fig is not None:
-            fig_extension = complete_path_save_fig.split('.')[-1]
+        if self.path_fig is not None:
+            fig_extension = self.path_fig.split('.')[-1]
             fig.write_image(
-                complete_path_save_fig, 
+                self.path_fig, 
                 format=fig_extension, 
                 scale=2, 
                 width=1280, 
                 height=720
             )
         # display plot
-        if bl_show_plot == True:
+        if self.bl_show_plot == True:
             fig.show()
 
-    def max_sharpe(self, array_sharpes:np.ndarray, array_weights:np.ndarray, array_sigmas:np.ndarray, 
-                   array_mus:np.ndarray, array_close:np.ndarray, bl_non_zero_w:bool=False, 
-                   int_round_close:int=2) -> dict:
+    @property
+    def max_sharpe(self) -> dict:
         '''
         DOCSTRING: MAXIMUM SHARPE RATIO PORTFOLIO
         INPUTS:
@@ -865,42 +912,39 @@ class Markowitz:
             - dict -> DICTIONARY CONTAINING INFORMATION ABOUT THE MAXIMUM SHARPE RATIO PORTFOLIO
         '''
         # ensuring that all weights are non-zero, if is user's interest
-        if bl_non_zero_w:
-            array_valid_indices = np.where((array_weights != 0).all(axis=1))[0]
+        if self.bl_non_zero_w_eff:
+            array_valid_indices = np.where((self.array_weights != 0).all(axis=1))[0]
             if len(array_valid_indices) == 0:
                 raise ValueError('No available portfolios with non-zero weights')
-            int_argmax_sharpe = array_valid_indices[array_sharpes[array_valid_indices].argmax()]
+            int_argmax_sharpe = array_valid_indices[self.array_sharpes[array_valid_indices].argmax()]
         else:
-            int_argmax_sharpe = array_sharpes.argmax()
+            int_argmax_sharpe = self.array_sharpes.argmax()
         # maximum sharpe ratio portfolio
-        array_eff_w = array_weights[array_sharpes.argmax()]
-        array_eff_risk = array_sigmas[array_sharpes.argmax()]
-        array_eff_mu = array_mus[array_sharpes.argmax()]
-        array_eff_sharpe = array_sharpes[array_sharpes.argmax()]
+        array_eff_w = self.array_weights[self.array_sharpes.argmax()]
+        array_eff_mu = self.array_mus[self.array_sharpes.argmax()]
+        array_eff_sharpe = self.array_sharpes[self.array_sharpes.argmax()]
         # efficient quantities
         array_eff_quantities = [
-            round(float(w) * self.float_prtf_notional / array_close[i]) 
+            round(float(w) * self.float_prtf_notional / self.array_close[i]) 
             for i, w in enumerate(array_eff_w.split())
         ]
         # calculating notional (ensure array_eff_quantities is properly calculated as float)
-        array_close = np.round(array_close, int_round_close)
-        array_notional = np.array(array_close) * np.array(array_eff_quantities)
+        self.array_close = np.round(self.array_close, self.int_round_close)
+        array_notional = np.array(self.array_close) * np.array(array_eff_quantities)
         return {
             'tickers': self.list_securities,
-            'argmin_risk': int_argmax_sharpe,
+            'argmax_sharpe': int_argmax_sharpe,
             'eff_weights': array_eff_w,
-            'eff_risk': array_eff_risk,
             'eff_mu': array_eff_mu,
             'eff_sharpe': array_eff_sharpe,
             'eff_quantities': array_eff_quantities,
-            'close': array_close,
+            'close': self.array_close,
             'notional': array_notional,
             'notional_total': array_notional.sum()
         }
 
-    def min_sigma(self, array_sharpes:np.ndarray, array_weights:np.ndarray, array_sigmas:np.ndarray, 
-             array_mus:np.ndarray, array_close:np.ndarray, bl_non_zero_w:bool=False, 
-             int_round_close:int=2) -> dict:
+    @property
+    def min_sigma(self) -> dict:
         '''
         DOCSTRING: MINIMUM RISK PORTFOLIO
         INPUTS:
@@ -908,49 +952,49 @@ class Markowitz:
             - array_weights: np.ndarray -> ARRAY CONTAINING ASSET WEIGHTS IN THE PORTFOLIOS
             - array_sigmas: np.ndarray -> ARRAY CONTAINING RISKS (STANDARD DEVIATIONS) OF THE PORTFOLIOS
             - array_mus: np.ndarray -> ARRAY CONTAINING EXPECTED RETURNS OF THE PORTFOLIOS
-            - bl_non_zero_w: bool -> ENSURE THAT ALL WEIGHTS ARE NON-ZERO
+            - bl_non_zero_w_eff: bool -> ENSURE THAT ALL WEIGHTS ARE NON-ZERO
         OUTPUTS:
             - dict -> DICTIONARY CONTAINING INFORMATION ABOUT THE MINIMUM RISK PORTFOLIO
         '''
+        
         # ensuring that all weights are non-zero, if is user's interest
-        if bl_non_zero_w:
-            array_valid_indices = np.where((array_weights != 0).all(axis=1))[0]
+        if self.bl_non_zero_w_eff:
+            array_valid_indices = np.where((self.array_weights != 0).all(axis=1))[0]
             if len(array_valid_indices) == 0:
                 raise ValueError('No available portfolios with non-zero weights')
-            int_argmin_risk = array_valid_indices[array_sigmas[array_valid_indices].argmin()]
+            int_argmin_risk = array_valid_indices[self.array_sigmas[array_valid_indices].argmin()]
         else:
-            int_argmin_risk = array_sigmas.argmin()
+            int_argmin_risk = self.array_sigmas.argmin()
         # minimum risk portfolio
-        array_eff_w = array_weights[int_argmin_risk]
-        array_eff_risk = array_sigmas[int_argmin_risk]
-        array_eff_mu = array_mus[int_argmin_risk]
-        array_eff_sharpe = array_sharpes[int_argmin_risk]
+        array_eff_w = self.array_weights[int_argmin_risk]
+        array_eff_risk = self.array_sigmas[int_argmin_risk]
+        array_eff_mu = self.array_mus[int_argmin_risk]
         # efficient quantities
         array_eff_quantities = [
-            round(float(w) * self.float_prtf_notional / array_close[i]) 
+            round(float(w) * self.float_prtf_notional / self.array_close[i]) 
             for i, w in enumerate(array_eff_w.split())
         ]
         # calculating notional (ensure array_eff_quantities is properly calculated as float)
-        array_close = np.round(array_close, int_round_close)
-        array_notional = np.array(array_close) * np.array(array_eff_quantities)
+        self.array_close = np.round(self.array_close, self.int_round_close)
+        array_notional = np.array(self.array_close) * np.array(array_eff_quantities)
         return {
             'tickers': self.list_securities,
             'argmin_risk': int_argmin_risk,
             'eff_weights': array_eff_w,
             'eff_risk': array_eff_risk,
             'eff_mu': array_eff_mu,
-            'eff_sharpe': array_eff_sharpe,
             'eff_quantities': array_eff_quantities,
-            'close': array_close,
+            'close': self.array_close,
             'notional': array_notional,
             'notional_total': array_notional.sum()
         }
 
-    def tickers_correction(self, dict_allocation:Dict[str, Any], list_ser=list()) -> Dict[str, Any]:
+    def lot_shares_ticker_corr(self, dict_allocation:Dict[str, Any], list_ser=list()) \
+        -> Dict[str, Any]:
         '''
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        DOCSTRING: LOT OF SHARES TICKER CORRECTION
+        INPUTS: DICT ALLOCATION
+        OUTPUTS: DICT
         '''
         df_trad_sec = TradingFilesB3().tradable_securities
         for ticker in dict_allocation['tickers']:
