@@ -5,12 +5,14 @@ import json
 from requests import HTTPError, request
 from bs4 import BeautifulSoup
 from lxml import html
-from typing import Optional, Union
+from typing import Optional, Union, List, Dict
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.remote.webelement import WebElement
 
 
 class HtmlHndler:
@@ -121,32 +123,62 @@ class HtmlHndler:
 
 class SeleniumWD:
 
-    def selenium_web_driver(self, url, webdriver_path, port=9515,
-                            time_wait_page_load=10, bl_open_minimized=False):
+    def __init__(self, url:str, path_webdriver:str, 
+                 int_port:int, str_user_agent:str='Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36', 
+                 int_wait_load:int=10, 
+                 int_delay:int=10,
+                 bl_opn_min:bool=True, 
+                 dict_args:Optional[List[str]]=None) -> None:
         '''
-        REFERENCES: https://www.udemy.com/course/selenium-webdriver-with-python3/, 
-            https://chromedriver.chromium.org/downloads
-        DOCSTRING: SELENIUM WEB DRIVER FOR WEB BROWSER TESTS
-        INPUTS: URL AND WEBDRIVER PATH
-        OUTPUTS: TUPLE WEB DRIVER AND DICT WITH NETWORK CONDITIONS (LATENY, DOWLOAD THROUGHPUT,
-            UPLOAD THROUGHPUT, OFFLINE, WHICH IS A BOOLEAN)
+        REFERENCES: 
+            1. LIST OF CHROMIUM COMMAND LINE SWITCHES: https://gist.github.com/dodying/34ea4760a699b47825a766051f47d43b
+            2. LIST OF USER AGENTS: https://gist.github.com/pzb/b4b6f57144aea7827ae4
+        DOCSTRING:
+        INPUTS: 
+        OUTPUTS:
         '''
+        self.url = url
+        self.path_webdriver = path_webdriver
+        self.int_port = int_port
+        self.str_user_agent = str_user_agent
+        self.int_wait_load = int_wait_load
+        self.int_delay = int_delay
+        self.bl_opn_min = bl_opn_min
+        self.dict_default_args = dict_args if dict_args is not None else [
+            '--no-sandbox',
+            '--disable-gpu',
+            '--disable-setuid-sandbox',
+            '--disable-web-security',
+            '--disable-dev-shm-usage',
+            '--memory-pressure-off',
+            '--ignore-certificate-errors',
+            '--disable-features=site-per-process',
+            f'--user-agent={str_user_agent}'
+        ]
+        self.browser = self.get_browser
+    
+    @property
+    def get_browser(self) -> WebDriver:
         # setting preferences
         d = DesiredCapabilities.CHROME
         d['goog:loggingPrefs'] = {'performance': 'ALL'}
+        # instantiate the browser command with passed args
+        options = webdriver.ChromeOptions()
+        for arg in self.dict_default_args:
+            options.add_argument(arg)
         # instantiate the browser command
-        driver = webdriver.Chrome(
-            executable_path=webdriver_path, port=port)
+        browser = webdriver.Chrome(
+            executable_path=self.path_webdriver, port=self.int_port, options=options)
         # open minimized
-        if bl_open_minimized == True:
-            driver.minimize_window()
+        if self.bl_opn_min == True:
+            browser.minimize_window()
         # open the provided url
-        driver.get(url)
-        driver.implicitly_wait(time_wait_page_load)
-        # return driver for webbrowser tests
-        return driver
+        browser.get(self.url)
+        browser.implicitly_wait(self.int_wait_load)
+        # return browser for webbrowser tests
+        return browser
 
-    def process_log(driver, log):
+    def process_log(self, log:Dict[str, Union[str, dict]]) -> Optional[Dict[str, Union[str, dict]]]:
         '''
         DOCSTRING: COLLECT NETWORK ACTIVITY
         INPUTS: DRIVER, LOG
@@ -154,12 +186,13 @@ class SeleniumWD:
         '''
         log = json.loads(log['message'])['message']
         if ('Network.response' in log['method'] and 'params' in log.keys()):
-            body = driver.execute_cdp_cmd('Network.getResponseBody', {'requestId': log[
+            body = self.browser.execute_cdp_cmd('Network.getResponseBody', {'requestId': log[
                 'params']['requestId']})
             print(json.dumps(body, indent=4, sort_keys=True))
             return log['params']
 
-    def get_browser_log_entries(self, driver):
+    @property
+    def get_browser_log_entries(self) -> List[Dict[str, Union[str, dict]]]:
         '''
         REFERENCES: https://stackoverflow.com/questions/20907180/getting-console-log-output-from-chrome-with-selenium-python-api-bindings
         DOCSTRING: GET LOGGING SELENIUM RESPONSE FROM WEBDRIVER
@@ -168,11 +201,10 @@ class SeleniumWD:
         '''
         loglevels = {'NOTSET': 0, 'DEBUG': 10, 'INFO': 20,
                      'WARNING': 30, 'ERROR': 40, 'SEVERE': 40, 'CRITICAL': 50}
-
         # initialise a logger
         browserlog = logging.getLogger("chrome")
         # get browser logs
-        slurped_logs = driver.get_log('browser')
+        slurped_logs = self.browser.get_log('browser')
         for entry in slurped_logs:
             # convert broswer log to python log format
             rec = browserlog.makeRecord("%s.%s" % (browserlog.name, entry['source']), loglevels.get(
@@ -187,7 +219,8 @@ class SeleniumWD:
         # and return logs incase you want them
         return slurped_logs
 
-    def process_browser_log_entry(self, entry):
+    def process_browser_log_entry(self, entry: Dict[str, Union[str, dict]]) \
+        -> Dict[str, Union[str, dict]]:
         '''
         REFERENCES: https://stackoverflow.com/questions/52633697/selenium-python-how-to-capture-network-traffics-response
         INPUTS: ENTRY
@@ -198,14 +231,15 @@ class SeleniumWD:
         # return messge
         return response
 
-    def get_network_traffic(self, driver):
+    @property
+    def get_network_traffic(self) -> List[Dict[str, Union[str, dict]]]:
         '''
         REFERENCES: https://stackoverflow.com/questions/52633697/selenium-python-how-to-capture-network-traffics-response
         INPUTS:
         OUTPUTS:
         '''
         # get browser log
-        browser_log = driver.get_log('performance')
+        browser_log = self.browser.get_log('performance')
         # getting events
         list_events = [self.process_browser_log_entry(
             entry) for entry in browser_log]
@@ -214,7 +248,8 @@ class SeleniumWD:
         # returning data
         return list_events
 
-    def selenium_find_element(self, web_driver, str_element_interest, selector_type='XPATH'):
+    def find_element(self, str_element_interest:str, selector_type:str='XPATH') \
+        -> WebElement:
         '''
         DOCSTRING: FINDING ELEMENT IN HTML BY SELECTOR TYPE
         INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
@@ -224,13 +259,13 @@ class SeleniumWD:
         OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
         '''
         try:
-            return web_driver.find_element(getattr(By, selector_type),
+            return self.browser.find_element(getattr(By, selector_type),
                                            str_element_interest)
         except AttributeError:
             raise Exception('Attribute, difined in selector type, not available in find element, ' +
                             'please consider revisiting these argument')
 
-    def selenium_find_elements(self, web_driver, str_xpath):
+    def find_elements(self, str_xpath:str) -> List[WebElement]:
         '''
         DOCSTRING: FINDING ELEMENTS IN HTML BY XPATH
         INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
@@ -238,12 +273,12 @@ class SeleniumWD:
         OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
         '''
         try:
-            return web_driver.find_elements_by_xpath(str_xpath)
+            return self.browser.find_elements_by_xpath(str_xpath)
         except AttributeError:
             raise Exception('Attribute, difined in selector type, not available in find element, ' +
                             'please consider revisiting these argument')
 
-    def selenium_fill_input(self, web_element, str_input):
+    def fill_input(self, web_element:WebElement, str_input:str) -> str:
         '''
         DOCSTRING: FILLING INPUT BOXES IN HTML
         INPUTS: WEB ELEMENT AND STRING TO INPUT
@@ -256,7 +291,7 @@ class SeleniumWD:
             raise Exception(
                 'Web element error, please consider revisiting this parameter')
 
-    def selenium_element_is_enabled(self, str_xpath):
+    def el_is_enabled(self, str_xpath:str) -> ec.ExpectedCondition:
         '''
         REFERENCES: https://github.com/clemfromspace/scrapy-selenium
         DOCSTRING: CHECK WHETHER WEB ELEMENT IS ENABLED OR NOT
@@ -265,14 +300,14 @@ class SeleniumWD:
         '''
         return ec.element_to_be_clickable((By.XPATH, str_xpath))
 
-    def selenium_wait_until_element_loaded(self, webdriver, str_xpath, delay=10):
+    def wait_until_el_loaded(self, str_xpath:str) -> WebDriverWait:
         '''
         REFERENCES: https://stackoverflow.com/questions/26566799/wait-until-page-is-loaded-with-selenium-webdriver-for-python
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        return WebDriverWait(webdriver, delay).until(self.selenium_element_is_enabled(str_xpath))
+        return WebDriverWait(self.browser, self.int_delay).until(self.el_is_enabled(str_xpath))
 
 
 class HtmlBuilder:
