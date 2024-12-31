@@ -128,6 +128,7 @@ class SeleniumWD:
                  int_wait_load:int=10, 
                  int_delay:int=10,
                  bl_opn_min:bool=True, 
+                 bl_headless:bool=True,
                  dict_args:Optional[List[str]]=None) -> None:
         '''
         REFERENCES: 
@@ -152,6 +153,7 @@ class SeleniumWD:
         self.int_wait_load = int_wait_load
         self.int_delay = int_delay
         self.bl_opn_min = bl_opn_min
+        self.bl_headless = bl_headless
         self.dict_default_args = dict_args if dict_args is not None else [
             '--no-sandbox',
             '--disable-gpu',
@@ -163,6 +165,9 @@ class SeleniumWD:
             '--disable-features=site-per-process',
             f'--user-agent={str_user_agent}'
         ]
+        # set headless mode for operations without graphical user interface (GUI) - if true
+        if self.bl_headless == True:
+            self.dict_default_args.append('--headless')
         self.browser = self.get_browser
     
     @property
@@ -176,12 +181,12 @@ class SeleniumWD:
         d = DesiredCapabilities.CHROME
         d['goog:loggingPrefs'] = {'performance': 'ALL'}
         # instantiate the browser command with passed args
-        options = webdriver.ChromeOptions()
+        browser_options = webdriver.ChromeOptions()
         for arg in self.dict_default_args:
-            options.add_argument(arg)
+            browser_options.add_argument(arg)
         # instantiate the browser command
         browser = webdriver.Chrome(
-            executable_path=self.path_webdriver, port=self.int_port, options=options)
+            executable_path=self.path_webdriver, port=self.int_port, options=browser_options)
         # open minimized
         if self.bl_opn_min == True:
             browser.minimize_window()
