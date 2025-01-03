@@ -19,8 +19,7 @@ class Brazil(WesternCalendar, ChristianMixin):
         (9, 7, "Independence Day"),
         (10, 12, "Our Lady of Aparecida"),
         (11, 2, "All Souls' Day"),
-        (11, 15, "Republic Day"),
-        (12, 24, "Christmas Evening")
+        (11, 15, "Republic Day")
     )
     include_sao_jose = False
     sao_jose_label = "São José"
@@ -38,6 +37,10 @@ class Brazil(WesternCalendar, ChristianMixin):
     consciencia_negra_label = "Consciência Negra"
     include_nossa_senhora_conceicao = False
     include_easter_sunday = True
+    # christmas evening
+    xmas_evng_day = (12, 24)
+    xmas_evng_label = 'Christmas Evening'
+    include_xmas_evng = False
 
     def get_carnaval(self, year):
         """
@@ -64,6 +67,11 @@ class Brazil(WesternCalendar, ChristianMixin):
         if self.include_nossa_senhora_conceicao:
             days.append(
                 (date(year, 12, 8), "Dia de Nossa Senhora da Conceição")
+            )
+        if self.include_xmas_evng:
+            month, day = self.xmas_evng_day
+            days.append(
+                (date(year, month, day), 'Christmas Evening')
             )
         return days
 
@@ -594,8 +602,10 @@ class BrazilBankCalendar(BrazilSaoPauloCity):
     include_good_friday = True
     include_ash_wednesday = False
     include_corpus_christi = True
-    include_consciencia_negra = True
+    include_consciencia_negra = False
     include_easter_sunday = False
+    include_xmas_evng = False
+    include_last_wd = False
 
     def get_last_day_of_year_for_only_internal_bank_trans(self, year):
         """
@@ -626,12 +636,15 @@ class BrazilBankCalendar(BrazilSaoPauloCity):
             (tuesday_carnaval, "Tuesday carnaval"),
         ]
 
-        non_working_days = [
-            (
-                self.get_last_day_of_year_for_only_internal_bank_trans(year),
-                "Last day of year for only internal bank transactions"
-            )
-        ]
+        if self.include_last_wd == True:
+            non_working_days = [
+                (
+                    self.get_last_day_of_year_for_only_internal_bank_trans(year),
+                    "Last day of year for only internal bank transactions"
+                )
+            ]
+        else:
+            non_working_days = []
 
         return days + carnaval_days + non_working_days
 

@@ -127,8 +127,9 @@ class SeleniumWD:
                  int_port:int, str_user_agent:str='Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36', 
                  int_wait_load:int=10, 
                  int_delay:int=10,
-                 bl_opn_min:bool=True, 
-                 bl_headless:bool=True,
+                 bl_opn_min:bool=False, 
+                 bl_headless:bool=False,
+                 bl_incognito:bool=False,
                  dict_args:Optional[List[str]]=None) -> None:
         '''
         REFERENCES: 
@@ -154,6 +155,7 @@ class SeleniumWD:
         self.int_delay = int_delay
         self.bl_opn_min = bl_opn_min
         self.bl_headless = bl_headless
+        self.bl_incognito = bl_incognito
         self.dict_default_args = dict_args if dict_args is not None else [
             '--no-sandbox',
             '--disable-gpu',
@@ -168,6 +170,8 @@ class SeleniumWD:
         # set headless mode for operations without graphical user interface (GUI) - if true
         if self.bl_headless == True:
             self.dict_default_args.append('--headless')
+        if self.bl_incognito == True:
+            self.dict_default_args.append('--incognito')
         self.browser = self.get_browser
     
     @property
@@ -188,7 +192,9 @@ class SeleniumWD:
         browser = webdriver.Chrome(
             executable_path=self.path_webdriver, port=self.int_port, options=browser_options)
         # open minimized
-        if self.bl_opn_min == True:
+        if \
+            (self.bl_opn_min == True) \
+            and (self.bl_headless == False):
             browser.minimize_window()
         # open the provided url
         browser.get(self.url)
