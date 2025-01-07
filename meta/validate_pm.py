@@ -1,4 +1,4 @@
-### METAPROGRAMMING CLASSES ###
+### VALIDATE PROPERTIES AND METHODS FROM A CLASS ###
 
 from pydantic import validate_arguments
 
