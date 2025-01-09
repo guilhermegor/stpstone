@@ -9,6 +9,7 @@ class ValidateAllMethodsMeta(type):
     INPUTS: NAME, BASES, DCT
     OUTPUTS: VALIDATED CLASS
     '''
+    
     def __new__(cls, name, bases, dct):
         for attr_name, attr_value in dct.items():
             if callable(attr_value) and not attr_name.startswith("__"):
