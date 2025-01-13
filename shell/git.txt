@@ -8,6 +8,7 @@ git add .
 git commit -m "message"
 git push -u origin main
 
+
 echo first commit
 cd "complete\project\path"
 REM remove git files from previous pushes
@@ -15,28 +16,51 @@ rd .git /S/Q
 REM initialize git interaction
 git init
 
+
+echo checkout specific commit
+echo requests historic state of the code - might be useful when containerizing applications
+REM the repository wil be in a detached HEAD state after checking out the specific commit, this is 
+REM     fine for working with the specific commit but not for making new changes on top of it
+git clone --no-checkout <repository-url>
+cd <repository-name>
+git checkout <commit-id>
+
+git clone --no-checkout https://github.com/example/repo.git
+cd repo
+git checkout abc1234
+
+REM create a new branch from the specific commit
+git checkout -b <new-branch-name> <commit-id>
+
+
 echo check differences between added files and git origin
 git add .
 git status
 git diff --cached
 
+
 echo record all files tracked by git locally
 git ls-files
 git ls-files > tracked_files.txt
 
+
 echo get all files published in the branch
 git ls-tree -r main --name-only
 
+
 echo check ignored files by the commit
 git check-ignore -v *
+
 
 echo force git to add untracked files
 git add -A
 git add -f .
 touch src/view/.gitkeep
 
+
 echo check folders/files ignored by git
 cat .gitignore
+
 
 echo handle errors when creating .gitignore files on windows
 git config --global core.autocrlf true
