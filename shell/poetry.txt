@@ -1,8 +1,0 @@
-https://www.youtube.com/watch?v=Ji2XDxmXSOM
-https://www.youtube.com/watch?v=gna8CRSYAY4
-
-echo publish package to python org
-
-poetry check
-poetry build
-poetry publish
