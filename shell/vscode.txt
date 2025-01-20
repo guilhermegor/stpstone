@@ -1,4 +1,0 @@
-(bash)
-
-code --list-extensions > requirements-dev.txt
-code --install-extension (extension-id  extension-vsix-path)
