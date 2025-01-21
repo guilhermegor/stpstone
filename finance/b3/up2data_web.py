@@ -26,9 +26,8 @@ from stpstone.meta.validate_pm import ValidateAllMethodsMeta
 
 class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
 
-    def __init__(self, req_session:ReqSession, 
-                dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
-                bl_use_timer:bool=False) -> None:
+    def __init__(self, dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
+                 req_session:Union[ReqSession, None]=None, bl_use_timer:bool=False) -> None:
         '''
         DOCSTRING:
         INPUTS:
