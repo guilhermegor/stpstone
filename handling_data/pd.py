@@ -3,14 +3,15 @@
 
 import os
 import pandas as pd
+from typing import List, Dict, Any
 from stpstone.settings._global_slots import YAML_MICROSOFT_APPS
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.directories_files_manag.managing_ff import DirFilesManagement
 from stpstone.loggs.create_logs import CreateLog
-from stpstone.microsoft_apps.excel.handlingxl import DealingExcel
+from stpstone.microsoft_apps.excel import DealingExcel
 
 
-class DealingPd:
+class DealingPd(DealingExcel):
     '''
     DOCSTRING: COMMON FUNCTIONS TO DEAL WITH DATA IMPORT TO PANDAS DATAFRAMES OR TIMESERIES
     '''
@@ -30,17 +31,17 @@ class DealingPd:
             print('BL_INDEX: {}'.format(bl_index))
         # write excel
         with pd.ExcelWriter(filename, engine='xlsxwriter', mode=mode) as writer:
-            for df, sheet_name in list_tup_df_sheet_name:
-                # checking df
-                if df.empty == True: continue
+            for df_, sheet_name in list_tup_df_sheet_name:
+                # # checking df_
+                # if df_.empty == True: continue
                 # removing indexes
                 if bl_index == 0:
-                    df.reset_index(drop=True, inplace=True)
-                    # df = df.style.hide_index()
-                df.to_excel(writer, sheet_name, index=bl_index, header=bl_header)
+                    df_.reset_index(drop=True, inplace=True)
+                    # df_ = df_.style.hide_index()
+                df_.to_excel(writer, sheet_name, index=bl_index, header=bl_header)
         # setting label
         if bl_set_sensitivity_label == True:
-            DealingExcel().xlsx_sensitivity_label(filename, YAML_MICROSOFT_APPS[
+            self.xlsx_sensitivity_label(filename, YAML_MICROSOFT_APPS[
                 'sensitivity_labels_office'], 
                 label_sensitivity.capitalize())
 
@@ -180,3 +181,65 @@ class DealingPd:
         for col_ in list(df_.columns):
             dict_[col_] = df_[col_].astype(str).str.len().max()
         return dict_
+
+    def change_dtypes(self, df_:pd.DataFrame, dict_dtypes:Dict[str, Any], list_cols_dt:List[str], 
+        str_fmt_dt:str='YYYY-MM-DD', errors:str='raise') -> pd.DataFrame:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        if any([col_ not in list(dict_dtypes.keys()) for col_ in list_cols_dt]):
+            for col_ in list(dict_dtypes.keys()):
+                dict_dtypes[col_] = str
+        df_ = df_.astype(dict_dtypes, errors=errors)
+        for col_ in list_cols_dt:
+            df_[col_] = [DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]]
+        return df_
+
+    def strip_all_obj_dtypes(self, df_:pd.DataFrame, list_cols_dt:List[str]) -> pd.DataFrame:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        list_cols = [col_ for col_ in list(df_.select_dtypes(['object']).columns) if col_ 
+            not in list_cols_dt]
+        for col_ in list_cols:
+            df_[col_] = [x.strip() for x in df_[col_]]
+        return df_
+
+    def fillna_data(self, df_:pd.DataFrame, list_cols_dt:List[str], str_dt_fillna:str='2100-12-31', 
+        str_data_fillna:str='-1') -> pd.DataFrame:
+        '''
+        DOCSTRING: FILLNA DATA/DATES
+        INPUTS: DATAFRAME, LIST COLS DT, LIST COLS DATA
+        OUTPUTS: DATAFRAME
+        '''
+        list_cols = [col_ for col_ in list(df_.columns) if col_ not in list_cols_dt]
+        if list_cols_dt is not None:
+            df_[list_cols_dt] = df_[list_cols_dt].fillna(str_dt_fillna)
+        df_[list_cols] = df_[list_cols].fillna(str_data_fillna)
+        return df_
+
+    def pipeline_df_startup(self, df_:pd.DataFrame, dict_dtypes:Dict[str, Any], 
+        list_cols_dt:List[str], str_dt_fillna:str='2100-12-31', str_data_fillna:str='-1', 
+        str_fmt_dt:str='YYYY-MM-DD'):
+        '''
+        DOCSTRING: PIPELINE DATAFRAME STARTUP
+        INPUTS: DATAFRAME, DICT DTYPES, LIST OF DATE TYPE COLUMNS, STR DT FILLNA, STR DATA FILLNA, 
+            STR DATE FORMAT INPUT
+        OUTPUTS:
+        '''
+        df_ = self.fillna_data(df_, list_cols_dt, str_dt_fillna, str_data_fillna)
+        df_ = self.change_dtypes(df_, dict_dtypes, list_cols_dt, str_fmt_dt)
+        df_ = self.strip_all_obj_dtypes(df_, list_cols_dt)
+        return df_
+
+    def cols_remove_dupl(self, df_):
+        '''
+        DOCSTRING: REMOVE DUPLICATES WITHIN COLUMNS AND KEEP JUST THE FIRST ONE
+        INPUTS: DATAFRAME
+        OUTPUTS: DATAFRAME
+        '''
+        return df_.loc[:, ~df_.columns.duplicated()]

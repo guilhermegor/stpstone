@@ -109,3 +109,17 @@ def timeit(method):
                   (method.__name__, (te - ts) * 1000))
         return result
     return timed
+
+def conditional_timeit(bl_use_timer):
+    '''
+    DOCSTRING: APPLIES THE @TIMEIT DECORATOR CONDITIONALLY BASED ON `USE_TIMER`
+    INPUT:
+        - USE_TIMER: BOOLEAN INDICATING WHETHER TO APPLY TIMING.
+    OUTPUT:
+        - A FUNCTION WRAPPED WITH THE @TIMEIT DECORATOR IF `USE_TIMER` IS TRUE.
+    '''
+    def decorator(method):
+        if bl_use_timer:
+            return timeit(method)
+        return method
+    return decorator

@@ -13,6 +13,7 @@ from datetime import datetime
 from zipfile import ZipFile, ZIP_DEFLATED
 from pathlib import Path
 from io import BytesIO, TextIOWrapper
+from typing import Tuple, List, Union
 from stpstone.handling_data.str import StrHandler
 from stpstone.handling_data.dicts import HandlingDicts
 
@@ -218,8 +219,10 @@ class DirFilesManagement:
             wget.download(url, filepath)
             return self.object_exists(filepath)
 
-    def get_zip_from_web_in_memory(self, file_url, bl_verify=True, bl_io_interpreting=False,
-                                   timeout=None):
+    def get_zip_from_web_in_memory(self, file_url:str, bl_verify:bool=True, 
+                                   bl_io_interpreting:bool=False, 
+                                   timeout:Union[Tuple[int, int], int]=(5, 5), 
+                                   session=None) -> List[ZipFile]:
         '''
         REFERENCES: https://stackoverflow.com/questions/5710867/downloading-and-unzipping-a-zip-file-without-writing-to-disk
         DOCSTRING: DOWNLOAD A ZIP AND UNZIP IT, HANDLING FILE IN MEMORY
@@ -227,11 +230,10 @@ class DirFilesManagement:
         OUTPUTS: LIST OF OPENNED FILES UNZIPPED
         '''
         # requiring url zip content
-        if timeout == None:
-            req_resp = requests.get(file_url, verify=bl_verify)
+        if session is not None:
+            req_resp = session.get(file_url, verify=bl_verify, timeout=timeout)
         else:
-            req_resp = requests.get(
-                file_url, verify=bl_verify, timeout=timeout)
+            req_resp = requests.get(file_url, verify=bl_verify, timeout=timeout)
         zipfile = ZipFile(BytesIO(req_resp.content))
         # defining names of files from extraction
         zip_names = zipfile.namelist()

@@ -11,7 +11,7 @@ from random import shuffle
 # private modules
 from stpstone.settings._global_slots import YAML_SESSION
 from stpstone.handling_data.dicts import HandlingDicts
-from stpstone.loggs.create_logs import timeit
+from stpstone.loggs.create_logs import conditional_timeit
 
 
 class ProxyServers:
@@ -81,7 +81,7 @@ class ReqSession(ProxyServers):
                  str_protocol:str='http', str_continent_code:Union[str, None]=None, 
                  str_country_code:Union[str, None]=None, bl_ssl:Union[bool, None]=None, 
                  float_ratio_times_alive_dead:Union[float, None]=0.02,
-                 float_min_timeout:Union[float, None]=600,
+                 float_min_timeout:Union[float, None]=600, bl_use_timer:bool=False,
                  list_status_forcelist:list=[429, 500, 502, 503, 504]) -> None:
         '''
         DOCSTRING: SESSION CONFIGURATION
@@ -105,6 +105,7 @@ class ReqSession(ProxyServers):
         self.bl_ssl = bl_ssl
         self.float_ratio_times_alive_dead = float_ratio_times_alive_dead
         self.float_min_timeout = float_min_timeout
+        self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.proxy = self.get_proxy if bl_proxy == True else None
         self.dict_proxy = dict_proxies if dict_proxies is not None else (
@@ -113,6 +114,7 @@ class ReqSession(ProxyServers):
         )
         self.session = self.configure_session(self.dict_proxy, self.int_retries, 
                                               self.int_backoff_factor)
+        self.ip_infos = self.ip_infos(self.session, bl_return_availability=False)
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:
         '''
@@ -241,19 +243,21 @@ class ReqSession(ProxyServers):
         return list_ser
 
     @property
-    @timeit
     def get_proxy(self) -> Union[Dict[str, Any], None]:
         '''
         DOCSTRING: RETRIEVES A VALID PROXY FROM THE FILTERED LIST, APPLYING THE TEST PROXY METHOD
         INPUTS: -
         OUTPUTS: DICT
         '''
-        list_ser = self._proxies
-        shuffle(list_ser)
-        for dict_proxy in list_ser:
-            str_ip = dict_proxy['ip']
-            int_port = dict_proxy['port']
-            if all([x is not None for x in [str_ip, int_port]]) == True:
-                if self.test_proxy(str_ip, int_port):
-                    return {'ip': str_ip, 'port': int_port}
-        return None
+        @conditional_timeit(bl_use_timer=self.bl_use_timer)
+        def retrieve_proxy():
+            list_ser = self._proxies
+            shuffle(list_ser)
+            for dict_proxy in list_ser:
+                str_ip = dict_proxy['ip']
+                int_port = dict_proxy['port']
+                if all([x is not None for x in [str_ip, int_port]]) == True:
+                    if self.test_proxy(str_ip, int_port):
+                        return {'ip': str_ip, 'port': int_port}
+            return None
+        return retrieve_proxy()

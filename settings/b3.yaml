@@ -291,7 +291,10 @@ cenarios_risco_tipo_curva:
 
 # up2data b3
 up2data_b3:
-  method_req: 'GET'
+  bl_verify: False
+  bl_io_interpreting: False
+  str_sep: ';'
+  str_decimal: ','
   request_token: 'https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={}'
   access_api: 'https://arquivos.b3.com.br/api/download/?token={}'
   securities_by_category_name:
@@ -312,8 +315,23 @@ up2data_b3:
   daily_trades: 'https://arquivos.b3.com.br/apinegocios/tickercsv/{}/'
   derivatives: 'https://arquivos.b3.com.br/tabelas/DerivativesOpenPosition/{}?lang=pt'
   instruments: 'https://arquivos.b3.com.br/tabelas/InstrumentsConsolidated/{}?lang=pt'
-  bl_io_interpreting: False
-  bl_verify: False
+  key_token: token
+  url_daily_trades: https://arquivos.b3.com.br/apinegocios/tickercsv/{}/
+  bl_io_interpretin: False
+  str_input_date_format: AAAA-MM-DD
+  col_dt_ref: DataReferencia
+  col_instrument: CodigoInstrumento
+  col_stock_update: AcaoAtualizacao
+  col_pv: PrecoNegocio
+  col_qty_trd: QuantidadeNegociada
+  col_closing_time: HoraFechamento
+  col_trd_code: CodigoIdentificadorNegocio
+  col_section_type: TipoSessaoPregao
+  col_trd_dt: DataNegocio
+  col_buyer_code: CodigoParticipanteComprador
+  col_seller_code: CodigoParticipanteVendedor
+  col_create_asset: ASSET
+  value_nan: N/A
 
 # maturity futures B3
 maturities_b3:

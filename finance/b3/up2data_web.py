@@ -1,8 +1,12 @@
-# COLLECTING UP2DATA B3 INFORMATION - ROOT URL: https://arquivos.b3.com.br/Web/Consolidated
+### COLLECTING UP2DATA B3 INFORMATION - ROOT URL: https://arquivos.b3.com.br/Web/Consolidated ###
 
+# pypi.org libs
 import pandas as pd
 from requests import request
 from zipfile import ZipFile
+from datetime import datetime
+from typing import Union
+# private modules
 from stpstone.settings._global_slots import YAML_B3
 from stpstone.opening_config.setup import iniciating_logging
 from stpstone.loggs.create_logs import CreateLog
@@ -15,41 +19,49 @@ from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.lists import StrHandler
 from stpstone.handling_data.xml import XMLFiles
 from stpstone.loggs.db_logs import DBLogs
+from stpstone.pool_conn.session import ReqSession
+from stpstone.handling_data.pd import DealingPd
+from stpstone.meta.validate_pm import ValidateAllMethodsMeta
 
 
-class UP2DATAB3:
+class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
 
-    def __init__(self, int_wd_bef:int=1) -> None:
+    def __init__(self, req_session:ReqSession, 
+                dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
+                bl_use_timer:bool=False) -> None:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        self.int_wd_bef = int_wd_bef
+        self.dt_ref = dt_ref
+        self.req_session = ReqSession(bl_use_timer=bl_use_timer) \
+            if req_session is None else req_session
         self.token = self.access_token
     
     @property
-    def access_token(self, str_method:str='GET', key_token:int='token') -> str:
+    def access_token(self) -> str:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        url_token = YAML_B3['up2data_b3']['request_token'].format(
-            DatesBR().sub_working_days(DatesBR().curr_date, self.int_wd_bef))
-        req_resp = request(str_method, url_token)
+        url_token = YAML_B3['up2data_b3']['request_token'].format(self.dt_ref)
+        req_resp = self.req_session.session.get(url_token)
         req_resp.raise_for_status()
-        return req_resp.json()[key_token]
+        return req_resp.json()[YAML_B3['up2data_b3']['key_token']]
     
     @property
-    def instruments_register(self, str_method:str='GET', list_ser:list=list()) -> pd.DataFrame:
+    def instruments_register(self) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # requesting data
-        resp_req = request(str_method, YAML_B3['up2data_b3']['access_api'].format(self.token))
+        resp_req = self.req_session.session.get(YAML_B3['up2data_b3']['access_api'].format(self.token))
         resp_req.raise_for_status()
         str_resp_req = resp_req.text
         # cleaning response
@@ -74,68 +86,56 @@ class UP2DATAB3:
         # returning instruments register
         return df_
     
-    def daily_trades_secondary_market(self, wd_bef=1, 
-                                      bl_change_date_type=False, str_sep=';', 
-                                      str_decimal=',', 
-                                      url_daily_trades='https://arquivos.b3.com.br/apinegocios/tickercsv/{}/', 
-                                      bl_verify=False, bl_io_interpreting=False, 
-                                      str_input_date_format='AAAA-MM-DD', 
-                                      col_data_ref='DataReferencia', 
-                                      col_instrumento='CodigoInstrumento', 
-                                      col_acao_atualizada='AcaoAtualizacao', col_pu='PrecoNegocio', 
-                                      col_qtd_negociada='QuantidadeNegociada', 
-                                      col_horario_fechamento='HoraFechamento', 
-                                      col_cod_id_negocio='CodigoIdentificadorNegocio', 
-                                      col_tipo_sessao_pregao='TipoSessaoPregao', 
-                                      col_data_negocio='DataNegocio', 
-                                      col_participante_comprador='CodigoParticipanteComprador', 
-                                      col_participante_vendedor='CodigoParticipanteVendedor', 
-                                      col_create_asset='ASSET', value_nan='N/A'):
+    @property
+    def daily_trades_secondary_market(self) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        # reference date
-        date_ref = DatesBR().sub_working_days(DatesBR().curr_date, wd_bef).strftime('%Y-%m-%d')
         # requesting daily trades
         file_daily_trades = DirFilesManagement().get_zip_from_web_in_memory(
-            url_daily_trades.format(date_ref), 
-            bl_io_interpreting=bl_io_interpreting,
-            bl_verify=bl_verify)
+            YAML_B3['up2data_b3']['url_daily_trades'].format(self.dt_ref.strftime('%Y-%m-%d')), 
+            bl_io_interpreting=YAML_B3['up2data_b3']['bl_io_interpreting'],
+            bl_verify=YAML_B3['up2data_b3']['bl_verify']
+        )
         # importing to pandas dataframe
-        reader = pd.read_csv(file_daily_trades,
-                             sep=str_sep, decimal=str_decimal)
+        reader = pd.read_csv(
+            file_daily_trades,
+            sep=YAML_B3['up2data_b3']['str_sep'], 
+            decimal=YAML_B3['up2data_b3']['str_decimal']
+        )
         df_daily_trades = pd.DataFrame(reader)
         # substituindo valores nulos
-        df_daily_trades.fillna(value_nan, inplace=True)
+        df_daily_trades.fillna(YAML_B3['up2data_b3']['value_nan'], inplace=True)
         # changing columns types
-        df_daily_trades = df_daily_trades.astype({
-            col_data_ref: str,
-            col_instrumento: str,
-            col_acao_atualizada: int,
-            col_pu: float,
-            col_qtd_negociada: int,
-            col_horario_fechamento: int,
-            col_cod_id_negocio: int,
-            col_tipo_sessao_pregao: int,
-            col_data_negocio: str,
-            col_participante_comprador: int,
-            col_participante_vendedor: int
-        }, errors='ignore')
-        if bl_change_date_type == True:
-            for col_ in [col_data_negocio, col_data_ref]:
-                df_daily_trades[col_] = [DatesBR().str_date_to_datetime(x, str_input_date_format) 
-                                        for x in df_daily_trades[col_].tolist()]
+        df_daily_trades = DealingPd().change_dtypes(
+            df_daily_trades, 
+            {
+                YAML_B3['up2data_b3']['col_dt_ref']: str,
+                YAML_B3['up2data_b3']['col_instrument']: str,
+                YAML_B3['up2data_b3']['col_stock_update']: int,
+                YAML_B3['up2data_b3']['col_pv']: float,
+                YAML_B3['up2data_b3']['col_qty_trd']: int,
+                YAML_B3['up2data_b3']['col_closing_time']: int,
+                YAML_B3['up2data_b3']['col_trd_code']: int,
+                YAML_B3['up2data_b3']['col_section_type']: int,
+                YAML_B3['up2data_b3']['col_trd_dt']: str,
+                YAML_B3['up2data_b3']['col_buyer_code']: int,
+                YAML_B3['up2data_b3']['col_seller_code']: int
+            }, 
+            [YAML_B3['up2data_b3']['col_dt_ref'], YAML_B3['up2data_b3']['col_trd_dt']], 
+            errors='ignore'
+        )
         # column asset
-        df_daily_trades[col_create_asset] = [row[col_instrumento][:3] for _, row in 
-                                             df_daily_trades.iterrows()]
+        df_daily_trades[YAML_B3['up2data_b3']['col_create_asset']] = [
+            row[YAML_B3['up2data_b3']['col_instrument']][:3] 
+            for _, row in df_daily_trades.iterrows()
+        ]
         # adding logging
         df_daily_trades = DBLogs().audit_log(
             df_daily_trades, 
-            DatesBR().utc_from_dt(
-                DatesBR().sub_working_days(DatesBR().curr_date, wd_bef)
-            ), 
+            DatesBR().utc_from_dt(self.dt_ref), 
             DatesBR().utc_log_ts
         )
         # returning dataframe

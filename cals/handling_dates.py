@@ -542,7 +542,7 @@ class DatesBR(BrazilBankCalendar):
     @property
     def utc_log_ts(self):
         '''
-        DOCSTRING: UTC LOG TIMESTAMP
+        DOCSTRING: NOW UTC LOG TIMESTAMP
         INPUTS: -
         OUTPUTS: TIMESTAMP
         '''

@@ -218,6 +218,9 @@ class HandlingDicts:
     def pair_headers_with_data(self, list_headers, list_data, list_ser=list()):
         '''
         DOCSTRING: PAIR HEADERS AND DATA AS KEYS AND VALUES IN A SERIALIZED LIST
+            - FOR EXAMPLE, IF LIST_HEADERS IS ['NAME', 'AGE'] AND LIST_DATA IS 
+                ['JOHN', 25, 'ALICE', 30], THE FUNCTION WILL RETURN [{'NAME': 'JOHN', 'AGE': 25}, 
+                {'NAME': 'ALICE', 'AGE': 30}]
         INPUTS: LIST HEADERS, LIST DATA
         OUTPUTS: LIST
         '''
@@ -232,3 +235,23 @@ class HandlingDicts:
             list_ser.append(entry)
         # returning list of dictionaries
         return list_ser
+
+    def replace_variables(dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) -> Dict[str, Any]:
+        '''
+        DOCSTRING: REPLACE PLACEHOLDERS IN THE BASE DICTIONARY WITH VALUES FROM THE REPLACEMENT 
+            DICTIONARY
+        INPUTS:
+            - DICT_BASE:DICT - THE DICTIONARY CONTAINING PLACEHOLDERS.
+            - DICT_REPLACER:DICT - THE DICTIONARY PROVIDING REPLACEMENT VALUES.
+        OUTPUTS: DICT
+        '''
+        for key, value in dict_base.items():
+            if isinstance(value, dict):
+                #   handle nested dictionaries
+                dict_base[key] = dict_replacer(value, dict_replacer)
+            elif isinstance(value, str) and value.startswith('{{') and value.endswith('}}'):
+                #   extract variable name and replace with corresponding value
+                var_name = value.strip('{{ }}').strip()
+                if var_name in dict_replacer:
+                    dict_base[key] = dict_replacer[var_name]
+        return dict_base
