@@ -5,6 +5,7 @@ from itertools import groupby
 from functools import cmp_to_key
 from collections import defaultdict, Counter, OrderedDict
 from heapq import nsmallest, nlargest
+from typing import Dict, Union, List, Any, Callable, Optional
 
 
 class HandlingDicts:
@@ -68,7 +69,7 @@ class HandlingDicts:
             return next((result for result in comparer_iter if result), 0)
         return sorted(items, key=cmp_to_key(comparer))
 
-    def merge_dicts(self, list_dicts, list_keys_merge=None, bl_sum_values_key=True):
+    def merge_dicts(self, list_ser, list_keys_merge=None, bl_sum_values_key=True):
         '''
         DOCSTRING: MERGE DICTS FOR EVERY KEY REPETITION
         INPUTS: FOREIGNER KEY, DICTS
@@ -80,7 +81,7 @@ class HandlingDicts:
         # if list of keys to merge is none, return a list of every values for the same key
         if list_keys_merge != None:
             # iterating through dictionaries of interest an merging accordingly to foreigner key
-            for dict_ in list_dicts:
+            for dict_ in list_ser:
                 for key, value in dict_.items():
                     if key in list_keys_merge:
                         dict_export[key].append(value)
@@ -91,19 +92,40 @@ class HandlingDicts:
             else:
                 return dict_export
         else:
-            for dict_ in list_dicts:
+            for dict_ in list_ser:
                 list_counter_dicts.append(Counter(dict_))
             return dict(sum(list_counter_dicts))
 
-    def filter_list_dicts(self, list_dicts, foreigner_key, k_value):
+    def filter_list_ser(self, list_ser, foreigner_key, k_value, str_filter_type:str='equal') \
+        -> List[Dict[str, Any]]:
         '''
         DOCSTRING: FILTER LIST OF DICTIONARIES
-        INPUTS: LIST OF DICTS, FOREINGER KEY, VALUE OF FOREIGNER KEY OF INTEREST
+        INPUTS: 
+            - LIST OF DICTS: LIST
+            - FOREINGER KEY: STRING
+            - VALUE OF FOREIGNER KEY OF INTEREST: STRING/INTEGER/FLOAT
+            - TYPE OF FILTER: STR
         OUTPUTS: LIST OF DICTS
         '''
-        return [dict_ for dict_ in list_dicts if dict_[foreigner_key] == k_value]
+        if str_filter_type == 'equal':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] == k_value]
+        elif str_filter_type == 'not_equal':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] != k_value]
+        elif str_filter_type == 'less_than':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] < k_value]
+        elif str_filter_type == 'greater_than':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] > k_value]
+        elif str_filter_type == 'less_than_or_equal_to':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] <= k_value]
+        elif str_filter_type == 'greater_than_or_equal_to':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] >= k_value]
+        elif str_filter_type == 'isin':
+            return [dict_ for dict_ in list_ser if dict_[foreigner_key] in k_value]
+        else:
+            raise ValueError(
+                'str_filter_type must be "equal", "not_equal", "less_than" or "greater_than"')
 
-    def merge_values_foreigner_keys(self, list_dicts, foreigner_key, list_keys_merge_dict):
+    def merge_values_foreigner_keys(self, list_ser, foreigner_key, list_keys_merge_dict):
         '''
         REFERECES: https://stackoverflow.com/questions/50167565/python-how-to-merge-dict-in-list-of-dicts-based-on-value
         DOCSTRING: MERGE DICTS ACCORDINGLY TO A FOREIGNER KEY IN THE LIST OF DICTS
@@ -111,22 +133,22 @@ class HandlingDicts:
         OUTPUTS: LIST OF DICTS
         '''
         # setting default variables
-        list_dicts_export = list()
+        list_ser_export = list()
         list_foreinger_keys = list()
-        list_dicts_export = list()
+        list_ser_export = list()
         # get values from foreinger key
         list_foreinger_keys = list(
-            set([dict_[foreigner_key] for dict_ in list_dicts]))
+            set([dict_[foreigner_key] for dict_ in list_ser]))
         # iterating through list of foreigner key and merging values of interest
         for key in list_foreinger_keys:
             # filter dicts for the given foreinger key
-            list_filtered_dicts = self.filter_list_dicts(
-                list_dicts, foreigner_key, key)
+            list_filtered_dicts = self.filter_list_ser(
+                list_ser, foreigner_key, key)
             # merge dictionaries accordingly to given keys
-            list_dicts_export.append(self.merge_dicts(
+            list_ser_export.append(self.merge_dicts(
                 list_filtered_dicts, list_keys_merge_dict))
         # return final result
-        return list_dicts_export
+        return list_ser_export
 
     def n_smallest(self, list_dict, key_, n):
         '''
@@ -163,15 +185,37 @@ class HandlingDicts:
         # return iteration in groups
         return groupby(list_dict, key=itemgetter('date'))
 
-    def add_k_v_serialized_list(self, list_dicts, k, v):
+    def add_key_value_to_dicts(
+        self, list_ser:List[Dict[str, Union[int, float, str]]], key:str,
+        value:Union[Callable[..., Union[int, float, str]], Union[int, float, str]],
+        list_keys_for_function:Optional[List[str]]=None, 
+        kwargs_static:Optional[Dict[str, Union[int, float, str, None]]]=None
+    ) -> List[Dict[str, Union[int, float, str]]]:
         '''
-        DOCSTRING: ADD KEY AND VALUE TO EVERY LIST WITHIN A SERIALIZED LIST
+        DOCSTRING: ADDS A KEY AND VALUE TO EVERY DICTIONARY IN A LIST
         INPUTS:
+            LIST_SER: A LIST OF DICTIONARIES TO BE UPDATED - LIST SERIALIZED
+            KEY: THE KEY TO ADD TO EACH DICTIONARY
+            VALUE: THE VALUE TO ASSOCIATE WITH THE KEY OR A FUNCTION TO COMPUTE THE VALUE
+            KEYS_FOR_FUNCTION: KEYS TO EXTRACT FROM THE DICTIONARY FOR THE VALUE FUNCTION (IF CALLABLE)
         OUTPUTS:
+            LIST OF UPDATED DICTIONARIES.
         '''
-        return [dict(dict_, **{str(k): str(v)}) for dict_ in list_dicts]
-    
-    def pair_headers_with_data(self, list_headers, list_data, list_dicts=list()):
+        for dict_ in list_ser:
+            if isinstance(dict_, dict):
+                #   check if the value is a function, otherwise assign the static value
+                if callable(value):
+                    args = [dict_.get(k) for k in list_keys_for_function] \
+                        if list_keys_for_function is not None else []
+                    if kwargs_static is not None:
+                        dict_[key] = value(*args, **kwargs_static)
+                    else:
+                        dict_[key] = value(*args)
+                else:
+                    dict_[key] = value
+        return list_ser
+
+    def pair_headers_with_data(self, list_headers, list_data, list_ser=list()):
         '''
         DOCSTRING: PAIR HEADERS AND DATA AS KEYS AND VALUES IN A SERIALIZED LIST
         INPUTS: LIST HEADERS, LIST DATA
@@ -185,6 +229,6 @@ class HandlingDicts:
         for i in range(0, len(list_data), len(list_headers)):
             # create a dictionary for each chunk
             entry = {list_headers[j]: list_data[i + j] for j in range(len(list_headers))}
-            list_dicts.append(entry)
+            list_ser.append(entry)
         # returning list of dictionaries
-        return list_dicts
+        return list_ser

@@ -5,7 +5,7 @@ import requests
 import json
 from stpstone.handling_data.str import StrHandler
 from stpstone.handling_data.json import JsonFiles
-from stpstone.setting.global_slots import YAML_ANBIMA
+from stpstone.setting._global_slots import YAML_ANBIMA
 from stpstone.cals.handling_dates import DatasBR
 
 

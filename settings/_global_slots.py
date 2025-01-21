@@ -26,3 +26,5 @@ YAML_MICROSOFT_APPS = reading_yaml(r'{}\microsoft_apps.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
 YAML_LLMS = reading_yaml(r'{}\llms.yaml'.format(
     os.path.dirname(os.path.realpath(__file__))))
+YAML_SESSION = reading_yaml(r'{}\session.yaml'.format(
+    os.path.dirname(os.path.realpath(__file__))))

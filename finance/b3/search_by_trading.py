@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from zipfile import ZipFile
-from stpstone.settings.global_slots import YAML_B3
+from stpstone.settings._global_slots import YAML_B3
 from stpstone.loggs.create_logs import CreateLog
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.cals.handling_dates import DatesBR
@@ -29,7 +29,7 @@ class TradingFilesB3:
         self.str_fillna_ts = str_fillna_ts
         self.str_fmt_dt = str_fmt_dt
 
-    def price_report(self, bl_debug=False, list_dicts=list()):
+    def price_report(self, bl_debug=False, list_ser=list()):
         '''
         DOCSTRING:
         INPUTS:
@@ -78,9 +78,9 @@ class TradingFilesB3:
                         except AttributeError:
                             continue
                     #   appendig dictionary to list
-                    list_dicts.append(dict_)
+                    list_ser.append(dict_)
         # uploading list of dictionaries to pandas
-        df_pr = pd.DataFrame(list_dicts)
+        df_pr = pd.DataFrame(list_ser)
         # removing duplicates
         df_pr.drop_duplicates(inplace=True)
         # adding logging
@@ -95,7 +95,7 @@ class TradingFilesB3:
         return df_pr
 
     @property
-    def tradable_securities(self, list_dicts=list()):
+    def tradable_securities(self, list_ser=list()):
         '''
         DOCSTRING: TRADABLE SECURITIES IN BRAZILLIAN EXCHANGE MARKET
         INPUTS: WORKING DAYS BEFORE
@@ -123,9 +123,9 @@ class TradingFilesB3:
             #   reading json file
             json_trd_sec = JsonFiles().loads_message_like(json_file)
             #   import to serialized list
-            list_dicts.extend(json_trd_sec)
+            list_ser.extend(json_trd_sec)
         # appending list serialized to dataframe
-        df_ = pd.DataFrame(list_dicts)
+        df_ = pd.DataFrame(list_ser)
         # filling na, in order to change data types
         df_.fillna(value={
             "MaturityDate": self.str_fillna_dt,
@@ -259,7 +259,7 @@ class TradingFilesB3:
         # retornando dataframe de interesse
         return df_dll
 
-    def options_b3(self, float_value_error=-1000.0, list_dicts=list(), bl_debug=False, 
+    def options_b3(self, float_value_error=-1000.0, list_ser=list(), bl_debug=False, 
                    float_days_year=365.0):
         '''
         DOCSTRING:
@@ -440,11 +440,11 @@ class TradingFilesB3:
                         print('IV: {}'.format(dict_[YAML_B3['options_traded_b3']['keys'][
                             'imp_vol']]))
                     #   appendig dictionary to list
-                    list_dicts.append(dict_)
+                    list_ser.append(dict_)
                     if bl_debug == True:
                         print(dict_)
         # uploading list of dictionaries to pandas
-        df_opt_in = pd.DataFrame(list_dicts)
+        df_opt_in = pd.DataFrame(list_ser)
         # removing duplicates
         df_opt_in.drop_duplicates(inplace=True)
         # adding logging

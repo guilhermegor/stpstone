@@ -4,7 +4,7 @@ from typing import List, Optional
 from openai import OpenAI
 from openai.api_resources.chat_completion import ChatCompletion
 from stpstone.handling_data.dicts import HandlingDicts
-from stpstone.settings.global_slots import YAML_LLMS
+from stpstone.settings._global_slots import YAML_LLMS
 
 
 class GPT():

@@ -1,6 +1,6 @@
 ### DATABASE LOGS
 
-from stpstone.settings.global_slots import YAML_GEN
+from stpstone.settings._global_slots import YAML_GEN
 from stpstone.cals.handling_dates import DatesBR
 
 

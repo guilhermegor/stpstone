@@ -3,7 +3,7 @@
 
 import os
 import pandas as pd
-from stpstone.settings.global_slots import YAML_MICROSOFT_APPS
+from stpstone.settings._global_slots import YAML_MICROSOFT_APPS
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.directories_files_manag.managing_ff import DirFilesManagement
 from stpstone.loggs.create_logs import CreateLog

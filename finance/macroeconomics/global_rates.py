@@ -1,7 +1,7 @@
 ### COLLECT WORLD GOVERNMENT BONDS DATA ###
 
 import pandas as pd
-from stpstone.settings.global_slots import YAML_GLB_RT
+from stpstone.settings._global_slots import YAML_GLB_RT
 from stpstone.handling_data.html import HtmlHndler
 from stpstone.handling_data.dicts import HandlingDicts
 from stpstone.handling_data.str import StrHandler

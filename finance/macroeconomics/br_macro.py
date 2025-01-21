@@ -6,7 +6,7 @@ import backoff
 import yfinance as yf
 import pandas as pd
 from requests import request
-from stpstone.settings.global_slots import YAML_BR_MACRO
+from stpstone.settings._global_slots import YAML_BR_MACRO
 from stpstone.handling_data.object import HandlingObjects
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.numbers import NumHandler
@@ -19,7 +19,7 @@ from stpstone.loggs.db_logs import DBLogs
 class Sidra:
 
     @property
-    def rl_dts_indicators(self, str_pool_name=None, list_dicts=list()):
+    def rl_dts_indicators(self, str_pool_name=None, list_ser=list()):
         '''
         REFERENCES: https://www.ibge.gov.br/calendario-indicadores-novoportal.html
         DOCSTRING: RELEASE DATES FROM MACRO SHORT-TERM INDICATORS
@@ -40,7 +40,7 @@ class Sidra:
             elif (str_pool_name != None) and len(el) > 1 and (
                 StrHandler().match_string_like(
                     el, '*' + YAML_BR_MACRO['sidra']['st_indicators']['pool_ref_dt'] + '*') == True):
-                list_dicts.append({
+                list_ser.append({
                     YAML_BR_MACRO['sidra']['st_indicators']['col_pool_name']: str_pool_name,
                     YAML_BR_MACRO['sidra']['st_indicators']['col_release_dt']: \
                         DatesBR().str_date_to_datetime(
@@ -51,7 +51,7 @@ class Sidra:
                         StrHandler().get_string_after_substr(el, ': ')
                 })
         # creating a dataframe from the serialized list
-        df_rl_dts_macro = pd.DataFrame(list_dicts)
+        df_rl_dts_macro = pd.DataFrame(list_ser)
         # id duplicates
         ds_id_dup = df_rl_dts_macro.duplicated(subset=[
             YAML_BR_MACRO['sidra']['st_indicators']['col_pool_name']], keep='last')
@@ -425,7 +425,7 @@ class YFinanceMacroBR:
         return json_brazillian_cpi
 
     def yforex(self, list_xcg_curr, wd_start_date=2, wd_end_date=0,
-                               list_dicts=list()):
+                               list_ser=list()):
         '''
         DOCSTRING:
         INPUTS:
@@ -448,9 +448,9 @@ class YFinanceMacroBR:
             df_[YAML_BR_MACRO['exchange_rates_yahoo']['col_date'].upper()] = \
                 df_.index.to_frame(name=YAML_BR_MACRO['exchange_rates_yahoo']['col_date'])
             #   appending to serialized list
-            list_dicts.extend(df_.to_dict(orient='records'))
+            list_ser.extend(df_.to_dict(orient='records'))
         # serialized list to dataframe
-        df_xcg = pd.DataFrame(list_dicts)
+        df_xcg = pd.DataFrame(list_ser)
         # renaming columns
         df_xcg = df_xcg.rename(columns={
             x: x.upper() for x in df_xcg.columns

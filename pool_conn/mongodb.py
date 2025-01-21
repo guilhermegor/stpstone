@@ -28,11 +28,11 @@ class MongoConn:
         '''
         DOCSTRING: INITIALIZES THE CONNECTION TO MONGODB
         INPUTS:
-            str_host (str): ADDRESS OF THE MONGODB SERVER
-            int_port (int): PORT OF THE MONGODB SERVER
-            str_dbname (str): NAME OF THE DATABASE
-            str_collection (str): NAME OF THE COLLECTION
-            logger (Optional[Logger]): LOGGER INSTANCE FOR LOGGING
+            - STR_HOST (STR): ADDRESS OF THE MONGODB SERVER
+            - INT_PORT (INT): PORT OF THE MONGODB SERVER
+            - STR_DBNAME (STR): NAME OF THE DATABASE
+            - STR_COLLECTION (STR): NAME OF THE COLLECTION
+            - LOGGER (OPTIONAL[LOGGER]): LOGGER INSTANCE FOR LOGGING
         OUTPUTS: -
         '''
         if self._client is None:
@@ -93,9 +93,9 @@ class MongoConn:
         '''
         DOCSTRING: CLOSES THE CONNECTION WHEN EXITING THE CONTEXT
         INPUTS:
-            exc_type: EXCEPTION TYPE
-            exc_val: EXCEPTION VALUE
-            exc_tb: TRACEBACK
+            - EXC_TYPE: EXCEPTION TYPE
+            - EXC_VAL: EXCEPTION VALUE
+            - EXC_TB: TRACEBACK
         OUTPUTS: -
         '''
         self.close

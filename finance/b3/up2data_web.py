@@ -3,7 +3,7 @@
 import pandas as pd
 from requests import request
 from zipfile import ZipFile
-from stpstone.settings.global_slots import YAML_B3
+from stpstone.settings._global_slots import YAML_B3
 from stpstone.opening_config.setup import iniciating_logging
 from stpstone.loggs.create_logs import CreateLog
 from stpstone.cals.handling_dates import DatesBR
@@ -189,7 +189,7 @@ class UP2DATAB3:
                     list_cols_lb_b3=['RptDt', 'TckrSymb', 'Asst', 'QtyCtrctsDay', 'QtyShrDay', 
                                      'DnrMinRate', 'DnrAvrgRate', 'DnrMaxRate', 'TakrMinRate', 
                                      'TakrAvrgRate', 'TakrMaxRate', 'MktNm'], 
-                    list_dicts=list()):
+                    list_ser=list()):
         '''
         DOCSTRING:
         INPUTS:
@@ -236,11 +236,11 @@ class UP2DATAB3:
             #   looping within available values
             for list_ in json_lb_b3[key_valores]:
                 #   appending to serialized list
-                list_dicts.append(
+                list_ser.append(
                     dict(zip(list_cols_lb_b3, list_))
                 )
         # builiding dataframe
-        df_lb_b3 = pd.DataFrame(list_dicts)
+        df_lb_b3 = pd.DataFrame(list_ser)
         # dropping duplicates
         df_lb_b3.drop_duplicates(inplace=True)
         # changing column types
@@ -281,7 +281,7 @@ class UP2DATAB3:
     def lending_open_position(self, wd_bef=1, url='https://arquivos.b3.com.br/tabelas/table/LendingOpenPosition/{}/{}', 
                               method='GET', key_pg_count='pageCount', key_valores='values', 
                               list_cols_lop_b3=['RptDt', 'TckrSymb', 'Asst', 'BalQty', 'TradAvrgPric', 'PricFctr', 'BalVal'], 
-                              list_dicts=list()):
+                              list_ser=list()):
         '''
         DOCSTRING:
         INPUTS:
@@ -328,11 +328,11 @@ class UP2DATAB3:
             #   looping within available values
             for list_ in json_lb_b3[key_valores]:
                 #   appending to serialized list
-                list_dicts.append(
+                list_ser.append(
                     dict(zip(list_cols_lop_b3, list_))
                 )
         # builiding dataframe
-        df_lop_b3 = pd.DataFrame(list_dicts)
+        df_lop_b3 = pd.DataFrame(list_ser)
         # dropping duplicates
         df_lop_b3.drop_duplicates(inplace=True)
         # changing column types

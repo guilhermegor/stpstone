@@ -3,7 +3,7 @@
 import pandas as pd
 from math import nan
 from pprint import pprint
-from stpstone.settings.global_slots import YAML_ANBIMA
+from stpstone.settings._global_slots import YAML_ANBIMA
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.json import JsonFiles
 from stpstone.handling_data.str import StrHandler
@@ -89,9 +89,9 @@ class AnbimaStats:
                     #   extending to consolidated list
                     list_data.extend(list_)
             # creating serialized list
-            list_dicts = HandlingDicts().pair_headers_with_data(list_headers, list_data)
+            list_ser = HandlingDicts().pair_headers_with_data(list_headers, list_data)
             # appending to exporting list
-            list_ser.extend(list_dicts)
+            list_ser.extend(list_ser)
         # importing to dataframe
         df_pmi_hat = pd.DataFrame(list_ser)
         # removing duplicates

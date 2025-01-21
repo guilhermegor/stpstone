@@ -2,7 +2,7 @@
 
 import pandas as pd
 from requests import request
-from stpstone.settings.global_slots import YAML_ANBIMA
+from stpstone.settings._global_slots import YAML_ANBIMA
 from stpstone.loggs.create_logs import CreateLog
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.cals.handling_dates import DatesBR
@@ -20,7 +20,7 @@ from stpstone.loggs.db_logs import DBLogs
 
 class AnbimaMTM:
 
-    def general_req(self, url, bl_verify, method='GET', str_sep='@', list_dicts=list()):
+    def general_req(self, url, bl_verify, method='GET', str_sep='@', list_ser=list()):
         '''
         DOCSTRING:
         INPUTS:
@@ -45,9 +45,9 @@ class AnbimaMTM:
                 #   creating serialized list
                 dict_ = dict(zip(list_headers, row.replace(',', '.').split(str_sep)))
                 #   appending to consolidated list
-                list_dicts.append(dict_)
+                list_ser.append(dict_)
         # turning into dataframe
-        df_ = pd.DataFrame(list_dicts)
+        df_ = pd.DataFrame(list_ser)
         # droping nan values
         df_.dropna(inplace=True)
         # returning dataframe

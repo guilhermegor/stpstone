@@ -6,7 +6,7 @@ import pandas as pd
 from requests import request, exceptions
 from typing import List
 from datetime import datetime
-from stpstone.settings.global_slots import YAML_INOA
+from stpstone.settings._global_slots import YAML_INOA
 from stpstone.cals.handling_dates import DatesBR
 
 

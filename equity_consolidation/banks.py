@@ -57,7 +57,7 @@ class NubankIntegration:
         else:
             raise Exception('Authetication mock variable ouught be a boolean')
 
-    def credit_card_bill(self, nu, bl_return_pd=True, list_dicts=list(), float_den_amount=100.0,
+    def credit_card_bill(self, nu, bl_return_pd=True, list_ser=list(), float_den_amount=100.0,
                          col_id='ID', col_description='DESCRIPTION', col_category='CATEGORY',
                          col_subcategory='SUBCATEGORY', col_amount='AMOUNT',
                          col_amount_wo_iof='AMOUNT_WITHOUT_IOF', col_time='TIME',
@@ -115,7 +115,7 @@ class NubankIntegration:
                 else:
                     lon = 99999999
                 #   serialized data to pandas dataframe
-                list_dicts.append({
+                list_ser.append({
                     col_id: dict_['id'].upper(),
                     col_description: dict_['description'].upper(),
                     col_category: dict_['category'].upper(),
@@ -134,7 +134,7 @@ class NubankIntegration:
                     col_lon: lon
                 })
             #   pandas dataframe
-            df_card_statements = pd.DataFrame(list_dicts)
+            df_card_statements = pd.DataFrame(list_ser)
             #   changing column types
             df_card_statements = df_card_statements.astype({
                 col_id: str,
