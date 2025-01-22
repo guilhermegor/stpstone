@@ -29,12 +29,14 @@ class TradingFilesB3:
         self.str_fillna_ts = str_fillna_ts
         self.str_fmt_dt = str_fmt_dt
 
-    def price_report(self, bl_debug=False, list_ser=list()):
+    def price_report(self, bl_debug=False):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # price report file .zip
         url = YAML_B3['price_report'][
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
@@ -95,12 +97,14 @@ class TradingFilesB3:
         return df_pr
 
     @property
-    def tradable_securities(self, list_ser=list()):
+    def tradable_securities(self):
         '''
         DOCSTRING: TRADABLE SECURITIES IN BRAZILLIAN EXCHANGE MARKET
         INPUTS: WORKING DAYS BEFORE
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_ser = list()
         # url
         url = YAML_B3['securities_tradable']['url'].format(DatesBR().sub_working_days(
             DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d'))
@@ -259,13 +263,15 @@ class TradingFilesB3:
         # retornando dataframe de interesse
         return df_dll
 
-    def options_b3(self, float_value_error=-1000.0, list_ser=list(), bl_debug=False, 
+    def options_b3(self, float_value_error=-1000.0, bl_debug=False, 
                    float_days_year=365.0):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # raw maximum theoretical margins
         list_rows_mtm = self.carga_mtm_b3
         # b3 financial indicators
@@ -494,14 +500,17 @@ class TradingFilesB3:
         return list_rows_mtm
 
     @property
-    def mtm_compra_venda(self, list_num_desagios_compra=list(),
-                         list_num_desagios_venda=list(), den_desagios=None, list_exportacao=list(),
+    def mtm_compra_venda(self, den_desagios=None,
                          key_stocks='stocks', key_funds='funds', key_etfs='etfs', key_bdrs='bdrs'):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS
         '''
+        # setting variables
+        list_num_desagios_compra = list()
+        list_num_desagios_venda = list()
+        list_exportacao = list()
         # carga de margens teóricas máximas crua
         list_rows_mtm = self.carga_mtm_b3
         # carga de ativos bovespa e bmf por tipo
@@ -699,7 +708,7 @@ class TradingFilesB3:
         return df_fpr_b3
 
     @property
-    def collateral_acc_spot_bov_b3(self, list_exportacao=list(), dict_repalce_str_erros={
+    def collateral_acc_spot_bov_b3(self, dict_repalce_str_erros={
             'ETF': ''}, col_ticker='TICKER', col_isin='ISIN', col_limite_qtds='LIMITE_QUANTIDADES',
             col_mes_arquivo='MES_ARQUIVO', key_limite_qtds='Limite (quantidade)'):
         '''
@@ -707,6 +716,8 @@ class TradingFilesB3:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_exportacao = list()
         # importing to memory html, in order to catch the url of the collateral accepted by b3, 
         #   regarding spot bov
         html_parser_acoes_units_etfs_aceitos_garantia_b3 = HtmlHndler().html_lxml_parser(
@@ -772,13 +783,14 @@ class TradingFilesB3:
         # returning dataframe
         return df_coll_acc_spot_bov
 
-    def cenarios_tipo_curva(self, list_cenarios_tipo_curva=None,
-                            list_dicts_exportacao_curvas=list()):
+    def cenarios_tipo_curva(self, list_cenarios_tipo_curva=None):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser_exportacao_curvas = list()
         # validando tipo de variáveis de interesse
         if list_cenarios_tipo_curva != None:
             #   convertendo para lista, caso não seja
@@ -817,10 +829,10 @@ class TradingFilesB3:
             #       importar para uma dataframe para exportação
             list_passagem = df_cenarios_passagem.to_dict(orient=YAML_B3[
                 'cenarios_risco_tipo_curva']['orient_df'])
-            list_dicts_exportacao_curvas.extend(list_passagem)
+            list_ser_exportacao_curvas.extend(list_passagem)
         # adicionando lista a um dataframe a ser exportado
         df_cenarios_tipo_curva = pd.DataFrame.from_dict(
-            list_dicts_exportacao_curvas)
+            list_ser_exportacao_curvas)
         # alterando tipo de variáveis de colunas de interesse
         df_cenarios_tipo_curva = df_cenarios_tipo_curva.astype({
             YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][0]: int,
@@ -842,13 +854,14 @@ class TradingFilesB3:
         # exportando dataframe de interesse
         return df_cenarios_tipo_curva
 
-    def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None,
-                                 list_dicts_exportacao_curvas=list()):
+    def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser_exportacao_curvas = list()
         # validando tipo de variáveis de interesse
         if list_cenarios_tipo_spot != None:
             #   convertendo para lista, caso não seja
@@ -886,10 +899,10 @@ class TradingFilesB3:
             #       importar para uma dataframe para exportação
             list_passagem = df_cenarios_passagem.to_dict(orient=YAML_B3[
                 'cenarios_risco_tipo_spot']['orient_df'])
-            list_dicts_exportacao_curvas.extend(list_passagem)
+            list_ser_exportacao_curvas.extend(list_passagem)
         # adicionando lista a um dataframe a ser exportado
         df_cenarios_tipo_spot = pd.DataFrame.from_dict(
-            list_dicts_exportacao_curvas)
+            list_ser_exportacao_curvas)
         # alterando tipo de variáveis de colunas de interesse
         df_cenarios_tipo_spot = df_cenarios_tipo_spot.astype({
             YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][0]: int,
@@ -1063,13 +1076,14 @@ class TradingFilesB3:
         # retornando fpr completo
         return df_fpr_b3
 
-    def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None, 
-                                 list_dicts_exportacao_curvas=list()):
+    def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser_exportacao_curvas = list()
         # validando tipo de variáveis de interesse
         if list_cenarios_tipo_spot != None:
             #   convertendo para lista, caso não seja
@@ -1118,9 +1132,9 @@ class TradingFilesB3:
             #       e importar para uma dataframe para exportação
             list_passagem = df_cenarios_passagem.to_dict(orient=YAML_B3[
                 'cenarios_risco_tipo_spot']['orient_df'])
-            list_dicts_exportacao_curvas.extend(list_passagem)
+            list_ser_exportacao_curvas.extend(list_passagem)
         # adicionando lista a um dataframe a ser exportado
-        df_cenarios_tipo_spot = pd.DataFrame.from_dict(list_dicts_exportacao_curvas)
+        df_cenarios_tipo_spot = pd.DataFrame.from_dict(list_ser_exportacao_curvas)
         # alterando tipo de variáveis de colunas de interesse
         df_cenarios_tipo_spot = df_cenarios_tipo_spot.astype({
             YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][0]: int,
@@ -1169,13 +1183,14 @@ class TradingFilesB3:
         col_notional_neg_dom_sess_reg='NOTIONAL_NEG_MOEDA_DOM_SESS_REG', 
         col_notional_neg_int_sess_reg='NOTIONAL_NEG_MOEDA_INT_SESS_REG', 
         col_pct_osc_int='PCT_OSC_INT', formato_dt='AAAA-MM-DD', qtd_erro=-1, 
-        col_ticker_cd='Symbol', col_tipo_mercado_cd='TIPO_MERCADO',
-        list_dict=list()):
+        col_ticker_cd='Symbol', col_tipo_mercado_cd='TIPO_MERCADO'):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # instruments and its respective market
         df_ = self.tradable_securities(self.int_wd_bef)
         # url to download maximum theoretical margins
@@ -1246,9 +1261,9 @@ class TradingFilesB3:
                     except:
                         dict_[col_] = qtd_erro
                 #   adicionando dicionário a lista serializada
-                list_dict.append(dict_)
+                list_ser.append(dict_)
         # adicionando a dataframe de exportação
-        df_trd_rpt = pd.DataFrame(list_dict)
+        df_trd_rpt = pd.DataFrame(list_ser)
         # removendo eventuais duplicatas
         df_trd_rpt.drop_duplicates(inplace=True)
         # alterando tipo de colunas de interesse

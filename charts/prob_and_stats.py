@@ -61,7 +61,7 @@ class ProbStatsCharts:
         # showing plot
         plt.show()
 
-    def ecdf_chart(self, list_dicts_data, legend_position='lower right'):
+    def ecdf_chart(self, list_ser_data, legend_position='lower right'):
         '''
         DOCSTRING: DISPLAY A EMPIRICAL CUMULATIVE DISTRIBUTION FUNCTION CHART
         INPUTS: LIST OF DICTIONARIES WITH DATA, X_LABEL, Y_LABEL AND LEGEND KEYS, BESIDE 
@@ -71,17 +71,17 @@ class ProbStatsCharts:
         # defining layout
         sns.set()
         # computing ecdf for the given data
-        for i in range(list_dicts_data):
+        for i in range(list_ser_data):
             x_axis, y_axis = NormalDistribution().ecdf(
-                list_dicts_data[i]['data'])
+                list_ser_data[i]['data'])
             # generating plot
             _ = plt.plot(x_axis, y_axis, marker='.', linestyle='none')
             # label the axis
-            _ = plt.xlabel(list_dicts_data[i]['data']['x_axis_label'])
-            _ = plt.ylabel(list_dicts_data[i]['data']['y_axis_label'])
+            _ = plt.xlabel(list_ser_data[i]['data']['x_axis_label'])
+            _ = plt.ylabel(list_ser_data[i]['data']['y_axis_label'])
         # annotate the plot
         _ = plt.legend((x['legend']
-                        for x in list_dicts_data), loc=legend_position)
+                        for x in list_ser_data), loc=legend_position)
         # display the plot
         plt.show()
 
@@ -289,13 +289,15 @@ class ProbStatsCharts:
         return axes
 
     def qq_plot(self, list_ppf, list_raw_data, chart_title=None, complete_saving_path=None,
-                bl_show_plot=True, list_quantiles=list(), j=0):
+                bl_show_plot=True, j=0):
         '''
         REFERENCES: https://towardsdatascience.com/understand-q-q-plot-using-simple-python-4f83d5b89f8f
         DOCSTRING:
         INPUTS:
         OUTPUTS: -
         '''
+        # setting variables
+        list_quantiles = list()
         # determining the quantiles
         for i in range(1, len(list_raw_data) + 1):
             j = i / len(list_raw_data)

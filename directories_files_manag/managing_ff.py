@@ -399,13 +399,13 @@ class DirFilesManagement:
                 directory, file_name), bl_to_datetime=bl_to_datetime)
                 for file_name in list_files_names_like]
             #   creating a list of dictionaries with name and last edition time
-            list_dicts_file_name_last_edition = [{
+            list_ser_file_name_last_edition = [{
                 key_file_name: list_files_names_like[i],
                 key_file_last_edition: list_files_last_edition[i][0]
             } for i in range(len(list_files_last_edition))]
             #   sort list of dictionaries
             return [os.path.join(directory, dict_[key_file_name]) for dict_
-                    in HandlingDicts().multikeysort(list_dicts_file_name_last_edition,
+                    in HandlingDicts().multikeysort(list_ser_file_name_last_edition,
                                                     ['-' + key_file_last_edition])]
 
     def list_dir_files(self, dir_path=None):

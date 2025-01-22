@@ -3,6 +3,7 @@
 import pandas as pd
 import numpy as np
 from io import StringIO
+from typing import Dict, Any
 from stpstone.loggs.create_logs import CreateLog
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.directories_files_manag.managing_ff import DirFilesManagement
@@ -17,14 +18,15 @@ class CVMDATA:
         str_dt_error:str='2100-01-01', 
         str_format_dt_input:str='YYYY-MM-DD',
         int_val_err:int=0,
-        dict_fund_class_subclass_register:dict=dict()
+        dict_fund_class_subclass_register:dict=Dict[str, Any]=None
     ):
         self.str_host_cvm = str_host_cvm
         self.logger = logger
         self.str_dt_error = str_dt_error
         self.str_format_dt_input = str_format_dt_input
         self.int_val_err = int_val_err
-        self.dict_fund_class_subclass_register = self.funds_classes_subclasses_register_raw
+        self.dict_fund_class_subclass_register = self.funds_classes_subclasses_register_raw \
+            if dict_fund_class_subclass_register is None else dict_fund_class_subclass_register
 
     @property
     def funds_register(
@@ -122,14 +124,15 @@ class CVMDATA:
     @property
     def funds_classes_subclasses_register_raw(
         self, 
-        str_app:str='FI/CAD/DADOS/registro_fundo_classe.zip',
-        dict_:dict=dict()
+        str_app:str='FI/CAD/DADOS/registro_fundo_classe.zip'
     ):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        dict_ = dict()
         # url
         url = f'{self.str_host_cvm}{str_app}'
         # downloading zip file into memory

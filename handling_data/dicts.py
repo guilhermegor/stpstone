@@ -26,12 +26,13 @@ class HandlingDicts:
         '''
         return max(dict_active.items(), key=itemgetter(1))
 
-    def merge_n_dicts(self, *dicts, dict_xpt=dict()):
+    def merge_n_dicts(self, *dicts):
         '''
         DOCSTRING: MERGE DICTIONARIES, FOR PYTHON 3.5+
         INPUTS: DICTIONARIES
         OUTPUTS: DICTIONARY
         '''
+        dict_xpt = dict()
         for dict_ in dicts:
             dict_xpt = {**dict_xpt, **dict_}
         return dict_xpt
@@ -150,21 +151,21 @@ class HandlingDicts:
         # return final result
         return list_ser_export
 
-    def n_smallest(self, list_dict, key_, n):
+    def n_smallest(self, list_ser, key_, n):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        return nsmallest(n, list_dict, key=lambda dict_: dict_[key_])
+        return nsmallest(n, list_ser, key=lambda dict_: dict_[key_])
 
-    def n_largest(self, list_dict, key_, n):
+    def n_largest(self, list_ser, key_, n):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
-        return nlargest(n, list_dict, key=lambda dict_: dict_[key_])
+        return nlargest(n, list_ser, key=lambda dict_: dict_[key_])
 
     def order_dict(self, dict_):
         '''
@@ -174,16 +175,16 @@ class HandlingDicts:
         '''
         return OrderedDict(sorted(dict_.items()))
 
-    def group_by_dicts(self, list_dict):
+    def group_by_dicts(self, list_ser):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
         # sort by the desired field first
-        list_dict.sort(key=itemgetter('date'))
+        list_ser.sort(key=itemgetter('date'))
         # return iteration in groups
-        return groupby(list_dict, key=itemgetter('date'))
+        return groupby(list_ser, key=itemgetter('date'))
 
     def add_key_value_to_dicts(
         self, list_ser:List[Dict[str, Union[int, float, str]]], key:str,
@@ -215,7 +216,7 @@ class HandlingDicts:
                     dict_[key] = value
         return list_ser
 
-    def pair_headers_with_data(self, list_headers, list_data, list_ser=list()):
+    def pair_headers_with_data(self, list_headers, list_data):
         '''
         DOCSTRING: PAIR HEADERS AND DATA AS KEYS AND VALUES IN A SERIALIZED LIST
             - FOR EXAMPLE, IF LIST_HEADERS IS ['NAME', 'AGE'] AND LIST_DATA IS 
@@ -224,6 +225,8 @@ class HandlingDicts:
         INPUTS: LIST HEADERS, LIST DATA
         OUTPUTS: LIST
         '''
+        # setting variables
+        list_ser = list()
         # ensuring the list_data length is a multiple of list_headers length
         if len(list_data) % len(list_headers) != 0:
             raise ValueError(

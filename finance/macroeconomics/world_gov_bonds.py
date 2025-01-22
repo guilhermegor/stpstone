@@ -26,12 +26,14 @@ class WGBD:
         return dt_utc
 
     @property
-    def bonds_10y_rates_rating(self, list_ser=list()):
+    def bonds_10y_rates_rating(self):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_WGBD['10y_rr']['url'], 
@@ -245,12 +247,14 @@ class WGBD:
         return df_inv_yc_ec, df_inv_yc_spreads
     
     @property
-    def yield_spreads_nations(self, list_td=list()):
+    def yield_spreads_nations(self):
         '''
         DOCSTRING: GET YIELD SPREADS AGAINST GERMANY, USA, CHINA AND AUSTRALIA
         INPUTS: -
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_td = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_WGBD['yield_spreads_nations']['url'], 
@@ -349,12 +353,14 @@ class WGBD:
         return df_spreads_nations
     
     @property
-    def ratings(self, list_td=list()):
+    def ratings(self):
         '''
         DOCSTRING: GET RATINGS FROM THE MAIN AGENCIES
         INPUTS: -
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_td = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_WGBD['yield_spreads_nations']['url'], 

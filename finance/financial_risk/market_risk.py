@@ -706,13 +706,15 @@ class MarkowitzEff:
     def eff_frontier(self, array_eff_risks:np.array, array_eff_returns:np.array, 
                      array_weights:np.array, array_mus:np.array, array_sigmas:np.array, 
                      float_rf:float, col_sigma:str='sigma', col_mu:str='float_mu', 
-                     col_w:str='weights', col_sharpe:str='sharpe', array_eff_weights:list=list(), 
+                     col_w:str='weights', col_sharpe:str='sharpe', 
                      atol:float=1e-2, int_pace_atol:int=5) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        array_eff_weights = list()
         # convert string-based array_weights to a 2D array by splitting the values
         array_weights_2d = np.array([list(map(float, row.split())) for row in array_weights])
         # iterate over the efficient returns and risks
@@ -989,13 +991,14 @@ class MarkowitzEff:
             'notional_total': array_notional.sum()
         }
 
-    def lot_shares_ticker_corr(self, dict_allocation:Dict[str, Any], list_ser=list()) \
+    def lot_shares_ticker_corr(self, dict_allocation:Dict[str, Any]) \
         -> Dict[str, Any]:
         '''
         DOCSTRING: LOT OF SHARES TICKER CORRECTION
         INPUTS: DICT ALLOCATION
         OUTPUTS: DICT
         '''
+        list_ser = list()
         df_trad_sec = TradingFilesB3().tradable_securities
         for ticker in dict_allocation['tickers']:
             float_qty_rnd = df_trad_sec[df_trad_sec['Symbol'] == ticker.replace('.SA', '')][

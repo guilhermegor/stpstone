@@ -19,13 +19,15 @@ from stpstone.loggs.db_logs import DBLogs
 class Sidra:
 
     @property
-    def rl_dts_indicators(self, str_pool_name=None, list_ser=list()):
+    def rl_dts_indicators(self, str_pool_name=None):
         '''
         REFERENCES: https://www.ibge.gov.br/calendario-indicadores-novoportal.html
         DOCSTRING: RELEASE DATES FROM MACRO SHORT-TERM INDICATORS
         INPUTS: -
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_ser = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_BR_MACRO['sidra']['st_indicators']['url'], 
@@ -271,8 +273,7 @@ class BCB:
                              api_currecy_exchange_day='CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?{}',
                              api_curency_exchange_period='CotacaoMoedaPeriodo(moeda=@moeda,dataInicial=@dataInicial,'
                              + 'dataFinalCotacao=@dataFinalCotacao)?{}', method='GET',
-                             key_value='value', key_simbolo='simbolo', str_currency='{}BRL', 
-                             dict_export=dict()):
+                             key_value='value', key_simbolo='simbolo', str_currency='{}BRL'):
         '''
         REFERENCES: https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/swagger-ui3#/
         DOCSTRING: BRAZILLIAN FOREIGN EXCHANGE FROM ALL CURRENCIES AVAILABE IN OLINDA API FROM
@@ -280,6 +281,8 @@ class BCB:
         INPUTS: URL
         OUTPUTS:
         '''
+        # setting variables
+        dict_export = dict()
         # creating reference datetime, in specific string type, according to working days before
         #   (0 as default)
         datetime_end_ref = DatesBR().sub_working_days(DatesBR().curr_date,
@@ -306,9 +309,9 @@ class BCB:
         # retrieving json
         json_currencies = resp_req.json()
         # collecting all currencies available (against BRL)
-        list_dict_currencies = json_currencies[key_value]
+        list_ser_currencies = json_currencies[key_value]
         list_currencies = [str(dict_[key_simbolo])
-                           for dict_ in list_dict_currencies]
+                           for dict_ in list_ser_currencies]
         # requesting current foreign available for all the currencies disposed before
         for currency in list_currencies:
             #   validating wheter the user aim for a bucket of currencies in a given day or period
@@ -424,13 +427,14 @@ class YFinanceMacroBR:
         # retrieving historical data
         return json_brazillian_cpi
 
-    def yforex(self, list_xcg_curr, wd_start_date=2, wd_end_date=0,
-                               list_ser=list()):
+    def yforex(self, list_xcg_curr, wd_start_date=2, wd_end_date=0):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # creating dates of interest according to working days provided
         inf_date = DatesBR().sub_working_days(DatesBR().curr_date, wd_start_date).strftime(
             '%Y-%m-%d')

@@ -262,12 +262,14 @@ class HandlingLists:
         return list_extended_lists
 
     def chunk_list(self, list_to_chunk, str_character_divides_clients=' ',
-                   int_chunk=150, bl_remove_duplicates=True, list_chunked=list()):
+                   int_chunk=150, bl_remove_duplicates=True):
         '''
         DOCSTRING: LIST TO CHUNK IN THE LIMIT SIZE
         INPUTS: LIST TO CHUNK, STRING CHARACTER TO DIVIDE CLIENT (DEFAULT), AND CHUNK (DEFAULT)
         OUTPUTS: LIST
         '''
+        # setting variables
+        list_chunked = list()
         # remove duplicates if is user's will
         if bl_remove_duplicates == True:
             list_to_chunk = HandlingLists().remove_duplicates(list_to_chunk)
@@ -306,12 +308,14 @@ class HandlingLists:
         #   returning final result
         return list_chunked
 
-    def cartesian_product(self, list_lists, int_break_n_n=None, list_export=list()):
+    def cartesian_product(self, list_lists, int_break_n_n=None):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_export = list()
         # list of cartesian product of lists
         list_cartesian_product = list(product(*list_lists))
         # iterating through cartesian products of lists, if break in max values for tuples is different

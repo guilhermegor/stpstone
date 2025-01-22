@@ -1,14 +1,16 @@
 ### CVM WEB SERVICE - BRAZILLIAN SEC
 
+import backoff
 import pandas as pd
 import multiprocessing as mp
 from requests import request
+from requests.exceptions import ReadTimeout
 from getpass import getuser
 from time import sleep
 from lxml import html
-from typing import Tuple
+from typing import Tuple, Optional
 from random import shuffle
-from stpstone.handling_data.html import HtmlHndler
+from stpstone.handling_data.html import HtmlHndler, SeleniumWD
 from stpstone.handling_data.dicts import HandlingDicts
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.str import StrHandler
@@ -23,11 +25,17 @@ class CVMWeb_WS_Funds:
 
     def __init__(
         self,
-        str_cookie:str,
+        str_cookie:Optional[str]=None,
+        str_id:Optional[str]=None,
+        str_passw:Optional[str]=None,
+        webdriver_path:Optional[str]=None,
+        port:Optional[str]=None,
+        time_wait_page_load:Optional[int]=10,
+        time_wait_el:Optional[int]=10,
+        bl_open_minimized:Optional[bool]=True,
         bl_parallel:bool=False,
-        cls_db_funds:type=None,
-        cls_db_daily_infos:type=None,
-        cls_db_dts_available:type=None,
+        bl_insert_or_ignore:bool=True,
+        cls_db:type=None,
         int_sleep:object=1,
         int_ncpus:int=mp.cpu_count() - 2 if mp.cpu_count() > 2 else 1,
         key_fund_code:str='fund_code',
@@ -55,11 +63,25 @@ class CVMWeb_WS_Funds:
             https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw (SEARCH FOR ouvidor=0)
         OUTPUTS: - 
         '''
-        self.str_cookie = str_cookie
+        self.str_id = str_id
+        self.str_passw = str_passw
+        self.webdriver_path = webdriver_path
+        self.port = port
+        self.time_wait_page_load = time_wait_page_load
+        self.time_wait_el = time_wait_el
+        self.bl_open_minimized = bl_open_minimized
+        self.str_cookie = str_cookie if str_cookie is not None else self.cookie_govbr(
+            str_id,
+            str_passw,
+            webdriver_path,
+            port,
+            time_wait_page_load,
+            time_wait_el,
+            bl_open_minimized
+        )
         self.bl_parallel = bl_parallel
-        self.cls_db_funds = cls_db_funds
-        self.cls_db_daily_infos = cls_db_daily_infos
-        self.cls_db_dts_available = cls_db_dts_available
+        self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.cls_db = cls_db
         self.int_sleep = int_sleep
         self.int_ncpus = int_ncpus
         self.dict_cookie = {'Cookie': self.str_cookie}
@@ -82,8 +104,46 @@ class CVMWeb_WS_Funds:
         self.str_host_ex_fund = str_host_ex_fund
         self.str_host_post_fund = str_host_post_fund
 
+    def cookie_govbr(self, 
+        str_id:str,
+        str_passw:str,
+        webdriver_path:str,
+        port:str,
+        time_wait_page_load:int=30,
+        time_wait_el:int=30,
+        bl_open_minimized:bool=False,
+        url:str='https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw', 
+        str_frame_name:str='Main',
+        xpath_click_login:str='//*[@id="linkGovBr"]/img',
+        xpath_fill_tin_br:str='//*[@id="accountId"]',
+        xpath_fill_passw:str='//*[@id="password"]',
+    ) -> str:
+        '''
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        '''
+        cls_selenium = SeleniumWD()
+        # create driver element, wait until page is loaded and the login button is available
+        driver = cls_selenium.selenium_web_driver(url, webdriver_path, port, time_wait_page_load, 
+            bl_open_minimized)
+        cls_selenium.selenium_element_is_clickable(driver, xpath_click_login, 
+            frame_name=str_frame_name)
+        # click login button
+        cls_selenium.selenium_find_element(driver, xpath_click_login).click()
+        # fill TIN br - tax payer id number
+        cls_selenium.selenium_wait_until_element_loaded(driver, xpath_fill_tin_br, time_wait_el)
+        cls_selenium.selenium_find_element(driver, xpath_fill_tin_br).send_keys(str_id)
+        # fill password
+        cls_selenium.selenium_wait_until_element_loaded(driver, xpath_fill_passw, time_wait_el)
+        cls_selenium.selenium_find_element(driver, xpath_fill_passw).send_keys(str_passw)
+        # get cookie
+        list_events = cls_selenium.get_network_traffic(driver)
+        print(list_events)
+        raise Exception('BREAK')
+
     def generic_req(self, str_method:str, url:str, str_header_ref:str, dict_data:dict={}, 
-        bl_allow_redirects:bool=True) -> html.HtmlElement:
+        bl_allow_redirects:bool=True, tup_timeout:Tuple[float, float]=(12.0, 21.0)) -> html.HtmlElement:
         '''
         DOCSTRING:
         INPUTS:
@@ -112,36 +172,51 @@ class CVMWeb_WS_Funds:
             headers=dict_headers, 
             data=dict_data, 
             cookies=self.dict_cookie,
-            allow_redirects=bl_allow_redirects
+            allow_redirects=bl_allow_redirects,
+            timeout=tup_timeout
         )
         resp_req.raise_for_status()
         html_content = HtmlHndler().html_lxml_parser(page=resp_req.text)
         return html_content
 
     @property
+    @backoff.on_exception(
+        backoff.constant,
+        ReadTimeout,
+        interval=10,
+        max_tries=20,
+    )
     def available_funds(
         self, 
+        str_table_nane:str='RAW_CVMWEB_COD_FUNDS',
         str_header_ref:str='CReservd.asp',
         str_app:str='SelecPartic.aspx?CD_TP_INFORM=15',
-        str_xpath_funds:str='//*[@id="PK_PARTIC"]/option',
+        str_xpath_funds:str='//select[@id="PK_PARTIC"]/option',
         str_xpath_value:str='./@value',
         str_method:str='GET',
-        bl_allow_redirects:bool=True,
-        list_ser=list()
+        bl_allow_redirects:bool=True
     ) -> pd.DataFrame:
         '''
         DOCSTRING: AVAILABLE FUND CODES AND EIN
         INPUTS: -
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_ser = list()
         # request html
         html_content = self.generic_req(str_method, self.str_host_ex_fund + str_app, 
                                         str_header_ref, bl_allow_redirects=bl_allow_redirects)
+        # print(f'HTML CONTENT: \n{html_content}')
+        # print('OPTION FUND: {}'.format(HtmlHndler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
         # looping within available funds and filling serialized list
         for el_option_fund in HtmlHndler().html_lxml_xpath(html_content, str_xpath_funds):
             #   get text and split into fund's ein and name
             try:
-                str_option_fund_raw = HtmlHndler().html_lxml_xpath(el_option_fund, './text()')[0]
+                str_option_fund_raw = HtmlHndler().html_lxml_xpath(el_option_fund, './text()')
+                if len(str_option_fund_raw) == 0: 
+                    continue
+                else:
+                    str_option_fund_raw = str_option_fund_raw[0]
                 str_option_fund_trt = StrHandler().remove_diacritics(str_option_fund_raw)
                 str_option_fund_trt = StrHandler().replace_all(
                     str_option_fund_trt,
@@ -161,9 +236,6 @@ class CVMWeb_WS_Funds:
                     }
                 )
                 str_fund_ein, str_fund_name =  str_option_fund_trt.split(' - ')
-            except IndexError:
-                #   funda ein and name not fund, continue
-                continue
             except ValueError:
                 raise Exception(
                     '** ERROR: FUND EIN AND NAME NOT FOUND \n\t' 
@@ -192,8 +264,12 @@ class CVMWeb_WS_Funds:
         df_funds[self.key_fund_ein_unm] = DocumentsNumbersBR(
             df_funds[self.key_fund_ein].tolist()).unmask_docs
         # loading in db, if is user's will
-        if self.cls_db_funds is not None: self.cls_db_funds._insert(
-            df_funds.to_dict(orient='records'))
+        if self.cls_db is not None: 
+            self.cls_db._insert(
+                df_funds.to_dict(orient='records'), 
+                str_table_nane, 
+                bl_insert_or_ignore=self.bl_insert_or_ignore
+            )
         # returning dataframe
         return df_funds
 
@@ -211,6 +287,7 @@ class CVMWeb_WS_Funds:
         INPUTS: FUND CODE
         OUTPUTS: HTML
         '''
+        # print(f'URL: {self.str_host_post_fund + str_app.format(str_fund_code)}')
         return \
             self.generic_req(
                 str_method, 
@@ -226,6 +303,7 @@ class CVMWeb_WS_Funds:
         html_content:html.HtmlElement,
         str_fund_code:str,
         url_fund_daily_infos:str,
+        str_table_nane:str='RAW_CVMWEB_DATAS_FUNDOS',
         str_dt_fmt:str='DD/MM/YYYY',
         xpath_avl_dates:str='//*[@id="ddCOMPTC"]/option/text()'
     ):
@@ -248,9 +326,13 @@ class CVMWeb_WS_Funds:
             } for d in list_dts
         ]
         if \
-            (self.cls_db_dts_available is not None) \
+            (self.cls_db is not None) \
             and (len(list_avl_dts_fund) > 0):
-            self.cls_db_dts_available._insert(list_avl_dts_fund)
+            self.cls_db._insert(
+                list_avl_dts_fund, 
+                str_table_nane, 
+                bl_insert_or_ignore=self.bl_insert_or_ignore
+            )
         return list_dts
 
     def fund_daily_reports_raw(
@@ -269,8 +351,7 @@ class CVMWeb_WS_Funds:
         str_header_ref:str='SelecPartic.aspx?CD_TP_INFORM=15',
         str_app:str='ConsInfDiario.aspx?PK_PARTIC={}&PK_SUBCLASSE=-1',
         str_method_fund_report_dt:str='POST',
-        bl_allow_redirects:bool=False,
-        dict_html_contents_dts:dict=dict()
+        bl_allow_redirects:bool=False
     ):
         '''
         DOCSTRING: SIMULATION OF JAVASCRIPT CODE EXECUTION WHEN THE REFERENCE DATE IS CHANGED IN THE 
@@ -278,7 +359,10 @@ class CVMWeb_WS_Funds:
         INPUTS: 
         OUTPUTS:
         '''
+        # setting variables
+        dict_html_contents_dts = dict()
         # looping within list of dates
+        # print(f'LIST_STR_DTS:{list_str_dts}')
         for str_dt in list_str_dts:
             #   build data dictionary
             dict_data = {
@@ -335,9 +419,10 @@ class CVMWeb_WS_Funds:
         },
         str_xpath_greatest_shareholders:str='//*[starts-with(@id, "lblCNPJPartic")]/text()',
         str_xpath_dropdown_box:str='//*[@id="ddCOMPTC"]/option[1]/@value',
-        str_fmt_date:str='DD/MM/YYYY',
-        list_ser=list()
+        str_fmt_date:str='DD/MM/YYYY'
     ) -> list:
+        # setting variables
+        list_ser = list()
         # in case of no available dates, return an empty list
         # print('DROPDOWN_EL: {}'.format(
         #     len(HtmlHndler().html_lxml_xpath(html_content_gen, 
@@ -356,6 +441,7 @@ class CVMWeb_WS_Funds:
             str_fund_code,
             list_str_dts
         )
+        # print(f'HTML INFOS DIARIAS - DTS CONSULTAR: {dict_html_contents_dts}')
         # looping within available funds and filling serialized list
         for str_dt, html_content_dt in dict_html_contents_dts.items():
             #   greatest shareholders and their holdings in the current fund
@@ -388,7 +474,8 @@ class CVMWeb_WS_Funds:
         self,
         str_fund_code:str,
         dict_dts_funds:dict,
-        str_code_version:str='dev'
+        str_code_version:str='dev',
+        str_table_nane:str='RAW_CVMWEB_INFOS_DIARIAS'
     ) -> list:
         '''
         DOCSTRING: BLOCK FUND DAILY REPORTS FOR DATES OF INTEREST TO FETCH - PARALLELIZED
@@ -413,9 +500,13 @@ class CVMWeb_WS_Funds:
         # print(f'LIST_SER_CVMWEB_DAILY_INFOS: \n{list_ser}')
         # backup in db, if is user's will
         if \
-            (self.cls_db_daily_infos is not None) \
+            (self.cls_db is not None) \
             and (len(list_ser) > 0):
-            self.cls_db_daily_infos._insert(list_ser)
+            self.cls_db._insert(
+                list_ser, 
+                str_table_nane, 
+                bl_insert_or_ignore=self.bl_insert_or_ignore
+            )
         # wait for the next iteration, if is user's will
         if self.int_sleep is not None:
             sleep(self.int_sleep)
@@ -428,13 +519,14 @@ class CVMWeb_WS_Funds:
         str_code_version:str='dev',
         str_dt_fmt_1:str='YYYY-MM-DD',
         str_strftime_format:str='%d/%m/%Y',
-        list_funds:list=list()
     ) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_funds = list()
         # check date format
         for str_fund_code, list_dts in dict_dts_funds.items():
             for i, str_dt in enumerate(list_dts):

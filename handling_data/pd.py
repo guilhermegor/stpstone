@@ -172,12 +172,13 @@ class DealingPd(DealingExcel):
                     columns={str(column): str(column)[:-2]})
         return merge_df
 
-    def max_chrs_per_column(df_:pd.DataFrame, dict_:dict=dict()) -> dict:
+    def max_chrs_per_column(df_:pd.DataFrame) -> dict:
         '''
         DOCSTRING: CALCULATE THE MAXIMUM NUMBER OF CHARACTERS IN A SPECIFIED COLUMN OF A DATAFRAME
         INPUTS: DATAFRAME
         OUTPUTS: DICT
         '''
+        dict_ = dict()
         for col_ in list(df_.columns):
             dict_[col_] = df_[col_].astype(str).str.len().max()
         return dict_

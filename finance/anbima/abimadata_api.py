@@ -124,12 +124,14 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_method
         )
     
-    def funds_trt(self, i_pg=0, i_fnd=0, list_ser=list()):
+    def funds_trt(self, i_pg=0, i_fnd=0):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # looping within all available fund pages
         while True:
             #   requesting for current fund json, in case status code is different
@@ -272,14 +274,15 @@ class AnbimaDataFunds(AnbimaDataGen):
     
     def fund_trt(
         self,
-        list_code_fnds: list,
-        dict_dfs=dict()
+        list_code_fnds: list
     ):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        dict_dfs = dict()
         # looping within the funds codes
         for str_code_fnd in list_code_fnds:
             #   setting variables

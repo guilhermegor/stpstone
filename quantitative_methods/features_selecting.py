@@ -227,7 +227,7 @@ class DimensionalityReduction:
         # returning datframe of interest
         return df_tmp_groupby
 
-    def var_iter(self, df, target_col, max_bins, list_dicts_woe_iv=list(), list_remarks=list(),
+    def var_iter(self, df, target_col, max_bins,
                  min_bins_monotonic=2, col_feature='feature', col_remarks='remarks',
                  name_categorical='categorical', orient_str='records'):
         '''
@@ -238,6 +238,9 @@ class DimensionalityReduction:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser_woe_iv = list()
+        list_remarks = list()
         # iterating over the columns within the dataframe
         for c_i in df.columns:
             if c_i not in [target_col]:
@@ -258,10 +261,10 @@ class DimensionalityReduction:
                     list_remarks.append(
                         {col_feature: c_i, col_remarks: name_categorical})
                 #   appending to list of dataframes
-                list_dicts_woe_iv.extend(
+                list_ser_woe_iv.extend(
                     df_agg_data.to_dict(orient=orient_str))
         # returning dataframes of woe, iv and remarks
-        return pd.DataFrame(list_dicts_woe_iv), pd.DataFrame(list_remarks)
+        return pd.DataFrame(list_ser_woe_iv), pd.DataFrame(list_remarks)
 
     def get_iv_woe(self, df, target_col, max_bins, name_missing_data='Missing', name_bins='_bins',
                    col_non_event_count='non_event_count', col_sample_class='sample_class',

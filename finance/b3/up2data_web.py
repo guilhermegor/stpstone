@@ -141,16 +141,18 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
         return df_daily_trades
 
     @property
-    def security_category_name(self, dict_export=dict(), key_ticker='TckrSymb',
+    def security_category_name(self, key_ticker='TckrSymb',
                                col_security_category_name='SctyCtgyNm',
                                col_market_name='MktNm',
-                               list_markets_classified=list(),
                                bl_return_markets_not_classified=False):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_markets_classified = list()
+        dict_export = dict() 
         # fetch in memory instruments register of assets traded in b3 exchange
         df_ = self.instruments_register_raw
         print('*** REIGSTER B3 RAW ***')
@@ -187,13 +189,14 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
                     method='GET', key_pg_count='pageCount', key_valores='values', 
                     list_cols_lb_b3=['RptDt', 'TckrSymb', 'Asst', 'QtyCtrctsDay', 'QtyShrDay', 
                                      'DnrMinRate', 'DnrAvrgRate', 'DnrMaxRate', 'TakrMinRate', 
-                                     'TakrAvrgRate', 'TakrMaxRate', 'MktNm'], 
-                    list_ser=list()):
+                                     'TakrAvrgRate', 'TakrMaxRate', 'MktNm']):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # reference date
         data_ref_lb_b3 = DatesBR().sub_working_days_before(
             DatesBR().curr_date, wd_bef).strftime('%Y-%m-%d')
@@ -279,13 +282,14 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
 
     def lending_open_position(self, wd_bef=1, url='https://arquivos.b3.com.br/tabelas/table/LendingOpenPosition/{}/{}', 
                               method='GET', key_pg_count='pageCount', key_valores='values', 
-                              list_cols_lop_b3=['RptDt', 'TckrSymb', 'Asst', 'BalQty', 'TradAvrgPric', 'PricFctr', 'BalVal'], 
-                              list_ser=list()):
+                              list_cols_lop_b3=['RptDt', 'TckrSymb', 'Asst', 'BalQty', 'TradAvrgPric', 'PricFctr', 'BalVal']):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # reference date
         data_ref_lb_b3 = DatesBR().sub_working_days_before(
             DatesBR().curr_date, wd_bef).strftime('%Y-%m-%d')

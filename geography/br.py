@@ -34,13 +34,15 @@ class BrazilGeo:
         return dict_message
 
     def zip_code(self, list_zip_codes, url='https://cep.awesomeapi.com.br/json/{}',
-                 method='GET', dict_zip_adresses=dict(), key_address_type='adress_type',
+                 method='GET', key_address_type='adress_type',
                  key_address='address', key_state='state'):
         '''
         DOCSTRING: ZIP CODE LOCATION INFO
         INPUTS: LIST ZIP CODES, URL (DEFAULT), METHOD (DEFAULT)
         OUTPUTS: DICTIONARY
         '''
+        # setting variables
+        dict_zip_adresses = dict()
         # looping through each zip code, requesting info about adrees, and raise exception
         #   if status code is different from 2xx
         for zip_ in list_zip_codes:

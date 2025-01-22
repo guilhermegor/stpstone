@@ -109,14 +109,15 @@ class RtFromPV:
 
 class TSIR:
 
-    def flat_forward(self, dict_nper_rates, working_days_year=252, dict_=dict()):
+    def flat_forward(self, dict_nper_rates, working_days_year=252):
         '''
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES - FLAT FORWARD MODEL
         INPUTS: DICT WITH NPER (KEYS) AND RATES (VALUES), AND WORKING DAYS IN A YEAR (252 AS DEFAULT)
         OUTPUTS: JSON (KEYS AS NPER TO MATURITY AND RESPECTIVELY RATES)
         '''
+        # setting variables
+        dict_ = dict()
         # store in memory dictionary with rates per nper
-        
         for curr_nper_wrkdays in range(list(dict_nper_rates.keys())[0],
                                        list(dict_nper_rates.keys())[-1] + 1):
             # forward rate - interpolation for two boundaries
@@ -173,12 +174,14 @@ class TSIR:
                         * nper_working_days ** (x - num_constants_cubic_spline / 2) for x in
                         range(int(num_constants_cubic_spline / 2), num_constants_cubic_spline)])
 
-    def literal_cubic_spline(self, dict_nper_rates, bl_debug=False, dict_=dict()):
+    def literal_cubic_spline(self, dict_nper_rates, bl_debug=False):
         '''
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        dict_ = dict()
         # tsir - nper x rate
         for curr_nper_wrkdays in range(list(dict_nper_rates.keys())[0],
                                        list(dict_nper_rates.keys())[-1] + 1):

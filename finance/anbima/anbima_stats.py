@@ -19,12 +19,14 @@ from stpstone.loggs.db_logs import DBLogs
 class AnbimaStats:
 
     @property
-    def pmi_hat(self, list_ser=list()):
+    def pmi_hat(self):
         '''
         DOCSTRING: IPCA PMI PROJECTED BY ANBIMA
         INPUTS: -
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_ser = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_ANBIMA['anbima_stats']['url_price_indexes'], 

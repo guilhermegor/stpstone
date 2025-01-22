@@ -249,13 +249,14 @@ class Operations(ConnectionApi):
                                        key_limit_spci='limitSpci',
                                        key_limit_spvi='limitSpvi',
                                        key_instrument_symbol='instrumentSymbol',
-                                       key_instrument_asset='instrumentAsset',
-                                       dict_export=dict()):
+                                       key_instrument_asset='instrumentAsset'):
         '''
         DOCSTRING: DICTIONARY WITH INSTRUMENTS AND RESPECTIVE AUTHORIZED MARKETS
         INPUTS: -
         OUTPUTS: DICTIONARY
         '''
+        # setting variables
+        dict_export = dict()
         # json groups of authorized markets
         json_authorized_markets = self.groups_authorized_markets
         # loop through each authorized market and collect its assets associated

@@ -12,12 +12,14 @@ from stpstone.handling_data.numbers import NumHandler
 
 class GlobalRates:
 
-    def generic_req(self, url, bl_verify=False, list_outlooks=list()):
+    def generic_req(self, url, bl_verify=False):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_outlooks = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             url, 

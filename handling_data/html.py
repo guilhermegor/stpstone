@@ -60,8 +60,7 @@ class HtmlHndler:
         soup = BeautifulSoup(html_, features='lxml')
         return soup(html_)
 
-    def parse_html_to_string(self, html_, parsing_lib='html.parser', list_=list(),
-                             list_tr_html=list(), dict_=dict(), dict_fill_blanks_td=dict(),
+    def parse_html_to_string(self, html_, parsing_lib='html.parser',
                              str_body_html='',
                              join_td_character='|', td_size_ajust_character=' '):
         '''
@@ -69,6 +68,11 @@ class HtmlHndler:
         INPUTS: HTML
         OUTPUTS: STRING
         '''
+        # setting variables
+        list_ = list()
+        list_tr_html = list()
+        dict_ = dict()
+        dict_fill_blanks_td = dict()
         # creating a parseable object
         obj_soup = BeautifulSoup(html_, parsing_lib)
         html_parsed_raw = obj_soup.get_text()

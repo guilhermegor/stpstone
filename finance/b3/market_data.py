@@ -35,15 +35,16 @@ class TradingVolumeB3:
     def bov_monthly(
             self, 
             int_year:int, 
-            int_month:int, 
-            list_th:List[str]=list(), 
-            list_td:List[str]=list()
+            int_month:int
         ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_th = list()
+        list_td = list()
         # format month and year to string
         str_month = f'{int_month:02}'
         str_year = str(int_year)
@@ -172,12 +173,14 @@ class CalendarB3:
         return num_let >= int_min_letters
 
     @property
-    def options_exercise_dates(self, list_ser:List[dict]=list()) -> pd.DataFrame:
+    def options_exercise_dates(self) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_B3['options_exercise_dates']['url'], 
@@ -231,12 +234,14 @@ class CalendarB3:
 
 class TradingHoursB3:
 
-    def futures_generic(self, url:str, int_cols:int, list_df:List[pd.DataFrame]=list()) -> list:
+    def futures_generic(self, url:str, int_cols:int) -> list:
         '''
         DOCSTRING: TRADING TIMES OF FUTURES REGARDING BRAZILLIAN PMI (IPCA) AND STOCK INDEXES
         INPUTS: -
         OUTPUTS:
         '''
+        # setting variables
+        list_df = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             url, 
@@ -409,12 +414,14 @@ class TradingHoursB3:
         )
 
     @property
-    def stocks(self, list_df:List[pd.DataFrame]=list()) -> list:
+    def stocks(self) -> list:
         '''
         DOCSTRING: TRADING TIMES OF BRAZILLIAN STOCKS
         INPUTS: -
         OUTPUTS:
         '''
+        # setting variables
+        list_df = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_B3['trading_hours_b3']['stocks']['url'], 
@@ -695,13 +702,14 @@ class MDB3:
         return df_fin_ind
 
     @property
-    def securities_volatility(self, method:str='GET', float_pct_factor:float=100.0, 
-                              list_ser:List[dict]=list()) -> pd.DataFrame:
+    def securities_volatility(self, method:str='GET', float_pct_factor:float=100.0) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # looping through page sets
         for _, dict_ in YAML_B3['securities_volatility_b3']['pages'].items():
             #   looping through hashes
@@ -900,7 +908,6 @@ class MDInvestingDotCom:
             self, 
             list_tickers:List[str], 
             str_period:str='max',
-            list_ser:List[dict]=list(), 
             col_date:str='Date', 
             col_ticker:str='Ticker'
         ) -> pd.DataFrame:
@@ -909,6 +916,8 @@ class MDInvestingDotCom:
         INPUTS:
         OUTPUTS
         '''
+        # setting variables
+        list_ser = list()
         # looping through list_tickers and collecting historical data
         for ticker in list_tickers:
             #   creating yfinance object for the current ticker
@@ -934,7 +943,7 @@ class MDInvestingDotCom:
 
     def close_price_hist(
             self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime, 
-            str_country:str='brazil', str_assets_class:str='acao', dict_close:dict=dict()
+            str_country:str='brazil', str_assets_class:str='acao'
         ) -> pd.DataFrame:
         '''
         DOCSTRING: HISTORIC CLOSING PRICES FROM INVESTING.COM
@@ -942,6 +951,8 @@ class MDInvestingDotCom:
             FORMATO DATA 'DD/MM/YYYY'
         OUTPUTS: JSON
         '''
+        # setting variables
+        dict_close = dict()
         # filling list of available assets
         if str_assets_class == 'acao' and type(str_assets_class) == str:
             for ticker in list_tickers:
@@ -1579,8 +1590,7 @@ class MDComDinheiro:
             dt_inf:datetime, 
             dt_sup:datetime, 
             str_fmt_dt_input:str='YYYY-MM-DD', 
-            int_wd_bef:int=2, 
-            list_ser=list(), 
+            int_wd_bef:int=2,
             col_classe_anbima:str='CLASSE_ANBIMA_DO_FUNDO', 
             col_nome_fundo:str='NOME_FUNDO', 
             col_like_max_drawdown:str='MDD*', 
@@ -1594,6 +1604,8 @@ class MDComDinheiro:
         INPUTS: LIST OF EINS, DATE INFERIOR AND SUPERIOR
         OUTPUTS: DATAFRAME
         '''
+        # setting variables
+        list_ser = list()
         # changing dates format
         dt_inf = DatesBR().str_date_to_datetime(dt_inf, str_fmt_dt_input)
         dt_sup = DatesBR().str_date_to_datetime(dt_sup, str_fmt_dt_input)

@@ -57,7 +57,7 @@ class NubankIntegration:
         else:
             raise Exception('Authetication mock variable ouught be a boolean')
 
-    def credit_card_bill(self, nu, bl_return_pd=True, list_ser=list(), float_den_amount=100.0,
+    def credit_card_bill(self, nu, bl_return_pd=True, float_den_amount=100.0,
                          col_id='ID', col_description='DESCRIPTION', col_category='CATEGORY',
                          col_subcategory='SUBCATEGORY', col_amount='AMOUNT',
                          col_amount_wo_iof='AMOUNT_WITHOUT_IOF', col_time='TIME',
@@ -71,12 +71,14 @@ class NubankIntegration:
         INPUTS: NU OBJECT, RETURNED THROUGH AUTHENTIFICATION
         OUTPUTS: JSON (DICT WITH CARD STATEMENTS, BILLS AND BILLS DETAILS AS KEYS)
         '''
+        # setting variables
+        list_ser = list()
         # import dictionary with card statements
-        list_dicts_card_statements = nu.get_card_statements()
+        list_ser_card_statements = nu.get_card_statements()
         # return pandas dataframe, if it is user's will
         if bl_return_pd == True:
             #   looping through card statements aiming to build a pandas dataframe
-            for dict_ in list_dicts_card_statements:
+            for dict_ in list_ser_card_statements:
                 #   dealing with eventually missing data
                 if 'subcategory' in dict_['details']:
                     subcategory = dict_['details']['subcategory'].upper()
@@ -171,13 +173,13 @@ class NubankIntegration:
                 bills[i]) for i in range(1, len(bills))]
             # send nubank credit card message
             jsonify_message = {
-                'card_statements': list_dicts_card_statements,
+                'card_statements': list_ser_card_statements,
                 'bills': bills,
                 'bills_details': bills_details
             }
             return JsonFiles().send_json(jsonify_message)
         except:
-            return list_dicts_card_statements
+            return list_ser_card_statements
 
     def current_account(self, nu):
         '''

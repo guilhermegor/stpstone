@@ -20,12 +20,14 @@ from stpstone.loggs.db_logs import DBLogs
 
 class AnbimaMTM:
 
-    def general_req(self, url, bl_verify, method='GET', str_sep='@', list_ser=list()):
+    def general_req(self, url, bl_verify, method='GET', str_sep='@'):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_ser = list()
         # requesting response
         resp_req = request(method, url, bl_verify)
         # raise exception in case of status code different from 2xx
@@ -144,12 +146,14 @@ class AnbimaMTM:
         return df_br_tb
     
     @property
-    def ima(self, str_sep='@', dict_list_ser=dict()):
+    def ima(self, str_sep='@'):
         '''
         DOCSTRING: MARKET INDEXES ANBIMA
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        dict_list_ser = dict()
         # requesting response
         resp_req = request(
             YAML_ANBIMA['sec_mkt_prcs']['ima']['method'], 

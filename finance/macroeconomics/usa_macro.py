@@ -42,12 +42,16 @@ class USAMacro:
         return HandlingObjects().literal_eval_data(message_content, "b'", "'")
 
     @property
-    def non_farm_payroll(self, list_td=list(), list_dicts_1=list(), list_dicts_2=list()):
+    def non_farm_payroll(self):
         '''
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         '''
+        # setting variables
+        list_td = list()
+        list_ser_1 = list()
+        list_ser_2 = list()
         # payload
         dict_payload = {}
         # header
@@ -146,24 +150,24 @@ class USAMacro:
             ]
             #   creating list of dictionaries
             if i == 1:
-                list_dicts_1 = HandlingDicts().pair_headers_with_data(
+                list_ser_1 = HandlingDicts().pair_headers_with_data(
                     list_th_1, 
                     list_td
                 )
             elif i == 2:
-                list_dicts_2 = HandlingDicts().pair_headers_with_data(
+                list_ser_2 = HandlingDicts().pair_headers_with_data(
                     list_th_2, 
                     list_td
                 )
-                # print(list_dicts_2)
+                # print(list_ser_2)
             else:
                 raise Exception('Table of payroll not supported for data treatment, ' 
                                 + 'please revisit the parameter')
         # serialized list into dataframe
-        df_payrolls = pd.DataFrame(list_dicts_1)
+        df_payrolls = pd.DataFrame(list_ser_1)
         df_payrolls = df_payrolls[[c for c in list(df_payrolls.columns) 
                                    if (c not in list_th_0) and (c not in list_th_2)]]
-        df_usa_labour_data = pd.DataFrame(list_dicts_2)
+        df_usa_labour_data = pd.DataFrame(list_ser_2)
         df_usa_labour_data = df_usa_labour_data[[c for c in list(
             df_usa_labour_data.columns) if (c not in list_th_1) and (c not in list_th_0)]]
         # looping through dataframes

@@ -26,13 +26,14 @@ class MultipleRegressionHT:
         # returning stats
         return model_fitted.summary()
 
-    def linearity_test(self, array_x, array_y, list_cols_iv, r_squared_cut=0.8, 
-                       list_linearity=list()):
+    def linearity_test(self, array_x, array_y, list_cols_iv, r_squared_cut=0.8):
         '''
         DOCSTRING: LINEARITY TEST - LINEAR RELATIONSHIP BETWEEN DV AND EACH IV
         INPUTS: ARRAY X, ARRAY Y, R-SQUARED CUT
         OUTPUTS: DICTIONARY
         '''
+        # setting variables
+        list_linearity = list()
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # looping through each iv

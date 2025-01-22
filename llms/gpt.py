@@ -26,13 +26,15 @@ class GPT():
         self.bl_strem=bl_stream,
         self.client = OpenAI(api_key=self.api_key)
 
-    def run_prompt(self, list_tuple:List[tuple], list_:list=list()) -> ChatCompletion:
+    def run_prompt(self, list_tuple:List[tuple]) -> ChatCompletion:
         '''
         DOCSTRING: RUN LLM WITH PROMPT
         INPUTS: 
             - LIST_TUPLE:LIST[TUPLE] IN ORDER TO CREATE A PROMPT TO REQUEST THE LLM
         OUTPUTS: STR
         '''
+        # setting variables
+        list_ = list()
         # user's information in order to build the prompt
         dict_content = {
             YAML_LLMS['openai']['key_role']: YAML_LLMS['openai']['value_user']
