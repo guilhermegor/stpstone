@@ -1,12 +1,14 @@
 ### CONNECTING TO SQLITE DATABASE ###
 
 import sqlite3
+import backoff
 from logging import Logger
 import pandas as pd
 from typing import List, Dict, Any, Optional
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.json import JsonFiles
 from stpstone.loggs.create_logs import CreateLog
+from stpstone.handling_data.pd import DealingPd
 
 
 class SQLiteDB:
@@ -22,6 +24,12 @@ class SQLiteDB:
         self.conn:sqlite3.Connection = sqlite3.connect(self.db_path)
         self.cursor:sqlite3.Cursor = self.conn.cursor()
 
+    @backoff.on_exception(
+        backoff.constant,
+        sqlite3.OperationalError,
+        interval=10,
+        max_tries=20,
+    )
     def _execute(self, str_query:str) -> None:
         '''
         DOCSTRING: RUN QUERY WITH DML ACCESS
@@ -30,8 +38,14 @@ class SQLiteDB:
         '''
         self.cursor.execute(str_query)
 
-    def _read(self, str_query:str, dict_type_cols:Dict[str, Any], 
-        list_cols_dt:Optional[List[str]], str_fmt_dt:Optional[str]) -> pd.DataFrame:
+    @backoff.on_exception(
+        backoff.constant,
+        sqlite3.OperationalError,
+        interval=10,
+        max_tries=20,
+    )
+    def _read(self, str_query:str, dict_dtypes:Dict[str, Any], 
+        list_cols_dt:Optional[List[str]]=None) -> pd.DataFrame:
         '''
         DOCSTRING:
         INPUTS:
@@ -39,14 +53,20 @@ class SQLiteDB:
         '''
         # retrieving dataframe
         df_ = pd.read_sql_query(str_query, self.conn)
-        # changing data types
-        df_ = df_.astype(dict_type_cols)
-        for col_ in list_cols_dt:
-            df_[col_] = [DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]]
+        if df_.empty == False:
+            #   changing data types
+            df_ = DealingPd().pipeline_df_startup(df_, dict_dtypes, list_cols_dt)
         # return dataframe
         return df_
 
-    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str) -> None:
+    @backoff.on_exception(
+        backoff.constant,
+        sqlite3.OperationalError,
+        interval=10,
+        max_tries=20,
+    )
+    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
+        bl_insert_or_ignore:bool=False) -> None:
         '''
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
         INPUTS: JSON_DATA
@@ -57,8 +77,12 @@ class SQLiteDB:
         # sql insert statement
         list_columns = ', '.join(json_data[0].keys())
         list_data = ', '.join(['?' for _ in json_data[0]])
-        str_query = f'INSERT OR IGNORE INTO {str_table_name} ' \
-            + f'({list_columns}) VALUES ({list_data})'
+        if bl_insert_or_ignore == True:
+            str_query = f'INSERT OR IGNORE INTO {str_table_name} ' \
+                + f'({list_columns}) VALUES ({list_data})'
+        else:
+            str_query = f'INSERT INTO {str_table_name} ' \
+                + f'({list_columns}) VALUES ({list_data})'
         try:
             # insert each record
             for record in json_data:
