@@ -20,5 +20,8 @@ Thumbs.db
 # VENV
 .venv
 
-# build tokens
+# python build artifacts
+dist/
+build/
+*.egg-info/
 .pypirc
