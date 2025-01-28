@@ -15,10 +15,13 @@ __pycache__/
 Thumbs.db
 
 # ENV
-.env
+* .env
 
 # VENV
 .venv
+
+# logs
+logs/
 
 # python build artifacts
 dist/
