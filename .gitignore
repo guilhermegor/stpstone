@@ -19,3 +19,6 @@ Thumbs.db
 
 # VENV
 .venv
+
+# build tokens
+.pypirc
