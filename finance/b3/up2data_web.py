@@ -60,7 +60,8 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
         # setting variables
         list_ser = list()
         # requesting data
-        resp_req = self.req_session.session.get(YAML_B3['up2data_b3']['access_api'].format(self.token))
+        resp_req = self.req_session.session.get(
+            YAML_B3['up2data_b3']['access_api'].format(self.token))
         resp_req.raise_for_status()
         str_resp_req = resp_req.text
         # cleaning response
@@ -73,9 +74,16 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
             list_ser.append(dict(zip(list_headers, list_row)))
         # dataframe from serialized list
         df_ = pd.DataFrame(list_ser)
+        # changing columns case, from cammel to snake
+        df_.columns = [StrHandler().camel_to_snake(x) for x in df_.columns]
         # changing column types
-        list_cols_df = list(df_.columns)
-        df_ = df_.astype(dict(zip(list_cols_df, [str] * len(list_cols_df))))
+        print('cols date: ', YAML_B3['instruments_register_row']['cols_date'])
+        df_ = DealingPd().pipeline_df_startup(
+            df_,
+            YAML_B3['instruments_register_row']['cols_dtype'],
+            YAML_B3['instruments_register_row']['cols_date'],
+            str_fmt_dt=YAML_B3['instruments_register_row']['str_fmt_dt']
+        )
         # adding logging
         df_ = DBLogs().audit_log(
             df_, 

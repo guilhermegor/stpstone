@@ -71,7 +71,8 @@ class PostgreSQLDB:
         # return dataframe
         return df_
 
-    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str) -> None:
+    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
+        bl_insert_or_ignore:bool=False) -> None:
         '''
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A POSTGRESQL TABLE
         INPUTS: JSON_DATA
@@ -81,13 +82,17 @@ class PostgreSQLDB:
         json_data = JsonFiles().normalize_json_keys(json_data)
         # sql insert statement
         list_columns = ', '.join(json_data[0].keys())
-        # list_placeholders = ', '.join(['%s' for _ in json_data[0]])
-        # str_query = f'INSERT INTO {str_table_name} ({list_columns}) VALUES ({list_placeholders}) ON CONFLICT DO NOTHING'
+        list_placeholders = ', '.join(['%s' for _ in json_data[0]])
+        if bl_insert_or_ignore == True:
+            str_query = f'INSERT INTO {str_table_name} ({list_columns}) VALUES ' \
+                + f'({list_placeholders}) ON CONFLICT DO NOTHING'
+        else:
+            str_query = f'INSERT INTO {str_table_name} ({list_columns}) VALUES ' \
+                + f'({list_placeholders})'
         try:
-            # use execute_values for bulk insert
             execute_values(
                 self.cursor,
-                f'INSERT INTO {str_table_name} ({list_columns}) VALUES %s ON CONFLICT DO NOTHING',
+                str_query,
                 [tuple(record.values()) for record in json_data]
             )
             self.conn.commit()

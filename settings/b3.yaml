@@ -354,3 +354,70 @@ bov_trading_volume:
   col_volume: VOLUME_BRL
   col_time_period: 'MONTH_YEAR'
   col_market: 'MARKET'
+
+# instruments b3
+instruments_register_row:
+  str_fmt_dt: YYYY-MM-DD
+  cols_dtype:
+    RPT_DT: str
+    TCKR_SYMB: str
+    ASST: str
+    ASST_DESC: str
+    SGMT_NM: str
+    MKT_NM: str
+    SCTY_CTGY_NM: str
+    XPRTN_DT: str
+    XPRTN_CD: str
+    TRADG_START_DT: str
+    TRADG_END_DT: str
+    BASE_CD: str
+    CONVS_CRIT_NM: str
+    MTRTY_DT_TRGT_PT: int
+    REQRD_CONVS_IND: str
+    ISIN: str
+    CFICD: str
+    DLVRY_NTCE_START_DT: str
+    DLVRY_NTCE_END_DT: str
+    OPTN_TP: str
+    CTRCT_MLTPLR: int
+    ASST_QTN_QTY: int
+    ALLCN_RND_LOT: int
+    TRADG_CCY: str
+    DLVRY_TP_NM: str
+    WDRWL_DAYS: int
+    WRKG_DAYS: int
+    CLNR_DAYS: int
+    RLVR_BASE_PRIC_NM: str
+    OPNG_FUTR_POS_DAY: int
+    SD_TP_CD1: str
+    UNDRLYG_TCKR_SYMB1: str
+    SD_TP_CD2: str
+    UNDRLYG_TCKR_SYMB2: str
+    PURE_GOLD_WGHT: float
+    EXRC_PRIC: float
+    OPTN_STYLE: str
+    VAL_TP_NM: str
+    PRM_UPFRNT_IND: str
+    OPNG_POS_LMT_DT: str
+    DSTRBTN_ID: str
+    PRIC_FCTR: float
+    DAYS_TO_STTLM: int
+    SRS_TP_NM: str
+    PRTCN_FLG: str
+    AUTOMTC_EXRC_IND: str
+    SPCFTN_CD: str
+    CRPN_NM: str
+    CORP_ACTN_START_DT: str
+    CTDY_TRTMT_TP_NM: str
+    MKT_CPTLSTN: float
+    CORP_GOVN_LVL_NM: str
+  cols_date: 
+    - RPT_DT
+    - TRADG_START_DT
+    - TRADG_END_DT
+    - XPRTN_DT
+    - DLVRY_NTCE_START_DT
+    - DLVRY_NTCE_END_DT
+    - CORP_ACTN_START_DT
+    - OPNG_POS_LMT_DT
+    - LOG_TIMESTAMP

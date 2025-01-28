@@ -427,3 +427,13 @@ class StrHandler:
             return False
         except ValueError:
             return True
+        
+    def camel_to_snake(self, str_cammel):
+        '''
+        Cammel case to snake case
+        Arguments:
+            str_ (str): string to be converted
+        Outputs: str
+        '''
+        str_snake = re.sub(r'(?<!^)(?=[A-Z])', '_', str_cammel).upper()
+        return str_snake
