@@ -1,4 +1,4 @@
-![alt text](image.png)
+![alt text](img/logo_stpstone.png)
 
 * Stylized name, shortened spelling of stepping stone;
 * A Python framework for ingesting and interpreting structured and unstructured financial data, designed to optimize quantitative methods in financial markets.
