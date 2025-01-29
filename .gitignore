@@ -15,7 +15,7 @@ __pycache__/
 Thumbs.db
 
 # ENV
-* .env
+*.env
 
 # VENV
 .venv
@@ -27,4 +27,4 @@ logs/
 dist/
 build/
 *.egg-info/
-.pypirc
+*.pypirc

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["guilhermegor <guirodrigues.gor@gmail.com>"]
 readme = "README.md"
@@ -32,7 +32,7 @@ investpy = "1.0.3"
 yfinance = "0.1.70"
 yahooquery = "2.3.2"
 nelson-siegel-svensson = "0.4.2"
-cvxopt = "1.3.0.1"
+cvxopt = "1.3.0"
 plotly = "5.14.1"
 bs4 = "0.0.1"
 numpy-financial = "1.0.0"
@@ -46,11 +46,11 @@ fpdf = "1.7.2"
 ftfy = "6.1.3"
 basicauth = "0.4.1"
 unidecode = "1.2.0"
-pywin32 = "300"
+pywin32 = {version = "300", platform = "win32"}
 xlwt = "1.3.0"
 pymsteams = "0.1.14"
 typing = "3.7.4.3"
-pyyaml = "5.4.1"
+pyyaml = "5.4.0"
 pyodbc = "4.0.35"
 psycopg2 = "2.8.6"
 sqlalchemy = "1.4.52"
@@ -59,11 +59,15 @@ mlxtend = "0.23.1"
 statistics = "1.0.3.5"
 sendgrid = "6.11.0"
 slack = "0.0.2"
-metatrader5 = "5.0.36"
 typeform = "1.1.0"
 pymysql = "1.1.1"
-pre-commit = "^4.0.1"
+pytest = "^7.0"
 
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
+pygments = "2.19.1"
+twine = "^6.1.0"
 
 [build-system]
 requires = ["poetry-core"]

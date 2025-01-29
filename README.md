@@ -209,6 +209,24 @@ These instructions will get you a copy of the project running on your local mach
 
 ### Installing
 
+#### PyPi.org
+
+```bash
+(bash)
+
+# latest version
+pip install stpstone
+# optional: versioning
+pip install stpstone==0.1.0
+
+```
+
+* Available at: https://pypi.org/project/stpstone/0.1.0/
+
+#### Local Machine Version
+
+* Git clone
+
 * Pyenv for Python ^3.9.13 local installation:
 
 ```powershell
