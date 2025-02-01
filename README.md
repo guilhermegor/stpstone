@@ -212,8 +212,6 @@ These instructions will get you a copy of the project running on your local mach
 #### PyPi.org
 
 ```bash
-(bash)
-
 # latest version
 pip install stpstone
 # optional: versioning
@@ -229,15 +227,12 @@ pip install stpstone==0.1.0
 
 * Pyenv for Python ^3.12.8 local installation:
 
-```powershell
 (PowerShell)
-
+```powershell
 Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile "./install-pyenv-win.ps1"; &"./install-pyenv-win.ps1"
 ```
 
 ```bash
-(bash)
-
 echo installing local version of python within project
 cd "complete/path/to/project"
 pyenv install 3.12.8
@@ -248,8 +243,6 @@ pyenv local 3.12.8
 
 * Activate poetry .venv
 ```bash
-(bash)
-
 echo defining local pyenv version
 pyenv global 3.12.8
 pyenv which python
@@ -295,7 +288,7 @@ poetry run python ./tests/markowitz_portfolios.py
 * [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
 ## License
-
+MIT
 
 ## Acknowledgments
 
