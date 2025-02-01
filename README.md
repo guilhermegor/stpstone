@@ -269,34 +269,22 @@ poetry run <module.py>
 
 ## Running the Tests
 
-* EDA - Exploratory Data Analysis:
+* EDA - Exploratory Data Analysis:  
 ```(bash)
-
-(bash)
-
 cd "complete/path/to/project"
-poetry run python stpstone.tests.eda.py
-
+poetry run python ./tests/eda.py
 ```
 
 * European / American Options:
 ```(bash)
-
-(bash)
-
 cd "complete/path/to/project"
-poetry run python tests.european-american-options.py
-
+poetry run python ./tests/european_american_options.py
 ```
 
 * Markowitz Portfolios:
 ```(bash)
-
-(bash)
-
 cd "complete/path/to/project"
-poetry run python tests.markowitz-portfolios.py
-
+poetry run python ./tests/markowitz_portfolios.py
 ```
 
 
