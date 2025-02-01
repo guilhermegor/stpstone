@@ -1,2 +1,0 @@
-recursive-include typeform *.py
-include *.rst *.py

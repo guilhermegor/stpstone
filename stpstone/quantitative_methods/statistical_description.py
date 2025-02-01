@@ -1,6 +1,5 @@
 ### STATISTICAL DESCRIPTION ###
 
-import statistics
 import numpy as np
 from scipy import stats
 from sklearn.metrics import mean_squared_error, mean_absolute_error
@@ -18,8 +17,8 @@ class StatiscalDescription:
             'nobs': stats.describe(np.array(array_data)).nobs,
             'minmax': stats.describe(np.array(array_data)).minmax,
             'mean': stats.describe(np.array(array_data)).mean,
-            'median': statistics.median(np.array(array_data)),
-            'mode': statistics.mode(np.array(array_data)),
+            'median': stats.median(np.array(array_data)),
+            'mode': stats.mode(np.array(array_data)),
             'variance_sample': stats.describe(np.array(array_data)).variance,
             'standard_deviation_sample': stats.describe(np.array(
                 array_data)).variance ** 0.5,
@@ -41,7 +40,7 @@ class StatiscalDescription:
         INPUTS: array OF REAL NUMBERS
         OUTPUTS: HARMONIC MEAN
         '''
-        return statistics.harmonic_mean(np.array(array_data))
+        return stats.harmonic_mean(np.array(array_data))
 
     def median_sample(self, array_data):
         '''
@@ -49,7 +48,7 @@ class StatiscalDescription:
         INPUTS: array OF REAL NUMBERS
         OUTPUTS: MEDIAN
         '''
-        return statistics.median(np.array(array_data))
+        return stats.median(np.array(array_data))
 
     def mode_sample(self, array_data):
         '''
@@ -57,7 +56,7 @@ class StatiscalDescription:
         INPUTS: array OF REAL NUMBERS
         OUTPUTS: MODE
         '''
-        return statistics.mode(np.array(array_data))
+        return stats.mode(np.array(array_data))
 
     def covariance(self, array_data_1, array_data_2):
         '''
