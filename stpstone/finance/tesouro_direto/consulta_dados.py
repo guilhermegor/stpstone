@@ -6,9 +6,9 @@ import pandas as pd
 from io import BytesIO
 from requests import request
 import sys
-sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python\Packages')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from stpstone.handling_data.str import StrHandler
-from stpstone.central._global_slots import YAML_BR_TRS
+from stpstone.settings._global_slots import YAML_BR_TRS
 from stpstone.cals.handling_dates import DatesBR
 
 
