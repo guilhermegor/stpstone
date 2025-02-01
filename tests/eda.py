@@ -4,7 +4,7 @@ import sys
 import pandas as pd
 import numpy as np
 from unittest import TestCase, main
-sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
 
 
