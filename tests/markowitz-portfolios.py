@@ -3,7 +3,7 @@
 import sys
 import numpy as np
 from unittest import TestCase, main
-sys.path.append(r'C:\Users\Guilherme\OneDrive\Documentos\GitHub')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from stpstone.finance.financial_risk.market_risk import Markowitz
 
 
