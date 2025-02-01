@@ -259,7 +259,7 @@ poetry run py --version
 
 echo installing poetry .venv
 poetry init
-poery install --no-root
+poetry install --no-root
 
 echo running current .venv
 poetry shell
