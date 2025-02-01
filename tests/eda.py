@@ -1,10 +1,10 @@
 ### EDA UNIT TEST ###
-
+import os
 import sys
 import pandas as pd
 import numpy as np
 from unittest import TestCase, main
-sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
 
 
@@ -16,15 +16,19 @@ class EDA(TestCase):
         INPUTS:
         OUTPUTS:
         '''
+
         # hardcodes
-        nome_completo_teste_mesa_eda = r'C:\Users\Guilherme\OneDrive\Bases\IV WOE UNIT TEST\data-customers-rating_20230921_2055.csv'
+        file_path_teste_mesa_eda = os.path.join(
+            os.path.dirname(__file__),
+            'bases',
+            'data-customers-rating_20230921_2055.csv')
         target_col = 'bad_customer'
         iv_target_number_missed_payments = 0.20542618611759142
         iv_target_state = 0.09767337364917127
         iv_target_use_online_streaming = 0.003143062167476093
         pp_numero_visitas_banco = 'medium predictor'
         # carregando dataframe com teste mesa para a a
-        reader = pd.read_csv(nome_completo_teste_mesa_eda)
+        reader = pd.read_csv(file_path_teste_mesa_eda)
         df_eda = pd.DataFrame(reader)
         # determinando o número de bins para a análise da massa de dados
         max_bins = int(np.sqrt(df_eda.shape[0]))
