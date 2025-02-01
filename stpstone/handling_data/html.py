@@ -319,7 +319,7 @@ class SeleniumWD:
             raise Exception(
                 'Web element error, please consider revisiting this parameter')
 
-    def el_is_enabled(self, str_xpath:str) -> ec.ExpectedCondition:
+    def el_is_enabled(self, str_xpath:str) -> ec.element_to_be_clickable:
         '''
         REFERENCES: https://github.com/clemfromspace/scrapy-selenium
         DOCSTRING: CHECK WHETHER WEB ELEMENT IS ENABLED OR NOT
