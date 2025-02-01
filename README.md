@@ -205,7 +205,7 @@ These instructions will get you a copy of the project running on your local mach
 
 ### Prerequisites
 
-* Python ^3.9.13
+* Python ^3.12
 
 ### Installing
 
@@ -227,7 +227,7 @@ pip install stpstone==0.1.0
 
 * Git clone
 
-* Pyenv for Python ^3.9.13 local installation:
+* Pyenv for Python ^3.12.8 local installation:
 
 ```powershell
 (PowerShell)
@@ -240,10 +240,10 @@ Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv
 
 echo installing local version of python within project
 cd "complete/path/to/project"
-pyenv install 3.9.13
+pyenv install 3.12.8
 pyenv versions
-pyenv global 3.9.13
-pyenv local 3.9.13
+pyenv global 3.12.8
+pyenv local 3.12.8
 ```
 
 * Activate poetry .venv
@@ -251,9 +251,9 @@ pyenv local 3.9.13
 (bash)
 
 echo defining local pyenv version
-pyenv local 3.9.13
+pyenv global 3.12.8
 pyenv which python
-poetry env use "COMPLETE_PATH_PY_3.9.13"
+poetry env use "COMPLETE_PATH_PY_3.12.8"
 echo check python version running locally
 poetry run py --version
 
