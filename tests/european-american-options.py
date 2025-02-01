@@ -2,7 +2,7 @@
 
 import sys
 from unittest import TestCase, main
-sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from stpstone.finance.derivatives.options.european import EuropeanOptions
 from stpstone.finance.derivatives.options.american import AmericanOptions
 
