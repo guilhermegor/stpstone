@@ -6,7 +6,7 @@ authors = ["Guilherme Rodrigues <55053188+guilhermegor@users.noreply.github.com>
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12.8"
+python = "^3.11.5"
 pyyaml = "6.0.2"
 pyodbc = "5.2.0"
 workalendar = "17.0.0"
@@ -37,7 +37,7 @@ plotly = "6.0.0"
 bs4 = "0.0.2"
 numpy-financial = "1.0.0"
 urllib3 = "2.3.0"
-lxml = "5.3.0"
+lxml = "^4.9.3"
 selenium = "4.28.1"
 joblib = "1.4.2"
 pypdf = "5.2.0"
@@ -55,14 +55,49 @@ mlxtend = "0.23.4"
 sendgrid = "6.11.0"
 slack = "^0.0.2"
 pymysql = "1.1.1"
-pytest = "8.3.4"
+mystic = "^0.4.3"
+yahooquery = "^2.3.7"
 
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"
 build = "^1.2.2.post1"
 twine = "^6.1.0"
+pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
+blue = "^0.9.1"
+isort = "^6.0.0"
+taskipy = "^1.14.1"
+
+
+[tool.poetry.group.doc.dependencies]
+mkdocs-material = "^9.6.1"
+mkdocstrings = "^0.27.0"
+mkdocstrings-python = "^1.13.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+src_paths = ["src/stpstone", "test"]
+honor_noqa = true
+line_length = 79
+
+[tool.pytest.ini_options]
+doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
+minversion = "6.2"
+testpaths = ["tests"]
+addopts = [
+    "--import-mode=importlib",
+    "--doctest-modules",
+]
+
+[tool.taskipy.tasks]
+pre_test = "task lint"
+test_cov = "pytest -s -x --cov=src/stpstone -vv"
+test = "pytest -s -x -vv"
+post_test = "coverage html"
+lint = "blue --check --diff . && isort --check --diff ."
+docs = "mkdocs serve"
