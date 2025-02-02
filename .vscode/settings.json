@@ -1,51 +1,58 @@
 {
-    "python.formatting.autopep8Args": ["--ignore", "E402"],
-	"yaml.format.singleQuote": true,
-	"workbench.iconTheme": "material-icon-theme",
-	"prettier.useTabs": true,
-	"prettier.singleQuote": true,
-	"prettier.requirePragma": true,
-	"prettier.insertPragma": true,
-	"[yaml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"editor.formatOnSave": true,
-	"editor.codeActionsOnSave": {
-		"source.organizeImports": "never",
-		"source.organizeFroms": "never"
-	},
-	"editor.quickSuggestions": null,
-	"editor.rulers": [102],
-	"workbench.colorCustomizations": {
-		"editorRuler.foreground": "#D3D3D3"
-	},
-	"jupyter.useNotebookEditor": true,
-	"workbench.editorAssociations": {
-		"*.ipynb": "jupyter-notebook"
-	},
-	"jupyter.askForKernelRestart": false,
-	"notebook.cellToolbarLocation": {
-		"default": "right",
-		"jupyter-notebook": "left"
-	},
-	"security.workspace.trust.untrustedFiles": "open",
-	"files.associations": {
-		"*.ipynb": "jupyter"
-	},
-	"editor.minimap.enabled": false,
-	"editor.bracketPairColorization.enabled": true,
-	"[python]": {
-		"editor.formatOnType": true
-	},
-	"bracket-pair-colorizer-2.depreciation-notice": false,
-	"jupyter.interactiveWindow.textEditor.executeSelection": true,
-	"git.enableSmartCommit": true,
-	"git.confirmSync": false,
-	"workbench.colorTheme": "Color Identifiers Dark",
-	"editor.inlineSuggest.suppressSuggestions": true,
-	"terminal.integrated.defaultProfile.windows": "Git Bash",
-	"files.exclude": {
-		"**/.git": false,
-		"**/.gitkeep": true
-	}
+  "python.formatting.autopep8Args": [
+    "--ignore",
+    "E402"
+  ],
+  "yaml.format.singleQuote": true,
+  "workbench.iconTheme": "material-icon-theme",
+  "prettier.useTabs": true,
+  "prettier.singleQuote": true,
+  "prettier.requirePragma": true,
+  "prettier.insertPragma": true,
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.tabSize": 4,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never",
+    "source.organizeFroms": "never"
+  },
+  "editor.quickSuggestions": null,
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "workbench.colorCustomizations": {
+    "editorRuler.foreground": "#D3D3D3"
+  },
+  "jupyter.useNotebookEditor": true,
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "jupyter.askForKernelRestart": false,
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "files.associations": {
+    "*.ipynb": "jupyter"
+  },
+  "editor.minimap.enabled": false,
+  "editor.bracketPairColorization.enabled": true,
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "bracket-pair-colorizer-2.depreciation-notice": false,
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "workbench.colorTheme": "Color Identifiers Dark",
+  "editor.inlineSuggest.suppressSuggestions": true,
+  "terminal.integrated.defaultProfile.windows": "Git Bash",
+  "files.exclude": {
+    "**/.git": false,
+    "**/.gitkeep": true
+  }
 }

@@ -178,7 +178,7 @@
     │   ├── setup.cfg
     │   ├── setup.py
     │   └── typeform
-    │       ├── __init__.py
+    │       ├──__init__.py
     │       ├── client.py
     │       ├── constants.py
     │       ├── dealing_tf.py
@@ -195,9 +195,6 @@
     └── webhooks
         ├── slack.py
         └── teams.py
-
-
-
 
 ## Getting Started
 
@@ -226,7 +223,6 @@ pip install stpstone==0.1.0
 #### Local Machine Version
 
 * Git clone
-
 * Pyenv for Python ^3.12.8 local installation:
 
 ```powershell
@@ -247,67 +243,40 @@ pyenv local 3.12.8
 ```
 
 * Activate poetry .venv
+
 ```bash
-(bash)
-
-echo defining local pyenv version
-pyenv global 3.12.8
-pyenv which python
-poetry env use "COMPLETE_PATH_PY_3.12.8"
-echo check python version running locally
-poetry run py --version
-
-echo installing poetry .venv
-poetry init
-poery install --no-root
-
-echo running current .venv
 poetry shell
-poetry add <package name, optionally version>
-poetry run <module.py>
 ```
 
 ## Running the Tests
 
-* EDA - Exploratory Data Analysis:
 ```(bash)
-
-(bash)
-
 cd "complete/path/to/project"
-poetry run python stpstone.tests.eda.py
-
+task test
 ```
 
-* European / American Options:
+## Running the Linter
+
 ```(bash)
-
-(bash)
-
 cd "complete/path/to/project"
-poetry run python tests.european-american-options.py
-
+task lint
 ```
 
-* Markowitz Portfolios:
+## Running the Docs
+
 ```(bash)
-
-(bash)
-
 cd "complete/path/to/project"
-poetry run python tests.markowitz-portfolios.py
-
+task docs
 ```
-
 
 ## Authors
 
-**Guilherme Rodrigues** 
+**Guilherme Rodrigues**
+
 * [GitHub](https://github.com/guilhermegor)
 * [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
 ## License
-
 
 ## Acknowledgments
 
