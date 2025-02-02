@@ -41,7 +41,13 @@ class CVMDATA:
         # url
         url = f'{self.str_host_cvm}{str_app}'
         # read the csv file from the url into a pandas dataframe
-        reader = pd.read_csv(url, sep=';', encoding='latin1', decimal='.', thousands=',')
+        reader = pd.read_csv(
+            url,
+            sep=';',
+            encoding='latin1',
+            decimal='.',
+            thousands=',',
+            low_memory=False)
         df_funds_register = pd.DataFrame(reader)
         # validate the content of dataframe
         if \
