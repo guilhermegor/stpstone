@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA
 class ExploratoryDataAnalysis:
 
     def bendford_law(self, array_data, bl_list_number_occurrencies=False):
-        '''
+        """
         REFERENCES: https://brilliant.org/wiki/benfords-law/
         DOCSTRING: FRAUD DETECTION MODEL, WHICH EVALUATES THE NUMBER OF FIRST DIGITS OCCURRENCIES
             IN A SAMPLE AND THE EXPECTED SET
@@ -17,7 +17,7 @@ class ExploratoryDataAnalysis:
             DATA OR THE NUMBER OF INTEGER FIRST NUMBERS FROM A REAL SAMPLE IN ASCENDING ORDER 
             DISCARDING ZEROS
         OUTPUTS: DICT (BENFORD EXPECTED ARRAY AND REAL NUMBERS OBSERVED ARRAY KEYS)
-        '''
+        """
         # expected occurrency of first numbers in a list
         array_benford = np.zeros(9)
         for i in range(9):
@@ -53,14 +53,14 @@ class ExploratoryDataAnalysis:
         return dict_message
 
     def is_monotonic(self, array_data):
-        '''
+        """
         REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: MONOTONIC IS A FUNCTION BETWEEN ORDERED SETS THAT PRESERVES OR REVERSES THE GIVEN 
             ORDER
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return all(array_data[i] <= array_data[i + 1] for i in range(len(array_data) - 1)) \
             or all(array_data[i] >= array_data[i + 1] for i in range(len(array_data) - 1))
 
@@ -69,7 +69,7 @@ class ExploratoryDataAnalysis:
                      remark_binned_monotonically='binned monotonically',
                      remark_binned_forcefully='binned forcefully',
                      remark_binned_error='could not bin'):
-        '''
+        """
         REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: BIN METHOD - 1. EQUI-SPACED BINS WITH AT LEAST 5% OF TOTAL OBSERVATIONS IN EACH 
@@ -79,7 +79,7 @@ class ExploratoryDataAnalysis:
             ACHIEVE MONOTIONICITY; 4. SEPARATE BINS WILL BE CREATED FOR MISSING VALUES
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # monotonic binning
         for n_bins in range(max_bins, 2, -1):
             try:
@@ -111,12 +111,12 @@ class ExploratoryDataAnalysis:
             return c_i, remarks, df[[c_i, target_col]].copy()
     
     def reshape_1d_arrays(self, array_data):
-        '''
+        """
         DOCSTRING: RESHAPE A 1D ARRAY TO 2D IN ORDER TO APPLY FEATUR SCALING, OR LINEARITY TESTS, 
             FOR INSTANCE
         INPUTS: ARRAY DATA
         OUTPUTS: ARRAY
-        '''
+        """
         # reshape array
         try:
             _= array_data[:, 0]
@@ -126,12 +126,12 @@ class ExploratoryDataAnalysis:
         return array_data
 
     def pca(self, array_data):
-        '''
+        """
         REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         DOCSTRING: PRINCIPAL COMPONENTS ANALYSIS
         INPUTS: DEPENDENT AND INDEPENDENT VARIABLES
         OUTPUTS: 
-        '''
+        """
         # pca fiiting model
         model_fitted = PCA(n_components=len(array_data)).fit(array_data)
         # returning model infos
@@ -143,11 +143,11 @@ class ExploratoryDataAnalysis:
         }
 
     def eda_database(self, df_data, bins=58, figsize=(20, 15)):
-        '''
+        """
         DOCSTRING: EXPLARATORY DATA ANALYSIS OF THE DATABASE
         INPUTS: DATAFRAME
         OUTPUTS: NONE
-        '''
+        """
         print('*** HEAD DATAFRAME ***')
         print(df_data.head())
         print('*** INFOS DATAFRAME ***')

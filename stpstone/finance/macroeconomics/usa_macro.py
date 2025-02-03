@@ -18,12 +18,12 @@ class USAMacro:
     def fred_request(self, api_key, data_source, data_source_id, date_inf=None, date_sup=None,
                      url_root='https://api.stlouisfed.org/fred/{}', file_type='json',
                      date_format=None):
-        '''
+        """
         REFERENCES: https://fred.stlouisfed.org/docs/api/fred/
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # adjusting variables types
         if date_format == 'dd/mm/yyyy':
             date_inf = DatesBR().str_date_to_datetime(date_inf)
@@ -43,11 +43,11 @@ class USAMacro:
 
     @property
     def non_farm_payroll(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_td = list()
         list_ser_1 = list()

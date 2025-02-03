@@ -10,20 +10,20 @@ from stpstone.finance.financial_risk.market_risk import Markowitz
 class TestMarkowitz(TestCase):
 
     def setUp(self):
-        '''
+        """
         DOCSTRING: SETUP FOR THE TEST CLASS
         INPUTS: -
         OUTPUTS: -
-        '''
+        """
         int_seed = 123
         np.random.seed(int_seed)
 
     def test_weights_wc_pos_min(self, float_rtol=1e-5, float_atol=1e-8):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - POSITIVE MINIMUM VALUES
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -46,11 +46,11 @@ class TestMarkowitz(TestCase):
         )
     
     def test_weights_wc_zero_min(self, float_rtol=1e-5, float_atol=1e-8):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - ZERO MINIMUM VALUES
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -70,11 +70,11 @@ class TestMarkowitz(TestCase):
             )
     
     def test_weights_wc_one_min(self, float_rtol=1e-5, float_atol=1e-8):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - ZERO MINIMUM VALUES
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -97,11 +97,11 @@ class TestMarkowitz(TestCase):
         )
     
     def test_weights_wc_neg_min(self):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - NEGATIVE MINIMUM VALUES
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -118,12 +118,12 @@ class TestMarkowitz(TestCase):
             self.assertEqual(str(context.exception), 'MIN_INVEST_PER_ASSET MUST BE POSITIVE.')
     
     def test_weights_wc_min_unbalanced(self):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - MINIMM VALUES UNBALANCED 
             WITH THE NUMBER OF ASSETS
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -141,11 +141,11 @@ class TestMarkowitz(TestCase):
                              + 'MUST MATCH THE NUMBER OF ASSETS.')
     
     def test_weights_wc_none_min(self):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - NONE MINIMUM VALUES
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -163,12 +163,12 @@ class TestMarkowitz(TestCase):
                              + 'AS A LIST WHEN CONSTRAINTS ARE ENABLED.')
 
     def test_weights_wc_numbers(self):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - LIST OF MINIMUM VALUES MUST 
             BE NUMBERS
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         array_min_w = ['nan', 0.0, 0.25, 0.5]
@@ -184,12 +184,12 @@ class TestMarkowitz(TestCase):
                              + 'OF NUMBERS.')
     
     def test_weights_wc_max_w(self):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS - MAX WEIGHT FOR EACH ASSET 
             WITHIN THE MINIMUM VALUES LIST
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = False
@@ -206,11 +206,11 @@ class TestMarkowitz(TestCase):
             self.assertEqual(str(context.exception), 'MIN_INVEST_PER_ASSET MUST BE BELOW 1.0')
 
     def test_weights_wc_multplier1(self, float_rtol=1e-5, float_atol=1e-8):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = True
@@ -230,11 +230,11 @@ class TestMarkowitz(TestCase):
             )
     
     def test_weights_wc_multplier2(self, float_rtol=1e-5, float_atol=1e-8):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITH CONSTRAINTS
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = True
         bl_multiplier = True
@@ -257,11 +257,11 @@ class TestMarkowitz(TestCase):
         )
 
     def test_weights_woc(self, float_rtol=1e-5, float_atol=1e-8):
-        '''
+        """
         DOCSTRING: TEST MARKOWITZ PORTFOLIO WEIGHTS WITHOUT CONSTRAINTS
         INPUTS: - 
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         int_n_assets = 4 
         bl_constraints = False
         bl_multiplier = False

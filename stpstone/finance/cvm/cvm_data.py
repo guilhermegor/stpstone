@@ -33,11 +33,11 @@ class CVMDATA:
         self, 
         str_app:str='FI/CAD/DADOS/cad_fi.csv'
     ):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # url
         url = f'{self.str_host_cvm}{str_app}'
         # read the csv file from the url into a pandas dataframe
@@ -126,11 +126,11 @@ class CVMDATA:
         self, 
         str_app:str='FI/CAD/DADOS/registro_fundo_classe.zip'
     ):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         dict_ = dict()
         # url
@@ -154,11 +154,11 @@ class CVMDATA:
         list_cols_dts,
         dict_cols_types
     ):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # assuming self.dict_fund_class_subclass_register[key_file_name] is a bytes object
         file_data = self.dict_fund_class_subclass_register[key_file_name]
         # trying to decode with 'ISO-8859-1' or 'latin1' encoding
@@ -186,11 +186,11 @@ class CVMDATA:
 
     @property
     def funds_classes(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # getting dataframe with funds
         df_funds_classes = self.funds_raw_infos(
             'registro_classe.csv',
@@ -234,11 +234,11 @@ class CVMDATA:
 
     @property
     def funds_register_2(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         df_funds_register = self.funds_raw_infos(
             'registro_fundo.csv',
             [
@@ -279,11 +279,11 @@ class CVMDATA:
 
     @property
     def funds_subclasses(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         df_funds_subclasses = self.funds_raw_infos(
             'registro_subclasse.csv',
             [

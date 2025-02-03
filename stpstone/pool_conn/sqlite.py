@@ -14,11 +14,11 @@ from stpstone.handling_data.pd import DealingPd
 class SQLiteDB:
 
     def __init__(self, db_path:str, logger:Optional[Logger]=None) -> None:
-        '''
+        """
         DOCSTRING: INITIALIZES THE CONNECTION TO THE SQLITE DATABASE
         INPUTS: DB_PATH
         OUTPUTS: -
-        '''
+        """
         self.db_path = db_path
         self.logger = logger
         self.conn:sqlite3.Connection = sqlite3.connect(self.db_path)
@@ -31,11 +31,11 @@ class SQLiteDB:
         max_tries=20,
     )
     def _execute(self, str_query:str) -> None:
-        '''
+        """
         DOCSTRING: RUN QUERY WITH DML ACCESS
         INPUTS: QUERY
         OUTPUTS: -
-        '''
+        """
         self.cursor.execute(str_query)
 
     @backoff.on_exception(
@@ -46,11 +46,11 @@ class SQLiteDB:
     )
     def _read(self, str_query:str, dict_dtypes:Dict[str, Any], 
         list_cols_dt:Optional[List[str]]=None) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # retrieving dataframe
         df_ = pd.read_sql_query(str_query, self.conn)
         if df_.empty == False:
@@ -67,11 +67,11 @@ class SQLiteDB:
     )
     def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
         bl_insert_or_ignore:bool=False) -> None:
-        '''
+        """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
         INPUTS: JSON_DATA
         OUTPUTS: -
-        '''
+        """
         # validate json, in order to have the same keys
         json_data = JsonFiles().normalize_json_keys(json_data)
         # sql insert statement
@@ -116,9 +116,9 @@ class SQLiteDB:
 
     @property
     def _close(self) -> None:
-        '''
+        """
         DOCSTRING: CLOSES THE CONNECTION TO THE DATABASE
         INPUTS: -
         OUTPUTS: -
-        '''
+        """
         self.conn.close()

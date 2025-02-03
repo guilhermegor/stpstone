@@ -6,12 +6,12 @@ import numpy_financial as npf
 class FinancialMath:
 
     def compound_interest(self, nominal_interest_rate, nominal_nper, real_nper):
-        '''
+        """
         DOCSTRING: COMPOUND INTEREST (NOMINAL FEE)
         INPUTS: NOMINAL FEE, NPER REALTED TO NOMINAL FEE AND NPER REGARDING THE REAL FEE 
             FOR THE OBSERVED PERIOD OF TIME
         OUTPUTS: FLOAT
-        '''
+        """
         # correcting parameters:
         if type(nominal_interest_rate) == list:
             nominal_interest_rate = 0.0
@@ -19,45 +19,45 @@ class FinancialMath:
         return float((1 + nominal_interest_rate) ** (real_nper / nominal_nper)) - 1.0
 
     def simple_interest_rate(self, nominal_interest_rate, nominal_nper, real_nper):
-        '''
+        """
         DOCSTRING: SIMPLETE INTEREST RATE
         INPUTS: NOMINAL INTEREST RATE, NOMINAL NPER, REAL NPER
         OUTPUTS: FLOAT
-        '''
+        """
         return 1 + nominal_interest_rate * nominal_nper / real_nper
 
     def present_value(self, rate, nper, pmt, fv=0, when='end'):
-        '''
+        """
         DOCSTRING: PRESENT VALUE
         INPUTS: RATE (FLOAT), NPER (INT), PMT (PAYMENT, INT), FV (FUTURE VALUE, WHETHER INT OR 
             FLOAT), WHEN (BEGIN OR END OF PERIOD)
         OUTPUTS: FLOAT OF PV
-        '''
+        """
         return npf.pv(rate, nper, pmt, fv, when)
 
     def future_value(self, rate, nper, pmt, pv=0, when='end'):
-        '''
+        """
         DOCSTRING: FUTURE VALUE
         INPUTS: RATE (FLOAT), NPER (INT), PMT (PAYMENT, INT), PV (PRESENT VALUE, WHETHER INT OR 
             FLOAT), WHEN (BEGIN OR END OF PERIOD)        
         OUTPUTS: FLOAT OF PV
-        '''
+        """
         return npf.fv(rate, nper, pmt, pv, when)
 
     def internal_rate_return(self, list_cash_flow):
-        '''
+        """
         DOCSTRING: INTERNAL RATE OF RETURN
         INPUTS: LIST OF VALUES THAT COMPRISE THE CASH FLOW
         OUTPUTS: FLOAT OF IRR
-        '''
+        """
         return npf.irr(list_cash_flow)
 
     def net_present_value(self, rate, list_cash_flow):
-        '''
+        """
         DOCSTRING: NET PRESENT VALUE FOR A CASH FLOW DISCOUNTED BY A RATE; ALONG VALUES OUGHT BE 
             AT LEAST ONE NEGATIVE AND ONE POSITIVE
         INPUTS: RATE (FLOAT) AND VALUES 
-        '''
+        """
         return npf.npv(rate, list_cash_flow)
 
 

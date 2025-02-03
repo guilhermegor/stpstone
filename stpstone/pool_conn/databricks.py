@@ -19,28 +19,28 @@ class Databricks:
         self.max_error_attempts = max_error_attempts
 
     def conn_dsn_databricks(self, dsn_conn, int_timeout=108000, bl_autocommit=True):
-        '''
+        """
         DOCSTRING: ESTABLISH CONNECTION WITH DATABRICKS
         INPUTS: CONNECTION STRING
         OUTPUTS: OBJECT WITH DATABRICKS CONNECTION
-        '''
+        """
         return pyo.connect('DSN={}'.format(dsn_conn), autocommit=bl_autocommit, timeout=int_timeout)
 
     def get_data_from_databricks(self, connection):
-        '''
+        """
         DOCSTRING: ATTEMPT TO CONSULT DATABRICKS
         INPUTS: QUERY AND CONNECTION OBJECT
         OUTPUTS: PANDAS DATAFRAME
-        '''
+        """
         return pd.read_sql(self.str_query, connection)
 
     def conn_databricks(self, bl_conn=False, int_max_wait=480, str_error='CONNECTION TIMEOUT EXPIRED',
                         bl_kill_process_when_databricks_down=False):
-        '''
+        """
         DOCSTRING: CONNECTION WITH DATABRICKS IN THE FIRST VALID DSN
         INPUTS: QUERT, LIST OF DSNS, LOGGER
         OUTPUTS: PANDAS DATAFRAME
-        '''
+        """
         # looping through dsns configuring
         for dsn in self.list_dsns:
             try:
@@ -74,11 +74,11 @@ class Databricks:
         return df_databricks
 
     def retrieve_query_data(self, int_max_wait=480, i=0, df_databricks=''):
-        '''
+        """
         DOCSTRING: RETRIEVE QUERY DATA
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # connection class
         class_databricks = Databricks(
             self.str_query, self.list_dsns, self.logger)

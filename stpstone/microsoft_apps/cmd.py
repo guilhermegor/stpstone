@@ -1,12 +1,12 @@
 ### CLASS TO DEAL WITH MICROSOFT CMD TERMINAL ###
 
 class BColors:
-    '''
+    """
     REFERENCES: https://stackoverflow.com/questions/4406389/if-else-in-a-list-comprehension
     DOCSTRING:
     INPUTS:
     OUTPUTS
-    '''
+    """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'

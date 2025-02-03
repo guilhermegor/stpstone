@@ -3,21 +3,15 @@
 # pypi.org libs
 import pandas as pd
 from requests import request
-from zipfile import ZipFile
 from datetime import datetime
 from typing import Union
-# private modules
+# local libs
 from stpstone.settings._global_slots import YAML_B3
-from stpstone.opening_config.setup import iniciating_logging
-from stpstone.loggs.create_logs import CreateLog
 from stpstone.cals.handling_dates import DatesBR
-from stpstone.handling_data.json import JsonFiles
-from stpstone.handling_data.object import HandlingObjects
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.handling_data.folders import DirFilesManagement
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.lists import StrHandler
-from stpstone.handling_data.xml import XMLFiles
 from stpstone.loggs.db_logs import DBLogs
 from stpstone.pool_conn.session import ReqSession
 from stpstone.handling_data.pd import DealingPd
@@ -28,11 +22,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
 
     def __init__(self, dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
                  req_session:Union[ReqSession, None]=None, bl_use_timer:bool=False) -> None:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         self.dt_ref = dt_ref
         self.req_session = ReqSession(bl_use_timer=bl_use_timer) \
             if req_session is None else req_session
@@ -40,11 +34,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
     
     @property
     def access_token(self) -> str:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         url_token = YAML_B3['up2data_b3']['request_token'].format(self.dt_ref)
         req_resp = self.req_session.session.get(url_token)
         req_resp.raise_for_status()
@@ -52,11 +46,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
     
     @property
     def instruments_register(self) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # requesting data
@@ -95,11 +89,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
     
     @property
     def daily_trades_secondary_market(self) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # requesting daily trades
         file_daily_trades = DirFilesManagement().get_zip_from_web_in_memory(
             YAML_B3['up2data_b3']['url_daily_trades'].format(self.dt_ref.strftime('%Y-%m-%d')), 
@@ -153,11 +147,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
                                col_security_category_name='SctyCtgyNm',
                                col_market_name='MktNm',
                                bl_return_markets_not_classified=False):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_markets_classified = list()
         dict_export = dict() 
@@ -198,11 +192,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
                     list_cols_lb_b3=['RptDt', 'TckrSymb', 'Asst', 'QtyCtrctsDay', 'QtyShrDay', 
                                      'DnrMinRate', 'DnrAvrgRate', 'DnrMaxRate', 'TakrMinRate', 
                                      'TakrAvrgRate', 'TakrMaxRate', 'MktNm']):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # reference date
@@ -268,7 +262,7 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
             list_cols_lb_b3[10]: float,
             list_cols_lb_b3[11]: str
         })
-        df_lb_b3[list_cols_lb_b3[0]] = [DatesBR().timestamp_separator_string_to_datetime(d) 
+        df_lb_b3[list_cols_lb_b3[0]] = [DatesBR().timestamp_to_date(d) 
                                         for d in df_lb_b3[list_cols_lb_b3[0]]]
         # sorting dataframe
         df_lb_b3.sort_values([
@@ -291,11 +285,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
     def lending_open_position(self, wd_bef=1, url='https://arquivos.b3.com.br/tabelas/table/LendingOpenPosition/{}/{}', 
                               method='GET', key_pg_count='pageCount', key_valores='values', 
                               list_cols_lop_b3=['RptDt', 'TckrSymb', 'Asst', 'BalQty', 'TradAvrgPric', 'PricFctr', 'BalVal']):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # reference date
@@ -356,7 +350,7 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
             list_cols_lop_b3[5]: float,
             list_cols_lop_b3[6]: float
         })
-        df_lop_b3[list_cols_lop_b3[0]] = [DatesBR().timestamp_separator_string_to_datetime(d) 
+        df_lop_b3[list_cols_lop_b3[0]] = [DatesBR().timestamp_to_date(d) 
                                         for d in df_lop_b3[list_cols_lop_b3[0]]]
         # sorting dataframe
         df_lop_b3.sort_values([
@@ -397,11 +391,11 @@ class UP2DATAB3(metaclass=ValidateAllMethodsMeta):
             'J.P.MORGAN': 'J.P. MORGAN', 
             'CHINA BRASIL': 'CHINA'
         }):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # importing to memory banks currently operating domestically
         reader = pd.read_csv(url_banks_brazil)
         df_banks_operating_domestically = pd.DataFrame(reader)

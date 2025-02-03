@@ -6,11 +6,11 @@ import numpy as np
 class InitialSettings:
 
     def set_parameters(self, *params, opt_style='call'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # check wheter is a call or put option, in case the type is neither of the former raise
         #   error
         if opt_style not in ['call', 'put']:
@@ -25,7 +25,7 @@ class InitialSettings:
 class PricingModels(InitialSettings):
 
     def binomial(self, s, k, r, t, n, u, d, opt_style, h_upper=None, h_lower=None):
-        '''
+        """
         REFERENCES: 
             https://www.youtube.com/watch?v=a3906k9C0fM, 
             https://www.youtube.com/watch?v=WxrRi9lNnqY,
@@ -35,7 +35,7 @@ class PricingModels(InitialSettings):
             R (ANNUAL RISK-FREE RATE), N (NODES), U (UP-FACTOR IN BINOMIAL MODELS), D (DOWN-FACTOR 
             - TO ENSURE RECOMBINING TREE USE 1/U), OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT FROM ARRAY_CP[0] (CALL-PUT PRICING FOR EACH NODE)
-        '''
+        """
         # initial parameters
         s, k, r, t, n, u, d = self.set_parameters(
             s, k, r, t, n, u, d, opt_style)
@@ -72,7 +72,7 @@ class PricingModels(InitialSettings):
         return array_cp[0]
 
     def barone_adesi_whaley(self, ):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG - PG 119
         DOCSTRING: QUADRATIC APPROXIMATION METHOD BY BARONE-ADESI AND WHALEY (1987) TO PRICE 
             CALL AND PUT OPTIONS ON AN UNDERLYING ASSET WITH THE COST-OF-CARRY RATE B - WHEN THE 
@@ -84,4 +84,4 @@ class PricingModels(InitialSettings):
             CORRELATION BETWEEN THE VOLATILITY WITH TIME TO MATURITY T AND THE REFERENCE VOLATILITY 
             (corr_t))
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """

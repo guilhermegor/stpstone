@@ -21,11 +21,11 @@ from stpstone.loggs.db_logs import DBLogs
 class AnbimaMTM:
 
     def general_req(self, url, bl_verify, method='GET', str_sep='@'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # requesting response
@@ -56,11 +56,11 @@ class AnbimaMTM:
         return df_
 
     def br_treasury_bonds(self, wd_bef=1):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # url
         url = YAML_ANBIMA['sec_mkt_prcs']['br_treasuries']['url'].format(
             DatesBR().sub_working_days(DatesBR().curr_date, wd_bef).strftime(
@@ -101,11 +101,11 @@ class AnbimaMTM:
         return df_br_tb
     
     def corporate_bonds(self, wd_bef=1):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # url
         url = YAML_ANBIMA['sec_mkt_prcs']['corporate_bonds']['url'].format(
             DatesBR().sub_working_days(DatesBR().curr_date, wd_bef).strftime(
@@ -147,11 +147,11 @@ class AnbimaMTM:
     
     @property
     def ima(self, str_sep='@'):
-        '''
+        """
         DOCSTRING: MARKET INDEXES ANBIMA
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         dict_list_ser = dict()
         # requesting response

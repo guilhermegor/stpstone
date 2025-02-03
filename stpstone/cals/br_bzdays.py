@@ -1,7 +1,7 @@
 ### BRAZILLIAN WORKING DAYS ###
-'''
+"""
 github.com/peopledoc/workalendar/blob/master/workalendar/america/brazil.py
-'''
+"""
 
 from datetime import timedelta, date
 

@@ -8,7 +8,7 @@ from requests.exceptions import ProxyError, ConnectTimeout, SSLError
 from urllib3.util import Retry
 from typing import Dict, Union, Any, List, Tuple
 from random import shuffle
-# private modules
+# local libs
 from stpstone.settings._global_slots import YAML_SESSION
 from stpstone.handling_data.dicts import HandlingDicts
 from stpstone.loggs.create_logs import conditional_timeit
@@ -18,11 +18,11 @@ class ProxyServers:
 
     @property
     def proxy_scrape_free(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         resp_req = request(
             YAML_SESSION['proxy_scrape']['method'], 
             YAML_SESSION['proxy_scrape']['url'], 
@@ -83,7 +83,7 @@ class ReqSession(ProxyServers):
                  float_ratio_times_alive_dead:Union[float, None]=0.02,
                  float_min_timeout:Union[float, None]=600, bl_use_timer:bool=False,
                  list_status_forcelist:list=[429, 500, 502, 503, 504]) -> None:
-        '''
+        """
         DOCSTRING: SESSION CONFIGURATION
         INPUTS: 
             - URL:STR
@@ -93,7 +93,7 @@ class ReqSession(ProxyServers):
             - BACKOFF_FACTOR:INT (1 AS DEFAULT)
             - STATUS_FORCELIST:LIST (429, 500, 502, 503, 504 AS DEFAULT)
         OUTPUTS: SESSION
-        '''
+        """
         self.bl_proxy = bl_proxy
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
@@ -117,11 +117,11 @@ class ReqSession(ProxyServers):
         self.ip_infos = self.ip_infos(self.session, bl_return_availability=False)
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return {
             'http': 'http://{}:{}'.format(str_ip, str(int_port)), 
             'https': 'http://{}:{}'.format(str_ip, str(int_port))
@@ -129,7 +129,7 @@ class ReqSession(ProxyServers):
 
     def configure_session(self, dict_proxy:Union[Dict[str, str], None]=None, 
                           int_retries:int=10, int_backoff_factor:int=1) -> Session:
-        '''
+        """
         DOCSTRING: CONFIGURES AN HTTP SESSION WITH RETRY MECHANISM AND EXPONENTIAL BACKOFF
         INPUTS: NONE
         OUTPUTS: CONFIGURED HTTP SESSION OBJECT
@@ -146,7 +146,7 @@ class ReqSession(ProxyServers):
             2. SESSION OBJECT OVERVIEW:
                 - MOUNT: MOUNTS THE RETRY STRATEGY TO THE SESSION, WITH THE GIVEN ADAPTER
                 - SESSION OBJECTS HAVE METHODS AS .GET() AND .POST()
-        '''
+        """
         retry_strategy = Retry(
             total=int_retries,
             backoff_factor=int_backoff_factor,
@@ -162,11 +162,11 @@ class ReqSession(ProxyServers):
 
     def ip_infos(self, session:Session, bl_return_availability:bool=False, 
                  tup_timeout:Tuple[int, int]=(5,5)) -> Union[List[Dict[str, Any]], None]:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         dict_payload = {}
         dict_headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -192,11 +192,11 @@ class ReqSession(ProxyServers):
             return resp_req.json()
     
     def test_proxy(self, str_ip:str, int_port:int) -> bool:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         try:
             session = self.configure_session(
                 dict_proxy={
@@ -212,11 +212,11 @@ class ReqSession(ProxyServers):
 
     @property
     def _proxies(self) -> List[Dict[str, Union[str, int]]]:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         list_ser = self.available_proxies
         # filtering proxies
         for k_filt, v_filt, str_strategy in [
@@ -244,11 +244,11 @@ class ReqSession(ProxyServers):
 
     @property
     def get_proxy(self) -> Union[Dict[str, Any], None]:
-        '''
+        """
         DOCSTRING: RETRIEVES A VALID PROXY FROM THE FILTERED LIST, APPLYING THE TEST PROXY METHOD
         INPUTS: -
         OUTPUTS: DICT
-        '''
+        """
         @conditional_timeit(bl_use_timer=self.bl_use_timer)
         def retrieve_proxy():
             list_ser = self._proxies

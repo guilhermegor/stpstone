@@ -8,20 +8,20 @@ from math import ceil
 class MT5():
 
     def package_info(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         print("MetaTrader5 package author: ", mt5.__author__)
         print("MetaTrader5 package version: ", mt5.__version__)
 
     def initialize(self, path, login, server, password):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         if not mt5.initialize(path=path, login=login, server=server, password=password):
             print("initialize() failed, error code =", mt5.last_error())
             # shut down connection to the MetaTrader 5 terminal
@@ -29,27 +29,27 @@ class MT5():
             # quit()
 
     def shutdown(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         mt5.shutdown()
 
     def symbols_get(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return mt5.symbols_get()
 
     def symbols_total(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         symbols = mt5.symbols_total()
         if symbols > 0:
             print("Total symbols =", symbols)
@@ -59,11 +59,11 @@ class MT5():
             return None
 
     def get_symbols_info(self, market_data=True):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         symbols = mt5.symbols_get()
         dict_tickers = dict()
         if market_data:
@@ -128,11 +128,11 @@ class MT5():
             return None
 
     def get_all_info_of_symbols(self, symbols):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         dict_tickers = dict()
         i = 0
         for symbol in symbols:
@@ -163,11 +163,11 @@ class MT5():
 
     def get_ticks_from(self, symbol, datetime_from, ticks_qty,
                        type_ticks=mt5.COPY_TICKS_ALL, print_quantidade=False):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         if not isinstance(datetime_from, datetime):
             print('datetime_from is not a datetime object')
             return None
@@ -186,11 +186,11 @@ class MT5():
 
     def get_ticks_range(self, symbol, datetime_from, datetime_to,
                         type_ticks=mt5.COPY_TICKS_ALL, print_quantidade=False):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         if not isinstance(datetime_from, datetime) or not isinstance(datetime_to, datetime):
             print('datetime_from or datetime_to is not a datetime object')
             return None
@@ -208,11 +208,11 @@ class MT5():
         return ticks_frame
 
     def get_last_tick(self, symbol):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         last_tick = mt5.symbol_info_tick(symbol)
         if last_tick:
             return last_tick
@@ -222,11 +222,11 @@ class MT5():
             return None
 
     def get_market_depth(self, ticker, n_times=10):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         if mt5.market_book_add(ticker):
             # get the market depth data 10 times in a loop
             for i in range(n_times):
@@ -250,21 +250,21 @@ class MT5():
         return items
 
     def enable_display_marketwatch(self, ticker):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         selected = mt5.symbol_select(ticker, True)
         if not selected:
             print("Failed to select {}".format(ticker))
 
     def get_symbol_info_tick(self, ticker):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # display the last GBPUSD tick
         lasttick = mt5.symbol_info_tick(ticker)
         print(lasttick)
@@ -276,11 +276,11 @@ class MT5():
         return symbol_info_tick_dict
 
     def get_symbol_properties(self, ticker):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # display EURJPY symbol properties
         symbol_info = mt5.symbol_info(ticker)
         if symbol_info != None:

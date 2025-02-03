@@ -8,7 +8,7 @@ class MarginSimulatorB3:
 
     def __init__(self, data_payload_portfolio, token='79a4413f55d7d982b61c669e6dd35eea',
                  hostname_api_margin_simulator_b3='https://simulador.b3.com.br/api/cors-app'):
-        '''
+        """
         INPUTS: DATA PAYLOAD PORTFOLIO EXEMPLE - data_payload_portfolio = [
                 {
                     'Security': {'symbol': 'ABCBF160'}
@@ -26,7 +26,7 @@ class MarginSimulatorB3:
                     'Position': {'longQuantity': 0,'shortQuantity':200,'longPrice': 0,'shortPrice': 0}
                 }
             ]
-        '''
+        """
         self.data_payload_portfolio = data_payload_portfolio
         self.token = token,
         self.hostname_api_margin_simulator_b3 = hostname_api_margin_simulator_b3
@@ -35,13 +35,13 @@ class MarginSimulatorB3:
     def total_deficit_surplus(self, method='POST', app='/web/V1.0/RiskCalculation',
                               value_liquidity_resource=4700000000, bl_verify=False,
                               bl_parse_dict_payload_data=True):
-        '''
+        """
         REFERENCES: https://simulador.b3.com.br/
         DOCSTRING: TOTAL DEFICIT SURPLUS B3 MARGIN CALL CALCULATION
         INPUTS: METHOD (DEFAULT), KEY HEADER (DEFAULT), URL AUTHENTIFICATION
             HEADER (DEFAULT)
         OUTPUTS: STRING
-        '''
+        """
         # requesting authorization authheader
         dict_headers = {
             'Accept': 'application/json',

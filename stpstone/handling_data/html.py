@@ -19,11 +19,11 @@ class HtmlHndler:
 
     def html_bs_parser(self, url:str, bl_verify:bool=True,
                        method:str='GET', parser:str='html.parser') -> Union[BeautifulSoup, str]:
-        '''
+        """
         DOCSTRING: HTML PARSER THROUGH BEAUTIFULSOUP
         INPUTS: HTML TEXT
         OUTPUTS: SOUP
-        '''
+        """
         try:
             html_status_invest = request(method, url, verify=bl_verify).content
             return BeautifulSoup(html_status_invest, parser)
@@ -32,11 +32,11 @@ class HtmlHndler:
 
     def html_lxml_parser(self, url: Optional[str]=None, page:Optional[bytes]=None,
                          method:str='GET', bl_verify:bool=True) -> html.HtmlElement:
-        '''
+        """
         DOCSTRING: HTML PARSER FOR LXML PURPOSES
         INPUTS: URL, METHOD (GET AS DEFAULT) AND BOOLEAN VERIFY (TRUE AS DEFAULT)
         OUTPUTS: DOCUMENT WITH HTML CONTENT
-        '''
+        """
         if page is None:
             req_resp = request(method, url, verify=bl_verify)
             req_resp.raise_for_status()
@@ -44,30 +44,30 @@ class HtmlHndler:
         return html.fromstring(page)
 
     def html_lxml_xpath(self, html_content, str_xpath):
-        '''
+        """
         DOCSTRING: XPATH TO HANDLE LXML PARSER
         INPUTS: HTML CONTENT AND STRING XPATH
         OUTPUTS: XPATH CONTENT
-        '''
+        """
         return html_content.xpath(str_xpath)
 
     def html_to_txt(self, html_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         soup = BeautifulSoup(html_, features='lxml')
         return soup(html_)
 
     def parse_html_to_string(self, html_, parsing_lib='html.parser',
                              str_body_html='',
                              join_td_character='|', td_size_ajust_character=' '):
-        '''
+        """
         DOCSTRING: PARSE HTML BODY
         INPUTS: HTML
         OUTPUTS: STRING
-        '''
+        """
         # setting variables
         list_ = list()
         list_tr_html = list()
@@ -135,7 +135,7 @@ class SeleniumWD:
                  bl_headless:bool=False,
                  bl_incognito:bool=False,
                  dict_args:Optional[List[str]]=None) -> None:
-        '''
+        """
         REFERENCES: 
             1. LIST OF CHROMIUM COMMAND LINE SWITCHES: https://gist.github.com/dodying/34ea4760a699b47825a766051f47d43b
             2. LIST OF USER AGENTS: https://gist.github.com/pzb/b4b6f57144aea7827ae4
@@ -150,7 +150,7 @@ class SeleniumWD:
             - BL OPEN MINIMIZED:BOOLEAN (DEFAULT TRUE)
             - DICT ARGUMENTS:DICT (DEFAULT NONE)
         OUTPUTS: NONE
-        '''
+        """
         self.url = url
         self.path_webdriver = path_webdriver
         self.int_port = int_port
@@ -180,11 +180,11 @@ class SeleniumWD:
     
     @property
     def get_browser(self) -> WebDriver:
-        '''
+        """
         DOCSTRING: BROWSER INITIATION WITH THE RESPECTIVE WEB DRIVER
         INPUTS: -
         OUTPUTS: WEB DRIVER
-        '''
+        """
         # setting preferences
         d = DesiredCapabilities.CHROME
         d['goog:loggingPrefs'] = {'performance': 'ALL'}
@@ -207,11 +207,11 @@ class SeleniumWD:
         return browser
 
     def process_log(self, log:Dict[str, Union[str, dict]]) -> Optional[Dict[str, Union[str, dict]]]:
-        '''
+        """
         DOCSTRING: COLLECT NETWORK ACTIVITY
         INPUTS: DRIVER, LOG
         OUTPUTS: OBJECT
-        '''
+        """
         log = json.loads(log['message'])['message']
         if ('Network.response' in log['method'] and 'params' in log.keys()):
             body = self.browser.execute_cdp_cmd('Network.getResponseBody', {'requestId': log[
@@ -221,12 +221,12 @@ class SeleniumWD:
 
     @property
     def get_browser_log_entries(self) -> List[Dict[str, Union[str, dict]]]:
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/20907180/getting-console-log-output-from-chrome-with-selenium-python-api-bindings
         DOCSTRING: GET LOGGING SELENIUM RESPONSE FROM WEBDRIVER
         INPUTS: DRIVER
         OUPUTS: BROWSER LOG ENTRIES (LIST)
-        '''
+        """
         loglevels = {'NOTSET': 0, 'DEBUG': 10, 'INFO': 20,
                      'WARNING': 30, 'ERROR': 40, 'SEVERE': 40, 'CRITICAL': 50}
         # initialise a logger
@@ -249,11 +249,11 @@ class SeleniumWD:
 
     def process_browser_log_entry(self, entry: Dict[str, Union[str, dict]]) \
         -> Dict[str, Union[str, dict]]:
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/52633697/selenium-python-how-to-capture-network-traffics-response
         INPUTS: ENTRY
         OUTPUTS: STRING
-        '''
+        """
         # process json from entry
         response = json.loads(entry['message'])['message']
         # return messge
@@ -261,11 +261,11 @@ class SeleniumWD:
 
     @property
     def get_network_traffic(self) -> List[Dict[str, Union[str, dict]]]:
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/52633697/selenium-python-how-to-capture-network-traffics-response
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # get browser log
         browser_log = self.browser.get_log('performance')
         # getting events
@@ -278,14 +278,14 @@ class SeleniumWD:
 
     def find_element(self, str_element_interest:str, selector_type:str='XPATH') \
         -> WebElement:
-        '''
+        """
         DOCSTRING: FINDING ELEMENT IN HTML BY SELECTOR TYPE
         INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
             BROWSERS), STRING WITH THE ELEMENT OF INTEREST (IDENTIFIER TO SELECTOR),
             SELECTOR TYPE(CLAS_NAME, CSS_SELECTOR, ID, LINK_TEXT, NAME,
             PARTIAL_LINK_TEXT, TAG_NAME AND XPATH, THE FORMER AS DEFAULT)
         OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
-        '''
+        """
         try:
             return self.browser.find_element(getattr(By, selector_type),
                                            str_element_interest)
@@ -294,12 +294,12 @@ class SeleniumWD:
                             'please consider revisiting these argument')
 
     def find_elements(self, str_xpath:str) -> List[WebElement]:
-        '''
+        """
         DOCSTRING: FINDING ELEMENTS IN HTML BY XPATH
         INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
             BROWSERS) AND XPATH
         OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
-        '''
+        """
         try:
             return self.browser.find_elements_by_xpath(str_xpath)
         except AttributeError:
@@ -307,11 +307,11 @@ class SeleniumWD:
                             'please consider revisiting these argument')
 
     def fill_input(self, web_element:WebElement, str_input:str) -> str:
-        '''
+        """
         DOCSTRING: FILLING INPUT BOXES IN HTML
         INPUTS: WEB ELEMENT AND STRING TO INPUT
         OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
+        """
         try:
             web_element.send_keys(str_input)
             return 'OK'
@@ -320,34 +320,34 @@ class SeleniumWD:
                 'Web element error, please consider revisiting this parameter')
 
     def el_is_enabled(self, str_xpath:str) -> ec.ExpectedCondition:
-        '''
+        """
         REFERENCES: https://github.com/clemfromspace/scrapy-selenium
         DOCSTRING: CHECK WHETHER WEB ELEMENT IS ENABLED OR NOT
         INPUTS: STR XPATH
         OUTPUTS: BOOLEAN
-        '''
+        """
         return ec.element_to_be_clickable((By.XPATH, str_xpath))
 
     def wait_until_el_loaded(self, str_xpath:str) -> WebDriverWait:
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/26566799/wait-until-page-is-loaded-with-selenium-webdriver-for-python
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return WebDriverWait(self.browser, self.int_delay).until(self.el_is_enabled(str_xpath))
 
 
 class HtmlBuilder:
 
     def tag(self, name, *content, cls=None, **attrs):
-        '''
+        """
         REFERENCES: - FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.
         DOCSTRINGS: HTML TAG CONSTRUCTOR
         INPUTS: *ARGUMENTS, AND **ATTRIBUTES, BESIDE A CLS WORKAROUND SINCE CLASS IS A SPECIAL 
             WORD FOR PYTHON
         OUTPUTS: STRING
-        '''
+        """
         # defining tag & method
         if cls is not None:
             attrs['class'] = cls

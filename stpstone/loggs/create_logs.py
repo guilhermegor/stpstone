@@ -6,18 +6,18 @@ import time
 
 
 class CreateLog:
-    '''
+    """
     DOCSTRING: PREENCHIMENTO DE LOGS AO LONGO DA ROTINA
     INPUTS: -
     OUTPUTS: INFOS
-    '''
+    """
 
     def creating_parent_folder(self, new_path):
-        '''
+        """
         DOCSTRING: CRIAÇÃO DE PASTA NA REDE PARA EMBARCAR LOGS
         INPUTS: NEW PATH
         OUTPUTS: INFOS
-        '''
+        """
         if not os.path.exists(new_path):
             os.makedirs(new_path)
             return 'OK'
@@ -25,11 +25,11 @@ class CreateLog:
             return 'NOK'
 
     def basic_conf(self, complete_path=None, basic_level='info'):
-        '''
+        """
         DOCSTRING: INICIO ROTINA DE FORNECIMENTO DE LOGS
         INPUTS: -
         OUTPUTS: LOGGER
-        '''
+        """
         # defining basic level of logging
         if basic_level == 'info':
             level = logging.INFO
@@ -57,46 +57,46 @@ class CreateLog:
         return logger
 
     def infos(self, logger, msg_str):
-        '''
+        """
         DOCSTRING: FORNECIMENTO DE INFORMAÇÕES SOBRE O ANDAMENTO DO CÓDIGO
         INPUTS: MENSAGEM EM STRING
         OUTPUTS: INFO
-        '''
+        """
         return logger.info(msg_str)
 
     def warnings(self, logger, msg_str):
-        '''
+        """
         DOCSTRING: ALERTAS PARA PONTOS DE ATENÇÃO NO CÓDIGO
         INPUTS: MENSAGEM EM STRING
         OUTPUTS: WARNING
-        '''
+        """
         return logger.warning(msg_str)
 
     def errors(self, logger, msg_str):
-        '''
+        """
         DOCSTRING: FALHAS POR PARTE DO USUÁRIO OU CONCEPÇÃO DO CÓDIGO
         INPUTS: MENSAGEM EM STRING
         OUTPUTS: ERROR
-        '''
+        """
         return logger.error(msg_str, exc_info=True)
 
     def critical(self, logger, msg_str):
-        '''
+        """
         DOCSTRING: APONTAR ERROS CRÍTICOS NO CÓDIGO
         INPUTS: MENSAGEM EM STRING
         OUTPUTS: ERROR
-        '''
+        """
         return logger.error(msg_str)
 
 
 # decorators
 def timeit(method):
-    '''
+    """
     REFERENCES: https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
     DOCSTRING: TIMING DECORRATOR TO MEASURE ELAPSED TIME TO EXECUTE A FUNCTION
     INPUTS: -
     OUTPUTS: ELAPSED TIME PRINTED
-    '''
+    """
     def timed(*args, **kw):
         ts = time.time()
         result = method(*args, **kw)
@@ -111,13 +111,13 @@ def timeit(method):
     return timed
 
 def conditional_timeit(bl_use_timer):
-    '''
+    """
     DOCSTRING: APPLIES THE @TIMEIT DECORATOR CONDITIONALLY BASED ON `USE_TIMER`
     INPUT:
         - USE_TIMER: BOOLEAN INDICATING WHETHER TO APPLY TIMING.
     OUTPUT:
         - A FUNCTION WRAPPED WITH THE @TIMEIT DECORATOR IF `USE_TIMER` IS TRUE.
-    '''
+    """
     def decorator(method):
         if bl_use_timer:
             return timeit(method)

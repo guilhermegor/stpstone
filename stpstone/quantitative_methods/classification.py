@@ -1,6 +1,6 @@
 ### HANDLING CLASSIFICATION ISSUES ###
 
-import numpy as np
+# pypi.org libs
 import matplotlib.pyplot as plt
 from sklearn.datasets import fetch_openml
 from sklearn.linear_model import SGDClassifier
@@ -16,32 +16,31 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
-from stpstone.quantitative_methods.fit_assessment import FitPerformance
+# local libs
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.handling_data.str import StrHandler
-from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
 
 
 class InputsClassification:
 
     def fetch_sklearn_database(self, database_name='mnist_784', version=1, bl_asframe=False):
-        '''
+        """
         DOCSTRING: DATASET FROM SCIKIT-LEARN, WHICH NORMALLY HAVE A SIMILAR DICTIONARY 
             STRUCTURE: DESCR (DESCRIPTION OF THE DATASET), DATA (ARRAY WITH ONE ROW PER 
             INSTANCE AND ONE COLUMN PER FEATURE), AND TARGET (AN ARRAY WITH LABELS)
         INPUTS: DATABASE NAME (MNIST_784 AS DEFAULT) AND VERSION
         OUTPUTS: DICTIONARY WITH DATA, TARGET, FEATURE NAMES, DESCR, DETAILS, CATEGORIES AND
             URL
-        '''
+        """
         return fetch_openml(database_name, version=version, as_frame=bl_asframe)
 
     def show_image_from_dataset(self, array_instance, cmap='binary', shape=(28, 28),
                                 bl_axis='off', complete_saving_path=None):
-        '''
+        """
         DOCSTRING: SHOW IMAGE FROM DATASET
         INPUTS: VECTOR INSTANCE, CMAP (DEFAULT), SHAPE (DEFAULT)
         OUTPUTS: -
-        '''
+        """
         # reshape image
         array_instance = array_instance.reshape(shape)
         # creating image
@@ -57,11 +56,11 @@ class InputsClassification:
 class Classification:
 
     def one_hot_vectorizer(self, list_corpus):
-        '''
+        """
         DOCSTRING: ONE HOT VECTORIZER, AIMING TO ENCODE A LIST OF STRINGS AND CONVERT TO AN ARRAY
         INPUTS: CORPUS (LIST TYPE)
         OUTPUTS: DICTIONARY (LABLES AND ARRAY OF ONE HOT ENCODER)
-        '''
+        """
         # list of words to vectorizer - alphabetical order
         list_labels = HandlingLists().extend_lists(
             *[x.split() for x in list_corpus])
@@ -78,7 +77,7 @@ class Classification:
         }
 
     def sgd_classifier(self, array_x, array_y, int_random_state_seed=5):
-        '''
+        """
         DOCSTRING: TRAINING A BINARY CLASSIFIER WITH STOCHASTIC GRADIENT DESCENT (SGD), 
             TO EAVLUATE WHTEHER OR NOT A NEW ELEMENT BELONGS TO THE SUBSET, WHICH 
             HAS THE ADVANTAGE OF BEING CAPABLE OF HANDLING VERY LARGE DATASETS EFFICIENTLY
@@ -86,7 +85,7 @@ class Classification:
             (5 AS DEFAULT)
         OUTPUTS: DICTIONARY WITH KEYS model AND PREDICTIONS (DATALABEL AND WHETHER IT 
             BELONGS TO THE ARRAY DATA OR NOT, CONSIDERING A CLASSIFICATION METHOD)
-        '''
+        """
         # estimator
         model = SGDClassifier(random_state=int_random_state_seed)
         # fitting model
@@ -108,7 +107,7 @@ class Classification:
             self, array_x, array_y, kernel='rbf', float_regularization_parameter=1,
             multiclass_classification_strategy='best',
             gamma='auto', int_random_state_seed=42):
-        '''
+        """
         DOCSTRING: SUPPORT VECTOR MACHINE CLASSIFICATION TO PREDICT, USING ONE VERSUS ONE 
             STRATEGY, TRAINING BINARY CLASSIFIERS, GETTING THEIR DECISION SCORES FOR THE DATA, 
             AND CHOOSING THE MODEL WHICH HAS AN OPTIMIZED RESPONSE, MATCHING TARGET CLASSIFICATION 
@@ -116,7 +115,7 @@ class Classification:
         INPUTS: ARRAY X, ARRAY Y, KERNEL (LINEAR OR RBF ARE THE MOST COMMON), REGUALARIZATION 
             PARAMETER (1 AS DEFAULT), MULTICLASS CLASSIFICATION STRATEGY, GAMMA AND RANDOM STATE SEED
         OUTPUTS: DICT
-        '''
+        """
         # classifier to the supporting vector machine classification, regarding multiclass
         #   classification strategy (best, ovr or ovo)
         if multiclass_classification_strategy == 'best':
@@ -154,12 +153,12 @@ class Classification:
 
     def decision_tree(self, array_x, array_y, impurity_crit='gini', 
                       float_max_depth=None, int_random_state_seed=42):
-        '''
+        """
         REFERENCES: https://www.datacamp.com/tutorial/decision-tree-classification-python
         DOCSTRING: DECISION TREE CLASSIFIER
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
         OUTPUTS: 
-        '''
+        """
         # classifier
         model = DecisionTreeClassifier(criterion=impurity_crit, max_depth=float_max_depth, 
                                        random_state=int_random_state_seed)
@@ -179,12 +178,12 @@ class Classification:
         }
 
     def random_forest(self, array_x, array_y, n_estimators=100, int_random_state_seed=42):
-        '''
+        """
         REFERENCES: https://www.datacamp.com/tutorial/random-forests-classifier-python
         DOCSTRING: RANDOM FOREST CLASSIFIER, A.K.A. DECISION TREE ENSEMBLED
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
         OUTPUTS: 
-        '''
+        """
         # fitting model
         model = RandomForestClassifier(random_state=int_random_state_seed, n_estimators=n_estimators)
         # fitting model
@@ -203,11 +202,11 @@ class Classification:
         }
 
     def knn_classifier(self, array_x, array_y, int_n_neighbors=5):
-        '''
+        """
         DOCSTRING: K NEIGHBORS CLASSIFIER
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
         OUTPUTS: 
-        '''
+        """
         # classifier
         model = KNeighborsClassifier(n_neighbors=int_n_neighbors)
         # fitting model
@@ -226,13 +225,13 @@ class Classification:
         }
 
     def k_means(self, n_clusters, array_y, array_x, int_random_state_seed=0):
-        '''
+        """
         REFERENCES: https://www.hashtagtreinamentos.com/k-means-para-clusterizar-ciencia-dados?gad_source=1&gclid=Cj0KCQjwlZixBhCoARIsAIC745Bm8VTK5AMNUKTlV3TpYm6RB6ag2IGUIMEvNNYTmKmAfqN7O5vA6mwaAi6FEALw_wcB
         DOCSTRING: K-MEANS CLUSTERING FOR LABELED DATA
         INPUTS:
         OUTPUTS: DICT (LABELS - INDENTIFICATIONS OF RESPECTIVE CLUSTER, AND ADJUSTED RAND, WHICH 
             INDICATES THE SCORE OF CLUSTERIZATION N_CLUSTERS-WISE)
-        '''
+        """
         # classifier
         model = KMeans(n_clusters=n_clusters, random_state=int_random_state_seed)
         # fitting model
@@ -251,11 +250,11 @@ class Classification:
         }
 
     def naive_bayes(self, array_x, array_y):
-        '''
+        """
         DOCSTRING: NAIVE BAYES CLASSIFIER
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
         OUTPUTS: DICT
-        '''
+        """
         # classifier
         model = GaussianNB()
         # fitting model
@@ -276,22 +275,22 @@ class Classification:
 class ImageProcessing:
 
     def img_dims(self, name_path):
-        '''
+        """
         REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         DOCSTRING: IMAGE DIMENSIONS
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # image dimensions (height x width x channels)
         return plt.imread(name_path).shape
 
     def pca_with_var_exp(self, name_path, var_exp):
-        '''
+        """
         REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         DOCSTRING: PRINCIPAL COMPONENTS ANALYSIS WITH EXPLAINED VARIANCE RESULT FOR IMAGES
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # defining the model
         model = PCA(var_exp)
         # fit transform
@@ -300,12 +299,12 @@ class ImageProcessing:
         return model.inverse_transform(model)
 
     def plot_subplot(float_exp_var_ratio, *array_x):
-        '''
+        """
         REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         DOCSTRING: PLOT THE ORIGINAL IMAGES AND THE IV VARIANCE REDUCTIONS
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # plot
         plt.subplot(3, 2, float_exp_var_ratio)
         plt.imshow(array_x, cmap='gray')

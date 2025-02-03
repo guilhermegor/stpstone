@@ -20,11 +20,11 @@ class AnbimaStats:
 
     @property
     def pmi_hat(self):
-        '''
+        """
         DOCSTRING: IPCA PMI PROJECTED BY ANBIMA
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_ser = list()
         # request html

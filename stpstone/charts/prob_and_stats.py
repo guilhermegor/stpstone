@@ -16,14 +16,14 @@ class ProbStatsCharts:
 
     def confusion_mtx_2x2(self, x_array_real_numbers, y_vector_real_numbers,
                           c_positive_floating_point_number=1.0):
-        '''
+        """
         DOCSTRING: CONFUSION MATRIX WITH PREDICTIONS (Y-AXIS) AND ACTUAL TARGETS (X-DATA) OF 
             THE DATA TESTED
         INPUTS: X AND Y ARRAIES OF REAL NUMBERS, AS WELL AS C POSITIVE FLOATING-POINT NUMBER 
             THAT DEFINES THE RELATIVE STRENGTH OF REGULARIZATION; SMALLER VALUES INDICATE STRONGER
             REGULARIZATION, FITTING-WISE ITS POORLY FITTED
         OUTPUTS: -
-        '''
+        """
         cm = LogLinearRegressions().logistic_regrression_logit(x_array_real_numbers,
                                                            y_vector_real_numbers,
                                                            c_positive_floating_point_number)[
@@ -41,13 +41,13 @@ class ProbStatsCharts:
 
     def confusion_mtx_nxn(self, conf_mx, cmap=plt.get_cmap('gray'), bl_focus_errors=True,
                           complete_saving_path=None, int_fill_non_error_values=0):
-        '''
+        """
         DOCSTRING: HEATMAP OF CONFUSION MATRIX FOR COMPLEX MODELS, IN GRAY SCALE, BEING 
             WHITER AN INDICATIVE OF HIGH NUMBER OF OCCURRENCES
         INPUTS: CONFUSION MATRIX, CMAP(GRAY AS DEFAULT), BOOLEAN FOCUS ON ERRORS, COMPLETE 
             SAVING PATH, NUMBER TO BE FILLED IN NON ERROR VALUES (DIAGONAL)
         OUTPUTS: -
-        '''
+        """
         # checking wheter or not to focus on errors (occurrences not in diagonal)
         if bl_focus_errors == True:
             row_sums = conf_mx.sum(axis=1, keepdims=True)
@@ -62,12 +62,12 @@ class ProbStatsCharts:
         plt.show()
 
     def ecdf_chart(self, list_ser_data, legend_position='lower right'):
-        '''
+        """
         DOCSTRING: DISPLAY A EMPIRICAL CUMULATIVE DISTRIBUTION FUNCTION CHART
         INPUTS: LIST OF DICTIONARIES WITH DATA, X_LABEL, Y_LABEL AND LEGEND KEYS, BESIDE 
             LEGEND POSITION
         OUTPUTS: -
-        '''
+        """
         # defining layout
         sns.set()
         # computing ecdf for the given data
@@ -86,11 +86,11 @@ class ProbStatsCharts:
         plt.show()
 
     def boxplot(self, df_data, x_axis_column_name, y_axis_column_name, x_label, y_label):
-        '''
+        """
         DOCSTRING: BOXPLOT TO EVALUATE INTER QUANTILE RANGE AND OUTLIERS
         INPUTS: DATAFRAME DATA, X axis COLUMN NAME, Y axis COLUMN NAME, X LABEL AND Y LABEL
         OUTPUTS: -
-        '''
+        """
         _ = sns.boxplot(x=x_axis_column_name,
                         y=y_axis_column_name, data=df_data)
         _ = plt.xlabel(x_label)
@@ -98,11 +98,11 @@ class ProbStatsCharts:
         plt.show()
 
     def scatter_plot(self, x_axis_data, y_axis_data, x_axis_label, y_axis_label):
-        '''
+        """
         DOCSTRING: SCATTER PLOT TO INFERE ABOUT CORRELATION BETWEEN DATA
         INPUTS: X axis DATA, Y axis DATA, X axis LABEL AND Y axis LABEL
         OUTPUTS: -
-        '''
+        """
         # defining layout
         sns.set()
         # setting data to chart
@@ -115,12 +115,12 @@ class ProbStatsCharts:
 
     def pandas_histogram_columns(self, dataframe, bins=None, figsize=(20, 15),
                                  complete_saving_path=None):
-        '''
+        """
         DOCSTRING: EXPLORATORY DATA ANALYSIS OF DATAFRAME COLUMNS FROM PANDAS
         INPUTS: DATAFRAME, BINS (NONE AS DEFAULT), FIGSIZE (((20,15) TUPLE AS DEFAULT)), 
             COMPLETE SAVING PATH (NONE AS DEFAULT)
         OUTPUTS: -
-        '''
+        """
         # defining number of bins in the chart
         if bins == None:
             bins = np.sqrt(dataframe.shape[0])
@@ -143,7 +143,7 @@ class ProbStatsCharts:
                                            label_axis_y='Percentage', font_size=16, bl_grid=True,
                                            tup_fig_size=(8, 4),
                                            complete_saving_path=None):
-        '''
+        """
         REFERENCES: (BINARY CLASSIFIER) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
         DOCSTRING: PLOT TO COMPARE PRECISION-RECALL TRADE-OFF, CLASSIFICATION-WISE IN SUPERVISED
             LEARNING TASKS FOR MACHINE LEARNING MODELS
@@ -152,7 +152,7 @@ class ProbStatsCharts:
             PRECISION, LIBE STYLE RECALL, LINE WIDTH, LABEL AXIS X, LABEL AXIS Y, FONT SIZE, 
             BOOLEAN GRID, TUPPLE FIGURE SIZE AND COMPLETE SAVING PATH (NONE AS DEFAULT)
         OUTPUTS: -
-        '''
+        """
         # cross validating the model --> establishing accuracy
         array_target_scores = FitPerformance().cross_validation(
             model_fitted, array_data, array_target, cross_validation_folds, scoring_method)[
@@ -186,7 +186,7 @@ class ProbStatsCharts:
                        plot_title=None, label_x_axis='False Positive Rate (Fall-Out)',
                        label_y_axis='True Positive Rate (Recall)', font_size=16,
                        bl_grid=True, tup_fig_size=(8, 4), complete_saving_path=None):
-        '''
+        """
         REFERENCES: (ROC CURVES) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
         DOCSTRING: RECEIVER OPERATING CHARACTERISTIC (ROC) CRUVE PLOTS SENSITIVITY (RECALL) VERSUS 
             1 - SPECIFICITY (TRUE NEGATIVE RATIO, OR THE RATIO OF NEGATIVE INSTANCES THAT ARE 
@@ -195,7 +195,7 @@ class ProbStatsCharts:
             PLOT TITLE, LABEL X AXIS, LABEL Y AXIS, FONT SIZE, BL GRID, TUP FIGURE SIZE, AND 
             COMPLETE SAVING PATH OF THE FIGURE
         OUTPUTS: -
-        '''
+        """
         # cross validating the model --> establishing accuracy
         array_target_scores = HandlingClassification().cross_validation_score(
             model_fitted, array_data, array_target, cross_validation_folds, scoring_method)
@@ -223,11 +223,11 @@ class ProbStatsCharts:
                   ncols=None, nrows=None, nbins=100, limits=(-100, 100),
                   tick_label_size=30, size=(60, 30), suptitle_fontsize=80,
                   subtitle_fontsize=40, bl_save=True, filepath=r'C:/Temp/Teste.png'):
-        '''
+        """
         DOCSTRING: HISTOGRAM
         INPUTS: VECTOR WITH DATA TO BE PLOTED, TITLE
         OUTPUTS: -
-        '''
+        """
         if not ncols or not nrows:
             fig, ax = plt.subplots()
             ax.hist(sample_vector, nbins, range=limits)
@@ -259,22 +259,22 @@ class ProbStatsCharts:
                 fig.savefig(filepath)
 
     def abline(self, plt_, slope, intercept):
-        '''
+        """
         DOCSTRING: PLOT A LINE FROM SLOPE AND INTERCEPT
         INPUTS: PLT_, SLOPE, ITERCEPT
         OUTPUTS
-        '''
+        """
         axes = plt_.gca()
         x_vals = np.array(axes.get_xlim())
         y_vals = intercept + slope * x_vals
         plt_.plot(x_vals, y_vals, '--')
 
     def add_identity(axes, *line_args, **line_kwargs):
-        '''
+        """
         DOCSTRING: PLOT A LINE FROM SLOPE AND INTERCEPT
         INPUTS: PLT_, SLOPE, ITERCEPT
         OUTPUTS
-        '''
+        """
         identity, = axes.plot([], [], *line_args, **line_kwargs)
 
         def callback(axes):
@@ -290,12 +290,12 @@ class ProbStatsCharts:
 
     def qq_plot(self, list_ppf, list_raw_data, chart_title=None, complete_saving_path=None,
                 bl_show_plot=True, j=0):
-        '''
+        """
         REFERENCES: https://towardsdatascience.com/understand-q-q-plot-using-simple-python-4f83d5b89f8f
         DOCSTRING:
         INPUTS:
         OUTPUTS: -
-        '''
+        """
         # setting variables
         list_quantiles = list()
         # determining the quantiles
@@ -336,7 +336,7 @@ class ProbStatsCharts:
             label_val_error='validation_data', x_label='Training set size',
             y_label='Root Mean Squared Error (RMSE)', plt_label='Model Perform',
             legend_plot_position='upper right', int_font_size=14):
-        '''
+        """
         REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
@@ -347,7 +347,7 @@ class ProbStatsCharts:
         OBSERVATION: A GAP BETWEEN TRAINING AND VALIDATION DATA IS THE HALLMARK OF OVERFITTING 
             MODELS - A WORKAROUND IS TO FEED MORE TRAINING DATA UNITL THE VALIDATION ERROR REACHES 
             THE TRAINING ERROR
-        '''
+        """
         # creating test-training sets
         X_train, X_val, y_train, y_val = train_test_split(array_data, array_target,
                                                           test_size=float_test_size)
@@ -388,12 +388,12 @@ class ProbStatsCharts:
                             label_yes, label_no, str_title,
                             str_xlabel, str_ylabel, complete_path_save_figure=None,
                             str_color_negative='salmon', str_color_positive='dodgerblue'):
-        '''
+        """
         REFERENCES: https://colab.research.google.com/drive/1-Slk6y5-E3eUnmM4vjtoRrGMoIKvD0hU#scrollTo=_NOjKvZRid5l
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # remove feature scaling from iv's
         X_set, y_set = cls_scaler.inverse_transform(array_x), array_y
         # linear interpolation of iv's

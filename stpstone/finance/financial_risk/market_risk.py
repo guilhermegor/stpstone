@@ -20,11 +20,11 @@ from stpstone.finance.b3.search_by_trading import TradingFilesB3
 class MarketRiskManagement:
 
     def prices_base_normalizer(self, list_returns, base=100):
-        '''
+        """
         DOCSTRING: RETURNS AS PRICES, PRESERVING DISTANCES THAT WOULD PRESENT THE GIVEN RETURNS
         INPUTS: RETURNS AND BASE
         OUTPUTS: ARRAY
-        '''
+        """
         # Converts returns into prices
         s = [base]
         for i in range(len(list_returns)):
@@ -32,19 +32,19 @@ class MarketRiskManagement:
         return np.array(s)
 
     def beta(self, list_returns, list_market):
-        '''
+        """
         REFERENCES: http://www.turingfinance.com/computational-investing-with-python-week-one/
         DOCSTRING: BETA OR CORRELATION TO A MARKET BENCHMARK
         INPUTS: LIST OF STOCK RETURNS AND MARKET RETURNS WITH THE SAME SIZE THROUGH THE SAME PERIOD
         OUTPUTS: FLOAT
-        '''
+        """
         # Create a matrix of [returns, market]
         m = np.matrix([list_returns, list_market])
         # Return the covariance of m divided by the standard deviation of the market returns
         return np.cov(m)[0][1] / np.std(list_market)
 
     def lower_partial_moment(self, list_returns, threshold, order=2):
-        '''
+        """
         REFERENCES: http://www.turingfinance.com/computational-investing-with-python-week-one/,
             https://breakingdownfinance.com/finance-topics/performance-measurement/lower-partial-moment/
         DOCSTRING: A MEASURE OF DOWNSIDE RISK COMPUTED AS THE AVERAGE OF THE SQUARED DEVIATIONS
@@ -53,7 +53,7 @@ class MarketRiskManagement:
             RETURN
         INPUTS: RETURNS, THRESHOLD AND ORDER (2 AS DEFAULT)
         OUTPUTS: FLOAT
-        '''
+        """
         # this method returns a lower partial moment of the returns
         # create an array he same length as returns containing the minimum return threshold
         threshold_array = np.empty(len(list_returns))
@@ -66,14 +66,14 @@ class MarketRiskManagement:
         return np.sum(diff ** order) / len(list_returns)
 
     def higher_partial_moment(self, list_returns, threshold, order):
-        '''
+        """
         DOCSTRING: A MEASURE OF DOWNSIDE RISK COMPUTED AS THE AVERAGE OF THE SQUARED DEVIATIONS
             ABOVE A TARGET RETURN. THIS MEASURE OF DOWNSIDE RISK IS MORE GENERAL THAN SEMI-
             VARIANCE WHICH IS COMPUTED AS THE AVERAGE OF THE SQUARED DEVIATIONS BELOW THE MEAN
             RETURN
         INPUTS: RETURNS, THRESHOLD AND ORDER (2 AS DEFAULT)
         OUTPUTS: FLOAT
-        '''
+        """
         # this method returns a higher partial moment of the returns
         # create an array he same length as returns containing the minimum return threshold
         threshold_array = np.empty(len(list_returns))
@@ -87,7 +87,7 @@ class MarketRiskManagement:
 
     def parametric_var(self, std_deviation, t, confidence_level, float_mu=0, h=252, ro=None,
                        port_financial_value=1000):
-        '''
+        """
         DOCSTRING: VALUE AT RISK, OR THE STATISTICAL RISK MANAGEMENT TECHINIQUE MEASURING THE
             MAXIMUM LOSS THAT AN INVESTMENTT PORTFOLIO IS LIKELY TO FACE WITHIN A SPECIFIC TIME
             FRAME WITH A CERTAIN DEGREE OF CONFIDENCE
@@ -99,7 +99,7 @@ class MarketRiskManagement:
             FINANCIAL VAR, PERCENTUAL VAR AND DRIFTED ADJUSTMENT, OR ERROR, THAT WILL BE POSITIVE
             IF THE EXPECTED PORTFOLIO RETURN IS GREATER THAN RISK FREE RATE OF RETURN, AND NEGATIVE
             OTHERWISE)
-        '''
+        """
         # wheter or not to consider a correlation to correct the transformation among risk
         #   time periods
         if ro:
@@ -125,13 +125,13 @@ class MarketRiskManagement:
 
     def equity_var(self, std_deviation, t, confidence_level, list_betas,
                    list_financial_exposures, float_mu=0, h=252, ro=None):
-        '''
+        """
         DOCSTRING: EQUITY VAR, OR SENSITIVITY OF ITS RISK FACTORS PORTFOLIO
         INPUTS: STANDARD DEVIATION, T (NPER), COFIDENCE LEVEL (1-ALFA, OR SIGNIFICANCE LEVEL),
             MU (0 AS DEFAULT), H (NOMINAL TIME HORIZON FOR SCALING PURPOSES, NUMBER OF WORKING
             DAYS IN A YEAR, 252 AS DEFAULT) AND RO (AUTOCORRELATION, NONE AS DEFAULT)
         OUTPUTS: DICTIONARY WITH FINANCIAL VAR AND PERCENTUAL VAR
-        '''
+        """
         # calculating the beta of the portfolio
         beta_portfolio = NumHandler().sumproduct(list_betas, list_financial_exposures) \
             / sum(list_financial_exposures)
@@ -146,12 +146,12 @@ class MarketRiskManagement:
 
     def normal_linear_interest_rate_var(self, confidence_level, array_pv01, array_yields, t, h,
                                         correl_yields=0, float_mu=0):
-        '''
+        """
         DOCSTRING: LINEAR RISK CASH FLOW MODEL, OR CASH FLOW MAP, IS THE INTEREST RATE VAR OF
             BONDS, SWAPS AND LOAN PORTFOLIOS THAT CAN BE REPRESENTED AS A SERIES OF CASH FLOWS
         INPUTS: CONFIDENCE LEVEL, ARRAY PV01, ARRAY DERIVATIVE PV01, ARRAY YIELDS, MU (0 AS DEFAULT)
         OUPUTS: FLOAT
-        '''
+        """
         # covariance matrix of array of yields
         cov_mtx = np.zeros((len(array_yields), len(array_yields)))
         for i in range(len(array_yields)):
@@ -173,12 +173,12 @@ class MarketRiskManagement:
 
     def expected_tail_loss(self, nth_lowest=10, port_financial_value=1000,
                            list_prices=None, list_returns=None):
-        '''
+        """
         DOCSTRING: EXPECTED TAIL LOSS FOR A NTH LOWEST AVERAGE LIST OF RETURNS
         INPUTS: NTH LOWEST (10 AS DEFAULT), PORTFOLIO FINANCIAL VALUE (1000 AS VALUE), 
             LIST OF PRICES (NONE AS DEFAULT), LIST OF RETURNS (NONE AS DEFAULT)
         OUTPUTS: DICTIONAY (PERCENTAGE ETL AND FINANCIAL ETL)
-        '''
+        """
         # checking parameters
         if any(all([x != None for x in [list_prices, list_returns]]),
                all([x == None for x in [list_prices, list_returns]])):
@@ -201,12 +201,12 @@ class MarketRiskManagement:
         }
 
     def drawdown(self, tau, list_original_prices=None, list_returns=None, prices_base=100):
-        '''
+        """
         DOCSTRING: DRAWDOWN, OR HIGHEST DECREASE OF RETURN FOR A GIVEN PORTFOLIO, AMID A MOVING
             TIME RANGE, PRESERVING ITS SIZE
         INPUTS: RETURNS, TAU (TIME PERIOD) AND PRICES BASE (100 AS DEFAULT)
         OUTPUTS: FLOAT
-        '''
+        """
         # returns the drawdown given time period tau
         if list_returns:
             values = MarketRiskManagement().prices_base_normalizer(list_returns, prices_base)
@@ -228,11 +228,11 @@ class MarketRiskManagement:
         return abs(drawdown)
 
     def max_drawdown(self, list_original_prices=None, list_returns=None, prices_base=100):
-        '''
+        """
         DOCSTRING: MAXIMUM DRAW DOWN FOR A GIVEN PORTFOLIO
         INPUTS: RETURNS
         OUTPUTS: FLOAT
-        '''
+        """
         # returns the maximum drawdown for any tau in (0, T) where T is the length of
         #   the return series
         max_drawdown = float('-inf')
@@ -253,13 +253,13 @@ class MarketRiskManagement:
         return abs(max_drawdown)
 
     def ewma(self, list_daily_returns, int_wdy=252, accuracy=0.01):
-        '''
+        """
         REFERENCES: https://www.investopedia.com/articles/07/ewma.asp
         DOCSTRING: EXPONENTIALLY WEIGHTED MOVING AVERAGE
         INPUTS: DAILY RETURNS, LAMBDA SMOOTHING PARAMETER (BY DEFAULT 94%, ACCORDING TO
             RISKMETRICS)
         OUTPUTS:
-        '''
+        """
         # number of observations precision-wise
         list_accuracy_0_01 = [44, 49, 55, 63, 74, 90, 113, 151, 228, 458]
         list_accuracy_0_001 = [66, 73, 83, 95, 112, 135, 169, 227, 342]
@@ -306,11 +306,11 @@ class MarketRiskManagement:
 
     def systematic_specific_risk(self, variance_portfolio, std_market, array_stocks_weights,
                                  array_stocks_beta):
-        '''
+        """
         DOCSTRING: SYSTEMATIC AND SPECIFIC RISK FOR A GIVEN PORTFOLIO
         INPUTS: STD PORTFOLIO, ARRAY STOCKS WEIGHTS AND ARRAY STOCKS BETA
         OUTPUTS: DICTIONARY WITH STD PORTFOLIO, SYSTEMATIC RISK AND SPECIFIC RISK
-        '''
+        """
         beta_portfolio = \
             LinearAlgebra().matrix_multiplication(np.array(array_stocks_weights),
                                                   LinearAlgebra().transpose_matrix(
@@ -326,13 +326,13 @@ class MarketRiskManagement:
 
 
 class MarkowitzEff:
-    '''
+    """
     REFERENCES: https://www.linkedin.com/pulse/python-aplicado-markowitz-e-teoria-nem-tão-moderna-de-paulo-rodrigues/?originalSubdomain=pt
     DOCSTRING: MARKOWITZ RISK-RETURN PLOT OF RANDOM PORTFOLIOS, AIMING TO FIND THE BEST ALLOCATION 
         WITH THE ASSETS PROVIDED
     INPUTS: -
     OUTPUTS: -
-    '''
+    """
 
     def __init__(
             self, df_mktdata:pd.DataFrame, int_n_portfolios:int, float_prtf_notional:float, 
@@ -414,19 +414,19 @@ class MarkowitzEff:
         )
 
     def sharpe_ratio(self, float_mu:float, float_sigma:float, float_rf:float) -> float:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return (float(float_mu) - float(float_rf)) / float(float_sigma)
 
     def sigma_portfolio(self, array_weights:np.array, array_returns:np.array) -> float:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # covariance between stocks
         array_cov = np.cov(array_returns)
         # returning portfolio standard deviation
@@ -435,11 +435,11 @@ class MarkowitzEff:
     def returns_min_w_uids(self, df_assets:pd.DataFrame, col_dt:str, col_id:str, 
                            col_returns:str, col_min_w:str) \
                             -> Tuple[np.ndarray, np.ndarray, List[str]]:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # filter where returns are not nulls
         df_assets = df_assets[~df_assets[col_returns].isnull()]
         # returns per uids
@@ -467,7 +467,7 @@ class MarkowitzEff:
                        array_min_w:np.array=None, nth_try:int=100, int_idx_val:int=2, 
                        bl_valid_weights:bool=False, i_attempts:int=0, 
                        float_atol_sum:float=1e-4, float_atol_w:float=10000.0) -> np.array:
-        '''
+        """
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
         INPUTS:
             - INT_N_ASSETS: THE NUMBER OF ASSETS IN THE PORTFOLIO
@@ -476,7 +476,7 @@ class MarkowitzEff:
         OUTPUTS:
             - A LIST OF WEIGHTS FOR THE ASSETS THAT SATISFY THE GIVEN CONSTRAINTS, 
                 WHERE SUM OF WEIGHTS = 1
-        '''
+        """
         # adjusting number of assets within the portfolio
         int_idx_val = min(len(array_min_w), int_idx_val)
         # check wheter the constraints are enabled
@@ -596,11 +596,11 @@ class MarkowitzEff:
                         bl_opt_possb_comb:bool=False, array_min_w:Optional[np.ndarray]=None, 
                         nth_try:int=100, int_wdy:int=252) \
                             -> Tuple[np.ndarray, np.ndarray, np.ndarray, str]:
-        '''
+        """
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
         OUTPUTS: TUP OF FLOATS
-        '''
+        """
         # adjusting variables' types
         array_r = np.asmatrix(array_returns)
         float_rf = float(float_rf)
@@ -627,11 +627,11 @@ class MarkowitzEff:
                           nth_try:int=100, int_wdy:int=252) \
                             -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
                                      np.ndarray, np.ndarray, List[str]]:
-        '''
+        """
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
         INPUTS: MATRIX ASSETS RETURNS, ARRAY EXPECTED RETURNS, FLOAT RISK FREE
         OUTPUTS: TUP OF FLOATS
-        '''
+        """
         # arrays of retunrs and minimum weights per asset
         array_returns, array_min_w, list_uuids = \
             self.returns_min_w_uids(
@@ -664,11 +664,11 @@ class MarkowitzEff:
     def optimal_portfolios(self, array_returns:np.ndarray, n_attempts:int=1000,
                            bl_progress_printing_opt:bool=False, int_wdy:int=252) \
                              -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        '''
+        """
         DOCSTRING: WEIGHTS RETURNS AND SIGMA FOR EFFICIENT FRONTIER
         INPUTS: MATRIX OF ASSETS' RETURNS
         OUTPUTS: TUP OF ARRAYS
-        '''
+        """
         # turn on/off progress printing
         opt.solvers.options['show_progress'] = bl_progress_printing_opt
         # configuring data types
@@ -708,11 +708,11 @@ class MarkowitzEff:
                      float_rf:float, col_sigma:str='sigma', col_mu:str='float_mu', 
                      col_w:str='weights', col_sharpe:str='sharpe', 
                      atol:float=1e-2, int_pace_atol:int=5) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         array_eff_weights = list()
         # convert string-based array_weights to a 2D array by splitting the values
@@ -751,7 +751,7 @@ class MarkowitzEff:
     
     @property
     def plot_risk_return_portfolio(self) -> None:
-        '''
+        """
         REFERENCES: https://plotly.com/python/reference/layout/, 
             https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html, 
             https://plotly.com/python/builtin-colorscales/
@@ -761,7 +761,7 @@ class MarkowitzEff:
             ARRAY OF EFFECTIVE RISKS, ARRAY OF EFFECTIVE RETURN FOR ALL SECURITIES IN A PORTFOLIO, 
             TITLE, YAXIS NAME AND XAXIS NAME
         OUTPUTS: PLOT
-        '''
+        """
         # maximum sharpe portfolio
         idx_max_sharpe = self.array_sharpes.argmax()
         max_sharpe_sigma = self.array_sigmas[idx_max_sharpe]
@@ -803,7 +803,7 @@ class MarkowitzEff:
                 #   define the hovertemplate to include weights
                 hovertemplate=(
                     'Risk: %{x:.2f}<br>' +
-                    'Return: %{y:.2f}<br>' +
+                    'Returns: %{y:.2f}<br>' +
                     'Sharpe: %{marker.color:.2f}<br>' +
                     'Weight: %{customdata[0]}<extra></extra>'
                 ),
@@ -819,7 +819,7 @@ class MarkowitzEff:
                 name='Efficient Frontier',
                 hovertemplate=(
                     'Risk: %{x:.2f}<br>' +
-                    'Return: %{y:.2f}<br>' +
+                    'Returns: %{y:.2f}<br>' +
                     'Weight: %{customdata}<extra></extra>'
                 ),
                 customdata=self.array_eff_weights
@@ -831,7 +831,7 @@ class MarkowitzEff:
                 mode='markers',
                 marker=dict(size=30, color='green', symbol='star'),
                 name='Min Risk Portfolio',
-                hovertemplate='Risk: %{x:.2f}<br>Return: %{y:.2f}<extra></extra>'
+                hovertemplate='Risk: %{x:.2f}<br>Returns: %{y:.2f}<extra></extra>'
             ),
             # add a red star for the maximum sharpe portfolio
             go.Scatter(
@@ -840,7 +840,7 @@ class MarkowitzEff:
                 mode='markers',
                 marker=dict(size=30, color='blue', symbol='star'),
                 name='Max Sharpe Portfolio',
-                hovertemplate='Risk: %{x:.2f}<br>Return: %{y:.2f}<extra></extra>'
+                hovertemplate='Risk: %{x:.2f}<br>Returns: %{y:.2f}<extra></extra>'
             )
         ]
         # configuring title data
@@ -902,7 +902,7 @@ class MarkowitzEff:
 
     @property
     def max_sharpe(self) -> dict:
-        '''
+        """
         DOCSTRING: MAXIMUM SHARPE RATIO PORTFOLIO
         INPUTS:
             - array_sharpes: np.ndarray -> ARRAY CONTAINING SHARPE RATIOS FOR THE PORTFOLIOS
@@ -912,7 +912,7 @@ class MarkowitzEff:
             - ensure_nonzero_weights: bool -> ENSURE THAT ALL WEIGHTS ARE NON-ZERO
         OUTPUTS:
             - dict -> DICTIONARY CONTAINING INFORMATION ABOUT THE MAXIMUM SHARPE RATIO PORTFOLIO
-        '''
+        """
         # ensuring that all weights are non-zero, if is user's interest
         if self.bl_non_zero_w_eff:
             array_valid_indices = np.where((self.array_weights != 0).all(axis=1))[0]
@@ -947,7 +947,7 @@ class MarkowitzEff:
 
     @property
     def min_sigma(self) -> dict:
-        '''
+        """
         DOCSTRING: MINIMUM RISK PORTFOLIO
         INPUTS:
             - array_sharpes: np.ndarray -> ARRAY CONTAINING SHARPE RATIOS FOR THE PORTFOLIOS
@@ -957,7 +957,7 @@ class MarkowitzEff:
             - bl_non_zero_w_eff: bool -> ENSURE THAT ALL WEIGHTS ARE NON-ZERO
         OUTPUTS:
             - dict -> DICTIONARY CONTAINING INFORMATION ABOUT THE MINIMUM RISK PORTFOLIO
-        '''
+        """
         
         # ensuring that all weights are non-zero, if is user's interest
         if self.bl_non_zero_w_eff:
@@ -993,11 +993,11 @@ class MarkowitzEff:
 
     def lot_shares_ticker_corr(self, dict_allocation:Dict[str, Any]) \
         -> Dict[str, Any]:
-        '''
+        """
         DOCSTRING: LOT OF SHARES TICKER CORRECTION
         INPUTS: DICT ALLOCATION
         OUTPUTS: DICT
-        '''
+        """
         list_ser = list()
         df_trad_sec = TradingFilesB3().tradable_securities
         for ticker in dict_allocation['tickers']:

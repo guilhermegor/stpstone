@@ -11,14 +11,14 @@ class GPT():
 
     def __init__(self, api_key:str, str_model:str, int_max_tokens:int=100, 
                  str_context:Optional[str]=None, bl_stream:bool=False) -> None:
-        '''
+        """
         REFERENCES:
             - DOCUMENTATION: https://platform.openai.com/docs/guides/gpt
             - MODELS AVAILABLE: https://platform.openai.com/docs/models/gp
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         self.api_key = api_key
         self.str_model = str_model
         self.int_max_tokens = int_max_tokens
@@ -27,12 +27,12 @@ class GPT():
         self.client = OpenAI(api_key=self.api_key)
 
     def run_prompt(self, list_tuple:List[tuple]) -> ChatCompletion:
-        '''
+        """
         DOCSTRING: RUN LLM WITH PROMPT
         INPUTS: 
             - LIST_TUPLE:LIST[TUPLE] IN ORDER TO CREATE A PROMPT TO REQUEST THE LLM
         OUTPUTS: STR
-        '''
+        """
         # setting variables
         list_ = list()
         # user's information in order to build the prompt

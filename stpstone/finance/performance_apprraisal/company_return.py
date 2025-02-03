@@ -4,7 +4,7 @@ class CompanyReturnAppraisal:
 
     def dupont_analysis(self, float_ni, float_net_revenue, float_avg_ta, float_avg_te, 
                         float_ebt, float_ebit):
-        '''
+        """
         REFERENCES: https://www.wallstreetprep.com/knowledge/dupont-analysis-template/
         DOCSTRING: DUPONT ANALYSIS IN THREE AND FIVE-STEPS
         INPUTS: NET INCOME, NET REVENUE, AVERAGE TOTAL ASSETS, AVERAGE TOTAL SHAREHOLDER'S EQUITY, 
@@ -16,7 +16,7 @@ class CompanyReturnAppraisal:
             4. ASSET TURNOVER (NET REVENUE / AVERAGE TOTAL ASSETS)
             5. FINANCIAL LEVERAGE RATIO (AVERAGE TOTAL ASSETS / AVERAGE SHAREHOLDER'S EQUITY)
         OUTPUTS: DICITONARY WITH 3-STEPS AND 5-STEPS DUPONT ROE
-        '''
+        """
         return {
             '3_steps_dupont_roe': float_ni / float_net_revenue * float_net_revenue / float_avg_ta \
                 * float_avg_ta / float_avg_te, 

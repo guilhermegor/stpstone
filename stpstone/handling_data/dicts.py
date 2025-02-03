@@ -11,51 +11,51 @@ from typing import Dict, Union, List, Any, Callable, Optional
 class HandlingDicts:
 
     def min_val_key(self, dict_active):
-        '''
+        """
         DOCSTRING: MINIMUN VALUE FOR A GIVEN SET OF VALUES IN A DICTIONARY
         INPUTS: ACTIVE DICTIONARY
         OUTPUTS: KEY, VALUE
-        '''
+        """
         return min(dict_active.items(), key=itemgetter(1))
 
     def max_val_key(self, dict_active):
-        '''
+        """
         DOCSTRING: MAXIMUN VALUE FOR A GIVEN SET OF VALUES IN A DICTIONARY
         INPUTS: ACTIVE DICTIONARY
         OUTPUTS: KEY, VALUE
-        '''
+        """
         return max(dict_active.items(), key=itemgetter(1))
 
     def merge_n_dicts(self, *dicts):
-        '''
+        """
         DOCSTRING: MERGE DICTIONARIES, FOR PYTHON 3.5+
         INPUTS: DICTIONARIES
         OUTPUTS: DICTIONARY
-        '''
+        """
         dict_xpt = dict()
         for dict_ in dicts:
             dict_xpt = {**dict_xpt, **dict_}
         return dict_xpt
 
     def cmp(self, x, y):
-        '''
+        """
         Replacement for built-in function cmp that was removed in Python 3
         Compare the two objects x and y and return an integer according to
         the outcome. The return value is negative if x < y, zero if x == y
         and strictly positive if x > y.
         https://portingguide.readthedocs.io/en/latest/comparisons.html#the-cmp-function
-        '''
+        """
         return (x > y) - (x < y)
 
     def multikeysort(self, items, columns):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/1143671/how-to-sort-objects-by-multiple-keys-in-python,
             https://stackoverflow.com/questions/28502774/typeerror-cmp-is-an-invalid-keyword-argument-for-this-function
         DOCSTRING: SORT A LIST OF DICTIONARIES
         INPUTS: LIST OF DICTS AND LIST OF COLUMNS, IF THERE IS A NEGATIVE (-) SIGN ON KEY, 
             IT WIL BE ORDERED IN REVERSE
         OUTPUTS: LIST OF DICTIONARIES
-        '''
+        """
         comparers = [
             ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(
                 col.strip()), 1))
@@ -71,11 +71,11 @@ class HandlingDicts:
         return sorted(items, key=cmp_to_key(comparer))
 
     def merge_dicts(self, list_ser, list_keys_merge=None, bl_sum_values_key=True):
-        '''
+        """
         DOCSTRING: MERGE DICTS FOR EVERY KEY REPETITION
         INPUTS: FOREIGNER KEY, DICTS
         OUTPUTS: DICTIONARY
-        '''
+        """
         # setting default variables
         dict_export = defaultdict(list)
         list_counter_dicts = list()
@@ -99,7 +99,7 @@ class HandlingDicts:
 
     def filter_list_ser(self, list_ser, foreigner_key, k_value, str_filter_type:str='equal') \
         -> List[Dict[str, Any]]:
-        '''
+        """
         DOCSTRING: FILTER LIST OF DICTIONARIES
         INPUTS: 
             - LIST OF DICTS: LIST
@@ -107,7 +107,7 @@ class HandlingDicts:
             - VALUE OF FOREIGNER KEY OF INTEREST: STRING/INTEGER/FLOAT
             - TYPE OF FILTER: STR
         OUTPUTS: LIST OF DICTS
-        '''
+        """
         if str_filter_type == 'equal':
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] == k_value]
         elif str_filter_type == 'not_equal':
@@ -127,12 +127,12 @@ class HandlingDicts:
                 'str_filter_type must be "equal", "not_equal", "less_than" or "greater_than"')
 
     def merge_values_foreigner_keys(self, list_ser, foreigner_key, list_keys_merge_dict):
-        '''
+        """
         REFERECES: https://stackoverflow.com/questions/50167565/python-how-to-merge-dict-in-list-of-dicts-based-on-value
         DOCSTRING: MERGE DICTS ACCORDINGLY TO A FOREIGNER KEY IN THE LIST OF DICTS
         INPUTS: LIST OF DICTS, FOREIGNER KEY AND LIST OF KEYS TO MERGE IN A GIVEN SET O DICTS
         OUTPUTS: LIST OF DICTS
-        '''
+        """
         # setting default variables
         list_ser_export = list()
         list_foreinger_keys = list()
@@ -152,35 +152,35 @@ class HandlingDicts:
         return list_ser_export
 
     def n_smallest(self, list_ser, key_, n):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return nsmallest(n, list_ser, key=lambda dict_: dict_[key_])
 
     def n_largest(self, list_ser, key_, n):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return nlargest(n, list_ser, key=lambda dict_: dict_[key_])
 
     def order_dict(self, dict_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return OrderedDict(sorted(dict_.items()))
 
     def group_by_dicts(self, list_ser):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # sort by the desired field first
         list_ser.sort(key=itemgetter('date'))
         # return iteration in groups
@@ -192,7 +192,7 @@ class HandlingDicts:
         list_keys_for_function:Optional[List[str]]=None, 
         kwargs_static:Optional[Dict[str, Union[int, float, str, None]]]=None
     ) -> List[Dict[str, Union[int, float, str]]]:
-        '''
+        """
         DOCSTRING: ADDS A KEY AND VALUE TO EVERY DICTIONARY IN A LIST
         INPUTS:
             LIST_SER: A LIST OF DICTIONARIES TO BE UPDATED - LIST SERIALIZED
@@ -201,7 +201,7 @@ class HandlingDicts:
             KEYS_FOR_FUNCTION: KEYS TO EXTRACT FROM THE DICTIONARY FOR THE VALUE FUNCTION (IF CALLABLE)
         OUTPUTS:
             LIST OF UPDATED DICTIONARIES.
-        '''
+        """
         for dict_ in list_ser:
             if isinstance(dict_, dict):
                 #   check if the value is a function, otherwise assign the static value
@@ -217,14 +217,14 @@ class HandlingDicts:
         return list_ser
 
     def pair_headers_with_data(self, list_headers, list_data):
-        '''
+        """
         DOCSTRING: PAIR HEADERS AND DATA AS KEYS AND VALUES IN A SERIALIZED LIST
             - FOR EXAMPLE, IF LIST_HEADERS IS ['NAME', 'AGE'] AND LIST_DATA IS 
                 ['JOHN', 25, 'ALICE', 30], THE FUNCTION WILL RETURN [{'NAME': 'JOHN', 'AGE': 25}, 
                 {'NAME': 'ALICE', 'AGE': 30}]
         INPUTS: LIST HEADERS, LIST DATA
         OUTPUTS: LIST
-        '''
+        """
         # setting variables
         list_ser = list()
         # ensuring the list_data length is a multiple of list_headers length
@@ -240,14 +240,14 @@ class HandlingDicts:
         return list_ser
 
     def replace_variables(dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) -> Dict[str, Any]:
-        '''
+        """
         DOCSTRING: REPLACE PLACEHOLDERS IN THE BASE DICTIONARY WITH VALUES FROM THE REPLACEMENT 
             DICTIONARY
         INPUTS:
             - DICT_BASE:DICT - THE DICTIONARY CONTAINING PLACEHOLDERS.
             - DICT_REPLACER:DICT - THE DICTIONARY PROVIDING REPLACEMENT VALUES.
         OUTPUTS: DICT
-        '''
+        """
         for key, value in dict_base.items():
             if isinstance(value, dict):
                 #   handle nested dictionaries

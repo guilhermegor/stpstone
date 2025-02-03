@@ -13,13 +13,13 @@ class DealingOutlook:
                    mail_attachments=None, send_behalf_of=None, auto_send_email=False,
                    bl_frame_sender=False, bl_read_receipt=False, bl_delivery_receipt=False,
                    bl_image_display=False, str_html_signature=None):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/63435690/send-outlook-email-with-attachment-to-list-of-users-in-excel-with-python
         DOCSTRING: SEND EMAIL WITH ATTACHMENTS AND ON BEHALF OF AN EMAIL, INSTEAD OF THE DEFAULT
         INPUTS: TO, CC, BCC (2 OUT OF THREE ARE OPTIONAL), SUBJECT, BODY, ATTACHMENTS, SEND ON
             BEHALF OF AND AUTO SEND (Y/N)
         OUTPUTS: -
-        '''
+        """
         # outlook object through win32com
         outlook = win32.Dispatch('outlook.application')
         # create mail item
@@ -85,12 +85,12 @@ class DealingOutlook:
                        list_fileformat=None, outlook_subfolder=None, move_to_folder=None,
                        save_only_first_event=False, bl_leave_after_first_occurance=False,
                        bl_break_loops=False):
-        '''
+        """
         DOCTRING: DOWNLOAD A FILE FROM AN SPECIFIC EMAIL
         INPUTS: EMAIL ACCOUNT, OUTLOOK FOLDER, PART OF SUBJECT SUB STRING, ATTACHMENT SAVING PATH
             MOVE TO AN ESPECIFIC FOLDER, SAVE ONLY FIRST EVENT (FALSE AS DEFAULT)
         OUTPUTS: JSON WITH SAVING STATUS (OK, NOK)
-        '''
+        """
         # defining variables
         out_app = win32.Dispatch('Outlook.Application')
         out_namespace = out_app.GetNamespace('MAPI')
@@ -161,13 +161,13 @@ class DealingOutlook:
     def received_email_subject_w_rule(self, email_account, outlook_folder,
                                       subj_sub_string, outlook_subfolder=None,
                                       output='subject'):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/22813814/clearly-documented-reading-of-emails-functionality-with-python-win32com-outlook,
             https://docs.microsoft.com/en-us/dotnet/api/microsoft.office.interop.outlook.mailitem?redirectedfrom=MSDN&view=outlook-pia#properties_
         DOCSTRING: LAST EMAIL SUBJECT WITH RULE (OR NAME LIKE)
         INPUTS: EMAIL ACCOUNT, OUTLOOK FOLDER, SUBJECT SUBSTRING, OUTLOOK FOLDER (NONE AS DEFAULT)
         OUTPUTS: OBJECT
-        '''
+        """
         # defining variables
         out_app = win32.Dispatch('Outlook.Application')
         out_namespace = out_app.GetNamespace('MAPI')
@@ -201,13 +201,13 @@ class DealingOutlook:
 
     def get_body_content(self, email_account, outlook_folder,
                          subj_sub_string, outlook_subfolder=None):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/22813814/clearly-documented-reading-of-emails-functionality-with-python-win32com-outlook,
             https://docs.microsoft.com/en-us/dotnet/api/microsoft.office.interop.outlook.mailitem?redirectedfrom=MSDN&view=outlook-pia#properties_
         DOCSTRING: GET BODY CONTENT
         INPUTS: EMAIL ACCOUNT, OUTLOOK FOLDER, SUBJECT SUBSTRING, OUTLOOK FOLDER (NONE AS DEFAULT)
         OUTPUTS: OBJECT
-        '''
+        """
         # defining variables
         out_app = win32.Dispatch('Outlook.Application')
         out_namespace = out_app.GetNamespace('MAPI')
@@ -235,12 +235,12 @@ class DealingOutlook:
 
     def reply_email(self, email_account, outlook_folder, subj_sub_string, msg_body, mail_cc=None,
                     mail_bcc=None, auto_send_email=False, bl_image_display=False, outlook_subfolder=None):
-        '''
+        """
         DOCSTRING: SEND AN AUTOMATED REPLY
         INPUTS: EMAIL ACCOUNT, OUTLOOK FOLDER, SUBJECT SUBSTRING, MESSAGE BODY, MAIL CC, MAIL BCC,
             AUTO SEND EMAIL, BL IMAGE DISPLAY AND OUTLOOK SUBFOLDER (NONE AS DEFAULT)
         OUTPUTS: OBJECT
-        '''
+        """
         # defining variables
         out_app = win32.Dispatch('Outlook.Application')
         out_namespace = out_app.GetNamespace('MAPI')

@@ -10,11 +10,11 @@ from stpstone.finance.derivatives.options.american import AmericanOptions
 class TestEuropeanDerivatives(TestCase):
 
     def test_binomial_pricing_model_european_call(self):
-        '''
+        """
         DOCSTRING: TEST BINOMIAL PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 100
         r = 0.06
@@ -29,11 +29,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_binomial_pricing_model_european_put(self):
-        '''
+        """
         DOCSTRING: TEST BINOMIAL PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 100
         r = 0.06
@@ -48,11 +48,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_binomial_pricing_model_european_call_w_barrier(self):
-        '''
+        """
         DOCSTRING: TEST BINOMIAL PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 100
         r = 0.06
@@ -69,11 +69,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_binomial_pricing_model_european_put_w_barrier(self):
-        '''
+        """
         DOCSTRING: TEST BINOMIAL PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 100
         r = 0.06
@@ -88,11 +88,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_binomial_pricing_model_american_call(self):
-        '''
+        """
         DOCSTRING: TEST BINOMIAL PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 100
         r = 0.06
@@ -107,11 +107,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_binomial_pricing_model_american_put(self):
-        '''
+        """
         DOCSTRING: TEST BINOMIAL PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 100
         r = 0.06
@@ -126,11 +126,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_crr_model_european_call(self):
-        '''
+        """
         DOCSTRING: TEST COX, ROSS AND RUBINSTEIN (CRR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -144,11 +144,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_crr_model_european_put(self):
-        '''
+        """
         DOCSTRING: TEST COX, ROSS AND RUBINSTEIN (CRR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -162,11 +162,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_jr_model_european_call(self):
-        '''
+        """
         DOCSTRING: TEST JARROW AND RUDD (JR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -180,11 +180,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_jr_model_european_put(self):
-        '''
+        """
         DOCSTRING: TEST JARROW AND RUDD (JR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -198,11 +198,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_eqp_model_european_call(self):
-        '''
+        """
         DOCSTRING: TEST JARROW AND RUDD (JR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -216,11 +216,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_eqp_model_european_put(self):
-        '''
+        """
         DOCSTRING: TEST JARROW AND RUDD (JR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -234,11 +234,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_trg_model_european_call(self):
-        '''
+        """
         DOCSTRING: TEST JARROW AND RUDD (JR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06
@@ -252,11 +252,11 @@ class TestEuropeanDerivatives(TestCase):
             cp0)
 
     def test_trg_model_european_put(self):
-        '''
+        """
         DOCSTRING: TEST JARROW AND RUDD (JR) PRICING MODEL
         INPUTS: -
         OUTPUTS: BOOLEAN WITH ACCOMPLISHMENT OF TEST
-        '''
+        """
         s = 100
         k = 110
         r = 0.06

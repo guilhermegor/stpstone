@@ -13,11 +13,11 @@ from stpstone.handling_data.numbers import NumHandler
 class GlobalRates:
 
     def generic_req(self, url, bl_verify=False):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_outlooks = list()
         # request html
@@ -109,11 +109,11 @@ class GlobalRates:
 
     @property
     def libor(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['libor_rates']['url'], 
             YAML_GLB_RT['libor_rates']['bl_verify']
@@ -121,11 +121,11 @@ class GlobalRates:
 
     @property
     def euribor(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['euribor_rates']['url'], 
             YAML_GLB_RT['euribor_rates']['bl_verify']
@@ -133,11 +133,11 @@ class GlobalRates:
     
     @property
     def central_banks(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['central_banks_rates']['url'], 
             YAML_GLB_RT['central_banks_rates']['bl_verify']
@@ -145,11 +145,11 @@ class GlobalRates:
     
     @property
     def ester(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['ester']['url'], 
             YAML_GLB_RT['ester']['bl_verify']
@@ -157,11 +157,11 @@ class GlobalRates:
     
     @property
     def sonia(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['sonia']['url'], 
             YAML_GLB_RT['sonia']['bl_verify']
@@ -169,11 +169,11 @@ class GlobalRates:
     
     @property
     def sofr(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['sofr']['url'], 
             YAML_GLB_RT['sofr']['bl_verify']
@@ -181,11 +181,11 @@ class GlobalRates:
     
     @property
     def usa_cpi(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['usa_cpi']['url'], 
             YAML_GLB_RT['usa_cpi']['bl_verify']
@@ -193,11 +193,11 @@ class GlobalRates:
     
     @property
     def uk_cpi(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['uk_cpi']['url'], 
             YAML_GLB_RT['uk_cpi']['bl_verify']
@@ -205,11 +205,11 @@ class GlobalRates:
     
     @property
     def can_cpi(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['can_cpi']['url'], 
             YAML_GLB_RT['can_cpi']['bl_verify']
@@ -217,11 +217,11 @@ class GlobalRates:
     
     @property
     def eur_cpi(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req(
             YAML_GLB_RT['eur_cpi']['url'], 
             YAML_GLB_RT['eur_cpi']['bl_verify']

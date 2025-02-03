@@ -10,11 +10,11 @@ class OneDrive:
     def check_sync_status(self,
                           dir_path_business='C:\\Users\\{}\\AppData\\Local\\Microsoft\\OneDrive\\logs\\Business1\\',
                           name_like='SyncEngine-*', bl_to_datetime=True):
-        '''
+        """
         DOCSTRING: CHECK WHETHER SYNC SERVICE IN LOCAL MACHINE IS ALIVE
         INPUTS: -
         OUTPUTS: DATETIME
-        '''
+        """
         # definifing local dir_path_business to status file
         dir_path_business = dir_path_business.format(getuser())
         # catch the most recent edited file

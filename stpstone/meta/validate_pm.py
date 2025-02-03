@@ -4,11 +4,11 @@ from pydantic import validate_arguments
 
 
 class ValidateAllMethodsMeta(type):
-    '''
+    """
     DOCSTRING: VALIDATE ALL INPUT AND OUTPUT TYPES OF A CLASS
     INPUTS: NAME, BASES, DCT
     OUTPUTS: VALIDATED CLASS
-    '''
+    """
     
     def __new__(cls, name, bases, dct):
         for attr_name, attr_value in dct.items():

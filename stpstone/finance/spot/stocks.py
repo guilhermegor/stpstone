@@ -9,31 +9,31 @@ from stpstone.finance.performance_apprraisal.financial_math import FinancialMath
 class ValuingStocks:
 
     def continuous_return(self, stock_d0, stock_d1):
-        '''
+        """
         DOCSTRING: CALCULATING LN RETURN FOR A STOCK - CONTINUOS RETURN
         INPUTS: STOCK D0 VALUE AND D1 VALUE
         OUTPUTS: FLOAT LN RETURN
-        '''
+        """
         stock_d0 = float(stock_d0)
         stock_d1 = float(stock_d1)
         return np.log(stock_d1 / stock_d0)
 
     def discrete_return(self, stock_d0, stock_d1):
-        '''
+        """
         DOCSTRING: CALCULATING STANDARD RETURN OF A STOCK BETWEEN TWO DATES - DISCRETE RETURN
         INPUTS: STOCK D0 VALUE AND D1 VALUE
         OUTPUTS: FLOAT RETURN
-        '''
+        """
         stock_d0 = float(stock_d0)
         stock_d1 = float(stock_d1)
         return stock_d1 / stock_d0 - 1
 
     def calc_returns_from_prices(self, list_prices, type_return='ln_return'):
-        '''
+        """
         DOCSTRING: LIST OF RETURS FROM A GIVEN LIST OF PRICES
         INPUTS: LIST OF PRICES AND TYPE OF RETURN CALCULATION (LN_RETURN AS STANDARD)
         OUPUTS: LIST OF RETURNS
-        '''
+        """
         if type_return == 'ln_return':
             return [ValuingStocks().continuous_return(list_prices[i - 1], list_prices[i])
                     for i in range(1, len(list_prices))]
@@ -49,11 +49,11 @@ class ValuingStocks:
                                         col_first_occurrence_ticker='first_occ_ticker',
                                         col_stock_returns='returns',
                                         type_return='ln_return'):
-        '''
+        """
         DOCSTRING: PANDAS RETURNS FROM SPOT PRICES OF SECURITIES WITHIN THE DATAFRAME
         INPUTS: DATAFRAME, COL PRICES, COL DATES (DATETIME FORMAT)
         OUTPUTS: DATAFRAME
-        '''
+        """
         # creating column with first occurrence of a ticker
         df_[col_first_occurrence_ticker] = np.where(df_[col_dt_date] == np.min(df_[col_dt_date]),
                                                     'OK', 'NOK')
@@ -72,21 +72,21 @@ class ValuingStocks:
         return df_
 
     def short_fee_cost(self, fee_short, nper_cd, short_price, quantities, year_cd=360):
-        '''
+        """
         DOCSTRING: SHORT STRATEGY FEE COST
         INPUTS: FEE, NPER CALENDAR DAYS, SHORT PRICE, QUANTITITES, YEAR CALENDAR DAYS
         OUTPUTS: FLOAT
-        '''
+        """
         return FinancialMath().compound_interest(fee_short, nper_cd,
                                                  year_cd) * short_price * quantities
 
     def pricing_strategy(self, long_price, short_price, leverage, operational_costs=0,
                          type_return='ln_return'):
-        '''
+        """
         DOCSTRING: PNL STOCK STRATEGIES (BUY & HOLD, LONG & SHORT)
         INPUTS: LONGE PRICE, SHORT PRICE, LEVERAGE, OPERATIONAL COSTS
         OUPUTS: DICTIONARY (MTM, PERCENTAGE RETURN, NOTIONAL)
-        '''
+        """
         if type_return == 'ln_return':
             return {
                 'mtm': (float(short_price) - float(long_price)) * float(leverage) - float(

@@ -11,11 +11,11 @@ from stpstone.quantitative_methods.regression import NonLinearEquations
 class InitialSettings:
 
     def set_parameters(self, *params, opt_type='call'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # check wheter is a call or put option, in case the type is neither of the former raise
         #   error
         if opt_type not in ['call', 'put']:
@@ -28,38 +28,38 @@ class InitialSettings:
 
 
 class BlackScholesMerton(InitialSettings):
-    '''
+    """
     REFERENCES: https://brilliant.org/wiki/black-scholes-merton/
-    '''
+    """
 
     def d1(self, s, k, b, t, sigma, q):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: D1 OF UNDERLYING OPTION
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), B (COST OF CARRY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET) AND Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, b, t, sigma, q = self.set_parameters(s, k, b, t, sigma, q)
         # return d1 probability
         return (np.log(s / k) + (b + sigma ** 2 / 2) * t) / (sigma * np.sqrt(t))
 
     def d2(self, s, k, b, t, sigma, q):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: D2 OF UNDERLYING OPTION (MONEYNESS)
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), B (COST OF CARRY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET) AND Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, b, t, sigma, q = self.set_parameters(s, k, b, t, sigma, q)
         # return d2 probability
         return self.d1(s, k, b, t, sigma, q) - sigma * np.sqrt(t)
 
     def general_opt_price(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: CALL/PUT PRICE OF AN UNDERLYING ASSET
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), 
@@ -68,7 +68,7 @@ class BlackScholesMerton(InitialSettings):
             OPTION WITH CONTINUOUS DIVIDEND YIELD, 0 FOR FUTURES, 0 AND R 0 FOR MARGINED FUTURES 
             OPTIONS, AND R - RF FOR CURRENCY OPTION MODEL) AND OPTION STYLE (CALL/PUT)
         OUTPUTS: CALL PRICE
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -85,14 +85,14 @@ class BlackScholesMerton(InitialSettings):
 
 
 class Greeks(BlackScholesMerton):
-    '''
+    """
     REFERENCES: https://www.macroption.com/option-greeks-excel/, https://en.wikipedia.org/wiki/Greeks_(finance)
     INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE),
         SIGMA (VOLATILITY OF UNDERLYING ASSET) AND Q (DIVIDEND YIELD)
-    '''
+    """
 
     def delta(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF THE THEORETICAL OPTION VALUE WITH RESPECT TO CHANGES IN THE
             UNDERLYING ASSET'S PRICE - FIRST DERIVATIVE OF THE OPTION VALUE WITH RESPECT TO THE
@@ -101,7 +101,7 @@ class Greeks(BlackScholesMerton):
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY) 
             AND OPTION STYLE (CALL/PUT)
         OUTPUTS:
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -114,7 +114,7 @@ class Greeks(BlackScholesMerton):
                 self.d1(s, k, b, t, sigma, q)) - 1)
 
     def future_delta_from_spot_delta(self, delta, b, t):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: IN SOME MARKETS IT IS OPTIONAL TO HEDGE WITH THE STOCK ITSELF OR, ALTERNATIVELY, 
             HEDGE WITH THE STOCK FUTURES - IN THE CASE WHERE ONE HEDGE WITH A FORWARD CONTRACT WITH 
@@ -123,11 +123,11 @@ class Greeks(BlackScholesMerton):
             CURRENCY SPOT OR ALTERNATIVELY A FORWARD WITH EXPIRATION MATCHING THE OPTION EXPIRATION
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return delta * np.exp(-b * t)
 
     def strike_from_delta(self, s, r, t, sigma, q, b, delta, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF THE THEORETICAL OPTION VALUE WITH RESPECT TO CHANGES IN THE
             UNDERLYING ASSET'S PRICE - FIRST DERIVATIVE OF THE OPTION VALUE WITH RESPECT TO THE
@@ -136,7 +136,7 @@ class Greeks(BlackScholesMerton):
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY) 
             AND OPTION STYLE (CALL/PUT)
         OUTPUTS:
-        '''
+        """
         # initial parameters
         s, r, t, sigma, q, b = self.set_parameters(
             s, r, t, sigma, q, b, opt_type)
@@ -149,13 +149,13 @@ class Greeks(BlackScholesMerton):
                               * sigma * t ** 0.5 + (b + sigma ** 2 / 2.0) * t)
 
     def gamma(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: DELTA SENSITIVITY TO SMALL CHANGES IN THE UNDERLYING PRICE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY) 
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
@@ -163,27 +163,27 @@ class Greeks(BlackScholesMerton):
             / (s * sigma * t ** 0.5)
 
     def saddle_gamma(self, k, r, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: CRITICAL POINT OF GAMMA - LOWER BOUNDARY
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY) 
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         k, r, sigma, q, b = self.set_parameters(k, r, sigma, q, b)
         # return greek
         return np.sqrt((np.exp(1) / pi) * ((2 * b - r) / sigma ** 2 + 1)) / k
 
     def gamma_p(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: PERCENTAGE CHAGENS IN DELTA FOR PERCENTAGE CHANGES IN THE UNDERLYING (GAMMA 
             PERCENT)
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY) 
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
@@ -191,7 +191,7 @@ class Greeks(BlackScholesMerton):
             / (100.0 * sigma * t ** 0.5)
 
     def theta(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         DOCSTRING: SENSITIVITY  MEASUREMENT OF TIME  BEFORE EXPIRATION DATE (IT WILL LOSE VALUE
             PRICED INTO THE EXTRINSIC VALUE OVER TIME) - GAUGE HOW MUCH VALUE AN OPTION LOSES ON
             A DAILY BASIS
@@ -199,7 +199,7 @@ class Greeks(BlackScholesMerton):
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), OPTION CALL OR PUT AND T
             (NUMBER OF DAY PER YEAR, GENERALLY 365 OR 252)
         OUTPUTS:
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -220,13 +220,13 @@ class Greeks(BlackScholesMerton):
                 NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
 
     def vega(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: SENSITIVITY MEASUREMENT OF VOLATILITY OVER TIME
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: VEGA
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
@@ -234,39 +234,39 @@ class Greeks(BlackScholesMerton):
             s, k, b, t, sigma, q)) * np.sqrt(t)
 
     def vega_local_maximum(self, k, t, sigma, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: LOCAL MAXIMUM OF VEGA
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: VEGA
-        '''
+        """
         # initial parameters
         k, t, sigma, b = self.set_parameters(k, t, sigma, b)
         # return greek
         return k * np.exp(-b + sigma ** 2 / 2.0) * t
 
     def strike_maximizes_vega(self, s, t, sigma, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: STRIKE THAT MAXIMIZES VEGA, GIVEN THE ASSET PRICE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: VEGA
-        '''
+        """
         # initial parameters
         s, t, sigma, b = self.set_parameters(s, t, sigma, b)
         # return greek
         return s * np.exp(b + sigma ** 2 / 2.0) * t
 
     def time_to_maturity_maximum_vega(self, s, k, r, sigma, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: TIME TO MATURITY WHEN VEGA IS THE GREATEST
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: VEGA
-        '''
+        """
         # initial parameters
         s, k, r, sigma, b = self.set_parameters(s, k, r, sigma, b)
         # return greek
@@ -274,13 +274,13 @@ class Greeks(BlackScholesMerton):
             / (8.0 * r + sigma ** 2)
 
     def vega_global_maximum(self, k, r, sigma, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: TIME TO MATURITY WHEN VEGA IS THE GREATEST
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: VEGA
-        '''
+        """
         # initial parameters
         k, r, sigma, b = self.set_parameters(k, r, sigma, b)
         # global maximum time for vega
@@ -297,26 +297,26 @@ class Greeks(BlackScholesMerton):
         }
 
     def vega_gamma_relationship(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RELATIONSHIP BETWEEN VEGA AND GAMMA - RETURNS VEGA
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
         return self.gamma(s, k, r, t, sigma, q, b) * sigma * s ** 2 * t
 
     def vega_delta_relationship(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RELATIONSHIP BETWEEN VEGA AND GAMMA - RETURNS VEGA
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b, opt_type = self.set_parameters(s, k, r, t, sigma, q, b,
                                                                  opt_type)
@@ -326,14 +326,14 @@ class Greeks(BlackScholesMerton):
             / (s * sigma * t ** 0.5)
 
     def vega_p(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VEGA PERCENTUAL CHANGE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B(COST OF CARRY) AND
             OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
@@ -341,14 +341,14 @@ class Greeks(BlackScholesMerton):
             self.d1(s, k, b, t, sigma, q)) * t ** 0.5
 
     def vega_elasticity(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VEGA PERCENTUAL CHANGE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B(COST OF CARRY) AND
             OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b, opt_type = self.set_parameters(s, k, r, t, sigma, q, b,
                                                                  opt_type)
@@ -357,13 +357,13 @@ class Greeks(BlackScholesMerton):
             / self.general_opt_price(s, k, r, t, sigma, q, b, opt_type)
 
     def rho(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         DOCSTRING: OPTION'S SENSITIVITY TO SMALL CHANGES IN THE RISK-FREE INTEREST RATE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), OPTION CALL OR PUT AND T
             (NUMBER OF DAY PER YEAR, GENERALLY 365 OR 252)
         OUTPUTS:
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -374,12 +374,12 @@ class Greeks(BlackScholesMerton):
             return -t * k * np.exp(- r * t) * NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
 
     def lambda_greek(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         DOCSTRING: 
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) OPTION CALL OR PUT
         OUTPUTS: LAMBDA
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -388,14 +388,14 @@ class Greeks(BlackScholesMerton):
             self.general_opt_price(s, k, r, t, sigma, q, b, opt_type)
 
     def vanna(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF VEGA ACCORDING TO SPOT, OR DELTA TO VOLATILITY (SIGMA)
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY) 
             AND OPTION STYLE (CALL/PUT)
         OUTPUTS:
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -404,7 +404,7 @@ class Greeks(BlackScholesMerton):
             self.d1(s, k, b, t, sigma, q)) / sigma
 
     def vanna_vol(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF VANNA ACCORDING TO VOLATILITY (SIGMA) (SECOND-ORDER PARTIAL 
             DERIVATIVE OF DELTA WITH RESPECT TO VOLATILITY)
@@ -412,7 +412,7 @@ class Greeks(BlackScholesMerton):
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY) 
             AND OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -422,14 +422,14 @@ class Greeks(BlackScholesMerton):
                 - self.d1(s, k, b, t, sigma, q) / self.d2(s, k, b, t, sigma, q) - 1.0)
 
     def charm(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF DELTA TO TIME, ALSO KNOWN AS CHARM OR DELTA BLEED
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY) 
             AND OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -446,14 +446,14 @@ class Greeks(BlackScholesMerton):
                         -self.d1(s, k, b, t, sigma, q)))
 
     def zomma(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF GAMMA TO IMPLIED VOLATILITY, ALSO KNOWN AS ZOMMA
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -462,14 +462,14 @@ class Greeks(BlackScholesMerton):
             s, k, b, t, sigma, q) - 1) / sigma
 
     def zomma_p(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: SPEED PERCENTAGE
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -477,14 +477,14 @@ class Greeks(BlackScholesMerton):
         return self.zomma(s, k, r, t, sigma, q, b) * s / 100
 
     def speed(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF GAMMA TO SPOT PRICE, ALSO KNOWN AS SPEED
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -493,14 +493,14 @@ class Greeks(BlackScholesMerton):
                                                        / (sigma * t ** 0.5)) / s
 
     def speed_p(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: SPEED PERCENTAGE
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -508,14 +508,14 @@ class Greeks(BlackScholesMerton):
         return self.speed(s, k, r, t, sigma, q, b) * s / 100
 
     def color(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF GAMMA TO TIME, ALSO KNOWN AS COLOR
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -525,14 +525,14 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
 
     def color_p(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF GAMMA TO TIME, ALSO KNOWN AS COLOR
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -543,14 +543,14 @@ class Greeks(BlackScholesMerton):
                                        * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
 
     def vomma(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VEGA PERCENTUAL CONVEXITY, OR THE SENSITIVITY OF CHANGES IN IMPLIED VOLATILITY
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -559,14 +559,14 @@ class Greeks(BlackScholesMerton):
             * self.d2(s, k, b, t, sigma, q) / sigma
 
     def vomma_p(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VEGA CONVEXITY, OR THE SENSITIVITY OF CHANGES IN IMPLIED VOLATILITY
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -575,7 +575,7 @@ class Greeks(BlackScholesMerton):
             * self.d2(s, k, b, t, sigma, q) / sigma
 
     def vomma_positive_outside_interval(self, s_k, r, t, sigma, q, b, bl_spot=True):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: INTERVAL BEYOND WHICH VOMMA BEGINS TO REGISTER POSITIVE VALUES -->
             INTERVAL TO SPOT OR STRIKE VALUES
@@ -583,7 +583,7 @@ class Greeks(BlackScholesMerton):
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             GAMMA (OR GAMMA_P)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -599,13 +599,13 @@ class Greeks(BlackScholesMerton):
         }
 
     def ultima(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VOMMA'S SENSITIVITY TO A CHANGE IN VOLATITLITY
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -616,13 +616,13 @@ class Greeks(BlackScholesMerton):
                 - self.d2(s, k, b, t, sigma, q) / self.d1(s, k, b, t, sigma, q) - 1.0)
 
     def d_vega_d_time(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VEGA'S SENSITIVITY TO A CHANGE IN TIME
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -632,14 +632,14 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
 
     def variance_vega(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: BSM'S FORMULA SENSITIVITY TO A SMALL CHANGE IN THE VARIANCE OF THE UNDERLYING 
             ASSET'S INSTANTENEOUS RATE OF RETURN
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -647,13 +647,13 @@ class Greeks(BlackScholesMerton):
         return self.vega(s, k, r, t, sigma, q, b) / (2 * sigma)
 
     def variance_vanna(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: CHANGE IN DELTA FOR A CHANGE IN THE VARIANCE
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -662,13 +662,13 @@ class Greeks(BlackScholesMerton):
             s, k, b, t, sigma, q) / (2.0 * sigma)
 
     def variance_vomma(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VARIANCE VEGA'S SENSITIVITY TO A SMALL CHANGE IN THE VARIANCE
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -678,13 +678,13 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q) - 1.0)
 
     def variance_ultima(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: VARIANCE ULTIMA IS THE THIRD DERIVATIVE OF BSM'S MODEL WITH RESPECT TO VARIANCE
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -696,13 +696,13 @@ class Greeks(BlackScholesMerton):
                         s, k, b, t, sigma, q) ** 2))
 
     def dbsm_dohm(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RATE OF CHANGE OF BSM'S MODEL REGARDING OHM (STANDARD DEVIATION - TIME)
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -711,7 +711,7 @@ class Greeks(BlackScholesMerton):
                                             / (sigma * t ** 0.5))
 
     def driftless_theta(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: TIME DECAY WITHOUT TAKING INTO ACCOUNT THE DRIFT OF THE UNDERLYING OR DISCOUNTING 
             - THE DRIFTLESS THETA THEREBY ISOLATES THE EFFECT TIME DECAY HAS ON UNCERTAINTY, 
@@ -721,7 +721,7 @@ class Greeks(BlackScholesMerton):
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
@@ -730,20 +730,20 @@ class Greeks(BlackScholesMerton):
             2.0 * t ** 0.5)
 
     def theta_vega_relationship(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RELATIONSHIP BETWEEN THETA AND VEGA - RETURNS THETA
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
         return -self.gamma(s, k, r, t, sigma, q, b) * sigma / (2.0 * t)
 
     def bleed_offset_volatility(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: IT MEASURES HOW MUCH THE VOLATILITY MUST INCREASE TO OFFSET THE THETA-BLEED/TIME
             DECAY - IN THE CASE OF POSITIVE THETA, ONE CAN ACTUALLY HAVE NEGATIVA OFFSET VOLATILITY 
@@ -752,20 +752,20 @@ class Greeks(BlackScholesMerton):
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
         return self.theta(s, k, r, t, sigma, q, b) / self.vega(s, k, r, t, sigma, q, b)
 
     def theta_gamma_relationship_driftless(self, s, k, r, t, sigma, q, b):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RELATIONSHIP BETWEEN DRIFTLESS GAMMA AND THETA - RETURNS DRIFTLESS THETA
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
         # return greek
@@ -773,14 +773,14 @@ class Greeks(BlackScholesMerton):
             s ** 2 * sigma ** 2)
 
     def phi(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: OPTION SENSITIVITY TO A CHANGE IN THE DIVIDEND YIELD (PHI, ALSO KNOWN AS RHO-2), 
             OR THE FOREIGN INTEREST RATE IN THE CASE OF A CURRENCY OPTION
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -793,13 +793,13 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q))
 
     def carry_rho(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: OPTION'S SENSITIVITY TO A SMALL CHANGE IN THE COST-OF-CARRY RATE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -812,13 +812,13 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q))
 
     def risk_neutral_prob_itm(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: RISK-NEUTRAL PROBABILITY FOR ENDING UP ITM AT MATURITY
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -829,14 +829,14 @@ class Greeks(BlackScholesMerton):
             return NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
 
     def strike_given_risk_neutral_prob(self, s, k, r, t, sigma, q, b, p, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING:
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY), 
             P (RISK-NEUTRAL PROBABILITY) AND opt_type (OPTION STYLE)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b, p = self.set_parameters(
             s, k, r, t, sigma, q, b, p, opt_type)
@@ -849,13 +849,13 @@ class Greeks(BlackScholesMerton):
                               + (b - sigma ** 2 / 2.0) * t)
 
     def d_zeta_d_vol(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: ZETA'S SENSITIVITY TO A SMALL CHANGE IN THE IMPLIED VOLATILITY
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -868,13 +868,13 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q) / sigma
 
     def d_zeta_d_time(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: THE ITM RISK-NEUTRAL PROBABILITY'S SENSITIVITY TO MOVING CLOSER TO MATURITY
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -887,13 +887,13 @@ class Greeks(BlackScholesMerton):
                 s, k, b, t, sigma, q) / (2.0 * t))
 
     def risk_neutral_probability_density(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: SECOND ORDER BSM'S FORMULA REGARDING STRIKE
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -902,13 +902,13 @@ class Greeks(BlackScholesMerton):
             k * sigma * t ** 0.5)
 
     def probability_ever_getting_itm(self, s, k, r, t, sigma, q, b, opt_type):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
         DOCSTRING: THE ITM RISK-NEUTRAL PROBABILITY'S SENSITIVITY TO MOVING CLOSER TO MATURITY
         INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
@@ -927,7 +927,7 @@ class Greeks(BlackScholesMerton):
                 z - 2 * lambda_ * sigma * t ** 0.5)
 
     def net_weighted_vega_exposure(self, psi_r, *dicts_opts):
-        '''
+        """
         REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG - PG 119
         DOCSTRING: NET WEIGHTED VEGA EXPOSURE
         INPUTS: PSI_R (VOLATILITY OF REFERENCE VOLATILITY), DICTIONARIES (KEYS - 
@@ -936,7 +936,7 @@ class Greeks(BlackScholesMerton):
             CORRELATION BETWEEN THE VOLATILITY WITH TIME TO MATURITY T AND THE REFERENCE VOLATILITY 
             (corr_t))
         OUTPUTS: FLOAT (VEGA)
-        '''
+        """
         # initial parameters
         psi_r = self.set_parameters(psi_r)
         # return greek
@@ -947,7 +947,7 @@ class Greeks(BlackScholesMerton):
 class IterativeMethods(Greeks):
 
     def binomial_pricing_model(self, s, k, r, t, n, u, d, opt_type, h_upper=None, h_lower=None):
-        '''
+        """
         REFERENCES: 
             https://www.youtube.com/watch?v=a3906k9C0fM, 
             https://www.youtube.com/watch?v=WxrRi9lNnqY,
@@ -956,7 +956,7 @@ class IterativeMethods(Greeks):
             R (ANNUAL RISK-FREE RATE), N (NODES), U (UP-FACTOR IN BINOMIAL MODELS), D (DOWN-FACTOR 
             - TO ENSURE RECOMBINING TREE USE 1/U), OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT FROM ARRAY_CP[0] (CALL-PUT PRICING FOR EACH NODE)
-        '''
+        """
         # initial parameters
         s, k, r, t, n, u, d = self.set_parameters(
             s, k, r, t, n, u, d, opt_type)
@@ -985,7 +985,7 @@ class IterativeMethods(Greeks):
         return array_cp[0]
 
     def crr_method(self, s, k, r, t, n, sigma, opt_type):
-        '''
+        """
         REFERENCES: 
             https://www.youtube.com/watch?v=nWslah9tHLk,
             https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
@@ -993,7 +993,7 @@ class IterativeMethods(Greeks):
         INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES), 
             SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
@@ -1025,7 +1025,7 @@ class IterativeMethods(Greeks):
         return array_cp[0]
 
     def jr_method(self, s, k, r, t, n, sigma, opt_type):
-        '''
+        """
         REFERENCES: 
             https://www.youtube.com/watch?v=nWslah9tHLk,
             https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
@@ -1033,7 +1033,7 @@ class IterativeMethods(Greeks):
         INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES), 
             SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
@@ -1066,7 +1066,7 @@ class IterativeMethods(Greeks):
         return array_cp[0]
 
     def eqp_method(self, s, k, r, t, n, sigma, opt_type):
-        '''
+        """
         REFERENCES: 
             https://www.youtube.com/watch?v=nWslah9tHLk,
             https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
@@ -1074,7 +1074,7 @@ class IterativeMethods(Greeks):
         INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES), 
             SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
@@ -1110,7 +1110,7 @@ class IterativeMethods(Greeks):
         return array_cp[0]
 
     def trg_method(self, s, k, r, t, n, sigma, opt_type):
-        '''
+        """
         REFERENCES: 
             https://www.youtube.com/watch?v=nWslah9tHLk,
             https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
@@ -1118,7 +1118,7 @@ class IterativeMethods(Greeks):
         INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES), 
             SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
         OUTPUTS: FLOAT
-        '''
+        """
         # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
@@ -1159,13 +1159,13 @@ class EuropeanOptions(IterativeMethods):
                            method='fsolve',
                            tolerance=1E-3, epsilon=1, max_iter=1000, orig_vol=0.5,
                            list_bounds=[(0, 2)]):
-        '''
+        """
         REFERENCES: https://www.youtube.com/watch?v=Jpy3iCsijIU, 
             https://www.option-price.com/documentation.php#impliedvolatility
         DOCSTRING: CALCULATING THE IMPLIED VOLATILITY FOR A GIVEN
         INPUTS: OPTION CALL OR PUT, TOLERANCE, EPSILON, MAX ITERATIONS, ORIGINAL VOL
         OUTPUTS: IMPLIED VOLATILITY AND MAX ITERATION HITTED BOOLEAN, ALL ENCAPSULED IN A TUPLE
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
             s, k, r, t, sigma, q, b, cp0, opt_type)
@@ -1237,14 +1237,14 @@ class EuropeanOptions(IterativeMethods):
                             + 'recognized, please revisit the parameter')
 
     def moneyness(self, s, k, r, t, sigma, q):
-        '''
+        """
         REFERENCES: MERCADO DE OPÇÕES, CONCEITOS E ESTRATÉGIAS / AUTOR: LUIZ MAURÍCIO DA SILVA /
             PGS. 74, 75, 76, 77, 78
         DOCSTRING: MEASURES WHETER THE OPTION WILL BE EXERCISED OR NOT TRANSLATED IN A PERCENTUAL
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE) AND
             SIGMA (VOLATILITY OF UNDERLYING ASSET)
         OUTPUTS: PERCENTAGE
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q = self.set_parameters(s, k, r, t, sigma, q)
         # returning moneyness
@@ -1252,13 +1252,13 @@ class EuropeanOptions(IterativeMethods):
                 + self.d2(s, k, r, t, sigma, q)) / 2
 
     def iaotm(self, s, k, r, t, sigma, opt_type, pct_moneyness_atm=0.05):
-        '''
+        """
         DOCSTRING: ITM / ATM / OTM - OPTIONS PREDICT OF EXERCISING
         INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE),
             SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION TYPE AND PERCENTAGE OF ATM
             (STANDARD VALUE OF 5%)
         OUTPUTS: ITM/ATM/OTM
-        '''
+        """
         # initial parameters
         s, k, r, t, sigma, q = self.set_parameters(
             s, k, r, t, sigma, q, opt_type)

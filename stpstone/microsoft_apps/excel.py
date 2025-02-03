@@ -1,9 +1,9 @@
 ### BIBLIOTECA COM FUNÇÕES PARA USAR COM O EXCEL ###
-'''
+"""
 ### fontes:  ###
 https://gist.github.com/mikepsn/27dd0d768ccede849051#file-excelapp-py-L16
 http://code.activestate.com/recipes/528870-class-for-writing-content-to-excel-and-formatting-/
-'''
+"""
 from __future__ import unicode_literals
 import os
 import io
@@ -39,11 +39,11 @@ RGB_PALE_YELLOW = 13565951  # RGB(255,255,206)
 class DealingExcel:
 
     def save_as(self, active_wb, nome_comp_arq):
-        '''
+        """
         DOCSTRING: SALVAR COMO EXCEL DE INTERESSE
         INPUTS: WORKBOOK ATIVO E NOME COMPLETO DO ARQUIVO XLS
         OUTPUTS: -
-        '''
+        """
         xlapp = Dispatch('Excel.Application')
         xlapp.Visible = 0
         wb = xlapp.Workbooks.Open(active_wb)
@@ -51,11 +51,11 @@ class DealingExcel:
         wb.Close(True)
 
     def save_as_active_wb(self, filename, filename_as):
-        '''
+        """
         DOCSTRING: SAVE AS ACTIVE WORKBOOK
         INPUTS: WORKBOOK NAME AND NAME TO SAVE AS
         OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
+        """
         xlapp = Dispatch('Excel.Application')
         xlapp.Visible = 0
         wb = xlapp.Workbooks.Open(filename)
@@ -65,11 +65,11 @@ class DealingExcel:
         return DirFilesManagement().object_exists(filename_as)
 
     def open_xl(self, nome_comp_arq):
-        '''
+        """
         DOCSTRING: ABRIR EXCEL DE INTERESSE
         INPUTS: NOME DO ARQUIVO DE INTERESSE
         OUTPUTS: EXCEL APP E PASTA DE TRABALHO ABERTA
-        '''
+        """
         xlapp = Dispatch('Excel.Application')
         xlapp.Visible = 0
         wb = xlapp.Workbooks.Open(nome_comp_arq)
@@ -77,18 +77,18 @@ class DealingExcel:
         return xlapp, wb
 
     def close_wb(self, active_wb, save_orn=True):
-        '''
+        """
         DOCSTRING: CLOSE ACTIVE WORKBOOK
         INPUTS: ACTIVE WORKBOOK AND WHETER SAVE IT OR NOT (BOOLEAN)
         OUTPUTS: -
-        '''
+        """
         active_wb.Close(save_orn)
 
     def delete_sheet(self, sheet_name, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: DELETE A SHEET FROM THE WORKBOOK
         INPUTS: SHEET NAME, XP APP AND WORBOOK
-        '''
+        """
         # activate workbook
         active_wb.Activate()
 
@@ -99,11 +99,11 @@ class DealingExcel:
         excel_app.DisplayAlerts = True
 
     def paste_values_column(self, nome_plan, str_range, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: COLAR COMO VALOR COLUNA DE INTERESSE
         INPUTS: COLUNA COMO STR
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -117,11 +117,11 @@ class DealingExcel:
 
     def color_range_w_rule(self, nome_plan, str_range, matching_value, cor_pintar_intervalo,
                            excel_app, active_wb):
-        '''
+        """
         DOCSTRING: COLORIR TODA A LINHA
         INPUTS: NOME DA PLAN, COLUNA COMO STR, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -139,11 +139,11 @@ class DealingExcel:
                 cel.EntireRow.Interior.PatternTintAndShade = 0
 
     def autofit_range_columns(self, nome_plan, str_range, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: COLAR COMO VALOR COLUNA DE INTERESSE
         INPUTS: NOME DA PLAN, COLUNA COMO STR, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -155,12 +155,12 @@ class DealingExcel:
         excel_app.ActiveSheet.Columns(str_range).Columns.AutoFit()
 
     def delete_entire_column(self, nome_plan, str_range, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: DELETAR COLUNA DE UMA PLANILHA EXCEL
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) , 
         XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -173,11 +173,11 @@ class DealingExcel:
 
     def delete_cells_w_specific_data(self, nome_plan, str_range, value_to_delete,
                                      excel_app, active_wb):
-        '''
+        """
         DOCSTRING: DELETAR VALORES DE UMA COLUNA CASO COINCIDAM COM UM VALOR ESPECÍFICO
         INPUTS: RANGE DE INTERESSE (COLUNA) , NOME PLANILHA, VALOR DE INTERESSE A SER DELETADO,
             XL APP E WORKBOOK ATIVO
-        '''
+        """
         # activate workbook
         active_wb.Activate()
 
@@ -195,11 +195,11 @@ class DealingExcel:
 
     def replacing_all_matching_str_column(self, nome_plan, str_range, value_to_replace,
                                           replace_value, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: SUBSTITUIR TODOS OS VALORES NUMÉRICOS EM UMA COLUNA DE UMA ARQUIVO EXCEL
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE E RANGE DE INTERESSE (COLUNA)
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -213,12 +213,12 @@ class DealingExcel:
                 cel.value = replace_value
 
     def create_new_column(self, nome_plan, str_range, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CRIAR COLUNA EM UMA PLANILHA EXCEL
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ANTES DA QUAL
         SERÁ CRIADA A COLUNA, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -230,12 +230,12 @@ class DealingExcel:
         excel_app.ActiveSheet.Columns(str_range).Insert()
 
     def text_to_columns(self, nome_plan, str_range, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CRIAR COLUNA EM UMA PLANILHA EXCEL
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ANTES DA QUAL
         SERÁ CRIADA A COLUNA, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -247,12 +247,12 @@ class DealingExcel:
         excel_app.ActiveSheet.Range(str_range).TextToColumns()
 
     def conf_title(self, nome_plan, str_range, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CONFIGURE 
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ANTES DA QUAL
         SERÁ CRIADA A COLUNA, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -272,12 +272,12 @@ class DealingExcel:
         excel_app.Range(str_range).Font.Bold = True
 
     def copy_column_paste_in_other(self, nome_plan, str_range_a, str_range_b, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CRIAR COLUNA EM UMA PLANILHA EXCEL
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ANTES DA QUAL
         SERÁ CRIADA A COLUNA, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -291,12 +291,12 @@ class DealingExcel:
         DealingExcel().clearclipboard()
 
     def move_column(self, nome_plan, str_range_a, str_range_b, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CRIAR COLUNA EM UMA PLANILHA EXCEL
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ANTES DA QUAL
         SERÁ CRIADA A COLUNA, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -310,11 +310,11 @@ class DealingExcel:
         DealingExcel().clearclipboard()
 
     def attr_value_cel(self, nome_plan, str_range, value_inter, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CHANGE A CEL VALUE
         INPUTS: NOME PLAN INTERESSE, RANGE (CEL), NEW VALUE, XL APP E ACTIVEWORKBOOK
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()
@@ -326,11 +326,11 @@ class DealingExcel:
         excel_app.Range(str_range).Value = value_inter
 
     def number_format(self, nome_plan, str_range, format_inter, excel_app, active_wb):
-        '''
+        """
         DOCSTRING: CHANGE A CEL VALUE
         INPUTS: NOME PLAN INTERESSE, RANGE (CEL), NEW VALUE, XL APP E ACTIVEWORKBOOK
         OUTPUTS: -
-        '''
+        """
 
         # activate workbook
         active_wb.Activate()

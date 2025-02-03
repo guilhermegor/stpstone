@@ -116,11 +116,11 @@ class DbfsCLI:
             return output
 
     def copy_and_run(self, local_path, dbfs_path, job_id, int_seconds_wait=10):
-        '''
+        """
         DOCSTRING: COPY CSV FILES TO DBFS IN DATABRICKS WORKSPACE THAN RUN THE JOB TO UPLOAD THE DATA
         INPUTS: LOCAL PATH, DBFS PATH AND THE JOB ID IN DATABRICKS
         OUTPUTS: -
-        '''
+        """
         self.copy(local_path, dbfs_path)
         tables = self.list_files('dbfs:/FileStore/tables')
         while dbfs_path not in tables.keys():

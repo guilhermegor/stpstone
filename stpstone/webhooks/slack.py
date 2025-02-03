@@ -14,14 +14,14 @@ class WebhookSlack:
         self.str_icon_emoji = str_icon_emoji
 
     def send_message(self, str_msg:str, str_method:str='POST') -> None:
-        '''
+        """
         DOCSTRING:
         INPUTS: 
             - MESSAGE:STR
             - METHOD:STR
             - ICON_EMOJI:STR (AVAILABLE EMOJIS: https://raw.githubusercontent.com/iamcal/emoji-data/master/emoji.json)
         OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
+        """
         dict_payload = {
             'channel': self.id_channel, 
             'username': self.str_username, 

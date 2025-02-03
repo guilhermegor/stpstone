@@ -10,81 +10,81 @@ from linear_algebra import distance, add, scalar_multiply
 class Calculus:
 
     def variables(self, str_symbols):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return sym.symbols(str_symbols.split(' '))
 
     def differentiation(self, f, variable_, nth_derivative=1, *args_symbols):
-        '''
+        """
         DOCSTRING: PERFORM NTH DIFFERENTIATION OF A FUNCTION
         INPUTS: FUNCTION, VARIABLE OF DIFFERENTIATION, NTH DERIVATIVE, *ARGS SYMBOLS
         OUTPUTS: POLYNOM
-        '''
+        """
         return sym.diff(f, variable_, nth_derivative)
 
     def integration(self, f, variable_, lower_bound=None, upper_bound=None):
-        '''
+        """
         DOCSTRING: PERFORM NTH DIFFERENTIATION OF A FUNCTION
         INPUTS: FUNCTION, VARIABLE, LOWER BOUNDARY, UPPER BOUNDARY
         OUTPUTS: POLYNOM
-        '''
+        """
         if all([x == None for x in [lower_bound, upper_bound]]):
             return sym.integrate(f, variable_)
         else:
             return sym.integrate(f, (variable_, lower_bound, upper_bound))
 
     def trapz_integration(self, f, variable_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return trapz(f, variable_)
 
     def cumtrapz_integration(self, f, variable_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return cumtrapz(f, variable_)
 
     def simplify(self, f):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return sym.simplify(f)
 
     def gradient_step(self, array_indep, gradient, step_size):
-        '''
+        """
         DOCSTRING: MOVES STEP_SIZE IN THE GRADIENT DIRECTION FROM V
         INPUTS: VECTOR, GRADIENT, STEP_SIZE
         OUTPUTS: VECTOR
-        '''
+        """
         array_indep = np.array(array_indep)
         assert len(array_indep) == len(gradient)
         step = scalar_multiply(step_size, gradient)
         return add(array_indep, step)
 
     def sum_of_squares_gradient(self, array_indep):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return [2 * v_i for v_i in array_indep]
 
     def least_gradient_vector(self, step_size=-0.01, iter=1000, epsilon=0.001):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # pick a random starting point
         array_indep = [random.uniform(-10, 10) for i in range(3)]
         # loop through

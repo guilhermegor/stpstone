@@ -35,13 +35,13 @@ class FixedIncomeAppraisal:
 
     @property
     def yield_durations(self):
-        '''
+        """
         REFERENCE: https://quant.stackexchange.com/questions/15549/modified-or-macauley-duration-in-python
         DOCSTRING: YIELD DURATIONS - MACAULAY AND MODIFIED
         INPUTS: CASH FLOWS, list_rates (FLOAT OR LIST OF FLOATS), PRESENT VALUE OF BOND, YTM, NUMBER
             OF CUPONS AND PAYMENTS PER YEAR
         OUTPUTS: DICTIONARY WITH MACAULAY_DURATION AND MODIFIED_DURATION
-        '''
+        """
         # calculating wheter through exact or approximated form
         if self.bl_exact_form_macaulay_dur == False:
             mac_dur = np.sum([self.list_cfs[i] * ((i + 1) / self.payments_per_year) /
@@ -61,11 +61,11 @@ class FixedIncomeAppraisal:
 
     @property
     def curve_durations(self):
-        '''
+        """
         DOCSTRING: CURVE DURATIONS
         INPUTS: PV MINUS, PV PLUS, PV ZERO AND DELTA CURVE
         OUTPUTS:
-        '''
+        """
         # effective duration
         eff_dur = (self.pv_minus - self.pv_plus) / \
             (2 * self.delta_curve * self.present_value)
@@ -76,23 +76,23 @@ class FixedIncomeAppraisal:
 
     @property
     def key_rate_duration(self):
-        '''
+        """
         DOCSTRING: KEY RATE DURATION IS THE BOND SENSITIVITY TO THE BENCHMARK YIELD CURVE IN A 
             SPECIFIC MATURITY, PROVIDING FURTHER SENSITIVITY TO NON-PARALLEL BENCHMARK YIELD CURVE 
             CHANGES
         INPUTS: PV, DELTA PV, DELTA RATE K
         OUTPUTS: FLOAT
-        '''
+        """
         return - 1.0 / self.present_value * (self.delta_pv / self.delta_yield)
 
     @property
     def money_duration(self):
-        '''
+        """
         DOCSTRING: THE MONEY DURATION OF A BOND IS A MEASURE OF THE PRICE CHANGE IN UNITS OF THE 
             CURRENCY IN WHICH THE BOND IS DENOMINATED
         INPUTS: ANNUAL MODIFIED DURATION (FLOAT), AND PV (FLOAT)
         OUTPUTS: FLOAT
-        '''
+        """
         # calculating wheter through exact or approximated form
         if self.bl_exact_form_money_dur == True:
             return self.yield_durations['macaulay_duration'] * self.present_value
@@ -101,13 +101,13 @@ class FixedIncomeAppraisal:
 
     @property
     def convexity(self):
-        '''
+        """
         REFERENCE: https://quant.stackexchange.com/questions/15549/modified-or-macauley-duration-in-python
         DOCSTRING: BOND CONVEXITY ADJUSTMENT - THE SECOND ORDER EFFECT
         INPUTS: CASH FLOWS, list_rates (FLOAT OR LIST OF FLOATS), PRESENT VALUE OF BOND, YTM, NUMBER
             OF CUPONS AND PAYMENTS PER YEAR
         OUTPUTS: TUPLE OF FLOATS
-        '''
+        """
         # calculating wheter through exact or approximated form
         if self.bl_exact_form_convexity == True:
             return np.sum([self.list_cfs[i] * ((i + 1) * (i + 2) / self.payments_per_year) /
@@ -118,11 +118,11 @@ class FixedIncomeAppraisal:
                 self.delta_yield ** 2 / self.present_value)
 
     def dv01(self, ytm, nper, side='C', contract='DI1'):
-        '''
+        """
         DOCSTRING: DV01 TO MEASURE A DI1 PNL APPLIED A STRESS OF 1 BPS (0.1%) IN YTM
         INPUTS: YTM, NPER, SIDE
         OUPUTS: FLOAT
-        '''
+        """
         if contract == 'DI1':
             if side == 'C':
                 reverse_side = 'V'
@@ -138,7 +138,7 @@ class FixedIncomeAppraisal:
 
     @property
     def pv01(self):
-        '''
+        """
         REFERENCES: https://www.theice.com/publicdocs/futures/Price_Sensitivity.pdf
         DOCSTRING: PV01, OR BASIS POINT VALUE, IS THE PRICE SENSITIVITY TO AN YIELD PERCENTUAL 
             CHANGE
@@ -146,7 +146,7 @@ class FixedIncomeAppraisal:
             OF CUPONS AND PAYMENTS PER YEAR (2 AS DEFAULT) AND SHIFT (0.0001 AS DEFAULT), BL 
             DIRECT FORM, PV MINUS (NONE DEFAULT) AND PV PLUS (NONE DEFAULT)
         OUPUTS: FLOAT
-        '''
+        """
         # calculating wheter through exact or approximated form
         if self.bl_exact_form_pv_01 == True:
             return self.yield_durations(
@@ -157,11 +157,11 @@ class FixedIncomeAppraisal:
 
     @property
     def approximate_delta_bond_price(self):
-        '''
+        """
         DOCSTRING: ESTIMAGTE PERCENTAGE PRICE CHANGE IN CURRENCY UNITS
         INPUTS: ANNUAL MODIFIED DURATION, PV, DELTA YIELD
         OUTPUTS: FLOAT
-        '''
+        """
         # calculating with or without second order bond pricing - convexity
         if self.bl_consider_convexity_delta_pv == False:
             return -self.money_duration(self.annual_modified_duration, self.present_value) \

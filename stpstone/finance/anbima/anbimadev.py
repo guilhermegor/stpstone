@@ -10,18 +10,18 @@ from stpstone.cals.handling_dates import DatasBR
 
 
 class AnbimaDev:
-    '''
+    """
     REFENCE PRODUTCS AND INDEXES: REFERENCES: https://developers.anbima.com.br/api-portal/pt-br/content/swagger-preços-e-índices#/
     REFERENCES FUNDS: https://developers.anbima.com.br/api-portal/pt-br/content/swagger-fundos#/Fundos/findByCodigoFundoUsingGET
-    '''
+    """
 
     def access_token(self, client_id, client_secret):
-        '''
+        """
         REFERENCES: https://developers.anbima.com.br/api-portal/pt-br
         DOCSTRING: TOKEN PARA CONSULTA DA API DA ANBIMA
         INPUTS: CLIET_ID E CLIENT_SECRET
         OUTPUTS: JSON
-        '''
+        """
         base64_credentials = StrHandler().base64_encode(client_id, client_secret)
         url = 'https://api.anbima.com.br/oauth/access-token'
         headers = {
@@ -38,11 +38,11 @@ class AnbimaDev:
         return JsonFiles().send_json(jsonify_message)
 
     def response_requests(self, url, headers, payload):
-        '''
+        """
         DOCSTRING: RESPOSTA PADRÃO PARA REQUISIÇÕES NO SWAGGER DO ANBIMA DEV
         INPUTS: URL, HEADERS E PAYLOAD
         OUTPUTS: DICT COM CÓDIGO DE RESPOSTA, MENSAGEM E URL
-        '''
+        """
         response = requests.request(
             method="POST", url=url, headers=headers, params=payload)
         try:
@@ -67,14 +67,14 @@ class AnbimaDev:
             DatasBR().curr_date(), 1), page_int=0, size_int=1000,
             data_inicio=DatasBR().sub_working_days(DatasBR().curr_date(), 2),
             data_fim=DatasBR().sub_working_days(DatasBR().curr_date(), 1)):
-        '''
+        """
         REFERENCES: https://developers.anbima.com.br/api-portal/pt-br/content/swagger-preços-e-índices#/
         DOCSTRING: CRIAÇÃO DE PARÂMETROS PARA SERVIREM COMO QUERIES PARA DIRECIONAR CONSULTA DO
             SERVIÇO
         INPUTS: COMBINAÇÃO KEYS (DATA, MES-ANO, PAGE-SIZE), DATA INTERESSE (DEFAULT D-1 ÚTIL), 
             PAGE INTEGER (DEFAULT 0), SIZE INTEGER (DEFAULT 1000)
         OUTPUTS: JSON
-        '''
+        """
         if str(type(data_interesse)) == "<class 'datetime.date'>":
             data_interesse = data_interesse.strftime('%Y-%m-%d')
         if combinacao_keys == 'data':
@@ -102,7 +102,7 @@ class AnbimaDev:
 
     def app_response(self, client_id, access_token, endpoint_correte, natureza_ativo,
                      app_interesse, payload_query):
-        '''
+        """
         REFERENCES: https://developers.anbima.com.br/api-portal/pt-br/content/swagger-preços-e-índices#/Títulos%20Públicos/getUsingGET_34
         DOCSTRING: PROJEÇÕES PARA IGPM E IPCA
         INPUTS: CLIENT ID, ACCESS_TOKEN (RESULTADO DE UMA CONEXÃO NO OAUTH2), ENDPOINT CORRENTE
@@ -116,7 +116,7 @@ class AnbimaDev:
             USAR O MÉTODO KEYS() E USAR O PAYLOAD CONSULTA (FUNÇÃO DA CLASSE) PARA COLHER O 
             PAYLOAD DE INTERESSE
         OUTPUTS: JSON
-        '''
+        """
         url = YAML_ANBIMA['hosts_anbima_dev_fundos'][endpoint_correte] + \
             YAML_ANBIMA['apps_anbima_dev'][natureza_ativo][app_interesse]
         headers = {

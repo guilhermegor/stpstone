@@ -10,11 +10,11 @@ class WebhookTeams:
 
     def send_message(self, str_msg:str, str_title:str='ROUTINE_CONCLUSION', 
                            bl_print_message:bool=False) -> None:
-        '''
+        """
         DOCSTRING: SEND PLAIN MESSAGE WITH TEXT AND TITLE
         INPUTS: WEBHOOK CONNECTION, MESSAGE, TITLE AND BODY
         OUTPUTS: -
-        '''
+        """
         teams_message = pymsteams.connectorcard(self.url_webhook)
         teams_message.title(str_title)
         teams_message.text(str_msg)

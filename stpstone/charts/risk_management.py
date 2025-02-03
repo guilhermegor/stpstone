@@ -10,12 +10,12 @@ class ChartsRskManagement:
                                     date_inf, date_sup, risk_free_nominal_rate,
                                     num_portfolios=25000, num_working_days_year=252,
                                     country='brazil'):
-        '''
+        """
         REFERENCES: https://towardsdatascience.com/efficient-frontier-portfolio-optimisation-in-python-e7844051e7f
         DOCSTRING: CHART OF 
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setup for markowitz portfolio
         setup_markowitz_portfolio = \
             MarketRiskManagement().setup_markowitz_portfolio(list_stocks_weights_portfolio,

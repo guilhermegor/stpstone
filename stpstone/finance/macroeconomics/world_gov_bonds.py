@@ -13,11 +13,11 @@ from stpstone.cals.handling_dates import DatesBR
 class WGBD:
 
     def parse_utc_dt_str(self, str_dt):
-        '''
+        """
         DOCSTRING: PARSER UTC DATETIME TO UTC FORMAT
         INTPUTS: STRING DATETIME
         OUTPUTS: DATETIME
-        '''
+        """
         # parse the date and time string without the timezone info
         dt_obj = datetime.strptime(str_dt[:-6], '%d %b %Y %H:%M')
         # manually set the UTC timezone
@@ -27,11 +27,11 @@ class WGBD:
 
     @property
     def bonds_10y_rates_rating(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # request html
@@ -123,11 +123,11 @@ class WGBD:
     
     @property
     def inv_yc_economies(self):
-        '''
+        """
         DOCSTRING: GET INVERTED YIELD CURVE ECONOMIES
         INPUTS: -
         OUTPUTS: TUPLE OF DATAFRAMES
-        '''
+        """
         # request html
         bs_html = HtmlHndler().html_bs_parser(
             YAML_WGBD['inv_yc_ec']['url'], 
@@ -248,11 +248,11 @@ class WGBD:
     
     @property
     def yield_spreads_nations(self):
-        '''
+        """
         DOCSTRING: GET YIELD SPREADS AGAINST GERMANY, USA, CHINA AND AUSTRALIA
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_td = list()
         # request html
@@ -354,11 +354,11 @@ class WGBD:
     
     @property
     def ratings(self):
-        '''
+        """
         DOCSTRING: GET RATINGS FROM THE MAIN AGENCIES
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_td = list()
         # request html

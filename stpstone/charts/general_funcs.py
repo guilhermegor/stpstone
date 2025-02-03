@@ -8,11 +8,11 @@ class GeneralPltFuncs:
 
     def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300, 
                  img_dir='images', sub_dir='end_to_end_project'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # creating directories
         images_path = Path() / img_dir / sub_dir
         images_path.mkdir(parents=True, exist_ok=True)

@@ -11,11 +11,11 @@ from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
 class EDA(TestCase):
 
     def test_eda(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # hardcodes
         nome_completo_teste_mesa_eda = r'C:\Users\Guilherme\OneDrive\Bases\IV WOE UNIT TEST\data-customers-rating_20230921_2055.csv'
         target_col = 'bad_customer'

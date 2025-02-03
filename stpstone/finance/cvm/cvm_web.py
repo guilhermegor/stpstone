@@ -57,12 +57,12 @@ class CVMWeb_WS_Funds:
         str_host_ex_fund:str=r'https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/CReservd/',
         str_host_post_fund:str=r'https://cvmweb.cvm.gov.br/SWB/Sistemas/ADM/CReservada/InfDiario/'
     ):
-        '''
+        """
         DOCSTRING: CVM WEB SERVICE - BRAZILLIAN SEC INPUTS
         INPUTS: COOKIE CAN BE CATCH TRACKING NETWORK WHEN LOGGING WITH THE GOV.BR ACCOUNT IN 
             https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw (SEARCH FOR ouvidor=0)
         OUTPUTS: - 
-        '''
+        """
         self.str_id = str_id
         self.str_passw = str_passw
         self.webdriver_path = webdriver_path
@@ -118,11 +118,11 @@ class CVMWeb_WS_Funds:
         xpath_fill_tin_br:str='//*[@id="accountId"]',
         xpath_fill_passw:str='//*[@id="password"]',
     ) -> str:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         cls_selenium = SeleniumWD()
         # create driver element, wait until page is loaded and the login button is available
         driver = cls_selenium.selenium_web_driver(url, webdriver_path, port, time_wait_page_load, 
@@ -144,11 +144,11 @@ class CVMWeb_WS_Funds:
 
     def generic_req(self, str_method:str, url:str, str_header_ref:str, dict_data:dict={}, 
         bl_allow_redirects:bool=True, tup_timeout:Tuple[float, float]=(12.0, 21.0)) -> html.HtmlElement:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         dict_headers = {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
             'Accept-Language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
@@ -196,11 +196,11 @@ class CVMWeb_WS_Funds:
         str_method:str='GET',
         bl_allow_redirects:bool=True
     ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: AVAILABLE FUND CODES AND EIN
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_ser = list()
         # request html
@@ -282,11 +282,11 @@ class CVMWeb_WS_Funds:
         str_method:str='GET',
         bl_allow_redirects:bool=False,
     ) -> Tuple[html.HtmlElement, str]:
-        '''
+        """
         DOCSTRING: GENERAL FUND DAILY REPORT WITH THE MOST RECENT DATE
         INPUTS: FUND CODE
         OUTPUTS: HTML
-        '''
+        """
         # print(f'URL: {self.str_host_post_fund + str_app.format(str_fund_code)}')
         return \
             self.generic_req(
@@ -307,11 +307,11 @@ class CVMWeb_WS_Funds:
         str_dt_fmt:str='DD/MM/YYYY',
         xpath_avl_dates:str='//*[@id="ddCOMPTC"]/option/text()'
     ):
-        '''
+        """
         DOCSTRING: AVAILABLE DATES FOR FUND DAY REPORT
         INPUTS: FUND CODE
         OUTPUTS: LIST
-        '''
+        """
         list_dts = [
             el_ 
             for el_ in HtmlHndler().html_lxml_xpath(html_content, xpath_avl_dates) 
@@ -353,12 +353,12 @@ class CVMWeb_WS_Funds:
         str_method_fund_report_dt:str='POST',
         bl_allow_redirects:bool=False
     ):
-        '''
+        """
         DOCSTRING: SIMULATION OF JAVASCRIPT CODE EXECUTION WHEN THE REFERENCE DATE IS CHANGED IN THE 
             DROP DOWN MENU, IN ORDER TO RETRIEVE THE FUND DAILY REPORTS FOR DATES OF INTEREST
         INPUTS: 
         OUTPUTS:
-        '''
+        """
         # setting variables
         dict_html_contents_dts = dict()
         # looping within list of dates
@@ -477,11 +477,11 @@ class CVMWeb_WS_Funds:
         str_code_version:str='dev',
         str_table_nane:str='RAW_CVMWEB_INFOS_DIARIAS'
     ) -> list:
-        '''
+        """
         DOCSTRING: BLOCK FUND DAILY REPORTS FOR DATES OF INTEREST TO FETCH - PARALLELIZED
         INPUTS: FUND CODE, DATES OF INTEREST, DIRECTORY TO BACKUP, NAME OF BACKUP FILE, CODE VERSION
         OUTPUTS: LIST OF DICTIONARIES
-        '''
+        """
         # generic request for the given fund code
         html_content_gen, url_fund_daily_infos = self.fund_daily_report_gen(str_fund_code)
         # dates of daily report available
@@ -520,11 +520,11 @@ class CVMWeb_WS_Funds:
         str_dt_fmt_1:str='YYYY-MM-DD',
         str_strftime_format:str='%d/%m/%Y',
     ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_funds = list()
         # check date format

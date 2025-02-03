@@ -21,11 +21,11 @@ class HandlingLists:
                                          str_original_replace_1=',',
                                          str_original_replace_2='.', str_result_replace='',
                                          bl_audit=False):
-        '''
+        """
         DOCSTRING: GET THE FIRST OCCURRENCE OF AN OBJECT WITHIN A LIST
         INPUTS: LIST, OBJECT AND BOOLEAN UPPERCASE (FALSE AS DEFAULT)
         OUTPUTS: INTEGER, FALSE IF THERE IS NO OCCURRENCE
-        '''
+        """
         # first occurrence of uppercase
         if bl_uppercase == True:
             try:
@@ -100,11 +100,11 @@ class HandlingLists:
                 + 'within the list for the first manifestation, please revisit the inputs')
 
     def get_list_until_invalid_occurrences(self, list_, list_invalid_values):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         # remove diacritcs from both lists
         list_ = [StrHandler().remove_diacritics(el) for el in list_]
         list_invalid_values = [StrHandler().remove_diacritics(el) for el in
@@ -121,24 +121,24 @@ class HandlingLists:
         return list_export
 
     def first_numeric(self, list_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         try:
             return next(iter([el for el in list_ if str(el).isnumeric()]))
         except StopIteration:
             return False
 
     def get_lower_upper_bound(self, sorted_list, value_to_put_in_between):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/55895500/need-to-check-if-value-is-between-two-numbers-in-a-list
         DOCSTRING: LOWER AND UPPER BOUND OF DATA THAT A VALUE IS IN BETWEEN; IT CONSIDERS A
             LIST IN ASCENDING ORDER
         INPUTS: SORTED LIST AND VALUE TO BE IN BETWEEN OF DATA WITHIN THE LIST
         OUTPUTS JSON WITH LOWER AND UPPER BOUND
-        '''
+        """
         # list index for for lower and upper bound
         if (value_to_put_in_between in sorted_list) and sorted_list[-1] != value_to_put_in_between:
             list_idx_lower_upper_bound = [bisect.bisect_left(sorted_list, value_to_put_in_between),
@@ -158,12 +158,12 @@ class HandlingLists:
                 value_to_put_in_between, sorted_list))
 
     def get_lower_mid_upper_bound(self, sorted_list, value_to_put_in_between):
-        '''
+        """
         DOCSTRING: LOWER, MIDDLE AND UPPER BOUND OF DATA THAT A VALUE IS IN BETWEEN; IT CONSIDERS A
             LIST IN ASCENDING ORDER
         INPUTS: SORTED LIST AND VALUE TO BE IN BETWEEN OF DATA WITHIN THE LIST
         OUTPUTS JSON WITH LOWER, MIDDLE, UPPER BOUND AND BOOLEAN WITH END OF LIST
-        '''
+        """
         # list index for for lower and upper bound
         if (value_to_put_in_between in sorted_list) and sorted_list[-1] != value_to_put_in_between:
             list_idx_lower_upper_bound = [bisect.bisect_left(sorted_list, value_to_put_in_between),
@@ -196,45 +196,45 @@ class HandlingLists:
                 value_to_put_in_between, sorted_list))
 
     def closest_bound(self, sorted_list, value_to_put_in_between):
-        '''
+        """
         DOCSTRING: CLOSEST BOUND TO A VALUE IN A LIST
         INPUTS: SORTED LIST, VALUE TO PUT IN BETWEEN
         OUTPUTS: VALUE
-        '''
+        """
         return sorted_list[min(range(len(sorted_list)), key=lambda i:
                                abs(sorted_list[i] - value_to_put_in_between))]
     
     def closest_number_within_list(list_, number_):
-        '''
+        """
         DOCSTRING: CLOSEST NUMBER TO NUMBER_ WITHIN A LIST
         INPUTS: LIST OF NUMBERS (NOT NECESSARILY SORTED) AND NUMBER K
         OUTPUTS: FLOAT/INTEGER
-        '''
+        """
         return list_[min(range(len(list_)), key=lambda i: abs(list_[i]-number_))]
 
     def first_occurrence_like(self, list_, str_like):
-        '''
+        """
         DOCSTRING: FIRST OCCURRENCE OF A MATCHING STRING WITHIN A LIST
         INPUTS: LIST AND STRING LIKE
         OUTPUTS: INTEGER
-        '''
+        """
         return list_.index(next(x for x in list_ if StrHandler().match_string_like(
             x, str_like) == True))
 
     def remove_duplicates(self, list_interest):
-        '''
+        """
         DOCSTRING: REMOVING DUPLICATES FROM A GIVEN LIST
         INPUTS: LIST
         OUTPUTS: LIST WITHOUT DUPLICATES
-        '''
+        """
         return list(OrderedDict.fromkeys(list_interest))
 
     def nth_smallest_numbers(self, list_numbers, nth_smallest):
-        '''
+        """
         DOCSTRING: RETURN THE NTH-SMALLEST NUMBERS FROM A LIST
         INPUTS: LIST NUMBERS
         OUTPUTS: NUMPY ARRAY
-        '''
+        """
         # turning into a array
         array_numbers = np.array(list_numbers)
         # sort array
@@ -243,11 +243,11 @@ class HandlingLists:
         return array_numbers[0:nth_smallest]
 
     def extend_lists(self, *lists, bl_remove_duplicates=True):
-        '''
+        """
         DOCSTRING: EXTEND N-LISTS AND REMOVE ITS DUPLICATES
         INPUTS: *ARGS WITH N-LISTS
         OUTPUTS: LIST
-        '''
+        """
         # returning list with n-lists to append and remove duplicates
         list_extended_lists = list()
         # iterating through each list and appending to the final one
@@ -263,11 +263,11 @@ class HandlingLists:
 
     def chunk_list(self, list_to_chunk, str_character_divides_clients=' ',
                    int_chunk=150, bl_remove_duplicates=True):
-        '''
+        """
         DOCSTRING: LIST TO CHUNK IN THE LIMIT SIZE
         INPUTS: LIST TO CHUNK, STRING CHARACTER TO DIVIDE CLIENT (DEFAULT), AND CHUNK (DEFAULT)
         OUTPUTS: LIST
-        '''
+        """
         # setting variables
         list_chunked = list()
         # remove duplicates if is user's will
@@ -309,11 +309,11 @@ class HandlingLists:
         return list_chunked
 
     def cartesian_product(self, list_lists, int_break_n_n=None):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_export = list()
         # list of cartesian product of lists
@@ -330,82 +330,82 @@ class HandlingLists:
             return list_cartesian_product
 
     def sort_alphanumeric(self, list_):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python
         DOCSTRING: SORT ALPHANUMERIC DATA FROM LIST
         INPUTS:
         OUTPUTS:
-        '''
+        """
         def convert(text): return int(text) if text.isdigit() else text
         def alphanum_key(key): return [convert(c)
                                        for c in re.split('([0-9]+)', key)]
         return sorted(list_, key=alphanum_key)
 
     def pairwise(self, iterable):
-        '''
+        """
         REFERENCES: https://docs.python.org/3/library/itertools.html#itertools.pairwise
         DOCSTRING: RETURN SUCCESSIVE OVERLAPPING PAIRS TAKEN FROM THE INPUT ITERABLE
         INPUTS: ITERABLE (LIST)
         OUTPUTS: LIST OF TUPLES
-        '''
+        """
         a, b = tee(iterable)
         next(b, None)
         return list(zip(a, b))
 
     def discard_from_list(self, list_, list_items_remove):
-        '''
+        """
         DOCSTRING: DISCARD-LIKE, FROM SETS, TO LISTS
         INPUTS: LIST AND LIST OF ELEMENTS TO REMOVE
         OUTPUTS: -
-        '''
+        """
         for item in list_items_remove:
             if item in list_:
                 list_.remove(item)
         return list_
 
     def absolute_frequency(self, list_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return Counter(list_)
 
     def flatten_list(self, list_):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return [x for xs in list_ for x in xs]
 
 class PriorityQueue:
-    '''
+    """
     REFERENCES: PYTHON COOKBOOK - DAVID BEASZLEY, BRIAN K. JONES
     DOCSTRING: CREATE A PRIORITY QUEUE LIST
     INPUTS: -
     OUTPUTS: -
-    '''
+    """
 
     def __init__(self):
         self._queue = []
         self._index = 0
 
     def push(self, item, priority):
-        '''
+        """
         DOCSTRING: PUSH ITEMS TO LIST
         INPUTS: ITEM, PRIORITY
         OUTPUTS: -
-        '''
+        """
         heappush(self._queue, (-priority, self._index, item))
         self._index += 1
 
     def pop(self):
-        '''
+        """
         DOCSTRING: REMOVE LAST ITEM FROM LIST
         INPUTS: -
         OUTPUTS: OBJECT
-        '''
+        """
         return heappop(self._queue)[-1]
 
 # sorted_list = [10, 30, 52, 73, 90, 113, 133, 154, 175, 197, 219, 240, 303, 365, 427, 492, 554, 617, 678,

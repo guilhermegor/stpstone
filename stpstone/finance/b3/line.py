@@ -9,12 +9,12 @@ from stpstone.cals.handling_dates import DatesBR
 
 
 class ConnectionApi:
-    '''
+    """
     REFENCES: http://www.b3.com.br/data/files/2E/95/28/F1/EBD17610515A8076AC094EA8/GUIDE-TO-LINE-5.0-API.pdf,
         https://line.bvmfnet.com.br/#/endpoints
     IMPORTANT: REQUIRE PROFILE LINE_SVC-FIRM-MNG-RIS_BVMF TO THE CAU EXCHANGE MANAGER ASSOCIATATED TO
         THE SERVICE USER
-    '''
+    """
 
     def __init__(self, client_id, client_secret, broker_code, category_code, token=None,
                  hostname_api_line_b3='https://api.line.bvmfnet.com.br'):
@@ -29,12 +29,12 @@ class ConnectionApi:
     def auth_header(self, method='GET', key_header='header', int_max_retrieves=1000,
                     int_status_code_ok=200, int_status_code_iteration=400, bl_verify=False,
                     app='/api/v1.0/token/authorization'):
-        '''
+        """
         DOCSTRING: AUTHENTICATION HEADER TO LINE B3 API
         INPUTS: METHOD (DEFAULT), KEY HEADER (DEFAULT), URL AUTHENTIFICATION
             HEADER (DEFAULT)
         OUTPUTS: STRING
-        '''
+        """
         # passing variables
         i = 0
         # requesting authorization authheader
@@ -65,7 +65,7 @@ class ConnectionApi:
                      key_expires_in='expires_in', bl_str_dict_params=False,
                      bl_verify=False, i_retrieves=0,
                      i_aux=0, int_expiration_time=0, app='/api/oauth/token'):
-        '''
+        """
         DOCSTRING: TOKEN TO GRANT ACCESS TO LINE BVMF SERVER
         INPUTS: METHOD (DEFAULT), MININUM TIME TO REFRESH (DEFAULT),
             MAXIMUM RETRIEVES (DEFAULT), KEY REFRESH TOKEN (DEFAULT),
@@ -73,7 +73,7 @@ class ConnectionApi:
             DEFAULT), CURRENT NUMBER OF RETRIEVES (DEFAULT), EXPIRATION TIME (DEFAULT),
             APP REFRESH TOKEN (DEFAULT)
         OUTPUTS: STRING
-        '''
+        """
         # header
         dict_headers = {
             'Authorization': 'Basic {}'.format(self.auth_header),
@@ -129,11 +129,11 @@ class ConnectionApi:
                     bl_debug_mode=False, int_max_retrieves=100, float_secs_sleep=None,
                     float_secs_sleep_increase_error=1.0, int_status_code_ok=200,
                     list_int_http_error_token=[401]):
-        '''
+        """
         DOCSTRING: REQUISITION FROM LINE B3 APPS
         INPUTS: METHOD, APP LINE B3, DICT PARAMS
         OUTPUTS: JSON
-        '''
+        """
         # passing variables
         i = 0
         float_secs_sleep_iteration = float_secs_sleep
@@ -204,11 +204,11 @@ class Operations(ConnectionApi):
     @property
     def exchange_limits(self, method='GET',
                         app='/api/v1.0/exchangeLimits/spxi/{}', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.app_request(self.token, method, app.format(self.broker_code),
                                 bl_retry_if_error=bl_retry_if_error)
 
@@ -216,23 +216,23 @@ class Operations(ConnectionApi):
     def groups_authorized_markets(self, method='GET',
                                   app='/api/v1.0/exchangeLimits/autorizedMarkets',
                                   bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: COLLECT AUTHORIZED MARKETS
         INPUTS: METHOD (DEFAULT GET), APP (DEFAULT), AND BOOLEAN RETRY IF ERROR (TRUE AS DEFAULT)
         OUTPUTS:
-        '''
+        """
         return self.app_request(self.token, method, app, bl_retry_if_error=bl_retry_if_error)
 
     def intruments_per_group(self, group_id, method='POST', str_bl_settled='true',
                              bl_parse_dict_params_data=True, float_secs_sleep=None,
                              app='/api/v1.0/exchangeLimits/findInstruments'):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
         INPUTS: DOCUMENT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
             'isRemoved': 'false', 'spci': int, 'spvi': int, 'symbol': str), BOOLEAN PARSE DICT,
             METHOD (DEFAULT), APP SPXI (DEFAULT)
         OUTPUTS: STATUS CODE
-        '''
+        """
         dict_payload = {
             'authorizedMarketGroupId': group_id,
             'isLimitSetted': str_bl_settled
@@ -250,11 +250,11 @@ class Operations(ConnectionApi):
                                        key_limit_spvi='limitSpvi',
                                        key_instrument_symbol='instrumentSymbol',
                                        key_instrument_asset='instrumentAsset'):
-        '''
+        """
         DOCSTRING: DICTIONARY WITH INSTRUMENTS AND RESPECTIVE AUTHORIZED MARKETS
         INPUTS: -
         OUTPUTS: DICTIONARY
-        '''
+        """
         # setting variables
         dict_export = dict()
         # json groups of authorized markets
@@ -304,22 +304,22 @@ class Resources(Operations):
     @property
     def instrument_informations(self, method='GET',
                                 app='/api/v1.0/symbol', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: INSTRUMENTS INFORMATION
         INPUTS: MEHTOD (DEFAULT), APP INSTRUMENT INFORMATION (DEFAULT)
         OUTPUTS: JSON (ID, SYMBOL AND ASSET)
-        '''
+        """
         return self.app_request(self.token, method, app,
                                 bl_retry_if_error=bl_retry_if_error)
 
     @property
     def instrument_infos_exchange_limits(self, key_infos_id='id',
                                          key_exchange_limits_id='instrumentId', key_symbol='symbol'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # dataframe of exchange limits
         df_exchange_limits = pd.DataFrame.from_dict(self.exchange_limits)
         # convert data types
@@ -348,11 +348,11 @@ class Resources(Operations):
                 for _, row in df_join_instruments.iterrows()}
 
     def instrument_id_by_symbol(self, symbol, method='GET', app='/api/v1.0/symbol/{}'):
-        '''
+        """
         DOCSTRING: RETRIEVES INSTRUMENT ID BY ITS SYMBOL
         INPUTS: INSTRUMENT SYMBOL (STR)
         OUTPUTS: INSTRUMENT ID (INT)
-        '''
+        """
         return self.app_request(self.token, method, app.format(str(symbol)))
 
 
@@ -360,14 +360,14 @@ class AccountsData(ConnectionApi):
 
     def client_infos(self, account_code, bl_retry_if_error=True, bl_debug_mode=False,
                      float_secs_sleep=None, method='GET', app='/api/v1.0/account'):
-        '''
+        """
         DOCSTRING: CLIENT REGISTER ON LINE B3dict_id_ativos_interesse
         INPUTS: ACCOUNT CODE, METHOD (DEFAULT), APP CLIENT INFOS (DEFAULT)
         OUTPUTS: JSON - KEYS: INTERNAL ID, CODE, DOCUMENT, BOOLEAN PROTECTED, BOOLEAN BLOCKED,
             NAME, CATEGORY, SEGMENT, STATUS, PARTICIPANT NAME, PNP NAME, PARTICIPANT CODE,
             PNP CODE, PNP ACCOUNT CODE, PARTICIPANT ACCOUNT CODE, PARTICIPANT ACCOUNT CODE,
             ACCOUNT TYPE, OWNER DOCUMENT CODE, OWNER NAME
-        '''
+        """
         # parameters
         dict_params = {
             'participantCode': self.broker_code,
@@ -380,12 +380,12 @@ class AccountsData(ConnectionApi):
                                 float_secs_sleep=float_secs_sleep, bl_debug_mode=bl_debug_mode)
 
     def spxi_get(self, account_id, method='GET', app='/api/v1.0/account/{}/lmt/spxi'):
-        '''
+        """
         DOCSTRING: GET SPXI INFORMATION FROM CLIENT CODE
         INPUTS: ACCOUNT CODE, METHOD, APP SPXI, KEY ID (FROM CLIENT INFOS)
         OUTPUTS: JSON - KEYS: INSTRUMENT ID, SYMBOL, SPCI, SPVI, SPCI EXCHANGE, SPVI EXCHANGE,
             IS REMOVED
-        '''
+        """
         # parameters
         dict_params = {
             'accId': account_id,
@@ -396,13 +396,13 @@ class AccountsData(ConnectionApi):
     def spxi_instrument_post(self, account_id, dict_payload,
                              bl_parse_dict_params_data=True, method='POST',
                              app='/api/v1.0/account/{}/lmt/spxi'):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO ACCOUNT
         INPUTS: ACCOUNT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
             'isRemoved': 'false', 'spci': int, 'spvi': int, 'symbol': str), BOOLEAN PARSE DICT,
             METHOD (DEFAULT), APP SPXI (DEFAULT)
         OUTPUTS: STATUS CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(account_id),
                                 dict_payload=dict_payload,
                                 bl_parse_dict_params_data=bl_parse_dict_params_data)
@@ -410,23 +410,23 @@ class AccountsData(ConnectionApi):
     def spxi_instrument_delete(self, account_id, dict_payload,
                                bl_parse_dict_params_data=True, method='POST',
                                app='/api/v1.0/account/{}/lmt/spxi'):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
         INPUTS: DOCUMENT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
             'isRemoved': 'true', 'symbol': str), BOOLEAN PARSE DICT, METHOD (DEFAULT), APP SPXI (DEFAULT)
         OUTPUTS: STATUS CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(account_id),
                                 dict_payload=dict_payload,
                                 bl_parse_dict_params_data=bl_parse_dict_params_data)
 
     def spxi_tmox_global_metrics_remove(self, account_id, method='DELETE',
                                         app='/api/v1.0/account/{}/lmt'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # parameters
         dict_params = {
             'accId': account_id,
@@ -436,11 +436,11 @@ class AccountsData(ConnectionApi):
 
     def specific_global_metric_remotion(self, account_id, metric, method='DELETE',
                                         app='/api/v2.0/account/{}/lmt'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # parameters
         dict_params = {
             'accId': account_id,
@@ -453,12 +453,12 @@ class AccountsData(ConnectionApi):
 class DocumentsData(ConnectionApi):
 
     def doc_info(self, doc_code, bl_retry_if_error=True, method='GET', app='/api/v1.0/document'):
-        '''
+        """
         DOCSTRING: GET INFOS REGARDING DOCUMENT CODE (HIGLIGHT TO THE POSSIBILITY TO RETRIEVE 
             DOCUMENT ID FROM DOCUMENT CODE)
         INPUTS: DOCUMENT CODE, BL RETRY IF ERROR (DEFAULT), METHOD (DEFAULT), APP (DEFAULT)
         OUTPUTS: JSON
-        '''
+        """
         # payload
         dict_params = {
             'participantCode': self.broker_code,
@@ -472,11 +472,11 @@ class DocumentsData(ConnectionApi):
     def block_unblock_doc(self, doc_id, bl_isblocked=True, bl_parse_dict_params_data=True, 
                           bl_retry_if_error=True,
                           method='POST', app='/api/v1.0/document/{}'):
-        '''
+        """
         DOCSTRING: BLOCK DOCUMENT
         INPUTS: DOC_ID, BL_ISBLOCKED
         OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
+        """
         # payload
         dict_params = {
             'id': str(doc_id),
@@ -491,11 +491,11 @@ class DocumentsData(ConnectionApi):
     def update_profile(self, doc_id, doc_profile_id, bl_parse_dict_params_data=True,
                        int_rmkt_evaluation=0, bl_retry_if_error=True, method='POST',
                        app='/api/v1.0/document/{}'):
-        '''
+        """
         DOCSTRING: UPDATE DOCUMENT PROFILE
         INPUTS: DOC ID, DOC PROFILE ID, RMKT EVALUATION (DEFAULT)
         OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
+        """
         # payload
         dict_payload = {
             'id': str(doc_id),
@@ -510,11 +510,11 @@ class DocumentsData(ConnectionApi):
 
     def bl_protection_mode(self, doc_id, bl_protect=True, bl_parse_dict_params_data=True,
                            bl_retry_if_error=True, method='POST', app='/api/v1.0/document/{}'):
-        '''
+        """
         DOCSTRING: PROTECTION MODE FOR THE CURRENT DOCUMET
         INPUTS: DOC ID, DOC PROFILE ID, RMKT EVALUATION (DEFAULT)
         OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
+        """
         # payload
         dict_payload = {
             'id': str(doc_id),
@@ -527,14 +527,14 @@ class DocumentsData(ConnectionApi):
 
     def client_infos(self, doc_id, bl_retry_if_error=True, float_secs_sleep=None, bl_debug_mode=False,
                      method='GET', app='/api/v1.0/account'):
-        '''
+        """
         DOCSTRING: CLIENT REGISTER ON LINE B3
         INPUTS: DOC ID, METHOD (DEFAULT), APP CLIENT INFOS (DEFAULT)
         OUTPUTS: JSON - KEYS: INTERNAL ID, CODE, DOCUMENT, BOOLEAN PROTECTED, BOOLEAN BLOCKED,
             NAME, CATEGORY, SEGMENT, STATUS, PARTICIPANT NAME, PNP NAME, PARTICIPANT CODE,
             PNP CODE, PNP ACCOUNT CODE, PARTICIPANT ACCOUNT CODE, PARTICIPANT ACCOUNT CODE,
             ACCOUNT TYPE, OWNER DOCUMENT CODE, OWNER NAME
-        '''
+        """
         # parameters
         dict_params = {
             'participantCode': self.broker_code,
@@ -549,11 +549,11 @@ class DocumentsData(ConnectionApi):
     def doc_profile(self, doc_id, method='GET', app='/api/v2.0/document/v2.0/document/{}',
                     key_api_line_b3_profile_full='profileFull',
                     key_api_line_b3_profile_name='profileName', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: DOC PROFILE (INTEGER AND NAME)
         INPUTS: DOC ID, METHOD (DEFAULT), APP CLIENT INFOS (DEFAULT)
         OUTPUTS: INTEGER AND STRIN
-        '''
+        """
         #   fetch json
         json_doc = self.app_request(self.token, method, app.format(doc_id),
                                     bl_retry_if_error=bl_retry_if_error)
@@ -564,12 +564,12 @@ class DocumentsData(ConnectionApi):
         }
 
     def spxi_get(self, doc_id, method='GET', app='/api/v1.0/document/{}/lmt/spxi'):
-        '''
+        """
         DOCSTRING: GET SPXI INFORMATION FROM CLIENT DOCUMENT
         INPUTS: DOC ID, METHOD, APP SPXI, KEY ID (FROM CLIENT INFOS)
         OUTPUTS: JSON - KEYS: INSTRUMENT ID, SYMBOL, SPCI, SPVI, SPCI EXCHANGE, SPVI EXCHANGE,
             IS REMOVED
-        '''
+        """
         # parameters
         dict_params = {
             'docId': doc_id,
@@ -580,13 +580,13 @@ class DocumentsData(ConnectionApi):
     def spxi_instrument_post(self, doc_id, dict_payload,
                              bl_parse_dict_params_data=True, method='POST',
                              app='/api/v1.0/document/{}/lmt/spxi', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
         INPUTS: DOCUMENT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
             'isRemoved': 'false', 'spci': int, 'spvi': int, 'symbol': str), BOOLEAN PARSE DICT,
             METHOD (DEFAULT), APP SPXI (DEFAULT)
         OUTPUTS: STATUS CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(doc_id),
                                 dict_payload=dict_payload,
                                 bl_parse_dict_params_data=bl_parse_dict_params_data,
@@ -595,13 +595,13 @@ class DocumentsData(ConnectionApi):
     def spxi_instrument_delete(self, doc_id, dict_payload,
                                bl_parse_dict_params_data=True, method='POST',
                                app='/api/v1.0/document/{}/lmt/spxi'):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
         INPUTS: DOCUMENT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
             'isRemoved': 'true', 'symbol': str), BOOLEAN PARSE DICT, METHOD (DEFAULT),
             APP SPXI (DEFAULT)
         OUTPUTS: STATUS CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(doc_id),
                                 dict_payload=dict_payload,
                                 bl_parse_dict_params_data=bl_parse_dict_params_data)
@@ -611,11 +611,11 @@ class Professional(ConnectionApi):
 
     def professional_code_get(self, method='GET',
                               app='/api/v1.0/operationsProfessionalParticipant/code'):
-        '''
+        """
         DOCSTRING: GET PROFESSIONAL INFORMATION FROM ITS CODE
         INPUTS: PROFESSIONAL CODE
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         dict_params = {
             'participantCode': self.broker_code,
             'pnpCode': self.category_code
@@ -631,11 +631,11 @@ class Professional(ConnectionApi):
                                        bl_retry_if_error=True, bl_debug_mode=True,
                                        bl_parse_dict_params_data=True,
                                        float_secs_sleep=None):
-        '''
+        """
         DOCSTRING: GET PROFESSIONAL POSITIONS HISTORIC FROM ITS CODE
         INPUTS: PROFESSIONAL CODE
         OUTPUTS: JSON WITH POSITIONS HISTORIC
-        '''
+        """
         # payload for request
         dict_payload = {
             'angularItensPerPage': int_items_per_page,
@@ -661,20 +661,20 @@ class ProfilesData(ConnectionApi):
 
     @property
     def risk_profile(self, method='GET', app='/api/v1.0/riskProfile'):
-        '''
+        """
         DOCSTRING: GET PROFILES AVAILABLE IN LINE B3
         INPUTS: PROFILE ID
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         return self.app_request(self.token, method, app)
 
     def entities_associated_profile(self, id_profile, method='GET',
                                     app='/api/v1.0/riskProfile/enty', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: ENTITY DOCUMENTS LINKED TO THE PROFILE
         INPUTS: PROFILE ID
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         dict_params = {
             'id': id_profile,
             'participantCode': self.broker_code,
@@ -685,52 +685,52 @@ class ProfilesData(ConnectionApi):
 
     def profile_global_limits_get(self, prof_id, method='GET',
                                   app='/api/v1.0/riskProfile/{}/lmt'):
-        '''
+        """
         DOCSTRING: GET PROFILE GLOBAL LIMITS BY ITS ID
         INPUTS: PROFILE ID
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(prof_id))
 
     def profile_market_limits_get(self, prof_id, method='GET',
                                   app='/api/v1.0/riskProfile/{}/lmt/mkta', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: GET PROFILE MARKET LIMITS BY ITS ID
         INPUTS: PROFILE ID
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(prof_id),
 
                                 bl_retry_if_error=bl_retry_if_error)
 
     def profile_spxi_limits_get(self, prof_id, method='GET',
                                 app='/api/v1.0/riskProfile/{}/lmt/spxi'):
-        '''
+        """
         DOCSTRING: GET PROFILE SPCI/SPVI LIMITS BY ITS ID
         INPUTS: PROFILE ID
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(prof_id))
 
     def profile_tmox_limits_get(self, prof_id, method='GET',
                                 app='/api/v1.0/riskProfile/{}/lmt/tmox'):
-        '''
+        """
         DOCSTRING: GET PROFILE TMOC/TMOV LIMITS BY ITS ID
         INPUTS: PROFILE ID
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(prof_id))
 
     def spxi_instrument_post(self, prof_id, dict_payload,
                              bl_parse_dict_params_data=True, method='POST',
                              app='/api/v1.0/riskProfile/{}/lmt/tmox', bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
         INPUTS: DOCUMENT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
             'isRemoved': false, 'symbol': 'RNEW4', 'tmoc': 0, 'tmocExchange': 0, 'tmov': 1000000,
             'tmovExchange': 0), BOOLEAN PARSE DICT, METHOD (DEFAULT), APP SPXI (DEFAULT)
         OUTPUTS: STATUS CODE
-        '''
+        """
         return self.app_request(self.token, method, app.format(prof_id),
                                 dict_payload=dict_payload,
                                 bl_parse_dict_params_data=bl_parse_dict_params_data,
@@ -742,11 +742,11 @@ class Monitoring(ConnectionApi):
     @property
     def alerts(self, method='GET', app='/api/v1.0/alert/lastalerts?filterRead=true',
                bl_retry_if_error=True):
-        '''
+        """
         DOCSTRING: INSTRUMENTS INFORMATION
         INPUTS: MEHTOD (DEFAULT), APP INSTRUMENT INFORMATION (DEFAULT)
         OUTPUTS: JSON (ID, SYMBOL AND ASSET)
-        '''
+        """
         return self.app_request(self.token, method, app, bl_retry_if_error=bl_retry_if_error)
 
 
@@ -757,11 +757,11 @@ class SystemEventManagement(ConnectionApi):
                int_entity_type=3, method='POST',
                bl_parse_dict_params_data=True, float_secs_sleep=None,
                app='/api/v1.0/systemEvent'):
-        '''
+        """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
         INPUTS: WORKING DAYS BEFORE AND AFTER
         OUTPUTS: STATUS CODE
-        '''
+        """
         # payload to consult the range of dates of interest
         dict_payload = {
             'participantCode': int(self.broker_code),

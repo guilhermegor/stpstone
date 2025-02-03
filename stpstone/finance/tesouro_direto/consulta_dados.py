@@ -15,13 +15,13 @@ from stpstone.cals.handling_dates import DatesBR
 class ConsultaDadosTesouroDireto:
 
     def pu_taxa_abertura_contratos(self, contrato, data_mtm, data_vencimento):
-        '''
+        """
         REFERENCES: https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0:
         DOCSTRING: PU E TAXA NA ABERTURA DO DIA
         INPUTS: CONTRATO, DATA DE REFERÊNCIA PARA MARCAÇÃO À MERCADO E DATA DE VENCIMENTO
         OUTPUTS: DICIONÁRIO (DIA, TAXA DE COMPRA NA ABERTURA, TAXA DE VENDA NA ABERTURA, 
             PU COMPRA NA ABERTURA, PU VENDA NA ABERTURA, PU VENDA NA ABERTURA, PU BASE ABERTURA)
-        '''
+        """
         # ajustando tipos da variáveis
         if isinstance(data_mtm, datetime.date) == True:
             data_mtm = DatesBR().datetime_to_string(data_mtm)

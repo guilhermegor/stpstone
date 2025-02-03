@@ -10,12 +10,12 @@ from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_
 class FitPerformance:
 
     def max_llf(self, array_x, array_y, array_y_hat):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/45033980/how-to-compute-aic-for-linear-regression-model-in-python
         DOCSTRING: MAXIMIZED LIKELIHOOD
         INPUTS: ARRAY INDEPENDENT, ARRAY DEPENDENT AN ARRAY OF PREDICTIONS
         OUTPUTS: FLOAT
-        '''
+        """
         #b number of observations
         nobs = float(array_x.shape[0])
         nobs2 = nobs / 2.0
@@ -30,13 +30,13 @@ class FitPerformance:
         return llf
 
     def aic(self, array_x, array_y, array_y_hat):
-        '''
+        """
         DOCSTRING: AKAIKE'S INFORMATION CRITERION (AIC) EVALUATES A COLLECTION OF MODELS 
             THAT EXPLAINS THE SAME DV - THE LOWER THE BETTER - BETTER THAN BIC FOR PREDICTION 
             PURPOSES
         INTPUTS: MODEL FITTED
         OUTPUTS: FLOAT
-        '''
+        """
         # number of features plus one dependent variable
         p = array_x.shape[1] + 2
         # log-likelihood
@@ -45,7 +45,7 @@ class FitPerformance:
         return -2.0 * llf + 2.0 * p
     
     def bic(self, array_x, array_y, array_y_hat):
-        '''
+        """
         REFERENCES: https://en.wikipedia.org/wiki/Bayesian_information_criterion
         DOCSTRING: SCHWARTZ'S BAYESIAN INFORMATION CRITERION (BIC) - THE LOWER THE BETTER - BETTER 
             THAN AIC WHEN GOODNESS OF FIT MODEL IS PREFERRED
@@ -54,7 +54,7 @@ class FitPerformance:
                 THE MODEL HAS
         INTPUTS: MODEL FITTED
         OUTPUTS: FLOAT
-        '''
+        """
         # number of parameters estimated by the model - q slopes + 1 intercept
         k = array_x.shape[1] + 2 # + 2 because the shape starts with 0
         # return bic
@@ -63,12 +63,12 @@ class FitPerformance:
     def cross_validation(self, model_fitted, array_x, array_y,
                          cross_validation_folds=3, scoring_method='neg_mean_squared_error',
                          cross_val_model='score', cross_val_model_method='predict_proba'):
-        '''
+        """
         REFERENCES: https://scikit-learn.org/stable/modules/cross_validation.html
         DOCSTRING: CROSS VALIDATION TO MEASURE ESTIMATOR PERFORMANCE
         INPUTS: MODEL ESTIMATOR, X ARRAY OF REAL NUMBERS, Y ARRAY OF REAL NUMBERS
         OUPUTS: DICT WITH SCORES, MEAN AND STANDARD DISTRIBUTION
-        '''
+        """
         # defining cross validation model for the current estimator
         if cross_val_model == 'score':
             scores = cross_val_score(
@@ -94,7 +94,7 @@ class FitPerformance:
                                             array_x_real_numbers, array_y_real_numbers,
                                             num_cross_validation_splitting_strategy=5,
                                             bl_return_train_score=True, bl_randomized_search=True):
-        '''
+        """
         REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_end_to_end_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH, 
             https://towardsdatascience.com/machine-learning-gridsearchcv-randomizedsearchcv-d36b89231b10
         DOCSTRING: FIDDLE AN ESTIMATOR WITH A COMBINATION OF HYPERPARAMETHERS AND FINDING THE 
@@ -105,7 +105,7 @@ class FitPerformance:
         OUTPUTS: DICTIONARY WITH BEST PARAMETERS, SCORE, BEST ESTIMATOR, CV RESULTS (RETURN A 
             LIST OF TUPLES WITH RMSE, OR ROOT MEAN SQUARED ERROR, IN WHICH LOWER IS BETTER, AND THE 
             PARAMETHERS CONSIDERED), AND THE MODEL REGRESSION WITH THE INPUTS OPTIMIZED
-        '''
+        """
         # fiddle estimator with hyperparameters until finding the optimal combination
         if bl_randomized_search == True:
             grid_search_model = RandomizedSearchCV(model_fitted, param_grid,
@@ -145,7 +145,7 @@ class FitPerformance:
                              cross_validation_folds=3, scoring_method='accuracy',
                              cross_val_model='score', key_scores='scores',
                              f1_score_average='macro'):
-        '''
+        """
         REFERENCES: (BINARY CLASSIFIERS + ROC CURVE) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
         DOCSTRING: CROSS VALIDATION, CONFUSION MATRIX, INSTEAD OF RETURNING THE EVALUATION SCORE, 
             IT RETURNS THE PREDICTIONS MADE ON EACH TEST FOLD OF THE CROSS VALIDATION, PLACED 
@@ -160,7 +160,7 @@ class FitPerformance:
             F1 (HARMONIC MEAN OF PRECISION AND RECALL) AND RERCEIVER OPERATING CHARACTERISTC - 
             AREA UNDER THE CURVE (ROC - AUC), BEING THE ESTIMATOR CLOSER TO 1 BEST IN THIS SCORE 
             BETTER
-        '''
+        """
         # cross validation scores
         array_cross_validation_scores = FitPerformance().cross_validation(
             model, array_x, array_y, cross_validation_folds,
@@ -183,13 +183,13 @@ class FitPerformance:
         }
     
     def fitting_perf_eval(self, array_y, array_y_hat):
-        '''
+        """
         REFERENCES: https://medium.com/@maxgrossman10/accuracy-recall-precision-f1-score-with-python-4f2ee97e0d6
         DOCSTRING: FITTING PERFOMANCE EVALUATION METRICS - F1 USED WHEN THERE IS AN INBALANCE BETWEEN 
             ERRORS TYPE I AND II, OTHERWISE ACCURACY WOULD BE USED
         INPUTS: Y ARRAY AND Y HAT ARRAY
         OUTPUTS: DICTIONARY
-        '''
+        """
         return {
             'accuracy': accuracy_score(array_y, array_y_hat), 
             'precision': precision_score(array_y, array_y_hat), 

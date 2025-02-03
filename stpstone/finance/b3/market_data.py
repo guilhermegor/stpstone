@@ -37,11 +37,11 @@ class TradingVolumeB3:
             int_year:int, 
             int_month:int
         ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_th = list()
         list_td = list()
@@ -163,22 +163,22 @@ class TradingVolumeB3:
 class CalendarB3:
 
     def bl_weekly_option(self, ticker_opc:str, int_min_letters:int=6) -> bool:
-        '''
+        """
         DOCSTRING: BOOLEAN TO WEEKLY EXPIRING OPTIONS
         INPUTS: TICKER
         OUTPUTS: BOOLEAN
-        '''
+        """
         num_let = sum(c.isalpha() for c in ticker_opc)
         num_let += sum(c.isdigit() for c in ticker_opc[:4])
         return num_let >= int_min_letters
 
     @property
     def options_exercise_dates(self) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # request html
@@ -235,11 +235,11 @@ class CalendarB3:
 class TradingHoursB3:
 
     def futures_generic(self, url:str, int_cols:int) -> list:
-        '''
+        """
         DOCSTRING: TRADING TIMES OF FUTURES REGARDING BRAZILLIAN PMI (IPCA) AND STOCK INDEXES
         INPUTS: -
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_df = list()
         # request html
@@ -331,11 +331,11 @@ class TradingHoursB3:
 
     @property
     def futures_pmi_idx(self) -> list:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_pmi_idx'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_pmi_idx']
@@ -343,11 +343,11 @@ class TradingHoursB3:
 
     @property
     def futures_brl_usd_int_rts(self) -> list:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_int_rts'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_int_rts']
@@ -355,11 +355,11 @@ class TradingHoursB3:
     
     @property
     def futures_commodities(self) -> list:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_commodities'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_commodities']
@@ -367,11 +367,11 @@ class TradingHoursB3:
     
     @property
     def futures_crypto(self) -> list:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_crypto'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_crypto']
@@ -379,11 +379,11 @@ class TradingHoursB3:
     
     @property
     def futures_forex(self) -> list:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_forex'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_forex']
@@ -391,11 +391,11 @@ class TradingHoursB3:
 
     @property
     def futures_otc(self) -> list:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_otc'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_otc']
@@ -403,11 +403,11 @@ class TradingHoursB3:
     
     @property
     def futures_opf_bef_aft_xrc(self) -> list:
-        '''
+        """
         DOCSTRING: OPTIONS ON FUTURES - BEFORE AND AFTER EXERCISE
         INPUTS: -
         OUTPUTS: 
-        '''
+        """
         return self.futures_generic(
             YAML_B3['trading_hours_b3']['futures']['url_opf'], 
             YAML_B3['trading_hours_b3']['futures']['num_cols_opf']
@@ -415,11 +415,11 @@ class TradingHoursB3:
 
     @property
     def stocks(self) -> list:
-        '''
+        """
         DOCSTRING: TRADING TIMES OF BRAZILLIAN STOCKS
         INPUTS: -
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_df = list()
         # request html
@@ -563,11 +563,11 @@ class TheorPortfB3:
 
     def generic_req(self, str_indice:str, method:str='GET', float_pct_factor:float=100.0) \
         -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # requesting data
         resp_req = request(method, YAML_B3['theor_port_b3']['url_{}'.format(str_indice)], 
                            verify=YAML_B3['theor_port_b3']['bl_verify'])
@@ -610,38 +610,38 @@ class TheorPortfB3:
     
     @property
     def ibov(self) -> pd.DataFrame:
-        ''''
+        """'
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req('ibov')
     
     @property
     def ibra(self) -> pd.DataFrame:
-        ''''
+        """'
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req('ibra')
     
     @property
     def ibrx100(self) -> pd.DataFrame:
-        ''''
+        """'
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req('ibrx100')
     
     @property
     def ibrx50(self) -> pd.DataFrame:
-        ''''
+        """'
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return self.generic_req('ibrx50')
 
 
@@ -650,11 +650,11 @@ class MDB3:
     @property
     def financial_indicators_b3(self, method:str='GET', float_pct_factor:float=100.0, 
                                 dt_input_fmt:str='DD/MM/YYYY') -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # requesting financial indicators b3
         resp_req = request(method, YAML_B3['financial_indicators']['url'])
         # raise exception if status code is different from 2xx
@@ -703,11 +703,11 @@ class MDB3:
 
     @property
     def securities_volatility(self, method:str='GET', float_pct_factor:float=100.0) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # looping through page sets
@@ -772,11 +772,11 @@ class MDYFinance:
                                       bl_verify:bool=False, 
                                       column_ticker:str='ticker', 
                                       colum_dt_date:str='dt_date') -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPTUS:
         OUTPUTS:
-        '''
+        """
         # dealing with securities list_tickers
         if (list_securities == None) or (list_securities == []):
             list_securities = []
@@ -810,11 +810,11 @@ class MDYFinance:
                       col_open:str='open', col_date:str='dt_date', 
                       col_daily_return:str='daily_return', 
                       str_type_return_calc:str='close_close') -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # order by ticker/date in ascending order
         df_yq_data.sort_values(
             by=[col_ticker, col_date], 
@@ -854,12 +854,12 @@ class MDInvestingDotCom:
         dict_headers:dict={
             'User-Agent': 'Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36'
         }) -> json:
-        '''
+        """
         DOCSTRING: TICKER REFERENCE FROM INVESTING.COM
         INPUTS: TICKER, HOST (DEFAULT), METHOD (DEFAULT), BOOLEAN VERIFY (DEFAULT), 
             KEY TICKER (DEFAULT), HEADERS (DEFAULT)
         OUTPUTS: STRING
-        '''
+        """
         # collect content from rest
         req_resp = request(
             str_method, 
@@ -881,12 +881,12 @@ class MDInvestingDotCom:
         dict_headers:dict={
             'User-Agent': 'Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36'
         }) -> json:
-        '''
+        """
         DOCSTRING: HISTORICAL CLOSING/INTRADAY TICKS FROM INVESTING.COM
         INPUTS: TICKER REFERENCE FROM INVESTING.COM, FROM DATE (TIMESTAMP), TO DATE (TIMESTAMP), 
             TYPE CLOSING/INTRADAY PRICE (D AS DEFAULT FOR CLOSING), HOST (DEFAULT) AND HEADERS
         OUTPUTS: JSON
-        '''
+        """
         # collect content from rest
         req_resp = request(
             str_method, 
@@ -911,11 +911,11 @@ class MDInvestingDotCom:
             col_date:str='Date', 
             col_ticker:str='Ticker'
         ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         # setting variables
         list_ser = list()
         # looping through list_tickers and collecting historical data
@@ -945,12 +945,12 @@ class MDInvestingDotCom:
             self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime, 
             str_country:str='brazil', str_assets_class:str='acao'
         ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: HISTORIC CLOSING PRICES FROM INVESTING.COM
         INPUTS: TICKERS, DATA INFERIOR, DATA SUPERIOR, PAÍS (BRAZIL COMO DEFAULT) COM
             FORMATO DATA 'DD/MM/YYYY'
         OUTPUTS: JSON
-        '''
+        """
         # setting variables
         dict_close = dict()
         # filling list of available assets
@@ -994,12 +994,12 @@ class MDInvestingDotCom:
             str_idx:str='Bovespa', 
             str_country:str='brazil'
         ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: CLOSING PRICE OF A GIVEN INDICE
         INPUTS: DATE INFERIOR, SUPERIOR, INDICE NAME (DEFAULT BOVESPA), 
             COUNTRY (DEFAULT BRAZIL), FORMAT OF EXTRACTION (DEFAULT JSON2)
         OUTPUTS: DICT WITH CLOSE PRICE
-        '''
+        """
         return pd.DataFrame([
             {d['date']: d['close']} 
             for d in HandlingObjects().literal_eval_data(
@@ -1023,13 +1023,13 @@ class MDComDinheiro:
             dt_sup:datetime, 
             str_fmt_extract:str='json2'
         ) -> json:
-        '''
+        """
         DOCSTRING: CLOSING PRICE OF BMF CONTRACTS
         INPUTS: USERNAME (COMDINHEIRO), PASSWORD (COMDINHEIRO), CONTRACT CODE, MATURITY CODE, 
             DATE INFERIOR (DDMMAAAA, AS A STRING, OR DATETIME FORMAT), DATE SUPERIOR (SAME FORMAT 
             AS DATE INFERIOR) AND FORMAT EXTRACTION (JSON AS DEFAULT)
         OUTPUTS: JSON
-        '''
+        """
         # applying date format
         if DatesBR().check_date_datetime_format(dt_inf) == True:
             dt_inf = DatesBR().datetime_to_string(dt_inf, '%d%m%Y')
@@ -1047,11 +1047,11 @@ class MDComDinheiro:
         return json_
 
     def indice_neg(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: FUNÇÃO PARA TRAZER O ÍNDICE DE NEGOCIABILIDADE DA B3
         INPUTS: ATIVO, DATA INICIAL E DATA FINAL ('DD/MM/AAAA')
         OUTPUTS: JSON COM O VALOR DO ÍNDICE DE NEGOCIABILIDADE NO PERÍODO
-        '''
+        """
         # definindo variáveis para pool de conexão
         if len(list_tickers) > 1:
             str_list_tickers = '%2B'.join(list_tickers)
@@ -1081,11 +1081,11 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
 
     def infos_sectors(self, dt_:datetime) -> json:
-        '''
+        """
         DOCSTRING: SECTOR INFORMATION REGARDING COMPANIES
         INPUTS: DATA PREGÃO DE INTERESSE
         OUTPUTS: JSON
-        '''
+        """
         # definindo variável para pool de conexão
         str_payload = 'username={}&password={}&URL=StockScreenerFull.php%3F%26'.format(
             self.user, self.passw) \
@@ -1113,11 +1113,11 @@ class MDComDinheiro:
 
     @property
     def corporate_events(self) -> json:
-        '''
+        """
         DOCSTRING: RETORNA INFORMAÇÕES CORPORATIVAS: DIVULGAÇÃO DE RESULTADOS,
         INPUTS: DATA PREGÃO DE INTERESSE
         OUTPUTS: JSON
-        '''
+        """
         # definindo variável para pool de conexão
         str_payload = 'username={}&password={}&URL=StockScreenerFull.php'.format(
             self.user, self.passw) \
@@ -1137,13 +1137,13 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
 
     def trading_infos(self, dt_inf:datetime, dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: RETURN INFORMATION ABOUT THE AMOUNT OF TRADES, LIQUIDITY ON THE STOCK EXCHANGE,
             MARKET VALUE, TRADING VOLUME, WEIGHT IN THE IBRX100 INDEX, BTC FOR PAPER,
             PURCHASES AND SALES OF FUNDS, FOR STOCKS IN THE IBOV
         INPUTS: DATES (INFERIOR AND SUPERIOR)
         OUTPUTS: JSON
-        '''
+        """
         # definindo variável para pool de conexão
         str_payload = 'username={}&password={}&URL=StockScreenerFull.php'.format(
             self.user, self.passw) \
@@ -1208,14 +1208,14 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
 
     def infos_risco(self, dt_inf:datetime, dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: RETURNS INFORMATION ABOUT 60 MONTHS ANNUALIZED VOLATILITY, VOLATILITY
             ANNUALIZED MONTHLY, YTD ANNUALIZED VOLATILITY, PARAMETRIC VAR, EWMA,
             BENCHMARK VAR PARAMETRIC (IN RELATION TO IBOVESPA), MAXIMUM DRAWDOWN 
             OF STOCKS IN THE IBOV
         INPUTS: DATES (INFERIOR AND SUPERIOR)
         OUTPUTS: JSON
-        '''
+        """
         # definindo variável para pool de conexão
         str_payload = 'username={}&password={}&URL=StockScreenerFull.php%3F%26'.format(
             self.user, self.passw) \
@@ -1264,11 +1264,11 @@ class MDComDinheiro:
 
     def trading_volume_securities(self, list_securities:str, str_benchmark:str, dt_inf:datetime, 
                                   dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # lista de papéis no formato da consulta do json da comdinheiro
         list_securities = '%2B'.join(list_securities).upper()
         # definindo variável para pool de conexão
@@ -1335,11 +1335,11 @@ class MDComDinheiro:
             dt_inf:datetime, 
             dt_sup:datetime
         ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # list of securities with the respective format, in order to be used in payload
         list_securities = '%2B'.join(list_securities).upper()
         # payload
@@ -1376,11 +1376,11 @@ class MDComDinheiro:
             dt_inf:datetime, 
             dt_sup: datetime
         ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # lista de papéis no formato da consulta do json da comdinheiro
         list_securities = '%2B'.join(list_securities).upper()
         # definindo variável para pool de conexão
@@ -1428,11 +1428,11 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
 
     def stocks_beta(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: BETA OF PROVIDED STOCKS
         INPUTS:  LIST OF TICKER AND INFERIOR AND SUPERIOR DATES
         OUTPUTS: JSON
-        '''
+        """
         # lista de papéis no formato da consulta do json da comdinheiro
         list_securities = '%2B'.join(list_tickers)
         # applying date format
@@ -1459,11 +1459,11 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
 
     def tradability_index(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: 
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # lista de papéis no formato da consulta do json da comdinheiro
         list_securities = '%2B'.join(list_tickers)
         # applying date format
@@ -1489,13 +1489,13 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
     
     def open_ended_funds_quotes(self, list_funds:List[str], dt_inf:datetime, dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: CLOSING PRICE OF FUNDS' SHARE
         INPUTS:  FUNDS CNPJ (list), MATURITY CODE,
             DATE INFERIOR (DDMMAAAsA, AS A STRING, OR DATETIME FORMAT), DATE SUPERIOR (SAME FORMAT
             AS DATE INFERIOR) AND FORMAT EXTRACTION (JSON AS DEFAULT)
         OUTPUTS: JSON
-        '''
+        """
         # list of securities with the format requested to be queried
         list_securities = '%2B'.join(list_funds)
         # applying date format
@@ -1519,11 +1519,11 @@ class MDComDinheiro:
         return JsonFiles().send_json(json_)
 
     def open_ended_funds_risk_infos(self, list_funds:List[str], dt_sup:datetime) -> json:
-        '''
+        """
         DOCSTRING: RISK INFOS REGARDING HISTORICAL VOLATILITY AND REDEMPTION
         INPUTS:  FUNDS CNPJ (list), DATE SUPERIOR
         OUTPUTS: JSON
-        '''
+        """
         # list of securities with the format requested to be queried
         list_securities = '%2B'.join(list_funds)
         # applying date format
@@ -1551,11 +1551,11 @@ class MDComDinheiro:
             dt_inf:datetime, 
             dt_sup:datetime
         ) -> json:
-        '''
+        """
         DOCSTRING: CÁLCULO DE SHARPE E DROWDOWN POR PERÍODO
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # list of securities with the format requested to be queried
         list_eins = '%2B'.join(list_eins)
         # payload
@@ -1598,12 +1598,12 @@ class MDComDinheiro:
             col_cnpj_sem_mascara:str='CNPJ_SEM_MASCARA', 
             col_cnpj:str='CNPJ_DO_FUNDO'
         ) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: FUND'S NAME, CNPJ, CORPORATE NAME, SHARPE WITH A RANGE OF TEMPORAL WINDOWS, 
             MAXIMUM DRAWDOWN (GIVEN A PERIOD OF TIME), ANBIMA'S CLASS, CODE
         INPUTS: LIST OF EINS, DATE INFERIOR AND SUPERIOR
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_ser = list()
         # changing dates format

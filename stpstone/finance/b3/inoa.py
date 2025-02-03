@@ -15,11 +15,11 @@ class AlphaTools:
     def __init__(self, str_user:str, str_passw:str, str_host:str, str_instance:str, 
         dt_start:datetime, dt_end:datetime, str_fmt_date_output:str='YYYY-MM-DD', 
         bl_debug_mode:bool=False):
-        '''
+        """
         DOCSTRING: CONNECTION TO INOA SERVICE ALPHATOOLS
         INPUTS: USER, PASSWORD, HOST, INSTANCE, LIST OF EINS, START AND END DATES
         OUTPUTS: -
-        '''
+        """
         self.str_user = str_user
         self.str_passw = str_passw
         self.str_host = str_host
@@ -36,11 +36,11 @@ class AlphaTools:
         max_tries=20,
     )
     def generic_req(self, str_method:str, str_app:str, dict_params:dict) -> json:
-        '''
+        """
         DOCSTRING: GENERIC REQUEST TO ALPHA TOOLS API
         INPUTS: METHOD, APP, PARAMETERS
         OUTPUTS: JSON
-        '''
+        """
         if self.bl_debug_mode == True:
             print(
                 f'METHOD: {str_method}',
@@ -57,11 +57,11 @@ class AlphaTools:
 
     @property
     def funds(self) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: FUNDS INFOS, WITHIN A GIVEN SET
         INPUTS: - 
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting initial variables
         dict_params = {
             YAML_INOA['alpha_tools']['funds']['key_values']: [
@@ -95,11 +95,11 @@ class AlphaTools:
         return df_funds
 
     def quotes(self, list_ids:List[int]) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: FUNDS' QUOTES
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting initial variables
         dict_params = {
             YAML_INOA['alpha_tools']['quotes']['key_funds_ids']: list_ids,

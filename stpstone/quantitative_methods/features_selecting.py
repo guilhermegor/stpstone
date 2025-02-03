@@ -12,14 +12,14 @@ class DimensionalityReduction:
 
     def backward_elimination(self, array_x, array_y, str_estimator='linear_regression', int_cv=5, 
                              int_verbose=0):
-        '''
+        """
         REFERENCES: 
             https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#sequentialfeatureselector, 
             https://rasbt.github.io/mlxtend/user_guide/feature_selection/SequentialFeatureSelector/
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defining the estimator
@@ -52,14 +52,14 @@ class DimensionalityReduction:
     
     def forward_elimination(self, array_x, array_y, str_estimator='linear_regression', int_cv=5, 
                             int_verbose=0):
-        '''
+        """
         REFERENCES: 
             https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#sequentialfeatureselector, 
             https://rasbt.github.io/mlxtend/user_guide/feature_selection/SequentialFeatureSelector/
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defining the estimator
@@ -92,13 +92,13 @@ class DimensionalityReduction:
     
     def exhaustive_feature_selection(self, array_x, array_y, str_estimator='linear_regression', 
                                      max_features=None, int_cv=5):
-        '''
+        """
         REFERENCES: 
             https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#exhaustivefeatureselector
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # maximum features
@@ -141,7 +141,7 @@ class DimensionalityReduction:
                     name_category='category', col_pct_non_event='pct_non_event',
                     col_pct_event='pct_event', col_first='first', col_count='count',
                     col_sum='sum', col_mean='mean', col_woe='woe', col_iv='iv'):
-        '''
+        """
         REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: INFORMATION VALUE (IV) AND WEIGHT OF EVIDENCE (WOE) USED TO UNDERSTAND 
@@ -149,7 +149,7 @@ class DimensionalityReduction:
             A PREDICTOR TO MEASURE BINARY OUTCOMES
         INPUTS: 
         OUTPUTS:
-        '''
+        """
         # replacing bins column names
         if name_bins in class_col:
             #   handle missing data
@@ -230,14 +230,14 @@ class DimensionalityReduction:
     def var_iter(self, df, target_col, max_bins,
                  min_bins_monotonic=2, col_feature='feature', col_remarks='remarks',
                  name_categorical='categorical', orient_str='records'):
-        '''
+        """
         REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: ITERATE OVER ALL FEATURES, CALCULATE WOE AND IV FOR THE CLASSES, AND 
             APPEND TO ONE DATAFRAME WOE_IV OF EXPORTATION
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser_woe_iv = list()
         list_remarks = list()
@@ -275,14 +275,14 @@ class DimensionalityReduction:
                    col_pct_event='pct_event', col_count='count', col_woe='woe', col_sum='sum',
                    col_iv='iv', col_remarks='remarks', col_number_classes='number_of_classes',
                    col_feature_null_pct='feature_null_percent', col_iv_sum='iv_sum'):
-        '''
+        """
         REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: AFTER GETTING WOE AND IV FOR ALL CLASSES OF FEATURES, CALCULATE THE AGGREGATED 
             IV VALUES FOR FEATURES
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # calculating woe, iv and getting the remarks for each bin
         df_woe_iv, df_binning_remarks = self.var_iter(df, target_col, max_bins)
         # limiting the columns of interest
@@ -314,13 +314,13 @@ class DimensionalityReduction:
         return df_iv, df_woe_iv.replace({name_missing_data: np.nan})
 
     def iv_label_predictive_power(self, df_iv, col_iv='iv', col_predictive_power='predictive_power'):
-        '''
+        """
         REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: LABEL PREDICTIVE POWER OF EACH FEATURE
         INPUTS: DATAFRAME INFORMATION VALUE(IV)
         OUTPUTS: DATAFRAME
-        '''
+        """
         # sort values
         df_iv.sort_values([col_iv], ascending=[False], inplace=True)
         # set label strength

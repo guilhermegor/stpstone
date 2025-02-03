@@ -7,20 +7,20 @@ from stpstone.loggs.create_logs import CreateLog
 
 
 def reading_yaml(yaml_path):
-    '''
+    """
     DOCSTRING: ABRIR ARQUIVOS .YAML
     INPUTS: CAMINHO
     OUTPUTS: ATRIBUIÇÃO DE INPUTS 
-    '''
+    """
     return yaml.load(open(yaml_path), Loader=yaml.FullLoader)
 
 
 def iniciating_logging(logger_name, parent_destination_log=None):
-    '''
+    """
     DOCSTRING: INICIALIZING LOGGING LIB
     INPUTS: COMPLETE PATH TO LOGGING DIRECTORY
     OUTPUTS: -
-    '''
+    """
     # creating parent directory
     if parent_destination_log != None:
         dispatch = CreateLog().creating_parent_folder(parent_destination_log)

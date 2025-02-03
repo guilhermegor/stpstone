@@ -7,11 +7,11 @@ from stpstone.cals.handling_dates import DatesBR
 class DBLogs:
 
     def audit_log(self, df_, str_url, dt_last_update):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # adding audit columns
         df_[YAML_GEN['audit_log_cols']['url']] = str_url
         df_[YAML_GEN['audit_log_cols']['last_update']] = dt_last_update

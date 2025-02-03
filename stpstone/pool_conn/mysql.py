@@ -9,11 +9,11 @@ from sqlalchemy import create_engine
 class MySQLDatabase:
 
     def read_sql(self, host, port, database, user, password, query, timeout=7200):
-        '''
+        """
         DOCSTRING:
         INPUTS: Database connection parameters and SQL query
         OUTPUTS: pandas DataFrame containing the query results
-        '''
+        """
         # creating connection object
         conn = create_engine(f'mysql+pymysql://{user}:{password}@{host}:{port}/{database}',
                              connect_args={'connect_timeout': timeout})
@@ -21,12 +21,12 @@ class MySQLDatabase:
         return pd.read_sql(query, con=conn)
 
     def engine(self, host, port, database, user, password, query, bl_insert_db=False):
-        '''
+        """
         DOCSTRING:
         RUN SQL QUERIES FOR MYSQL DATABASE
         INPUTS: Database connection parameters and SQL query
         OUTPUTS: Query result (if SELECT) or success message (if INSERT/UPDATE/DELETE)
-        '''
+        """
         try:
             #   making MySQL connection
             conn = pymysql.connect(
@@ -55,11 +55,11 @@ class MySQLDatabase:
 
     def insert_data(self, host, port, database, user, password, table_name, from_json=True,
                     json_data_path=None, json_mem=None, timeout_secs=3):
-        '''
+        """
         DOCSTRING: INSERT DATA INTO MYSQL (FROM JSON FILE OR MEMORY)
         INPUTS: Database connection parameters, table name, JSON data (from file or memory)
         OUTPUTS: Insertion status message
-        '''
+        """
         if from_json:
             #   defining record list from json
             if json_data_path:

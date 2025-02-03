@@ -16,7 +16,7 @@ class PostgreSQLDB:
     def __init__(self, dbname:str, user:str, password:str, host:str, port:int, 
                  str_schema:str='public', logger:Optional[Logger]=None) \
         -> None:
-        '''
+        """
         DOCSTRING: INITIALIZES THE CONNECTION TO THE POSTGRESQL DATABASE
         INPUTS: 
             - DBNAME:STR
@@ -27,7 +27,7 @@ class PostgreSQLDB:
             - SCHEMA:STR
             - LOGGER:OPTIONAL[LOGGER]
         OUTPUTS: -
-        '''
+        """
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -47,20 +47,20 @@ class PostgreSQLDB:
         self._execute(f"SET search_path TO '{self.str_schema}';")
 
     def _execute(self, str_query:str) -> None:
-        '''
+        """
         DOCSTRING: RUN QUERY WITH DML ACCESS
         INPUTS: QUERY
         OUTPUTS: -
-        '''
+        """
         self.cursor.execute(str_query)
 
     def _read(self, str_query:str, dict_type_cols:Optional[Dict[str, Any]]=None, 
               list_cols_dt:Optional[List[str]]=None, str_fmt_dt:Optional[str]=None) -> pd.DataFrame:
-        '''
+        """
         DOCSTRING: RUN QUERY AND RETURN RESULTS AS DATAFRAME
         INPUTS: QUERY, DICT_TYPE_COLS, LIST_COLS_DT, STR_FMT_DT
         OUTPUTS: Pandas DataFrame
-        '''
+        """
         # retrieving dataframe
         df_ = pd.read_sql_query(str_query, self.conn)
         # changing data types
@@ -73,11 +73,11 @@ class PostgreSQLDB:
 
     def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
         bl_insert_or_ignore:bool=False) -> None:
-        '''
+        """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A POSTGRESQL TABLE
         INPUTS: JSON_DATA
         OUTPUTS: -
-        '''
+        """
         # validate json, in order to have the same keys
         json_data = JsonFiles().normalize_json_keys(json_data)
         # sql insert statement
@@ -124,20 +124,20 @@ class PostgreSQLDB:
 
     @property
     def _close(self) -> None:
-        '''
+        """
         DOCSTRING: CLOSES THE CONNECTION TO THE DATABASE
         INPUTS: -
         OUTPUTS: -
-        '''
+        """
         self.conn.close()
     
     def _bkp_db(self, str_backup_dir:str, str_bkp_name:str=None) -> str:
-        '''
+        """
         DOCSTRING: BACKUP DATABASE - NEED PG_DUMP TO BE CONFIGURED WITHIN ENVIRONMENT VARIABLES
         INPUTS: 
             - BACKUP_DIR (STR): DIRECTORY WHERE THE BACKUP FILE WILL BE SAVED
         OUTPUTS: STR: PATH TO THE BACKUP FILE, OR AN ERROR MESSAGE.
-        '''
+        """
         try:
             # ensure the backup directory exists
             os.makedirs(str_backup_dir, exist_ok=True)

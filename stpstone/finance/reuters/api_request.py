@@ -12,24 +12,24 @@ class Reuters:
 
     def fetch_data(self, app, payload={}, method='GET',
                    endpoint='https://apiservice.reuters.com/api/'):
-        '''
+        """
         REFERENCES: https://www.reuters.com/markets/currencies
         DOCSTRING: FETCHING DATA FROM RETURES CHARTS
         INPUTS: ENDPOINT (DEFAULT) AND METHOD (DEFAULT)
         OUTPUTS: JSON (ACCESS TOKEN, TOKEN TYPE AND EXPIRES IN KEYS)
-        '''
+        """
         # requesting info from reuters api
         return request(
             method=method, url=urljoin(endpoint, app), params=payload, verify=False).text
 
     def token(self, api_key, deviceid, app='service/modtoken',
               method='GET'):
-        '''
+        """
         REFERENCES: https://www.reuters.com/markets/currencies
         DOCSTRING: GET TOKEN FROM REUTERS API
         INPUTS: APP (DEFAULT) AND METHOD (DEFAULT)
         OUTPUTS: JSON (ACCESS TOKEN, TOKEN TYPE AND EXPIRES IN KEYS)
-        '''
+        """
         # parameters for the endpoint
         payload = {
             'method': 'get',
@@ -46,12 +46,12 @@ class Reuters:
 
     def quotes(self, currency, app='getFetchQuotes/{}',
                endpoint='https://www.reuters.com/companies/api/'):
-        '''
+        """
         REFERENCES: https://www.reuters.com/markets/currencies
         DOCSTRING: QUOUTES FROM REUTERS
         INPUTS: CURRENCY, APP (DEFAULT) AND ENDPOINT (DEFAULT)
         OUTPUTS: JSON
-        '''
+        """
         return HandlingObjects().literal_eval_data(self.fetch_data(urljoin(app, currency),
                                                                    endpoint=endpoint))
 

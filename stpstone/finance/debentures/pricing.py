@@ -3,6 +3,6 @@
 class DebeturesBR:
 
     def duration(self):
-        '''
-        '''
+        """
+        """
         pass

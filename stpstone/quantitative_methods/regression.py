@@ -23,7 +23,7 @@ from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
 class LinearRegressions:
 
     def normal_equation(self, array_x, array_y, bl_optimize=True):
-        '''
+        """
         REFERENCE: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
@@ -31,7 +31,7 @@ class LinearRegressions:
             LEAST SQUARES REGRESSION
         INPUTS: ARRAY DATA AND ARRAY TARGET
         OUTPUTS: ARRAY WITH BEST THETA VECTOR, RESIDUALS, RANK
-        '''
+        """
         if bl_optimize == True:
             return np.linalg.lstsq(array_x, array_y, rcond=None)
         else:
@@ -39,7 +39,7 @@ class LinearRegressions:
 
     def batch_gradient_descent(self, array_x, array_y, max_iter=1000, eta=0.1, m=100,
                                theta=np.random.randn(2, 1)):
-        '''
+        """
         REFERENCE: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
@@ -48,7 +48,7 @@ class LinearRegressions:
             100 AS DEFAULT), THETA (GIVEN A FIRST APROXIMATION AS DEFAULT)
         OUTPUTS: ARRAY WITH BEST THETA VECTOR
         OBSERVATIONS: 1. INCREASING THE ETA MAY IMPLY IN CONVERGING FASTER TO OPTIMAL THETA
-        '''
+        """
         for _ in range(max_iter):
             gradients = 2 / m * \
                 array_x.T.dot(array_x.dot(theta) - array_y)
@@ -58,7 +58,7 @@ class LinearRegressions:
     def stochastic_gradient_descent(self, array_x, array_y, method='sklearn',
                                     n_epochs=1000, t0=5, t1=50, m=100, theta=np.random.randn(2, 1),
                                     tolerance=1e-3, penalty=None, eta0=0.1):
-        '''
+        """
         REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
@@ -69,7 +69,7 @@ class LinearRegressions:
             T0 AND T1 LEARNING SCHEDULE HYPERPARAMETERS, M (ITERATIONS, 100 AS DEFAULT), 
             THETA (RANDOM INITIALIZATION), TOLERANCE (1E-3 AS DEFAULT), PENALTY (NONE AS DEFAULT), 
             ETA0 (INITIAL LEARNING RATE, 0.1 AS DEFAULT)
-        '''
+        """
         if method == 'implemented':
             # defining the learning rate at each iteration, which is gradually reduced to solve the
             #   dilema of escaping from local optimal, but never settling at the minimal
@@ -101,12 +101,12 @@ class LinearRegressions:
             }
 
     def linear_regression(self, array_x, array_y):
-        '''
+        """
         DOCSTRING: BEST FITTING LINE FOR A SAMPLE OF DATA IN X ARRAY, COMAPARED TO AN Y ARRAY
         INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH 
             INCLINATION)
-        '''
+        """
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # fitting the model
@@ -134,12 +134,12 @@ class LinearRegressions:
             }
 
     def k_neighbors_regression(self, array_x, array_y):
-        '''
+        """
         DOCSTRING: BEST FITTING LINE FOR A SAMPLE OF DATA IN X ARRAY, COMAPARED TO AN Y ARRAY
         INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH 
             INCLINATION)
-        '''
+        """
         model = KNeighborsRegressor().fit(np.array(array_x),
                                       np.array(array_y))
         return {
@@ -154,13 +154,13 @@ class LinearRegressions:
         }
 
     def polynomial_equations(self, array_x, array_y, int_degree=2, bl_include_bias=True):
-        '''
+        """
         DOCSTRING: POLYNOMIAL REGRESSION TO HANDLE WITH NON-LINEAR EQUATIONS WITH A LINEAR 
             APPROXIMATION
         INPUTS: ARRAY DATA, INTEGER DEGREE (2 AS DEFAULT) AND BOOLEAN TO WHETER OR NOT INCLUDE BIAS 
             (FALSE AS DEFAULT)
         OUTPUTS: DICTIONARY WITH MODEL FITTED, INTERCEPT AND COEFICIENTS
-        '''
+        """
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defininig polynomial model
@@ -185,7 +185,7 @@ class LinearRegressions:
 
     def ridge_regression(self, array_x, array_y, alpha=0,
                          solver_ridge_regression='cholesky'):
-        '''
+        """
         REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
@@ -194,7 +194,7 @@ class LinearRegressions:
             THE MODEL WEIGHTS AS SMALL AS POSSIBLE
         INPUTS: ARRAY DATA, ARRAY TARGET, ALPHA (SENSITIVITY TO MODEL WIEGHTS - 0 AS DEFAULT), 
             AND SOLVER (CHOLESKY AS DEFAULT)
-        '''
+        """
         # defining the model
         ridge_reg = Ridge(alpha=alpha, solver=solver_ridge_regression)
         # fit the data
@@ -210,14 +210,14 @@ class LinearRegressions:
         }
 
     def lasso_regression(self, array_x, array_y, alpha=0.1):
-        '''
+        """
         REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
         DOCSTRING:
         INPUTS:
         OUTPUTS: 
-        '''
+        """
         # declaring the model
         model = Lasso(alpha=alpha)
         # fitting curve
@@ -233,14 +233,14 @@ class LinearRegressions:
         }
 
     def elastic_net_regression(self, array_x, array_y, alpha=0.1, l1_ratio=0.5):
-        '''
+        """
         REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
             2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
             978-1-492-03264-9.”
         DOCSTRING:
         INPUTS:
         OUTPUTS: 
-        '''
+        """
         # declaring the model
         model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio)
         # fitting curve
@@ -259,11 +259,11 @@ class LinearRegressions:
 class NonLinearRegressions:
 
     def decision_tree_regression(self, array_x, array_y, seed=None):
-        '''
+        """
         DOCSTRING: DECISION TREE REGRESSION
         INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE AND PREDICT
-        '''
+        """
         model = DecisionTreeRegressor(random_state=seed).fit(
             np.array(array_x), 
             np.array(array_y)
@@ -275,13 +275,13 @@ class NonLinearRegressions:
         }
 
     def random_forest_regression(self, array_x, array_y, seed=None, n_estimators=100):
-        '''
+        """
         DOCSTRING: RANDOM FOREST REGRESSION, FITTING SEVERAL DECISION TREES AND AVERAGING THE 
             PREDICTIONS --> BUILIDING A MODEL ONT TOP OF MANY OTHER MODELS IS CALLED ENSEMBLE 
             LEARNING
         INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE AND PREDICT
-        '''
+        """
         model = RandomForestRegressor(random_state=seed, n_estimators=n_estimators).fit(
             np.array(array_x), np.array(array_y)
         )
@@ -295,13 +295,13 @@ class NonLinearRegressions:
     def support_vector_regression(self, array_x, array_y, kernel='poly',
                                           int_degree=2, c_positive_floating_point_number=100,
                                           epsilon=0.1):
-        '''
+        """
         DOCSTRING: SUPPORT VECTOR MACHINE MODEL FOR REGRESSION PURPOSES
         INPUTS: ARRAY DATA, ARRAY TARGET, KERNEL (POLY AS DEFAULT), INT DEGREE (DEGREE OF THE 
             POLYNOMINAL DISTRIBUTION, BEING 2 AS DEFAULT, C (FLOATING POINT NUMBER WITH 100 
             AS DEFAULT) AND EPSILON (0.1 AS DEFAULT)
         OUTPUTS: DICTIONARY WITH SCORE, PREDICT AND MODEL KEYS
-        '''
+        """
         model = SVR(kernel=kernel, degree=int_degree, C=c_positive_floating_point_number,
                    epsilon=epsilon)
         model = model.fit(np.array(array_x), np.array(array_y))
@@ -321,7 +321,7 @@ class LogLinearRegressions:
                                   intercept_scaling=1, random_state=0, verbose=0,
                                   bl_fit_intercept=True, bl_warm_start=False,
                                   class_weight=None, bl_dual=False, n_jobs=None):
-        '''
+        """
         REFERENCE: https://realpython.com/logistic-regression-python/, 
             https://www.udemy.com/course/machinelearning/
         DOCSTRING: LOGIT MODEL
@@ -337,7 +337,7 @@ class LogLinearRegressions:
             ALSO KNOWN AS ACCURACY), CONFUSION MATRIX (PROVIDE THE ACTUAL AND PREDICTED OUTPUTS
             REGARDING TRUE NEGATIVE (C0,0), FALSE NEGATIVE (C1,0), FALSE POSITIVES (C0,1) 
             AND TRUE POSITIVES (C1,1))
-        '''
+        """
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # fitting the model
@@ -376,13 +376,13 @@ class NonLinearEquations:
                                bl_print_convergence_messages=False, bl_print_warning_messages=True,
                                bl_inter_monitor=False, int_size_trial_solution_population=40,
                                tolerance=5e-5):
-        '''
+        """
         REFERENCES: https://stackoverflow.com/questions/21765794/python-constrained-non-linear-optimization, 
             https://mystic.readthedocs.io/en/latest/mystic.html, https://docs.scipy.org/doc/scipy/reference/optimize.html
         DOCSTRING: PRICE & STORN DIFFERENTIAL EVOLUTION SOLVER
         INPUTS:
         OUTPUTS:
-        '''
+        """
         if method == 'scipy':
             return differential_evolution(cost_func, list_bounds, maxiter=max_iter, tol=tolerance,
                                           disp=bl_print_convergence_messages)
@@ -406,19 +406,19 @@ class NonLinearEquations:
                 'Method not recognized, please revisit the parameter')
 
     def optimize_curve_fit(self, func, array_x, array_y):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return curve_fit(func, xdata=array_x, y_data=array_y)
 
     def polynomial_fit(self, array_x, array_y):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS: ARRAY ESTIMATIVES AND ARRAY POLYNOMIAL INTERPOLATED VALUES
-        '''
+        """
         # estimatives
         y_est = np.polyfit(array_x, array_y)
         # return estimatives and values interpolated

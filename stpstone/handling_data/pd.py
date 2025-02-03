@@ -1,131 +1,118 @@
 
-### DEAL WITH PANDAS ISSUES ###
+### PANDAS DATAFRAME MODULE ###
 
+# pypi.org libs
 import os
 import pandas as pd
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
+from logging import Logger
+# local libs
 from stpstone.settings._global_slots import YAML_MICROSOFT_APPS
 from stpstone.cals.handling_dates import DatesBR
 from stpstone.handling_data.folders import DirFilesManagement
 from stpstone.loggs.create_logs import CreateLog
-from stpstone.microsoft_apps.excel import DealingExcel
+# check if this is a windows machine
+if os.name == 'nt':
+    from stpstone.microsoft_apps.excel import DealingExcel
 
 
-class DealingPd(DealingExcel):
-    '''
-    DOCSTRING: COMMON FUNCTIONS TO DEAL WITH DATA IMPORT TO PANDAS DATAFRAMES OR TIMESERIES
-    '''
+class DealingPd():
 
-    def append_df_to_Excel(self, filename, list_tup_df_sheet_name, bl_header=True, bl_index=0, 
-        mode='w', label_sensitivity='internal', bl_set_sensitivity_label=False, bl_debug_mode=False):
-        '''
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        '''
-        # debug mode
+    def append_df_to_Excel(self, filename:str, list_tup_df_sheet_name:List[Tuple[pd.DataFrame, str]], 
+                           bl_header:bool=True, bl_index:int=0, mode:str='w', 
+                           label_sensitivity:str='internal', bl_set_sensitivity_label:bool=False, 
+                           bl_debug_mode:bool=False) -> None:
+        """
+        Append dataframe to Excel
+        Args:
+            - filename (str): Path to Excel file
+            - list_tup_df_sheet_name (List[Tuple[pd.DataFrame, str]]): List of tuples with dataframe and sheet name
+            - bl_header (bool): Whether to write headers
+            - bl_index (int): Whether to write index
+            - mode (str): Mode to open Excel file
+            - label_sensitivity (str): Label sensitivity
+            - bl_set_sensitivity_label (bool): Whether to set sensitivity label
+            - bl_debug_mode (bool): Whether to print debug messages
+        Returns:
+            None
+        """
         if bl_debug_mode == True:
             print('LIST_TUP_DF_SHEET_NAME: {}'.format(list_tup_df_sheet_name))
             print('FILENAME: {}'.format(filename))
             print('MODE: {}'.format(mode))
             print('BL_INDEX: {}'.format(bl_index))
-        # write excel
         with pd.ExcelWriter(filename, engine='xlsxwriter', mode=mode) as writer:
             for df_, sheet_name in list_tup_df_sheet_name:
-                # # checking df_
-                # if df_.empty == True: continue
-                # removing indexes
                 if bl_index == 0:
                     df_.reset_index(drop=True, inplace=True)
-                    # df_ = df_.style.hide_index()
                 df_.to_excel(writer, sheet_name, index=bl_index, header=bl_header)
-        # setting label
-        if bl_set_sensitivity_label == True:
-            self.xlsx_sensitivity_label(filename, YAML_MICROSOFT_APPS[
+        if \
+            (bl_set_sensitivity_label == True) \
+            and (os.name == 'nt'):
+            DealingExcel().xlsx_sensitivity_label(filename, YAML_MICROSOFT_APPS[
                 'sensitivity_labels_office'], 
                 label_sensitivity.capitalize())
 
-    def export_xl(self, logger, nome_completo_xlsx_exportacao, list_tup_df_sheet_name, 
-        range_colunas='A:CC', bl_adjust_layout=False, bl_debug_mode=False):
-        '''
-        DOCSTRING: EXPORTANDO DAFRAME PARA EXCEL
-        INPUTS: LOGGER, NOME COMPLETO XLSX DE EXPOTAÇÃO, DATAFRAME DE EXPORTAÇÃO, NOME DA PLANILHA, 
-            RANGE DE COLUNAS, BOOLEAN AUTOAJUSTE (DEFAULT)
-        OUTPUTS: BOOLEAN
-        '''
-        #   exportando dataframe para excel
-        DealingPd().append_df_to_Excel(
-            nome_completo_xlsx_exportacao, list_tup_df_sheet_name, bl_header=True, bl_index=0, 
+    def export_xl(self, logger:Logger, path_xlsx:str, 
+                  list_tup_df_sheet_name:List[Tuple[pd.DataFrame, str]], 
+                  range_columns:str='A:CC', bl_adjust_layout:bool=False, 
+                  bl_debug_mode:bool=False) -> bool:
+        """
+        Export dataframe to Excel
+        Args:
+            - logger (logging.Logger): Logger object
+            - path_xlsx (str): Path to Excel file
+            - list_tup_df_sheet_name (list): List of tuples of DataFrames and sheet names
+            - range_columns (str): Range of columns to autofit
+            - bl_adjust_layout (bool): Whether to adjust layout of Excel file
+            - bl_debug_mode (bool): Whether to print debug messages
+        Returns:
+            bool
+        """
+        self.append_df_to_Excel(
+            path_xlsx, list_tup_df_sheet_name, bl_header=True, bl_index=0, 
             bl_debug_mode=bl_debug_mode)
-        #   validando se o arquivo foi exportado com sucesso
-        blame_exportacao_xlsx = DirFilesManagement().object_exists(
-            nome_completo_xlsx_exportacao)
-        if blame_exportacao_xlsx == 'NOK':
-            CreateLog().warnings(logger, 'Arquivo não salvo na rede: {}'.format(
-                nome_completo_xlsx_exportacao))
-            raise Exception('Arquivo {} não salvo na rede, favor validar'.format(
-                nome_completo_xlsx_exportacao))
-        else:
+        blame_xpt = DirFilesManagement().object_exists(path_xlsx)
+        if blame_xpt == True:
             if bl_adjust_layout == True:
-                for _, plan_nome in list_tup_df_sheet_name:
-                    #   corrigindo formato do xlsx exportado, e aplicando um autofit nas colunas 
-                    #       de interesse
-                    xla, wb = self.open_xl(nome_completo_xlsx_exportacao)
-                    self.autofit_range_columns(plan_nome, range_colunas, xla, wb)
-                    self.close_wb(wb)
-        return blame_exportacao_xlsx
-
-    def json_to_excel(self, json_path_name, xlsx_path_name):
-        '''
-        DOCSTRING: EXPORT JSON FILE TO EXCEL XLSX
-        INPUTS: JSON AND XLSX COMPLETE NAME
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
-        '''
-        pd.read_json(json_path_name).to_excel(xlsx_path_name)
-        if os.path.exists(xlsx_path_name):
-            return 'OK'
+                for _, sheet_name in list_tup_df_sheet_name:
+                    xl_app, wb = DealingExcel().open_xl(path_xlsx)
+                    DealingExcel().autofit_range_columns(sheet_name, range_columns, xl_app, wb)
+                    DealingExcel().close_wb(wb)
         else:
-            return 'NOK'
+            CreateLog().warnings(logger, 'File not saved to hard drive: {}'.format(
+                path_xlsx))
+            raise Exception('File not saved to hard drive: {}'.format(path_xlsx))
+        return blame_xpt
 
-    def json_normalizer(self, json_path):
-        '''
-        DOCSTRING: JSON NORMALIZER FROM PANDAS
-        INPUTS: JSON PATH
-        OUTPUTS: JSON IN DATAFRAME
-        '''
-        return pd.read_json(json_path)
+    def settingup_pandas(self, int_decimal_places:int=3, bl_wrap_repr:bool=False, 
+                         int_max_rows:int=25) -> None:
+        """
+        Setting up pandas options
+        Args:
+            - int_decimal_places (int): Number of decimal places to display in output
+            - bl_wrap_repr (bool): Whether to wrap repr(DataFrame) across additional lines
+            - int_max_rows (int): Maximum number of rows to display in output
+        Returns:
+            None
+        """
+        pd.set_option("display.precision", int_decimal_places)
+        pd.set_option("display.expand_frame_repr", bl_wrap_repr)
+        pd.set_option("display.max_rows", int_max_rows)
 
-    def settingup_pandas(self):
-        '''
-        DOCSTRING: CONFIGURAÇÃO BÁSICA DO PANDAS
-        INPUTS: COLUNA COMO STR
-        OUTPUTS: -
-        '''
-        # Use 3 decimal places in output display
-        pd.set_option("display.precision", 3)
-        # Don't wrap repr(DataFrame) across additional lines
-        pd.set_option("display.expand_frame_repr", False)
-        # Set max rows displayed in output to 25
-        pd.set_option("display.max_rows", 25)
-
-    def dataframe_to_dict(self, dataframe_export, orientation='records'):
-        '''
-        REFERENCES: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_dict.html
-        DOCSTRING: EXPORT DATAFRAME TO JSON
-        INPUTS: DATAFRAME TO BE EXPORTED, ORIENTATION(SPLIT, RECORDS (DEFAULT), INDEX, COLUMNS, VALUES, 
-            TABLE)
-        OUTPUTS: JSON
-        '''
-        return dataframe_export.to_dict(orient=orientation)
-
-    def convert_datetime_columns(self, df_, list_col_date, bl_pandas_convertion=True):
-        '''
-        DOCSTRING: CONVERTING DATE COLUMNS TO DATETIME
-        INPUTS: DATAFRAME, COLUMNS WITH DATE INFO
-        OUTPUTS: DATAFRAME
-        '''
-        # checking wheter to covert through a pandas convertion, or resort to a excel format transformation
-        #   of data in date column format
+    def convert_datetime_columns(self, df_:pd.DataFrame, list_col_date:List[str], 
+                                 bl_pandas_convertion:bool=True) -> pd.DataFrame:
+        """
+        Convert datetime columns
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to convert
+            - list_col_date (list): List of columns to convert
+            - bl_pandas_convertion (bool): Whether to use pandas conversion or excel format
+        Returns:
+            pd.DataFrame
+        """
+        # checking wheter to covert through a pandas convertion, or resort to a excel format 
+        #   transformation of data in date column format
         if bl_pandas_convertion:
             for col_date in list_col_date:
                 df_.loc[:, col_date] = pd.to_datetime(
@@ -149,35 +136,42 @@ class DealingPd(DealingExcel):
         # returning dataframe with date column to datetime forma
         return df_
 
-    def merge_dfs_into_df(self, df_1, df_2, cols_list):
-        '''
-        DOCSTRING: MERGING TWO DFS INTO A NEW ONE, REMOVING THEIR INTERSECTION ON A LIST OF COLUMNS
-        INPUTS: TWO DATAFRAMES AND A LIST WITH COLUMNS NAMES
-        OUTPUTS: DATAFRAME
-        '''
-        intersec_df = pd.merge(df_1, df_2, how='inner', on=cols_list)
-        merge_df = pd.merge(df_2, intersec_df, how='outer',
-                            on=cols_list, indicator=True)
-        merge_df = merge_df.loc[merge_df._merge == 'left_only']
-        merge_df.dropna(how='all', axis=1, inplace=True)
+    def merge_dfs_into_df(self, df_1:pd.DataFrame, df_2:pd.DataFrame, list_cols:List[str]
+                          ) -> pd.DataFrame:
+        """
+        Merging two dataframes and removing their intersections into a list of columns
+        Args:
+            - df_1 (pandas.DataFrame): First dataframe to merge
+            - df_2 (pandas.DataFrame): Second dataframe to merge
+            - list_cols (list): List of columns to merge
+        Returns:
+            pd.DataFrame
+        """
+        df_intersec = pd.merge(df_1, df_2, how='inner', on=list_cols)
+        df_merge = pd.merge(df_2, df_intersec, how='outer',
+                            on=list_cols, indicator=True)
+        df_merge = df_merge.loc[df_merge._merge == 'left_only']
+        df_merge.dropna(how='all', axis=1, inplace=True)
         try:
-            merge_df = merge_df.drop(columns='_merge')
+            df_merge = df_merge.drop(columns='_merge')
         except:
             pass
-        for column in merge_df.columns:
-            if column in cols_list:
+        for column in df_merge.columns:
+            if column in list_cols:
                 pass
             else:
-                merge_df = merge_df.rename(
+                df_merge = df_merge.rename(
                     columns={str(column): str(column)[:-2]})
-        return merge_df
+        return df_merge
 
-    def max_chrs_per_column(df_:pd.DataFrame) -> dict:
-        '''
-        DOCSTRING: CALCULATE THE MAXIMUM NUMBER OF CHARACTERS IN A SPECIFIED COLUMN OF A DATAFRAME
-        INPUTS: DATAFRAME
-        OUTPUTS: DICT
-        '''
+    def max_chrs_per_column(df_:pd.DataFrame) -> Dict[str, int]:
+        """
+        Calculate the maximum number of characters per column
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to calculate
+        Returns:
+            Dict[str, int
+        """
         dict_ = dict()
         for col_ in list(df_.columns):
             dict_[col_] = df_[col_].astype(str).str.len().max()
@@ -185,11 +179,17 @@ class DealingPd(DealingExcel):
 
     def change_dtypes(self, df_:pd.DataFrame, dict_dtypes:Dict[str, Any], list_cols_dt:List[str], 
         str_fmt_dt:str='YYYY-MM-DD', errors:str='raise') -> pd.DataFrame:
-        '''
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        '''
+        """
+        Change columns dtypes
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to change
+            - dict_dtypes (dict): Dictionary of columns and dtypes
+            - list_cols_dt (list): List of columns to change
+            - str_fmt_dt (str): Date format
+            - errors (str): Error handling mode
+        Returns:
+            pd.DataFrame
+        """
         if any([col_ not in list(dict_dtypes.keys()) for col_ in list_cols_dt]):
             for col_ in list(dict_dtypes.keys()):
                 dict_dtypes[col_] = str
@@ -199,11 +199,14 @@ class DealingPd(DealingExcel):
         return df_
 
     def strip_all_obj_dtypes(self, df_:pd.DataFrame, list_cols_dt:List[str]) -> pd.DataFrame:
-        '''
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        '''
+        """
+        Strip values from columns with object dtype
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to strip
+            - list_cols_dt (list): List of columns to strip
+        Returns:
+            pd.DataFrame
+        """
         list_cols = [col_ for col_ in list(df_.select_dtypes(['object']).columns) if col_ 
             not in list_cols_dt]
         for col_ in list_cols:
@@ -212,11 +215,16 @@ class DealingPd(DealingExcel):
 
     def fillna_data(self, df_:pd.DataFrame, list_cols_dt:List[str], str_dt_fillna:str='2100-12-31', 
         str_data_fillna:str='-1') -> pd.DataFrame:
-        '''
-        DOCSTRING: FILLNA DATA/DATES
-        INPUTS: DATAFRAME, LIST COLS DT, LIST COLS DATA
-        OUTPUTS: DATAFRAME
-        '''
+        """
+        Fill NaN values
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to fill
+            - list_cols_dt (list): List of date type columns
+            - str_dt_fillna (str): Date fillna value
+            - str_data_fillna (str): Data fillna value
+        Returns:
+            pd.DataFrame
+        """
         list_cols = [col_ for col_ in list(df_.columns) if col_ not in list_cols_dt]
         if list_cols_dt is not None:
             df_[list_cols_dt] = df_[list_cols_dt].fillna(str_dt_fillna)
@@ -225,22 +233,30 @@ class DealingPd(DealingExcel):
 
     def pipeline_df_startup(self, df_:pd.DataFrame, dict_dtypes:Dict[str, Any], 
         list_cols_dt:List[str], str_dt_fillna:str='2100-12-31', str_data_fillna:str='-1', 
-        str_fmt_dt:str='YYYY-MM-DD'):
-        '''
-        DOCSTRING: PIPELINE DATAFRAME STARTUP
-        INPUTS: DATAFRAME, DICT DTYPES, LIST OF DATE TYPE COLUMNS, STR DT FILLNA, STR DATA FILLNA, 
-            STR DATE FORMAT INPUT
-        OUTPUTS:
-        '''
+        str_fmt_dt:str='YYYY-MM-DD') -> pd.DataFrame:
+        """
+        Pipepline for dataframe cleaning
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to clean
+            - dict_dtypes (dict): Dictionary of columns and dtypes
+            - list_cols_dt (list): List of columns to change
+            - str_dt_fillna (str): Date fillna value
+            - str_data_fillna (str): Data fillna value
+            - str_fmt_dt (str): Date format
+        Returns:
+            pd.DataFrame
+        """
         df_ = self.fillna_data(df_, list_cols_dt, str_dt_fillna, str_data_fillna)
         df_ = self.change_dtypes(df_, dict_dtypes, list_cols_dt, str_fmt_dt)
         df_ = self.strip_all_obj_dtypes(df_, list_cols_dt)
         return df_
 
-    def cols_remove_dupl(self, df_):
-        '''
-        DOCSTRING: REMOVE DUPLICATES WITHIN COLUMNS AND KEEP JUST THE FIRST ONE
-        INPUTS: DATAFRAME
-        OUTPUTS: DATAFRAME
-        '''
+    def cols_remove_dupl(self, df_:pd.DataFrame) -> pd.DataFrame:
+        """
+        Columns names remove duplicates
+        Args:
+            - df_ (pandas.DataFrame): DataFrame to remove
+        Returns:
+            pd.DataFrame
+        """
         return df_.loc[:, ~df_.columns.duplicated()]

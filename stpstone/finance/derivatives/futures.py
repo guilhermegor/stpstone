@@ -21,22 +21,22 @@ class NotionalFromPV:
     
     def general_pricing(self, float_pv, float_size, float_qty, float_xcg_rt_1, 
                         float_xcg_rt_2=1):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         return float_pv * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
 
     def dap(self, float_pv, float_qty, float_pmi_idx_mm1, float_pmi_ipca_rt_hat, dt_pmi_last, 
             dt_pmi_follw, wd_bef_ref=0, float_size=0.00025, str_format_dt_input='YYYY-MM-DD'):
-        '''
+        """
         DOCSTRING: PRICING DAP CONTRACT - FUTURE OF BRAZILLIAN PMI MAIN CORE
         INPUTS: PRESENT VALUE OF DAP, QUANTITY, PMI INDEX MONTH MINUS 1, PMI IPCA RATE EXPECTED (
             ACCORING TO ANBIMA), LAST DATE OF PMI IPCA RELEASE, FOLLOWING DATE OF PMI IPCA RELEASE, 
             WORKING DAYS BEFORE (REFERENCE DATE), AND SIZE (0.00025 STANDARD)
         OUTPUTS: FLOAT
-        '''
+        """
         # checking wheter the dates are in datetime format
         if DatesBR().check_date_datetime_format(dt_pmi_last) == False:
             dt_pmi_last = DatesBR().str_date_to_datetime(dt_pmi_last, str_format_dt_input)
@@ -66,12 +66,12 @@ class NotionalFromRt:
 
     def di1(self, float_nominal_rt, dt_xpt, int_wd_bef=0, float_fv=100000.0, 
             int_wddy=252, int_wd_cap=1, str_format_dt_input='YYYY-MM-DD'):
-        '''
+        """
         DOCSTRING: DI1 CONTRACT PRICING - CONSIDERS DAYTRADE AND SWING TRADE PRICING
         INPUTS: NOMINAL RATE, DATE OF SETTLEMENT, WORKING DAYS BEFORE, FUTURE VALUE, WORKING DAYS 
             WITHIN A YEAR, WORKING DAYS OF CAPITALIZATION (1 AS STANDARD), DATE FORMAT INPUT
         OUTPUTS:
-        '''
+        """
         # checking wheter the settlement date is in datetime format
         if DatesBR().check_date_datetime_format(dt_xpt) == False:
             dt_xpt = DatesBR().str_date_to_datetime(dt_xpt, str_format_dt_input)
@@ -90,11 +90,11 @@ class RtFromPV:
 
     def ddi(self, float_pv_di, float_fut_dol, float_ptax_dm1, dt_xpt, int_wd_bef=0, int_cddy=365,
             float_fv_di=100000.0, str_format_dt_input='YYYY-MM-DD'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # checking wheter the settlement date is in datetime format
         if DatesBR().check_date_datetime_format(dt_xpt) == False:
             dt_xpt = DatesBR().str_date_to_datetime(dt_xpt, str_format_dt_input)
@@ -110,11 +110,11 @@ class RtFromPV:
 class TSIR:
 
     def flat_forward(self, dict_nper_rates, working_days_year=252):
-        '''
+        """
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES - FLAT FORWARD MODEL
         INPUTS: DICT WITH NPER (KEYS) AND RATES (VALUES), AND WORKING DAYS IN A YEAR (252 AS DEFAULT)
         OUTPUTS: JSON (KEYS AS NPER TO MATURITY AND RESPECTIVELY RATES)
-        '''
+        """
         # setting variables
         dict_ = dict()
         # store in memory dictionary with rates per nper
@@ -141,11 +141,11 @@ class TSIR:
         return dict_
 
     def cubic_spline(self, dict_nper_rates):
-        '''
+        """
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES
         INPUTS:
         OUTPUTS:
-        '''
+        """
         cs = CubicSpline(list(dict_nper_rates.keys()),
                          list(dict_nper_rates.values()))
         dict_ = dict(zip(range(list(dict_nper_rates.keys())[0],
@@ -156,12 +156,12 @@ class TSIR:
 
     def third_degree_polynomial_cubic_splice(self, list_constants_cubic_spline, nper_working_days,
                                              bl_end_list, num_constants_cubic_spline=8):
-        '''
+        """
         DOCSTRING: THIRD DEGREE POLYNOMINAL FOR CUBIC SPLINE, CALCULATING WICH YTM REFEREES TO
             THE CURRENT NPER
         INPUTS: LIST OF CONSTANTS (A 0 X N AND B 0 X N)
         OUTPUTS: FLOAT
-        '''
+        """
         if len(list_constants_cubic_spline) != num_constants_cubic_spline:
             raise Exception('Poor definied list of constants for cubic spline, '
                             + 'ought have {} elements'.format(num_constants_cubic_spline))
@@ -175,11 +175,11 @@ class TSIR:
                         range(int(num_constants_cubic_spline / 2), num_constants_cubic_spline)])
 
     def literal_cubic_spline(self, dict_nper_rates, bl_debug=False):
-        '''
+        """
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         dict_ = dict()
         # tsir - nper x rate
@@ -240,13 +240,13 @@ class TSIR:
 
     def nelson_siegel(self, dict_nper_rates, tau_first_assumption=1.0,
                            number_samples=None):
-        '''
+        """
         REFERENCES: https://nelson-siegel-svensson.readthedocs.io/en/latest/readme.html#calibration
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES
         INPUTS: DICT WITH NPER (AS KEY) AND RATES (AS VALUES), AS WELL AS FIRST ASSUMPTION 
             FOR TAU AND NUMBER OF SAMPLES WITHIN THE RANGE
         OUTPUTS: DICTIONARY WITH RATE (Y), PERIOD (T)
-        '''
+        """
         y, status = calibrate_ns_ols(
             np.array(list(dict_nper_rates.keys())),
             np.array(list(dict_nper_rates.values())), tau_first_assumption)

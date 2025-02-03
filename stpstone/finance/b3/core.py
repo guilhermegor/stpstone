@@ -15,12 +15,12 @@ class MarginSimulatorB3:
     @property
     def access_token(self, method='GET', bl_verify=False,
                      bl_str_dict_params=False, app='/api/oauth/token'):
-        '''
+        """
         DOCSTRING: ACCESS TOKEN TO GRANT ACCESS TO MARGIN SIMULATOR B3
         INPUTS: METHOD (DEFAULT), KEY HEADER (DEFAULT), URL AUTHENTIFICATION
             HEADER (DEFAULT)
         OUTPUTS: STRING
-        '''
+        """
         # passing variables
         i = 0
         # requesting authorization authheader

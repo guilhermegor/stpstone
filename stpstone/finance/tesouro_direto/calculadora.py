@@ -10,12 +10,12 @@ from stpstone.cals.handling_dates import DatesBR
 class PrecificacaoTD:
 
     def ltn(self, ytm, du, valor_nominal=1000, du_1_ano=252, periodicidade_capitalizacao=1):
-        '''
+        """
         DOCSTRING: TÍTULO PRÉ-FIXADO COM PAGAMENTO DE PRINCIPAL E JUROS NO VENCIMENTO
         INPUTS: YIELD TO MATURITY, OU MARCAÇÃO A MERCADO, DU ATÉ O VENCIMENTO, VALOR NOMINAL,
             POR PADRÃO R$ 1.000,00 E DU
         OUTPUTS: VALOR PRESENTE DO TÍTULO, OU MARCAÇÃO A MERADO DO MESMO
-        '''
+        """
         return FinancialMath().present_value(
             FinancialMath().compound_interest(
                 ytm, du_1_ano, periodicidade_capitalizacao), du, 0,
@@ -23,13 +23,13 @@ class PrecificacaoTD:
 
     def ntn_f(self, ytm, lista_dus_fluxos_caixa, taxa_nominal_cupom=0.1, valor_nominal=1000,
               du_1_ano=252, periodicidade_pagmento_cupons=126, periodicidade_capitalizacao=1):
-        '''
+        """
         DOCSTRING: TÍTULO PRÉ-FIXADO COM PAGAMENTO DE JUROS SEMESTRALMENTE E PRINCIPAL NO
             VENCIMENTO
         INPUTS: YIELD DO MATURITY, DU ATÉ O VENCIMENTO, CUPOM PAGO AO ANO
             (PERCENTUAL DO VALOR NOMINAL),
         OUTPUTS: VALOR PRESENTE DO FLUXO DE CAIXA
-        '''
+        """
         ytm_real = FinancialMath().compound_interest(
             ytm, du_1_ano, periodicidade_capitalizacao)
         cupom_semestral = valor_nominal \
@@ -51,12 +51,12 @@ class PrecificacaoTD:
     def pr1(self, data_negociacao=DatesBR().add_working_days(DatesBR().curr_date(),
                                                              1).strftime('%d/%m/%Y'),
             dia_atualizacao_vna=15):
-        '''
+        """
         DOCSTRING: PROPORÇÃO ENTRE OS DIAS CORRIDOS DESDE O ÚLTIMO IPCA ATÉ A DATA DE VIGÊNCIA DO
             PRÓXIMO
         INPUTS: DATA DE NEGOCIAÇÃO EM DD/MM/AAAA
         OUTPUTS: INT
-        '''
+        """
         # convertendo a data str para formato datetime
         data_negociacao = DatesBR().str_date_to_datetime(data_negociacao, 'DD/MM/AAAA')
         data_negociacao = DatesBR().add_working_days(data_negociacao, 1)
@@ -87,11 +87,11 @@ class PrecificacaoTD:
 
     def vna_projetado_ntnb(self, vna_ultimo_disponivel_ntnb, ipca_projetado_aa, pr1,
                            nper_dias_uteis_aa=252, nper_dias_corridos_am=30):
-        '''
+        """
         DOCSTRING: VNA PROJETADO PARA DIAS DE NEGOCIAÇÃO QUE NÃO TENHA O VNA DISPONÍVEL
         INPUTS: VNA ÚLTIMO DISPONÍVEL (TRUNCADO NA SEXTA CASA), IPCA PROJETADO E PR1
         OUTPUTS: VNA PROJETADO (BOOLEAN)
-        '''
+        """
         ipca_projetado_adu = FinancialMath().compound_interest(ipca_projetado_aa, nper_dias_uteis_aa,
                                                                nper_dias_corridos_am)
         return vna_ultimo_disponivel_ntnb * (1 + ipca_projetado_adu) ** pr1
@@ -102,13 +102,13 @@ class PrecificacaoTD:
                         dia_atualizacao_vna=15,
                         nper_dias_uteis_aa=252, nper_dias_corridos_am=30,
                         valor_nominal=100):
-        '''
+        """
         DOCSTRING: PRECIFICAÇÃO NTN-B PRINCIPAL
         INPUTS: YTM, DU, VNA ÚLTIMO DISPONÍVEL, IPCA PROJETADO AA, DATA DE NEGOCIAÇÃO (
             POR PADRÃO D+1), DIA DE ATUALIZAÇÃO DO VNA (PADRÃO 15), NÚMERO DE DIAS ÚTEIS EM UM ANO,
             NÚMERO DE DIAS CORRIDOS EM UM MÊS (PADRÃO 30) E VALOR NOMINAL DO TÍTULO (PADRÃO 100)
         OUTPUTS: FLOAT
-        '''
+        """
         # pr1
         pr1 = PrecificacaoTD().pr1(data_negociacao, dia_atualizacao_vna)
         # vna projetado
@@ -128,13 +128,13 @@ class PrecificacaoTD:
               dia_atualizacao_vna=15,
               nper_dias_uteis_aa=252, nper_dias_corridos_am=30,
               valor_nominal=100, taxa_cupom_aa=0.06, periodicidade_pagmento_cupons=126):
-        '''
+        """
         DOCSTRING: PRECIFICAÇÃO NTN-B (COM PAGAMENTO DE CUPONS)
         INPUTS: YTM, LISTA DUS, VNA ÚLTIMO DISPONÍVEL, IPCA PROJETADO AA, DATA DE NEGOCIAÇÃO (
             POR PADRÃO D+1), DIA DE ATUALIZAÇÃO DO VNA (PADRÃO 15), NÚMERO DE DIAS ÚTEIS EM UM ANO,
             NÚMERO DE DIAS CORRIDOS EM UM MÊS (PADRÃO 30) E VALOR NOMINAL DO TÍTULO (PADRÃO 100)
         OUTPUTS: FLOAT
-        '''
+        """
         # pr1
         pr1 = PrecificacaoTD().pr1(data_negociacao, dia_atualizacao_vna)
         # vna projetado
@@ -163,23 +163,23 @@ class PrecificacaoTD:
 
     def vna_projetado_lft(self, vna_ultimo_disponivel_lft, taxa_selic_projetada_aa,
                           periodicidade_capitalizacao=1, nper_dias_uteis_aa=252):
-        '''
+        """
         DOCSTRING: VNA PROJETADO LFT
         INPUTS: VNA ÚLTIMO DISPONÍVEL (LFT), TAXA SELIC PROJETADA NOMINAL, PERIODICIDADE DE
             CAPITALIZAÇÃO (POR PADRÃO 1), DIAS ÚTEIS EM UM ANO (POR PADRÃO 252)
         OUTPUT: FLOAT
-        '''
+        """
         return vna_ultimo_disponivel_lft * \
             (1 + FinancialMath().compound_interest(taxa_selic_projetada_aa,
                                                    nper_dias_uteis_aa, periodicidade_capitalizacao))
 
     def lft(self, ytm, vna_ultimo_disponivel_lft, taxa_selic_projetada_aa,
             periodicidade_capitalizacao=1, nper_dias_uteis_aa=252, valor_nominal=1):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUT:
-        '''
+        """
         # vna atualizado
         vna_projetado_lft = PrecificacaoTD().vna_projetado_lft(vna_ultimo_disponivel_lft,
                                                                taxa_selic_projetada_aa,
@@ -192,19 +192,19 @@ class PrecificacaoTD:
         return vna_projetado_lft * cotacao
 
     def rentabilidade_liquida(self, rentabilidade_bruta, periodo_vigencia):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         pass
 
     def dus_vencimento(self, data_vencimento, data_referencia=DatesBR().curr_date()):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # convertendo datas para datetime
         if type(data_vencimento) == str:
             data_vencimento = DatesBR().str_date_to_datetime(data_vencimento, 'DD/MM/AAAA')
@@ -217,11 +217,11 @@ class PrecificacaoTD:
                                                            list_last_week_year_day)
 
     def dus_pagamento_cupons(self, prim_dia_util, papel, vencimento):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         # criando variáveis de passagem
         dict_cupons = dict()
         # convertendo datas para datetime
@@ -372,9 +372,9 @@ class PrecificacaoTD:
 #     DatesBR().get_working_days_delta(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
 #                                      DatesBR().str_date_to_datetime('04/01/2021', 'DD/MM/AAAA'))
 # print(int_bzd)
-# print(len(DatesBR().list_working_days(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
+# print(len(DatesBR().list_rng_wds(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
 #                                       DatesBR().str_date_to_datetime('04/01/2021', 'DD/MM/AAAA'))))
-# print(DatesBR().list_working_days(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
+# print(DatesBR().list_rng_wds(DatesBR().str_date_to_datetime('10/08/2020', 'DD/MM/AAAA'),
 #                                   DatesBR().str_date_to_datetime('04/01/2021', 'DD/MM/AAAA')))
 # print(PrecificacaoTD().ntn_f(0.06846,
 #                              list(PrecificacaoTD().dus_pagamento_cupons(

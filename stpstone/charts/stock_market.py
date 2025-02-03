@@ -8,13 +8,13 @@ class StockMarket:
 
     def stock_price_evolution(self, list_stocks_tickers, date_inf, date_sup, country, str_x_label,
                               str_y_label):
-        '''
+        """
         DOCSTRING: CHART OF STOCK PRICE EVOLUTION
         INPUTS: LIST OF STOCKS TICKERS, INFERIOR AND SUPERIOR DATES, COUNTRY 
             (EX.: BRAZIL/ UNITED STATES), STR WITH X LABEL, AND ITS Y LABEL AXIS NAMES 
             FOR THE CHART
         OUTPUTS:
-        '''
+        """
         # define plt style
         plt.style.use('fivethirtyeight')
 

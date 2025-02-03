@@ -11,9 +11,9 @@ from stpstone.settings._global_slots import YAML_ANBIMA
 
 
 class AnbimaDataGen:
-    '''
+    """
     REFERENCES: https://developers.anbima.com.br/api-portal/pt-br
-    '''
+    """
 
     def __init__(
             self,
@@ -25,11 +25,11 @@ class AnbimaDataGen:
             str_host_prd='https://api.anbima.com.br/',
             str_host_dev='https://api-sandbox.anbima.com.br/'
         ):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         self.str_client_id = str_client_id
         self.str_client_secret = str_client_secret
         self.bl_debug = bl_debug
@@ -40,11 +40,11 @@ class AnbimaDataGen:
 
     @property
     def access_token(self, str_app='oauth/access-token', str_method='POST'):
-        '''
+        """
         DOCSTRING: AUTHORIZATION TOKEN IN ORDER TO GRANT ACCESS TO DESIRED APP
         INPUTS: STR_APP, STR_METHOD
         OUTPUTS: JSON
-        '''
+        """
         # url
         str_url = self.str_host_prd + str_app
         # encoding credentials to base64
@@ -74,11 +74,11 @@ class AnbimaDataGen:
         return resp_req.json()
 
     def generic_request(self, str_app, str_method):
-        '''
+        """
         DOCSTRING: GENERIC REQUEST TO ANBIMA DATA
         INPUTS: STR_APP, STR_METHOD, DICT_PAYLOAD
         OUTPUTS: JSON
-        '''
+        """
         # url
         str_url = self.str_host + str_app
         if self.bl_debug == True:
@@ -101,9 +101,9 @@ class AnbimaDataGen:
 
 
 class AnbimaDataFunds(AnbimaDataGen):
-    '''
+    """
     REFERENCES: https://developers.anbima.com.br/pt/swagger-de-fundos-v2-rcvm-175/#/Notas%20explicativas/buscarNotasExplicativas
-    '''
+    """
 
     def funds_raw(
         self,
@@ -111,11 +111,11 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app='feed/fundos/v2/fundos?size={}&page={}',
         str_method='GET'
     ):
-        '''
+        """
         DOCSTRING: RETRIEVE AVAILABLE CLOSED AND OPENED-END FUNDS
         INPTUS: -
         OUTPUTS: JSON
-        '''
+        """
         return self.generic_request(
             str_app.format(
                 self.int_chunk,
@@ -125,11 +125,11 @@ class AnbimaDataFunds(AnbimaDataGen):
         )
     
     def funds_trt(self, i_pg=0, i_fnd=0):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # looping within all available fund pages
@@ -235,7 +235,7 @@ class AnbimaDataFunds(AnbimaDataGen):
         ]:
             df_funds[col_dt].fillna(YAML_ANBIMA['anbima_data_api']['str_ts_fill_na'], inplace=True)
             df_funds[col_dt] = [
-                DatesBR().timestamp_separator_string_to_datetime(d, format=YAML_ANBIMA['anbima_data_api']['str_dt_format']) 
+                DatesBR().timestamp_to_date(d, format=YAML_ANBIMA['anbima_data_api']['str_dt_format']) 
                 for d in df_funds[col_dt]
             ]
         df_funds.fillna(YAML_ANBIMA['anbima_data_api']['str_fill_na'], inplace=True)
@@ -265,22 +265,22 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app='feed/fundos/v2/fundos/{}/historico',
         str_method='GET'
     ):
-        '''
+        """
         DOCSTRING: RETRIEVE INFORMATION REGARDING A SPECIFIC FUND
         INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
         OUTPUTS: JSON
-        '''
+        """
         return self.generic_request(str_app.format(str_code_fnd), str_method)
     
     def fund_trt(
         self,
         list_code_fnds: list
     ):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         dict_dfs = dict()
         # looping within the funds codes
@@ -341,7 +341,7 @@ class AnbimaDataFunds(AnbimaDataGen):
                             and (len(col_) > 10):
                             df_[col_].fillna(YAML_ANBIMA['anbima_data_api']['str_ts_fill_na'], inplace=True)
                             df_[col_] = [
-                                DatesBR().timestamp_separator_string_to_datetime(
+                                DatesBR().timestamp_to_date(
                                     d, format=YAML_ANBIMA['anbima_data_api']['str_dt_format']
                                 ) 
                                 for d in df_[col_]
@@ -370,11 +370,11 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/{}/historico',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: HISTORICAL CHANGES OF REGISTRATION DATA FOR THE FUND
         INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
         OUTPUTS: JSON
-        '''
+        """
         return self.generic_request(str_app.format(str_code_class), str_method)
     
     def segment_investor(
@@ -383,12 +383,12 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/segmento-investidor/{}/patrimonio-liquido',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: INVESTOR SEGMENT INFORMATION, DISPLAYING THE DISTRIBUTION OF AUM 
             BY PERCENTAGE VALUES
         INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
         OUTPUTS: JSON
-        '''
+        """
         return self.generic_request(str_app.format(str_code_class), str_method)
     
     def time_series_fund(
@@ -399,11 +399,11 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/{}/serie-historica',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: TIME SERIES FOR A GIVEN FUND
         INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
         OUTPUTS: JSON
-        '''
+        """
         dict_payload = {
             'size': self.int_chunk,
             'data-inicio': str_date_inf,
@@ -421,11 +421,11 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/serie-historica/lote',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: TIME SERIES OF FUNDS FOR A GIVEN DATE OF UPDATE
         INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
         OUTPUTS: JSON
-        '''
+        """
         dict_payload = {
             'data-atualizacao': str_date_update,
             'size': self.int_chunk
@@ -442,11 +442,11 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/dados-cadastrais/lote',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: FUNDS REGISTRATION FOR A GIVEN DATE
         INPTUS: DATE OF UPDATE
         OUTPUTS: JSON
-        '''
+        """
         dict_payload = {
             'data-atualizacao': str_date_update,
             'size': self.int_chunk
@@ -463,11 +463,11 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/instituicoes',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: INSTITUTIONS MANAGING CLOSED/OPENED-END FUNDS
         INPTUS: -
         OUTPUTS: JSON
-        '''
+        """
         dict_payload = {
             'size': self.int_chunk
         }
@@ -483,11 +483,11 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/instituicoes/{}',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: INSTITUTIONS MANAGING CLOSED/OPENED-END FUNDS
         INPTUS: EIN (EMPLOYER IDENTIFICATION NUMBER)
         OUTPUTS: JSON
-        '''
+        """
         dict_payload = {
             'size': self.int_chunk
         }
@@ -503,9 +503,9 @@ class AnbimaDataFunds(AnbimaDataGen):
             str_app='feed/fundos/v2/fundos/{}/notas-explicativas',
             str_method='GET'
         ):
-        '''
+        """
         DOCSTRING: EXPLANATORY NOTES FOR A GIVEN FUND
         INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
         OUTPUTS: JSON
-        '''
+        """
         return self.generic_request(str_app.format(str_code_class), str_method)

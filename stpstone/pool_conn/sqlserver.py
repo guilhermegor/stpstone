@@ -7,11 +7,11 @@ from pyodbc import connect
 class SqlServerDB:
 
     def db_connection(self, driver_sql, server, port, database, user_id, password, timeout=7200):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # creating connection string
         if driver_sql == '{SQL Server}':
             str_conex = r'Driver={};Server={};Database={};U={};PWD={}'.format(
@@ -30,11 +30,11 @@ class SqlServerDB:
         return connect(str_conex, autocommit=True, timeout=timeout)
 
     def read_sql(self, driver_sql, server, port, database, user_id, password, query, timeout=7200):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS: DATAFRAME PANDAS
-        '''
+        """
         # creating connection object
         conn = self.db_connection(driver_sql, server, port,
                                   database, user_id, password, timeout)

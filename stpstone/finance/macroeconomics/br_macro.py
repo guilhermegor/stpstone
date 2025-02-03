@@ -20,12 +20,12 @@ class Sidra:
 
     @property
     def rl_dts_indicators(self, str_pool_name=None):
-        '''
+        """
         REFERENCES: https://www.ibge.gov.br/calendario-indicadores-novoportal.html
         DOCSTRING: RELEASE DATES FROM MACRO SHORT-TERM INDICATORS
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_ser = list()
         # request html
@@ -69,12 +69,12 @@ class Sidra:
 
     def sidra_variables(self, aggregate, variable='all', location='BR', method='GET',
                         url='https://servicodados.ibge.gov.br/api/v3/agregados/{}/variaveis/{}'):
-        '''
+        """
         REFERENCES: https://servicodados.ibge.gov.br/api/docs/agregados?versao=3
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # payload
         dict_payload = {
             'localidades': location
@@ -90,12 +90,12 @@ class Sidra:
 
     def sidra_modification_dates(self, aggregate, method='GET',
                                  url='https://servicodados.ibge.gov.br/api/v3/agregados/{}/periodos'):
-        '''
+        """
         REFERENCES: https://servicodados.ibge.gov.br/api/docs/agregados?versao=3
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # converting aggregate and variable to string
         aggregate = str(aggregate)
         # requesting data
@@ -107,42 +107,42 @@ class Sidra:
 
     @property
     def ipca_modification_dates(self, aggregate='1737'):
-        '''
+        """
         REFERENCES: https://sidra.ibge.gov.br/tabela/1737
         DOCSTRING: INDICE NUMBER OF IPCA (INFLATION INDEX FOR BRAZILLIAN PURPOSES)
         INPUTS: -
         OUTPUTS: DICTIONARY (CLOSING MONTH AND INDICE NUMBER KEYS)
-        '''
+        """
         return self.sidra_modification_dates(aggregate)
 
     @property
     def ipca_15_modification_dates(self, aggregate='3065'):
-        '''
+        """
         REFERENCES: https://sidra.ibge.gov.br/tabela/3065
         DOCSTRING: INDICE NUMBER OF IPCA 15 (INFLATION INDEX FOR BRAZILLIAN PURPOSES)
         INPUTS: -
         OUTPUTS: DICTIONARY (CLOSING MONTH AND INDICE NUMBER KEYS)
-        '''
+        """
         return self.sidra_modification_dates(aggregate)
 
     @property
     def ipca_in_index_number(self, aggregate='1737', variable='2266'):
-        '''
+        """
         REFERENCES: https://sidra.ibge.gov.br/tabela/1737
         DOCSTRING: INDICE NUMBER OF IPCA (INFLATION INDEX FOR BRAZILLIAN PURPOSES)
         INPUTS: -
         OUTPUTS: DICTIONARY (CLOSING MONTH AND INDICE NUMBER KEYS)
-        '''
+        """
         return self.sidra_variables(aggregate, variable)[0]['resultados'][0]['series'][0]['serie']
 
     @property
     def ipca_15_in_index_number(self, aggregate='3065', variable='1117'):
-        '''
+        """
         REFERENCES: https://sidra.ibge.gov.br/tabela/3065
         DOCSTRING: INDICE NUMBER OF IPCA 15 (INFLATION INDEX FOR BRAZILLIAN PURPOSES)
         INPUTS: -
         OUTPUTS: DICTIONARY (CLOSING MONTH AND INDICE NUMBER KEYS)
-        '''
+        """
         return self.sidra_variables(aggregate, variable)[0]['resultados'][0]['series'][0]['serie']
 
 
@@ -155,12 +155,12 @@ class BCB:
         max_tries=20,
     )
     def sgs_bcb(self, int_sgs_tabel, data_inic, data_fim):
-        '''
+        """
         REFERENCES: https://dadosabertos.bcb.gov.br/dataset/20542-saldo-da-carteira-de-credito-com-recursos-livres---total/resource/6e2b0c97-afab-4790-b8aa-b9542923cf88
         DOCSTRING: INFOS FROM SGS BCB REST
         INPUTS: INPUTS, INCIAL AND END DATES ('DD/MM/YYYY' OR DATETIME FORMAT)
         OUPUTS: SGS RESPONSE
-        '''
+        """
         # adjusting variables types
         if isinstance(data_inic, datetime.date) == True:
             data_inic = DatesBR().datetime_to_string(data_inic)
@@ -178,30 +178,30 @@ class BCB:
         return HandlingObjects().literal_eval_data(message_content, "b'", "'")
 
     def igpm(self, data_inic, data_fim, tabela_sgs_bcb='189'):
-        '''
+        """
         REFERENCES: https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint
         DOCSTRING: IGPM TIMES SERIES
         INPUTS: INICIAL DATE, FINAL DATE, AND SGS BCB TABLE
         OUTPUTS: LIST OF DICTS (DATE, VALUE)
-        '''
+        """
         return self.sgs_bcb(tabela_sgs_bcb, data_inic, data_fim)
 
     def selic_daily(self, data_inic, data_fim, tabela_sgs_bcb='11'):
-        '''
+        """
         REFERENCES: https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint
         DOCSTRING: DAILY SELIC
         INPUTS: INICIAL DATE, FINAL DATE, AND SGS BCB TABLE
         OUTPUTS: LIST OF DICTS (DATE, VALUE)
-        '''
+        """
         return self.sgs_bcb(tabela_sgs_bcb, data_inic, data_fim)
 
     def selic_target(self, data_inic, data_fim, tabela_sgs_bcb='432'):
-        '''
+        """
         REFERENCES: https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint
         DOCSTRING: DAILY SELIC
         INPUTS: INICIAL DATE, FINAL DATE, AND SGS BCB TABLE
         OUTPUTS: LIST OF DICTS (DATE, VALUE)
-        '''
+        """
         return self.sgs_bcb(tabela_sgs_bcb, data_inic, data_fim)
 
     def usd_brl(self, data_ref, formato_data_saida='%m/%d/%Y', int_dol_usd_security_id=9800508,
@@ -209,12 +209,12 @@ class BCB:
                 key_last_update='lastUpdate', int_precision_decimals=4,
                 endpoint_taxas_referenciais_b3='https://sistemaswebb3-derivativos.b3.com.br/financialIndicatorsProxy/ReferenceExchangeRate/GetReferenceExchangeRate/eyJsYW5ndWFnZSI6InB0LWJyIn0=',
                 method_req='GET', bl_verify=False):
-        '''
+        """
         REFERENCES: https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/aplicacao#!/recursos/CotacaoDolarDia#eyJmb3JtdWxhcmlvIjp7IiRmb3JtYXQiOiJqc29uIiwiJHRvcCI6MTAwLCJkYXRhQ290YWNhbyI6IjEyLTA5LTIwMjAifSwicHJvcHJpZWRhZGVzIjpbMCwxLDJdfQ==
         DOCSTRING: COMMERCIAL DOL/BRL IN DAILY OBSERVATIONS
         INPUTS: DATE (WHETHER DATETIME OR 'DD/MM/YYYY')
         OUTPUTS: JSON
-        '''
+        """
         # dateformat adjustment
         if DatesBR().check_date_datetime_format(data_ref) == True:
             data_ref = DatesBR().datetime_to_string(data_ref, formato_data_saida)
@@ -274,13 +274,13 @@ class BCB:
                              api_curency_exchange_period='CotacaoMoedaPeriodo(moeda=@moeda,dataInicial=@dataInicial,'
                              + 'dataFinalCotacao=@dataFinalCotacao)?{}', method='GET',
                              key_value='value', key_simbolo='simbolo', str_currency='{}BRL'):
-        '''
+        """
         REFERENCES: https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/swagger-ui3#/
         DOCSTRING: BRAZILLIAN FOREIGN EXCHANGE FROM ALL CURRENCIES AVAILABE IN OLINDA API FROM
             DOMESTIC CENTRAL BANK
         INPUTS: URL
         OUTPUTS:
-        '''
+        """
         # setting variables
         dict_export = dict()
         # creating reference datetime, in specific string type, according to working days before
@@ -365,12 +365,12 @@ class BCB:
     def market_macro_expec(self, url='https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?$top=100000&$orderby=Data%20desc&$format=json&$select=Indicador,IndicadorDetalhe,Data,DataReferencia,Media,Mediana,Minimo,Maximo,numeroRespondentes', 
         col_indicator='Indicador', col_detailed_indicator='IndicadorDetalhe', col_date='Data', col_ref_year='DataReferencia', 
         col_avg='Media', col_median='Mediana', col_min='Minimo', col_max='Maximo', col_num_answ='numeroRespondentes'):
-        '''
+        """
         DOCSTRING: ANNUAL MARKET EXPECTATIONS FROM THE BRAZILIAN CENTRAL BANK, INCLUDING INDICATORS LIKE GDP 
             GROWTH AND INFLATION, WITH STATISTICS ON AVERAGE, MEDIAN, MIN, MAX VALUES, AND RESPONDENT COUNT.
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # request olinda bcb
         dict_headers = {
             'accept': 'application/json',
@@ -404,11 +404,11 @@ class YFinanceMacroBR:
     @property
     def ipca_forecast(self, method='GET', url='https://sbcharts.investing.com/events_charts/eu/1165.json',
                       int_convert_miliseconds_seconds=1000):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # requesting data
         req_resp = request(method, url)
         # raises exception when not a 2xx response
@@ -428,11 +428,11 @@ class YFinanceMacroBR:
         return json_brazillian_cpi
 
     def yforex(self, list_xcg_curr, wd_start_date=2, wd_end_date=0):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # creating dates of interest according to working days provided

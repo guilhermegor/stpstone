@@ -216,12 +216,9 @@ These instructions will get you a copy of the project running on your local mach
 
 # latest version
 pip install stpstone
-# optional: versioning
-pip install stpstone==0.1.0
-
 ```
 
-* Available at: https://pypi.org/project/stpstone/0.1.0/
+* Available at: https://pypi.org/project/stpstone/
 
 #### Local Machine Version
 

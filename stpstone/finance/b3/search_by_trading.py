@@ -30,11 +30,11 @@ class TradingFilesB3:
         self.str_fmt_dt = str_fmt_dt
 
     def price_report(self, bl_debug=False):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # price report file .zip
@@ -98,11 +98,11 @@ class TradingFilesB3:
 
     @property
     def tradable_securities(self):
-        '''
+        """
         DOCSTRING: TRADABLE SECURITIES IN BRAZILLIAN EXCHANGE MARKET
         INPUTS: WORKING DAYS BEFORE
         OUTPUTS: DATAFRAME
-        '''
+        """
         # setting variables
         list_ser = list()
         # url
@@ -198,7 +198,7 @@ class TradingFilesB3:
         for col_ in [
             "SecurityValidityTimestamp"
         ]:
-            df_[col_] = [DatesBR().timestamp_separator_string_to_datetime(
+            df_[col_] = [DatesBR().timestamp_to_date(
                 d, substring_datetime=' ', format=self.str_fmt_dt) for d in df_[col_]]
         # adding logging
         df_ = DBLogs().audit_log(
@@ -213,11 +213,11 @@ class TradingFilesB3:
 
     @property
     def daily_liquidity_limits(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # url
         url = YAML_B3['daily_liquidity_limits']['url'].format(DatesBR().sub_working_days(
             DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d'))
@@ -265,11 +265,11 @@ class TradingFilesB3:
 
     def options_b3(self, float_value_error=-1000.0, bl_debug=False, 
                    float_days_year=365.0):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # raw maximum theoretical margins
@@ -466,11 +466,11 @@ class TradingFilesB3:
 
     @property
     def carga_mtm_b3(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # url de exportação do arquivo de margens teóricas máximas b3
         url_mtm = YAML_B3['margens_teoricas_maximas_b3'][
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
@@ -502,11 +502,11 @@ class TradingFilesB3:
     @property
     def mtm_compra_venda(self, den_desagios=None,
                          key_stocks='stocks', key_funds='funds', key_etfs='etfs', key_bdrs='bdrs'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS
-        '''
+        """
         # setting variables
         list_num_desagios_compra = list()
         list_num_desagios_venda = list()
@@ -638,11 +638,11 @@ class TradingFilesB3:
 
     @property
     def fatores_primitivos_risco_b3(self):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # determinando url de download dos fatores primitivos de risco da b3
         url = YAML_B3['fatores_primitivos_risco_b3']['url'].format(DatesBR().sub_working_days(
                 DatesBR().curr_date, self.int_wd_bef).strftime('%y%m%d'))
@@ -711,11 +711,11 @@ class TradingFilesB3:
     def collateral_acc_spot_bov_b3(self, dict_repalce_str_erros={
             'ETF': ''}, col_ticker='TICKER', col_isin='ISIN', col_limite_qtds='LIMITE_QUANTIDADES',
             col_mes_arquivo='MES_ARQUIVO', key_limite_qtds='Limite (quantidade)'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_exportacao = list()
         # importing to memory html, in order to catch the url of the collateral accepted by b3, 
@@ -784,11 +784,11 @@ class TradingFilesB3:
         return df_coll_acc_spot_bov
 
     def cenarios_tipo_curva(self, list_cenarios_tipo_curva=None):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser_exportacao_curvas = list()
         # validando tipo de variáveis de interesse
@@ -855,11 +855,11 @@ class TradingFilesB3:
         return df_cenarios_tipo_curva
 
     def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser_exportacao_curvas = list()
         # validando tipo de variáveis de interesse
@@ -935,12 +935,12 @@ class TradingFilesB3:
                                                                 '2944', '2925', '2946',
                                                                 '2901', '2902', '2934'],
                                        int_cenario_sup_avaliacao=529, bl_debug=True):
-        '''
+        """
         DOCSTRING: UNINDO FATORES PRIMITIVOS DE RISCO, CURVAS SPOT E POR TIPO EM UM DATAFRAME COM 
             OS IDS DE CENÁRIOS DE ITNERESSE
         INPUTS: -
         OUTPUTS: DATAFRAME
-        '''
+        """
         # criando dataframe de tipos de frps de interesse
         df_tipos_fprs = pd.DataFrame(
             YAML_B3['fatores_primitivos_risco_b3']['tipos_fprs'])
@@ -1077,11 +1077,11 @@ class TradingFilesB3:
         return df_fpr_b3
 
     def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser_exportacao_curvas = list()
         # validando tipo de variáveis de interesse
@@ -1184,11 +1184,11 @@ class TradingFilesB3:
         col_notional_neg_int_sess_reg='NOTIONAL_NEG_MOEDA_INT_SESS_REG', 
         col_pct_osc_int='PCT_OSC_INT', formato_dt='AAAA-MM-DD', qtd_erro=-1, 
         col_ticker_cd='Symbol', col_tipo_mercado_cd='TIPO_MERCADO'):
-        '''
+        """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
-        '''
+        """
         # setting variables
         list_ser = list()
         # instruments and its respective market

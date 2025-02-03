@@ -10,12 +10,12 @@ from stpstone.handling_data.str import StrHandler
 class BrazilGeo:
 
     def states(self, bol_accents=True, key_nome='nome'):
-        '''
+        """
         DOCSTRING: RETURN BRAZILLIAN STATES
         INPUTS: BOOLEAN ACCENTS (WHETER SHOULD BE INCLUDED IN FEDERATIVE UNITY OR NOT, 
             BY DEFAULT TRUE)
         OUTPUTS: SERIALIZED JSON WITH STATES ID, SHORT NAME AND REGION
-        '''
+        """
         # fetching states of brazillian territory
         url_localidades_brasil = 'https://servicodados.ibge.gov.br/api/v1/localidades/estados'
         # rest consult to ibge database
@@ -36,11 +36,11 @@ class BrazilGeo:
     def zip_code(self, list_zip_codes, url='https://cep.awesomeapi.com.br/json/{}',
                  method='GET', key_address_type='adress_type',
                  key_address='address', key_state='state'):
-        '''
+        """
         DOCSTRING: ZIP CODE LOCATION INFO
         INPUTS: LIST ZIP CODES, URL (DEFAULT), METHOD (DEFAULT)
         OUTPUTS: DICTIONARY
-        '''
+        """
         # setting variables
         dict_zip_adresses = dict()
         # looping through each zip code, requesting info about adrees, and raise exception
