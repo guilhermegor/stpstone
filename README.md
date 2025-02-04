@@ -123,7 +123,7 @@
     │   └── mp_helper.py
     ├── opening_config
     │   └── setup.py
-    ├── pool_conn
+    ├── connections
     │   ├── dabricksCLI.py
     │   ├── databricks.py
     │   ├── generic.py
@@ -151,7 +151,7 @@
     │   └── statistical_inference.py
     ├── sendgrid
     │   └── handling_sendgrid.py
-    ├── settings
+    ├── _settings
     │   ├── _global_slots.py
     │   ├── anbima.yaml
     │   ├── b3.yaml

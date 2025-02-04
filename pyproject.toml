@@ -57,12 +57,14 @@ sendgrid = "6.11.0"
 slack = "^0.0.2"
 pymysql = "1.1.1"
 pytest = "8.3.4"
+pydantic = "2.10.6"
 
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"
 build = "^1.2.2.post1"
 twine = "^6.1.0"
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]

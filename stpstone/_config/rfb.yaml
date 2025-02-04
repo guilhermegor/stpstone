@@ -1,0 +1,237 @@
+### DEFAULT ###
+
+generic:
+  dtypes:
+    FILE_NAME: str
+    REF_YEAR_MONTH: str
+
+
+### APPENDIX ###
+
+# appendix stands for metadata, or auxiliary data that is not available to be scraped, but is 
+#   necessary for the analysis
+appendix:
+  company_size:
+    schema: RAW
+    table_name: COMPANY_SIZE
+    data:
+      - CODE: '00'
+        DESCRIPTION: N/A
+      - CODE: '01'
+        DESCRIPTION: MICRO
+      - CODE: '03'
+        DESCRIPTION: SMALL
+      - CODE: '05'
+        DESCRIPTION: OTHERS
+  id_headquarters_branch:
+    schema: RAW
+    table_name: ID_HEADQUARTERS_BRANCH
+    data:
+      - CODE: 1
+        DESCRIPTION: HEADQUARTERS
+      - CODE: 2
+        DESCRIPTION: BRANCH
+  registration_status:
+    schema: RAW
+    table_name: ID_HEADQUARTERS_BRANCH
+    data:
+      - CODE: 1
+        DESCRIPTION: 'NULL'
+      - CODE: 2
+        DESCRIPTION: ACTIVE
+      - CODE: 3
+        DESCRIPTION: SUSPENDED
+      - CODE: 4
+        DESCRIPTION: UNFIT
+      - CODE: 8
+        DESCRIPTION: RETIRED
+  simplified_tx_system:
+    schema: RAW
+    table_name: SIMPLIFIED_TX_SYSTEM
+    data:
+      - CODE: S
+        DESCRIPTION: 'YES'
+      - CODE: 'N'
+        DESCRIPTION: 'NO'
+      - CODE: EM BRANCO
+        DESCRIPTION: 'OTHERS'
+  mei:
+    schema: RAW
+    table_name: MEI
+    data:
+      - CODE: S
+        DESCRIPTION: 'YES'
+      - CODE: 'N'
+        DESCRIPTION: 'NO'
+      - CODE: EM BRANCO
+        DESCRIPTION: 'OTHERS'
+  type_person:
+    schema: RAW
+    table_name: TYPE_PERSON
+    data:
+      - CODE: 1
+        DESCRIPTION: LEGAL ENTITY
+      - CODE: 2
+        DESCRIPTION: NATURAL PERSON
+      - CODE: 3
+        DESCRIPTION: FOREIGNER
+
+
+### RESOURCES TO BE SCRAPED ###
+
+companies:
+  app_fstr: Empresas{}.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: COMPANIES
+  list_cols_dt:
+  dtypes:
+    EIN: str
+    COMPANY_NAME: str
+    LEGAL_FORM: str
+    LEGAL_RESP_QUALIF: str
+    COMPANY_SHARE_CAPITAL: float
+    COMPANY_SIZE: int
+    #   filled for governmental entities with legal code 1xxx, and empty otherwise
+    RESP_FEDERAL_ENTITY: str
+
+businesses:
+  app_fstr: Estabelecimentos{}.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: BUSINESSES
+  list_cols_dt:
+    - DT_REGISTRATION_STATUS
+    - DT_INCEPTION
+    - DT_SPECIAL_SIT
+  dtypes:
+    EIN_BASIC: str
+    EIN_ORDER: str
+    EIN_VD: str
+    ID_HEADQUARTERS_BRANCH: int
+    COMPANY_NAME: str
+    ID_REGISTRATION_STATUS: str
+    DT_REGISTRATION_STATUS: str
+    ID_REASON_REGISTRATION_STATUS: int
+    CITY_FOREIGN_COUNTRY: str
+    COUNTRY: str
+    DT_INCEPTION: str
+    CNAE_MAIN: str
+    CNAE_SECOND: str
+    TYPE_PUBLIC_PLACE: str
+    DESC_PUBLIC_PLACE: str
+    NUMBER: str
+    ADDRESS_COMPLEMENT: str
+    NEIGHBORHOOD: str
+    ZIP_CODE: str
+    STATE: str
+    CITY: str
+    AREA_CODE_1: int
+    TELEPHONE_1: int
+    AREA_CODE_2: int
+    TELEPHONE_2: int
+    AREA_CODE_FAX: int
+    FAX: int
+    ELECTRONIC_MAILING: str
+    SPECIAL_SIT: str
+    DT_SPECIAL_SIT: str
+
+simplified_taxation_system:
+  app: Simples.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: SIMP_TAX_SYS
+  list_cols_dt:
+    - DT_BEG_SIMPL_TX
+    - DT_END_SIMPL_TX
+    - DT_BEG_MEI_TX
+    - DT_END_MEI_TX
+  dtypes:
+    EIN: str
+    BL_SIMPL_TX: str
+    DT_BEG_SIMPL_TX: str
+    DT_END_SIMPL_TX: str
+    BL_MEI_TX: str
+    DT_BEG_MEI_TX: str
+    DT_END_MEI_TX: str
+
+shareholders:
+  app_fstr: Socios{}.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: SIMP_TAX_SYS
+  list_cols_dt:
+    - DT_BEG_SHAREHOLDER
+  dtypes:
+    EIN_COMPANY: str
+    ID_TYPE_PERSON: int
+    NAME: str
+    DOC_SHAREHOLDER: str
+    SHAREHOLDER_EDUCATION: str
+    DT_BEG_SHAREHOLDER: str
+    COUNTRY: str
+    LEGAL_REPRESENTATIVE: str
+    REPRESENTATIVE_NAME: str
+    REPRESENTATIVE_EDUCATION: str
+    AGE_RANGE: str
+
+countries:
+  app: Paises.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: COUNTRIES
+  list_cols_dt:
+  dtypes:
+    CODE: str
+    NAME: str
+
+cities:
+  app: Municipios.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: CITIES
+  list_cols_dt:
+  dtypes:
+    CODE: str
+    NAME: str
+
+shareholders_education:
+  app: Qualificacoes.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: LEGAL_FORM
+  list_cols_dt:
+  dtypes:
+    CODE: str
+    DESCRIPTION: str
+
+legal_form:
+  app: Naturezas.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: LEGAL_FORM
+  list_cols_dt:
+  dtypes:
+    CODE: str
+    DESCRIPTION: str
+
+# national classification of economic activity
+ncea:
+  app: Cnaes.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: RFB_CNAES
+  list_cols_dt:
+  dtypes:
+    CODE: str
+    DESCRIPTION: str
+
+registration_status:
+  app: Motivos.zip
+  bl_io_interpreting: True
+  schema: RAW
+  table_name: REGISTRATION_STATUS
+  list_cols_dt:
+  dtypes:
+    CODE: str
+    REASON_REG_STATUS: str
