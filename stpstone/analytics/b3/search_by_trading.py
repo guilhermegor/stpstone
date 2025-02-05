@@ -7,7 +7,7 @@ from stpstone._config._global_slots import YAML_B3
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.handling_data.json import JsonFiles
+from stpstone.parsers.json import JsonFiles
 from stpstone.parsers.folders import DirFilesManagement
 from stpstone.handling_data.txt import HandlingTXTFiles
 from stpstone.parsers.str import StrHandler

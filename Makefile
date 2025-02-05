@@ -17,3 +17,32 @@ build_package_test_pypi_org: clean_dist
 	export $$(grep -v '^#' .env | xargs) && \
 		python -m twine upload -u "$$PYPI_USERNAME" -p "$$PYPI_PASSWORD" \
 		--repository-url https://test.pypi.org/legacy/ dist/*
+
+
+### README SUPPORT ###
+
+package_tree:
+	python -c "import os; from stpstone.parsers.folders import FoldersTree; \
+		root_path = os.getcwd(); \
+		cls_tree = FoldersTree(os.path.join(root_path, 'stpstone'), \
+			bl_ignore_dot_folders=True, list_ignored_folders=['__pycache__'], \
+			bl_add_linebreak_markdown=False); \
+		cls_tree.export_tree(os.path.join(root_path, 'data', 'package_tree.txt'))"
+
+update_tree:
+	@echo "Updating README.md with the latest package tree..."
+	@awk 'BEGIN {FS="\n"; OFS="\n"; section_found=0} \
+		/^## Project Structure/ { \
+			section_found=1; \
+			print; \
+			print "```"; \
+			system("cat data/package_tree.txt"); \
+			print "```"; \
+			while ((getline line > 0) && (line !~ /^```/)) {} \
+		} \
+		!section_found {print} \
+		section_found && /^```/ {section_found=0}' README.md > README.md.tmp
+	@mv README.md.tmp README.md
+	@echo "README.md updated successfully."
+
+update_readme: package_tree update_tree

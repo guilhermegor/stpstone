@@ -7,7 +7,7 @@ readme = "README.md"
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.12.8"
+python = ">=3.12.8,<3.14"
 pyyaml = "6.0.2"
 pyodbc = "5.2.0"
 workalendar = "17.0.0"

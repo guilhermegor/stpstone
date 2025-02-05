@@ -5,7 +5,7 @@ import numpy as np
 from requests import request
 from typing import List, Dict, Union
 # local libs
-from stpstone.handling_data.json import JsonFiles
+from stpstone.parsers.json import JsonFiles
 
 
 class MarginSimulatorB3:

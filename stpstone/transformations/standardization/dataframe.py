@@ -10,9 +10,10 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
 from stpstone.parsers.lists import HandlingLists
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class DFStandardization:
+class DFStandardization(metaclass=TypeChecker):
 
     def check_if_empty(self, df_:pd.DataFrame) -> pd.DataFrame:
         """
@@ -93,13 +94,23 @@ class DFStandardization:
         """
         print(f'DICT DTYPES: {dict_dtypes}')
         print(f'LIST COLS DT: {list_cols_dt}')
+        # general columns types
+        list_cols_dt.extend([key for key, value in dict_dtypes.items() if value == 'date'])
+        dict_dtypes = {k: ('str' if v == 'date' else v) for k, v in dict_dtypes.items()}
+        print(f'DICT DTYPES: {dict_dtypes}')
+        print(f'LIST COLS DT: {list_cols_dt}')
         df_ = df_.astype(dict_dtypes, errors=errors)
+        # dates types
         for col_ in list_cols_dt:
             df_[col_] = [DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]]
-        list_cols_dtypes = HandlingLists().extend_lists(list(dict_dtypes.keys()), list_cols_dt)
-        if any([col_ not in list(dict_dtypes.keys()) for col_ in list_cols_dtypes]):
-            for col_ in list(dict_dtypes.keys()):
-                dict_dtypes[col_] = str
+        # missing columns - leftovers from previous steps
+        list_cols_missing = [
+            c for c in list(df_.columns) 
+            if c not in HandlingLists().extend_lists(list(dict_dtypes.keys()), list_cols_dt)
+        ]
+        print(f'LIST COLS MISSING: {list_cols_missing}')
+        if len(list_cols_missing) > 0:
+            df_[list_cols_missing] = df_[list_cols_missing].astype(str)
         print(f'DF AFTER 3: \n{df_}')
         return df_
     
@@ -112,10 +123,17 @@ class DFStandardization:
         Returns:
             pd.DataFrame
         """
+        print('DF INFO 2: \n{}'.format(df_.info()))
+        print(f'COLS OBJ: {list(df_.select_dtypes(['object']).columns)}')
         list_cols = [col_ for col_ in list(df_.select_dtypes(['object']).columns) if col_ 
             not in list_cols_dt]
+        print('COLS STRIP: ', list_cols)
         for col_ in list_cols:
-            df_[col_] = [x.strip() for x in df_[col_]]
+            print(f'COL_STRIP: {col_}')
+            try:
+                df_[col_] = [x.strip() for x in df_[col_]]
+            except AttributeError:
+                pass
         print(f'DF AFTER 4: \n{df_}')
         return df_
     
@@ -163,22 +181,23 @@ class DFStandardization:
             pd.DataFrame
         """
         print(f'DF BEFORE: \n{df_}')
-        # steps = [
-        #     lambda df_: self.column_names(df_, cols_from_case, cols_to_case),
-        #     lambda df_: self.change_dtypes(df_, dict_dtypes, list_cols_dt, str_fmt_dt),
-        #     lambda df_: self.strip_all_obj_dtypes(df_, list_cols_dt),
-        #     lambda df_: self.completeness(df_, list_cols_dt),
-        #     self.cols_remove_dupl,
-        #     lambda df_: self.data_remove_dupl(df_, list_cols_remove_dupl)
-        # ]
-        df_ = self.check_if_empty(df_)
-        df_ = self.column_names(df_, cols_from_case, cols_to_case)
-        df_ = self.completeness(df_, list_cols_dt)
-        df_ = self.change_dtypes(df_, dict_dtypes, list_cols_dt, str_fmt_dt)
-        df_ = self.strip_all_obj_dtypes(df_, list_cols_dt)
-        df_ = self.cols_remove_dupl(df_)
-        df_ = self.data_remove_dupl(df_, list_cols_remove_dupl)
-        # df_ = generic_pipeline(df_, steps)
+        steps = [
+            self.check_if_empty,
+            self.column_names(df_, cols_from_case, cols_to_case),
+            self.completeness(df_, list_cols_dt),
+            self.change_dtypes(df_, dict_dtypes, list_cols_dt, str_fmt_dt),
+            self.strip_all_obj_dtypes(df_, list_cols_dt),
+            self.cols_remove_dupl,
+            self.data_remove_dupl(df_, list_cols_remove_dupl)
+        ]
+        # df_ = self.check_if_empty(df_)
+        # df_ = self.column_names(df_, cols_from_case, cols_to_case)
+        # df_ = self.completeness(df_, list_cols_dt)
+        # df_ = self.change_dtypes(df_, dict_dtypes, list_cols_dt, str_fmt_dt)
+        # df_ = self.strip_all_obj_dtypes(df_, list_cols_dt)
+        # df_ = self.cols_remove_dupl(df_)
+        # df_ = self.data_remove_dupl(df_, list_cols_remove_dupl)
+        df_ = generic_pipeline(df_, steps)
         print(f'DF FINAL: \n{df_}')
         raise Exception('BREAK')
         return df_
@@ -239,7 +258,7 @@ class DFStandardizationML(DFStandardization):
         steps = [
             self._pipeline(df_, cols_from_case, cols_to_case, dict_dtypes, list_cols_dt, 
                          list_cols_remove_dupl, str_fmt_dt),
-            lambda df_: self.handle_outliers(df_, method_handle_outliers),
-            lambda df_: self.scale_numeric_data(df_, method_scale_numeric_data)
+            self.handle_outliers(df_, method_handle_outliers),
+            self.scale_numeric_data(df_, method_scale_numeric_data)
         ]
         return generic_pipeline(df_, steps)

@@ -7,6 +7,7 @@ from datetime import datetime
 from requests import exceptions
 from typing import Tuple, List, Dict, Any, Optional
 from sqlalchemy.orm import Session
+from logging import Logger
 # project modules
 from stpstone.parsers.folders import DirFilesManagement
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -14,6 +15,7 @@ from stpstone.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.connections.netops.session import ReqSession
 from stpstone.transformations.standardization.dataframe import DFStandardization
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class ABCRequests(ABC):
@@ -29,7 +31,8 @@ class ABCRequests(ABC):
         dict_headers:Optional[Dict[str, str]]=None,
         dict_payload:Optional[Dict[str, str]]=None, 
         session:Optional[ReqSession]=None,
-        cls_db:Optional[Session]=None
+        cls_db:Optional[Session]=None,
+        logger:Optional[Logger]=None
     ) -> None:
         self.dict_metadata = dict_metadata
         self.bl_create_session = bl_create_session
@@ -41,6 +44,7 @@ class ABCRequests(ABC):
         self.dict_payload = dict_payload
         self.session = session if session is not None else self.session_config
         self.cls_db = cls_db
+        self.logger = logger
 
     @property
     def session_config(self):
@@ -57,6 +61,8 @@ class ABCRequests(ABC):
         tup_timeout:Tuple[float, float]=(12.0, 12.0)
     ) -> pd.DataFrame:
         url = self.str_host + app
+        if self.logger is not None:
+            CreateLog().infos(self.logger, 'Requesting data from: {}'.format(url))
         print(f'URL: {url}')
         print('DICT DTYPES: {}'.format(dict_dtypes))
         # requesting for data
@@ -73,7 +79,7 @@ class ABCRequests(ABC):
                 decimal=',', thousands='.')
             df_ = pd.DataFrame(reader)
             df_['FILE_NAME'] = file.name
-            df_['REF_YEAR_MONTH'] = str(DatesBR().year_number(self.dt_ref)) \
+            df_['REF_DATE'] = str(DatesBR().year_number(self.dt_ref)) \
                 + str(DatesBR().month_number(self.dt_ref, bl_month_mm=True))
         else:
             req_resp = self.session.get(url, verify=self.bl_verify, timeout=tup_timeout, 
@@ -130,7 +136,9 @@ class ABCRequests(ABC):
                     self.generic_req(
                         self.dict_metadata[str_resource]['app_fstr'].format(i), 
                         self.dict_metadata[str_resource]['dtypes'],
-                        self.dict_metadata[str_resource]['list_cols_dt'],
+                        self.dict_metadata[str_resource].get('list_cols_dt', []) \
+                            if self.dict_metadata[str_resource].get('list_cols_dt', []) \
+                            is not None else [],   
                         bl_io_interpreting=self.dict_metadata[str_resource]['bl_io_interpreting']
                     ).to_dict(orient='records')
                 )

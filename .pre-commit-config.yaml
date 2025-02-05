@@ -34,3 +34,10 @@ repos:
     rev: v1.17.0
     hooks:
       - id: commitizen
+  - repo: local
+    hooks:
+      - id: update-readme
+        name: Update README.md with package tree
+        entry: mingw32-make update_readme
+        language: system
+        stages: [commit]

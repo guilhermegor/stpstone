@@ -241,7 +241,7 @@ class HandlingDicts:
         # returning list of dictionaries
         return list_ser
 
-    def replace_variables(dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) -> Dict[str, Any]:
+    def fill_placeholders(dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) -> Dict[str, Any]:
         """
         DOCSTRING: REPLACE PLACEHOLDERS IN THE BASE DICTIONARY WITH VALUES FROM THE REPLACEMENT 
             DICTIONARY

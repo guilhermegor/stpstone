@@ -14,10 +14,10 @@ from typing import List, Union, Tuple, Optional
 # local libs
 from stpstone.utils.cals.br_bzdays import BrazilBankCalendar
 from stpstone.parsers.str import StrHandler
-from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class DatesBR(BrazilBankCalendar, metaclass=TypeCheck):
+class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
 
     def build_date(self, year:int, month:int, day:int) -> date:
         return date(year=year, month=month, day=day)

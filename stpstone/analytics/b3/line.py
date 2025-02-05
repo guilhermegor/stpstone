@@ -7,12 +7,12 @@ from requests import request
 from pprint import pprint
 from typing import List, Dict, Any, Union, Optional
 # local libs
-from stpstone.handling_data.json import JsonFiles
+from stpstone.parsers.json import JsonFiles
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ConnectionApi(metaclass=TypeCheck):
+class ConnectionApi(metaclass=TypeChecker):
     """
     Metadata: 
         - http://www.b3.com.br/data/files/2E/95/28/F1/EBD17610515A8076AC094EA8/GUIDE-TO-LINE-5.0-API.pdf,

@@ -4,6 +4,7 @@
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
+from logging import Logger
 # project modules
 from stpstone._config._global_slots import YAML_RFB
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -15,12 +16,12 @@ class CompaniesRFB(ABCRequests):
 
     def __init__(
         self,
-        bl_create_session:bool=False,
         bl_new_proxy:bool=False,
         bl_verify:bool=False,
         dt_ref:datetime=DatesBR().curr_date,
         session:Optional[ReqSession]=None, 
-        cls_db:Optional[Session]=None
+        cls_db:Optional[Session]=None,
+        logger:Optional[Logger]=None
     ) -> None:
         """
         Ein (Employer Identification Numb - acronym for CNPJ, in Portugues-BR) registry from 
@@ -35,7 +36,6 @@ class CompaniesRFB(ABCRequests):
         """
         super().__init__(
             dict_metadata=YAML_RFB,
-            bl_create_session=bl_create_session,
             bl_new_proxy=bl_new_proxy,
             bl_verify=bl_verify,
             str_host = 'https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/{}-{}/'.format(
@@ -60,6 +60,7 @@ class CompaniesRFB(ABCRequests):
             },
             dict_payload=None,
             session=session,
-            cls_db=cls_db
+            cls_db=cls_db,
+            logger=logger
         )
 

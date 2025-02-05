@@ -10,7 +10,7 @@ from stpstone._config._global_slots import YAML_BR_MACRO
 from stpstone.handling_data.object import HandlingObjects
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.numbers import NumHandler
-from stpstone.handling_data.json import JsonFiles
+from stpstone.parsers.json import JsonFiles
 from stpstone.handling_data.html import HtmlHndler
 from stpstone.parsers.str import StrHandler
 from stpstone.utils.loggs.db_logs import DBLogs

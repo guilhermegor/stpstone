@@ -3,7 +3,7 @@
 generic:
   dtypes:
     FILE_NAME: str
-    REF_YEAR_MONTH: str
+    REF_DATE: date
 
 
 ### APPENDIX ###
@@ -100,10 +100,6 @@ businesses:
   bl_io_interpreting: True
   schema: RAW
   table_name: BUSINESSES
-  list_cols_dt:
-    - DT_REGISTRATION_STATUS
-    - DT_INCEPTION
-    - DT_SPECIAL_SIT
   dtypes:
     EIN_BASIC: str
     EIN_ORDER: str
@@ -111,11 +107,11 @@ businesses:
     ID_HEADQUARTERS_BRANCH: int
     COMPANY_NAME: str
     ID_REGISTRATION_STATUS: str
-    DT_REGISTRATION_STATUS: str
+    DT_REGISTRATION_STATUS: date
     ID_REASON_REGISTRATION_STATUS: int
     CITY_FOREIGN_COUNTRY: str
     COUNTRY: str
-    DT_INCEPTION: str
+    DT_INCEPTION: date
     CNAE_MAIN: str
     CNAE_SECOND: str
     TYPE_PUBLIC_PLACE: str
@@ -134,41 +130,34 @@ businesses:
     FAX: int
     ELECTRONIC_MAILING: str
     SPECIAL_SIT: str
-    DT_SPECIAL_SIT: str
+    DT_SPECIAL_SIT: date
 
 simplified_taxation_system:
   app: Simples.zip
   bl_io_interpreting: True
   schema: RAW
   table_name: SIMP_TAX_SYS
-  list_cols_dt:
-    - DT_BEG_SIMPL_TX
-    - DT_END_SIMPL_TX
-    - DT_BEG_MEI_TX
-    - DT_END_MEI_TX
   dtypes:
     EIN: str
     BL_SIMPL_TX: str
-    DT_BEG_SIMPL_TX: str
-    DT_END_SIMPL_TX: str
+    DT_BEG_SIMPL_TX: date
+    DT_END_SIMPL_TX: date
     BL_MEI_TX: str
-    DT_BEG_MEI_TX: str
-    DT_END_MEI_TX: str
+    DT_BEG_MEI_TX: date
+    DT_END_MEI_TX: date
 
 shareholders:
   app_fstr: Socios{}.zip
   bl_io_interpreting: True
   schema: RAW
   table_name: SIMP_TAX_SYS
-  list_cols_dt:
-    - DT_BEG_SHAREHOLDER
   dtypes:
     EIN_COMPANY: str
     ID_TYPE_PERSON: int
     NAME: str
     DOC_SHAREHOLDER: str
     SHAREHOLDER_EDUCATION: str
-    DT_BEG_SHAREHOLDER: str
+    DT_BEG_SHAREHOLDER: date
     COUNTRY: str
     LEGAL_REPRESENTATIVE: str
     REPRESENTATIVE_NAME: str
@@ -180,7 +169,6 @@ countries:
   bl_io_interpreting: True
   schema: RAW
   table_name: COUNTRIES
-  list_cols_dt:
   dtypes:
     CODE: str
     NAME: str
@@ -190,7 +178,6 @@ cities:
   bl_io_interpreting: True
   schema: RAW
   table_name: CITIES
-  list_cols_dt:
   dtypes:
     CODE: str
     NAME: str
@@ -200,7 +187,6 @@ shareholders_education:
   bl_io_interpreting: True
   schema: RAW
   table_name: LEGAL_FORM
-  list_cols_dt:
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -210,7 +196,6 @@ legal_form:
   bl_io_interpreting: True
   schema: RAW
   table_name: LEGAL_FORM
-  list_cols_dt:
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -221,7 +206,6 @@ ncea:
   bl_io_interpreting: True
   schema: RAW
   table_name: RFB_CNAES
-  list_cols_dt:
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -231,7 +215,6 @@ registration_status:
   bl_io_interpreting: True
   schema: RAW
   table_name: REGISTRATION_STATUS
-  list_cols_dt:
   dtypes:
     CODE: str
     REASON_REG_STATUS: str

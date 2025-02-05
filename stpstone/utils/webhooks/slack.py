@@ -1,7 +1,7 @@
 ### WEBHOOK SLACK ###
 
 from requests import request
-from stpstone.handling_data.json import JsonFiles
+from stpstone.parsers.json import JsonFiles
 
 
 class WebhookSlack:

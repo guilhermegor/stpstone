@@ -3,7 +3,7 @@
 from pydantic import validate_arguments
 
 
-class TypeCheck(type):
+class TypeChecker(type):
     """
     DOCSTRING: VALIDATE ALL INPUT AND OUTPUT TYPES OF A CLASS
     INPUTS: NAME, BASES, DCT
@@ -19,7 +19,7 @@ class TypeCheck(type):
 
 if __name__ == '__main__':
 
-    class MyClass(metaclass=TypeCheck):
+    class MyClass(metaclass=TypeChecker):
 
         def method_one(self, x: int, y: int) -> int:
             return x + y

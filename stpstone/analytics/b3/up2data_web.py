@@ -15,10 +15,10 @@ from stpstone.handling_data.lists import StrHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.connections.netops.session import ReqSession
 from stpstone.parsers.pd import DealingPd
-from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class UP2DATAB3(metaclass=TypeCheck):
+class UP2DATAB3(metaclass=TypeChecker):
 
     def __init__(self, dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
                  req_session:Union[ReqSession, None]=None, bl_use_timer:bool=False) -> None:
