@@ -37,7 +37,7 @@ repos:
   - repo: local
     hooks:
       - id: update-readme
-        name: Update README.md with package tree
+        name: update readme package tree
         entry: mingw32-make update_readme
         language: system
         types: [file]
