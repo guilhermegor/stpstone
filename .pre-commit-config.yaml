@@ -28,8 +28,8 @@ repos:
   - repo: https://github.com/PyCQA/bandit
     rev: '1.7.4'
     hooks:
-    - id: bandit
-      args: ["-r", "."]
+      - id: bandit
+        args: ["-r", "."]
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v1.17.0
     hooks:
@@ -40,4 +40,4 @@ repos:
         name: Update README.md with package tree
         entry: mingw32-make update_readme
         language: system
-        stages: [commit]
+        types: [file]
