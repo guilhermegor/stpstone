@@ -89,7 +89,7 @@ class HandlingLists:
                 if StrHandler().regex_match_alphanumeric(StrHandler().remove_diacritics(
                     list_[i].replace(
                         str_original_replace_1, str_result_replace).replace(
-                            str_original_replace_2, str_result_replace)).strip()) == None:
+                            str_original_replace_2, str_result_replace)).strip()) is None:
                     return i
             else:
                 return int_error
@@ -277,13 +277,13 @@ class HandlingLists:
         inf_limit = list_position_chunks[0]
         sup_limit = list_position_chunks[1]
         # checking wheter str_character_divides_clients is None, in this case append lists
-        if str_character_divides_clients == None:
+        if str_character_divides_clients is None:
             return [list_to_chunk[x: x + int_chunk] for x in range(0, len(list_to_chunk), int_chunk)]
         # iterating through list to chunk, dividing in sublists with maximum size
         if len(list_position_chunks) > 2:
             for lim in list_position_chunks[2:]:
                 #   narrowing query list
-                if str_character_divides_clients == None:
+                if str_character_divides_clients is None:
                     list_chunked.append(list_to_chunk[inf_limit: sup_limit])
                 else:
                     list_chunked.append(str_character_divides_clients.join(
@@ -292,7 +292,7 @@ class HandlingLists:
                 inf_limit = sup_limit
                 sup_limit = lim
             #   last append of sublist
-            if str_character_divides_clients == None:
+            if str_character_divides_clients is None:
                 list_chunked.append(list_to_chunk[
                     list_position_chunks[-2]: list_position_chunks[-1]])
             else:

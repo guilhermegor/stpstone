@@ -13,7 +13,7 @@ class HandlingObjects:
         INPUTS: DATA OBJECT, STRING LEFT BOUND, STRING RIGHT BOUND
         OUTPUTS:
         """
-        if any([x == None for x in [str_left_bound, str_right_bound]]):
+        if any([x is None for x in [str_left_bound, str_right_bound]]):
             return ast.literal_eval(data_object)
         else:
             return ast.literal_eval(StrHandler().find_between(

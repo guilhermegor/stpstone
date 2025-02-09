@@ -155,7 +155,7 @@ class DataCleaning:
         #   when fitting a strategy for replacing nan values
         array_data_copy = array_data.copy()
         # creating imputer with the desired strategy
-        if n_neighbors == None:
+        if n_neighbors is None:
             imputer = SimpleImputer(strategy=strategy, missing_values=missing_values)
         else:
             imputer = KNNImputer(n_neighbors=n_neighbors, missing_values=np.nan)

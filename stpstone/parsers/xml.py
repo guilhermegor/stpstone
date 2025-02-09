@@ -25,25 +25,25 @@ class XMLFiles:
         """
         return node.attrib.get(attrib_name)
 
-    def xml_parser(self, xml_file):
+    def parser(self, file):
         """
         DOCSTRING: XML PARSER THROUGH BEAUTIFULSOUP
         INPUTS: XML FILE COMPLETE PATH
         OUTPUTS: SOUP
         """
-        infile = open(xml_file, 'r', encoding='UTF-8')
+        infile = open(file, 'r', encoding='UTF-8')
         contents = infile.read()
         return BeautifulSoup(contents, 'xml')
 
-    def xml_memory_parser(self, xml_cache):
+    def memory_parser(self, cache):
         """
         DOCSTRING: FETCH XML
         INPUTS: XML_CACHE
         OUTPUTS: XML IN MEMORY - SOUP
         """
-        return BeautifulSoup(xml_cache, 'xml')
+        return BeautifulSoup(cache, 'xml')
 
-    def xml_find(self, soup_xml, tag):
+    def find(self, soup_xml, tag):
         """
         DOCSTRING: GET SOUP ELEMENT WITHIN A TAG
         INPUTS: SOUP_XML, TAG
@@ -51,7 +51,7 @@ class XMLFiles:
         """
         return soup_xml.find(tag)
 
-    def xml_find_all(self, soup_xml, tag):
+    def find_all(self, soup_xml, tag):
         """
         DOCSTRING: GET A LIST OF ELEMENTS IN SOUP XML THAT RESPECT A GIVEN TAG
         INPUTS: SOUP_XML, TAG
@@ -59,7 +59,7 @@ class XMLFiles:
         """
         return soup_xml.find_all(tag)
 
-    def xml_get_text(self, soup_xml):
+    def get_text(self, soup_xml):
         """
         DOCSTRING: GET TEXT WITHIN AN XML ELEMENT
         INPUTS: SOUP_XML

@@ -126,7 +126,7 @@ loan_balance:
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
-  cols_to_case: upper_snake
+  cols_to_case: constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
@@ -155,7 +155,7 @@ lending_open_position:
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
-  cols_to_case: upper_snake
+  cols_to_case: constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first

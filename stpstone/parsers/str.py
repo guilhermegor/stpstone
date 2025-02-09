@@ -184,7 +184,7 @@ class StrHandler:
         """
         return str_.split(substring)[1]
     
-    def extract_info_between_braces(str_:str, str_pattern:str=r'\{(.*?)\}') -> str:
+    def extract_info_between_braces(self, str_:str, str_pattern:str=r'\{(.*?)\}') -> str:
         return re.findall(str_pattern, str_)
 
     def base64_encode(self, userid, password):
@@ -298,13 +298,15 @@ class StrHandler:
         """
         return normalize('NFC', str1).casefold() == normalize('NFC', str2).casefold()
 
-    def remove_non_alphanumeric_chars(self, str_, str_pattern_maintain=r'[\W_]',
-                                      str_replace=''):
+    def remove_non_alphanumeric_chars(self, str_, str_pattern_maintain=r'[\W_]', str_replace=''):
         """
-        DOCSTRING: REMOVE NON-ALPHANUMERIC CHARACTERS
-        INPUTS: STRING TO BE REPLACED, STRING PATTERN ('[\W_]'  == [^a-zA-Z0-9_], AS DEFAULT), 
-            AND STR REPLACE
-        OUTPUTS: STRING
+        Remove non-alphanumeric characters from a string.
+        Args:
+            str_ (str): The input string.
+            str_pattern_maintain (str): Regex pattern to match non-alphanumeric characters (default: r'[\W_]').
+            str_replace (str): The string to replace matched characters with (default: '').
+        Returns:
+            str: The string with non-alphanumeric characters removed.
         """
         return re.sub(str_pattern_maintain, str_replace, str_)
 
@@ -359,7 +361,7 @@ class StrHandler:
         """
         return re.sub(str_replaced, str_replace, str_, flags=re.IGNORECASE)
 
-    def matchcase(str_):
+    def matchcase(self, str_):
         """
         REFERENCES: PYTHON COOKBOOK - DAVID BEASZLEY, BRIAN K. JONES
         DOCSTRING: MATCHASE SENSE
@@ -434,12 +436,11 @@ class StrHandler:
     def convert_case(self, str_:str, from_case:str, to_case:str) -> str:
         """
         Converts a string between different naming conventions:
-            - camelCase - 'cam'
+            - camelCase - 'camel'
             - PascalCase - 'pascal'
-            - snake_case - 'snake'
             - kebab-case - 'kebab'
-            - UPPER_SNAKE_CASE - 'upper_snake'
-            - upperFirst - 'upper_first'
+            - UPPER_CONSTANT - 'constant'
+            - UpperFirst - 'upper_first'
         Args:
             - cols_from_case (str): Current case of the string
             - cols_to_case (str): Desired case of the string
@@ -451,16 +452,14 @@ class StrHandler:
             words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_).lower().split('_')
         elif from_case == 'pascal':
             words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_).lower().split('_')
-        elif from_case == 'snake':
-            words = str_.lower().split('_')
         elif from_case == 'kebab':
             words = str_.lower().split("-")
-        elif from_case == 'upper_snake':
+        elif from_case == 'constant':
             words = str_.lower().split('_')
         elif from_case == 'upper_first':
             words = [str_[0].upper() + str_[1:].lower()]
         else:
-            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_snake', 'upper_first']")
+            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'constant', 'upper_first']")
         # converting to case
         if to_case == 'camel':
             return words[0] + ''.join(word.capitalize() for word in words[1:])
@@ -470,12 +469,12 @@ class StrHandler:
             return '_'.join(words).lower()
         elif to_case == 'kebab':
             return "-".join(words).lower()
-        elif to_case == 'upper_snake':
+        elif to_case == 'constant':
             return '_'.join(words).upper()
         elif to_case == 'upper_first':
             return words[0].capitalize()
         else:
-            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_snake', 'upper_first']")
+            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'constant', 'upper_first']")
     
     def fill_fstr_from_globals(self, str_:str) -> str:
         """
@@ -491,4 +490,4 @@ class StrHandler:
             k: v for k, v in globals().items()
             if k in list_placeholders
         }
-        str_ = str_.format(**dict_placeholders)
+        return str_.format(**dict_placeholders)

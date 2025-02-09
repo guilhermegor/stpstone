@@ -31,7 +31,7 @@ class Calculus:
         INPUTS: FUNCTION, VARIABLE, LOWER BOUNDARY, UPPER BOUNDARY
         OUTPUTS: POLYNOM
         """
-        if all([x == None for x in [lower_bound, upper_bound]]):
+        if all([x is None for x in [lower_bound, upper_bound]]):
             return sym.integrate(f, variable_)
         else:
             return sym.integrate(f, (variable_, lower_bound, upper_bound))

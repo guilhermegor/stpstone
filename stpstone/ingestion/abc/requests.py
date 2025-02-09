@@ -6,12 +6,12 @@ import pandas as pd
 from abc import ABC, abstractmethod
 from datetime import datetime
 from requests import exceptions, request, Response
-from typing import Tuple, List, Dict, Any, Optional
+from typing import Tuple, List, Dict, Any, Optional, Union
 from sqlalchemy.orm import Session
 from logging import Logger
-from zipfile import BadZipFile
+from io import TextIOWrapper, BufferedReader, BytesIO
+from zipfile import ZipFile, BadZipFile
 # project modules
-from stpstone.parsers.folders import DirFilesManagement
 from stpstone.parsers.dicts import HandlingDicts
 from stpstone.parsers.str import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -19,9 +19,129 @@ from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.connections.netops.session import ReqSession
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.parsers.xml import XMLFiles
+from stpstone.parsers.json import JsonFiles
 
 
-class ABCRequests(ABC):
+class HandleReqResponses(ABC):
+
+    def _handle_response(self, req_resp:Response, dict_dtypes:Dict[str, Any], 
+                        bl_io_interpreting: bool = False) -> pd.DataFrame:
+        if self.req_trt_injection(req_resp) is not None:
+            return self.req_trt_injection(req_resp)
+        elif req_resp.url.endswith('.zip'):
+            return self.handle_zip_response(req_resp, dict_dtypes, bl_io_interpreting)
+        elif req_resp.url.endswith('.csv'):
+            return self.handle_csv_response(req_resp)
+        elif req_resp.url.endswith('.xlsx'):
+            return self.handle_excel_response(req_resp)
+        elif req_resp.url.endswith('.txt'):
+            return self.handle_csv_response(req_resp)
+        elif req_resp.url.endswith('.xml'):
+            return self.handle_xml_response(req_resp)
+        elif req_resp.url.endswith('.json'):
+            return self.handle_xml_response(req_resp)
+        else:
+            json_ = req_resp.json()
+            return pd.DataFrame(json_)
+
+    @abstractmethod
+    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+        return None
+
+    def handle_zip_response(self, req_resp: Response, dict_dtypes: Dict[str, Any], 
+                             dict_xml_keys:Optional[Dict[str, Any]]=None, 
+                             key_attrb_xml:Optional[str]=None) -> Union[pd.DataFrame, List[pd.DataFrame]]:
+        zipfile = ZipFile(BytesIO(req_resp.content))
+        list_ = []
+        for file_name in zipfile.namelist():
+            with zipfile.open(file_name) as file:
+                if file_name.endswith('.zip'):
+                    nested_zip_response = Response()
+                    nested_zip_response._content = file.read()
+                    nested_df = self.handle_zip_response(
+                        nested_zip_response, dict_dtypes, dict_xml_keys, key_attrb_xml)
+                    if isinstance(nested_df, pd.DataFrame):
+                        nested_df['FILE_NAME'] = file_name
+                        list_.extend(nested_df.to_dict(orient='records'))
+                    elif isinstance(nested_df, list):
+                        for df_ in nested_df:
+                            df_['FILE_NAME'] = file_name
+                        list_.extend(nested_df)
+                elif file_name.endswith('.csv'):
+                    df_ = self.handle_csv_response(file)
+                    df_['FILE_NAME'] = file_name
+                    list_.extend(df_.to_dict(orient='records'))
+                elif file_name.endswith('.xlsx'):
+                    df_ = self.handle_excel_response(file)
+                    df_['FILE_NAME'] = file_name
+                    list_.extend(df_.to_dict(orient='records'))
+                elif file_name.endswith('.txt'):
+                    df_ = self.handle_csv_response(file)
+                    df_['FILE_NAME'] = file_name
+                    list_.extend(df_.to_dict(orient='records'))
+                elif file_name.endswith('.xml'):
+                    df_ = self.handle_xml_response(file)
+                    df_['FILE_NAME'] = file_name
+                    list_.extend(df_.to_dict(orient='records'))
+                elif file_name.endswith('.json'):
+                    df_ = self.handle_json_response(file)
+                    df_['FILE_NAME'] = file_name
+                    list_.extend(df_.to_dict(orient='records'))
+                else:
+                    if self.logger is not None:
+                        CreateLog().warnings(self.logger, f'Unsupported file type: {req_resp.url}')
+                    raise ValueError(f'Unsupported file type: {req_resp.url}')
+        if list_:
+            return list_
+        else:
+            return pd.DataFrame()
+
+    def handle_csv_response(self, file:Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        return pd.read_csv(file, delimiter=',')
+
+    def handle_excel_response(self, file:Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        return pd.read_excel(file)
+
+    def handle_xml_response(self, file:Union[BytesIO, TextIOWrapper], 
+                             dict_xml_keys:Dict[str, Any], key_attrb_xml:Optional[str]=None) \
+                                -> pd.DataFrame:
+        list_ser = list()
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        soup_xml = XMLFiles().memory_parser(file)
+        for key, list_tags in dict_xml_keys['tags'].items():
+            for soup_content in soup_xml.find_all(key):
+                dict_ = dict()
+                for tag in list_tags:
+                    try:
+                        tag_ = soup_content.find(tag)
+                        print(tag_)
+                        dict_[tag] = tag_.get_text()
+                        if \
+                            (dict_xml_keys['attributes'][key_attrb_xml] is not None) and \
+                            (dict_xml_keys['attributes'][key_attrb_xml] in tag_.attrs):
+                            dict_[dict_xml_keys['attributes'][key_attrb_xml]] = tag_.attrs[
+                                dict_xml_keys['attributes'][key_attrb_xml]]
+                    except AttributeError:
+                        continue
+                list_ser.append(dict_)
+        return pd.DataFrame(list_ser)
+
+    def handle_json_response(self, file:Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        json_file = file.read()
+        list_ser = JsonFiles().loads_message_like(json_file)
+        df_ = pd.DataFrame(list_ser)
+        return df_
+
+
+class ABCRequests(HandleReqResponses):
 
     def __init__(
         self,
@@ -37,10 +157,6 @@ class ABCRequests(ABC):
         self.cls_db = cls_db
         self.logger = logger
         self.token = self.access_token
-
-    @abstractmethod
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        return None
 
     @property
     def access_token(self):
@@ -120,7 +236,7 @@ class ABCRequests(ABC):
                 CreateLog().warnings(self.logger, f'Invalid request method: {req_method}')
             raise Exception(f'Invalid request method: {req_method}')
         # request content
-        if self.session is None:
+        if self.session is not None:
             func_generic_req = self.generic_req_w_session
         else:
             func_generic_req = self.generic_req_wo_session
@@ -143,45 +259,18 @@ class ABCRequests(ABC):
         # building url and requesting
         url = host + app
         if self.logger is not None:
-            CreateLog().infos(self.logger, 'Requesting data from: {}'.format(url))
+            CreateLog().infos(self.logger, f'Starting request to: {host + app}')
         else:
-            print('{} - Requesting data from: {}'.format(DatesBR().current_timestamp_string, url))
+            print(f'Starting request to: {host + app}')
         req_resp = self.generic_req(
             req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
         )
         # dealing with request content type
-        if self.req_trt_injection(req_resp) is not None:
-            df_ = self.req_trt_injection(req_resp)
-        elif url.endswith('.zip') == True:
-            obj_ = DirFilesManagement().get_zip_from_web_in_memory(
-                req_resp, 
-                bl_io_interpreting=bl_io_interpreting
-            )
-            print('OBJ_ZIP_REQ: {}'.format(obj_))
-            print('TYPE OBJ_ZIP_REQ: {}'.format(type(obj_)))
-            if isinstance(obj_, list) == True:
-                list_ = list()
-                for name_xlsx in obj_:
-                    reader = pd.read_excel(name_xlsx, encoding='utf-8')
-                    df_ = pd.DataFrame(reader)
-                    df_['FILE_NAME'] = name_xlsx
-                    list_.extend(df_.to_dict(orient='records'))
-                df_ = pd.DataFrame(list_)
-                df_.drop_duplicates(inplace=True)
-            else:
-                reader = pd.read_csv(obj_, sep=';', header=None, names=list(dict_dtypes.keys()), 
-                    decimal=',', thousands='.')
-                df_ = pd.DataFrame(reader)
-                df_['FILE_NAME'] = obj_.name
-        elif url.endswith('.csv') == True:
-            reader = pd.read_csv(req_resp.content, sep=',')
-            df_ = pd.DataFrame(reader)
-        else:
-            json_ = req_resp.json()
-            reader = pd.DataFrame(json_)
-            df_ = pd.DataFrame(reader)
+        df_ = self._handle_response(req_resp, dict_dtypes, bl_io_interpreting)
+        if self.logger is not None:
+            CreateLog().infos(self.logger, f'Request completed successfully: {host + app}')
         # standardizing
-        cls_dt_stddz = DFStandardization(
+        cls_df_stdz = DFStandardization(
             HandlingDicts().merge_n_dicts(
                 dict_dtypes, 
                 {
@@ -197,7 +286,7 @@ class ABCRequests(ABC):
             type_error_action, 
             strt_keep_when_duplicated,
         )
-        df_ = cls_dt_stddz._pipeline(df_)
+        df_ = cls_df_stdz._pipeline(df_)
         if self.cls_db is not None:
             df_ = DBLogs().audit_log(
                 df_, 
@@ -210,43 +299,40 @@ class ABCRequests(ABC):
             )
         return df_
 
-    def insert_table(self, str_resource:str, list_ser:Optional[List[Dict[str, Any]]]=None, 
-                      bl_insert_or_ignore:bool=False, bl_schema:bool=True) -> None:
+    def insert_table(self, str_resource: str, list_ser: Optional[List[Dict[str, Any]]] = None, 
+                 bl_insert_or_ignore: bool = False, bl_schema: bool = True) -> None:
         """
         Insert data into data table
         Args:
             - str_resource (str): resource name
-            - bl_insert_or_ignore(bool): False as default
-            - bl_schema(bool): some databases, like SQLite, doesn't have schemas - True as default
-        Returns:
-            pd.DataFrame
+            - list_ser (List[Dict[str, Any]]): data to insert
+            - bl_insert_or_ignore (bool): False as default
+            - bl_schema (bool): some databases, like SQLite, don't have schemas - True as default
+        Raises:
+            Exception: If database or data is not defined
         """
-        if self.cls_db == None: 
-            raise Exception('data insertion failed due to lack of database definition, '
-                + 'please revisit this parameter')
+        if self.cls_db is None:
+            raise Exception('Data insertion failed due to lack of database definition. '
+                        'Please revisit this parameter.')
+        if list_ser is None:
+            raise Exception('Data insertion failed due to lack of data. '
+                        'Please revisit this parameter.')
         if str_resource == 'general':
             return None
         elif str_resource == 'metadata':
             for _, dict_ in self.dict_metadata[str_resource].items():
-                if bl_schema == False:
-                    str_table_name = '{}_{}'.format(
-                        dict_['schema'], 
-                        dict_['table_name']
-                    )
+                str_table_name = dict_['table_name']
+                if bl_schema:
+                    str_table_name = f"{dict_['schema']}_{str_table_name}"
                 self.cls_db._insert(
                     dict_['data'], 
                     str_table_name=str_table_name,
                     bl_insert_or_ignore=True
                 )
         else:
-            if list_ser is None:
-                raise Exception('data insertion failed due to lack of data, '
-                    + 'please revisit this parameter')
-            if bl_schema == False:
-                str_table_name = '{}_{}'.format(
-                    self.dict_metadata[str_resource]['schema'], 
-                    self.dict_metadata[str_resource]['table_name']
-                )
+            str_table_name = self.dict_metadata[str_resource]['table_name']
+            if bl_schema:
+                str_table_name = f"{self.dict_metadata[str_resource]['schema']}_{str_table_name}"
             self.cls_db._insert(
                 list_ser, 
                 str_table_name=str_table_name,

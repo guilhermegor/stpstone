@@ -181,7 +181,7 @@ class MarketRiskManagement:
         """
         # checking parameters
         if any(all([x != None for x in [list_prices, list_returns]]),
-               all([x == None for x in [list_prices, list_returns]])):
+               all([x is None for x in [list_prices, list_returns]])):
             raise Exception('Please revisit original prices and returns arguments; only one '
                             'of them ought be different from none')
         # defining returns

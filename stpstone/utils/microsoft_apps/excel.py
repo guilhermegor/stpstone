@@ -605,7 +605,7 @@ class ExcelWriter(object):
         Add content to cell at row,col location.
         NB only recommended for small amounts of data http://support.microsoft.com/kb/247412.
         """
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
         sheet.Cells(row, col).Value = content
 
@@ -614,7 +614,7 @@ class ExcelWriter(object):
         Add row in a single operation.  Takes a tuple per row.
         Much more efficient than cell by cell. http://support.microsoft.com/kb/247412.
         """
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
         col_n = len(data_tuple)
         last_col = start_col + col_n - 1
@@ -631,7 +631,7 @@ class ExcelWriter(object):
         http://support.microsoft.com/kb/247412.
         Returns next available row.
         """
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
         row_n = len(list_data_tuples)
         last_row = start_row + row_n - 1
@@ -647,7 +647,7 @@ class ExcelWriter(object):
     def getRangeByCells(self, cell_start_row, cell_start_col, cell_end_row, cell_end_col,
                         sheet=None):
         """Get a range defined by cell start and cell end e.g. (1,1) A1 and (7,2) B7"""
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
 
         return sheet.Range(sheet.Cells(cell_start_row, cell_start_col),
@@ -657,7 +657,7 @@ class ExcelWriter(object):
         """
         Fit colums to contents.
         """
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
         col_n = col_start
         while col_n <= col_end:
@@ -668,7 +668,7 @@ class ExcelWriter(object):
         """
         Fit column to contents.
         """
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
         sheet.Range(sheet.Cells(1, col_n), sheet.Cells(
             1, col_n)).EntireColumn.AutoFit()
@@ -677,7 +677,7 @@ class ExcelWriter(object):
         """
         Set column width.
         """
-        if sheet == None:
+        if sheet is None:
             sheet = self.default_sheet
         sheet.Range(sheet.Cells(1, col_n), sheet.Cells(
             1, col_n)).ColumnWidth = width

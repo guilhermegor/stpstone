@@ -122,7 +122,7 @@ class ProbStatsCharts:
         OUTPUTS: -
         """
         # defining number of bins in the chart
-        if bins == None:
+        if bins is None:
             bins = np.sqrt(dataframe.shape[0])
         # defining layout
         sns.set()

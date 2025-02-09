@@ -89,7 +89,7 @@ class Databricks:
                 int_max_wait=int_max_wait)
             #   logger-wise, if it is None print message, otherwise call the logger object to store
             #       data in network
-            if self.logger == None:
+            if self.logger is None:
                 print('#{} Attempting connection with DSNs to Databricks'.format(i))
             else:
                 CreateLog().infos(self.logger,

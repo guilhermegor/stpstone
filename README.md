@@ -214,7 +214,23 @@ These instructions will get you a copy of the project running on your local mach
 
 * Python ^3.12
 
+* Makefile (v3.82.90 or higher, validated with v3.82.90, but newer versions may work);
+
 ### Installing
+
+#### Makefile:
+
+* Windows: 
+    - download MinGW - [Minimalist GNU for Windows](https://sourceforge.net/projects/mingw/)
+    - add C:\MinGW\bin\ (or respective installation directory) to environment variables, from the OS
+    - run cli for installation and checking wheter it was succesful: 
+    ```bash
+    (bash)
+    mingw-get install mingw32-make
+    mingw32-make --version
+    ```
+* MacOS: https://wahyu-ehs.medium.com/makefile-on-mac-os-2ef0e67b0a15
+* Linux: https://stackoverflow.com/questions/3915067/what-are-makefiles-make-install-etc
 
 #### PyPi.org
 

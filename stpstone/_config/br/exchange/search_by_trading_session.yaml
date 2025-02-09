@@ -1,0 +1,163 @@
+### CONFIGURATION TOOLS###
+
+credentials:
+  host: https://www.b3.com.br/pesquisapregao/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+
+metadata:
+
+downstream_processes:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+price_report:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: download?filelist=PR{dt_ref_enshort}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: constant
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: b3_price_report
+  bl_insert_or_ignore: False
+  bl_schema: True
+  xml_keys:
+    tags:
+      PricRpt:
+        - Dt
+        - TckrSymb
+        - Id
+        - Prtry
+        - MktIdrCd
+        - TradQty
+        - OpnIntrst
+        - FinInstrmQty
+        - OscnPctg
+        - NtlFinVol
+        - IntlFinVol
+        - BestBidPric
+        - BestAskPric
+        - FrstPric
+        - MinPric
+        - MaxPric
+        - TradAvrgPric
+        - LastPric
+        - VartnPts
+        - MaxTradLmt
+        - MinTradLmt
+    attributes:
+      currency: Ccy
+  dtypes:
+    DT: date
+    TCKR_SYMB: str
+    ID: str
+    PRTRY: str
+    MKT_IDR_CD: str
+    TRAD_QTY: int
+    OPN_INTRST: float
+    FIN_INSTRM_QTY: int
+    OSCN_PCTG: float
+    NTL_FIN_VOL: int
+    INTL_FIN_VOL: int
+    BEST_BID_PRIC: float
+    BEST_ASK_PRIC: float
+    FRST_PRIC: float
+    MIN_PRIC: float
+    MAX_PRIC: float
+    TRAD_AVRG_PRIC: float
+    LAST_PRIC: float
+    VARTN_PTS: float
+    MAX_TRAD_LMT: float
+    MIN_TRAD_LMT: float
+
+securities_tradable:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: download?filelist=SecurityList{dt_ref_enshort}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: constant
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: b3_securities_tradable
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SYMBOL: str
+    SECURITY_ID: int64
+    SECURITY_ID_SOURCE: int
+    SECURITY_EXCHANGE: str
+    NO_APPL_I_DS: str
+    PRODUCT: int
+    CFI_CODE: str
+    SECURITY_GROUP: str
+    SECURITY_TYPE: str
+    SECURITY_SUB_TYPE: str
+    MATURITY_MONTH_YEAR: str
+    MATURITY_DATE: str
+    ISSUE_DATE: str
+    COUNTRY_OF_ISSUE: str
+    CONTRACT_MULTIPLIER: float
+    SECURITY_DESC: str
+    CONTRACT_SETTL_MONTH: str
+    SETTL_TYPE: str
+    SETTL_DATE: str
+    MIN_PRICE_INCREMENT: float
+    TICK_SIZE_DENOMINATOR: int
+    MIN_ORDER_QTY: float
+    MAX_ORDER_QTY: int64
+    NO_INSTR_ATTRIB: str
+    NO_UNDERLYINGS: str
+    CURRENCY: str
+    SETTL_CURRENCY: str
+    ASSET: str
+    SECURITY_VALIDITY_TIMESTAMP: str
+    MARKET_SEGMENT_ID: int
+    NO_LOT_TYPE_RULES: str
+    IMPLIED_MARKET_INDICATOR: int
+    MIN_CROSS_QTY: int
+    CLEARING_HOUSE_ID: str
+    ISIN_NUMBER: str
+    MULTI_LEG_MODEL: str
+    MULTI_LEG_PRICE_METHOD: str
+    SECURITY_STRATEGY_TYPE: str
+    NO_LEGS: str
+    NO_SHARES_ISSUED: str
+    GOVERNANCE_INDICATOR: str
+    CORPORATE_ACTION_EVENT_ID: int
+    PRICE_DIVISOR: str
+    PUT_OR_CALL: str
+    STRIKE_PRICE: str
+    STRIKE_CURRENCY: str
+    EXERCISE_STYLE: str
+    SECURITY_MATCH_TYPE: str

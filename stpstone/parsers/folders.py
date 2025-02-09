@@ -11,7 +11,7 @@ import wget
 import py7zr
 from datetime import datetime
 from zipfile import ZipFile, ZIP_DEFLATED
-from io import BytesIO, TextIOWrapper
+from io import BytesIO, TextIOWrapper, BufferedReader
 from typing import Tuple, List, Union, Optional, Dict
 from requests import Session, Response
 # local libs
@@ -221,7 +221,8 @@ class DirFilesManagement:
             return self.object_exists(filepath)
 
     def get_zip_from_web_in_memory(self, req_resp:Response, 
-                                   bl_io_interpreting:bool=False) -> List[ZipFile]:
+                                   bl_io_interpreting:bool=False) \
+            -> Union[TextIOWrapper, BufferedReader, List[BufferedReader]]:
         """
         REFERENCES: https://stackoverflow.com/questions/5710867/downloading-and-unzipping-a-zip-file-without-writing-to-disk
         DOCSTRING: DOWNLOAD A ZIP AND UNZIP IT, HANDLING FILE IN MEMORY
@@ -321,7 +322,7 @@ class DirFilesManagement:
         #   name like given
         for file_dir in files_dir:
             if fnmatch.fnmatch(file_dir, name_like):
-                if file_name_return == None:
+                if file_name_return is None:
                     file_name_return = file_dir
                 else:
                     if os.path.getmtime(parent_dir
@@ -329,7 +330,7 @@ class DirFilesManagement:
                                             os.path.join(parent_dir, file_name_return)):
                         file_name_return = file_dir
         # return the complete file path, or NOK whether it has not been found
-        if file_name_return == None:
+        if file_name_return is None:
             return False
         else:
             return os.path.join(parent_dir, file_name_return)

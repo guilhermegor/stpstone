@@ -105,7 +105,7 @@ class DimensionalityReduction:
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # maximum features
-        if max_features == None:
+        if max_features is None:
             max_features=array_x.shape[1]
         # defining the estimator
         if str_estimator == 'linear_regression':

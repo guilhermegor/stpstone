@@ -34,7 +34,7 @@ class PickleFiles:
         INPUTS: PICKLE FILE
         OUTPUTS: DATA IN MEMORY
         """
-        if encoding == None:
+        if encoding is None:
             with open(pickle_file, 'rb') as read_file:
                 return pickle.load(read_file)
         else:

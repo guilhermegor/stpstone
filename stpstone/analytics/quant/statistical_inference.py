@@ -123,7 +123,7 @@ class MultipleRegressionHT:
         # checking wheter the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defining the order p of the test
-        if p == None:
+        if p is None:
             p = array_x.shape[1] + 1
         # fitting multiple regression model
         model_fitted = sm.OLS(array_y, array_x).fit()

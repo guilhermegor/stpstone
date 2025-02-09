@@ -50,6 +50,6 @@ update_readme: package_tree update_tree
 
 ### SUPPORT ACTIONS ###
 
-create_yaml_requests:
+scaffolding_ingestion_request:
 	bash cli/create_req_yaml.sh
 	bash cli/create_req_cls_py.sh

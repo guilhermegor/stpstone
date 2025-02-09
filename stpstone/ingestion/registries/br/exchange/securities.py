@@ -52,6 +52,6 @@ class ExchRegBR(ABCRequests):
         # dataframe from serialized list
         df_ = pd.DataFrame(list_ser)
         # changing columns case, from cammel to snake
-        df_.columns = [StrHandler().convert_case(x, 'pascal', 'upper_snake') for x in df_.columns]
+        df_.columns = [StrHandler().convert_case(x, 'pascal', 'constant') for x in df_.columns]
         # return dataframe
         return df_

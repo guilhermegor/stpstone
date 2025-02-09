@@ -26,7 +26,7 @@ class HandlingTGZFiles:
         # print(tgz_path)
         # requesting data when it is provided a valid url, whereas a complete source path have
         #   to be declared
-        if all([x == None for x in [url_source, complete_source_path]]):
+        if all([x is None for x in [url_source, complete_source_path]]):
             raise Exception('Url source or complete path of source ought be passed in order to '
                             + 'data from the file.')
         elif url_source != None:

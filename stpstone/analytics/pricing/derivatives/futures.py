@@ -250,7 +250,7 @@ class TSIR:
         y, status = calibrate_ns_ols(
             np.array(list(dict_nper_rates.keys())),
             np.array(list(dict_nper_rates.values())), tau_first_assumption)
-        if number_samples == None:
+        if number_samples is None:
             t = np.linspace(list(dict_nper_rates.keys())[
                             0], list(dict_nper_rates.keys())[-1], int(list(dict_nper_rates.keys())[
                                 -1] - list(dict_nper_rates.keys())[0] + 1))

@@ -28,7 +28,7 @@ class JsonFiles:
         INPUTS: JSON FILE
         OUTPUTS: DATA IN MEMORY
         """
-        if encoding == None:
+        if encoding is None:
             with open(json_file, "r", errors=errors) as read_file:
                 return json.load(read_file)
         else:

@@ -315,7 +315,7 @@ class BCB:
         # requesting current foreign available for all the currencies disposed before
         for currency in list_currencies:
             #   validating wheter the user aim for a bucket of currencies in a given day or period
-            if int_working_days_before_begin == None:
+            if int_working_days_before_begin is None:
                 #   payload for currencies available consulting
                 dict_payload = {
                     'format': 'json',
