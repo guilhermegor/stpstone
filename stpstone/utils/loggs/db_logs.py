@@ -3,6 +3,7 @@
 # pypi.org libs
 import socket
 import pandas as pd
+from datetime import datetime
 # local libs
 from stpstone._config._global_slots import YAML_GEN
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -10,7 +11,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 
 class DBLogs:
     
-    def audit_log(self, df_:pd.DataFrame, str_url:str, dt_last_update:str) -> pd.DataFrame:
+    def audit_log(self, df_:pd.DataFrame, str_url:str, dt_db_ref:datetime) -> pd.DataFrame:
         """
         Adds audit columns to the DataFrame for logging.
         Args:
@@ -21,7 +22,7 @@ class DBLogs:
             - pd.DataFrame: DataFrame with audit log information.
         """
         df_[YAML_GEN['audit_log_cols']['url']] = str_url
-        df_[YAML_GEN['audit_log_cols']['last_update']] = dt_last_update
+        df_[YAML_GEN['audit_log_cols']['db_ref_date']] = dt_db_ref
         df_[YAML_GEN['audit_log_cols']['log_timestamp']] = DatesBR().utc_log_ts
         return df_
 

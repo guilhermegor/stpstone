@@ -568,12 +568,12 @@ class TheorPortfB3:
         OUTPUTS:
         """
         # requesting data
-        resp_req = request(method, YAML_B3['theor_port_b3']['url_{}'.format(str_indice)], 
+        req_resp = request(method, YAML_B3['theor_port_b3']['url_{}'.format(str_indice)], 
                            verify=YAML_B3['theor_port_b3']['bl_verify'])
         # raising exception in case of status code different from 2xx
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # requesting json
-        json_ibov = resp_req.json()
+        json_ibov = req_resp.json()
         # building serialized list
         list_ser = [
             {
@@ -655,11 +655,11 @@ class MDB3:
         OUTPUTS:
         """
         # requesting financial indicators b3
-        resp_req = request(method, YAML_B3['financial_indicators']['url'])
+        req_resp = request(method, YAML_B3['financial_indicators']['url'])
         # raise exception if status code is different from 2xx
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # appeding json to dataframe
-        df_fin_ind = pd.DataFrame(resp_req.json())
+        df_fin_ind = pd.DataFrame(req_resp.json())
         # changing column types
         df_fin_ind = df_fin_ind.astype({
             YAML_B3['financial_indicators']['col_si_code']: np.int64,
@@ -714,11 +714,11 @@ class MDB3:
             #   looping through hashes
             for str_hash in dict_['hashes']:
                 #   request security volatility page
-                resp_req = request(method, dict_['url'].format(str_hash))
+                req_resp = request(method, dict_['url'].format(str_hash))
                 #   raise exception for status different from 2xx
-                resp_req.raise_for_status()
+                req_resp.raise_for_status()
                 #   get json in memory
-                json_ = resp_req.json()
+                json_ = req_resp.json()
                 #   reseting json with results
                 list_ = json_['results']
                 #   creating serialized list
@@ -764,45 +764,6 @@ class MDB3:
 
 
 class MDYFinance:
-
-    def historical_data_securities_yq(self, dt_inf:datetime, dt_sup:datetime, 
-                                      list_securities:Optional[list]=None, 
-                                      list_indexes:Optional[list]=None,
-                                      bl_verify:bool=False, 
-                                      column_ticker:str='ticker', 
-                                      colum_dt_date:str='dt_date') -> pd.DataFrame:
-        """
-        DOCSTRING:
-        INPTUS:
-        OUTPUTS:
-        """
-        # dealing with securities list_tickers
-        if (list_securities == None) or (list_securities == []):
-            list_securities = []
-        else:
-            # list_securities = ['{}.SA'.format(str(x).upper()) for x in list_securities]
-            list_securities = [str(x).upper() for x in list_securities]
-        # dealing with indexes list_tickers
-        if (list_indexes == None) or (list_indexes == []):
-            list_indexes = []
-        else:
-            list_indexes = ['^{}'.format(str(x).upper()) for x in list_indexes]
-        # extending stock's list
-        list_tickers = HandlingLists().extend_lists(list_indexes, list_securities)
-        # removing duplicates
-        list_tickers = HandlingLists().remove_duplicates(list_tickers)
-        # getting historical data
-        list_yq_data = Ticker(list_tickers, verify=bl_verify)
-        df_yq_data = list_yq_data.history(start=dt_inf, end=dt_sup)
-        # index to column - ticker
-        df_yq_data[column_ticker] = [str(x[0]).replace('^', '').replace('.SA', '') 
-                                     for x in df_yq_data.index]
-        # index to column - date in datetime format
-        df_yq_data[colum_dt_date] = [x[1] for x in df_yq_data.index]
-        # filling nan values with upper data
-        df_yq_data[column_ticker].fillna(method='ffill', inplace=True)
-        # retrieving historical data
-        return df_yq_data
 
     def daily_returns(self, df_yq_data:pd.DataFrame, column_symbol:str='symbol', 
                       col_ticker:str='ticker', col_close:str='adjclose', 
@@ -1040,7 +1001,7 @@ class MDComDinheiro:
             f'username={self.user}&password={self.passw}&URL=HistoricoCotacaoBMF'
             + f'-{str_ticker}-{dt_inf}-{dt_sup}-{str_maturity_code}-1&format={str_fmt_extract}'
         )
-        # sending rest resp_req
+        # sending rest req_resp
         json_ = ComDinheiro().requests_api_cd(str_payload).text.encode('utf8')
         json_ = HandlingObjects().literal_eval_data(json_, "b'", "'").replace(r'\n', '')
         return json_
@@ -1074,9 +1035,9 @@ class MDComDinheiro:
             + 'tabela%26oculta_cabecalho_sup%3D0%26relat_alias_automatico%3' \
             + 'DcMDalias_01&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     def infos_sectors(self, dt_:datetime) -> List[Dict[str, Any]]:
@@ -1105,9 +1066,9 @@ class MDComDinheiro:
             + 'primeira_coluna_ticker%3D0%26periodos%3D0%26periodicidade%3Danual%26' \
             + 'formato_data%3D1&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     @property
@@ -1130,9 +1091,9 @@ class MDComDinheiro:
             + 'relat_alias_automatico%3DcMDalias_01%26primeira_coluna_ticker%3D0%26' \
             + 'periodos%3D0%26periodicidade%3Danual%26formato_data%3D1&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     def trading_infos(self, dt_inf:datetime, dt_sup:datetime) -> List[Dict[str, Any]]:
@@ -1201,9 +1162,9 @@ class MDComDinheiro:
             + '0%26periodos%3D0%26periodicidade%3Danual%26formato_data%3D1%26' \
             + 'formato_data%3D1&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     def infos_risco(self, dt_inf:datetime, dt_sup:datetime) -> List[Dict[str, Any]]:
@@ -1256,9 +1217,9 @@ class MDComDinheiro:
             + 'periodos%3D0%26periodicidade%3Danual%26formato_data%3D1%26' \
             + 'formato_data%3D1&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     def trading_volume_securities(self, list_securities:str, str_benchmark:str, dt_inf:datetime, 
@@ -1322,10 +1283,10 @@ class MDComDinheiro:
             + 'oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01&format=json2'
         # print('PAYLOAD: {}'.format(str_payload))
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
-        # print(resp_req.text)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
+        # print(req_resp.text)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     def mdtv_list_securities(
@@ -1361,9 +1322,9 @@ class MDComDinheiro:
             + '%26oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01%26s' \
             + 'cript%3D&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(str(resp_req.text.encode('utf8')) + "'"), "b'", "''").replace(
+            str(str(req_resp.text.encode('utf8')) + "'"), "b'", "''").replace(
                 r'\n', '').replace(r' ', ''))
         # return dataframe
         return pd.DataFrame(json_['resposta']['tab-p0']['linha'])
@@ -1421,9 +1382,9 @@ class MDComDinheiro:
             + '%26enviar_email_log%3D0%26transpor%3D0%26op01%3Dtabela' \
             '%26oculta_cabecalho_sup%3D0%26relat_alias_automatico%3DcMDalias_01&format=json2'
         # fetching data
-        resp_req = ComDinheiro().requests_api_cd(str_payload)
+        req_resp = ComDinheiro().requests_api_cd(str_payload)
         json_ = ast.literal_eval(StrHandler().find_between(
-            str(resp_req.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
+            str(req_resp.text.encode('utf8')), "b'", "'").replace(r'\n', ''))
         return JsonFiles().send_json(json_)
 
     def stocks_beta(self, list_tickers:List[str], dt_inf:datetime, dt_sup:datetime) -> List[Dict[str, Any]]:

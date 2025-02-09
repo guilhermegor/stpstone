@@ -1,47 +1,33 @@
-### EINS (EMPLOYER IDENTIFICATION NUMBER - CNPJ) - BRAZILLIAN FEDERAL REVENUE OFFICE (RFB) ###
+### BRAZILLIAN INTERNAL REVENUE SERVICE - TAXATION AUTHORITY - RFB ###
 
 # pypi.org libs
+import pandas as pd
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 from logging import Logger
+from requests import Response
 # project modules
-from stpstone._config._global_slots import YAML_RFB
+from stpstone._config._global_slots import YAML_IRSBR
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class CompaniesRFB(ABCRequests):
+class IRSBR(ABCRequests):
 
     def __init__(
-        self,
-        bl_new_proxy:bool=False,
-        bl_verify:bool=False,
-        dt_ref:datetime=DatesBR().curr_date,
+        self, 
+        bl_create_session:bool=False,
+        bl_new_proxy:bool=False, 
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         session:Optional[ReqSession]=None, 
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
-        """
-        Ein (Employer Identification Numb - acronym for CNPJ, in Portugues-BR) registry from 
-            Brazillian Federal Reserver Office (RFB)
-        Args:
-            - dt_ref(datetime): reference date, current day as standard
-        Return:
-            None
-        Metadata:
-            https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf
-            https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/
-        """
         super().__init__(
-            dict_metadata=YAML_RFB,
-            bl_new_proxy=bl_new_proxy,
-            bl_verify=bl_verify,
-            str_host = 'https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/{}-{}/'.format(
-                DatesBR().year_number(dt_ref),
-                DatesBR().month_number(dt_ref, bl_month_mm=True)
-            ),
+            dict_metadata=YAML_IRSBR,
+            session=session,
             dt_ref=dt_ref,
             dict_headers={
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -59,8 +45,11 @@ class CompaniesRFB(ABCRequests):
                 'sec-ch-ua-platform': '"Windows"'
             },
             dict_payload=None,
-            session=session,
             cls_db=cls_db,
-            logger=logger
+            logger=logger, 
+            year_dt_ref = DatesBR().year_number(self.dt_ref),
+            month_dt_ref = DatesBR().month_number(self.dt_ref, bl_month_mm=True)
         )
 
+    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+        return None

@@ -82,11 +82,11 @@ class Sidra:
         # converting aggregate and variable to string
         aggregate, variable = str(aggregate), str(variable)
         # requesting data
-        resp_req = request(method, url.format(aggregate, variable), data=dict_payload)
+        req_resp = request(method, url.format(aggregate, variable), data=dict_payload)
         # raises exception when not a 2xx response
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # retrieve json
-        return resp_req.json()
+        return req_resp.json()
 
     def sidra_modification_dates(self, aggregate, method='GET',
                                  url='https://servicodados.ibge.gov.br/api/v3/agregados/{}/periodos'):
@@ -99,11 +99,11 @@ class Sidra:
         # converting aggregate and variable to string
         aggregate = str(aggregate)
         # requesting data
-        resp_req = request(method, url.format(aggregate))
+        req_resp = request(method, url.format(aggregate))
         # raises exception when not a 2xx response
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # retrieve json
-        return resp_req.json()
+        return req_resp.json()
 
     @property
     def ipca_modification_dates(self, aggregate='1737'):
@@ -246,12 +246,12 @@ class BCB:
             }
         except:
             # consult the html from b3 reference interest taxes
-            resp_req = request(
+            req_resp = request(
                 method_req, endpoint_taxas_referenciais_b3, verify=bl_verify)
             # raise exception in case return is different from 2xx
-            resp_req.raise_for_status()
+            req_resp.raise_for_status()
             # returning content
-            json_ref_taxes_b3 = resp_req.content
+            json_ref_taxes_b3 = req_resp.content
             # turning type from byte to dictionary
             json_ref_taxes_b3 = HandlingObjects().literal_eval_data(
                 json_ref_taxes_b3, "b'", "'")
@@ -302,12 +302,12 @@ class BCB:
         }
         dict_payload = JsonFiles().dict_to_json(dict_payload)
         # retriving data
-        resp_req = request(method, url.format(api_currencies), headers=dict_header,
+        req_resp = request(method, url.format(api_currencies), headers=dict_header,
                            data=dict_payload)
         # raises exception when not a 2xx response
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # retrieving json
-        json_currencies = resp_req.json()
+        json_currencies = req_resp.json()
         # collecting all currencies available (against BRL)
         list_ser_currencies = json_currencies[key_value]
         list_currencies = [str(dict_[key_simbolo])
@@ -330,7 +330,7 @@ class BCB:
                     dict_params.items()) + '&%24' + '%24'.join(
                         '{}={}'.format(k, v) for k, v in dict_payload.items())
                 #   requesting currency exchange against brl
-                resp_req = request(method, url.format(api_currecy_exchange_day.format(
+                req_resp = request(method, url.format(api_currecy_exchange_day.format(
                     str_payload)),
                     headers=dict_header)
             else:
@@ -349,12 +349,12 @@ class BCB:
                     dict_params.items()) + '&%24' + '%24'.join(
                         '{}={}'.format(k, v) for k, v in dict_payload.items())
                 #   requesting currency exchange against brl
-                resp_req = request(method, url.format(api_curency_exchange_period.format(
+                req_resp = request(method, url.format(api_curency_exchange_period.format(
                     str_payload)), headers=dict_header)
             #   raises exception when not a 2xx response
-            resp_req.raise_for_status()
+            req_resp.raise_for_status()
             #   retrieving json
-            json_currency_exchange = resp_req.json()
+            json_currency_exchange = req_resp.json()
             #   appending to export dictionary
             dict_export[str_currency.format(
                 currency)] = json_currency_exchange[key_value]
@@ -378,9 +378,9 @@ class BCB:
             'access_token': 's56HuH4yFasr',
             'Cookie': 'BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000X4IrBKiAUyQvbYXXFfX0gne:1dof89mke; TS013694c2=012e4f88b3c6fee6e3a792e5d4f68cb31972d27ba778ec1e05a622b5b87ecf0bda522fe8652f85210b7cbe2b227fe76a647ca3acc6'
         }
-        resp_req = requests('GET', url, headers=dict_headers)
-        resp_req.raise_for_status()
-        json_bcb_expec = resp_req.json()
+        req_resp = requests('GET', url, headers=dict_headers)
+        req_resp.raise_for_status()
+        json_bcb_expec = req_resp.json()
         # load to pandas dataframe
         df_expec_bcb = pd.DataFrame(json_bcb_expec['value'])
         # changing columns types

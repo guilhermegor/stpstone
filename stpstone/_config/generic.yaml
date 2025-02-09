@@ -8,7 +8,7 @@ requests:
 # audit log cols for storage banks
 audit_log_cols:
   url: URL
-  last_update: LAST_UPDATE
+  ref_date: REF_DATE
   log_timestamp: LOG_TIMESTAMP
   user: USER
   host: HOST

@@ -62,10 +62,10 @@ class DataFrameValidator:
             self.check_duplicates,
         ]
         if dict_rng_constraints:
-            steps.append(lambda: self.validate_ranges(dict_rng_constraints))
+            steps.append(self.validate_ranges(dict_rng_constraints))
         if col_start and col_end:
-            steps.append(lambda: self.validate_dates(col_start, col_end))
+            steps.append(self.validate_dates(col_start, col_end))
         if list_tup_categorical_constraints:
             col_, allowed_values = list_tup_categorical_constraints
-            steps.append(lambda: self.validate_categorical_values(col_, allowed_values))
+            steps.append(self.validate_categorical_values(col_, allowed_values))
         return generic_pipeline(self.df_, steps)

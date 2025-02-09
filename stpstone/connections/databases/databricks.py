@@ -26,7 +26,7 @@ class Databricks:
         """
         return pyo.connect('DSN={}'.format(dsn_conn), autocommit=bl_autocommit, timeout=int_timeout)
 
-    def get_data_from_databricks(self, connection):
+    def fetch_data_from_databricks(self, connection):
         """
         DOCSTRING: ATTEMPT TO CONSULT DATABRICKS
         INPUTS: QUERY AND CONNECTION OBJECT
@@ -46,7 +46,7 @@ class Databricks:
             try:
                 #   creating connection with the sql database
                 connection = self.conn_dsn_databricks(dsn)
-                df_databricks = func_timeout(int_max_wait, self.get_data_from_databricks,
+                df_databricks = func_timeout(int_max_wait, self.fetch_data_from_databricks,
                                              args=(connection))
                 #   if the connection was established break the loop, otherwise log error
                 bl_conn = True

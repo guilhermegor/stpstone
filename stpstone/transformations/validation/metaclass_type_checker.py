@@ -1,19 +1,36 @@
 ### VALIDATES DATA FORMATS ###
 
-from pydantic import validate_arguments
+from pydantic import validate_arguments, BaseModel, Field, ConfigDict
+from typing import get_type_hints
+import pandas as pd
 
+class DataFrameModel(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    df: pd.DataFrame = Field(..., description="Pandas DataFrame")
 
 class TypeChecker(type):
-    """
-    DOCSTRING: VALIDATE ALL INPUT AND OUTPUT TYPES OF A CLASS
-    INPUTS: NAME, BASES, DCT
-    OUTPUTS: VALIDATED CLASS
-    """
-    
     def __new__(cls, name, bases, dct):
         for attr_name, attr_value in dct.items():
             if callable(attr_value) and not attr_name.startswith("__"):
-                dct[attr_name] = validate_arguments(attr_value)
+                #   use get_type_hints to inspect function signature
+                type_hints = get_type_hints(attr_value)
+                #   check if any argument or return type is a DataFrame
+                has_dataframe = False
+                for hint in type_hints.values():
+                    #   handle generics
+                    origin = getattr(hint, '__origin__', hint)
+                    #   check dataframe or dataframe model
+                    if origin is pd.DataFrame or origin is DataFrameModel:
+                        has_dataframe = True
+                        break
+                if has_dataframe:
+                  #   use pydantic validate_arguments
+                  dct[attr_name] = validate_arguments(
+                      attr_value, 
+                      config={"arbitrary_types_allowed": True}
+                    )
+                else:
+                  dct[attr_name] = validate_arguments(attr_value)
         return super().__new__(cls, name, bases, dct)
 
 
@@ -26,7 +43,6 @@ if __name__ == '__main__':
 
         def method_two(self, z: str) -> str:
             return z.upper()
-
 
     # usage
     obj = MyClass()

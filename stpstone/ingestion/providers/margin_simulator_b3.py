@@ -64,9 +64,9 @@ class MarginSimulatorB3:
             if dict_payload != None:
                 dict_payload = JsonFiles().dict_to_json(dict_payload)
         # resquet host REST information
-        resp_req = request(method=method, host=self.host + app,
+        req_resp = request(method=method, host=self.host + app,
                            headers=dict_headers, data=dict_payload, verify=bl_verify)
         # raises exception when not a 2xx response
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # getting authheader
-        return resp_req.json()
+        return req_resp.json()

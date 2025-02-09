@@ -1,19 +1,17 @@
-### DEFAULT ###
+### CONFIGURATION TOOLS###
 
-generic:
+credentials:
+  host: https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/{year_dt_ref}-{month_dt_ref}/
+
+logs:
   dtypes:
     FILE_NAME: str
     REF_DATE: date
 
-
-### APPENDIX ###
-
-# appendix stands for metadata, or auxiliary data that is not available to be scraped, but is 
-#   necessary for the analysis
-appendix:
+metadata:
   company_size:
     schema: RAW
-    table_name: COMPANY_SIZE
+    table_name: irsbr_company_size
     data:
       - CODE: '00'
         DESCRIPTION: N/A
@@ -25,7 +23,7 @@ appendix:
         DESCRIPTION: OTHERS
   id_headquarters_branch:
     schema: RAW
-    table_name: ID_HEADQUARTERS_BRANCH
+    table_name: irsbr_id_headquarters_branch
     data:
       - CODE: 1
         DESCRIPTION: HEADQUARTERS
@@ -33,7 +31,7 @@ appendix:
         DESCRIPTION: BRANCH
   registration_status:
     schema: RAW
-    table_name: ID_HEADQUARTERS_BRANCH
+    table_name: irsbr_registration_status
     data:
       - CODE: 1
         DESCRIPTION: 'NULL'
@@ -47,7 +45,7 @@ appendix:
         DESCRIPTION: RETIRED
   simplified_tx_system:
     schema: RAW
-    table_name: SIMPLIFIED_TX_SYSTEM
+    table_name: irsbr_simplified_tx_system
     data:
       - CODE: S
         DESCRIPTION: 'YES'
@@ -57,7 +55,7 @@ appendix:
         DESCRIPTION: 'OTHERS'
   mei:
     schema: RAW
-    table_name: MEI
+    table_name: irsbr_mei
     data:
       - CODE: S
         DESCRIPTION: 'YES'
@@ -67,7 +65,7 @@ appendix:
         DESCRIPTION: 'OTHERS'
   type_person:
     schema: RAW
-    table_name: TYPE_PERSON
+    table_name: irsbr_type_person
     data:
       - CODE: 1
         DESCRIPTION: LEGAL ENTITY
@@ -80,11 +78,15 @@ appendix:
 ### RESOURCES TO BE SCRAPED ###
 
 companies:
-  app_fstr: Empresas{}.zip
+  app: Empresas{i}.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: COMPANIES
-  list_cols_dt:
+  table_name: irsbr_companies
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     EIN: str
     COMPANY_NAME: str
@@ -96,10 +98,15 @@ companies:
     RESP_FEDERAL_ENTITY: str
 
 businesses:
-  app_fstr: Estabelecimentos{}.zip
+  app: Estabelecimentos{i}.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: BUSINESSES
+  table_name: irsbr_businesses
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     EIN_BASIC: str
     EIN_ORDER: str
@@ -134,9 +141,14 @@ businesses:
 
 simplified_taxation_system:
   app: Simples.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: SIMP_TAX_SYS
+  table_name: irsbr_simp_tax_sys
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     EIN: str
     BL_SIMPL_TX: str
@@ -147,10 +159,15 @@ simplified_taxation_system:
     DT_END_MEI_TX: date
 
 shareholders:
-  app_fstr: Socios{}.zip
+  app: Socios{i}.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: SIMP_TAX_SYS
+  table_name: irsbr_shareholders
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     EIN_COMPANY: str
     ID_TYPE_PERSON: int
@@ -166,36 +183,55 @@ shareholders:
 
 countries:
   app: Paises.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: COUNTRIES
+  table_name: irsbr_countries
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     CODE: str
     NAME: str
 
 cities:
   app: Municipios.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: CITIES
+  table_name: irsbr_cities
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     CODE: str
     NAME: str
 
 shareholders_education:
   app: Qualificacoes.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: LEGAL_FORM
+  table_name: irsbr_legal_form
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str
 
 legal_form:
   app: Naturezas.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
   schema: RAW
-  table_name: LEGAL_FORM
+  table_name: irsbr_legal_form
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -203,18 +239,28 @@ legal_form:
 # national classification of economic activity
 ncea:
   app: Cnaes.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: RFB_CNAES
+  table_name: irsbr_rfb_cnaes
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str
 
 registration_status:
   app: Motivos.zip
+  req_method: GET
+  bl_verify: False
   bl_io_interpreting: True
+  str_fmt_dt: 'YYYY-MM-DD'
   schema: RAW
-  table_name: REGISTRATION_STATUS
+  table_name: irsbr_registration_status
+  bl_insert_or_ignore: False
+  bl_schema: True
   dtypes:
     CODE: str
     REASON_REG_STATUS: str

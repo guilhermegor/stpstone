@@ -1,11 +1,13 @@
 ### INOA SYSTEMS ###
 
+# pypi.org libs
 import json
 import backoff
 import pandas as pd
 from requests import request, exceptions
-from typing import List
+from typing import List, Dict, Any
 from datetime import datetime
+# local libs
 from stpstone._config._global_slots import YAML_INOA
 from stpstone.utils.cals.handling_dates import DatesBR
 
@@ -54,10 +56,10 @@ class AlphaTools:
                 f'USER: {self.str_user}',
                 f'PASSW:{self.str_passw}'
             )
-        resp_req = request(str_method, url=self.str_host+str_app, json=dict_params, 
+        req_resp = request(str_method, url=self.str_host+str_app, json=dict_params, 
             auth=(self.str_user, self.str_passw))
-        resp_req.raise_for_status()
-        return resp_req.json()
+        req_resp.raise_for_status()
+        return req_resp.json()
 
     @property
     def funds(self) -> pd.DataFrame:

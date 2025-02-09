@@ -46,3 +46,10 @@ update_tree:
 	@echo "README.md updated successfully."
 
 update_readme: package_tree update_tree
+
+
+### SUPPORT ACTIONS ###
+
+create_yaml_requests:
+	bash cli/create_req_yaml.sh
+	bash cli/create_req_cls_py.sh

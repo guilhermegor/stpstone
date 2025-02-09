@@ -1,0 +1,173 @@
+### CONFIGURATION TOOLS###
+
+credentials:
+  host: https://arquivos.b3.com.br/
+  headers:
+    authority: arquivos.b3.com.br
+    accept: '*/*'
+    accept-language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7
+    cookie: OptanonAlertBoxClosed=2023-03-24T13:33:20.482Z; _ga_T6D1M7G116=GS1.1.1684332031.17.0.1684332031.60.0.0; _tt_enable_cookie=1; _ttp=-3ewIEHyq8lWLAqJVQ6O6T5fGqv; _ga_X5KRPBP7ZE=GS1.3.1690829338.5.1.1690829690.60.0.0; _ga_0W7NXV5699=GS1.1.1695259533.1.0.1695259540.0.0.0; lumClientId=FF8080818A6B1B5C018ABCE5D291602D; lumMonUid=l_QNKA5sbq-l9hkDYeDpkuHl5Qvn8pSA; _ga_F2HQZ24Y48=GS1.1.1695386295.1.1.1695386413.36.0.0; visid_incap_2246223=zCpOWadTSVqdEX/oNXZmLb0vl2UAAAAAQUIPAAAAAAArXUd3AyxcF+G4fbInAZ/+; _gcl_au=1.1.1328610258.1704896955; _gcl_aw=GCL.1709150038.CjwKCAiA0PuuBhBsEiwAS7fsNTm-phWyGfd21MQsHApfiDnWpzvVnpH-JCKFzGOxLwGYnYogLKSlFBoCQXQQAvD_BwE; _ga_5E2DT9ZLVR=GS1.1.1709150038.3.1.1709150112.60.0.0; _ga_CNJN5WQC5G=GS1.1.1709239346.20.0.1709239476.0.0.0; _ga_CRYYSCYF12=GS1.1.1709825617.2.1.1709825617.60.0.0; _ga_FTT9L7SR7B=GS1.1.1709827350.1.1.1709829244.54.0.0; nlbi_2246223=LPzcM1dvj3Qj9PJY9OkOmwAAAAAHcT0kwIANYP4of6jRlfTo; incap_ses_1239_2246223=V2rbSa8xMQgKwd16LtExEbuC+WUAAAAA6Bx9qzgrW2qvO8fGb1s7Ug==; dtCookie=v_4_srv_33_sn_B96EE88FC773C73EDD967E7FE8D41023_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_0_rcs-3Acss_0; _gid=GA1.3.971339064.1710850908; _clck=v6volp%7C2%7Cfk7%7C0%7C1232; auth0=; TS0171d45d=011d592ce15f7772eec4672b5224a65a3ed9ad68450822231fe43032d6783dbc2d826bb431969fefc876b99ec27a5a6eacbd316945; _ga_SS7FXRTPP3=GS1.1.1710850908.138.1.1710852407.59.0.0; _ga=GA1.3.154973072.1679664794; OptanonConsent=isGpcEnabled=0&datestamp=Tue+Mar+19+2024+09%3A46%3A47+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A1%2CC0001%3A1%2CC0004%3A1%2CC0002%3A1&geolocation=%3B&AwaitingReconsent=false; _clsk=hrfzvd%7C1710852408467%7C8%7C1%7Cb.clarity.ms%2Fcollect; incap_ses_1239_2246223=9YpWOoNjqRP6zeF6LtExEfGI+WUAAAAASCaRRjwRJW3uB4oCgh0+dg==; nlbi_2246223=fL1wUKg2iFtTP+KU9OkOmwAAAABL1G2EaiPMxRnkbfBf01Ql; visid_incap_2246223=WX+mv0j8SJ2ikziYIwjLooCG+WUAAAAAQUIPAAAAAAD1iQw5sjPBQa6Xku7lrpeD; auth0=
+    sec-ch-ua: '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"'
+    sec-ch-ua-mobile: '?0'
+    sec-ch-ua-platform: Windows
+    sec-fetch-dest: empty
+    sec-fetch-mode: cors
+    sec-fetch-site: same-origin
+    user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+    x-elastica_gw: 3.116.0
+  payload:
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+instruments_register:
+  host: https://arquivos.b3.com.br/apinegocios/tickercsv/{dt_ref}/
+  headers:
+  payload:
+  app: api/download/?token={token}
+  req_method: GET
+  bl_verify: False
+  bl_io_interpreting: False
+  timeout: (12.0, 12.0)
+  str_fmt_dt: YYYY-MM-DD
+  schema: RAW
+  table_name: b3_instruments_registration
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    RPT_DT: date
+    TCKR_SYMB: str
+    ASST: str
+    ASST_DESC: str
+    SGMT_NM: str
+    MKT_NM: str
+    SCTY_CTGY_NM: str
+    XPRTN_DT: date
+    XPRTN_CD: str
+    TRADG_START_DT: date
+    TRADG_END_DT: date
+    BASE_CD: str
+    CONVS_CRIT_NM: str
+    MTRTY_DT_TRGT_PT: date
+    REQRD_CONVS_IND: str
+    ISIN: str
+    CFICD: str
+    DLVRY_NTCE_START_DT: date
+    DLVRY_NTCE_END_DT: date
+    OPTN_TP: str
+    CTRCT_MLTPLR: int
+    ASST_QTN_QTY: int
+    ALLCN_RND_LOT: int
+    TRADG_CCY: str
+    DLVRY_TP_NM: str
+    WDRWL_DAYS: int
+    WRKG_DAYS: int
+    CLNR_DAYS: int
+    RLVR_BASE_PRIC_NM: str
+    OPNG_FUTR_POS_DAY: int
+    SD_TP_CD1: str
+    UNDRLYG_TCKR_SYMB1: str
+    SD_TP_CD2: str
+    UNDRLYG_TCKR_SYMB2: str
+    PURE_GOLD_WGHT: float
+    EXRC_PRIC: float
+    OPTN_STYLE: str
+    VAL_TP_NM: str
+    PRM_UPFRNT_IND: str
+    OPNG_POS_LMT_DT: date
+    DSTRBTN_ID: str
+    PRIC_FCTR: float
+    DAYS_TO_STTLM: int
+    SRS_TP_NM: str
+    PRTCN_FLG: str
+    AUTOMTC_EXRC_IND: str
+    SPCFTN_CD: str
+    CRPN_NM: str
+    CORP_ACTN_START_DT: date
+    CTDY_TRTMT_TP_NM: str
+    MKT_CPTLSTN: float
+    CORP_GOVN_LVL_NM: str
+
+daily_trades:
+  app: apinegocios/tickercsv/{dt_ref}/
+  req_method: GET
+  bl_verify: False
+  bl_io_interpreting: False
+  timeout: (12.0, 12.0)
+  str_fmt_dt: YYYY-MM-DD
+  schema: RAW
+  table_name: b3_daily_trades
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATA_REFERENCIA: date
+    CODIGO_INSTRUMENTO: str
+    ACAO_ATUALIZACAO: date
+    PRECO_NEGOCIO: float
+    QUANTIDADE_NEGOCIADA: int
+    HORA_FECHAMENTO: int
+    CODIGO_IDENTIFICADOR_NEGOCIO: str
+    TIPO_SESSAO_PREGAO: int
+    DATA_NEGOCIO: date
+    CODIGO_PARTICIPANTE_COMPRADOR: int
+    CODIGO_PARTICIPANTE_VENDEDOR: int
+
+loan_balance:
+  req_method: GET
+  app: tabelas/table/LoanBalance/{dt_ref}/{i}
+  bl_verify: False
+  bl_io_interpreting: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_snake
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: b3_loan_balance
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    RPT_DT: date
+    TCKR_SYMB: str
+    ASST: str
+    QTY_CTRCTS_DAY: int
+    QTY_SHR_DAY: int
+    DNR_MIN_RATE: float
+    DNR_AVRG_RATE: float
+    DNR_MAX_RATE: float
+    TAKR_MIN_RATE: float
+    TAKR_AVRG_RATE: float
+    TAKR_MAX_RATE: float
+    MKT_NM: str
+
+lending_open_position:
+  req_method: GET
+  app: tabelas/table/LendingOpenPosition/{dt_ref}/{i}
+  bl_verify: False
+  bl_io_interpreting: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_snake
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: b3_loan_balance
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    RPT_DT: date
+    TCKR_SYMB: str
+    ASST: str
+    BAL_QTY: int
+    TRAD_AVRG_PRIC: float
+    PRIC_FCTR: float
+    BAL_VAL: float

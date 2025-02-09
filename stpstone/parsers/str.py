@@ -183,6 +183,9 @@ class StrHandler:
         OUTPUTS: STRING
         """
         return str_.split(substring)[1]
+    
+    def extract_info_between_braces(str_:str, str_pattern:str=r'\{(.*?)\}') -> str:
+        return re.findall(str_pattern, str_)
 
     def base64_encode(self, userid, password):
         """
@@ -295,7 +298,7 @@ class StrHandler:
         """
         return normalize('NFC', str1).casefold() == normalize('NFC', str2).casefold()
 
-    def remove_non_alphanumeric_chars(self, str_, str_pattern_maintain='[\W_]',
+    def remove_non_alphanumeric_chars(self, str_, str_pattern_maintain=r'[\W_]',
                                       str_replace=''):
         """
         DOCSTRING: REMOVE NON-ALPHANUMERIC CHARACTERS
@@ -431,17 +434,17 @@ class StrHandler:
     def convert_case(self, str_:str, from_case:str, to_case:str) -> str:
         """
         Converts a string between different naming conventions:
-            - camelCase
-            - PascalCase
-            - snake_case
-            - kebab-case
-            - UPPER_SNAKE_CASE
+            - camelCase - 'cam'
+            - PascalCase - 'pascal'
+            - snake_case - 'snake'
+            - kebab-case - 'kebab'
+            - UPPER_SNAKE_CASE - 'upper_snake'
+            - upperFirst - 'upper_first'
         Args:
-            - string (str): Input string to convert.
-            - from_case (str): Current case of the string. Options: ['camel', 'pascal', 'snake', 'kebab', 'upper_snake']
-            - to_case (str): Desired output case. Options: ['camel', 'pascal', 'snake', 'kebab', 'upper_snake']
+            - cols_from_case (str): Current case of the string
+            - cols_to_case (str): Desired case of the string
         Returns:
-            str: Converted string
+            list
         """
         # from case
         if from_case == 'camel':
@@ -454,8 +457,10 @@ class StrHandler:
             words = str_.lower().split("-")
         elif from_case == 'upper_snake':
             words = str_.lower().split('_')
+        elif from_case == 'upper_first':
+            words = [str_[0].upper() + str_[1:].lower()]
         else:
-            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_snake']")
+            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_snake', 'upper_first']")
         # converting to case
         if to_case == 'camel':
             return words[0] + ''.join(word.capitalize() for word in words[1:])
@@ -467,5 +472,23 @@ class StrHandler:
             return "-".join(words).lower()
         elif to_case == 'upper_snake':
             return '_'.join(words).upper()
+        elif to_case == 'upper_first':
+            return words[0].capitalize()
         else:
-            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_snake']")
+            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_snake', 'upper_first']")
+    
+    def fill_fstr_from_globals(self, str_:str) -> str:
+        """
+        Fill fstr named placeholders from globals - the placeholder must have the same name as the 
+            global variable aimed to fill this gap
+        Args:
+            - str_ (str): fstr
+        Returns:
+            str
+        """
+        list_placeholders = self.extract_info_between_braces(str_)
+        dict_placeholders = {
+            k: v for k, v in globals().items()
+            if k in list_placeholders
+        }
+        str_ = str_.format(**dict_placeholders)

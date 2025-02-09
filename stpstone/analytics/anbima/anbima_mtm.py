@@ -17,10 +17,10 @@ class AnbimaMTM:
 
     def general_req(self, url:str, bl_verify:bool, method:str='GET', str_sep:str='@') -> pd.DataFrame:
         list_ser = list()
-        resp_req = request(method, url, bl_verify)
-        resp_req.raise_for_status()
+        req_resp = request(method, url, bl_verify)
+        req_resp.raise_for_status()
         # turning content into list of rows
-        str_tb = resp_req.text
+        str_tb = req_resp.text
         list_tb = str_tb.split('\r\n')[2:]
         # turn into serialized list
         for row in list_tb:
@@ -115,14 +115,14 @@ class AnbimaMTM:
         """
         dict_list_ser = dict()
         str_sep='@'
-        resp_req = request(
+        req_resp = request(
             YAML_ANBIMA['sec_mkt_prcs']['ima']['method'], 
             YAML_ANBIMA['sec_mkt_prcs']['ima']['url'], 
             YAML_ANBIMA['sec_mkt_prcs']['ima']['bl_verify']
         )
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # turning content into list of rows
-        str_tb = resp_req.text
+        str_tb = req_resp.text
         list_tb = str_tb.split('\r\n')[2:]
         # turn into serialized list
         for row in list_tb:

@@ -65,14 +65,14 @@ class USAMacro:
         'Cookie': 'ASP.NET_SessionId=dp3ziqlcjny45xqehrow1v2a; TEServer=TEIIS'
         }
         # requesting response
-        resp_req = request(YAML_USA_MACRO['non_farm_payroll']['req_method'], 
+        req_resp = request(YAML_USA_MACRO['non_farm_payroll']['req_method'], 
                            YAML_USA_MACRO['non_farm_payroll']['url'], headers=dict_headers, 
                            data=dict_payload, 
                            verify=YAML_USA_MACRO['non_farm_payroll']['bl_verify'])
         # status code different from 2xx raise error
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # parsing html
-        bs_html = BeautifulSoup(resp_req.content, 'html.parser')
+        bs_html = BeautifulSoup(req_resp.content, 'html.parser')
         # * TABLE HISTORICAL DATA NON-FARM PAYROLL
         # headers
         list_th_0 = [

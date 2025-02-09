@@ -8,13 +8,12 @@ import pycurl
 import os
 import fnmatch
 import wget
-import requests
 import py7zr
 from datetime import datetime
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO, TextIOWrapper
 from typing import Tuple, List, Union, Optional, Dict
-from requests import Session
+from requests import Session, Response
 # local libs
 from stpstone.parsers.str import StrHandler
 from stpstone.parsers.dicts import HandlingDicts
@@ -221,21 +220,14 @@ class DirFilesManagement:
             wget.download(url, filepath)
             return self.object_exists(filepath)
 
-    def get_zip_from_web_in_memory(self, url:str, bl_verify:bool=True, 
-                                   bl_io_interpreting:bool=False, 
-                                   timeout:Union[Tuple[int, int], int]=(5, 5), 
-                                   dict_headers:Optional[Dict[str, str]]=None,
-                                   session:Optional[Session]=None) -> List[ZipFile]:
+    def get_zip_from_web_in_memory(self, req_resp:Response, 
+                                   bl_io_interpreting:bool=False) -> List[ZipFile]:
         """
         REFERENCES: https://stackoverflow.com/questions/5710867/downloading-and-unzipping-a-zip-file-without-writing-to-disk
         DOCSTRING: DOWNLOAD A ZIP AND UNZIP IT, HANDLING FILE IN MEMORY
         INPUTS: FILE URL
         OUTPUTS: LIST OF OPENNED FILES UNZIPPED
         """
-        if session is None:
-            req_resp = requests.get(url, verify=bl_verify, timeout=timeout, headers=dict_headers)
-        else:
-            req_resp = session.get(url, verify=bl_verify, timeout=timeout, headers=dict_headers)
         zipfile = ZipFile(BytesIO(req_resp.content))
         # defining names of files from extraction
         zip_names = zipfile.namelist()

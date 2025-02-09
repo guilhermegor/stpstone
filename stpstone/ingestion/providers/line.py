@@ -44,16 +44,16 @@ class ConnectionApi(metaclass=TypeChecker):
         while (int_status_code_iteration != int_status_code_ok) and (
                 i <= int_max_retrieves):
             try:
-                resp_req = request(method=method, url=self.hostname_api_line_b3 + app,
+                req_resp = request(method=method, url=self.hostname_api_line_b3 + app,
                                    headers=dict_headers, verify=bl_verify)
             except:
                 continue
-            int_status_code_iteration = resp_req.status_code
+            int_status_code_iteration = req_resp.status_code
             i += 1
         # raises exception when not a 2xx response
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         # getting authheader
-        return resp_req.json()[key_header]
+        return req_resp.json()[key_header]
 
     @property
     def access_token(self, method:str='POST', int_refresh_min_time:int=4000,
@@ -92,16 +92,16 @@ class ConnectionApi(metaclass=TypeChecker):
             while (int_status_code_iteration != int_status_code_ok) and (
                     i_aux <= max_retrieves):
                 try:
-                    resp_req = request(method=method, url=self.hostname_api_line_b3 + app,
+                    req_resp = request(method=method, url=self.hostname_api_line_b3 + app,
                                        headers=dict_headers, params=dict_params, verify=bl_verify)
                 except:
                     continue
-                int_status_code_iteration = resp_req.status_code
+                int_status_code_iteration = req_resp.status_code
                 i_aux += 1
             #   raises exception when not a 2xx response
-            resp_req.raise_for_status()
+            req_resp.raise_for_status()
             #   retrieving json
-            dict_token = resp_req.json()
+            dict_token = req_resp.json()
             #   refresh token
             refresh_token = dict_token[key_refresh_token]
             #   token
@@ -144,12 +144,12 @@ class ConnectionApi(metaclass=TypeChecker):
                 # print('PARAMS: {}'.format(dict_params))
                 # print('DATA: {}'.format(dict_payload))
                 try:
-                    resp_req = request(method=method, url=self.hostname_api_line_b3 + app_line_b3,
+                    req_resp = request(method=method, url=self.hostname_api_line_b3 + app_line_b3,
                                        headers=dict_header, params=dict_params, data=dict_payload)
-                    # print('ENDPOINT + API: {}'.format(resp_req.url))
-                    if resp_req.status_code == int_status_code_ok:
+                    # print('ENDPOINT + API: {}'.format(req_resp.url))
+                    if req_resp.status_code == int_status_code_ok:
                         bl_retry_request = False
-                    elif resp_req.status_code in list_int_http_error_token:
+                    elif req_resp.status_code in list_int_http_error_token:
                         #   reset token wheter http error 401 has been reached
                         dict_header = {
                             'Authorization': 'Bearer {}'.format(self.access_token),
@@ -171,17 +171,17 @@ class ConnectionApi(metaclass=TypeChecker):
             # reseting variables
             float_secs_sleep_iteration = float_secs_sleep
         else:
-            resp_req = request(method=method, url=self.hostname_api_line_b3 + app_line_b3,
+            req_resp = request(method=method, url=self.hostname_api_line_b3 + app_line_b3,
                                headers=dict_header, params=dict_params, data=dict_payload)
             if bl_debug_mode == True:
                 print('REQUEST SUCCESFULLY MADE')
         #   raises exception when not a 2xx response
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         #   retrieving response
         try:
-            return resp_req.json()
+            return req_resp.json()
         except:
-            return resp_req.status_code
+            return req_resp.status_code
 
 
 class Operations(ConnectionApi):

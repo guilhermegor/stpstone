@@ -1,0 +1,84 @@
+### CONFIGURATION TOOLS###
+
+credentials:
+  host: https://arquivos.b3.com.br/api/download/?token={token}
+  host_token: https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={dt_ref}
+  get_token:
+    req_method: GET
+    bl_verify: False
+    timeout: (12.0, 12.0)
+  keys:
+    token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+
+
+### RESOURCES TO BE SCRAPED ###
+
+instruments_register:
+  app: api/download/?token={token}
+  req_method: GET
+  bl_verify: False
+  bl_io_interpreting: False
+  timeout: (12.0, 12.0)
+  str_fmt_dt: 'YYYY-MM-DD'
+  schema: RAW
+  table_name: B3_INSTRUMENTS_REGISTRATION
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    RPT_DT: date
+    TCKR_SYMB: str
+    ASST: str
+    ASST_DESC: str
+    SGMT_NM: str
+    MKT_NM: str
+    SCTY_CTGY_NM: str
+    XPRTN_DT: date
+    XPRTN_CD: str
+    TRADG_START_DT: date
+    TRADG_END_DT: date
+    BASE_CD: str
+    CONVS_CRIT_NM: str
+    MTRTY_DT_TRGT_PT: date
+    REQRD_CONVS_IND: str
+    ISIN: str
+    CFICD: str
+    DLVRY_NTCE_START_DT: date
+    DLVRY_NTCE_END_DT: date
+    OPTN_TP: str
+    CTRCT_MLTPLR: int
+    ASST_QTN_QTY: int
+    ALLCN_RND_LOT: int
+    TRADG_CCY: str
+    DLVRY_TP_NM: str
+    WDRWL_DAYS: int
+    WRKG_DAYS: int
+    CLNR_DAYS: int
+    RLVR_BASE_PRIC_NM: str
+    OPNG_FUTR_POS_DAY: int
+    SD_TP_CD1: str
+    UNDRLYG_TCKR_SYMB1: str
+    SD_TP_CD2: str
+    UNDRLYG_TCKR_SYMB2: str
+    PURE_GOLD_WGHT: float
+    EXRC_PRIC: float
+    OPTN_STYLE: str
+    VAL_TP_NM: str
+    PRM_UPFRNT_IND: str
+    OPNG_POS_LMT_DT: date
+    DSTRBTN_ID: str
+    PRIC_FCTR: float
+    DAYS_TO_STTLM: int
+    SRS_TP_NM: str
+    PRTCN_FLG: str
+    AUTOMTC_EXRC_IND: str
+    SPCFTN_CD: str
+    CRPN_NM: str
+    CORP_ACTN_START_DT: date
+    CTDY_TRTMT_TP_NM: str
+    MKT_CPTLSTN: float
+    CORP_GOVN_LVL_NM: str

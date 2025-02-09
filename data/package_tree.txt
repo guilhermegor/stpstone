@@ -4,6 +4,13 @@ stpstone
 │   ├── _global_slots.py
 │   ├── anbima.yaml
 │   ├── b3.yaml
+│   ├── br
+│   │   ├── exchange
+│   │   │   ├── up2data_registries.yaml
+│   │   │   ├── up2data_volumes_trd.yaml
+│   │   │   └── warranty.yaml
+│   │   └── taxation
+│   │       └── irsbr.yaml
 │   ├── br_macro.yaml
 │   ├── br_treasury.yaml
 │   ├── comdinheiro.yaml
@@ -12,8 +19,8 @@ stpstone
 │   ├── inoa.yaml
 │   ├── llms.yaml
 │   ├── microsoft_apps.yaml
-│   ├── rfb.yaml
-│   ├── session.yaml
+│   ├── netops
+│   │   └── session.yaml
 │   ├── usa_macro.yaml
 │   └── world_gov_bonds.yaml
 ├── analytics
@@ -24,12 +31,8 @@ stpstone
 │   ├── auditing
 │   │   └── earnings_manipulation.py
 │   ├── b3
-│   │   ├── inoa.py
-│   │   ├── line.py
-│   │   ├── margin_simulator.py
 │   │   ├── market_data.py
-│   │   ├── search_by_trading.py
-│   │   └── up2data_web.py
+│   │   └── search_by_trading.py
 │   ├── comdinheiro
 │   │   └── api_request.py
 │   ├── cvm
@@ -103,12 +106,25 @@ stpstone
 │   ├── abc
 │   │   └── requests.py
 │   ├── mktdata
-│   │   └── publicly_trd_sec.py
-│   ├── registration
+│   │   ├── exchange
+│   │   ├── otc
+│   │   └── primary_mkt
+│   ├── providers
+│   │   ├── inoa.py
+│   │   ├── line.py
+│   │   └── margin_simulator_b3.py
+│   ├── registries
 │   │   └── br
-│   │       └── rfb
-│   │           └── companies_public_data.py
+│   │       ├── exchange
+│   │       │   ├── securities.py
+│   │       │   └── warranty.py
+│   │       ├── primary_mkt
+│   │       └── taxation
+│   │           └── irsbr_records.py
 │   └── tradings
+│       └── br
+│           └── exchange
+│               └── volumes.py
 ├── parsers
 │   ├── dicts.py
 │   ├── folders.py

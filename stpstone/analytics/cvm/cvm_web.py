@@ -42,7 +42,7 @@ class CVMWeb_WS_Funds:
         key_fund_daily_infos_url:str='url',
         key_fund_ein:str='fund_ein',
         key_fund_name:str='fund_name',
-        key_ref_date:str='ref_date',
+        key_ref_date:str='db_ref_date',
         key_total_portfolio:str='total_portfolio',
         key_aum:str='aum',
         key_quote:str='quote',
@@ -166,7 +166,7 @@ class CVMWeb_WS_Funds:
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
         }
-        resp_req = request(
+        req_resp = request(
             method=str_method, 
             url=url, 
             headers=dict_headers, 
@@ -175,8 +175,8 @@ class CVMWeb_WS_Funds:
             allow_redirects=bl_allow_redirects,
             timeout=tup_timeout
         )
-        resp_req.raise_for_status()
-        html_content = HtmlHndler().html_lxml_parser(page=resp_req.text)
+        req_resp.raise_for_status()
+        html_content = HtmlHndler().html_lxml_parser(page=req_resp.text)
         return html_content
 
     @property
@@ -387,15 +387,15 @@ class CVMWeb_WS_Funds:
             #     dict_data,
             #     bl_allow_redirects=bl_allow_redirects,
             # )
-            resp_req = request(
+            req_resp = request(
                 method=str_method_fund_report_dt, 
                 url=self.str_host_post_fund + str_app.format(str_fund_code),
                 allow_redirects=False, 
                 data=dict_data, 
                 cookies=self.dict_cookie
             )
-            resp_req.raise_for_status()
-            html_content = HtmlHndler().html_lxml_parser(page=resp_req.text)
+            req_resp.raise_for_status()
+            html_content = HtmlHndler().html_lxml_parser(page=req_resp.text)
             # print(f'\nLIST_SER2_DAILY_INFOS: {list_ser_2}')
             dict_html_contents_dts[str_dt] = html_content
         # return html contents

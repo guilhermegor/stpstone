@@ -143,7 +143,6 @@ class PostgreSQLDB:
             os.makedirs(str_backup_dir, exist_ok=True)
             # generate the backup file name
             backup_file = os.path.join(str_backup_dir, str_bkp_name)
-            # set the environment variable for self.password authentication
             env = os.environ.copy()
             env['PGPASSWORD'] = self.password
             # run the pg_dump command

@@ -31,7 +31,7 @@ class WebhookSlack:
         dict_headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
-        resp_req = request(str_method, self.url_webhook, headers=dict_headers, 
+        req_resp = request(str_method, self.url_webhook, headers=dict_headers, 
                            data=JsonFiles().dict_to_json(dict_payload))
-        resp_req.raise_for_status()
-        return resp_req.text
+        req_resp.raise_for_status()
+        return req_resp.text

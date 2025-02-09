@@ -1,17 +1,20 @@
 ### ABSTRACT BASE CLASS - REQUESTS ###
 
 # pypi.org libs
+import backoff
 import pandas as pd
 from abc import ABC, abstractmethod
 from datetime import datetime
-from requests import exceptions
+from requests import exceptions, request, Response
 from typing import Tuple, List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from logging import Logger
+from zipfile import BadZipFile
 # project modules
 from stpstone.parsers.folders import DirFilesManagement
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.parsers.dicts import HandlingDicts
+from stpstone.parsers.str import StrHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.connections.netops.session import ReqSession
 from stpstone.transformations.standardization.dataframe import DFStandardization
@@ -22,78 +25,179 @@ class ABCRequests(ABC):
 
     def __init__(
         self,
-        dict_metadata:Dict[str, Any], 
-        bl_create_session:bool=False,
-        bl_new_proxy:bool=False,
-        bl_verify:bool=False,
-        str_host:Optional[str]=None,
-        dt_ref:datetime=DatesBR().curr_date,
-        dict_headers:Optional[Dict[str, str]]=None,
-        dict_payload:Optional[Dict[str, str]]=None, 
+        dict_metadata:Dict[str, Any],
         session:Optional[ReqSession]=None,
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
         self.dict_metadata = dict_metadata
-        self.bl_create_session = bl_create_session
-        self.bl_new_proxy = bl_new_proxy
-        self.bl_verify = bl_verify
-        self.str_host = str_host
+        self.session = session
         self.dt_ref = dt_ref
-        self.dict_headers = dict_headers
-        self.dict_payload = dict_payload
-        self.session = session if session is not None else self.session_config
         self.cls_db = cls_db
         self.logger = logger
+        self.token = self.access_token
+
+    @abstractmethod
+    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+        return None
 
     @property
-    def session_config(self):
-        if self.bl_create_session == True:
-            session = ReqSession(bl_new_proxy=self.bl_new_proxy).session
-        else:
-            session = None
-        return session
+    def access_token(self):
+        url_token = StrHandler().fill_fstr_from_globals(
+            self.dict_metadata['credentials']['get_token']['host_token']
+        )
+        req_resp = self.generic_req(
+            self.dict_metadata['credentials']['get_token']['req_method'], 
+            url_token, 
+            self.dict_metadata['credentials']['get_token']['bl_verify'], 
+            self.dict_metadata['credentials']['get_token']['timeout']
+        )
+        req_resp.raise_for_status()
+        return req_resp.json()[self.dict_metadata['credentials']['keys']['token']]
+
+    def generic_req_w_session(
+        self, 
+        req_method:str,
+        url:str,
+        bl_verify:bool,
+        tup_timeout:Tuple[float, float]=(12.0, 12.0), 
+        dict_headers:Optional[Dict[str, str]]=None,
+        dict_payload:Optional[Dict[str, str]]=None
+    ) -> Response:
+        if req_method == 'GET':
+            req_resp = self.session.get(url, verify=bl_verify, timeout=tup_timeout, 
+                                        headers=dict_headers, payload=dict_payload)
+        elif req_method == 'POST':
+            req_resp = self.session.post(url, verify=bl_verify, timeout=tup_timeout, 
+                                         headers=dict_headers, payload=dict_payload)
+        req_resp.raise_for_status()
+        return req_resp
+
+    @backoff.on_exception(
+        backoff.constant,
+        exceptions.RequestException,
+        interval=10,
+        max_tries=20,
+    )
+    def generic_req_wo_session(
+        self,
+        req_method:str,
+        url:str,
+        bl_verify:bool,
+        tup_timeout:Tuple[float, float]=(12.0, 12.0), 
+        dict_headers:Optional[Dict[str, str]]=None,
+        dict_payload:Optional[Dict[str, str]]=None
+    ) -> Response:
+        req_resp = request(req_method, url, verify=bl_verify, 
+                           timeout=tup_timeout, headers=dict_headers, payload=dict_payload)
+        req_resp.raise_for_status()
+        return req_resp
 
     def generic_req(
+        self,
+        req_method:str,
+        url:str,
+        bl_verify:bool,
+        tup_timeout:Tuple[float, float]=(12.0, 12.0), 
+        dict_headers:Optional[Dict[str, str]]=None,
+        dict_payload:Optional[Dict[str, str]]=None
+    ) -> Response:
+        """
+        Check wheter the request method is valid and do the request with distinctions for session and
+            local proxy-based requests
+        Args:
+            - req_method (str): request method
+            - url (str): request url
+            - bl_verify (bool): verify request
+            - tup_timeout (Tuple[float, float]): request timeout
+        Returns:
+            Tuple[Response, str]
+        """
+        # checking wheter request method is valid
+        if req_method not in ['GET', 'POST']:
+            if self.logger is not None:
+                CreateLog().warnings(self.logger, f'Invalid request method: {req_method}')
+            raise Exception(f'Invalid request method: {req_method}')
+        # request content
+        if self.session is None:
+            func_generic_req = self.generic_req_w_session
+        else:
+            func_generic_req = self.generic_req_wo_session
+        req_resp = func_generic_req(
+            req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
+        )
+        return req_resp
+
+    def trt_req(
         self, 
-        app:str, dict_dtypes:Dict[str, Any], list_cols_dt:List[str],
-        bl_io_interpreting:bool=False, 
-        tup_timeout:Tuple[float, float]=(12.0, 12.0)
+        req_method:str, host:str, dict_dtypes:Dict[str, Any], 
+        dict_headers:Optional[Dict[str, str]]=None,
+        dict_payload:Optional[Dict[str, str]]=None, app:Optional[str]=None, 
+        bl_verify:bool=False, bl_io_interpreting:bool=False, 
+        tup_timeout:Tuple[float, float]=(12.0, 12.0), cols_from_case:Optional[str]=None, 
+        cols_to_case:Optional[str]=None, list_cols_drop_dupl:List[str]=None, 
+        str_fmt_dt:str='YYYY-MM-DD', type_error_action:str='raise', 
+        strt_keep_when_duplicated:str='first'
     ) -> pd.DataFrame:
-        url = self.str_host + app
+        # building url and requesting
+        url = host + app
         if self.logger is not None:
             CreateLog().infos(self.logger, 'Requesting data from: {}'.format(url))
-        print(f'URL: {url}')
-        print('DICT DTYPES: {}'.format(dict_dtypes))
-        # requesting for data
-        if url.endswith('.zip') == True:
-            file = DirFilesManagement().get_zip_from_web_in_memory(
-                url, 
-                bl_verify=self.bl_verify, 
-                bl_io_interpreting=bl_io_interpreting, 
-                timeout=tup_timeout,
-                dict_headers=self.dict_headers,
-                session=self.session
-            )
-            reader = pd.read_csv(file, sep=';', header=None, names=list(dict_dtypes.keys()), 
-                decimal=',', thousands='.')
-            df_ = pd.DataFrame(reader)
-            df_['FILE_NAME'] = file.name
-            df_['REF_DATE'] = str(DatesBR().year_number(self.dt_ref)) \
-                + str(DatesBR().month_number(self.dt_ref, bl_month_mm=True))
         else:
-            req_resp = self.session.get(url, verify=self.bl_verify, timeout=tup_timeout, 
-                                    headers=self.dict_headers, payload=self.dict_payload)
-            req_resp.raise_for_status()
+            print('{} - Requesting data from: {}'.format(DatesBR().current_timestamp_string, url))
+        req_resp = self.generic_req(
+            req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
+        )
+        # dealing with request content type
+        if self.req_trt_injection(req_resp) is not None:
+            df_ = self.req_trt_injection(req_resp)
+        elif url.endswith('.zip') == True:
+            obj_ = DirFilesManagement().get_zip_from_web_in_memory(
+                req_resp, 
+                bl_io_interpreting=bl_io_interpreting
+            )
+            print('OBJ_ZIP_REQ: {}'.format(obj_))
+            print('TYPE OBJ_ZIP_REQ: {}'.format(type(obj_)))
+            if isinstance(obj_, list) == True:
+                list_ = list()
+                for name_xlsx in obj_:
+                    reader = pd.read_excel(name_xlsx, encoding='utf-8')
+                    df_ = pd.DataFrame(reader)
+                    df_['FILE_NAME'] = name_xlsx
+                    list_.extend(df_.to_dict(orient='records'))
+                df_ = pd.DataFrame(list_)
+                df_.drop_duplicates(inplace=True)
+            else:
+                reader = pd.read_csv(obj_, sep=';', header=None, names=list(dict_dtypes.keys()), 
+                    decimal=',', thousands='.')
+                df_ = pd.DataFrame(reader)
+                df_['FILE_NAME'] = obj_.name
+        elif url.endswith('.csv') == True:
+            reader = pd.read_csv(req_resp.content, sep=',')
+            df_ = pd.DataFrame(reader)
+        else:
             json_ = req_resp.json()
             reader = pd.DataFrame(json_)
             df_ = pd.DataFrame(reader)
         # standardizing
-        df_ = DFStandardization()._pipeline(
-            df_, 
-            HandlingDicts().merge_n_dicts(dict_dtypes, self.dict_metadata['generic']['dtypes']), 
-            list_cols_dt
+        cls_dt_stddz = DFStandardization(
+            HandlingDicts().merge_n_dicts(
+                dict_dtypes, 
+                {
+                    k: v 
+                    for k, v in self.dict_metadata['logs']['dtypes'].items() 
+                    if k in list(df_.columns)
+                }
+            ), 
+            cols_from_case,
+            cols_to_case,
+            list_cols_drop_dupl,
+            str_fmt_dt, 
+            type_error_action, 
+            strt_keep_when_duplicated,
         )
+        df_ = cls_dt_stddz._pipeline(df_)
         if self.cls_db is not None:
             df_ = DBLogs().audit_log(
                 df_, 
@@ -106,75 +210,23 @@ class ABCRequests(ABC):
             )
         return df_
 
-    def non_iteratively_get_raw_data(self, str_resource:str) -> pd.DataFrame:
-        """
-        Non-iteratively get raw data
-        Args:
-            - str_resource (str): resource name
-        Return:
-            pd.DataFrame
-        """
-        return self.generic_req(
-            self.dict_metadata[str_resource]['app'], 
-            self.dict_metadata[str_resource]['dtypes'],
-            self.dict_metadata[str_resource]['list_cols_dt'],
-            bl_io_interpreting=self.dict_metadata[str_resource]['bl_io_interpreting']
-        )
-
-    def iteratively_get_raw_data(self, str_resource:str, i:int=0) -> pd.DataFrame:
-        """
-        Iteratively get raw data
-        Args:
-            - str_resource (str): resource name
-        Return:
-            pd.DataFrame
-        """
-        list_ser = list()
-        while True:
-            try:
-                list_ser.extend(
-                    self.generic_req(
-                        self.dict_metadata[str_resource]['app_fstr'].format(i), 
-                        self.dict_metadata[str_resource]['dtypes'],
-                        self.dict_metadata[str_resource].get('list_cols_dt', []) \
-                            if self.dict_metadata[str_resource].get('list_cols_dt', []) \
-                            is not None else [],   
-                        bl_io_interpreting=self.dict_metadata[str_resource]['bl_io_interpreting']
-                    ).to_dict(orient='records')
-                )
-                i += 1
-            except exceptions.HTTPError:
-                break
-        return pd.DataFrame(list_ser)
-
-    def get_raw_data(self, str_resource:str) -> pd.DataFrame:
-        """
-        Get raw data from brazillian federal revenue office (RFB for Brazillian acronym)
-        Args:
-            - str_resource (str): resource name
-        Return:
-            pd.DataFrame
-        """
-        if 'app_fstr' in self.dict_metadata[str_resource]:
-            return self.iteratively_get_raw_data(str_resource)
-        else:
-            return self.non_iteratively_get_raw_data(str_resource)
-
-    def insert_table(self, str_resource:str, bl_insert_or_ignore:bool=False, 
-        bl_schema:bool=True) -> None:
+    def insert_table(self, str_resource:str, list_ser:Optional[List[Dict[str, Any]]]=None, 
+                      bl_insert_or_ignore:bool=False, bl_schema:bool=True) -> None:
         """
         Insert data into data table
         Args:
             - str_resource (str): resource name
             - bl_insert_or_ignore(bool): False as default
             - bl_schema(bool): some databases, like SQLite, doesn't have schemas - True as default
-        Return:
+        Returns:
             pd.DataFrame
         """
         if self.cls_db == None: 
             raise Exception('data insertion failed due to lack of database definition, '
                 + 'please revisit this parameter')
-        if str_resource == 'appendix':
+        if str_resource == 'general':
+            return None
+        elif str_resource == 'metadata':
             for _, dict_ in self.dict_metadata[str_resource].items():
                 if bl_schema == False:
                     str_table_name = '{}_{}'.format(
@@ -187,20 +239,149 @@ class ABCRequests(ABC):
                     bl_insert_or_ignore=True
                 )
         else:
+            if list_ser is None:
+                raise Exception('data insertion failed due to lack of data, '
+                    + 'please revisit this parameter')
             if bl_schema == False:
                 str_table_name = '{}_{}'.format(
                     self.dict_metadata[str_resource]['schema'], 
                     self.dict_metadata[str_resource]['table_name']
                 )
             self.cls_db._insert(
-                self.get_raw_data(str_resource), 
+                list_ser, 
                 str_table_name=str_table_name,
                 bl_insert_or_ignore=bl_insert_or_ignore
             )
 
-    def insert_tables(self, bl_insert_or_ignore:bool=False, bl_schema:bool=True) -> None:
+    def non_iteratively_get_data(self, str_resource:str, bl_fetch:bool=False) -> pd.DataFrame:
         """
-        Insert data into data tables
+        Non-iteratively get raw data
+        Args:
+            - str_resource (str): resource name
+        Returns:
+            pd.DataFrame
+        """
+        app_ = self.dict_metadata[str_resource]['app'] if 'app' in self.dict_metadata[str_resource] \
+            else self.dict_metadata[str_resource]['app']
+        host_ = self.dict_metadata[str_resource]['host'] \
+            if self.dict_metadata[str_resource].get('host', None) is not None \
+            else self.dict_metadata['credentials']['host']
+        host_ = StrHandler().fill_fstr_from_globals(host_)
+        dict_headers = self.dict_metadata[str_resource]['dict_headers'] \
+            if self.dict_metadata[str_resource].get('dict_headers', None) is not None \
+            else self.dict_metadata['credentials'].get('dict_headers', None)
+        dict_payload = self.dict_metadata[str_resource]['dict_payload'] \
+            if self.dict_metadata[str_resource].get('dict_payload', None) is not None \
+            else self.dict_metadata['credentials'].get('dict_payload', None)
+        print('HOST NAME: {}'.format(host_))
+        df_ = self.trt_req(
+            self.dict_metadata[str_resource]['req_method'],
+            host_,
+            self.dict_metadata[str_resource]['dtypes'], 
+            dict_headers,
+            dict_payload,
+            app_, 
+            self.dict_metadata[str_resource]['bl_verify'],
+            self.dict_metadata[str_resource]['bl_io_interpreting'],
+            self.dict_metadata[str_resource]['timeout'],
+            self.dict_metadata[str_resource]['cols_from_case'],
+            self.dict_metadata[str_resource]['cols_to_case'],
+            self.dict_metadata[str_resource]['list_cols_drop_dupl'],
+            self.dict_metadata[str_resource]['str_fmt_dt']
+        )
+        if self.cls_db is not None:
+            self.insert_table(
+                str_resource, 
+                df_.to_dict(orient='records'), 
+                self.dict_metadata[str_resource]['bl_insert_or_ignore'], 
+                self.dict_metadata[str_resource]['bl_schema']
+            )
+        if bl_fetch == True:
+            return df_
+        else:
+            return None
+
+    def iteratively_get_data(self, str_resource:str, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+        """
+        Iteratively get raw data
+        Args:
+            - str_resource (str): resource name
+        Returns:
+            Optional[pd.DataFrame]
+        """
+        list_ser = list()
+        i = 0
+        app_ = self.dict_metadata[str_resource]['app'] if 'app' in self.dict_metadata[str_resource] \
+            else self.dict_metadata[str_resource]['app']
+        host_ = self.dict_metadata[str_resource]['host'] \
+            if self.dict_metadata[str_resource].get('host', None) is not None \
+            else self.dict_metadata['credentials']['host']
+        host_ = StrHandler().fill_fstr_from_globals(host_)
+        dict_headers = self.dict_metadata[str_resource]['dict_headers'] \
+            if self.dict_metadata[str_resource].get('dict_headers', None) is not None \
+            else self.dict_metadata['credentials'].get('dict_headers', None)
+        dict_payload = self.dict_metadata[str_resource]['dict_payload'] \
+            if self.dict_metadata[str_resource].get('dict_payload', None) is not None \
+            else self.dict_metadata['credentials'].get('dict_payload', None)
+        print('HOST NAME: {}'.format(host_))
+        while True:
+            try:
+                list_ser.extend(
+                    self.trt_req(
+                        self.dict_metadata[str_resource]['req_method'],
+                        host_,
+                        self.dict_metadata[str_resource]['dtypes'], 
+                        dict_headers,
+                        dict_payload,
+                        app_.format(i), 
+                        self.dict_metadata[str_resource]['bl_verify'],
+                        self.dict_metadata[str_resource]['bl_io_interpreting'],
+                        self.dict_metadata[str_resource]['timeout'],
+                        self.dict_metadata[str_resource]['cols_from_case'],
+                        self.dict_metadata[str_resource]['cols_to_case'],
+                        self.dict_metadata[str_resource]['list_cols_drop_dupl'],
+                        self.dict_metadata[str_resource]['str_fmt_dt']
+                    ).to_dict(orient='records')
+                )
+                if self.cls_db is not None:
+                    self.insert_table(
+                        str_resource, 
+                        list_ser, 
+                        self.dict_metadata[str_resource]['bl_insert_or_ignore'], 
+                        self.dict_metadata[str_resource]['bl_schema']
+                    )
+                    if bl_fetch == False: list_ser = list()
+                i += 1
+            except (exceptions.HTTPError, BadZipFile) as e:
+                if self.logger is not None:
+                    CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
+                else:
+                    print(f'#{i} Iteration failed due to: {e}')
+                break
+        if len(list_ser) > 0:
+            return pd.DataFrame(list_ser)
+        else:
+            return None
+
+    def _source(self, str_resource:str, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+        """
+        Get/load raw data - if a class database is passed, the data collected will be inserted into 
+            the respective table; please make sure this key is filled within the metadata
+        Args:
+            - str_resource (str): resource name
+        Returns:
+            Optional[pd.DataFrame]
+        """
+        if StrHandler().match_string_like(self.dict_metadata[str_resource], '{*}') == True:
+            self.dict_metadata[str_resource]['app'] = \
+                StrHandler().fill_fstr_from_globals(self.dict_metadata[str_resource]['app'])
+        if StrHandler().match_string_like(self.dict_metadata[str_resource], '{i}') == True:
+            return self.iteratively_get_data(str_resource, bl_fetch)
+        return self.non_iteratively_get_data(str_resource, bl_fetch)
+    
+    def _sources(self, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+        """
+        Get/load raw data
         Args:
             - str_resource (str): resource name
             - bl_insert_or_ignore(bool): False as default
@@ -208,6 +389,17 @@ class ABCRequests(ABC):
         Return:
             pd.DataFrame
         """
-        for key in list(self.dict_metadata.keys()):
-            if key != 'generic':
-                self.insert_table(key, bl_insert_or_ignore, bl_schema)
+        list_ser = list()
+        for str_resource in list(self.dict_metadata.keys()):
+            if str_resource not in \
+                ['credentials', 'logs', 'metadata']:
+                if bl_fetch == True:
+                    list_ser.extend(
+                        self._source(str_resource, bl_fetch).to_dict(orient='records')
+                    )
+                else:
+                    self._source(str_resource, bl_fetch)
+        if len(list_ser) > 0:
+            return pd.DataFrame(list_ser)
+        else:
+            return None

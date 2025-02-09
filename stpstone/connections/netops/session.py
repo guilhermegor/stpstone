@@ -1,12 +1,11 @@
-### HANDLING API REQUESTS ###
+### SESSION CONFIGURATION ###
 
 # pypi.org libs
-import pandas as pd
 from requests.adapters import HTTPAdapter
 from requests import Session, request
 from requests.exceptions import ProxyError, ConnectTimeout, SSLError, ConnectionError
 from urllib3.util import Retry
-from typing import Dict, Union, Any, List, Tuple
+from typing import Dict, Union, Any, List, Tuple, Optional
 from random import shuffle
 # local libs
 from stpstone._config._global_slots import YAML_SESSION
@@ -23,12 +22,12 @@ class ProxyServers:
         INPUTS:
         OUTPUTS:
         """
-        resp_req = request(
+        req_resp = request(
             YAML_SESSION['proxy_scrape']['method'], 
             YAML_SESSION['proxy_scrape']['url'], 
         )
-        resp_req.raise_for_status()
-        json_proxies = resp_req.json()
+        req_resp.raise_for_status()
+        json_proxies = req_resp.json()
         return [
             {
                 'protocol': str(dict_['protocol']).lower(),
@@ -80,8 +79,8 @@ class ReqSession(ProxyServers):
                  list_anonimity_value:Union[List[str], str, None]=['anonymous', 'elite'], 
                  str_protocol:str='http', str_continent_code:Union[str, None]=None, 
                  str_country_code:Union[str, None]=None, bl_ssl:Union[bool, None]=None, 
-                 float_ratio_times_alive_dead:Union[float, None]=0.02,
-                 float_min_timeout:Union[float, None]=600, bl_use_timer:bool=False,
+                 float_ratio_times_alive_dead:Optional[float]=0.02,
+                 float_max_timeout:Optional[float]=60, bl_use_timer:bool=False,
                  list_status_forcelist:list=[429, 500, 502, 503, 504]) -> None:
         """
         DOCSTRING: SESSION CONFIGURATION
@@ -104,7 +103,7 @@ class ReqSession(ProxyServers):
         self.str_country_code = str_country_code
         self.bl_ssl = bl_ssl
         self.float_ratio_times_alive_dead = float_ratio_times_alive_dead
-        self.float_min_timeout = float_min_timeout
+        self.float_max_timeout = float_max_timeout
         self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.proxy = self.get_proxy if bl_new_proxy == True else None
@@ -183,13 +182,13 @@ class ReqSession(ProxyServers):
             'upgrade-insecure-requests': '1',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36'
         }
-        resp_req = session.get(YAML_SESSION['ipinfos']['url'], headers=dict_headers, 
+        req_resp = session.get(YAML_SESSION['ipinfos']['url'], headers=dict_headers, 
                                     data=dict_payload, timeout=tup_timeout)
-        resp_req.raise_for_status()
+        req_resp.raise_for_status()
         if bl_return_availability == True:
             return True
         else:
-            return resp_req.json()
+            return req_resp.json()
     
     def test_proxy(self, str_ip:str, int_port:int) -> bool:
         """
@@ -225,7 +224,7 @@ class ReqSession(ProxyServers):
             ('protocol', self.str_protocol, 'equal'),
             ('bl_ssl', self.bl_ssl, 'equal'),
             ('ratio_times_alive_dead', self.float_ratio_times_alive_dead, 'greater_than_or_equal_to'),
-            ('timeout', self.float_min_timeout, 'greater_than_or_equal_to'),
+            ('timeout', self.float_max_timeout, 'less_than_or_equal_to'),
             ('continent_code', self.str_continent_code, 'equal'),
             ('country_code', self.str_country_code, 'equal')
         ]:

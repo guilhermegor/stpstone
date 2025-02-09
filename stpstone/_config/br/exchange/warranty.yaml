@@ -1,0 +1,69 @@
+### CONFIGURATION TOOLS###
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+
+downstream_processes:
+  issuer_name_stddz:
+    'S/A': ''
+    'S.A.': '' 
+    'S.A': ''
+    ' SA': ''
+    'LTDA.': ''
+    'LTDA': ''
+    '(BRASIL)': '' 
+    'Brasil S.A.': ''
+    'BRASIL S A': ''
+    'DE INVESTIMENTO': '' 
+    'DE INVEST. ': '' 
+    'BCO': 'BANCO' 
+    'J.P.MORGAN': 'J.P. MORGAN' 
+    'CHINA BRASIL': 'CHINA'
+
+
+### RESOURCES TO BE SCRAPED ###
+
+# participants of the Brazilllian Reserves Transfer System (STR)
+banks_rts_br:
+  host: http://www.bcb.gov.br/pom/spb/estatistica/port/ParticipantesSTRport.csv
+  app: 
+  req_method: GET
+  bl_verify: False
+  bl_io_interpreting: False
+  str_fmt_dt: 'YYYY-MM-DD'
+  schema: RAW
+  table_name: banks_rts_br
+  bl_insert_or_ignore: False
+  bl_schema: True
+  list_cols_dt:
+  dtypes:
+    ISPB: date
+    NOME_REDUZIDO: str
+    NUMERO_CODIGO: str
+    PARTICIPA_DA_COMPE: category
+    ACESSO_PRINCIPAL: catergory
+    NOME_EXTENSO: str
+    INICIO_DA_OPERACAO: str
+
+# accepted bond issuers by Brazilian Securities Exchange
+b3_bond_issuers_accp_warranty:
+  host: https://www.b3.com.br/data/files/86/34/44/30/407E971089F29C97AC094EA8/Emissores%20Aceitos%20-%20Titulos%20Privados.zip
+  app: 
+  req_method: GET
+  bl_verify: False
+  str_fmt_dt: 'YYYY-MM-DD'
+  schema: RAW
+  table_name: b3_bond_issuers_accp_warranty
+  bl_insert_or_ignore: False
+  bl_schema: True
+  list_cols_dt:
+  dtypes:
+    ISPB: date
+    NOME_REDUZIDO: str
+    NUMERO_CODIGO: str
+    PARTICIPA_DA_COMPE: category
+    ACESSO_PRINCIPAL: catergory
+    NOME_EXTENSO: str
+    INICIO_DA_OPERACAO: str

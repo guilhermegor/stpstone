@@ -39,7 +39,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         return 10000 * dt_time.year + 100 * dt_time.month + dt_time.day
 
     def excel_float_to_date(self, float_excel_date:float) -> date:
-        return dt_.fromordinal(date(1900, 1, 1).toordinal() + float_excel_date - 2)
+        return datetime.fromordinal(date(1900, 1, 1).toordinal() + float_excel_date - 2)
 
     def excel_float_to_datetime(self, float_excel_date):
         return datetime.fromordinal(datetime(1900, 1, 1).toordinal() + float_excel_date - 2)
