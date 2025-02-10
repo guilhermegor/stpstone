@@ -22,7 +22,7 @@ build_package_test_pypi_org: clean_dist
 ### README SUPPORT ###
 
 package_tree:
-	python -c "import os; from stpstone.parsers.folders import FoldersTree; \
+	python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
 		root_path = os.getcwd(); \
 		cls_tree = FoldersTree(os.path.join(root_path, 'stpstone'), \
 			bl_ignore_dot_folders=True, list_ignored_folders=['__pycache__'], \

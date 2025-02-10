@@ -7,7 +7,7 @@ from requests import request
 from pprint import pprint
 from typing import List, Dict, Any, Union, Optional
 # local libs
-from stpstone.parsers.json import JsonFiles
+from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 

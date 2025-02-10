@@ -9,7 +9,7 @@ from logging import Logger
 # local libs
 from stpstone._config._global_slots import YAML_MICROSOFT_APPS
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.loggs.create_logs import CreateLog
 # check if this is a windows machine
 if os.name == 'nt':

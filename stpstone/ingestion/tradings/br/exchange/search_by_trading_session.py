@@ -10,7 +10,7 @@ from requests import Response
 # project modules
 from stpstone._config._global_slots import YAML_EXAMPLE
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 class SearchByTradingSessionB3(ABCRequests):

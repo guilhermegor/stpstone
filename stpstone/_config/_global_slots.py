@@ -3,13 +3,15 @@
 # pypi.org libs
 import os
 # local libs
-from stpstone.parsers.yaml import reading_yaml
+from stpstone.utils.parsers.yaml import reading_yaml
 
 
 root_path = os.path.dirname(os.path.realpath(__file__))
+
 YAML_IRSBR = reading_yaml(os.path.join(root_path, 'br/taxation/irsbr.yaml'))
 YAML_B3_UP2DATA_REGISTRIES = reading_yaml(os.path.join(root_path, 'br/exchange/up2data_registries.yaml'))
 YAML_B3_UP2DATA_VOLUMES_TRD = reading_yaml(os.path.join(root_path, 'br/exchange/up2data_volumes_trd.yaml'))
+YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(os.path.join(root_path, 'br/bylaws/investment_funds.yaml'))
 YAML_SESSION = reading_yaml(os.path.join(root_path, 'netops/session.yaml'))
 
 # ! deprecated

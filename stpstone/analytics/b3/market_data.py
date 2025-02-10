@@ -16,14 +16,14 @@ sys.path.append('\\'.join([d for d in os.path.dirname(
     os.path.realpath(__file__)).split('\\')][:-3]))
 from stpstone._config._global_slots import YAML_B3
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.json import JsonFiles
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.finance.comdinheiro.api_request import ComDinheiro
 from stpstone.handling_data.object import HandlingObjects
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.document_numbers.br import DocumentsNumbersBR
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.handling_data.html import HtmlHndler
 from stpstone.handling_data.numbers import NumHandler
 from stpstone.utils.loggs.db_logs import DBLogs

@@ -8,9 +8,9 @@ from stpstone._config._global_slots import YAML_USA_MACRO
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.object import HandlingObjects
 from stpstone.handling_data.html import HtmlHndler
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.db_logs import DBLogs
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class USAMacro:

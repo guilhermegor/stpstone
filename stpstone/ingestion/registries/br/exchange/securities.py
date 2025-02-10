@@ -10,10 +10,10 @@ from requests import Response
 # project modules
 from stpstone._config._global_slots import YAML_B3_UP2DATA_REGISTRIES
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.parsers.str import StrHandler
-from stpstone.parsers.lists import HandlingLists
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.lists import HandlingLists
 
 
 class ExchRegBR(ABCRequests):

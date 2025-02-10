@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import List, Tuple, Optional, Dict, Any
 from stpstone.quantitative_methods.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.linear_algebra import LinearAlgebra
-from stpstone.parsers.json import JsonFiles
+from stpstone.utils.parsers.json import JsonFiles
 from stpstone.finance.spot.stocks import ValuingStocks
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.handling_data.numbers import NumHandler

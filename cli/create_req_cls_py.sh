@@ -4,7 +4,7 @@
 PROJECT_ROOT="$(pwd)/stpstone"
 
 # prompt for folder path within the project
-read -p "Enter the folder path within the project (default: ./ingestion): " folder_path
+read -p "Enter the PY folder path within the project (default: ./ingestion): " folder_path
 folder_path=${folder_path:-./ingestion}
 
 # ensure the folder path is within the project directory
@@ -20,7 +20,7 @@ full_dir_path="$PROJECT_ROOT/$folder_path"
 mkdir -p "$full_dir_path"
 
 # require path and file name
-read -p "Enter the YAML file name (without extension, default: request_config): " file_name
+read -p "Enter the PY file name (without extension, default: request_config): " file_name
 file_name=${file_name:-request_config}
 
 # create yaml file
@@ -37,17 +37,18 @@ from requests import Response
 # project modules
 from stpstone._config._global_slots import YAML_EXAMPLE
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
+
 
 class ScaffoldingReq(ABCRequests):
 
     def __init__(
         self,
-        session: Optional[ReqSession] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        cls_db: Optional[Session] = None,
-        logger: Optional[Logger] = None
+        session:Optional[ReqSession]=None,
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        cls_db:Optional[Session]=None,
+        logger:Optional[Logger]=None
     ) -> None:
         self.token = self.access_token
         super().__init__(
@@ -58,8 +59,8 @@ class ScaffoldingReq(ABCRequests):
             logger=logger
         )
     
-    def trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         return None
 EOF
 
-echo "Arquivo criado com sucesso em: $full_path"
+echo "File succesfully created at: $full_dir_path/$file_name.py"

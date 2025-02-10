@@ -7,9 +7,9 @@ from typing import Dict, Any, List, Optional
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 # local libs
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
-from stpstone.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
@@ -20,7 +20,8 @@ class DFStandardization(metaclass=TypeChecker):
         dict_dtypes:Dict[str, Any], 
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
         list_remove_duplicated_data:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
-        type_error_action:str='raise', strt_keep_when_duplicated:str='first'
+        type_error_action:str='raise', strt_keep_when_duplicated:str='first', 
+        str_data_fillna:str='-1', str_dt_fillna:str='2100-12-31'
     ):
         self.dict_dtypes = dict_dtypes
         self.cols_from_case = cols_from_case
@@ -29,6 +30,8 @@ class DFStandardization(metaclass=TypeChecker):
         self.str_fmt_dt = str_fmt_dt
         self.type_error_action = type_error_action
         self.strt_keep_when_duplicated = strt_keep_when_duplicated
+        self.str_data_fillna = str_data_fillna
+        self.str_dt_fillna = str_dt_fillna
         self.list_cols_dt = [key for key, value in dict_dtypes.items() if value == 'date']
 
     def check_if_empty(self, df_:pd.DataFrame) -> pd.DataFrame:
@@ -105,12 +108,12 @@ class DFStandardization(metaclass=TypeChecker):
     ) -> pd.DataFrame:
         steps = [
             self.check_if_empty,
-            self.column_names(df_, self.cols_from_case, self.cols_to_case),
+            self.column_names(df_),
             self.completeness(df_),
-            self.change_dtypes(df_, self.str_fmt_dt),
+            self.change_dtypes(df_),
             self.strip_all_obj_dtypes(df_),
             self.remove_duplicated_cols,
-            self.data_remove_dupl(df_, self.list_remove_duplicated_data)
+            self.data_remove_dupl(df_)
         ]
         df_ = generic_pipeline(df_, steps)
         return df_

@@ -2,9 +2,9 @@
 
 import os
 import win32com.client as win32
-from stpstone.parsers.str import StrHandler
-from stpstone.parsers.folders import DirFilesManagement
-from stpstone.parsers.json import JsonFiles
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.json import JsonFiles
 
 
 class DealingOutlook:

@@ -1,7 +1,7 @@
 ### HANDLING OBJECTS OF A MYRIAD OF DATATYPES ###
 
 import ast
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class HandlingObjects:

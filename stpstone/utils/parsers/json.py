@@ -3,7 +3,7 @@
 import os
 import ast
 import json
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 from typing import List, Dict, Any, Union
 
 

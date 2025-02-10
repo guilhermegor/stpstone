@@ -5,7 +5,7 @@ import operator
 import functools
 from fractions import Fraction
 from math import gcd
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class NumHandler:

@@ -6,8 +6,8 @@ from math import nan
 # local libs
 from stpstone._config._global_slots import YAML_ANBIMA
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.str import StrHandler
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.handling_data.html import HtmlHndler
 from stpstone.utils.loggs.db_logs import DBLogs
 

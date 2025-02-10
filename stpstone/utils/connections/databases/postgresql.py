@@ -7,7 +7,7 @@ from psycopg2.extras import execute_values
 from logging import Logger
 from typing import List, Dict, Any, Optional
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.json import JsonFiles
+from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.loggs.create_logs import CreateLog
 
 

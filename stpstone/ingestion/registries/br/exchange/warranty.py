@@ -8,7 +8,7 @@ from logging import Logger
 from requests import Response
 # project modules
 from stpstone._config._global_slots import YAML_B3_UP2DATA_REGISTRIES
-from stpstone.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 

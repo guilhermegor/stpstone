@@ -11,7 +11,7 @@ import pandas as pd
 from win32com.client import Dispatch, constants
 from xlwt import Workbook
 from ctypes import windll
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 STYLE_HEADING1 = "style_heading1"

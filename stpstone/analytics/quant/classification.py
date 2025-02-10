@@ -18,7 +18,7 @@ from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
 # local libs
 from stpstone.handling_data.lists import HandlingLists
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class InputsClassification:

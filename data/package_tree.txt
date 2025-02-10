@@ -5,7 +5,10 @@ stpstone
 │   ├── anbima.yaml
 │   ├── b3.yaml
 │   ├── br
+│   │   ├── bylaws
+│   │   │   └── investment_funds.yaml
 │   │   ├── exchange
+│   │   │   ├── search_by_trading_session.yaml
 │   │   │   ├── up2data_registries.yaml
 │   │   │   ├── up2data_volumes_trd.yaml
 │   │   │   └── warranty.yaml
@@ -82,67 +85,26 @@ stpstone
 │   │   └── yield.py
 │   └── spot
 │       └── stocks.py
-├── connections
-│   ├── clouds
-│   │   ├── aws_s3.py
-│   │   └── sendgrid.py
-│   ├── databases
-│   │   ├── dabricksCLI.py
-│   │   ├── databricks.py
-│   │   ├── generic.py
-│   │   ├── mongodb.py
-│   │   ├── mysql.py
-│   │   ├── postgresql.py
-│   │   ├── redis.py
-│   │   ├── sqlite.py
-│   │   └── sqlserver.py
-│   └── netops
-│       ├── manager.py
-│       └── session.py
 ├── dsa
 │   └── trees
 │       └── b_tree.py
 ├── ingestion
 │   ├── abc
 │   │   └── requests.py
-│   ├── mktdata
-│   │   ├── exchange
-│   │   ├── otc
-│   │   └── primary_mkt
-│   ├── providers
-│   │   ├── inoa.py
-│   │   ├── line.py
-│   │   └── margin_simulator_b3.py
 │   ├── registries
 │   │   └── br
+│   │       ├── bylaws
+│   │       │   └── investment_funds.py
 │   │       ├── exchange
 │   │       │   ├── securities.py
 │   │       │   └── warranty.py
-│   │       ├── primary_mkt
 │   │       └── taxation
 │   │           └── irsbr_records.py
 │   └── tradings
 │       └── br
 │           └── exchange
+│               ├── search_by_trading_session.py
 │               └── volumes.py
-├── parsers
-│   ├── dicts.py
-│   ├── folders.py
-│   ├── html.py
-│   ├── img.py
-│   ├── json.py
-│   ├── lists.py
-│   ├── lxml.py
-│   ├── numbers.py
-│   ├── object.py
-│   ├── pd.py
-│   ├── pdf.py
-│   ├── pickle.py
-│   ├── str.py
-│   ├── tgz.py
-│   ├── txt.py
-│   ├── xml.py
-│   └── yaml.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py
@@ -159,6 +121,28 @@ stpstone
     │   ├── br_bzdays.py
     │   ├── handling_dates.py
     │   └── usa_bzdays.py
+    ├── connections
+    │   ├── clouds
+    │   │   ├── aws_s3.py
+    │   │   └── sendgrid.py
+    │   ├── databases
+    │   │   ├── dabricksCLI.py
+    │   │   ├── databricks.py
+    │   │   ├── generic.py
+    │   │   ├── mongodb.py
+    │   │   ├── mysql.py
+    │   │   ├── postgresql.py
+    │   │   ├── redis.py
+    │   │   ├── sqlite.py
+    │   │   └── sqlserver.py
+    │   └── netops
+    │       ├── manager.py
+    │       └── session.py
+    ├── exchange
+    │   └── br
+    │       ├── inoa.py
+    │       ├── line.py
+    │       └── margin_simulator_b3.py
     ├── geography
     │   └── br.py
     ├── loggs
@@ -171,10 +155,27 @@ stpstone
     │   ├── onedrive.py
     │   ├── outlook.py
     │   └── windows_os.py
-    ├── multithreading
     ├── orchestrators
     │   └── airflow
     │       └── plugins.py
+    ├── parsers
+    │   ├── dicts.py
+    │   ├── folders.py
+    │   ├── html.py
+    │   ├── img.py
+    │   ├── json.py
+    │   ├── lists.py
+    │   ├── lxml.py
+    │   ├── numbers.py
+    │   ├── object.py
+    │   ├── pd.py
+    │   ├── pdf.py
+    │   ├── pickle.py
+    │   ├── str.py
+    │   ├── tgz.py
+    │   ├── txt.py
+    │   ├── xml.py
+    │   └── yaml.py
     ├── pipelines
     │   ├── asynchronous.py
     │   ├── conditional.py

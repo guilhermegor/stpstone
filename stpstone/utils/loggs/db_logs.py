@@ -22,7 +22,7 @@ class DBLogs:
             - pd.DataFrame: DataFrame with audit log information.
         """
         df_[YAML_GEN['audit_log_cols']['url']] = str_url
-        df_[YAML_GEN['audit_log_cols']['db_ref_date']] = dt_db_ref
+        df_[YAML_GEN['audit_log_cols']['ref_date']] = dt_db_ref
         df_[YAML_GEN['audit_log_cols']['log_timestamp']] = DatesBR().utc_log_ts
         return df_
 

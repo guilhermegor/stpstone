@@ -5,7 +5,7 @@ import textwrap
 from PyPDF2 import PdfFileReader
 from fpdf import FPDF
 from base64 import b64encode
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class PDFHandler:

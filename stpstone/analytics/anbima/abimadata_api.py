@@ -5,9 +5,9 @@ import pandas as pd
 from requests import request, exceptions
 from typing import List, Dict, Any, Optional
 # local libs
-from stpstone.parsers.str import StrHandler
-from stpstone.parsers.json import JsonFiles
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone._config._global_slots import YAML_ANBIMA
 

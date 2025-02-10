@@ -9,7 +9,7 @@ from typing import Dict, Union, Any, List, Tuple, Optional
 from random import shuffle
 # local libs
 from stpstone._config._global_slots import YAML_SESSION
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.create_logs import conditional_timeit
 
 

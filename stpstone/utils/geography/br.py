@@ -4,7 +4,7 @@ from requests import request
 import ast
 import sys
 sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python\Packages')
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class BrazilGeo:

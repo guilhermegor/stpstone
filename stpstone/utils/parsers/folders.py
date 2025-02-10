@@ -15,8 +15,8 @@ from io import BytesIO, TextIOWrapper, BufferedReader
 from typing import Tuple, List, Union, Optional, Dict
 from requests import Session, Response
 # local libs
-from stpstone.parsers.str import StrHandler
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.dicts import HandlingDicts
 
 
 class DirFilesManagement:
@@ -186,6 +186,10 @@ class DirFilesManagement:
         if t[1]:
             t[1] = t[1][1:]
         return t
+    
+    def get_file_extension(self, str_):
+        _, extension = os.path.splitext(str_)
+        return extension.strip('.')
 
     def download_web_file(self, url, filepath=None):
         """

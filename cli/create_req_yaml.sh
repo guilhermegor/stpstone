@@ -4,7 +4,7 @@
 PROJECT_ROOT="$(pwd)/stpstone"
 
 # prompt for folder path within the project
-read -p "Enter the folder path within the project (default: ./_config): " folder_path
+read -p "Enter the YAML folder path within the project (default: ./_config): " folder_path
 folder_path=${folder_path:-./_config}
 
 # ensure the folder path is within the project directory
@@ -44,6 +44,7 @@ logs:
   dtypes:
     FILE_NAME: str
     REF_DATE: date
+    URL: str
 
 metadata:
 
@@ -64,6 +65,7 @@ resource_example:
   timeout: (12.0, 12.0)
   cols_from_case:
   cols_to_case:
+  list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
@@ -87,6 +89,13 @@ resource_example:
         - col5
     attributes:
       attrb: Attrb
+  regex_patterns:
+    parent_pattern_1:
+      pattern_1: 
+      pattern_2:
+    parent_pattern_2:
+      pattern_1: 
+      pattern_2:
 EOF
 
-echo "YAML file created at: $file_path"
+echo "File succesfully created at: $full_dir_path/$file_name.yaml"

@@ -4,8 +4,8 @@ import pandas as pd
 from datetime import datetime, timezone
 from stpstone._config._global_slots import YAML_WGBD
 from stpstone.handling_data.html import HtmlHndler
-from stpstone.parsers.dicts import HandlingDicts
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.cals.handling_dates import DatesBR
 

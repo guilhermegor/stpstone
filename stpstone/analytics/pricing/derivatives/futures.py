@@ -13,7 +13,7 @@ from stpstone.handling_data.handlingstr import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.central._global_slots import MATURITY_WEEK_DAY_PER_CONTRACT
 from stpstone.handling_data.handling_numbers import LinearAlgebra
-from stpstone.parsers.json_format import JsonFiles
+from stpstone.utils.parsers.json_format import JsonFiles
 from stpstone.handling_data.handling_lists import HandlingLists
 
 

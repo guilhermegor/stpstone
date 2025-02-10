@@ -1,7 +1,7 @@
 ### HANDLING ONEDRIVE ISSUES ###
 
 from getpass import getuser
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class OneDrive:

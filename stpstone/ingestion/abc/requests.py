@@ -1,6 +1,8 @@
 ### ABSTRACT BASE CLASS - REQUESTS ###
 
 # pypi.org libs
+import fitz
+import re
 import backoff
 import pandas as pd
 from abc import ABC, abstractmethod
@@ -12,25 +14,27 @@ from logging import Logger
 from io import TextIOWrapper, BufferedReader, BytesIO
 from zipfile import ZipFile, BadZipFile
 # project modules
-from stpstone.parsers.dicts import HandlingDicts
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.db_logs import DBLogs
-from stpstone.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.parsers.xml import XMLFiles
-from stpstone.parsers.json import JsonFiles
+from stpstone.utils.parsers.xml import XMLFiles
+from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class HandleReqResponses(ABC):
 
     def _handle_response(self, req_resp:Response, dict_dtypes:Dict[str, Any], 
-                        bl_io_interpreting: bool = False) -> pd.DataFrame:
+                         dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None) \
+                        -> pd.DataFrame:
         if self.req_trt_injection(req_resp) is not None:
             return self.req_trt_injection(req_resp)
         elif req_resp.url.endswith('.zip'):
-            return self.handle_zip_response(req_resp, dict_dtypes, bl_io_interpreting)
+            return self.handle_zip_response(req_resp, dict_dtypes)
         elif req_resp.url.endswith('.csv'):
             return self.handle_csv_response(req_resp)
         elif req_resp.url.endswith('.xlsx'):
@@ -41,6 +45,9 @@ class HandleReqResponses(ABC):
             return self.handle_xml_response(req_resp)
         elif req_resp.url.endswith('.json'):
             return self.handle_xml_response(req_resp)
+        elif DirFilesManagement().get_file_extension(req_resp.url) in \
+            ['pdf', 'docx', 'doc', 'docm', 'dot', 'dotm']:
+            return self.handle_pdf_doc_response(req_resp, dict_regex_patterns)
         else:
             json_ = req_resp.json()
             return pd.DataFrame(json_)
@@ -51,7 +58,9 @@ class HandleReqResponses(ABC):
 
     def handle_zip_response(self, req_resp: Response, dict_dtypes: Dict[str, Any], 
                              dict_xml_keys:Optional[Dict[str, Any]]=None, 
-                             key_attrb_xml:Optional[str]=None) -> Union[pd.DataFrame, List[pd.DataFrame]]:
+                             key_attrb_xml:Optional[str]=None, 
+                             dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None) \
+                            -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
         for file_name in zipfile.namelist():
@@ -86,6 +95,10 @@ class HandleReqResponses(ABC):
                     list_.extend(df_.to_dict(orient='records'))
                 elif file_name.endswith('.json'):
                     df_ = self.handle_json_response(file)
+                    df_['FILE_NAME'] = file_name
+                    list_.extend(df_.to_dict(orient='records'))
+                elif file_name.endswith('.pdf'):
+                    df_ = self.handle_pdf_doc_response(file, dict_regex_patterns)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
                 else:
@@ -139,6 +152,57 @@ class HandleReqResponses(ABC):
         list_ser = JsonFiles().loads_message_like(json_file)
         df_ = pd.DataFrame(list_ser)
         return df_
+    
+    def handle_pdf_doc_response(self, req_resp:Response, dict_regex_patterns:Dict[str, Dict[str, str]]) \
+        -> pd.DataFrame:
+        list_pages = list()
+        list_matches = list()
+        bl_match = False
+        bytes_pdf = BytesIO(req_resp.content)
+        doc_pdf = fitz.open(
+            stream=bytes_pdf, 
+            filetype=DirFilesManagement().get_file_extension(req_resp.url)
+        )
+        # join 2 pages at a time, in order to find infos that are separated due to page break
+        for i in range(0, len(doc_pdf), 2):
+            text1 = doc_pdf[i].get_text('text') if i < len(doc_pdf) else ''
+            text2 = doc_pdf[i+1].get_text('text') if i+1 < len(doc_pdf) else ''
+            list_pages.append(text1 + '\n' + text2)
+        # looping within pages
+        for i_pg, str_page in enumerate(list_pages):
+            str_page = StrHandler().remove_diacritics(str_page)
+            #   searching for regex patterns
+            for parent, dict_ in dict_regex_patterns.items():
+                for pattern_name, pattern_regex in dict_.items():
+                    pattern_regex = StrHandler().remove_diacritics(pattern_regex)
+                    # if i_pg == 7:
+                    #     print(pattern_name, pattern_regex)
+                    #     print(str_page)
+                    #     print(f'REGEX MATCH: {re.search(pattern_regex, str_page, re.IGNORECASE)}')
+                    #     raise Exception('BREAK')
+                    regex_match = re.search(pattern_regex, str_page, re.IGNORECASE)
+                    if regex_match is not None:
+                        try:
+                            regex_group_1 = regex_match.group(1)
+                        except IndexError:
+                            regex_group_1 = 'N/A'
+                        list_matches.append({
+                            'PARENT_PATTERN': parent.upper(),
+                            'PATTERN_NAME': pattern_name.upper(),
+                            'PATTERN_REGEX': pattern_regex,
+                            'REGEX_MATCH_0': regex_match.group(0),
+                            'REGEX_MATCH_1': regex_group_1
+                        })
+                        bl_match = True
+        if bl_match == False:
+            list_matches.append({
+                    'PARENT_PATTERN': 'FILE WITH NO MATCHING REGEX',
+                    'PATTERN_NAME': 'N/A',
+                    'PATTERN_REGEX': 'N/A',
+                    'REGEX_MATCH_0': 'N/A',
+                    'REGEX_MATCH_1': 'N/A'
+                })
+        return pd.DataFrame(list_matches)
 
 
 class ABCRequests(HandleReqResponses):
@@ -156,22 +220,24 @@ class ABCRequests(HandleReqResponses):
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = self.access_token
+        self.token = self.access_token \
+            if self.dict_metadata['credentials']['token']['host'] is not None else None
 
     @property
     def access_token(self):
         url_token = StrHandler().fill_fstr_from_globals(
-            self.dict_metadata['credentials']['get_token']['host_token']
+            self.dict_metadata['credentials']['token']['host']
         )
         req_resp = self.generic_req(
-            self.dict_metadata['credentials']['get_token']['req_method'], 
+            self.dict_metadata['credentials']['token']['get']['req_method'], 
             url_token, 
-            self.dict_metadata['credentials']['get_token']['bl_verify'], 
-            self.dict_metadata['credentials']['get_token']['timeout']
+            self.dict_metadata['credentials']['token']['get']['bl_verify'], 
+            self.dict_metadata['credentials']['token']['get']['timeout']
         )
         req_resp.raise_for_status()
-        return req_resp.json()[self.dict_metadata['credentials']['keys']['token']]
+        return req_resp.json()[self.dict_metadata['credentials']['token']['keys']['token']]
 
+    # ! TODO: implement timeout
     def generic_req_w_session(
         self, 
         req_method:str,
@@ -182,14 +248,15 @@ class ABCRequests(HandleReqResponses):
         dict_payload:Optional[Dict[str, str]]=None
     ) -> Response:
         if req_method == 'GET':
-            req_resp = self.session.get(url, verify=bl_verify, timeout=tup_timeout, 
-                                        headers=dict_headers, payload=dict_payload)
+            req_resp = self.session.get(url, verify=bl_verify, 
+                                        headers=dict_headers, params=dict_payload)
         elif req_method == 'POST':
-            req_resp = self.session.post(url, verify=bl_verify, timeout=tup_timeout, 
-                                         headers=dict_headers, payload=dict_payload)
+            req_resp = self.session.post(url, verify=bl_verify, 
+                                         headers=dict_headers, data=dict_payload)
         req_resp.raise_for_status()
         return req_resp
 
+    # ! TODO: implement timeout
     @backoff.on_exception(
         backoff.constant,
         exceptions.RequestException,
@@ -205,8 +272,13 @@ class ABCRequests(HandleReqResponses):
         dict_headers:Optional[Dict[str, str]]=None,
         dict_payload:Optional[Dict[str, str]]=None
     ) -> Response:
-        req_resp = request(req_method, url, verify=bl_verify, 
-                           timeout=tup_timeout, headers=dict_headers, payload=dict_payload)
+        # print(f'URL: {url}')
+        if req_method == 'GET':
+            req_resp = request(req_method, url, verify=bl_verify, 
+                            headers=dict_headers, params=dict_payload)
+        elif req_method == 'POST':
+            req_resp = request(req_method, url, verify=bl_verify, 
+                            headers=dict_headers, data=dict_payload)
         req_resp.raise_for_status()
         return req_resp
 
@@ -250,25 +322,34 @@ class ABCRequests(HandleReqResponses):
         req_method:str, host:str, dict_dtypes:Dict[str, Any], 
         dict_headers:Optional[Dict[str, str]]=None,
         dict_payload:Optional[Dict[str, str]]=None, app:Optional[str]=None, 
-        bl_verify:bool=False, bl_io_interpreting:bool=False, 
-        tup_timeout:Tuple[float, float]=(12.0, 12.0), cols_from_case:Optional[str]=None, 
-        cols_to_case:Optional[str]=None, list_cols_drop_dupl:List[str]=None, 
-        str_fmt_dt:str='YYYY-MM-DD', type_error_action:str='raise', 
-        strt_keep_when_duplicated:str='first'
+        bl_verify:bool=False, tup_timeout:Tuple[float, float]=(12.0, 12.0), 
+        cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
+        list_cols_drop_dupl:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
+        type_error_action:str='raise', strt_keep_when_duplicated:str='first', 
+        dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None
     ) -> pd.DataFrame:
         # building url and requesting
-        url = host + app
+        url = host + app if app is not None else host
         if self.logger is not None:
-            CreateLog().infos(self.logger, f'Starting request to: {host + app}')
+            CreateLog().infos(self.logger, f'Starting request to: {url}')
         else:
-            print(f'Starting request to: {host + app}')
+            print(f'Starting request to: {url}')
         req_resp = self.generic_req(
             req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
         )
         # dealing with request content type
-        df_ = self._handle_response(req_resp, dict_dtypes, bl_io_interpreting)
+        df_ = self._handle_response(req_resp, dict_dtypes, dict_regex_patterns)
+        df_ = DBLogs().audit_log(
+            df_, 
+            url, 
+            DatesBR().build_date(
+                DatesBR().year_number(self.dt_ref), 
+                DatesBR().month_number(self.dt_ref, bl_month_mm=False), 
+                1
+            )
+        )
         if self.logger is not None:
-            CreateLog().infos(self.logger, f'Request completed successfully: {host + app}')
+            CreateLog().infos(self.logger, f'Request completed successfully: {url}')
         # standardizing
         cls_df_stdz = DFStandardization(
             HandlingDicts().merge_n_dicts(
@@ -287,16 +368,6 @@ class ABCRequests(HandleReqResponses):
             strt_keep_when_duplicated,
         )
         df_ = cls_df_stdz._pipeline(df_)
-        if self.cls_db is not None:
-            df_ = DBLogs().audit_log(
-                df_, 
-                url, 
-                DatesBR().build_date(
-                    DatesBR().year_number(self.dt_ref), 
-                    DatesBR().month_number(self.dt_ref, bl_month_mm=False), 
-                    1
-                )
-            )
         return df_
 
     def insert_table(self, str_resource: str, list_ser: Optional[List[Dict[str, Any]]] = None, 
@@ -339,19 +410,24 @@ class ABCRequests(HandleReqResponses):
                 bl_insert_or_ignore=bl_insert_or_ignore
             )
 
-    def non_iteratively_get_data(self, str_resource:str, bl_fetch:bool=False) -> pd.DataFrame:
+    def non_iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False) \
+        -> Optional[pd.DataFrame]:
         """
         Non-iteratively get raw data
         Args:
             - str_resource (str): resource name
+            - host (Optional[str]): host name
+            - bl_fetch (bool): False as default
         Returns:
             pd.DataFrame
         """
         app_ = self.dict_metadata[str_resource]['app'] if 'app' in self.dict_metadata[str_resource] \
             else self.dict_metadata[str_resource]['app']
-        host_ = self.dict_metadata[str_resource]['host'] \
+        host_ = host if host is not None else (
+            self.dict_metadata[str_resource].get('host', None) \
             if self.dict_metadata[str_resource].get('host', None) is not None \
             else self.dict_metadata['credentials']['host']
+        )
         host_ = StrHandler().fill_fstr_from_globals(host_)
         dict_headers = self.dict_metadata[str_resource]['dict_headers'] \
             if self.dict_metadata[str_resource].get('dict_headers', None) is not None \
@@ -359,7 +435,6 @@ class ABCRequests(HandleReqResponses):
         dict_payload = self.dict_metadata[str_resource]['dict_payload'] \
             if self.dict_metadata[str_resource].get('dict_payload', None) is not None \
             else self.dict_metadata['credentials'].get('dict_payload', None)
-        print('HOST NAME: {}'.format(host_))
         df_ = self.trt_req(
             self.dict_metadata[str_resource]['req_method'],
             host_,
@@ -368,12 +443,14 @@ class ABCRequests(HandleReqResponses):
             dict_payload,
             app_, 
             self.dict_metadata[str_resource]['bl_verify'],
-            self.dict_metadata[str_resource]['bl_io_interpreting'],
             self.dict_metadata[str_resource]['timeout'],
             self.dict_metadata[str_resource]['cols_from_case'],
             self.dict_metadata[str_resource]['cols_to_case'],
             self.dict_metadata[str_resource]['list_cols_drop_dupl'],
-            self.dict_metadata[str_resource]['str_fmt_dt']
+            self.dict_metadata[str_resource]['str_fmt_dt'],
+            self.dict_metadata[str_resource]['type_error_action'],
+            self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
+            self.dict_metadata[str_resource]['regex_patterns'],
         )
         if self.cls_db is not None:
             self.insert_table(
@@ -387,11 +464,14 @@ class ABCRequests(HandleReqResponses):
         else:
             return None
 
-    def iteratively_get_data(self, str_resource:str, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+    def iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False) \
+        -> Optional[pd.DataFrame]:
         """
         Iteratively get raw data
         Args:
             - str_resource (str): resource name
+            - host (Optional[str]): host name
+            - bl_fetch (bool): False as default
         Returns:
             Optional[pd.DataFrame]
         """
@@ -399,9 +479,11 @@ class ABCRequests(HandleReqResponses):
         i = 0
         app_ = self.dict_metadata[str_resource]['app'] if 'app' in self.dict_metadata[str_resource] \
             else self.dict_metadata[str_resource]['app']
-        host_ = self.dict_metadata[str_resource]['host'] \
+        host_ = host if host is not None else (
+            self.dict_metadata[str_resource].get('host', None) \
             if self.dict_metadata[str_resource].get('host', None) is not None \
             else self.dict_metadata['credentials']['host']
+        )
         host_ = StrHandler().fill_fstr_from_globals(host_)
         dict_headers = self.dict_metadata[str_resource]['dict_headers'] \
             if self.dict_metadata[str_resource].get('dict_headers', None) is not None \
@@ -409,7 +491,6 @@ class ABCRequests(HandleReqResponses):
         dict_payload = self.dict_metadata[str_resource]['dict_payload'] \
             if self.dict_metadata[str_resource].get('dict_payload', None) is not None \
             else self.dict_metadata['credentials'].get('dict_payload', None)
-        print('HOST NAME: {}'.format(host_))
         while True:
             try:
                 list_ser.extend(
@@ -421,12 +502,14 @@ class ABCRequests(HandleReqResponses):
                         dict_payload,
                         app_.format(i), 
                         self.dict_metadata[str_resource]['bl_verify'],
-                        self.dict_metadata[str_resource]['bl_io_interpreting'],
                         self.dict_metadata[str_resource]['timeout'],
                         self.dict_metadata[str_resource]['cols_from_case'],
                         self.dict_metadata[str_resource]['cols_to_case'],
                         self.dict_metadata[str_resource]['list_cols_drop_dupl'],
-                        self.dict_metadata[str_resource]['str_fmt_dt']
+                        self.dict_metadata[str_resource]['str_fmt_dt'],
+                        self.dict_metadata[str_resource]['type_error_action'],
+                        self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
+                        self.dict_metadata[str_resource]['regex_patterns'],
                     ).to_dict(orient='records')
                 )
                 if self.cls_db is not None:
@@ -449,23 +532,32 @@ class ABCRequests(HandleReqResponses):
         else:
             return None
 
-    def _source(self, str_resource:str, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+    def _source(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False) \
+        -> Optional[pd.DataFrame]:
         """
         Get/load raw data - if a class database is passed, the data collected will be inserted into 
             the respective table; please make sure this key is filled within the metadata
         Args:
             - str_resource (str): resource name
+            - host (Optional[str]): host name
+            - bl_fetch (bool): False as default
         Returns:
             Optional[pd.DataFrame]
         """
-        if StrHandler().match_string_like(self.dict_metadata[str_resource], '{*}') == True:
+        if \
+            (self.dict_metadata[str_resource]['app'] is not None) \
+            and (StrHandler().match_string_like(
+                self.dict_metadata[str_resource]['app'], '{*}') == True):
             self.dict_metadata[str_resource]['app'] = \
                 StrHandler().fill_fstr_from_globals(self.dict_metadata[str_resource]['app'])
-        if StrHandler().match_string_like(self.dict_metadata[str_resource], '{i}') == True:
-            return self.iteratively_get_data(str_resource, bl_fetch)
-        return self.non_iteratively_get_data(str_resource, bl_fetch)
+        if \
+            (self.dict_metadata[str_resource]['app'] is not None) \
+            and (StrHandler().match_string_like(
+                self.dict_metadata[str_resource]['app'], '{i}') == True):
+            return self.iteratively_get_data(str_resource, host, bl_fetch)
+        return self.non_iteratively_get_data(str_resource, host, bl_fetch)
     
-    def _sources(self, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+    def _sources(self, host:Optional[str]=None, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
         """
         Get/load raw data
         Args:
@@ -478,13 +570,13 @@ class ABCRequests(HandleReqResponses):
         list_ser = list()
         for str_resource in list(self.dict_metadata.keys()):
             if str_resource not in \
-                ['credentials', 'logs', 'metadata']:
+                ['credentials', 'logs', 'metadata', 'downstream_processes']:
                 if bl_fetch == True:
                     list_ser.extend(
                         self._source(str_resource, bl_fetch).to_dict(orient='records')
                     )
                 else:
-                    self._source(str_resource, bl_fetch)
+                    self._source(str_resource, host, bl_fetch)
         if len(list_ser) > 0:
             return pd.DataFrame(list_ser)
         else:

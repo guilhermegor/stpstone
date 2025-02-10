@@ -6,7 +6,7 @@ from io import StringIO
 from typing import Dict, Any
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class CVMDATA:

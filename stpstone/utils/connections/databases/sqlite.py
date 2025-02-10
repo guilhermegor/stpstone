@@ -6,9 +6,9 @@ from logging import Logger
 import pandas as pd
 from typing import List, Dict, Any, Optional
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.json import JsonFiles
+from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.parsers.pd import DealingPd
+from stpstone.utils.parsers.pd import DealingPd
 
 
 class SQLiteDB:

@@ -111,6 +111,9 @@ class StrHandler:
         shaved = ''.join(c for c in norm_txt if not combining(c))
         return normalize('NFC', shaved)
 
+    def normalize_text(self, str_):
+        return normalize('NFKD', str_).encode('ascii', 'ignore').decode('utf-8')
+
     def remove_end_period_marks(self, corpus, patterns='[!.?+]'):
         """
         DOCSTRING: REMOVE END PERIOD MARKS

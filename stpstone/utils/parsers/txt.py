@@ -1,7 +1,7 @@
 ### HANDLING TXT FILES ###
 
 from re import sub
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class HandlingTXTFiles:

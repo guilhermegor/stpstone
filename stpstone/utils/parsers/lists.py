@@ -6,9 +6,9 @@ import numpy as np
 from heapq import heappush, heappop
 from collections import OrderedDict, Counter
 from itertools import chain, tee, product
-from stpstone.parsers.json import JsonFiles
-from stpstone.parsers.str import StrHandler
-from stpstone.parsers.numbers import NumHandler
+from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.numbers import NumHandler
 
 
 class HandlingLists:

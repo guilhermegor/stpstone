@@ -11,11 +11,11 @@ from lxml import html
 from typing import Tuple, Optional
 from random import shuffle
 from stpstone.handling_data.html import HtmlHndler, SeleniumWD
-from stpstone.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.multithreading.mp_helper import mp_worker, mp_run_parallel
 from stpstone.documents_numbers.br import DocumentsNumbersBR

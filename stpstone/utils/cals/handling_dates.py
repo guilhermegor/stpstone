@@ -13,7 +13,7 @@ from more_itertools import unique_everseen
 from typing import List, Union, Tuple, Optional
 # local libs
 from stpstone.utils.cals.br_bzdays import BrazilBankCalendar
-from stpstone.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
