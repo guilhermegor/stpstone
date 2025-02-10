@@ -1,0 +1,20 @@
+pg_dump and pg_restore must be recognized as environment variables.
+1.1. Add the PostgreSQL bin directory to the system's environment variables (PATH). 
+    - This directory is typically located at: C:\Program Files\PostgreSQL\15\bin.
+1.2. Run the following commands in CMD to confirm:
+$ pg_dump --version
+$ pg_restore --version
+
+
+echo backup postgresql database
+
+@echo off
+set PGPASSWORD=xAPjR3hd1*
+pg_dump -h "HOST_ADDRESS" -p "PORT" -U "USER" -F c -b -f DB_BKP_COMPLETE_PATH DB_BKP_NAME
+
+
+echo retore database
+
+@echo off
+set PGPASSWORD=xAPjR3hd1*
+pg_restore -h "HOST_ADDRESS" -p "PORT" -U "USER" -d DB_BKP_NAME -a DB_BKP_COMPLETE_PATH
