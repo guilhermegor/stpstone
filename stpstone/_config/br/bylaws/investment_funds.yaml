@@ -26,7 +26,7 @@ downstream_processes:
 
 ### RESOURCES TO BE SCRAPED ###
 
-redemption_requests:
+funds_infos:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -47,15 +47,59 @@ redemption_requests:
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    PARENT_PATTERN: str
-    PATTERN_NAME: str
+    EVENT: str
+    CONDITION: str
+    ACTION: str
     PATTERN_REGEX: str
-    REGEX_MATCH_0: str
-    REGEX_MATCH_1: str
+    REGEX_GROUP_0: str
   regex_patterns:
-    xp_redemptions_1:
-      conversion: (?i)resgate\s*\n\s*convers[aã]o\s+da\s+cota:\s*(.*)
-      payment: Pagamento:\s*(D\+2\s+Dias\s+Uteis\s+contados\s+apos\s+a\s+conversao)
-    xp_redemptions_2:
-      conversion: (?i)n[aã]o\s*haver[aá]\s*resgate\s*de\s*cotas
-      payment: (?i)n[aã]o\s*haver[aá]\s*resgate\s*de\s*cotas
+    company_id:
+      xp_1:
+        name: (?i)termo\s*de\s*apura[cç][aã]o\s*da\s*consulta\s*formal\s*para\s+assembleia\s*geral\s*(extraordin[aá]ria|ordin[aá]ria)?\s*de\s*cotistas\s*do\s*([\s\S]+?)\s*cnpj
+        ein_number: | 
+          (?i)cnpj(?: n.)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
+      xp_2:
+        name: (?i)ata\s+da\s+assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+do\s+([\s\S]+?)\s+cnpj
+        ein_number: | 
+          (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}(?=\s*\(.Fundo.\))
+      xp_3:
+        name: (?i)assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+de\s+cotistas\s+do\s+([\s\S]+?)\s+cnpj
+        ein_number: | 
+          (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}(?=\s*\(.Fundo.\))
+      xp_4:
+        name: (?i)instrumento\s+particular\s+de\s+altera[cç][aã]o\s+do\s+regulamento\s+do\s+([\s\S]+?)\s+a\s+xp
+        ein_number: | 
+          (?i)cnpj\s+sob\s+o\s+nº\s+(\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2})
+      modal_1:
+        name: (?i)ata\s+de\s+assembleia\s+geral\s+de\s+cotistas\s+do\s+([\s\S]+?)\s+cnpj
+        ein_number: | 
+          (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
+      bny_mellon_1:
+        name: (?i)^(?:.*\n)*?(.*?)\s*CNPJ\s*nº\s*\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
+        ein_number: | 
+          (?i)cnpj(?: n.)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
+      vortx_1:
+        name: (?i)termo\s+de\s+apura[cç][aã]o\s+da\s+consulta\s+formal\s+(?:do|da)\s+([\s\S]+?)\s+CNPJ\s+SOB\s+O\s+n.
+        ein_number: | 
+          (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
+    fund_structure:
+      xp_1:
+        liquidity_profile: (?i)condom[ií]nio:\s*(aberto|fechado)
+      xp_2:
+        liquidity_profile: (?i)condom[ií]nio\s*(aberto|fechado)
+    redemptions:
+      xp_1:
+        conversion: (?i)resgate\s*\n\s*convers[aã]o\s+da\s+cota:\s*(.*)
+        payment: (?i)pagamento:\s*(D\+2\s+Dias\s+Uteis\s+contados\s+apos\s+a\s+conversao)
+      xp_2:
+        conversion: (?i)n[aã]o\s*haver[aá]\s*resgate\s*de\s*cotas
+        payment: (?i)n[aã]o\s*haver[aá]\s*resgate\s*de\s*cotas
+      xp_3:
+        conversion: (?i)regime\s*fechado
+        payment: (?i)regime\s*fechado
+      xp_4:
+        conversion: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+1º\s+dia\s+[uú]til
+        payment: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+1º\s+dia\s+[uú]til
+      modal_1:
+        conversion: (?i)convers[aã]o\s+das\s+cotas\s+no\s+resgate:\s*(.*)
+        payment: (?i)pagamento\s+do\s+resgate:\s*(.*)

@@ -157,7 +157,6 @@ class HandleReqResponses(ABC):
         -> pd.DataFrame:
         list_pages = list()
         list_matches = list()
-        bl_match = False
         bytes_pdf = BytesIO(req_resp.content)
         doc_pdf = fitz.open(
             stream=bytes_pdf, 
@@ -168,41 +167,42 @@ class HandleReqResponses(ABC):
             text1 = doc_pdf[i].get_text('text') if i < len(doc_pdf) else ''
             text2 = doc_pdf[i+1].get_text('text') if i+1 < len(doc_pdf) else ''
             list_pages.append(text1 + '\n' + text2)
-        # looping within pages
         for i_pg, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics(str_page)
-            #   searching for regex patterns
-            for parent, dict_ in dict_regex_patterns.items():
-                for pattern_name, pattern_regex in dict_.items():
-                    pattern_regex = StrHandler().remove_diacritics(pattern_regex)
-                    # if i_pg == 7:
-                    #     print(pattern_name, pattern_regex)
-                    #     print(str_page)
-                    #     print(f'REGEX MATCH: {re.search(pattern_regex, str_page, re.IGNORECASE)}')
-                    #     raise Exception('BREAK')
-                    regex_match = re.search(pattern_regex, str_page, re.IGNORECASE)
-                    if regex_match is not None:
-                        try:
-                            regex_group_1 = regex_match.group(1)
-                        except IndexError:
-                            regex_group_1 = 'N/A'
-                        list_matches.append({
-                            'PARENT_PATTERN': parent.upper(),
-                            'PATTERN_NAME': pattern_name.upper(),
-                            'PATTERN_REGEX': pattern_regex,
-                            'REGEX_MATCH_0': regex_match.group(0),
-                            'REGEX_MATCH_1': regex_group_1
-                        })
-                        bl_match = True
-        if bl_match == False:
-            list_matches.append({
-                    'PARENT_PATTERN': 'FILE WITH NO MATCHING REGEX',
-                    'PATTERN_NAME': 'N/A',
-                    'PATTERN_REGEX': 'N/A',
-                    'REGEX_MATCH_0': 'N/A',
-                    'REGEX_MATCH_1': 'N/A'
-                })
-        return pd.DataFrame(list_matches)
+            for str_event, dict_l1 in dict_regex_patterns.items():
+                for str_condition, dict_l2 in dict_l1.items():
+                    for str_action, pattern_regex in dict_l2.items():
+                        pattern_regex = StrHandler().remove_diacritics(pattern_regex)
+                        #   find all matches without newlines
+                        regex_match = re.search(
+                            pattern_regex, 
+                            str_page, 
+                            flags=re.DOTALL | re.MULTILINE
+                        )
+                        if regex_match is not None:
+                            dict_ = {
+                                'EVENT': str_event.upper(),
+                                'CONDITION': str_condition.upper(),
+                                'ACTION': str_action.upper(),
+                                'PATTERN_REGEX': pattern_regex
+                            }
+                            for i_match in range(0, len(regex_match.groups()) + 1):
+                                regex_group = regex_match.group(i_match).replace('\n', ' ')
+                                #   remove double spaces and trim the string
+                                regex_group = re.sub(r'\s+', ' ', regex_group).strip()
+                                dict_[f'REGEX_GROUP_{i_match}'] = regex_group
+                            list_matches.append(dict_)
+                        else:
+                            list_matches.append({
+                                'EVENT': str_event.upper(),
+                                'CONDITION': 'N/A',
+                                'ACTION': str_action.upper(),
+                                'PATTERN_REGEX': 'zzN/A',
+                                'REGEX_GROUP_0': 'N/A'
+                            })
+        df_ = pd.DataFrame(list_matches)
+        df_.drop_duplicates(inplace=True)
+        return df_
 
 
 class ABCRequests(HandleReqResponses):

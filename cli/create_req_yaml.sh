@@ -90,12 +90,13 @@ resource_example:
     attributes:
       attrb: Attrb
   regex_patterns:
-    parent_pattern_1:
-      pattern_1: 
-      pattern_2:
-    parent_pattern_2:
-      pattern_1: 
-      pattern_2:
+    event:
+      condition_1:
+        action_1: pattern_regex_1
+        action_2: pattern_regex_2
+      condition_2:
+        action_1: pattern_regex_1
+        action_2: pattern_regex_2
 EOF
 
 echo "File succesfully created at: $full_dir_path/$file_name.yaml"
