@@ -79,6 +79,7 @@ resource_example:
     COL_3: int
     COL_4: float
     COL_5: category
+  df_read_params:
   xml_keys:
     tags:
       tag_parent:

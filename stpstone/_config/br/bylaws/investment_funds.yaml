@@ -55,31 +55,35 @@ funds_infos:
   regex_patterns:
     company_id:
       xp_1:
-        name: (?i)termo\s*de\s*apura[cç][aã]o\s*da\s*consulta\s*formal\s*para\s+assembleia\s*geral\s*(extraordin[aá]ria|ordin[aá]ria)?\s*de\s*cotistas\s*do\s*([\s\S]+?)\s*cnpj
+        name: (?i)termo\s*de\s*apura[cç][aã]o\s*da\s*consulta\s*formal\s*para\s+assembleia\s*geral\s*(extraordin[aá]ria|ordin[aá]ria)?\s*de\s*cotistas\s*do\s*([^*]+?)\s*cnpj
         ein_number: | 
           (?i)cnpj(?: n.)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
       xp_2:
-        name: (?i)ata\s+da\s+assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+do\s+([\s\S]+?)\s+cnpj
+        name: (?i)ata\s+da\s+assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+do\s+([^*]+?)\s+cnpj
         ein_number: | 
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}(?=\s*\(.Fundo.\))
       xp_3:
-        name: (?i)assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+de\s+cotistas\s+do\s+([\s\S]+?)\s+cnpj
+        name: (?i)assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+de\s+cotistas\s+do\s+([^*]+?)\s+cnpj
         ein_number: | 
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}(?=\s*\(.Fundo.\))
       xp_4:
-        name: (?i)instrumento\s+particular\s+de\s+altera[cç][aã]o\s+do\s+regulamento\s+do\s+([\s\S]+?)\s+a\s+xp
+        name: (?i)instrumento\s+particular\s+de\s+altera[cç][aã]o\s+do\s+regulamento\s+do\s+([^*]+?)\s+a\s+xp
         ein_number: | 
           (?i)cnpj\s+sob\s+o\s+nº\s+(\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2})
+      xp_5:
+        name: (?i)termo\s*de\s*apura[cç][aã]o\s*da\s*consulta\s*formal\s*para\s+assembleia\s*geral\s*(extraordin[aá]ria|ordin[aá]ria)?\s*de\s*cotistas\s*do\s*([^*]+?)\s*cnpj
+        ein_number: | 
+          (?i)cnpj(?: n.*)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
       modal_1:
-        name: (?i)ata\s+de\s+assembleia\s+geral\s+de\s+cotistas\s+do\s+([\s\S]+?)\s+cnpj
+        name: (?i)ata\s+de\s+assembleia\s+geral\s+de\s+cotistas\s+do\s+([^*]+?)\s+cnpj
         ein_number: | 
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
       bny_mellon_1:
         name: (?i)^(?:.*\n)*?(.*?)\s*CNPJ\s*nº\s*\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
-        ein_number: | 
+        ein_number: |
           (?i)cnpj(?: n.)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
       vortx_1:
-        name: (?i)termo\s+de\s+apura[cç][aã]o\s+da\s+consulta\s+formal\s+(?:do|da)\s+([\s\S]+?)\s+CNPJ\s+SOB\s+O\s+n.
+        name: (?i)termo\s+de\s+apura[cç][aã]o\s+da\s+consulta\s+formal\s+(?:do|da)\s+([^*]+?)\s+CNPJ\s+SOB\s+O\s+n.
         ein_number: | 
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
     fund_structure:
@@ -89,17 +93,95 @@ funds_infos:
         liquidity_profile: (?i)condom[ií]nio\s*(aberto|fechado)
     redemptions:
       xp_1:
-        conversion: (?i)resgate\s*\n\s*convers[aã]o\s+da\s+cota:\s*(.*)
-        payment: (?i)pagamento:\s*(D\+2\s+Dias\s+Uteis\s+contados\s+apos\s+a\s+conversao)
+        conversion: (?i)resgate[^.*]*?sem\s+taxa\s+de\s+sa.da[^*]*?com\s+taxa\s+de\s+sa.da.
+        payment: (?i)\d{1}(o|º)[^*]*?subsequente\s+.\s+data\s+da\s+convers.o
       xp_2:
+        conversion: (?i)data\s+de\s+conversao\s+[^*]*?pedido\s+(de|do)\s+resgate
+        payment: (?i)data\s+de\s+pagamento\s+do\s+resgate[^+]*?convers.o
+      xp_3:
+        conversion: (?i)resgate\s*\n\s*convers[aã]o\s+da\s+cota:\s*(.*)
+        payment: (?i)pagamento:\s*(D\+\d\s+Dias\s+Uteis\s+contados\s+apos\s+a\s+conversao)
+      xp_4:
         conversion: (?i)n[aã]o\s*haver[aá]\s*resgate\s*de\s*cotas
         payment: (?i)n[aã]o\s*haver[aá]\s*resgate\s*de\s*cotas
-      xp_3:
+      xp_5:
         conversion: (?i)regime\s*fechado
         payment: (?i)regime\s*fechado
-      xp_4:
+      xp_6:
+        conversion: (?i)resgate\s+\d{1,2}:\d{1,2}\s+d\+\d{1}\s+\d{1,2}.\s+dia\s+.til[^.]*solicita[cç][aã]o
+        payment: (?i)subsequente\s+[aà]\s+data\s+da\s+solicita[cç][aã]o[^.]*?convers[aã]o
+      xp_7:
+        conversion: (?i)resgate\s+convers.o\s+da\s+cota(:|)\s+[^.]*pagamento
+        payment: (?i)pagamento(:|)\s+[^.*]*?hor.rio
+      xp_8:
+        conversion: (?i)resgate\s+d\+\d{1}\s+d\+\d{1}
+        payment: (?i)mesm(a|o)\s+[^.]*convers.o
+      xp_9:
+        conversion: (?i)Resgate\s+convers.o\s+da\s+cota[^.]*?pagamento
+        payment: (?i)Pagamento:\s*(D\+\d+\s*Dias úteis)
+      xp_10:
+        conversion: (?i)resgate\s+d\+\d{1}[^.*]*\d{1}
+        payment: (?i)\d*\s+dia\s+([uú]til)\s+subsequente\s+[aà]\s+data\s+da\s+convers.o
+      xp_11:
+        conversion: (?i)resgate\s+[^.*]*?(corridos|.teis)
+        payment: (?i)\d*.\s+dia\s+([uú]til)\s+subsequente\s+[aà]\s+data\s+da\s+convers.o
+      xp_12:
+        conversion: (?i)resgate\s+[^.*]*?(corridos|.teis)
+        payment: (?i)resgate\s+d\+\d{1}\s+d\+\d{1}\s+dias\s+(corridos|ut[eé]is)\s+\d(o|º)\s+dia\s+([uú]til|corrido|)\s+subsequente\s+[aà]\s+data\s+da\s+conversao
+      xp_13:
+        conversion: (?i)resgateconversao\s+da\s+cota.d\+\d{1,2}
+        payment: pagamento:d\+\d{1,2}\s+dia[^*]*?
+      xp_14:
+        conversion: (?i)data\s+de\s+convers[aã]o[^*]*?pedido\s+de\s+resgate
+        payment: pagamento:d\+\d{1,2}\s+dia[^*]*?horario
+      xp_15:
+        conversion: (?i)data\s+de\s+convers[aã]o[^*]*?pedido\s+de\s+resgate
+        payment: (?i)data\s+de\s+pagamento\s+do\s+resgate[^*]*?convers[aã]o\s+(de|da|das)\s+cotas
+      xp_16:
+        conversion: (?i)resgate(.|)conversao[^*]*?pagamento
+        payment: (?i)pagamento:d\+\d{1,2}\s+dia\s+(.til)
+      xp_17:
+        conversion: (?i)o\s+cotista+\s+n[aã]o\s+poder[aá]\s+requerer\s+o\s+resgate\s+[^*]*?\.
+        payment: (?i)o\s+cotista+\s+n[aã]o\s+poder[aá]\s+requerer\s+o\s+resgate\s+[^*]*?\.
+      xp_18:
+        conversion: (?i)d\+\d{1,2}\s+dia(s|)\s+(corridos|[uú]teis)\s+d\+\d{1,2}\s+dia(s|)\s+[^*]*?solicita[cç][aã]o\s+de\s+aplica[cç][aã]o\s+e\s+resgate
+        payment: (?i)d\+\d{1,2}\s+dia(s|)\s+(corridos|[uú]teis)\s+d\+\d{1,2}\s+dia(s|)\s+[^*]*?solicita[cç][aã]o\s+de\s+aplica[cç][aã]o\s+e\s+resgate
+      xp_19:
+        conversion: (?i)condom[ií]nio\s+fechado
+        payment: (?i)condom[ií]nio\s+fechado
+      xp_20:
+        conversion: (?i)resgate[^*]*?convers[aã]o\s+da\s+cota[^*]*?convers[aã]o
+        payment: (?i)convers[aã]o\s+da\s+cota[^*]*?hor[aá]rio
+      xp_21:
+        conversion: (?i)resgate[^*]*?pagamento
+        payment: (?i)resgate[^*]*?pagamento[^*?]*?convers[aã]o
+      xp_22:
+        conversion: (?i)(resgate\s+convers[aã]o\s+[^*]*?(.teis|corridos))[\s\S]*?(convers.o\s+[^*]*?movimenta..o)
+        payment: (?i)(resgate\s+convers[aã]o\s+[^*]*?(.teis|corridos))[\s\S]*?(convers.o\s+[^*]*?movimenta..o)
+      xp_23:
+        conversion: (?i)resgate[^*]*?movimenta..o
+        payment: (?i)resgate[^*]*?movimenta..o
+      xp_24:
+        conversion: (?i)ser[aã]o\s+permitidas\s+a\s+transfer[eê]ncia\s+e\s+o\s+resgate\s+de\s+cotas[^*]*?cada\s+clube\s+de\s+investimento
+        payment: (?i)resgate\s+de\s+cotas\s[^*]*?contados\s+da\s+data\s+(da|de)\s+formaliza[cç][aã]o\s(do\s+pedido|)(,\s+sem\s+a\s+cobran.a\s+de\s+qualquer\s+taxa|)
+      xp_revisao_1:
         conversion: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+1º\s+dia\s+[uú]til
         payment: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+1º\s+dia\s+[uú]til
+      xp_revisao_2:
+        conversion: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+1.\s+dia\s+.til
+        payment: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+1.\s+dia\s+.til
+      xp_revisao_3:
+        conversion: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+2.\s+dia\s+.til
+        payment: (?i)resgate\s+.*\s+d\+0\s+d\+0\s+2.\s+dia\s+.til
+      xp_revisao_4:
+        conversion: (?i)resgate\s+\d{1,2}:\d{1,2}\s+d\+\d{1}\s+d\+\d{1}\s+dias\s+corridos\s+subsequentes\s+ao\s+da\s+solicita[cç][aã]o\s+\d{1}.\s+dia\s+.til
+        payment: (?i)resgate\s+\d{1,2}:\d{1,2}\s+d\+\d{1}\s+d\+\d{1}\s+dias\s+corridos\s+subsequentes\s+ao\s+da\s+solicita[cç][aã]o\s+\d{1}.\s+dia\s+.til
+      xp_revisao_5:
+        conversion: (?i)resgate\s+\d{1,2}:\d{1,2}\s+d\+\d{1}\s+d\+\d{1}\s+dias\s+corridos\s+subsequentes\s+ao\s+da\s+solicita[cç][aã]o\s+\d{1}.\s+dia\s+.til
+        payment: (?i)resgate\s+\d{1,2}:\d{1,2}\s+d\+\d{1}\s+d\+\d{1}\s+dias\s+corridos\s+subsequentes\s+ao\s+da\s+solicita[cç][aã]o\s+\d{1}.\s+dia\s+.til
+      xp_revisao_6:
+        conversion: (?i)n[aã]o\s+[eé]\s+permitido\s+o\s+resgate\s+d(e|as)\s+cotas\s+do\s+fundo
+        payment: (?i)n[aã]o\s+[eé]\s+permitido\s+o\s+resgate\s+d(e|as)\s+cotas\s+do\s+fundo
       modal_1:
         conversion: (?i)convers[aã]o\s+das\s+cotas\s+no\s+resgate:\s*(.*)
         payment: (?i)pagamento\s+do\s+resgate:\s*(.*)

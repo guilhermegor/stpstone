@@ -3,8 +3,11 @@
 # pypi.org libs
 import fitz
 import re
+import os
 import backoff
+import unicodedata
 import pandas as pd
+from getpass import getuser
 from abc import ABC, abstractmethod
 from datetime import datetime
 from requests import exceptions, request, Response
@@ -28,26 +31,37 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 
 class HandleReqResponses(ABC):
 
-    def _handle_response(self, req_resp:Response, dict_dtypes:Dict[str, Any], 
-                         dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None) \
-                        -> pd.DataFrame:
+    def remove_diacritics(self, str_):
+        str_ = str_.lower()
+        str_ = str_.replace('\n', ' ')
+        return ''.join(c for c in unicodedata.normalize('NFKD', str_) if not unicodedata.combining(c))
+
+    def _handle_response(
+        self, 
+        req_resp:Response, 
+        dict_dtypes:Dict[str, Any], 
+        dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None, 
+        dict_df_read_params:Optional[Dict[str, Any]]=None, 
+        bl_debug:bool=False
+    ) -> pd.DataFrame:
         if self.req_trt_injection(req_resp) is not None:
             return self.req_trt_injection(req_resp)
         elif req_resp.url.endswith('.zip'):
             return self.handle_zip_response(req_resp, dict_dtypes)
-        elif req_resp.url.endswith('.csv'):
-            return self.handle_csv_response(req_resp)
+        elif \
+            (req_resp.url.endswith('.csv')) \
+            or (req_resp.url.endswith('.txt')) \
+            or (req_resp.url.endswith('.asp')):
+            return self.handle_csv_response(req_resp, dict_df_read_params)
         elif req_resp.url.endswith('.xlsx'):
-            return self.handle_excel_response(req_resp)
-        elif req_resp.url.endswith('.txt'):
-            return self.handle_csv_response(req_resp)
+            return self.handle_excel_response(req_resp, dict_df_read_params)
         elif req_resp.url.endswith('.xml'):
             return self.handle_xml_response(req_resp)
         elif req_resp.url.endswith('.json'):
             return self.handle_xml_response(req_resp)
         elif DirFilesManagement().get_file_extension(req_resp.url) in \
             ['pdf', 'docx', 'doc', 'docm', 'dot', 'dotm']:
-            return self.handle_pdf_doc_response(req_resp, dict_regex_patterns)
+            return self.handle_pdf_doc_response(req_resp, dict_regex_patterns, bl_debug)
         else:
             json_ = req_resp.json()
             return pd.DataFrame(json_)
@@ -59,7 +73,8 @@ class HandleReqResponses(ABC):
     def handle_zip_response(self, req_resp: Response, dict_dtypes: Dict[str, Any], 
                              dict_xml_keys:Optional[Dict[str, Any]]=None, 
                              key_attrb_xml:Optional[str]=None, 
-                             dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None) \
+                             dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None, 
+                             dict_df_read_params:Optional[Dict[str, Any]]=None) \
                             -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
@@ -77,16 +92,14 @@ class HandleReqResponses(ABC):
                         for df_ in nested_df:
                             df_['FILE_NAME'] = file_name
                         list_.extend(nested_df)
-                elif file_name.endswith('.csv'):
-                    df_ = self.handle_csv_response(file)
+                elif \
+                    (file_name.endswith('.csv')) \
+                    or (file_name.endswith('.txt')):
+                    df_ = self.handle_csv_response(file, dict_df_read_params)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
                 elif file_name.endswith('.xlsx'):
-                    df_ = self.handle_excel_response(file)
-                    df_['FILE_NAME'] = file_name
-                    list_.extend(df_.to_dict(orient='records'))
-                elif file_name.endswith('.txt'):
-                    df_ = self.handle_csv_response(file)
+                    df_ = self.handle_excel_response(file. dict_df_read_params)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
                 elif file_name.endswith('.xml'):
@@ -110,15 +123,23 @@ class HandleReqResponses(ABC):
         else:
             return pd.DataFrame()
 
-    def handle_csv_response(self, file:Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+    def handle_csv_response(
+        self, 
+        file:Union[BytesIO, TextIOWrapper], 
+        dict_df_read_params:Optional[Dict[str, Any]]
+    ) -> pd.DataFrame:
         if isinstance(file, BytesIO):
             file.seek(0)
-        return pd.read_csv(file, delimiter=',')
+        return pd.read_csv(file, **dict_df_read_params)
 
-    def handle_excel_response(self, file:Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+    def handle_excel_response(
+        self, 
+        file:Union[BytesIO, TextIOWrapper], 
+        dict_df_read_params:Optional[Dict[str, Any]]
+    ) -> pd.DataFrame:
         if isinstance(file, BytesIO):
             file.seek(0)
-        return pd.read_excel(file)
+        return pd.read_excel(file, **dict_df_read_params)
 
     def handle_xml_response(self, file:Union[BytesIO, TextIOWrapper], 
                              dict_xml_keys:Dict[str, Any], key_attrb_xml:Optional[str]=None) \
@@ -153,10 +174,19 @@ class HandleReqResponses(ABC):
         df_ = pd.DataFrame(list_ser)
         return df_
     
-    def handle_pdf_doc_response(self, req_resp:Response, dict_regex_patterns:Dict[str, Dict[str, str]]) \
+    def handle_pdf_doc_response(self, req_resp:Response, dict_regex_patterns:Dict[str, Dict[str, str]], 
+                                bl_debug:bool=False) \
         -> pd.DataFrame:
+        # setting variables
         list_pages = list()
         list_matches = list()
+        dict_count_matches = dict()
+        dict_actions_per_event = {
+            evnt: len(dict_l2) 
+            for evnt, dict_l1 in dict_regex_patterns.items() 
+            for _, dict_l2 in dict_l1.items()
+        }
+        # reading pdf/doc
         bytes_pdf = BytesIO(req_resp.content)
         doc_pdf = fitz.open(
             stream=bytes_pdf, 
@@ -167,19 +197,64 @@ class HandleReqResponses(ABC):
             text1 = doc_pdf[i].get_text('text') if i < len(doc_pdf) else ''
             text2 = doc_pdf[i+1].get_text('text') if i+1 < len(doc_pdf) else ''
             list_pages.append(text1 + '\n' + text2)
-        for i_pg, str_page in enumerate(list_pages):
-            str_page = StrHandler().remove_diacritics(str_page)
+        # loop through each page looking for regex pattern, where event is the info that is targeted, 
+        #   condition is a case of match found previously, and action is the subclass of action with 
+        #   an associated regex
+        for i, str_page in enumerate(list_pages):
+            str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
+            if bl_debug == True:
+                print('PG {}/{}'.format(i+1, len(list_pages)))
+                print('DICT ACTIONS PER EVENT: ', dict_actions_per_event)
+                print('DICT COUNT MATCHES: ', dict_count_matches)
+                print('LEN COUNT MATHCES: ', len(dict_count_matches))
+                if i == 10:
+                    print(str_page)
+                    root_path = os.path.abspath(os.path.join(os.path.dirname(
+                        os.path.realpath(__file__)), "..", "..", ".."))
+                    path_json = os.path.join(root_path, 'data/test-str-page_{}_{}_{}.json'.format(
+                        getuser(), 
+                        DatesBR().curr_date.strftime('%Y%m%d'),
+                        DatesBR().curr_time.strftime('%H%M%S')
+                    ))
+                    JsonFiles().dump_message(str_page, path_json)
+            #   if, for every event, all the actions have at least one match, then break the loop
+            if \
+                (len(dict_count_matches) > 0) \
+                and (
+                    all([
+                        len([_ for _, count in dict_count_matches[evnt].items() if count > 0]) \
+                            >= num_actions 
+                        for evnt, num_actions in dict_actions_per_event.items() 
+                        if evnt in dict_count_matches
+                    ]) == True
+                ):
+                break
+            #   looping within pages to find regex matches for every event/action
             for str_event, dict_l1 in dict_regex_patterns.items():
+                if bl_debug == True:
+                    print(f'EVENT: {str_event}')
                 for str_condition, dict_l2 in dict_l1.items():
+                    if bl_debug == True:
+                        print(f'CONDITION: {str_condition}')
                     for str_action, pattern_regex in dict_l2.items():
-                        pattern_regex = StrHandler().remove_diacritics(pattern_regex)
-                        #   find all matches without newlines
+                        #   checking wheter should stop at first match
+                        if str_event not in dict_count_matches:
+                            dict_count_matches[str_event] = dict()
+                        if str_action not in dict_count_matches[str_event]:
+                            dict_count_matches[str_event][str_action] = 0
+                        if (all([dict_count_matches[str_event][k] >= 1 
+                                 for k in list(dict_count_matches[str_event].keys())]) == True): break
+                        pattern_regex = StrHandler().remove_diacritics_nfkd(
+                            pattern_regex, bl_lower_case=False)
+                        if bl_debug == True:
+                            print(str_action, pattern_regex)
                         regex_match = re.search(
                             pattern_regex, 
                             str_page, 
-                            flags=re.DOTALL | re.MULTILINE
+                            # flags=re.DOTALL | re.MULTILINE
                         )
                         if regex_match is not None:
+                            dict_count_matches[str_event][str_action] += 1
                             dict_ = {
                                 'EVENT': str_event.upper(),
                                 'CONDITION': str_condition.upper(),
@@ -326,7 +401,8 @@ class ABCRequests(HandleReqResponses):
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
         list_cols_drop_dupl:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
         type_error_action:str='raise', strt_keep_when_duplicated:str='first', 
-        dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None
+        dict_regex_patterns:Optional[Dict[str, Dict[str, str]]]=None, 
+        dict_df_read_params:Optional[Dict[str, Any]]=None, bl_debug:bool=False
     ) -> pd.DataFrame:
         # building url and requesting
         url = host + app if app is not None else host
@@ -338,7 +414,9 @@ class ABCRequests(HandleReqResponses):
             req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
         )
         # dealing with request content type
-        df_ = self._handle_response(req_resp, dict_dtypes, dict_regex_patterns)
+        df_ = self._handle_response(
+            req_resp, dict_dtypes, dict_regex_patterns, dict_df_read_params, bl_debug
+        )
         df_ = DBLogs().audit_log(
             df_, 
             url, 
@@ -410,8 +488,8 @@ class ABCRequests(HandleReqResponses):
                 bl_insert_or_ignore=bl_insert_or_ignore
             )
 
-    def non_iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False) \
-        -> Optional[pd.DataFrame]:
+    def non_iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
+                                 bl_debug:bool=False) -> Optional[pd.DataFrame]:
         """
         Non-iteratively get raw data
         Args:
@@ -451,6 +529,8 @@ class ABCRequests(HandleReqResponses):
             self.dict_metadata[str_resource]['type_error_action'],
             self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
             self.dict_metadata[str_resource]['regex_patterns'],
+            self.dict_metadata[str_resource]['df_read_params'],
+            bl_debug
         )
         if self.cls_db is not None:
             self.insert_table(
@@ -464,7 +544,8 @@ class ABCRequests(HandleReqResponses):
         else:
             return None
 
-    def iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False) \
+    def iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
+                             bl_debug:bool=False) \
         -> Optional[pd.DataFrame]:
         """
         Iteratively get raw data
@@ -510,6 +591,8 @@ class ABCRequests(HandleReqResponses):
                         self.dict_metadata[str_resource]['type_error_action'],
                         self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
                         self.dict_metadata[str_resource]['regex_patterns'],
+                        self.dict_metadata[str_resource]['df_read_params'],
+                        bl_debug
                     ).to_dict(orient='records')
                 )
                 if self.cls_db is not None:
@@ -532,7 +615,8 @@ class ABCRequests(HandleReqResponses):
         else:
             return None
 
-    def _source(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False) \
+    def _source(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
+                bl_debug:bool=False) \
         -> Optional[pd.DataFrame]:
         """
         Get/load raw data - if a class database is passed, the data collected will be inserted into 
@@ -554,10 +638,11 @@ class ABCRequests(HandleReqResponses):
             (self.dict_metadata[str_resource]['app'] is not None) \
             and (StrHandler().match_string_like(
                 self.dict_metadata[str_resource]['app'], '{i}') == True):
-            return self.iteratively_get_data(str_resource, host, bl_fetch)
-        return self.non_iteratively_get_data(str_resource, host, bl_fetch)
+            return self.iteratively_get_data(str_resource, host, bl_fetch, bl_debug)
+        return self.non_iteratively_get_data(str_resource, host, bl_fetch, bl_debug)
     
-    def _sources(self, host:Optional[str]=None, bl_fetch:bool=False) -> Optional[pd.DataFrame]:
+    def _sources(self, host:Optional[str]=None, bl_fetch:bool=False, bl_debug:bool=False) \
+        -> Optional[pd.DataFrame]:
         """
         Get/load raw data
         Args:
@@ -576,7 +661,7 @@ class ABCRequests(HandleReqResponses):
                         self._source(str_resource, bl_fetch).to_dict(orient='records')
                     )
                 else:
-                    self._source(str_resource, host, bl_fetch)
+                    self._source(str_resource, host, bl_fetch, bl_debug)
         if len(list_ser) > 0:
             return pd.DataFrame(list_ser)
         else:

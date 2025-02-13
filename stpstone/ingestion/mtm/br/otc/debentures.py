@@ -1,4 +1,4 @@
-### BRAZILLIAN INVETMENT FUNDS BYLAWS ###
+### DEBENTURES MTM INGESTION ###
 
 # pypi.org libs
 import pandas as pd
@@ -8,29 +8,41 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
-from stpstone._config._global_slots import YAML_INVESTMENT_FUNDS_BYLAWS
+from stpstone._config._global_slots import YAML_DEBENTURES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class InvestmentFundsBylaws(ABCRequests):
+class DebenturesComBR(ABCRequests):
+    """
+    Debentures MTM ingestion
+    Metadata:
+        - https://www.debentures.com.br/exploreosnd/exploreosnd.asp
+    """
 
     def __init__(
         self,
         session:Optional[ReqSession]=None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_beg:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 10),
+        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
         self.session = session
-        self.dt_ref = dt_ref
+        self.dt_beg = dt_beg
+        self.dt_end = dt_end
         self.cls_db = cls_db
         self.logger = logger
+        self.dt_ref = dt_end
+        self.dt_beg_yyyymmdd = dt_beg.strftime('%Y%m%d')
+        self.dt_end_yyyymmdd = dt_end.strftime('%Y%m%d')
+        self.dt_beg_ddmmyyyy = dt_beg.strftime('%d/%m/%Y')
+        self.dt_end_ddmmyyyy = dt_end.strftime('%d/%m/%Y')
         super().__init__(
-            dict_metadata=YAML_INVESTMENT_FUNDS_BYLAWS,
+            dict_metadata=YAML_DEBENTURES,
             session=session,
-            dt_ref=dt_ref,
+            dt_ref=dt_end,
             cls_db=cls_db,
             logger=logger
         )

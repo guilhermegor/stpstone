@@ -1,0 +1,291 @@
+### CONFIGURATION TOOLS###
+
+credentials:
+  host: https://www.debentures.com.br/exploreosnd/consultaadados/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+downstream_processes:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+mtm:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: emissoesdedebentures/puhistorico_e.asp?op_exc=Nada&ativo=&dt_ini={dt_beg_ddmmyyyy}&dt_fim={dt_end_ddmmyyyy}&Submit.x=30&Submit.y=6.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: debentures_com_br_mtm
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    Data do PU: date
+    Ativo: str
+    Valor Nominal: float
+    Juros: float
+    Prêmio: float
+    Preço Unitário: float 
+    Critério de Cálculo: category
+    Situação: category
+  df_read_params:
+    encoding: latin1
+    decimal: ','
+    thousands: '.'
+    low_memory: False
+    skiprows: 2
+    sep: \t
+
+infos:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: emissoesdedebentures/caracteristicas_e.asp
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: debentures_com_br_infos
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    Codigo do Ativo: str
+    Empresa: str
+    Serie: str
+    Emissao: int
+    IPO: str
+    Situacao: str
+    ISIN: str
+    Registro CVM da Emissao: str
+    Data de Registro CVM da Emissao: date
+    Registro CVM do Programa: str
+    Data de Registro CVM do Programa: date
+    Data de Emissao: date
+    Data de Vencimento: date
+    Motivo de Saida: str
+    Data de Saida / Novo Vencimento: date
+    Data do Inicio da Rentabilidade: date
+    Data do Inicio da Distribuicao: date
+    Data da Proxima Repactuacao: date
+    Ato Societario (1): str
+    Data do Ato (1): date
+    Ato Societario (2): str
+    Data do Ato (2): date
+    Forma: str
+    Garantia/Especie: str
+    Classe: category
+    Quantidade Emitida: int
+    Artigo 14: str
+    Artigo 24: str
+    Quantidade em Mercado: int
+    Quantidade em Tesouraria: int
+    Quantidade Resgatada: int
+    Quantidade Cancelada: int
+    Quantidade Convertida no SND: int
+    Quantidade Convertida fora do SND: int
+    Quantidade Permutada no SND: int
+    Quantidade Permutada fora do SND: int
+    Unidade Monetaria: str
+    Valor Nominal na Emissao: float
+    Valor Nominal Atual: float
+    Data Ult. VNA: date
+    indice: str
+    Tipo: str
+    Criterio de Calculo: str
+    Dia de Referencia para indice de Precos: str
+    Criterio para indice: str
+    Corrige a cada: str
+    Percentual Multiplicador/Rentabilidade: float
+    Limite da TJLP: float
+    Tipo de Tratamento do Limite da TJLP: str
+    Juros Criterio Antigo do SND: str
+    Premios Criterio Antigo do SND: str
+    Amortizacao - Taxa: float
+    Amortizacao - Cada: str
+    Amortizacao - Unidade: str
+    Amortizacao - Carencia: str
+    Amortizacao - Criterio: str
+    Tipo de Amortizacao: str
+    Juros Criterio Novo - Taxa: float
+    Juros Criterio Novo - Prazo: int
+    Juros Criterio Novo - Cada: str
+    Juros Criterio Novo - Unidade: str
+    Juros Criterio Novo - Carencia: str
+    Juros Criterio Novo - Criterio: str
+    Juros Criterio Novo - Tipo: str
+    Premio Criterio Novo - Taxa: float
+    Premio Criterio Novo - Prazo: int
+    Premio Criterio Novo - Cada: str
+    Premio Criterio Novo - Unidade: str
+    Premio Criterio Novo - Carencia: str
+    Premio Criterio Novo - Criterio: str
+    Premio Criterio Novo - Tipo: str
+    Participacao - Taxa: float
+    Participacao - Cada: str
+    Participacao - Unidade: str
+    Participacao - Carencia: str
+    Participacao - Descricao: str
+    Banco Mandatario: str
+    Agente Fiduciario: str
+    Instituicao Depositaria: str
+    Coordenador Lider: str
+    CNPJ: str
+    Deb. Incent. (Lei 12.431): str
+    Escritura Padronizada: str
+    Resgate Antecipado: str
+  df_read_params:
+    encoding: latin1
+    decimal: ','
+    thousands: '.'
+    low_memory: False
+    skiprows: 4
+    sep: \t
+
+otc_pvs:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={dt_beg_yyyymmdd}&dt_fim={dt_end_yyyymmdd}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: debentures_com_br_otc_pvs
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    Data: date
+    Emissor: str
+    Código do Ativo: str
+    ISIN: str
+    Quantidade: int
+    Número de Negócios: int
+    PU Mínimo: float
+    PU Médio: float
+    PU Máximo: float
+    '% PU da Curva': float
+  df_read_params:
+    encoding: latin1
+    decimal: ','
+    thousands: '.'
+    low_memory: False
+    skiprows: 2
+    sep: \t
+
+primary_offers:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: volumeporperiodo_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={dt_beg_ddmmyyyy}&dt_fim={dt_end_ddmmyyyy}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: debentures_com_br_primary_offers
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    Código do Ativo: str
+    Emissor: str
+    Situacao: str
+    Data de Emissão: date
+    Data de Registro no SND: date
+    Data de Registro na CVM: date
+    Volume em US$: float
+  df_read_params:
+    encoding: latin1
+    decimal: ','
+    thousands: '.'
+    low_memory: False
+    skiprows: 2
+    sep: \t
+
+secondary_otc_volume:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={dt_beg_yyyymmdd}&dt_fim={dt_end_ddmmyyyy}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: debentures_com_br_primary_offers
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    Data: date
+    Emissor: str
+    Código do Ativo: str
+    ISIN: str
+    Quantidade: int
+    Número de Negócios: int
+    PU Mínimo: float
+    PU Médio: float
+    PU Máximo: float
+    '% PU da Curva': float
+  df_read_params:
+    encoding: latin1
+    decimal: ','
+    thousands: '.'
+    low_memory: False
+    skiprows: 2
+    sep: \t

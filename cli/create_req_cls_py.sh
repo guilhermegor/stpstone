@@ -31,7 +31,7 @@ cat <<EOF > "$full_dir_path/$file_name.py"
 import pandas as pd
 from datetime import datetime
 from typing import Optional
-from sqlalchemy.orm import Session, Dict
+from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
@@ -50,7 +50,10 @@ class ScaffoldingReq(ABCRequests):
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
-        self.token = self.access_token
+        self.session = session
+        self.dt_ref = dt_ref
+        self.cls_db = cls_db
+        self.logger = logger
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
             session=session,

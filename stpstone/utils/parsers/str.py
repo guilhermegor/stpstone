@@ -111,6 +111,11 @@ class StrHandler:
         shaved = ''.join(c for c in norm_txt if not combining(c))
         return normalize('NFC', shaved)
 
+    def remove_diacritics_nfkd(self, str_:str, bl_lower_case:bool=True) -> str:
+        if bl_lower_case == True: str_ = str_.lower()
+        str_ = str_.replace('\n', '')
+        return ''.join(c for c in normalize('NFKD', str_) if not combining(c))
+
     def normalize_text(self, str_):
         return normalize('NFKD', str_).encode('ascii', 'ignore').decode('utf-8')
 
@@ -444,11 +449,12 @@ class StrHandler:
             - kebab-case - 'kebab'
             - UPPER_CONSTANT - 'constant'
             - UpperFirst - 'upper_first'
+            - Default (words separated by spaces) - 'default'
         Args:
             - cols_from_case (str): Current case of the string
             - cols_to_case (str): Desired case of the string
         Returns:
-            list
+            str: Transformed string
         """
         # from case
         if from_case == 'camel':
@@ -461,6 +467,8 @@ class StrHandler:
             words = str_.lower().split('_')
         elif from_case == 'upper_first':
             words = [str_[0].upper() + str_[1:].lower()]
+        elif from_case == 'default':
+            words = str_.lower().split()
         else:
             raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'constant', 'upper_first']")
         # converting to case
