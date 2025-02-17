@@ -1,7 +1,7 @@
 ### MULTIPROCESSING HELPER ###
 
 import multiprocessing as mp
-from typing import Callable
+from typing import Callable, Optional
 
 
 def mp_worker(args):
@@ -19,7 +19,7 @@ def mp_worker(args):
 
 def mp_run_parallel(
     func:Callable, 
-    list_task_args:list, 
+    list_task_args:Optional[list]=None, 
     int_ncpus:int=mp.cpu_count() - 2 if mp.cpu_count() > 2 else 1
 ):
     """
@@ -34,6 +34,8 @@ def mp_run_parallel(
         WORKER, INT NCPUS
     OUTPUTS: LIST
     """
+    if list_task_args is None:
+        list_task_args = [((), {})]
     # prepare arguments for the worker
     args_list = [(func, pos_args, kw_args) for pos_args, kw_args in list_task_args]
     # use multiprocessing Pool for parallel processing

@@ -502,3 +502,10 @@ class StrHandler:
             if k in list_placeholders
         }
         return str_.format(**dict_placeholders)
+
+    def fill_zeros(self, str_prefix:str, int_num:int, total_length:int=11) -> str:
+        str_num = str(int_num)
+        required_zeros = total_length - len(str_prefix) - len(str_num)
+        if required_zeros < 0:
+            raise ValueError("Total length is too small for the given inputs.")
+        return f"{str_prefix}{'0' * required_zeros}{str_num}"
