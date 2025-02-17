@@ -365,10 +365,12 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         else:
             return datetime.fromtimestamp(timestamp_dt)
 
-    def timestamp_to_date(self, str_timestamp:str, substring_datetime:str='T', 
+    def timestamp_to_date(self, timestamp:Union[str, int], substring_datetime:Optional[str]='T', 
                           format_output:str='YYYY-MM-DD') -> datetime:
+        if substring_datetime == None:
+            return datetime.fromtimestamp(int(timestamp) / 1000, tz=timezone.utc)
         return self.str_date_to_datetime(
-            StrHandler().get_string_until_substr(str_timestamp, substring_datetime), format_output)
+            StrHandler().get_string_until_substr(str(timestamp), substring_datetime), format_output)
 
     def timestamp_to_datetime(self, timestamp_dt:datetime, bl_return_from_utc:bool=False) \
         -> Union[datetime, str]:

@@ -79,7 +79,7 @@ class ReqSession(ProxyServers):
                  list_anonimity_value:Union[List[str], str, None]=['anonymous', 'elite'], 
                  str_protocol:str='http', str_continent_code:Union[str, None]=None, 
                  str_country_code:Union[str, None]=None, bl_ssl:Union[bool, None]=None, 
-                 float_ratio_times_alive_dead:Optional[float]=0.02,
+                 float_min_ratio_times_alive_dead:Optional[float]=0.02,
                  float_max_timeout:Optional[float]=60, bl_use_timer:bool=False,
                  list_status_forcelist:list=[429, 500, 502, 503, 504]) -> None:
         """
@@ -94,6 +94,7 @@ class ReqSession(ProxyServers):
         OUTPUTS: SESSION
         """
         self.bl_new_proxy = bl_new_proxy
+        self.dict_proxies = dict_proxies
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
         self.bl_alive = bl_alive
@@ -102,18 +103,19 @@ class ReqSession(ProxyServers):
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
         self.bl_ssl = bl_ssl
-        self.float_ratio_times_alive_dead = float_ratio_times_alive_dead
+        self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
         self.float_max_timeout = float_max_timeout
         self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
-        self.proxy = self.get_proxy if bl_new_proxy == True else None
-        self.dict_proxy = dict_proxies if dict_proxies is not None else (
-            self._dict_proxy(self.proxy['ip'], self.proxy['port']) 
+
+    @property
+    def session(self):
+        proxy = self.get_proxy if self.bl_new_proxy == True else None
+        dict_proxy = self.dict_proxies if self.dict_proxies is not None else (
+            self._dict_proxy(proxy['ip'], proxy['port']) 
             if self.proxy is not None else None
         )
-        self.session = self.configure_session(self.dict_proxy, self.int_retries, 
-                                              self.int_backoff_factor)
-        self.ip_infos = self.ip_infos(self.session, bl_return_availability=False)
+        return self.configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:
         """
@@ -190,7 +192,7 @@ class ReqSession(ProxyServers):
         else:
             return req_resp.json()
     
-    def test_proxy(self, str_ip:str, int_port:int) -> bool:
+    def test_proxy(self, str_ip:str, int_port:int, bl_return_availability:bool=True) -> bool:
         """
         DOCSTRING:
         INPUTS:
@@ -205,7 +207,7 @@ class ReqSession(ProxyServers):
                 int_retries=0,
                 int_backoff_factor=0
             )
-            return self.ip_infos(session, bl_return_availability=True)
+            return self.ip_infos(session, bl_return_availability=bl_return_availability)
         except (ProxyError, ConnectTimeout, SSLError, ConnectionError):
             return False
 
@@ -223,7 +225,7 @@ class ReqSession(ProxyServers):
             ('anonymity', self.list_anonimity_value, 'isin'),
             ('protocol', self.str_protocol, 'equal'),
             ('bl_ssl', self.bl_ssl, 'equal'),
-            ('ratio_times_alive_dead', self.float_ratio_times_alive_dead, 'greater_than_or_equal_to'),
+            ('ratio_times_alive_dead', self.float_min_ratio_times_alive_dead, 'greater_than_or_equal_to'),
             ('timeout', self.float_max_timeout, 'less_than_or_equal_to'),
             ('continent_code', self.str_continent_code, 'equal'),
             ('country_code', self.str_country_code, 'equal')
@@ -256,7 +258,31 @@ class ReqSession(ProxyServers):
                 str_ip = dict_proxy['ip']
                 int_port = dict_proxy['port']
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    if self.test_proxy(str_ip, int_port):
+                    if self.test_proxy(str_ip, int_port, bl_return_availability=True) == True:
                         return {'ip': str_ip, 'port': int_port}
             return None
+        return retrieve_proxy()
+
+    @property
+    def get_proxies(self) -> Union[Dict[str, Any], None]:
+        """
+        DOCSTRING: RETRIEVES A VALID PROXY FROM THE FILTERED LIST, APPLYING THE TEST PROXY METHOD
+        INPUTS: -
+        OUTPUTS: DICT
+        """
+        list_ = list()
+        @conditional_timeit(bl_use_timer=self.bl_use_timer)
+        def retrieve_proxy():
+            list_ser = self._proxies
+            shuffle(list_ser)
+            for dict_proxy in list_ser:
+                str_ip = dict_proxy['ip']
+                int_port = dict_proxy['port']
+                if all([x is not None for x in [str_ip, int_port]]) == True:
+                    if self.test_proxy(str_ip, int_port, bl_return_availability=True) == True:
+                        list_.append({'ip': str_ip, 'port': int_port})
+            if len(list_) > 0:
+                return list_
+            else:
+                return None
         return retrieve_proxy()

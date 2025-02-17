@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from lxml import html
 from typing import Optional, Union, List, Dict
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,7 +18,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class HtmlHndler:
 
-    def html_bs_parser(self, url:str, bl_verify:bool=True,
+    def bs_parser(self, url:str, bl_verify:bool=True,
                        method:str='GET', parser:str='html.parser') -> Union[BeautifulSoup, str]:
         """
         DOCSTRING: HTML PARSER THROUGH BEAUTIFULSOUP
@@ -30,7 +31,7 @@ class HtmlHndler:
         except HTTPError as e:
             return 'HTTP Error: {}'.format(e)
 
-    def html_lxml_parser(self, url: Optional[str]=None, page:Optional[bytes]=None,
+    def lxml_parser(self, url: Optional[str]=None, page:Optional[bytes]=None,
                          method:str='GET', bl_verify:bool=True) -> html.HtmlElement:
         """
         DOCSTRING: HTML PARSER FOR LXML PURPOSES
@@ -43,7 +44,7 @@ class HtmlHndler:
             page = req_resp.content
         return html.fromstring(page)
 
-    def html_lxml_xpath(self, html_content, str_xpath):
+    def lxml_xpath(self, html_content, str_xpath):
         """
         DOCSTRING: XPATH TO HANDLE LXML PARSER
         INPUTS: HTML CONTENT AND STRING XPATH
@@ -51,7 +52,7 @@ class HtmlHndler:
         """
         return html_content.xpath(str_xpath)
 
-    def html_to_txt(self, html_):
+    def to_txt(self, html_):
         """
         DOCSTRING:
         INPUTS:
@@ -131,6 +132,7 @@ class SeleniumWD:
                  int_port:int, str_user_agent:str='Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36', 
                  int_wait_load:int=10, 
                  int_delay:int=10,
+                 str_proxy:str=None,
                  bl_opn_min:bool=False, 
                  bl_headless:bool=False,
                  bl_incognito:bool=False,
@@ -176,10 +178,12 @@ class SeleniumWD:
             self.dict_default_args.append('--headless')
         if self.bl_incognito == True:
             self.dict_default_args.append('--incognito')
-        self.browser = self.get_browser
+        if str_proxy is not None:
+            self.dict_default_args.append(f'--proxy-server={str_proxy}')
+        self.web_driver = self.get_web_driver
     
     @property
-    def get_browser(self) -> WebDriver:
+    def get_web_driver(self) -> WebDriver:
         """
         DOCSTRING: BROWSER INITIATION WITH THE RESPECTIVE WEB DRIVER
         INPUTS: -
@@ -188,23 +192,23 @@ class SeleniumWD:
         # setting preferences
         d = DesiredCapabilities.CHROME
         d['goog:loggingPrefs'] = {'performance': 'ALL'}
-        # instantiate the browser command with passed args
+        # instantiate the web_driver command with passed args
         browser_options = webdriver.ChromeOptions()
         for arg in self.dict_default_args:
             browser_options.add_argument(arg)
-        # instantiate the browser command
-        browser = webdriver.Chrome(
-            executable_path=self.path_webdriver, port=self.int_port, options=browser_options)
+        # instantiate the web_driver command
+        service = Service(executable_path=self.path_webdriver)
+        web_driver = webdriver.Chrome(service=service, options=browser_options)
         # open minimized
         if \
             (self.bl_opn_min == True) \
             and (self.bl_headless == False):
-            browser.minimize_window()
+            web_driver.minimize_window()
         # open the provided url
-        browser.get(self.url)
-        browser.implicitly_wait(self.int_wait_load)
-        # return browser for webbrowser tests
-        return browser
+        web_driver.get(self.url)
+        web_driver.implicitly_wait(self.int_wait_load)
+        # return web_driver for webbrowser tests
+        return web_driver
 
     def process_log(self, log:Dict[str, Union[str, dict]]) -> Optional[Dict[str, Union[str, dict]]]:
         """
@@ -214,7 +218,7 @@ class SeleniumWD:
         """
         log = json.loads(log['message'])['message']
         if ('Network.response' in log['method'] and 'params' in log.keys()):
-            body = self.browser.execute_cdp_cmd('Network.getResponseBody', {'requestId': log[
+            body = self.web_driver.execute_cdp_cmd('Network.getResponseBody', {'requestId': log[
                 'params']['requestId']})
             print(json.dumps(body, indent=4, sort_keys=True))
             return log['params']
@@ -231,8 +235,8 @@ class SeleniumWD:
                      'WARNING': 30, 'ERROR': 40, 'SEVERE': 40, 'CRITICAL': 50}
         # initialise a logger
         browserlog = logging.getLogger("chrome")
-        # get browser logs
-        slurped_logs = self.browser.get_log('browser')
+        # get web_driver logs
+        slurped_logs = self.web_driver.get_log('web_driver')
         for entry in slurped_logs:
             # convert broswer log to python log format
             rec = browserlog.makeRecord("%s.%s" % (browserlog.name, entry['source']), loglevels.get(
@@ -240,7 +244,7 @@ class SeleniumWD:
             # log using original timestamp.. us -> ms
             rec.created = entry['timestamp'] / 1000
             try:
-                # add browser log to python log
+                # add web_driver log to python log
                 browserlog.handle(rec)
             except:
                 print(entry)
@@ -266,8 +270,8 @@ class SeleniumWD:
         INPUTS:
         OUTPUTS:
         """
-        # get browser log
-        browser_log = self.browser.get_log('performance')
+        # get web_driver log
+        browser_log = self.web_driver.get_log('performance')
         # getting events
         list_events = [self.process_browser_log_entry(
             entry) for entry in browser_log]
@@ -276,8 +280,8 @@ class SeleniumWD:
         # returning data
         return list_events
 
-    def find_element(self, str_element_interest:str, selector_type:str='XPATH') \
-        -> WebElement:
+    def find_element(self, selector:Union[WebElement, WebDriver], str_element_interest:str, 
+                     selector_type:str='XPATH') -> WebElement:
         """
         DOCSTRING: FINDING ELEMENT IN HTML BY SELECTOR TYPE
         INPUTS: WEB DRIVER (FROM SELENIUM, EITHER CHROME, SAFARI, FIREFOX, INTERNET EXPLORER WEB
@@ -287,8 +291,7 @@ class SeleniumWD:
         OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
         """
         try:
-            return self.browser.find_element(getattr(By, selector_type),
-                                           str_element_interest)
+            return selector.find_element(getattr(By, selector_type), str_element_interest)
         except AttributeError:
             raise Exception('Attribute, difined in selector type, not available in find element, ' +
                             'please consider revisiting these argument')
@@ -301,7 +304,7 @@ class SeleniumWD:
         OUTPUTS: WEB DRIVER ELEMENT OF INTEREST
         """
         try:
-            return self.browser.find_elements_by_xpath(str_xpath)
+            return self.web_driver.find_elements_by_xpath(str_xpath)
         except AttributeError:
             raise Exception('Attribute, difined in selector type, not available in find element, ' +
                             'please consider revisiting these argument')
@@ -319,7 +322,7 @@ class SeleniumWD:
             raise Exception(
                 'Web element error, please consider revisiting this parameter')
 
-    def el_is_enabled(self, str_xpath:str) -> ec.ExpectedCondition:
+    def el_is_enabled(self, str_xpath:str) -> bool:
         """
         REFERENCES: https://github.com/clemfromspace/scrapy-selenium
         DOCSTRING: CHECK WHETHER WEB ELEMENT IS ENABLED OR NOT
@@ -335,7 +338,7 @@ class SeleniumWD:
         INPUTS:
         OUTPUTS:
         """
-        return WebDriverWait(self.browser, self.int_delay).until(self.el_is_enabled(str_xpath))
+        return WebDriverWait(self.web_driver, self.int_delay).until(self.el_is_enabled(str_xpath))
 
 
 class HtmlBuilder:

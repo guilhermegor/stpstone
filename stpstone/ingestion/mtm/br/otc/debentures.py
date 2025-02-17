@@ -19,6 +19,7 @@ class DebenturesComBR(ABCRequests):
     Debentures MTM ingestion
     Metadata:
         - https://www.debentures.com.br/exploreosnd/exploreosnd.asp
+    Special thanks to Rodrigo Prado (https://github.com/royopa) for helping to develop this class
     """
 
     def __init__(
