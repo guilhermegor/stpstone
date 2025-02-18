@@ -33,11 +33,11 @@ mtm:
   headers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
-  app: emissoesdedebentures/puhistorico_e.asp?op_exc=Nada&ativo=&dt_ini={dt_beg_ddmmyyyy}&dt_fim={dt_end_ddmmyyyy}&Submit.x=30&Submit.y=6.csv
+  app: emissoesdedebentures/puhistorico_e.asp?op_exc=Nada&ativo=&dt_ini={{dt_beg_ddmmyyyy}}&dt_fim={{dt_end_ddmmyyyy}}&Submit.x=30&Submit.y=6.csv
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
-  cols_to_case: constant
+  cols_to_case: upper_constant
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
@@ -74,7 +74,7 @@ infos:
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
-  cols_to_case: constant
+  cols_to_case: upper_constant
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
@@ -183,11 +183,11 @@ otc_pvs:
   headers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
-  app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={dt_beg_yyyymmdd}&dt_fim={dt_end_yyyymmdd}
+  app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={{dt_beg_yyyymmdd}}&dt_fim={{dt_end_yyyymmdd}}
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
-  cols_to_case: constant
+  cols_to_case: upper_constant
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
@@ -222,11 +222,11 @@ primary_offers:
   headers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
-  app: volumeporperiodo_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={dt_beg_ddmmyyyy}&dt_fim={dt_end_ddmmyyyy}
+  app: volumeporperiodo_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={{dt_beg_ddmmyyyy}}&dt_fim={{dt_end_ddmmyyyy}}
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
-  cols_to_case: constant
+  cols_to_case: upper_constant
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
@@ -258,11 +258,11 @@ secondary_otc_volume:
   headers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
-  app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={dt_beg_yyyymmdd}&dt_fim={dt_end_ddmmyyyy}
+  app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={{dt_beg_yyyymmdd}}&dt_fim={{dt_end_ddmmyyyy}}
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
-  cols_to_case: constant
+  cols_to_case: upper_constant
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise

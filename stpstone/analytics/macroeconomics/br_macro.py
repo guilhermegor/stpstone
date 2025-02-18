@@ -6,7 +6,7 @@ import backoff
 import yfinance as yf
 import pandas as pd
 from requests import request
-from stpstone._config._global_slots import YAML_BR_MACRO
+from stpstone._config.global_slots import YAML_BR_MACRO
 from stpstone.handling_data.object import HandlingObjects
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.numbers import NumHandler

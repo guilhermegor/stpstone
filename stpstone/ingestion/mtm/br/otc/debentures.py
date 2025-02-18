@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
-from stpstone._config._global_slots import YAML_DEBENTURES
+from stpstone._config.global_slots import YAML_DEBENTURES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests

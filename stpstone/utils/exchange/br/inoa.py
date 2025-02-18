@@ -8,7 +8,7 @@ from requests import request, exceptions
 from typing import List, Dict, Any
 from datetime import datetime
 # local libs
-from stpstone._config._global_slots import YAML_INOA
+from stpstone._config.global_slots import YAML_INOA
 from stpstone.utils.cals.handling_dates import DatesBR
 
 

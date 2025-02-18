@@ -11,6 +11,7 @@ from unicodedata import normalize, combining
 from string import ascii_uppercase, ascii_lowercase, digits
 from fnmatch import fnmatch
 from bs4 import BeautifulSoup
+from typing import Dict, Any
 
 
 class StrHandler:
@@ -191,9 +192,6 @@ class StrHandler:
         OUTPUTS: STRING
         """
         return str_.split(substring)[1]
-    
-    def extract_info_between_braces(self, str_:str, str_pattern:str=r'\{(.*?)\}') -> str:
-        return re.findall(str_pattern, str_)
 
     def base64_encode(self, userid, password):
         """
@@ -447,30 +445,34 @@ class StrHandler:
             - camelCase - 'camel'
             - PascalCase - 'pascal'
             - kebab-case - 'kebab'
-            - UPPER_CONSTANT - 'constant'
+            - UPPER_CONSTANT - 'upper_constant'
+            - lower_constant - 'lower_constant'
             - UpperFirst - 'upper_first'
             - Default (words separated by spaces) - 'default'
         Args:
-            - cols_from_case (str): Current case of the string
-            - cols_to_case (str): Desired case of the string
+            - from_case (str): Current case of the string
+            - to_case (str): Desired case of the string
         Returns:
             str: Transformed string
         """
         # from case
         if from_case == 'camel':
-            words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_).lower().split('_')
+            words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_)
+            words = re.sub(r'([a-zA-Z])(\d)', r'\1_\2', words)
+            words = re.sub(r'(\d)([a-zA-Z])', r'\1_\2', words)
+            words = words.lower().split('_')
         elif from_case == 'pascal':
             words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_).lower().split('_')
         elif from_case == 'kebab':
             words = str_.lower().split("-")
-        elif from_case == 'constant':
+        elif from_case == 'upper_constant' or from_case == 'lower_constant':
             words = str_.lower().split('_')
         elif from_case == 'upper_first':
             words = [str_[0].upper() + str_[1:].lower()]
         elif from_case == 'default':
             words = str_.lower().split()
         else:
-            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'constant', 'upper_first']")
+            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']")
         # converting to case
         if to_case == 'camel':
             return words[0] + ''.join(word.capitalize() for word in words[1:])
@@ -480,28 +482,34 @@ class StrHandler:
             return '_'.join(words).lower()
         elif to_case == 'kebab':
             return "-".join(words).lower()
-        elif to_case == 'constant':
+        elif to_case == 'upper_constant':
             return '_'.join(words).upper()
+        elif to_case == 'lower_constant':
+            return '_'.join(words).lower()
         elif to_case == 'upper_first':
             return words[0].capitalize()
         else:
-            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'constant', 'upper_first']")
+            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']")
     
-    def fill_fstr_from_globals(self, str_:str) -> str:
+    def extract_info_between_braces(self, str_:str, str_pattern:str=r'\{\{(.*?)\}\}') -> str:
+        return re.findall(str_pattern, str_)
+    
+    def fill_fstr_placeholders(self, str_:str, dict_placeholders:Dict[str, Any]) -> str:
         """
-        Fill fstr named placeholders from globals - the placeholder must have the same name as the 
-            global variable aimed to fill this gap
+        Fill fstr named placeholders
         Args:
             - str_ (str): fstr
+            - dict_placeholders (Dict[str, Any]): named placeholders
         Returns:
             str
         """
         list_placeholders = self.extract_info_between_braces(str_)
-        dict_placeholders = {
-            k: v for k, v in globals().items()
-            if k in list_placeholders
-        }
-        return str_.format(**dict_placeholders)
+        for placeholder in list_placeholders:
+            if placeholder in dict_placeholders:
+                str_ = str_.replace(f"{{{{{placeholder}}}}}", str(dict_placeholders[placeholder]))
+            else:
+                str_ = str_.replace(f"{{{{{placeholder}}}}}", f"{{{{{placeholder}}}}}")
+        return str_
 
     def fill_zeros(self, str_prefix:str, int_num:int, total_length:int=11) -> str:
         str_num = str(int_num)

@@ -1,0 +1,70 @@
+### CONFIGURATION TOOLS ###
+### METADATA: https://coinmarketcap.com/api/documentation/v1/ ###
+
+credentials:
+  host: https://pro-api.coinmarketcap.com/v1/
+  headers:
+    Accepts: application/json
+    X-CMC_PRO_API_KEY: '{{token}}'
+  payload:    
+    start: '1'
+    limit: '5000'
+    convert: 'USD'
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+downstream_processes:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ohlcv_latest:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}}
+  slugs:
+  app: cryptocurrency/listings/latest
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case:
+  cols_to_case:
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: coinmarket_ohlcv_latest
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    ID: str
+    NAME: str
+    SYMBOL: str
+    PRICE: float
+    MARKET_CAP: float
+    VOLUME: float
+    SLUG: str
+    TOTAL_SUPPLY: float
+    CMC_RANK: int
+    NUM_MARKET_PAIRS: int
+    LAST_UPDATE: str
+  df_read_params:

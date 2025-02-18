@@ -14,7 +14,7 @@ from datetime import date, datetime
 from typing import Tuple, Optional, List, Dict, Any
 sys.path.append('\\'.join([d for d in os.path.dirname(
     os.path.realpath(__file__)).split('\\')][:-3]))
-from stpstone._config._global_slots import YAML_B3
+from stpstone._config.global_slots import YAML_B3
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.str import StrHandler

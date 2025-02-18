@@ -78,7 +78,7 @@ metadata:
 ### RESOURCES TO BE SCRAPED ###
 
 companies:
-  app: Empresas{i}.zip
+  app: Empresas{{i}}.zip
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
@@ -94,11 +94,11 @@ companies:
     LEGAL_RESP_QUALIF: str
     COMPANY_SHARE_CAPITAL: float
     COMPANY_SIZE: int
-    #   filled for governmental entities with legal code 1xxx, and empty otherwise
+    #   filled for governmental slugs with legal code 1xxx, and empty otherwise
     RESP_FEDERAL_ENTITY: str
 
 businesses:
-  app: Estabelecimentos{i}.zip
+  app: Estabelecimentos{{i}}.zip
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
@@ -159,7 +159,7 @@ simplified_taxation_system:
     DT_END_MEI_TX: date
 
 shareholders:
-  app: Socios{i}.zip
+  app: Socios{{i}}.zip
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True

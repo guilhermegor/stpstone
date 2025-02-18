@@ -5,7 +5,7 @@ import socket
 import pandas as pd
 from datetime import datetime
 # local libs
-from stpstone._config._global_slots import YAML_GEN
+from stpstone._config.global_slots import YAML_GEN
 from stpstone.utils.cals.handling_dates import DatesBR
 
 

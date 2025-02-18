@@ -8,7 +8,7 @@ from urllib3.util import Retry
 from typing import Dict, Union, Any, List, Tuple, Optional
 from random import shuffle
 # local libs
-from stpstone._config._global_slots import YAML_SESSION
+from stpstone._config.global_slots import YAML_SESSION
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.create_logs import conditional_timeit
 
@@ -113,7 +113,7 @@ class ReqSession(ProxyServers):
         proxy = self.get_proxy if self.bl_new_proxy == True else None
         dict_proxy = self.dict_proxies if self.dict_proxies is not None else (
             self._dict_proxy(proxy['ip'], proxy['port']) 
-            if self.proxy is not None else None
+            if proxy is not None else None
         )
         return self.configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
 

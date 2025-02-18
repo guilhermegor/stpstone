@@ -25,7 +25,7 @@ file_name=${file_name:-request_config}
 
 # create yaml file
 cat <<EOF > "$full_dir_path/$file_name.yaml"
-### CONFIGURATION TOOLS###
+### CONFIGURATION TOOLS ###
 
 credentials:
   host:
@@ -59,7 +59,10 @@ resource_example:
   host:
   headers:
   payload:
-  # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}}
+  slugs:
   app:
   bl_verify: False
   timeout: (12.0, 12.0)

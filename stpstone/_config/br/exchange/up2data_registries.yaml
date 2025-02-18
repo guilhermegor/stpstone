@@ -1,7 +1,7 @@
 ### CONFIGURATION TOOLS###
 
 credentials:
-  host: https://arquivos.b3.com.br/api/download/?token={token}/
+  host: https://arquivos.b3.com.br/api/download/?token={{token}}/
   host_token: https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={dt_ref}
   get_token:
     req_method: GET
@@ -19,7 +19,7 @@ logs:
 ### RESOURCES TO BE SCRAPED ###
 
 instruments_register:
-  app: api/download/?token={token}
+  app: api/download/?token={{token}}
   req_method: GET
   bl_verify: False
   bl_io_interpreting: False

@@ -4,7 +4,7 @@
 import pandas as pd
 from math import nan
 # local libs
-from stpstone._config._global_slots import YAML_ANBIMA
+from stpstone._config.global_slots import YAML_ANBIMA
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.dicts import HandlingDicts

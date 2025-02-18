@@ -1,37 +1,39 @@
-### SECURITIES ACCEPTED AS WARRANT BY BRAZILIAN SECURITIES EXCHANGE ###
+### CRYPTO - COIN PAPRIKA INGESTION REQUEST ###
 
 # pypi.org libs
 import pandas as pd
+from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
-from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
+from stpstone._config.global_slots import YAML_CRYPTO_COINPAPRIKA
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class BondIssuersWB3(ABCRequests):
+class CoinPaprika(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None, 
+        session:Optional[ReqSession]=None,
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
-        self.token = self.access_token
+        self.session = session
+        self.dt_ref = dt_ref
+        self.cls_db = cls_db
+        self.logger = logger
         super().__init__(
-            dict_metadata=YAML_B3_UP2DATA_REGISTRIES,
+            dict_metadata=YAML_CRYPTO_COINPAPRIKA,
             session=session,
-            dict_headers=None,
-            dict_payload=None,
+            dt_ref=dt_ref,
             cls_db=cls_db,
             logger=logger
         )
     
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         return None
-
-    # ! TODO: downstream processing to standardize issuer name in both banks_rts_br and b3_bond_issuers_accp_warranty
-    # ! TODO: inner-join bond issuers accepted by b3 with banks participating in brazillian rts

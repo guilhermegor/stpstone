@@ -14,6 +14,9 @@ YAML_IRSBR = reading_yaml(os.path.join(root_path, 'br/taxation/irsbr.yaml'))
 # exchange
 YAML_B3_UP2DATA_REGISTRIES = reading_yaml(os.path.join(root_path, 'br/exchange/up2data_registries.yaml'))
 YAML_B3_UP2DATA_VOLUMES_TRD = reading_yaml(os.path.join(root_path, 'br/exchange/up2data_volumes_trd.yaml'))
+YAML_CRYPTO_COINMARKET = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coinmarket.yaml'))
+YAML_CRYPTO_COINPAPRIKA = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coinpaprika.yaml'))
+YAML_CRYPTO_COINCAP = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coincap.yaml'))
 
 # otc
 YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'br/otc/debentures.yaml'))

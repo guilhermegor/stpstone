@@ -2,7 +2,7 @@
 
 import pandas as pd
 from datetime import datetime, timezone
-from stpstone._config._global_slots import YAML_WGBD
+from stpstone._config.global_slots import YAML_WGBD
 from stpstone.handling_data.html import HtmlHndler
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler

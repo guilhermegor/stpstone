@@ -1,31 +1,4 @@
-#!/bin/bash
-
-# define the project root directory
-PROJECT_ROOT="$(pwd)/stpstone"
-
-# prompt for folder path within the project
-read -p "Enter the PY folder path within the project (default: ./ingestion): " folder_path
-folder_path=${folder_path:-./ingestion}
-
-# ensure the folder path is within the project directory
-if [[ "$folder_path" != ./* ]]; then
-  echo "Error: The folder path must be within the project directory."
-  exit 1
-fi
-
-# construct the full directory path
-full_dir_path="$PROJECT_ROOT/$folder_path"
-
-# ensure the directory exists
-mkdir -p "$full_dir_path"
-
-# require path and file name
-read -p "Enter the PY file name (without extension, default: request_config): " file_name
-file_name=${file_name:-request_config}
-
-# create yaml file
-cat <<EOF > "$full_dir_path/$file_name.py"
-### SCAFFOLDING INGESTION REQUEST ###
+### CRYPTO - COIN MAKET INGESTION REQUEST ###
 
 # pypi.org libs
 import pandas as pd
@@ -35,13 +8,13 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
-from stpstone._config.global_slots import YAML_EXAMPLE
+from stpstone._config.global_slots import YAML_CRYPTO_COINMARKET
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class ScaffoldingReq(ABCRequests):
+class CoinMarket(ABCRequests):
 
     def __init__(
         self,
@@ -57,7 +30,7 @@ class ScaffoldingReq(ABCRequests):
         self.logger = logger
         self.token = token
         super().__init__(
-            dict_metadata=YAML_EXAMPLE,
+            dict_metadata=YAML_CRYPTO_COINMARKET,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
@@ -66,7 +39,20 @@ class ScaffoldingReq(ABCRequests):
         )
     
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        return None
-EOF
-
-echo "File succesfully created at: $full_dir_path/$file_name.py"
+        list_ser = list()
+        json_ = req_resp.json()
+        for dict_ in json_['data']:
+            list_ser.append({
+                'ID': dict_['id'],
+                'NAME': dict_['name'],
+                'SYMBOL': dict_['symbol'],
+                'PRICE': dict_['quote']['USD']['price'],
+                'MARKET_CAP': dict_['quote']['USD']['market_cap'],
+                'VOLUME': dict_['quote']['USD']['volume_24h'],
+                'SLUG': dict_['slug'], 
+                'TOTAL_SUPPLY': dict_['total_supply'],
+                'CMC_RANK': dict_['cmc_rank'],
+                'NUM_MARKET_PAIRS': dict_['num_market_pairs'],
+                'LAST_UPDATE': dict_['last_updated'], 
+            })
+        return pd.DataFrame(list_ser)

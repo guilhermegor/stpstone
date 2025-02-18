@@ -16,7 +16,7 @@
 stpstone
 ├── __init__.py
 ├── _config
-│   ├── _global_slots.py
+│   ├── global_slots.py
 │   ├── anbima.yaml
 │   ├── b3.yaml
 │   ├── br

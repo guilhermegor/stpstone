@@ -9,7 +9,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone._config._global_slots import YAML_ANBIMA
+from stpstone._config.global_slots import YAML_ANBIMA
 
 
 class AnbimaDataGen:

@@ -32,11 +32,11 @@ price_report:
   headers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
-  app: download?filelist=PR{dt_ref_enshort}.zip
+  app: download?filelist=PR{{dt_ref_enshort}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
-  cols_to_case: constant
+  cols_to_case: upper_constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
@@ -100,11 +100,11 @@ securities_tradable:
   headers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
-  app: download?filelist=SecurityList{dt_ref_enshort}.zip
+  app: download?filelist=SecurityList{{dt_ref_enshort}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
-  cols_to_case: constant
+  cols_to_case: upper_constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first

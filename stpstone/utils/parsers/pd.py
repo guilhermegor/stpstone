@@ -7,7 +7,7 @@ import pandas as pd
 from typing import List, Dict, Any, Tuple
 from logging import Logger
 # local libs
-from stpstone._config._global_slots import YAML_MICROSOFT_APPS
+from stpstone._config.global_slots import YAML_MICROSOFT_APPS
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.loggs.create_logs import CreateLog

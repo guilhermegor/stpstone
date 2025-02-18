@@ -8,7 +8,7 @@ from requests import request
 import sys
 sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python\Packages')
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.central._global_slots import YAML_BR_TRS
+from stpstone.central.global_slots import YAML_BR_TRS
 from stpstone.utils.cals.handling_dates import DatesBR
 
 

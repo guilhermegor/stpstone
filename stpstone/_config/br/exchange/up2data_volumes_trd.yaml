@@ -28,7 +28,7 @@ metadata:
 ### RESOURCES TO BE SCRAPED ###
 
 instruments_register:
-  host: https://arquivos.b3.com.br/apinegocios/tickercsv/{dt_ref}/
+  host: https://arquivos.b3.com.br/apinegocios/tickercsv/{{dt_ref}}/
   headers:
   payload:
   app: api/download/?token={token}
@@ -96,7 +96,7 @@ instruments_register:
     CORP_GOVN_LVL_NM: str
 
 daily_trades:
-  app: apinegocios/tickercsv/{dt_ref}/
+  app: apinegocios/tickercsv/{{dt_ref}}/
   req_method: GET
   bl_verify: False
   bl_io_interpreting: False
@@ -121,12 +121,12 @@ daily_trades:
 
 loan_balance:
   req_method: GET
-  app: tabelas/table/LoanBalance/{dt_ref}/{i}
+  app: tabelas/table/LoanBalance/{{dt_ref}}/{{i}}
   bl_verify: False
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
-  cols_to_case: constant
+  cols_to_case: upper_constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
@@ -155,7 +155,7 @@ lending_open_position:
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
-  cols_to_case: constant
+  cols_to_case: upper_constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first

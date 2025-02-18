@@ -1,5 +1,6 @@
 ### HANDLING DICTIONARIES ISSUES ###
 
+import re
 from operator import itemgetter
 from itertools import groupby
 from functools import cmp_to_key
@@ -241,22 +242,21 @@ class HandlingDicts:
         # returning list of dictionaries
         return list_ser
 
-    def fill_placeholders(dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) -> Dict[str, Any]:
+    def fill_placeholders(self, dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) \
+        -> Dict[str, Any]:
         """
-        DOCSTRING: REPLACE PLACEHOLDERS IN THE BASE DICTIONARY WITH VALUES FROM THE REPLACEMENT 
-            DICTIONARY
-        INPUTS:
-            - DICT_BASE:DICT - THE DICTIONARY CONTAINING PLACEHOLDERS.
-            - DICT_REPLACER:DICT - THE DICTIONARY PROVIDING REPLACEMENT VALUES.
-        OUTPUTS: DICT
+        Replaces placeholders in the base dictionary with values from the replacement dictionary
+        Args:
+            - dict_base (Dict[str, Any]): The dictionary containing placeholders
+            - dict_replacer (Dict[str, Any]): The dictionary providing replacement values
+        Returns:
+            Dict[str, Any]: The updated dictionary with placeholders replaced.
         """
-        for key, value in dict_base.items():
+        placeholder_pattern = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+        def replace_value(value):
             if isinstance(value, dict):
-                #   handle nested dictionaries
-                dict_base[key] = dict_replacer(value, dict_replacer)
-            elif isinstance(value, str) and value.startswith('{{') and value.endswith('}}'):
-                #   extract variable name and replace with corresponding value
-                var_name = value.strip('{{ }}').strip()
-                if var_name in dict_replacer:
-                    dict_base[key] = dict_replacer[var_name]
-        return dict_base
+                return {k: replace_value(v) for k, v in value.items()}
+            elif isinstance(value, str):
+                return placeholder_pattern.sub(lambda m: dict_replacer.get(m.group(1), m.group(0)), value)
+            return value
+        return {key: replace_value(value) for key, value in dict_base.items()}

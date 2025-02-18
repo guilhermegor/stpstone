@@ -5,7 +5,7 @@ import pandas as pd
 from requests import request
 from datetime import datetime
 # local libs
-from stpstone._config._global_slots import YAML_ANBIMA
+from stpstone._config.global_slots import YAML_ANBIMA
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.db_logs import DBLogs
 

@@ -1,0 +1,70 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://api.coincap.io/v2/
+  headers:
+    Accept-Encoding: gzip
+    Authorization: Bearer {{token}}
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+downstream_processes:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ohlcv_latest:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}}
+  slugs:
+    - bitcoin
+    - solaris
+    - ethereum
+  app: assets/{{slug}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    ID: str
+    RANK: int
+    SYMBOL: str
+    NAME: str
+    SUPPLY: float
+    MAX_SUPPLY: float
+    MARKET_CAP_USD: float
+    VOLUME_USD_24_HR: float
+    PRICE_USD: float
+    CHANGE_PERCENT_24_HR: float
+    VWAP_24_HR: float
+    EXPLORER: str
+  df_read_params:
