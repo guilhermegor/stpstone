@@ -61,7 +61,7 @@ resource_example:
   payload:
   # iteratively_get_data placeholders: 
   #   - i (int): https://example.com/{{i}}
-  #   - slug (str): https://example.com/{{slug}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
   app:
   bl_verify: False

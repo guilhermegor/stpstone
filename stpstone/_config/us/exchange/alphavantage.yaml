@@ -1,0 +1,61 @@
+### CONFIGURATION TOOLS ###
+### METADATA: https://www.alphavantage.co/documentation/ ###
+
+credentials:
+  host: https://www.alphavantage.co/query
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+downstream_processes:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ohlcv_not_adjusted:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}}
+  slugs:
+  app: query?function=TIME_SERIES_DAILY&symbol={{slug}}&apikey={{token}}&datatype=json&outputsize=compact
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case:
+  cols_to_case:
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: us_alphav_ohlcv_not_adjusted
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATE: date
+    TICKER: str
+    OPEN: float
+    HIGH: float
+    LOW: float
+    CLOSE: float
+    VOLUME: float
+  df_read_params:

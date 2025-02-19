@@ -284,7 +284,8 @@ class ABCRequests(HandleReqResponses):
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None, 
-        token:Optional[str]=None
+        token:Optional[str]=None, 
+        list_slugs:Optional[List[str]]=None
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
@@ -298,6 +299,7 @@ class ABCRequests(HandleReqResponses):
                 if self.dict_metadata['credentials']['token']['host'] is not None 
                 else None
             )
+        self.list_slugs = list_slugs
 
     @property
     def access_token(self):
@@ -515,8 +517,10 @@ class ABCRequests(HandleReqResponses):
         Returns:
             pd.DataFrame
         """
+        # setting variables
         dict_instance_vars = self.get_instance_variables
         app_ = self.dict_metadata[str_resource].get('app', None)
+        app_ = StrHandler().fill_fstr_placeholders(app_, dict_instance_vars)
         host_ = host if host is not None else (
             self.dict_metadata[str_resource].get('host', None) \
             if self.dict_metadata[str_resource].get('host', None) is not None \
@@ -531,6 +535,9 @@ class ABCRequests(HandleReqResponses):
         dict_payload = self.dict_metadata[str_resource]['payload'] \
             if self.dict_metadata[str_resource].get('payload', None) is not None \
             else self.dict_metadata['credentials'].get('payload', None)
+        if dict_payload is not None:
+            dict_payload = HandlingDicts().fill_placeholders(dict_payload, dict_instance_vars)
+        # requiring data
         df_ = self.trt_req(
             self.dict_metadata[str_resource]['req_method'],
             host_,
@@ -578,6 +585,7 @@ class ABCRequests(HandleReqResponses):
         i = 0
         dict_instance_vars = self.get_instance_variables
         app_ = self.dict_metadata[str_resource].get('app', None)
+        app_ = StrHandler().fill_fstr_placeholders(app_, dict_instance_vars)
         host_ = host if host is not None else (
             self.dict_metadata[str_resource].get('host', None) \
             if self.dict_metadata[str_resource].get('host', None) is not None \
@@ -592,7 +600,10 @@ class ABCRequests(HandleReqResponses):
         dict_payload = self.dict_metadata[str_resource]['payload'] \
             if self.dict_metadata[str_resource].get('payload', None) is not None \
             else self.dict_metadata['credentials'].get('payload', None)
-        list_slugs = self.dict_metadata[str_resource].get('slugs', None)
+        if dict_payload is not None:
+            dict_payload = HandlingDicts().fill_placeholders(dict_payload, dict_instance_vars)
+        list_slugs = self.list_slugs if self.list_slugs is not None \
+            else self.dict_metadata[str_resource].get('slugs', None)
         # iterating through slugs/number of pages
         if list_slugs is not None:
             for str_slug in list_slugs:
@@ -616,7 +627,7 @@ class ABCRequests(HandleReqResponses):
                         self.dict_metadata[str_resource]['df_read_params'],
                         bl_debug
                     )
-                    df_['ENTITY'] = str_slug
+                    df_['SLUG_URL'] = str_slug
                     list_ser.extend(df_.to_dict(orient='records'))
                     if self.cls_db is not None:
                         self.insert_table(

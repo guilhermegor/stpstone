@@ -18,8 +18,8 @@ class YFinanceProvider(metaclass=TypeChecker):
     def __init__(
         self, 
         list_tickers:List[str], 
-        dt_beg:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_beg:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52).strftime('%Y-%m-%d'),
+        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1).strftime('%Y-%m-%d'),
         session:Optional[ReqSession]=None
     ) -> None:
         self.list_tickers = list_tickers

@@ -17,6 +17,8 @@ YAML_B3_UP2DATA_VOLUMES_TRD = reading_yaml(os.path.join(root_path, 'br/exchange/
 YAML_CRYPTO_COINMARKET = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coinmarket.yaml'))
 YAML_CRYPTO_COINPAPRIKA = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coinpaprika.yaml'))
 YAML_CRYPTO_COINCAP = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coincap.yaml'))
+YAML_US_ALPHAVANTAGE = reading_yaml(os.path.join(root_path, 'us/exchange/alphavantage.yaml'))
+YAML_US_TIINGO = reading_yaml(os.path.join(root_path, 'us/exchange/tiingo.yaml'))
 
 # otc
 YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'br/otc/debentures.yaml'))

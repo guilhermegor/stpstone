@@ -8,13 +8,21 @@ from stpstone.utils.exchange.ww.yf_provider import YFinanceProvider
 
 
 list_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA']
-session = ReqSession(bl_new_proxy=True, bl_use_timer=True).session
+# session = ReqSession(bl_new_proxy=True, bl_use_timer=True).session
+session = None
 
-cls_yf = YFinanceProvider(
-    list_tickers=list_tickers, 
-    dt_beg=DatesBR().sub_working_days(DatesBR().curr_date, 52), 
-    dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 1),
-    session=session
-)
+if session is not None:
+    cls_yf = YFinanceProvider(
+        list_tickers=list_tickers, 
+        dt_beg=DatesBR().sub_working_days(DatesBR().curr_date, 52), 
+        dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        session=session
+    )
+else:
+    cls_yf = YFinanceProvider(
+        list_tickers=list_tickers, 
+        dt_beg=DatesBR().sub_working_days(DatesBR().curr_date, 52), 
+        dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 1)
+    )
 
 print(cls_yf.mktdata)

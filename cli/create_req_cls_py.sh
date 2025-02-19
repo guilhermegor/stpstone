@@ -30,7 +30,7 @@ cat <<EOF > "$full_dir_path/$file_name.py"
 # pypi.org libs
 import pandas as pd
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
@@ -49,20 +49,23 @@ class ScaffoldingReq(ABCRequests):
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None, 
-        token:Optional[str]=None
+        token:Optional[str]=None, 
+        list_slugs:Optional[List[str]]=None
     ) -> None:
         self.session = session
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token
+        self.token = token, 
+        self.list_slugs = list_slugs
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
             logger=logger, 
-            token=token
+            token=token, 
+            list_slugs=list_slugs
         )
     
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
