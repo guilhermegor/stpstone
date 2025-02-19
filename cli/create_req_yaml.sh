@@ -63,6 +63,8 @@ resource_example:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
   app:
   bl_verify: False
   timeout: (12.0, 12.0)

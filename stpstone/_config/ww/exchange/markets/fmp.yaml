@@ -1,0 +1,215 @@
+### CONFIGURATION TOOLS ###
+### METADATA: https://site.financialmodelingprep.com/developer/docs ###
+
+credentials:
+  host: https://financialmodelingprep.com/stable/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+downstream_processes:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+mkt_hours_exchanges_yesterday:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+  app: all-exchange-market-hours?apikey={{token}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: ww_fmp_mkts_hours_yesterday
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    EXCHANGE: str
+    NAME: str
+    OPENING_HOUR: str
+    CLOSING_HOUR: str
+    TIMEZONE: str
+    IS_MARKET_OPEN: bool
+  df_read_params:
+
+crypto_ohlcv_yesterday:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+    - BTCUSD
+    - SOLUSD
+    - ETHUSD
+  app: quote?symbol={{slug}}&apikey={{token}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: ww_fmp_crypto_ohlcv_yesterday
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SYMBOL: str
+    NAME: str
+    PRICE: float
+    CHANGE_PERCENTAGE: float
+    CHANGE: float
+    VOLUME: float
+    DAY_LOW: float
+    DAY_HIGH: float
+    YEAR_HIGH: float
+    YEAR_LOW: float
+    MARKET_CAP: float
+    PRICE_AVG_50: float
+    PRICE_AVG_200: float
+    EXCHANGE: str
+    OPEN: float
+    PREVIOUS_CLOSE: float
+    TIMESTAMP: int
+  df_read_params:
+
+stocks_ohlcv_yesterday:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs: 10
+  app: batch-quote?symbols={{chunk_slugs}}&apikey={{token}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: ww_fmp_stocks_ohlcv_yesterday
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SYMBOL: str
+    NAME: str
+    PRICE: float
+    CHANGE_PERCENTAGE: float
+    CHANGE: float
+    VOLUME: float
+    DAY_LOW: float
+    DAY_HIGH: float
+    YEAR_HIGH: float
+    YEAR_LOW: float
+    MARKET_CAP: float
+    PRICE_AVG_50: float
+    PRICE_AVG_200: float
+    EXCHANGE: str
+    OPEN: float
+    PREVIOUS_CLOSE: float
+    TIMESTAMP: int
+  df_read_params:
+
+etfs_ohlcv_yesterday:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  app: batch-etf-quotes?apikey={{token}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: us_fmp_etfs_ohlcv_yesterday
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SYMBOL: str
+    PRICE: float
+    CHANGE: float
+    VOLUME: float
+  df_read_params:
+
+commodities_ohlcv_yesterday:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  app: batch-commodity-quotes?apikey={{token}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name: us_fmp_commodities_ohlcv_yesterday
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SYMBOL: str
+    PRICE: float
+    CHANGE: float
+    VOLUME: float
+  df_read_params:

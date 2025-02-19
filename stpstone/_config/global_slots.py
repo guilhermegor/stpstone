@@ -19,6 +19,7 @@ YAML_CRYPTO_COINPAPRIKA = reading_yaml(os.path.join(root_path, 'ww/exchange/cryp
 YAML_CRYPTO_COINCAP = reading_yaml(os.path.join(root_path, 'ww/exchange/crypto/coincap.yaml'))
 YAML_US_ALPHAVANTAGE = reading_yaml(os.path.join(root_path, 'us/exchange/alphavantage.yaml'))
 YAML_US_TIINGO = reading_yaml(os.path.join(root_path, 'us/exchange/tiingo.yaml'))
+YAML_WW_FMP = reading_yaml(os.path.join(root_path, 'ww/exchange/markets/fmp.yaml'))
 
 # otc
 YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'br/otc/debentures.yaml'))

@@ -49,10 +49,12 @@ stpstone
 │   ├── world_gov_bonds.yaml
 │   └── ww
 │       └── exchange
-│           └── crypto
-│               ├── coincap.yaml
-│               ├── coinmarket.yaml
-│               └── coinpaprika.yaml
+│           ├── crypto
+│           │   ├── coincap.yaml
+│           │   ├── coinmarket.yaml
+│           │   └── coinpaprika.yaml
+│           └── markets
+│               └── fmp.yaml
 ├── analytics
 │   ├── anbima
 │   │   ├── abimadata_api.py
@@ -142,10 +144,12 @@ stpstone
 │       │       └── tiingo.py
 │       └── ww
 │           └── exchange
-│               └── crypto
-│                   ├── coincap.py
-│                   ├── coinmarket.py
-│                   └── coinpaprika.py
+│               ├── crypto
+│               │   ├── coincap.py
+│               │   ├── coinmarket.py
+│               │   └── coinpaprika.py
+│               └── markets
+│                   └── fmp.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py

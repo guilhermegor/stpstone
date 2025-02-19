@@ -5,7 +5,6 @@ import fitz
 import re
 import os
 import backoff
-import unicodedata
 import pandas as pd
 from getpass import getuser
 from abc import ABC, abstractmethod
@@ -14,10 +13,11 @@ from requests import exceptions, request, Response
 from typing import Tuple, List, Dict, Any, Optional, Union
 from sqlalchemy.orm import Session
 from logging import Logger
-from io import TextIOWrapper, BufferedReader, BytesIO
+from io import TextIOWrapper, BytesIO
 from zipfile import ZipFile, BadZipFile
 # project modules
 from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.db_logs import DBLogs
@@ -606,43 +606,93 @@ class ABCRequests(HandleReqResponses):
             else self.dict_metadata[str_resource].get('slugs', None)
         # iterating through slugs/number of pages
         if list_slugs is not None:
-            for str_slug in list_slugs:
-                try:
-                    df_ = self.trt_req(
-                        self.dict_metadata[str_resource]['req_method'],
-                        host_,
-                        self.dict_metadata[str_resource]['dtypes'], 
-                        dict_headers,
-                        dict_payload,
-                        StrHandler().fill_fstr_placeholders(app_, {'slug': str_slug}), 
-                        self.dict_metadata[str_resource]['bl_verify'],
-                        self.dict_metadata[str_resource]['timeout'],
-                        self.dict_metadata[str_resource]['cols_from_case'],
-                        self.dict_metadata[str_resource]['cols_to_case'],
-                        self.dict_metadata[str_resource]['list_cols_drop_dupl'],
-                        self.dict_metadata[str_resource]['str_fmt_dt'],
-                        self.dict_metadata[str_resource]['type_error_action'],
-                        self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
-                        self.dict_metadata[str_resource].get('regex_patterns', None),
-                        self.dict_metadata[str_resource]['df_read_params'],
-                        bl_debug
-                    )
-                    df_['SLUG_URL'] = str_slug
-                    list_ser.extend(df_.to_dict(orient='records'))
-                    if self.cls_db is not None:
-                        self.insert_table(
-                            str_resource, 
-                            list_ser, 
-                            self.dict_metadata[str_resource]['bl_insert_or_ignore'], 
-                            self.dict_metadata[str_resource]['bl_schema']
+            str_extract_from_braces = StrHandler().extract_info_between_braces(app_)[0] \
+                if StrHandler().extract_info_between_braces(app_) is not None else ''
+            if str_extract_from_braces == 'slug':
+                for str_slug in list_slugs:
+                    try:
+                        df_ = self.trt_req(
+                            self.dict_metadata[str_resource]['req_method'],
+                            host_,
+                            self.dict_metadata[str_resource]['dtypes'], 
+                            dict_headers,
+                            dict_payload,
+                            StrHandler().fill_fstr_placeholders(app_, {'slug': str_slug}), 
+                            self.dict_metadata[str_resource]['bl_verify'],
+                            self.dict_metadata[str_resource]['timeout'],
+                            self.dict_metadata[str_resource]['cols_from_case'],
+                            self.dict_metadata[str_resource]['cols_to_case'],
+                            self.dict_metadata[str_resource]['list_cols_drop_dupl'],
+                            self.dict_metadata[str_resource]['str_fmt_dt'],
+                            self.dict_metadata[str_resource]['type_error_action'],
+                            self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
+                            self.dict_metadata[str_resource].get('regex_patterns', None),
+                            self.dict_metadata[str_resource]['df_read_params'],
+                            bl_debug
                         )
-                        if bl_fetch == False: list_ser = list()
-                except (exceptions.HTTPError, BadZipFile) as e:
-                    if self.logger is not None:
-                        CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
-                    else:
-                        print(f'#{i} Iteration failed due to: {e}')
-                    break
+                        df_['SLUG_URL'] = str_slug
+                        list_ser.extend(df_.to_dict(orient='records'))
+                        if self.cls_db is not None:
+                            self.insert_table(
+                                str_resource, 
+                                list_ser, 
+                                self.dict_metadata[str_resource]['bl_insert_or_ignore'], 
+                                self.dict_metadata[str_resource]['bl_schema']
+                            )
+                            if bl_fetch == False: list_ser = list()
+                    except (exceptions.HTTPError, BadZipFile) as e:
+                        if self.logger is not None:
+                            CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
+                        else:
+                            print(f'#{i} Iteration failed due to: {e}')
+                        break
+            elif str_extract_from_braces == 'chunk_slugs':
+                list_chunks_slugs = HandlingLists().chunk_list(
+                    list_to_chunk=self.list_slugs, 
+                    str_character_divides_clients=',',
+                    int_chunk=self.dict_metadata[str_resource].get('int_chunk_slugs', 10)
+                )
+                for str_chunk_slugs in list_chunks_slugs:
+                    try:
+                        df_ = self.trt_req(
+                            self.dict_metadata[str_resource]['req_method'],
+                            host_,
+                            self.dict_metadata[str_resource]['dtypes'], 
+                            dict_headers,
+                            dict_payload,
+                            StrHandler().fill_fstr_placeholders(
+                                app_, {'chunk_slugs': str_chunk_slugs}), 
+                            self.dict_metadata[str_resource]['bl_verify'],
+                            self.dict_metadata[str_resource]['timeout'],
+                            self.dict_metadata[str_resource]['cols_from_case'],
+                            self.dict_metadata[str_resource]['cols_to_case'],
+                            self.dict_metadata[str_resource]['list_cols_drop_dupl'],
+                            self.dict_metadata[str_resource]['str_fmt_dt'],
+                            self.dict_metadata[str_resource]['type_error_action'],
+                            self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
+                            self.dict_metadata[str_resource].get('regex_patterns', None),
+                            self.dict_metadata[str_resource]['df_read_params'],
+                            bl_debug
+                        )
+                        df_['SLUG_URL'] = str_chunk_slugs
+                        list_ser.extend(df_.to_dict(orient='records'))
+                        if self.cls_db is not None:
+                            self.insert_table(
+                                str_resource, 
+                                list_ser, 
+                                self.dict_metadata[str_resource]['bl_insert_or_ignore'], 
+                                self.dict_metadata[str_resource]['bl_schema']
+                            )
+                            if bl_fetch == False: list_ser = list()
+                    except (exceptions.HTTPError, BadZipFile) as e:
+                        if self.logger is not None:
+                            CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
+                        else:
+                            print(f'#{i} Iteration failed due to: {e}')
+                        break
+            else:
+                raise Exception('Neither {{slug}} or {{chunk_slugs}} are found in the app ' 
+                                + 'parameter, please revisit it.')
         else:
             while True:
                 try:
@@ -710,6 +760,7 @@ class ABCRequests(HandleReqResponses):
             and (
                 (StrHandler().match_string_like(app_, '*{{i}}*') == True) 
                 or (StrHandler().match_string_like(app_, '*{{slug}}*') == True)
+                or (StrHandler().match_string_like(app_, '*{{chunk_slugs}}*') == True)
             ):
             return self.iteratively_get_data(str_resource, host, bl_fetch, bl_debug)
         return self.non_iteratively_get_data(str_resource, host, bl_fetch, bl_debug)
