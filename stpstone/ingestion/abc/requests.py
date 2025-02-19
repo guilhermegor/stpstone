@@ -31,11 +31,6 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 
 class HandleReqResponses(ABC):
 
-    def remove_diacritics(self, str_):
-        str_ = str_.lower()
-        str_ = str_.replace('\n', ' ')
-        return ''.join(c for c in unicodedata.normalize('NFKD', str_) if not unicodedata.combining(c))
-
     def _handle_response(
         self, 
         req_resp:Response, 

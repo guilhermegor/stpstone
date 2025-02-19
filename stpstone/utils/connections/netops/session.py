@@ -76,7 +76,7 @@ class ReqSession(ProxyServers):
 
     def __init__(self, bl_new_proxy:bool=True, dict_proxies:Union[Dict[str, str], None]=None, 
                  int_retries:int=10, int_backoff_factor:int=1, bl_alive:bool=True,
-                 list_anonimity_value:Union[List[str], str, None]=['anonymous', 'elite'], 
+                 list_anonimity_value:List[str]=['anonymous', 'elite', 'transparent'], 
                  str_protocol:str='http', str_continent_code:Union[str, None]=None, 
                  str_country_code:Union[str, None]=None, bl_ssl:Union[bool, None]=None, 
                  float_min_ratio_times_alive_dead:Optional[float]=0.02,

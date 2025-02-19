@@ -177,7 +177,7 @@ stpstone
     │   │   ├── line.py
     │   │   └── margin_simulator_b3.py
     │   └── ww
-    │       └── yfinance.py
+    │       └── yf_provider.py
     ├── geography
     │   └── br.py
     ├── loggs
