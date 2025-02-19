@@ -1,7 +1,6 @@
 stpstone
 ├── __init__.py
 ├── _config
-│   ├── global_slots.py
 │   ├── anbima.yaml
 │   ├── b3.yaml
 │   ├── br
@@ -12,6 +11,8 @@ stpstone
 │   │   │   ├── up2data_registries.yaml
 │   │   │   ├── up2data_volumes_trd.yaml
 │   │   │   └── warranty.yaml
+│   │   ├── otc
+│   │   │   └── debentures.yaml
 │   │   └── taxation
 │   │       └── irsbr.yaml
 │   ├── br_macro.yaml
@@ -19,13 +20,20 @@ stpstone
 │   ├── comdinheiro.yaml
 │   ├── generic.yaml
 │   ├── global_rates.yaml
+│   ├── global_slots.py
 │   ├── inoa.yaml
 │   ├── llms.yaml
 │   ├── microsoft_apps.yaml
 │   ├── netops
 │   │   └── session.yaml
 │   ├── usa_macro.yaml
-│   └── world_gov_bonds.yaml
+│   ├── world_gov_bonds.yaml
+│   └── ww
+│       └── exchange
+│           └── crypto
+│               ├── coincap.yaml
+│               ├── coinmarket.yaml
+│               └── coinpaprika.yaml
 ├── analytics
 │   ├── anbima
 │   │   ├── abimadata_api.py
@@ -91,6 +99,10 @@ stpstone
 ├── ingestion
 │   ├── abc
 │   │   └── requests.py
+│   ├── mtm
+│   │   └── br
+│   │       └── otc
+│   │           └── debentures.py
 │   ├── registries
 │   │   └── br
 │   │       ├── bylaws
@@ -101,10 +113,16 @@ stpstone
 │   │       └── taxation
 │   │           └── irsbr_records.py
 │   └── tradings
-│       └── br
+│       ├── br
+│       │   └── exchange
+│       │       ├── search_by_trading_session.py
+│       │       └── volumes.py
+│       └── ww
 │           └── exchange
-│               ├── search_by_trading_session.py
-│               └── volumes.py
+│               └── crypto
+│                   ├── coincap.py
+│                   ├── coinmarket.py
+│                   └── coinpaprika.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py
@@ -139,10 +157,12 @@ stpstone
     │       ├── manager.py
     │       └── session.py
     ├── exchange
-    │   └── br
-    │       ├── inoa.py
-    │       ├── line.py
-    │       └── margin_simulator_b3.py
+    │   ├── br
+    │   │   ├── inoa.py
+    │   │   ├── line.py
+    │   │   └── margin_simulator_b3.py
+    │   └── ww
+    │       └── yfinance.py
     ├── geography
     │   └── br.py
     ├── loggs

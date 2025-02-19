@@ -16,14 +16,18 @@
 stpstone
 ├── __init__.py
 ├── _config
-│   ├── global_slots.py
 │   ├── anbima.yaml
 │   ├── b3.yaml
 │   ├── br
+│   │   ├── bylaws
+│   │   │   └── investment_funds.yaml
 │   │   ├── exchange
+│   │   │   ├── search_by_trading_session.yaml
 │   │   │   ├── up2data_registries.yaml
 │   │   │   ├── up2data_volumes_trd.yaml
 │   │   │   └── warranty.yaml
+│   │   ├── otc
+│   │   │   └── debentures.yaml
 │   │   └── taxation
 │   │       └── irsbr.yaml
 │   ├── br_macro.yaml
@@ -31,13 +35,20 @@ stpstone
 │   ├── comdinheiro.yaml
 │   ├── generic.yaml
 │   ├── global_rates.yaml
+│   ├── global_slots.py
 │   ├── inoa.yaml
 │   ├── llms.yaml
 │   ├── microsoft_apps.yaml
 │   ├── netops
 │   │   └── session.yaml
 │   ├── usa_macro.yaml
-│   └── world_gov_bonds.yaml
+│   ├── world_gov_bonds.yaml
+│   └── ww
+│       └── exchange
+│           └── crypto
+│               ├── coincap.yaml
+│               ├── coinmarket.yaml
+│               └── coinpaprika.yaml
 ├── analytics
 │   ├── anbima
 │   │   ├── abimadata_api.py
@@ -97,67 +108,36 @@ stpstone
 │   │   └── yield.py
 │   └── spot
 │       └── stocks.py
-├── connections
-│   ├── clouds
-│   │   ├── aws_s3.py
-│   │   └── sendgrid.py
-│   ├── databases
-│   │   ├── dabricksCLI.py
-│   │   ├── databricks.py
-│   │   ├── generic.py
-│   │   ├── mongodb.py
-│   │   ├── mysql.py
-│   │   ├── postgresql.py
-│   │   ├── redis.py
-│   │   ├── sqlite.py
-│   │   └── sqlserver.py
-│   └── netops
-│       ├── manager.py
-│       └── session.py
 ├── dsa
 │   └── trees
 │       └── b_tree.py
 ├── ingestion
 │   ├── abc
 │   │   └── requests.py
-│   ├── mktdata
-│   │   ├── exchange
-│   │   ├── otc
-│   │   └── primary_mkt
-│   ├── providers
-│   │   ├── inoa.py
-│   │   ├── line.py
-│   │   └── margin_simulator_b3.py
+│   ├── mtm
+│   │   └── br
+│   │       └── otc
+│   │           └── debentures.py
 │   ├── registries
 │   │   └── br
+│   │       ├── bylaws
+│   │       │   └── investment_funds.py
 │   │       ├── exchange
 │   │       │   ├── securities.py
 │   │       │   └── warranty.py
-│   │       ├── primary_mkt
 │   │       └── taxation
 │   │           └── irsbr_records.py
 │   └── tradings
-│       └── br
+│       ├── br
+│       │   └── exchange
+│       │       ├── search_by_trading_session.py
+│       │       └── volumes.py
+│       └── ww
 │           └── exchange
-│               └── volumes.py
-├── parsers
-│   ├── dicts.py
-│   ├── folders.py
-│   ├── html.py
-│   ├── img.py
-│   ├── json.py
-│   ├── lists.py
-│   ├── lxml.py
-│   ├── numbers.py
-│   ├── object.py
-│   ├── pd.py
-│   ├── pdf.py
-│   ├── pickle.py
-│   ├── str.py
-│   ├── tgz.py
-│   ├── txt.py
-│   ├── xml.py
-│   └── yaml.py
+│               └── crypto
+│                   ├── coincap.py
+│                   ├── coinmarket.py
+│                   └── coinpaprika.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py
@@ -174,6 +154,30 @@ stpstone
     │   ├── br_bzdays.py
     │   ├── handling_dates.py
     │   └── usa_bzdays.py
+    ├── connections
+    │   ├── clouds
+    │   │   ├── aws_s3.py
+    │   │   └── sendgrid.py
+    │   ├── databases
+    │   │   ├── dabricksCLI.py
+    │   │   ├── databricks.py
+    │   │   ├── generic.py
+    │   │   ├── mongodb.py
+    │   │   ├── mysql.py
+    │   │   ├── postgresql.py
+    │   │   ├── redis.py
+    │   │   ├── sqlite.py
+    │   │   └── sqlserver.py
+    │   └── netops
+    │       ├── manager.py
+    │       └── session.py
+    ├── exchange
+    │   ├── br
+    │   │   ├── inoa.py
+    │   │   ├── line.py
+    │   │   └── margin_simulator_b3.py
+    │   └── ww
+    │       └── yfinance.py
     ├── geography
     │   └── br.py
     ├── loggs
@@ -186,10 +190,27 @@ stpstone
     │   ├── onedrive.py
     │   ├── outlook.py
     │   └── windows_os.py
-    ├── multithreading
     ├── orchestrators
     │   └── airflow
     │       └── plugins.py
+    ├── parsers
+    │   ├── dicts.py
+    │   ├── folders.py
+    │   ├── html.py
+    │   ├── img.py
+    │   ├── json.py
+    │   ├── lists.py
+    │   ├── lxml.py
+    │   ├── numbers.py
+    │   ├── object.py
+    │   ├── pd.py
+    │   ├── pdf.py
+    │   ├── pickle.py
+    │   ├── str.py
+    │   ├── tgz.py
+    │   ├── txt.py
+    │   ├── xml.py
+    │   └── yaml.py
     ├── pipelines
     │   ├── asynchronous.py
     │   ├── conditional.py
