@@ -3,21 +3,34 @@ stpstone
 ├── _config
 │   ├── anbima.yaml
 │   ├── b3.yaml
-│   ├── br
-│   │   ├── bylaws
-│   │   │   └── investment_funds.yaml
-│   │   ├── exchange
-│   │   │   ├── search_by_trading_session.yaml
-│   │   │   ├── up2data_registries.yaml
-│   │   │   ├── up2data_volumes_trd.yaml
-│   │   │   └── warranty.yaml
-│   │   ├── otc
-│   │   │   └── debentures.yaml
-│   │   └── taxation
-│   │       └── irsbr.yaml
 │   ├── br_macro.yaml
 │   ├── br_treasury.yaml
 │   ├── comdinheiro.yaml
+│   ├── countries
+│   │   ├── br
+│   │   │   ├── bylaws
+│   │   │   │   └── investment_funds.yaml
+│   │   │   ├── exchange
+│   │   │   │   ├── search_by_trading_session.yaml
+│   │   │   │   ├── up2data_registries.yaml
+│   │   │   │   ├── up2data_volumes_trd.yaml
+│   │   │   │   └── warranty.yaml
+│   │   │   ├── otc
+│   │   │   │   └── debentures.yaml
+│   │   │   └── taxation
+│   │   │       └── irsbr.yaml
+│   │   ├── us
+│   │   │   └── exchange
+│   │   │       ├── alphavantage.yaml
+│   │   │       └── tiingo.yaml
+│   │   └── ww
+│   │       └── exchange
+│   │           ├── crypto
+│   │           │   ├── coincap.yaml
+│   │           │   ├── coinmarket.yaml
+│   │           │   └── coinpaprika.yaml
+│   │           └── markets
+│   │               └── fmp.yaml
 │   ├── generic.yaml
 │   ├── global_rates.yaml
 │   ├── global_slots.py
@@ -26,20 +39,8 @@ stpstone
 │   ├── microsoft_apps.yaml
 │   ├── netops
 │   │   └── session.yaml
-│   ├── us
-│   │   └── exchange
-│   │       ├── alphavantage.yaml
-│   │       └── tiingo.yaml
 │   ├── usa_macro.yaml
-│   ├── world_gov_bonds.yaml
-│   └── ww
-│       └── exchange
-│           ├── crypto
-│           │   ├── coincap.yaml
-│           │   ├── coinmarket.yaml
-│           │   └── coinpaprika.yaml
-│           └── markets
-│               └── fmp.yaml
+│   └── world_gov_bonds.yaml
 ├── analytics
 │   ├── anbima
 │   │   ├── abimadata_api.py

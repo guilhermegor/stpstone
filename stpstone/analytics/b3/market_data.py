@@ -763,48 +763,6 @@ class MDB3:
         return df_sec_vol
 
 
-class MDYFinance:
-
-    def daily_returns(self, df_yq_data:pd.DataFrame, column_symbol:str='symbol', 
-                      col_ticker:str='ticker', col_close:str='adjclose', 
-                      col_open:str='open', col_date:str='dt_date', 
-                      col_daily_return:str='daily_return', 
-                      str_type_return_calc:str='close_close') -> pd.DataFrame:
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # order by ticker/date in ascending order
-        df_yq_data.sort_values(
-            by=[col_ticker, col_date], 
-            ascending=[True, True], 
-            inplace=True
-        )
-        # daily returns grouped by symbol
-        if str_type_return_calc == 'close_close':
-            df_yq_data[col_daily_return] = (
-                df_yq_data.groupby(col_ticker)[col_close]
-                .apply(lambda x: np.log(x / x.shift(1)))
-                .reset_index(0, drop=True)
-            )
-        elif str_type_return_calc == 'open_close':
-            df_yq_data[col_daily_return] = (
-                df_yq_data.groupby(col_ticker).apply(
-                    lambda group: np.log(group[col_open] / group[col_close].shift(1))
-                ).reset_index(level=0, drop=True)
-            )
-        else:
-            raise Exception('Type of return calculation not supported. '
-                            + f'TYPE: {str_type_return_calc}')
-        # optionally reset nulls when switching symbols for clarity
-        df_yq_data.loc[
-            df_yq_data.groupby(level=column_symbol).head(1).index, col_daily_return
-        ] = None
-        # returning dataframe with daily returns
-        return df_yq_data
-
-
 class MDInvestingDotCom:
 
     def ticker_reference_investing_com(
