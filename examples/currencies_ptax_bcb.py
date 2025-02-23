@@ -17,9 +17,5 @@ class_ptax = PTAXBCB(
     bl_debug=False
 )
 df_composition_ptax = class_ptax.composition_currency
-df_composition_ptax.to_excel(
-    r"C:\Users\guiro\Downloads\ptax-bcb_20220928_1426.xlsx", 
-    index=False
-)
 print(f'DF PTAX BCB: \n{df_composition_ptax}')
 print(df_composition_ptax.info())
