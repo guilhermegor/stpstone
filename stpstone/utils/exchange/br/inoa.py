@@ -15,7 +15,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 class AlphaTools:
 
     def __init__(self, str_user:str, str_passw:str, str_host:str, str_instance:str, 
-        dt_beg:datetime, dt_end:datetime, str_fmt_date_output:str='YYYY-MM-DD', 
+        dt_inf:datetime, dt_sup:datetime, str_fmt_date_output:str='YYYY-MM-DD', 
         bl_debug_mode:bool=False):
         """
         Connection to INOA Alpha Tools API
@@ -24,8 +24,8 @@ class AlphaTools:
             - str_passw (str): password
             - str_host (str): host
             - str_instance (str): instance
-            - dt_beg (datetime): start date
-            - dt_end (datetime): end date
+            - dt_inf (datetime): start date
+            - dt_sup (datetime): end date
             - str_fmt_date_output (str): format date output
             - bl_debug_mode (bool): debug mode
         Returns:
@@ -35,8 +35,8 @@ class AlphaTools:
         self.str_passw = str_passw
         self.str_host = str_host
         self.str_instance = str_instance
-        self.dt_beg = dt_beg
-        self.dt_end = dt_end
+        self.dt_inf = dt_inf
+        self.dt_sup = dt_sup
         self.str_fmt_date_output = str_fmt_date_output
         self.bl_debug_mode = bl_debug_mode if bl_debug_mode is not None else True
 
@@ -91,9 +91,9 @@ class AlphaTools:
     def quotes(self, list_ids:List[int]) -> pd.DataFrame:
         dict_params = {
             YAML_INOA['alpha_tools']['quotes']['key_funds_ids']: list_ids,
-            YAML_INOA['alpha_tools']['quotes']['key_start_dt']: self.dt_beg.strftime(
+            YAML_INOA['alpha_tools']['quotes']['key_start_dt']: self.dt_inf.strftime(
                 '%Y-%m-%d'),
-            YAML_INOA['alpha_tools']['quotes']['key_end_dt']: self.dt_end.strftime(
+            YAML_INOA['alpha_tools']['quotes']['key_end_dt']: self.dt_sup.strftime(
                 '%Y-%m-%d'),
         }
         json_req = self.generic_req(

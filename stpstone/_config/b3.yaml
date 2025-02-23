@@ -94,14 +94,14 @@ trading_hours_b3:
     url_int_rts: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/'
     url_commodities: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/'
     url_crypto: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/'
-    url_forex: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/'
+    url_currency: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/'
     url_otc: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/otc/'
     url_opf: 'https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/'
     num_cols_pmi_idx: 8
     num_cols_int_rts: 8
     num_cols_commodities: 3
     num_cols_crypto: 7
-    num_cols_forex: 8
+    num_cols_currency: 8
     num_cols_otc: 3
     num_cols_opf: 3
 

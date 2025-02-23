@@ -11,6 +11,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
 from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone._config.global_slots import YAML_GEN
 
 
 class DFStandardization(metaclass=TypeChecker):
@@ -21,7 +22,7 @@ class DFStandardization(metaclass=TypeChecker):
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
         list_remove_duplicated_data:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
         type_error_action:str='raise', strt_keep_when_duplicated:str='first', 
-        str_data_fillna:str='-1', str_dt_fillna:str='2100-12-31'
+        str_data_fillna:str='-1', str_dt_fillna:Optional[str]=None
     ):
         self.dict_dtypes = dict_dtypes
         self.cols_from_case = cols_from_case
@@ -31,7 +32,15 @@ class DFStandardization(metaclass=TypeChecker):
         self.type_error_action = type_error_action
         self.strt_keep_when_duplicated = strt_keep_when_duplicated
         self.str_data_fillna = str_data_fillna
-        self.str_dt_fillna = str_dt_fillna
+        self.str_dt_fillna = str_dt_fillna if str_dt_fillna is not None else (
+            '2099-12-31' if self.str_fmt_dt == 'YYYY-MM-DD' else
+            '31/12/2099' if self.str_fmt_dt == 'DD/MM/YYYY' else
+            '31/12/99' if self.str_fmt_dt == 'DD/MM/YY' else
+            '31122099' if self.str_fmt_dt == 'DDMMYYYY' else
+            '311299' if self.str_fmt_dt == 'DDMMYY' else
+            '20991231' if self.str_fmt_dt == 'YYYYMMDD' else
+            '31122099'
+        )
         self.list_cols_dt = [key for key, value in dict_dtypes.items() if value == 'date']
 
     def check_if_empty(self, df_:pd.DataFrame) -> pd.DataFrame:
@@ -74,7 +83,11 @@ class DFStandardization(metaclass=TypeChecker):
         df_ = df_.astype(dict_dtypes, errors=self.type_error_action)
         # dates types
         for col_ in self.list_cols_dt:
-            df_[col_] = [DatesBR().str_date_to_datetime(d, self.str_fmt_dt) for d in df_[col_]]
+            if col_ != YAML_GEN['audit_log_cols']['ref_date']:
+                df_[col_] = [DatesBR().str_date_to_datetime(d, self.str_fmt_dt) for d in df_[col_]]
+            else:
+                df_[col_] = [DatesBR().str_date_to_datetime(
+                    d, YAML_GEN['audit_log_cols']['str_fmt_dt']) for d in df_[col_]]
         # missing columns - leftovers from previous steps
         list_cols_missing = [
             c for c in list(df_.columns) 

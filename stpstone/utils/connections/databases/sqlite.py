@@ -30,7 +30,7 @@ class SQLiteDB:
         interval=10,
         max_tries=20,
     )
-    def _execute(self, str_query:str) -> None:
+    def execute(self, str_query:str) -> None:
         """
         DOCSTRING: RUN QUERY WITH DML ACCESS
         INPUTS: QUERY
@@ -44,7 +44,7 @@ class SQLiteDB:
         interval=10,
         max_tries=20,
     )
-    def _read(self, str_query:str, dict_dtypes:Dict[str, Any], 
+    def read(self, str_query:str, dict_dtypes:Dict[str, Any], 
         list_cols_dt:Optional[List[str]]=None) -> pd.DataFrame:
         """
         DOCSTRING:
@@ -65,7 +65,7 @@ class SQLiteDB:
         interval=10,
         max_tries=20,
     )
-    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
+    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
         bl_insert_or_ignore:bool=False) -> None:
         """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
@@ -96,7 +96,7 @@ class SQLiteDB:
                 )
         except Exception as e:
             self.conn.rollback()
-            self._close
+            self.close
             if self.logger is not None:
                 CreateLog().errors(
                     self.logger, 
@@ -115,7 +115,7 @@ class SQLiteDB:
             )
 
     @property
-    def _close(self) -> None:
+    def close(self) -> None:
         """
         DOCSTRING: CLOSES THE CONNECTION TO THE DATABASE
         INPUTS: -

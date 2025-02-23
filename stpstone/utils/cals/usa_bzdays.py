@@ -24,10 +24,10 @@ class WorkCalendar:
     def is_weekend(self, date:datetime) -> bool:
         return date.weekday() >= 5
     
-    def diff_working_days(self, dt_bgn:datetime, dt_end:datetime) -> int:
+    def diff_working_days(self, dt_bgn:datetime, dt_sup:datetime) -> int:
         current_date = dt_bgn
         working_days = 0
-        while current_date <= dt_end:
+        while current_date <= dt_sup:
             if current_date.weekday() < 5 and not self.calendar.is_holiday(current_date):
                 working_days += 1
             current_date += timedelta(days=1)

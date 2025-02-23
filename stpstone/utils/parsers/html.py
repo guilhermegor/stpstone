@@ -2,7 +2,7 @@
 
 import logging
 import json
-from requests import HTTPError, request
+from requests import HTTPError, request, Response
 from bs4 import BeautifulSoup
 from lxml import html
 from typing import Optional, Union, List, Dict
@@ -31,17 +31,13 @@ class HtmlHndler:
         except HTTPError as e:
             return 'HTTP Error: {}'.format(e)
 
-    def lxml_parser(self, url: Optional[str]=None, page:Optional[bytes]=None,
-                         method:str='GET', bl_verify:bool=True) -> html.HtmlElement:
+    def lxml_parser(self, req_resp:Response) -> html.HtmlElement:
         """
         DOCSTRING: HTML PARSER FOR LXML PURPOSES
         INPUTS: URL, METHOD (GET AS DEFAULT) AND BOOLEAN VERIFY (TRUE AS DEFAULT)
         OUTPUTS: DOCUMENT WITH HTML CONTENT
         """
-        if page is None:
-            req_resp = request(method, url, verify=bl_verify)
-            req_resp.raise_for_status()
-            page = req_resp.content
+        page = req_resp.content
         return html.fromstring(page)
 
     def lxml_xpath(self, html_content, str_xpath):

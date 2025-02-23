@@ -13,5 +13,5 @@ df_ = AlphaVantageUS(
     cls_db=None, 
     token=get_password('ALPHAVANTAGE', 'API_KEY'), 
     list_slugs=['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA']
-)._source('ohlcv_not_adjusted', bl_debug=False, bl_fetch=True)
+).source('ohlcv_not_adjusted', bl_debug=False, bl_fetch=True)
 print(f'DF ALPHAVANTAGE: \n{df_}')

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
-from stpstone._config.global_slots import YAML_CRYPTO_COINCAP
+from stpstone._config.global_slots import YAML_WW_CRYPTO_COINCAP
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
@@ -30,7 +30,7 @@ class CoinCap(ABCRequests):
         self.logger = logger
         self.token = token
         super().__init__(
-            dict_metadata=YAML_CRYPTO_COINCAP,
+            dict_metadata=YAML_WW_CRYPTO_COINCAP,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,

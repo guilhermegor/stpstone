@@ -14,5 +14,5 @@ df_ = IRSBR(
     bl_new_proxy=False,
     dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5), 
     cls_db=None
-)._source('companies')
+).source('companies')
 print(df_)

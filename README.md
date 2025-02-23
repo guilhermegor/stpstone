@@ -30,6 +30,9 @@ stpstone
 │   │   │   │   ├── up2data_registries.yaml
 │   │   │   │   ├── up2data_volumes_trd.yaml
 │   │   │   │   └── warranty.yaml
+│   │   │   ├── macroeconomics
+│   │   │   │   └── currencies
+│   │   │   │       └── ptax_bcb.yaml
 │   │   │   ├── otc
 │   │   │   │   └── debentures.yaml
 │   │   │   └── taxation
@@ -121,6 +124,10 @@ stpstone
 ├── ingestion
 │   ├── abc
 │   │   └── requests.py
+│   ├── macroeconomics
+│   │   └── br
+│   │       └── currencies
+│   │           └── ptax_bcb.py
 │   ├── mtm
 │   │   └── br
 │   │       └── otc

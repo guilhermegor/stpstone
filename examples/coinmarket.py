@@ -14,5 +14,5 @@ df_ = CoinMarket(
     dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5), 
     cls_db=None, 
     token=get_password('COIN_MARKET', 'API_KEY')
-)._source('ohlcv_latest', bl_debug=False, bl_fetch=True)
+).source('ohlcv_latest', bl_debug=False, bl_fetch=True)
 print(f'DF MKTDATA COIN MARKET: \n{df_}')

@@ -53,12 +53,6 @@ class ScaffoldingReq(ABCRequests):
         token:Optional[str]=None, 
         list_slugs:Optional[List[str]]=None
     ) -> None:
-        self.session = session
-        self.dt_ref = dt_ref
-        self.cls_db = cls_db
-        self.logger = logger
-        self.token = token, 
-        self.list_slugs = list_slugs
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
             session=session,
@@ -68,6 +62,12 @@ class ScaffoldingReq(ABCRequests):
             token=token, 
             list_slugs=list_slugs
         )
+        self.session = session
+        self.dt_ref = dt_ref
+        self.cls_db = cls_db
+        self.logger = logger
+        self.token = token, 
+        self.list_slugs = list_slugs
     
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         return None

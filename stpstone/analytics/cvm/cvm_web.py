@@ -265,7 +265,7 @@ class CVMWeb_WS_Funds:
             df_funds[self.key_fund_ein].tolist()).unmask_docs
         # loading in db, if is user's will
         if self.cls_db is not None: 
-            self.cls_db._insert(
+            self.cls_db.insert(
                 df_funds.to_dict(orient='records'), 
                 str_table_nane, 
                 bl_insert_or_ignore=self.bl_insert_or_ignore
@@ -328,7 +328,7 @@ class CVMWeb_WS_Funds:
         if \
             (self.cls_db is not None) \
             and (len(list_avl_dts_fund) > 0):
-            self.cls_db._insert(
+            self.cls_db.insert(
                 list_avl_dts_fund, 
                 str_table_nane, 
                 bl_insert_or_ignore=self.bl_insert_or_ignore
@@ -502,7 +502,7 @@ class CVMWeb_WS_Funds:
         if \
             (self.cls_db is not None) \
             and (len(list_ser) > 0):
-            self.cls_db._insert(
+            self.cls_db.insert(
                 list_ser, 
                 str_table_nane, 
                 bl_insert_or_ignore=self.bl_insert_or_ignore

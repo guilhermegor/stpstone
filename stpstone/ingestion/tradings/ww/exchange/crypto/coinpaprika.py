@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 # project modules
-from stpstone._config.global_slots import YAML_CRYPTO_COINPAPRIKA
+from stpstone._config.global_slots import YAML_WW_CRYPTO_COINPAPRIKA
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
@@ -28,7 +28,7 @@ class CoinPaprika(ABCRequests):
         self.cls_db = cls_db
         self.logger = logger
         super().__init__(
-            dict_metadata=YAML_CRYPTO_COINPAPRIKA,
+            dict_metadata=YAML_WW_CRYPTO_COINPAPRIKA,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,

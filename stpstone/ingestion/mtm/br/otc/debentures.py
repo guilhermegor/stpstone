@@ -25,25 +25,25 @@ class DebenturesComBR(ABCRequests):
     def __init__(
         self,
         session:Optional[ReqSession]=None,
-        dt_beg:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 10),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 10),
+        dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
         self.session = session
-        self.dt_beg = dt_beg
-        self.dt_end = dt_end
+        self.dt_inf = dt_inf
+        self.dt_sup = dt_sup
         self.cls_db = cls_db
         self.logger = logger
-        self.dt_ref = dt_end
-        self.dt_beg_yyyymmdd = dt_beg.strftime('%Y%m%d')
-        self.dt_end_yyyymmdd = dt_end.strftime('%Y%m%d')
-        self.dt_beg_ddmmyyyy = dt_beg.strftime('%d/%m/%Y')
-        self.dt_end_ddmmyyyy = dt_end.strftime('%d/%m/%Y')
+        self.dt_ref = dt_sup
+        self.dt_beg_yyyymmdd = dt_inf.strftime('%Y%m%d')
+        self.dt_end_yyyymmdd = dt_sup.strftime('%Y%m%d')
+        self.dt_beg_ddmmyyyy = dt_inf.strftime('%d/%m/%Y')
+        self.dt_end_ddmmyyyy = dt_sup.strftime('%d/%m/%Y')
         super().__init__(
             dict_metadata=YAML_DEBENTURES,
             session=session,
-            dt_ref=dt_end,
+            dt_ref=dt_sup,
             cls_db=cls_db,
             logger=logger
         )

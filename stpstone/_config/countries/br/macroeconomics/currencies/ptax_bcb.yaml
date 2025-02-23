@@ -1,0 +1,161 @@
+### PTAX BCB ###
+### METADATA: https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes ###
+
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host:
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ids:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host: https://ptax.bcb.gov.br/
+  headers:
+  payload:
+    method: exibeFormularioConsultaBoletim
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  app: ptax_internet/consultaBoletim.do
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case:
+  cols_to_case:
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CURRENCY_ID: int
+    CURRENCY_NAME: str
+  df_read_params:
+  xpaths:
+    currency_options: //select[@name='ChkMoeda']/option
+
+available_currencies:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host: http://www4.bcb.gov.br/
+  headers:
+  payload:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  app: Download/fechamento/M{{dt_sup_yyyymmdd}}.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case:
+  cols_to_case:
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  schema: RAW
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CODE: str
+    NAME: str
+    SYMBOL: str
+    COUNTRY_CODE: int
+    COUNTRY_NAME: str
+    TYPE: category
+    DT_EXCLUSION: date
+  df_read_params:
+    names:
+      - CODE
+      - NAME
+      - SYMBOL
+      - COUNTRY_CODE
+      - COUNTRY_NAME
+      - TYPE
+      - DT_EXCLUSION
+    sep: ';'
+    skiprows: 1
+
+close_currency_rates:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host: https://ptax.bcb.gov.br/
+  headers:
+  payload:
+    method: gerarCSVFechamentoMoedaNoPeriodo
+    DATAINI: '{{dt_inf_ddmmyyyy}}' 
+    DATAFIM: '{{dt_sup_ddmmyyyy}}'
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  app: ptax_internet/consultaBoletim.do?ChkMoeda={{slug}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case:
+  cols_to_case:
+  list_cols_drop_dupl:
+  str_fmt_dt: DDMMYYYY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+    - ValueError
+    - TypeError
+  schema: RAW
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATE: date
+    CURRENCY_CODE: str
+    CURRENCY_TYPE: category
+    CURRENCY_SYMBOL: str
+    BID: float
+    ASK: float
+    BID_REVERSE: float
+    ASK_REVERSE: float
+  df_read_params:
+    names:
+      - DATE
+      - CURRENCY_CODE
+      - CURRENCY_TYPE
+      - CURRENCY_SYMBOL
+      - BID
+      - ASK
+      - BID_REVERSE
+      - ASK_REVERSE
+    sep: ';'
+    skiprows: 1
+    decimal: ','

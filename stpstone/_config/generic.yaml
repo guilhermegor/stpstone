@@ -7,6 +7,7 @@ requests:
 
 # audit log cols for storage banks
 audit_log_cols:
+  str_fmt_dt: YYYY-MM-DD
   url: URL
   ref_date: REF_DATE
   log_timestamp: LOG_TIMESTAMP

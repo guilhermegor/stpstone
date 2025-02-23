@@ -18,21 +18,21 @@ class YFinanceProvider(metaclass=TypeChecker):
     def __init__(
         self, 
         list_tickers:List[str], 
-        dt_beg:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52).strftime('%Y-%m-%d'),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1).strftime('%Y-%m-%d'),
+        dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52).strftime('%Y-%m-%d'),
+        dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1).strftime('%Y-%m-%d'),
         session:Optional[ReqSession]=None
     ) -> None:
         self.list_tickers = list_tickers
         self.session = session
-        self.dt_beg = dt_beg
-        self.dt_end = dt_end
+        self.dt_inf = dt_inf
+        self.dt_sup = dt_sup
     
     @property
     def mktdata(self) -> pd.DataFrame:
         df_ = download(
             tickers=self.list_tickers, 
-            start=self.dt_beg.strftime('%Y-%m-%d'), 
-            end=self.dt_end.strftime('%Y-%m-%d'), 
+            start=self.dt_inf.strftime('%Y-%m-%d'), 
+            end=self.dt_sup.strftime('%Y-%m-%d'), 
             group_by='ticker', 
             session=self.session
         )

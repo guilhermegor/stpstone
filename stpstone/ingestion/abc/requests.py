@@ -13,7 +13,7 @@ from requests import exceptions, request, Response
 from typing import Tuple, List, Dict, Any, Optional, Union
 from sqlalchemy.orm import Session
 from logging import Logger
-from io import TextIOWrapper, BytesIO
+from io import TextIOWrapper, BytesIO, StringIO
 from zipfile import ZipFile, BadZipFile
 # project modules
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -39,23 +39,21 @@ class HandleReqResponses(ABC):
         dict_df_read_params:Optional[Dict[str, Any]]=None, 
         bl_debug:bool=False
     ) -> pd.DataFrame:
+        url_ = req_resp.url.split('?')[0]
+        str_file_extension = DirFilesManagement().get_file_extension(url_)
         if self.req_trt_injection(req_resp) is not None:
             return self.req_trt_injection(req_resp)
-        elif req_resp.url.endswith('.zip'):
+        elif str_file_extension == 'zip':
             return self.handle_zip_response(req_resp, dict_dtypes)
-        elif \
-            (req_resp.url.endswith('.csv')) \
-            or (req_resp.url.endswith('.txt')) \
-            or (req_resp.url.endswith('.asp')):
+        elif str_file_extension in ['csv', 'txt', 'asp', 'do']:
             return self.handle_csv_response(req_resp, dict_df_read_params)
-        elif req_resp.url.endswith('.xlsx'):
+        elif str_file_extension == 'xlsx':
             return self.handle_excel_response(req_resp, dict_df_read_params)
-        elif req_resp.url.endswith('.xml'):
+        elif str_file_extension == 'xml':
             return self.handle_xml_response(req_resp)
-        elif req_resp.url.endswith('.json'):
+        elif str_file_extension == 'json':
             return self.handle_xml_response(req_resp)
-        elif DirFilesManagement().get_file_extension(req_resp.url) in \
-            ['pdf', 'docx', 'doc', 'docm', 'dot', 'dotm']:
+        elif str_file_extension in ['pdf', 'docx', 'doc', 'docm', 'dot', 'dotm']:
             return self.handle_pdf_doc_response(req_resp, dict_regex_patterns, bl_debug)
         else:
             json_ = req_resp.json()
@@ -94,7 +92,7 @@ class HandleReqResponses(ABC):
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
                 elif file_name.endswith('.xlsx'):
-                    df_ = self.handle_excel_response(file. dict_df_read_params)
+                    df_ = self.handle_excel_response(file, dict_df_read_params)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
                 elif file_name.endswith('.xml'):
@@ -120,20 +118,24 @@ class HandleReqResponses(ABC):
 
     def handle_csv_response(
         self, 
-        file:Union[BytesIO, TextIOWrapper], 
+        file:Union[BytesIO, TextIOWrapper, Response], 
         dict_df_read_params:Optional[Dict[str, Any]]
     ) -> pd.DataFrame:
         if isinstance(file, BytesIO):
             file.seek(0)
+        elif isinstance(file, Response):
+            file = StringIO(file.text)
         return pd.read_csv(file, **dict_df_read_params)
 
     def handle_excel_response(
         self, 
-        file:Union[BytesIO, TextIOWrapper], 
+        file:Union[BytesIO, TextIOWrapper, Response], 
         dict_df_read_params:Optional[Dict[str, Any]]
     ) -> pd.DataFrame:
         if isinstance(file, BytesIO):
             file.seek(0)
+        elif isinstance(file, Response):
+            file = StringIO(file.text)
         return pd.read_excel(file, **dict_df_read_params)
 
     def handle_xml_response(self, file:Union[BytesIO, TextIOWrapper], 
@@ -491,7 +493,7 @@ class ABCRequests(HandleReqResponses):
                 str_table_name = dict_['table_name']
                 if bl_schema:
                     str_table_name = f"{dict_['schema']}_{str_table_name}"
-                self.cls_db._insert(
+                self.cls_db.insert(
                     dict_['data'], 
                     str_table_name=str_table_name,
                     bl_insert_or_ignore=True
@@ -500,20 +502,26 @@ class ABCRequests(HandleReqResponses):
             str_table_name = self.dict_metadata[str_resource]['table_name']
             if bl_schema:
                 str_table_name = f"{self.dict_metadata[str_resource]['schema']}_{str_table_name}"
-            self.cls_db._insert(
+            self.cls_db.insert(
                 list_ser, 
                 str_table_name=str_table_name,
                 bl_insert_or_ignore=bl_insert_or_ignore
             )
 
-    def non_iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
-                                 bl_debug:bool=False) -> Optional[pd.DataFrame]:
+    def non_iteratively_get_data(
+        self, 
+        str_resource:str, 
+        host:Optional[str]=None, 
+        bl_fetch:bool=False, 
+        bl_debug:bool=False
+    ) -> Optional[pd.DataFrame]:
         """
         Non-iteratively get raw data
         Args:
             - str_resource (str): resource name
             - host (Optional[str]): host name
             - bl_fetch (bool): False as default
+            - bl_debug (bool): False as default
         Returns:
             pd.DataFrame
         """
@@ -537,26 +545,44 @@ class ABCRequests(HandleReqResponses):
             else self.dict_metadata['credentials'].get('payload', None)
         if dict_payload is not None:
             dict_payload = HandlingDicts().fill_placeholders(dict_payload, dict_instance_vars)
+        list_ignorable_exceptions = self.dict_metadata[str_resource].get(
+            'list_ignorable_exceptions', list()
+        ) if self.dict_metadata[str_resource].get(
+            'list_ignorable_exceptions', list()
+        ) is not None else list()
+        list_ignorable_exceptions = [
+            eval(exception) if isinstance(exception, str) else exception
+            for exception in list_ignorable_exceptions
+        ]
         # requiring data
-        df_ = self.trt_req(
-            self.dict_metadata[str_resource]['req_method'],
-            host_,
-            self.dict_metadata[str_resource]['dtypes'], 
-            dict_headers,
-            dict_payload,
-            app_, 
-            self.dict_metadata[str_resource]['bl_verify'],
-            self.dict_metadata[str_resource]['timeout'],
-            self.dict_metadata[str_resource]['cols_from_case'],
-            self.dict_metadata[str_resource]['cols_to_case'],
-            self.dict_metadata[str_resource]['list_cols_drop_dupl'],
-            self.dict_metadata[str_resource]['str_fmt_dt'],
-            self.dict_metadata[str_resource]['type_error_action'],
-            self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
-            self.dict_metadata[str_resource].get('regex_patterns', None),
-            self.dict_metadata[str_resource]['df_read_params'],
-            bl_debug
-        )
+        try:
+            df_ = self.trt_req(
+                self.dict_metadata[str_resource]['req_method'],
+                host_,
+                self.dict_metadata[str_resource]['dtypes'], 
+                dict_headers,
+                dict_payload,
+                app_, 
+                self.dict_metadata[str_resource]['bl_verify'],
+                self.dict_metadata[str_resource]['timeout'],
+                self.dict_metadata[str_resource]['cols_from_case'],
+                self.dict_metadata[str_resource]['cols_to_case'],
+                self.dict_metadata[str_resource]['list_cols_drop_dupl'],
+                self.dict_metadata[str_resource]['str_fmt_dt'],
+                self.dict_metadata[str_resource]['type_error_action'],
+                self.dict_metadata[str_resource]['strt_keeping_when_duplicated'],
+                self.dict_metadata[str_resource].get('regex_patterns', None),
+                self.dict_metadata[str_resource]['df_read_params'],
+                bl_debug
+            )
+        except tuple(list_ignorable_exceptions) as e:
+            if self.logger is not None:
+                CreateLog().warnings(
+                    self.logger, 
+                    f'Non-iterable method encountered ignorable error: {str(e)}. Continuing...'
+                )
+            else:
+                print(f'Non-iterable method encountered ignorable error: {str(e)}. Continuing...')
         if self.cls_db is not None:
             self.insert_table(
                 str_resource, 
@@ -569,14 +595,20 @@ class ABCRequests(HandleReqResponses):
         else:
             return None
 
-    def iteratively_get_data(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
-                             bl_debug:bool=False) -> Optional[pd.DataFrame]:
+    def iteratively_get_data(
+        self, 
+        str_resource:str, 
+        host:Optional[str]=None, 
+        bl_fetch:bool=False, 
+        bl_debug:bool=False
+    ) -> Optional[pd.DataFrame]:
         """
         Iteratively get raw data
         Args:
             - str_resource (str): resource name
             - host (Optional[str]): host name
             - bl_fetch (bool): False as default
+            - bl_debug (bool): False as default
         Returns:
             Optional[pd.DataFrame]
         """
@@ -604,6 +636,15 @@ class ABCRequests(HandleReqResponses):
             dict_payload = HandlingDicts().fill_placeholders(dict_payload, dict_instance_vars)
         list_slugs = self.list_slugs if self.list_slugs is not None \
             else self.dict_metadata[str_resource].get('slugs', None)
+        list_ignorable_exceptions = self.dict_metadata[str_resource].get(
+            'list_ignorable_exceptions', list()
+        ) if self.dict_metadata[str_resource].get(
+            'list_ignorable_exceptions', list()
+        ) is not None else list()
+        list_ignorable_exceptions = [
+            eval(exception) if isinstance(exception, str) else exception
+            for exception in list_ignorable_exceptions
+        ]
         # iterating through slugs/number of pages
         if list_slugs is not None:
             str_extract_from_braces = StrHandler().extract_info_between_braces(app_)[0] \
@@ -640,12 +681,23 @@ class ABCRequests(HandleReqResponses):
                                 self.dict_metadata[str_resource]['bl_schema']
                             )
                             if bl_fetch == False: list_ser = list()
-                    except (exceptions.HTTPError, BadZipFile) as e:
+                    except tuple(list_ignorable_exceptions) as e:
                         if self.logger is not None:
-                            CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
+                            CreateLog().warnings(
+                                self.logger, 
+                                'Iteration encountered an ignorable exception ' 
+                                + f'{e.__class__.__name__}: {e}. Continuing...'
+                            )
                         else:
-                            print(f'#{i} Iteration failed due to: {e}')
-                        break
+                            print('Iteration encountered an ignorable exception ' 
+                                + f'{e.__class__.__name__}: {e}. Continuing...')
+                    except Exception as e:
+                        if self.logger is not None:
+                            CreateLog().critical(
+                                self.logger, f'Iteration failed due to {e.__class__.__name__}: {e}'
+                            )
+                        else:
+                            raise Exception(f'Iteration failed due to {e.__class__.__name__}: {e}')
             elif str_extract_from_braces == 'chunk_slugs':
                 list_chunks_slugs = HandlingLists().chunk_list(
                     list_to_chunk=self.list_slugs, 
@@ -684,12 +736,24 @@ class ABCRequests(HandleReqResponses):
                                 self.dict_metadata[str_resource]['bl_schema']
                             )
                             if bl_fetch == False: list_ser = list()
-                    except (exceptions.HTTPError, BadZipFile) as e:
+                    except tuple(list_ignorable_exceptions) as e:
                         if self.logger is not None:
-                            CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
+                            CreateLog().warnings(
+                                self.logger, 
+                                'Iteration encountered an ignorable exception ' 
+                                + f'{e.__class__.__name__}: {e}. Continuing...'
+                            )
                         else:
-                            print(f'#{i} Iteration failed due to: {e}')
-                        break
+                            print('Iteration encountered an ignorable exception ' 
+                                + f'{e.__class__.__name__}: {e}. Continuing...')
+                        continue
+                    except Exception as e:
+                        if self.logger is not None:
+                            CreateLog().critical(
+                                self.logger, f'Iteration failed due to {e.__class__.__name__}: {e}'
+                            )
+                        else:
+                            raise Exception(f'Iteration failed due to {e.__class__.__name__}: {e}')
             else:
                 raise Exception('Neither {{slug}} or {{chunk_slugs}} are found in the app ' 
                                 + 'parameter, please revisit it.')
@@ -726,18 +790,30 @@ class ABCRequests(HandleReqResponses):
                         )
                         if bl_fetch == False: list_ser = list()
                     i += 1
-                except (exceptions.HTTPError, BadZipFile) as e:
+                except tuple(list_ignorable_exceptions) as e:
                     if self.logger is not None:
-                        CreateLog().warnings(self.logger, f'#{i} Iteration failed due to: {e}')
+                        CreateLog().warnings(
+                            self.logger, 
+                            'Iteration encountered an ignorable exception ' 
+                            + f'{e.__class__.__name__}: {e}. Continuing...'
+                        )
                     else:
-                        print(f'#{i} Iteration failed due to: {e}')
-                    break
+                        print('Iteration encountered an ignorable exception ' 
+                                + f'{e.__class__.__name__}: {e}. Continuing...')
+                    continue
+                except Exception as e:
+                    if self.logger is not None:
+                        CreateLog().critical(
+                            self.logger, f'Iteration failed due to {e.__class__.__name__}: {e}'
+                        )
+                    else:
+                        raise Exception(f'Iteration failed due to {e.__class__.__name__}: {e}')
         if len(list_ser) > 0:
             return pd.DataFrame(list_ser)
         else:
             return None
 
-    def _source(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
+    def source(self, str_resource:str, host:Optional[str]=None, bl_fetch:bool=False, 
                 bl_debug:bool=False) -> Optional[pd.DataFrame]:
         """
         Get/load raw data - if a class database is passed, the data collected will be inserted into 
@@ -762,32 +838,7 @@ class ABCRequests(HandleReqResponses):
                 or (StrHandler().match_string_like(app_, '*{{slug}}*') == True)
                 or (StrHandler().match_string_like(app_, '*{{chunk_slugs}}*') == True)
             ):
-            return self.iteratively_get_data(str_resource, host, bl_fetch, bl_debug)
-        return self.non_iteratively_get_data(str_resource, host, bl_fetch, bl_debug)
-    
-    def _sources(self, host:Optional[str]=None, bl_fetch:bool=False, bl_debug:bool=False) \
-        -> Optional[pd.DataFrame]:
-        """
-        Get/load raw data
-        Args:
-            - str_resource (str): resource name
-            - bl_insert_or_ignore(bool): False as default
-            - bl_schema(bool): some databases, like SQLite, doesn't have schemas - True as default
-        Return:
-            pd.DataFrame
-        """
-        list_ser = list()
-        for str_resource in list(self.dict_metadata.keys()):
-            if str_resource not in \
-                ['credentials', 'logs', 'metadata', 'downstream_processes']:
-                if bl_fetch == True:
-                    list_ser.extend(
-                        self._source(str_resource, host, bl_fetch, bl_debug)\
-                            .to_dict(orient='records')
-                    )
-                else:
-                    self._source(str_resource, host, bl_fetch, bl_debug)
-        if len(list_ser) > 0:
-            return pd.DataFrame(list_ser)
+            func_get_data = self.iteratively_get_data
         else:
-            return None
+            func_get_data = self.non_iteratively_get_data
+        return func_get_data(str_resource, host, bl_fetch, bl_debug)

@@ -377,15 +377,15 @@ class TradingHoursB3:
         )
     
     @property
-    def futures_forex(self) -> list:
+    def futures_currency(self) -> list:
         """
         DOCSTRING:
         INPUTS:
         OUTPUTS
         """
         return self.futures_generic(
-            YAML_B3['trading_hours_b3']['futures']['url_forex'], 
-            YAML_B3['trading_hours_b3']['futures']['num_cols_forex']
+            YAML_B3['trading_hours_b3']['futures']['url_currency'], 
+            YAML_B3['trading_hours_b3']['futures']['num_cols_currency']
         )
 
     @property

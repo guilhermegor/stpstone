@@ -44,9 +44,9 @@ class PostgreSQLDB:
         }
         self.conn: Connection = psycopg2.connect(**self.dict_db_config)
         self.cursor: Cursor = self.conn.cursor()
-        self._execute(f"SET search_path TO '{self.str_schema}';")
+        self.execute(f"SET search_path TO '{self.str_schema}';")
 
-    def _execute(self, str_query:str) -> None:
+    def execute(self, str_query:str) -> None:
         """
         DOCSTRING: RUN QUERY WITH DML ACCESS
         INPUTS: QUERY
@@ -54,7 +54,7 @@ class PostgreSQLDB:
         """
         self.cursor.execute(str_query)
 
-    def _read(self, str_query:str, dict_type_cols:Optional[Dict[str, Any]]=None, 
+    def read(self, str_query:str, dict_type_cols:Optional[Dict[str, Any]]=None, 
               list_cols_dt:Optional[List[str]]=None, str_fmt_dt:Optional[str]=None) -> pd.DataFrame:
         """
         DOCSTRING: RUN QUERY AND RETURN RESULTS AS DATAFRAME
@@ -71,7 +71,7 @@ class PostgreSQLDB:
         # return dataframe
         return df_
 
-    def _insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
+    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
         bl_insert_or_ignore:bool=False) -> None:
         """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A POSTGRESQL TABLE
@@ -104,7 +104,7 @@ class PostgreSQLDB:
                 )
         except Exception as e:
             self.conn.rollback()
-            self._close
+            self.close
             if self.logger is not None:
                 CreateLog().errors(
                     self.logger, 
@@ -123,7 +123,7 @@ class PostgreSQLDB:
             )
 
     @property
-    def _close(self) -> None:
+    def close(self) -> None:
         """
         DOCSTRING: CLOSES THE CONNECTION TO THE DATABASE
         INPUTS: -

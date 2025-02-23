@@ -427,7 +427,7 @@ class YFinanceMacroBR:
         # retrieving historical data
         return json_brazillian_cpi
 
-    def yforex(self, list_xcg_curr, wd_start_date=2, wd_end_date=0):
+    def ycurrency(self, list_xcg_curr, wd_start_date=2, wd_end_date=0):
         """
         DOCSTRING:
         INPUTS:

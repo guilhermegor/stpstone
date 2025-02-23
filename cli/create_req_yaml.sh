@@ -48,8 +48,6 @@ logs:
 
 metadata:
 
-downstream_processes:
-
 
 ### RESOURCES TO BE SCRAPED ###
 
@@ -59,21 +57,23 @@ resource_example:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
-  #   - i (int): https://example.com/{{i}}
-  #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app:
   bl_verify: False
   timeout: (12.0, 12.0)
-  cols_from_case:
-  cols_to_case:
+  cols_from_case: default
+  cols_to_case: upper_constant
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
   schema: RAW
   table_name:
   bl_insert_or_ignore: False
@@ -103,6 +103,9 @@ resource_example:
       condition_2:
         action_1: pattern_regex_1
         action_2: pattern_regex_2
+  xpaths:
+    name_1: xpath_1
+    name_2: xpath_2
 EOF
 
 echo "File succesfully created at: $full_dir_path/$file_name.yaml"
