@@ -10,7 +10,7 @@ logs:
 
 metadata:
   company_size:
-    schema: RAW
+    schema: raw
     table_name: irsbr_company_size
     data:
       - CODE: '00'
@@ -22,7 +22,7 @@ metadata:
       - CODE: '05'
         DESCRIPTION: OTHERS
   id_headquarters_branch:
-    schema: RAW
+    schema: raw
     table_name: irsbr_id_headquarters_branch
     data:
       - CODE: 1
@@ -30,7 +30,7 @@ metadata:
       - CODE: 2
         DESCRIPTION: BRANCH
   registration_status:
-    schema: RAW
+    schema: raw
     table_name: irsbr_registration_status
     data:
       - CODE: 1
@@ -44,7 +44,7 @@ metadata:
       - CODE: 8
         DESCRIPTION: RETIRED
   simplified_tx_system:
-    schema: RAW
+    schema: raw
     table_name: irsbr_simplified_tx_system
     data:
       - CODE: S
@@ -54,7 +54,7 @@ metadata:
       - CODE: EM BRANCO
         DESCRIPTION: 'OTHERS'
   mei:
-    schema: RAW
+    schema: raw
     table_name: irsbr_mei
     data:
       - CODE: S
@@ -64,7 +64,7 @@ metadata:
       - CODE: EM BRANCO
         DESCRIPTION: 'OTHERS'
   type_person:
-    schema: RAW
+    schema: raw
     table_name: irsbr_type_person
     data:
       - CODE: 1
@@ -83,7 +83,7 @@ companies:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_companies
   bl_insert_or_ignore: False
   bl_schema: True
@@ -103,7 +103,7 @@ businesses:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_businesses
   bl_insert_or_ignore: False
   bl_schema: True
@@ -145,7 +145,7 @@ simplified_taxation_system:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_simp_tax_sys
   bl_insert_or_ignore: False
   bl_schema: True
@@ -164,7 +164,7 @@ shareholders:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_shareholders
   bl_insert_or_ignore: False
   bl_schema: True
@@ -187,7 +187,7 @@ countries:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_countries
   bl_insert_or_ignore: False
   bl_schema: True
@@ -201,7 +201,7 @@ cities:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_cities
   bl_insert_or_ignore: False
   bl_schema: True
@@ -215,7 +215,7 @@ shareholders_education:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_legal_form
   bl_insert_or_ignore: False
   bl_schema: True
@@ -228,7 +228,7 @@ legal_form:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  schema: RAW
+  schema: raw
   table_name: irsbr_legal_form
   bl_insert_or_ignore: False
   bl_schema: True
@@ -243,7 +243,7 @@ ncea:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_rfb_cnaes
   bl_insert_or_ignore: False
   bl_schema: True
@@ -257,7 +257,7 @@ registration_status:
   bl_verify: False
   bl_io_interpreting: True
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
+  schema: raw
   table_name: irsbr_registration_status
   bl_insert_or_ignore: False
   bl_schema: True

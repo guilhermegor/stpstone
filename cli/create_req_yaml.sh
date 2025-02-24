@@ -74,7 +74,7 @@ resource_example:
   type_error_action: raise
   strt_keeping_when_duplicated: first
   list_ignorable_exceptions:
-  schema: RAW
+  schema: raw
   table_name:
   bl_insert_or_ignore: False
   bl_schema: True

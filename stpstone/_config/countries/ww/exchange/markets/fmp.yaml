@@ -46,7 +46,7 @@ mkt_hours_exchanges_yesterday:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: ww_fmp_mkts_hours_yesterday
   bl_insert_or_ignore: False
   bl_schema: True
@@ -81,7 +81,7 @@ crypto_ohlcv_yesterday:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: ww_fmp_crypto_ohlcv_yesterday
   bl_insert_or_ignore: False
   bl_schema: True
@@ -126,7 +126,7 @@ stocks_ohlcv_yesterday:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: ww_fmp_stocks_ohlcv_yesterday
   bl_insert_or_ignore: False
   bl_schema: True
@@ -171,7 +171,7 @@ etfs_ohlcv_yesterday:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: us_fmp_etfs_ohlcv_yesterday
   bl_insert_or_ignore: False
   bl_schema: True
@@ -203,7 +203,7 @@ commodities_ohlcv_yesterday:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: us_fmp_commodities_ohlcv_yesterday
   bl_insert_or_ignore: False
   bl_schema: True

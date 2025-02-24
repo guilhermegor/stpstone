@@ -241,7 +241,7 @@ class CVMWeb_WS_Funds:
                     '** ERROR: FUND EIN AND NAME NOT FOUND \n\t' 
                     + '- COMMON ERROR IS AN UNEXPECTED "-" CHARACTER, PROVIDED THE CODE'
                     + ' EXPECTS ONLY ONE SEPARATOR FOR FUND EIN AND NAME \n\t'
-                    + '- RAW DROP DOWN OPTION FUND: {} \n\t'.format(str_option_fund_raw)
+                    + '- raw DROP DOWN OPTION FUND: {} \n\t'.format(str_option_fund_raw)
                     + '- REPLACED OPTION FUND: {} \n\t'.format(str_option_fund_trt)
                     + '- URL CVMWEB: {}'.format(self.str_host_ex_fund + str_app)
                 )

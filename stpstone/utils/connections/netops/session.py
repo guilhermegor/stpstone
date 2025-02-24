@@ -80,7 +80,7 @@ class ReqSession(ProxyServers):
                  str_protocol:str='http', str_continent_code:Union[str, None]=None, 
                  str_country_code:Union[str, None]=None, bl_ssl:Union[bool, None]=None, 
                  float_min_ratio_times_alive_dead:Optional[float]=0.02,
-                 float_max_timeout:Optional[float]=60, bl_use_timer:bool=False,
+                 float_max_timeout:Optional[float]=600, bl_use_timer:bool=False,
                  list_status_forcelist:list=[429, 500, 502, 503, 504]) -> None:
         """
         DOCSTRING: SESSION CONFIGURATION

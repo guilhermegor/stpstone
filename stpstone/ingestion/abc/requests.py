@@ -14,7 +14,7 @@ from typing import Tuple, List, Dict, Any, Optional, Union
 from sqlalchemy.orm import Session
 from logging import Logger
 from io import TextIOWrapper, BytesIO, StringIO
-from zipfile import ZipFile, BadZipFile
+from zipfile import ZipFile
 # project modules
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.lists import HandlingLists
@@ -39,8 +39,7 @@ class HandleReqResponses(ABC):
         dict_df_read_params:Optional[Dict[str, Any]]=None, 
         bl_debug:bool=False
     ) -> pd.DataFrame:
-        url_ = req_resp.url.split('?')[0]
-        str_file_extension = DirFilesManagement().get_file_extension(url_)
+        str_file_extension = DirFilesManagement().get_file_extension(req_resp.url)
         if self.req_trt_injection(req_resp) is not None:
             return self.req_trt_injection(req_resp)
         elif str_file_extension == 'zip':
@@ -52,7 +51,7 @@ class HandleReqResponses(ABC):
         elif str_file_extension == 'xml':
             return self.handle_xml_response(req_resp)
         elif str_file_extension == 'json':
-            return self.handle_xml_response(req_resp)
+            return self.handle_json_response(req_resp)
         elif str_file_extension in ['pdf', 'docx', 'doc', 'docm', 'dot', 'dotm']:
             return self.handle_pdf_doc_response(req_resp, dict_regex_patterns, bl_debug)
         else:
@@ -73,7 +72,8 @@ class HandleReqResponses(ABC):
         list_ = []
         for file_name in zipfile.namelist():
             with zipfile.open(file_name) as file:
-                if file_name.endswith('.zip'):
+                str_file_extension = DirFilesManagement().get_file_extension(file_name)
+                if str_file_extension == 'zip':
                     nested_zip_response = Response()
                     nested_zip_response._content = file.read()
                     nested_df = self.handle_zip_response(
@@ -86,24 +86,24 @@ class HandleReqResponses(ABC):
                             df_['FILE_NAME'] = file_name
                         list_.extend(nested_df)
                 elif \
-                    (file_name.endswith('.csv')) \
-                    or (file_name.endswith('.txt')):
+                    (str_file_extension == 'csv') \
+                    or (str_file_extension == 'txt'):
                     df_ = self.handle_csv_response(file, dict_df_read_params)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
-                elif file_name.endswith('.xlsx'):
+                elif str_file_extension == 'xlsx':
                     df_ = self.handle_excel_response(file, dict_df_read_params)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
-                elif file_name.endswith('.xml'):
+                elif str_file_extension == '.xml':
                     df_ = self.handle_xml_response(file)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
-                elif file_name.endswith('.json'):
+                elif str_file_extension == 'json':
                     df_ = self.handle_json_response(file)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))
-                elif file_name.endswith('.pdf'):
+                elif str_file_extension == 'pdf':
                     df_ = self.handle_pdf_doc_response(file, dict_regex_patterns)
                     df_['FILE_NAME'] = file_name
                     list_.extend(df_.to_dict(orient='records'))

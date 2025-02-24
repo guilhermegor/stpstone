@@ -22,7 +22,7 @@ logs:
 
 metadata:
   crypto_assets:
-    schema: RAW
+    schema: raw
     table_name: coinpaprika_crypto_assets
     data:
       - ID: btc-bitcoin
@@ -65,7 +65,7 @@ ohlcv_latest:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: coinpaprika_ohlcv_latest
   bl_insert_or_ignore: False
   bl_schema: True

@@ -2,6 +2,7 @@
 
 # pypi.org libs
 import os
+import re
 import shutil
 import tempfile
 import pycurl
@@ -187,9 +188,11 @@ class DirFilesManagement:
             t[1] = t[1][1:]
         return t
     
-    def get_file_extension(self, str_):
-        _, extension = os.path.splitext(str_)
-        return extension.strip('.')
+    def get_file_extension(self, url):
+        match = re.search(r'\.([a-zA-Z0-9]+)(?:[\?#]|$)', url)
+        if match:
+            return match.group(1)  # Return the file extension
+        return ''
 
     def download_web_file(self, url, filepath=None):
         """

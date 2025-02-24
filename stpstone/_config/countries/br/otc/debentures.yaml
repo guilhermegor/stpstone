@@ -42,7 +42,7 @@ mtm:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: debentures_com_br_mtm
   bl_insert_or_ignore: False
   bl_schema: True
@@ -79,7 +79,7 @@ infos:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: debentures_com_br_infos
   bl_insert_or_ignore: False
   bl_schema: True
@@ -192,7 +192,7 @@ otc_pvs:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: debentures_com_br_otc_pvs
   bl_insert_or_ignore: False
   bl_schema: True
@@ -231,7 +231,7 @@ primary_offers:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: debentures_com_br_primary_offers
   bl_insert_or_ignore: False
   bl_schema: True
@@ -267,7 +267,7 @@ secondary_otc_volume:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: debentures_com_br_primary_offers
   bl_insert_or_ignore: False
   bl_schema: True

@@ -49,7 +49,7 @@ ids:
   str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name:
   bl_insert_or_ignore: False
   bl_schema: True
@@ -81,7 +81,7 @@ available_currencies:
   str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name:
   bl_insert_or_ignore: False
   bl_schema: True
@@ -133,7 +133,7 @@ close_currency_rates:
   list_ignorable_exceptions:
     - ValueError
     - TypeError
-  schema: RAW
+  schema: raw
   table_name:
   bl_insert_or_ignore: False
   bl_schema: True

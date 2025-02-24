@@ -51,7 +51,7 @@ ohlcv_latest:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: coinmarket_ohlcv_latest
   bl_insert_or_ignore: False
   bl_schema: True

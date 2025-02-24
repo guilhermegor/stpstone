@@ -25,8 +25,8 @@ instruments_register:
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   str_fmt_dt: 'YYYY-MM-DD'
-  schema: RAW
-  table_name: B3_INSTRUMENTS_REGISTRATION
+  schema: raw
+  table_name: b3_instruments_registration
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

@@ -37,7 +37,7 @@ instruments_register:
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   str_fmt_dt: YYYY-MM-DD
-  schema: RAW
+  schema: raw
   table_name: b3_instruments_registration
   bl_insert_or_ignore: False
   bl_schema: True
@@ -102,7 +102,7 @@ daily_trades:
   bl_io_interpreting: False
   timeout: (12.0, 12.0)
   str_fmt_dt: YYYY-MM-DD
-  schema: RAW
+  schema: raw
   table_name: b3_daily_trades
   bl_insert_or_ignore: False
   bl_schema: True
@@ -130,7 +130,7 @@ loan_balance:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: b3_loan_balance
   bl_insert_or_ignore: False
   bl_schema: True
@@ -159,7 +159,7 @@ lending_open_position:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: b3_loan_balance
   bl_insert_or_ignore: False
   bl_schema: True

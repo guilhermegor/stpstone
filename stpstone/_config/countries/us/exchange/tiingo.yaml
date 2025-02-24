@@ -39,7 +39,7 @@ ohlcv_adjusted:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
-  app: daily/{{slug}}/prices?startDate={{dt_beg_yyyy_mm_dd}}&endDate={{dt_end_yyyy_mm_dd}}&format=json&resampleFreq=daily
+  app: daily/{{slug}}/prices?startDate={{dt_beg_yyyymmdd}}&endDate={{dt_end_yyyymmdd}}&format=json&resampleFreq=daily
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
@@ -48,7 +48,7 @@ ohlcv_adjusted:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
   strt_keeping_when_duplicated: first
-  schema: RAW
+  schema: raw
   table_name: us_tiingo_ohlcv_adjusted
   bl_insert_or_ignore: False
   bl_schema: True
