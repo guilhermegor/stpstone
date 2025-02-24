@@ -3,7 +3,7 @@
 from typing import List, Callable
 
 
-def streaming_pipeline(generator, functions:List[Callable]):
+def streamingpipeline(generator, functions:List[Callable]):
     """
     Processes a generator stream through a sequence of functions
     Examples of usage:
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     def add_exclamation(text): return text + '!'
 
     stream = iter(['hello', 'world'])
-    processed_stream = streaming_pipeline(stream, [to_uppercase, add_exclamation])
+    processed_stream = streamingpipeline(stream, [to_uppercase, add_exclamation])
 
     for item in processed_stream:
         print(item)

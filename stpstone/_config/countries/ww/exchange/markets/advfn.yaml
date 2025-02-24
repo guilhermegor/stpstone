@@ -1,11 +1,9 @@
 ### CONFIGURATION TOOLS ###
-### METADATA: https://www.tiingo.com/documentation/ ###
 
 credentials:
-  host: https://api.tiingo.com/tiingo/
+  host: https://br.advfn.com/
   headers:
-    Content-Type: application/json
-    Authorization: Token {{token}}
+    Cookie: ADVFNUID=70ef3fe162e0f05e9d3bb02d7448c46b9994d44
   payload:
   token:
     host:
@@ -24,46 +22,44 @@ logs:
 
 metadata:
 
-downstream_processes:
-
 
 ### RESOURCES TO BE SCRAPED ###
 
-ohlcv_adjusted:
+daily_ohlcv:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
   headers:
   payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
   # iteratively_get_data placeholders: 
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
-  slugs:
-  app: daily/{{slug}}/prices?startDate={{dt_inf_yyyymmdd}}&endDate={{dt_sup_yyyymmdd}}&format=json&resampleFreq=daily
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: common/api/histo/GetHistoricalData?symbol={{market}}^{{ticker}}&frequency=DAILY&from={{dt_inf_unix_ts}}&to={{dt_sup_unix_ts}}
   bl_verify: False
   timeout: (12.0, 12.0)
-  cols_from_case: camel
+  cols_from_case: pascal
   cols_to_case: upper_constant
   list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
+  str_fmt_dt: unix_ts
   type_error_action: raise
   strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
   schema: raw
-  table_name: us_tiingo_ohlcv_adjusted
+  table_name:
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    DATE: str
-    CLOSE: float
-    HIGH: float
-    LOW: float
-    OPEN: float
+    DATE: date
+    CLOSE_PRICE: float
+    CHANGE: float
+    CHANGE_PERCENTAGE: float
+    OPEN_PRICE: float
+    HIGH_PRICE: float
+    LOW_PRICE: float
     VOLUME: float
-    ADJ_CLOSE: float
-    ADJ_HIGH: float
-    ADJ_LOW: float
-    ADJ_OPEN: float
-    ADJ_VOLUME: float
-    DIV_CASH: float
-    SPLIT_FACTOR: float
+    TICKER: str
   df_read_params:

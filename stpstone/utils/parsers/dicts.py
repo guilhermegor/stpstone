@@ -257,6 +257,11 @@ class HandlingDicts:
             if isinstance(value, dict):
                 return {k: replace_value(v) for k, v in value.items()}
             elif isinstance(value, str):
-                return placeholder_pattern.sub(lambda m: dict_replacer.get(m.group(1), m.group(0)), value)
+                return placeholder_pattern.sub(
+                    lambda m: str(dict_replacer.get(m.group(1), m.group(0))), 
+                    value
+                )
+            elif isinstance(value, list):
+                return [replace_value(v) for v in value]
             return value
         return {key: replace_value(value) for key, value in dict_base.items()}

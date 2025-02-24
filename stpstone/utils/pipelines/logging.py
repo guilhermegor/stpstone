@@ -7,7 +7,7 @@ from typing import Any, Callable, List
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-def logging_pipeline(data:Any, functions:List[Callable], logger:Logger) -> Any:
+def loggingpipeline(data:Any, functions:List[Callable], logger:Logger) -> Any:
     """
     Executes a sequence of functions while logging each step.
     """
@@ -25,5 +25,5 @@ if __name__ == '__main__':
     def square(x): return x ** 2
     def halve(x): return x / 2
 
-    result = logging_pipeline(4, [square, halve])
+    result = loggingpipeline(4, [square, halve])
     # Logs: Applied square, result: 16 → Applied halve, result: 8

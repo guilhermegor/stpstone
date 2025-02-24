@@ -93,7 +93,7 @@ class AlphaTools:
             YAML_INOA['alpha_tools']['quotes']['key_funds_ids']: list_ids,
             YAML_INOA['alpha_tools']['quotes']['key_start_dt']: self.dt_inf.strftime(
                 '%Y-%m-%d'),
-            YAML_INOA['alpha_tools']['quotes']['key_end_dt']: self.dt_sup.strftime(
+            YAML_INOA['alpha_tools']['quotes']['key_sup_dt']: self.dt_sup.strftime(
                 '%Y-%m-%d'),
         }
         json_req = self.generic_req(

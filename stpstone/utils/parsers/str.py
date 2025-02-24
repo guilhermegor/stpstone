@@ -120,7 +120,7 @@ class StrHandler:
     def normalize_text(self, str_):
         return normalize('NFKD', str_).encode('ascii', 'ignore').decode('utf-8')
 
-    def remove_end_period_marks(self, corpus, patterns='[!.?+]'):
+    def remove_sup_period_marks(self, corpus, patterns='[!.?+]'):
         """
         DOCSTRING: REMOVE END PERIOD MARKS
         INPUTS: CORPUS AND PATTERNS (DEFAULT)
@@ -494,7 +494,7 @@ class StrHandler:
     def extract_info_between_braces(self, str_:str, str_pattern:str=r'\{\{(.*?)\}\}') -> str:
         return re.findall(str_pattern, str_)
     
-    def fill_fstr_placeholders(self, str_:str, dict_placeholders:Dict[str, Any]) -> str:
+    def fill_placeholders(self, str_:str, dict_placeholders:Dict[str, Any]) -> str:
         """
         Fill fstr named placeholders
         Args:

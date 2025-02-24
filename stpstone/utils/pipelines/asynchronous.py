@@ -4,7 +4,7 @@ import asyncio
 from typing import Callable, List, Any
 
 
-async def async_pipeline(data:Any, functions:List[Callable]) -> Any:
+async def asyncpipeline(data:Any, functions:List[Callable]) -> Any:
     """
     Executes a sequence of asynchronous functions on a given input
     Examples of usage:
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         return data + 10
 
     async def main():
-        result = await async_pipeline(5, [async_step_1, async_step_2])
+        result = await asyncpipeline(5, [async_step_1, async_step_2])
         print(result)  # Output: 20
 
     asyncio.run(main())

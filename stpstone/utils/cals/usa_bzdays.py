@@ -46,5 +46,5 @@ if __name__ == '__main__':
     check_date = datetime(2025, 1, 20)  # Martin Luther King Jr. Day (USA)
     print(f"Is {check_date} a holiday? {cls_usabzdays.is_holiday(check_date)}")
     # check if a specific date is a weekend
-    weekdt_end = datetime(2025, 1, 11)
-    print(f"Is {weekdt_end} a weekend? {cls_usabzdays.is_weekend(weekdt_end)}")
+    weekdt_sup = datetime(2025, 1, 11)
+    print(f"Is {weekdt_sup} a weekend? {cls_usabzdays.is_weekend(weekdt_sup)}")

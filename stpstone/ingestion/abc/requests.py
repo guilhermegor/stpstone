@@ -5,13 +5,13 @@ import fitz
 import re
 import os
 import backoff
+import urllib
 import pandas as pd
 from getpass import getuser
 from abc import ABC, abstractmethod
 from datetime import datetime
-from requests import exceptions, request, Response
+from requests import exceptions, request, Response, Session, Request
 from typing import Tuple, List, Dict, Any, Optional, Union
-from sqlalchemy.orm import Session
 from logging import Logger
 from io import TextIOWrapper, BytesIO, StringIO
 from zipfile import ZipFile
@@ -27,6 +27,7 @@ from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.xml import XMLFiles
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class HandleReqResponses(ABC):
@@ -302,11 +303,12 @@ class ABCRequests(HandleReqResponses):
                 else None
             )
         self.list_slugs = list_slugs
+        self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
 
     @property
     def access_token(self):
         dict_instance_vars = self.get_instance_variables
-        url_token = StrHandler().fill_fstr_placeholders(
+        url_token = StrHandler().fill_placeholders(
             self.dict_metadata['credentials']['token']['host'], 
             dict_instance_vars
         )
@@ -334,14 +336,19 @@ class ABCRequests(HandleReqResponses):
         bl_verify:bool,
         tup_timeout:Tuple[float, float]=(12.0, 12.0), 
         dict_headers:Optional[Dict[str, str]]=None,
-        dict_payload:Optional[Dict[str, str]]=None
+        payload:Optional[Union[str, Dict[str, str]]]=None
     ) -> Response:
-        if req_method == 'GET':
-            req_resp = self.session.get(url, verify=bl_verify, 
-                                        headers=dict_headers, params=dict_payload)
-        elif req_method == 'POST':
-            req_resp = self.session.post(url, verify=bl_verify, 
-                                         headers=dict_headers, data=dict_payload)
+        if re.search(self.pattern_special_http_chars, url):
+            #   prepare the request manually to preserve special characters
+            req_resp = Request(req_method, url, headers=dict_headers, params=payload)
+            req_preppped = self.session.prepare_request(req_resp)
+            req_preppped.url = url
+            req_resp = self.session.send(req_preppped, verify=bl_verify)
+        else:
+            if req_method == 'GET':
+                req_resp = self.session.get(url, verify=bl_verify, headers=dict_headers, params=payload)
+            elif req_method == 'POST':
+                req_resp = self.session.post(url, verify=bl_verify, headers=dict_headers, data=payload)
         req_resp.raise_for_status()
         return req_resp
 
@@ -359,14 +366,19 @@ class ABCRequests(HandleReqResponses):
         bl_verify:bool,
         tup_timeout:Tuple[float, float]=(12.0, 12.0), 
         dict_headers:Optional[Dict[str, str]]=None,
-        dict_payload:Optional[Dict[str, str]]=None
+        payload:Optional[Dict[str, str]]=None
     ) -> Response:
-        if req_method == 'GET':
-            req_resp = request(req_method, url, verify=bl_verify, 
-                            headers=dict_headers, params=dict_payload)
-        elif req_method == 'POST':
-            req_resp = request(req_method, url, verify=bl_verify, 
-                            headers=dict_headers, data=dict_payload)
+        if re.search(self.pattern_special_http_chars, url):
+            #   prepare the request manually to preserve special characters
+            req = Request(req_method, url, headers=dict_headers, params=payload)
+            req_preppped = req.prepare()
+            with Session() as session:
+                req_resp = session.send(req_preppped, verify=bl_verify)
+        else:
+            if req_method == 'GET':
+                req_resp = request(req_method, url, verify=bl_verify, headers=dict_headers, params=payload)
+            elif req_method == 'POST':
+                req_resp = request(req_method, url, verify=bl_verify, headers=dict_headers, data=payload)
         req_resp.raise_for_status()
         return req_resp
 
@@ -377,7 +389,7 @@ class ABCRequests(HandleReqResponses):
         bl_verify:bool,
         tup_timeout:Tuple[float, float]=(12.0, 12.0), 
         dict_headers:Optional[Dict[str, str]]=None,
-        dict_payload:Optional[Dict[str, str]]=None
+        payload:Optional[Dict[str, str]]=None
     ) -> Response:
         """
         Check wheter the request method is valid and do the request with distinctions for session and
@@ -401,7 +413,7 @@ class ABCRequests(HandleReqResponses):
         else:
             func_generic_req = self.generic_req_wo_session
         req_resp = func_generic_req(
-            req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
+            req_method, url, bl_verify, tup_timeout, dict_headers, payload
         )
         return req_resp
 
@@ -409,7 +421,7 @@ class ABCRequests(HandleReqResponses):
         self, 
         req_method:str, host:str, dict_dtypes:Dict[str, Any], 
         dict_headers:Optional[Dict[str, str]]=None,
-        dict_payload:Optional[Dict[str, str]]=None, app:Optional[str]=None, 
+        payload:Optional[Dict[str, str]]=None, app:Optional[str]=None, 
         bl_verify:bool=False, tup_timeout:Tuple[float, float]=(12.0, 12.0), 
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
         list_cols_drop_dupl:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
@@ -424,7 +436,7 @@ class ABCRequests(HandleReqResponses):
         else:
             print(f'Starting request to: {url}')
         req_resp = self.generic_req(
-            req_method, url, bl_verify, tup_timeout, dict_headers, dict_payload
+            req_method, url, bl_verify, tup_timeout, dict_headers, payload
         )
         # dealing with request content type
         df_ = self._handle_response(
@@ -463,7 +475,7 @@ class ABCRequests(HandleReqResponses):
             type_error_action, 
             strt_keep_when_duplicated,
         )
-        df_ = cls_df_stdz._pipeline(df_)
+        df_ = cls_df_stdz.pipeline(df_)
         if bl_debug == True:
             print(f'*** TRT REQ - STANDARDIZATION: \n{df_}')
         return df_
@@ -528,23 +540,29 @@ class ABCRequests(HandleReqResponses):
         # setting variables
         dict_instance_vars = self.get_instance_variables
         app_ = self.dict_metadata[str_resource].get('app', None)
-        app_ = StrHandler().fill_fstr_placeholders(app_, dict_instance_vars)
+        app_ = StrHandler().fill_placeholders(app_, dict_instance_vars)
         host_ = host if host is not None else (
             self.dict_metadata[str_resource].get('host', None) \
             if self.dict_metadata[str_resource].get('host', None) is not None \
             else self.dict_metadata['credentials']['host']
         )
-        host_ = StrHandler().fill_fstr_placeholders(host_, dict_instance_vars)
+        host_ = StrHandler().fill_placeholders(host_, dict_instance_vars)
         dict_headers = self.dict_metadata[str_resource]['headers'] \
             if self.dict_metadata[str_resource].get('headers', None) is not None \
             else self.dict_metadata['credentials'].get('headers', None)
         if dict_headers is not None:
             dict_headers = HandlingDicts().fill_placeholders(dict_headers, dict_instance_vars)
-        dict_payload = self.dict_metadata[str_resource]['payload'] \
+        payload = self.dict_metadata[str_resource]['payload'] \
             if self.dict_metadata[str_resource].get('payload', None) is not None \
             else self.dict_metadata['credentials'].get('payload', None)
-        if dict_payload is not None:
-            dict_payload = HandlingDicts().fill_placeholders(dict_payload, dict_instance_vars)
+        if payload is not None:
+            if isinstance(payload, dict):
+                payload = HandlingDicts().fill_placeholders(payload, dict_instance_vars)
+            elif isinstance(payload, str):
+                payload = StrHandler().fill_placeholders(payload, dict_instance_vars)
+            else:
+                raise Exception('Payload must be either dict or str.')
+        print(f'PAYLOAD: {payload}')
         list_ignorable_exceptions = self.dict_metadata[str_resource].get(
             'list_ignorable_exceptions', list()
         ) if self.dict_metadata[str_resource].get(
@@ -561,7 +579,7 @@ class ABCRequests(HandleReqResponses):
                 host_,
                 self.dict_metadata[str_resource]['dtypes'], 
                 dict_headers,
-                dict_payload,
+                payload,
                 app_, 
                 self.dict_metadata[str_resource]['bl_verify'],
                 self.dict_metadata[str_resource]['timeout'],
@@ -617,23 +635,28 @@ class ABCRequests(HandleReqResponses):
         i = 0
         dict_instance_vars = self.get_instance_variables
         app_ = self.dict_metadata[str_resource].get('app', None)
-        app_ = StrHandler().fill_fstr_placeholders(app_, dict_instance_vars)
+        app_ = StrHandler().fill_placeholders(app_, dict_instance_vars)
         host_ = host if host is not None else (
             self.dict_metadata[str_resource].get('host', None) \
             if self.dict_metadata[str_resource].get('host', None) is not None \
             else self.dict_metadata['credentials']['host']
         )
-        host_ = StrHandler().fill_fstr_placeholders(host_, dict_instance_vars)
+        host_ = StrHandler().fill_placeholders(host_, dict_instance_vars)
         dict_headers = self.dict_metadata[str_resource]['headers'] \
             if self.dict_metadata[str_resource].get('headers', None) is not None \
             else self.dict_metadata['credentials'].get('headers', None)
         if dict_headers is not None:
             dict_headers = HandlingDicts().fill_placeholders(dict_headers, dict_instance_vars)
-        dict_payload = self.dict_metadata[str_resource]['payload'] \
+        payload = self.dict_metadata[str_resource]['payload'] \
             if self.dict_metadata[str_resource].get('payload', None) is not None \
             else self.dict_metadata['credentials'].get('payload', None)
-        if dict_payload is not None:
-            dict_payload = HandlingDicts().fill_placeholders(dict_payload, dict_instance_vars)
+        if payload is not None:
+            if isinstance(payload, dict):
+                payload = HandlingDicts().fill_placeholders(payload, dict_instance_vars)
+            elif isinstance(payload, str):
+                payload = StrHandler().fill_placeholders(payload, dict_instance_vars)
+            else:
+                raise Exception('Payload must be either dict or str.')
         list_slugs = self.list_slugs if self.list_slugs is not None \
             else self.dict_metadata[str_resource].get('slugs', None)
         list_ignorable_exceptions = self.dict_metadata[str_resource].get(
@@ -657,8 +680,8 @@ class ABCRequests(HandleReqResponses):
                             host_,
                             self.dict_metadata[str_resource]['dtypes'], 
                             dict_headers,
-                            dict_payload,
-                            StrHandler().fill_fstr_placeholders(app_, {'slug': str_slug}), 
+                            payload,
+                            StrHandler().fill_placeholders(app_, {'slug': str_slug}), 
                             self.dict_metadata[str_resource]['bl_verify'],
                             self.dict_metadata[str_resource]['timeout'],
                             self.dict_metadata[str_resource]['cols_from_case'],
@@ -711,8 +734,8 @@ class ABCRequests(HandleReqResponses):
                             host_,
                             self.dict_metadata[str_resource]['dtypes'], 
                             dict_headers,
-                            dict_payload,
-                            StrHandler().fill_fstr_placeholders(
+                            payload,
+                            StrHandler().fill_placeholders(
                                 app_, {'chunk_slugs': str_chunk_slugs}), 
                             self.dict_metadata[str_resource]['bl_verify'],
                             self.dict_metadata[str_resource]['timeout'],
@@ -766,8 +789,8 @@ class ABCRequests(HandleReqResponses):
                             host_,
                             self.dict_metadata[str_resource]['dtypes'], 
                             dict_headers,
-                            dict_payload,
-                            StrHandler().fill_fstr_placeholders(app_, {'i': i}), 
+                            payload,
+                            StrHandler().fill_placeholders(app_, {'i': i}), 
                             self.dict_metadata[str_resource]['bl_verify'],
                             self.dict_metadata[str_resource]['timeout'],
                             self.dict_metadata[str_resource]['cols_from_case'],
@@ -830,7 +853,7 @@ class ABCRequests(HandleReqResponses):
         if \
             (app_ is not None) \
             and (StrHandler().match_string_like(app_, '*{{*}}*') == True):
-            app_ = StrHandler().fill_fstr_placeholders(app_, dict_instance_vars)
+            app_ = StrHandler().fill_placeholders(app_, dict_instance_vars)
         if \
             (app_ is not None) \
             and (

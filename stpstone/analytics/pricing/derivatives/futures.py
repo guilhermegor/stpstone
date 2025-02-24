@@ -155,7 +155,7 @@ class TSIR:
         return dict_
 
     def third_degree_polynomial_cubic_splice(self, list_constants_cubic_spline, nper_working_days,
-                                             bl_end_list, num_constants_cubic_spline=8):
+                                             bl_sup_list, num_constants_cubic_spline=8):
         """
         DOCSTRING: THIRD DEGREE POLYNOMINAL FOR CUBIC SPLINE, CALCULATING WICH YTM REFEREES TO
             THE CURRENT NPER
@@ -165,7 +165,7 @@ class TSIR:
         if len(list_constants_cubic_spline) != num_constants_cubic_spline:
             raise Exception('Poor definied list of constants for cubic spline, '
                             + 'ought have {} elements'.format(num_constants_cubic_spline))
-        if bl_end_list == False:
+        if bl_sup_list == False:
             return sum([list_constants_cubic_spline[x]
                         * nper_working_days ** x for x in
                         range(0, int(num_constants_cubic_spline / 2))])
@@ -191,11 +191,11 @@ class TSIR:
             if len(dict_lower_mid_upper_bound_nper.keys()) == 4:
                 # working days for each bound and boolean of wheter its the ending element of
                 #   original list within or not
-                du1, du2, du3, bl_end_list = dict_lower_mid_upper_bound_nper.values()
+                du1, du2, du3, bl_sup_list = dict_lower_mid_upper_bound_nper.values()
                 i1, i2, i3 = [dict_nper_rates[v]
                               for k, v in dict_lower_mid_upper_bound_nper.items()
                               if k != 'end_of_list']
-                # print(du1, du2, du3, bl_end_list)
+                # print(du1, du2, du3, bl_sup_list)
                 # print(i1, i2, i3)
             else:
                 raise Exception('Dimension-wise the list ought have 4 positions, contemplating: '
@@ -230,7 +230,7 @@ class TSIR:
             print(array_constants_solution)
             # rates of return (IRR, ytm) for the current working day nper
             dict_[curr_nper_wrkdays] = self.third_degree_polynomial_cubic_splice(
-                array_constants_solution, curr_nper_wrkdays, bl_end_list,
+                array_constants_solution, curr_nper_wrkdays, bl_sup_list,
                 len(array_constants_solution)
             )
             if bl_debug == True:

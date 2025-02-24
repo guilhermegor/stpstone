@@ -267,7 +267,7 @@ class BCB:
                 'timestamp_cotacao': dict_usd_brl[key_last_update],
             }
 
-    def foreign_exchange_bcb(self, int_working_days_before_end=1, int_working_days_before_begin=None,
+    def foreign_exchange_bcb(self, int_working_days_before_sup=1, int_working_days_before_infin=None,
                              url='https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/{}',
                              api_currencies='Moedas',
                              api_currecy_exchange_day='CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?{}',
@@ -285,13 +285,13 @@ class BCB:
         dict_export = dict()
         # creating reference datetime, in specific string type, according to working days before
         #   (0 as default)
-        datetime_end_ref = DatesBR().sub_working_days(DatesBR().curr_date,
-                                                      int_working_days_before_end)
-        str_datetime_end_ref = datetime_end_ref.strftime('%m-%d-%Y')
-        if int_working_days_before_begin != None:
-            datetime_begin_ref = DatesBR().sub_working_days(DatesBR().curr_date,
-                                                            int_working_days_before_end)
-            str_datetime_begin_ref = datetime_begin_ref.strftime('%m-%d-%Y')
+        datetime_sup_ref = DatesBR().sub_working_days(DatesBR().curr_date,
+                                                      int_working_days_before_sup)
+        str_datetime_sup_ref = datetime_sup_ref.strftime('%m-%d-%Y')
+        if int_working_days_before_infin != None:
+            datetime_infin_ref = DatesBR().sub_working_days(DatesBR().curr_date,
+                                                            int_working_days_before_sup)
+            str_datetime_infin_ref = datetime_infin_ref.strftime('%m-%d-%Y')
         # header
         dict_header = {
             'accept': 'application/json;odata.metadata=minimal'
@@ -315,14 +315,14 @@ class BCB:
         # requesting current foreign available for all the currencies disposed before
         for currency in list_currencies:
             #   validating wheter the user aim for a bucket of currencies in a given day or period
-            if int_working_days_before_begin is None:
+            if int_working_days_before_infin is None:
                 #   payload for currencies available consulting
                 dict_payload = {
                     'format': 'json',
                 }
                 dict_params = {
                     'moeda': "'{}'".format(str(currency)),
-                    'dataCotacao': "'{}'".format(str(str_datetime_end_ref)),
+                    'dataCotacao': "'{}'".format(str(str_datetime_sup_ref)),
                 }
                 #   coverting to string payload and params
                 str_payload = '%40' + '&%40'.join(
@@ -340,8 +340,8 @@ class BCB:
                 }
                 dict_params = {
                     'moeda': "'{}'".format(str(currency)),
-                    'dataInicial': "'{}'".format(str(str_datetime_begin_ref)),
-                    'dataFinalCotacao': "'{}'".format(str(str_datetime_end_ref)),
+                    'dataInicial': "'{}'".format(str(str_datetime_infin_ref)),
+                    'dataFinalCotacao': "'{}'".format(str(str_datetime_sup_ref)),
                 }
                 #   coverting to string payload and params
                 str_payload = '%40' + '&%40'.join(
@@ -417,7 +417,7 @@ class YFinanceMacroBR:
         json_brazillian_cpi = req_resp.json()
         # getting historical data
         json_brazillian_cpi = [{
-            'datetime': DatesBR().timestamp_float_to_datetime(
+            'datetime': DatesBR().unix_timestamp_to_datetime(
                 int(int(dict_['timestamp']) / int_convert_miliseconds_seconds), bl_format=True),
             'actual_state': str(dict_['actual_state']),
             'actual': float(dict_['actual']),
@@ -427,7 +427,7 @@ class YFinanceMacroBR:
         # retrieving historical data
         return json_brazillian_cpi
 
-    def ycurrency(self, list_xcg_curr, wd_start_date=2, wd_end_date=0):
+    def ycurrency(self, list_xcg_curr, wd_start_date=2, wd_sup_date=0):
         """
         DOCSTRING:
         INPUTS:
@@ -438,7 +438,7 @@ class YFinanceMacroBR:
         # creating dates of interest according to working days provided
         inf_date = DatesBR().sub_working_days(DatesBR().curr_date, wd_start_date).strftime(
             '%Y-%m-%d')
-        sup_date = DatesBR().sub_working_days(DatesBR().curr_date, wd_end_date).strftime(
+        sup_date = DatesBR().sub_working_days(DatesBR().curr_date, wd_sup_date).strftime(
             '%Y-%m-%d')
         # looping within exchange currencies
         for xcg_curr in list_xcg_curr:

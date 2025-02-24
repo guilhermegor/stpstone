@@ -187,7 +187,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         else:
             return dt_.strftime('%B')
 
-    def dates_beg_end_month(self, dt_, last_month_year=12) -> Tuple[date, date]:
+    def dates_inf_sup_month(self, dt_, last_month_year=12) -> Tuple[date, date]:
         year = self.year_number(dt_)
         month = self.month_number(dt_)
         day = 1
@@ -260,41 +260,41 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
     def add_calendar_days(self, original_date, days_to_add):
         return original_date + timedelta(days=days_to_add)
 
-    def delta_working_hours(self, timestamp_beg:str, timestamp_end:str, int_hour_start_office:int=8,
-                            int_hour_end_office:int=18, int_hour_start_lunch:int=0,
-                            int_hour_end_lunch:int=0, list_wds:List[int]=[0, 1, 2, 3, 4]) -> int:
+    def delta_working_hours(self, timestamp_inf:str, timestamp_sup:str, int_hour_start_office:int=8,
+                            int_hour_sup_office:int=18, int_hour_start_lunch:int=0,
+                            int_hour_sup_lunch:int=0, list_wds:List[int]=[0, 1, 2, 3, 4]) -> int:
         """
         Calculate the number of working hours between two timestamps
         Args:
-            - timestamp_beg (str): start timestamp_dt
-            - timestamp_end (str): end timestamp_dt
+            - timestamp_inf (str): start timestamp_dt
+            - timestamp_sup (str): end timestamp_dt
             - int_hour_start_office (int): start hour office
-            - int_hour_end_office (int): end hour office
+            - int_hour_sup_office (int): end hour office
             - int_hour_start_lunch (int): start hour lunch
-            - int_hour_end_lunch (int): end hour lunch
+            - int_hour_sup_lunch (int): end hour lunch
             - list_wds (List[int]): list of working days
         Returns:
             int
         References: https://pypi.org/project/businesstimedelta/
         """
         # timestamp_dt convertation to datetime
-        y_inf, mt_inf, d_inf = int(timestamp_beg.split(' ')[0].split('-')[0]), \
-            int(timestamp_beg.split(' ')[0].split('-')[1]), \
-            int(timestamp_beg.split(' ')[0].split('-')[2])
-        h_inf, m_inf, s_inf = int(timestamp_beg.split(' ')[1].split(':')[0]), \
-            int(timestamp_beg.split(' ')[1].split(':')[1]), \
-            int(timestamp_beg.split(' ')[1].split(':')[2])
-        y_sup, mt_sup, d_sup = int(timestamp_end.split(' ')[0].split('-')[0]), \
-            int(timestamp_end.split(' ')[0].split('-')[1]), \
-            int(timestamp_end.split(' ')[0].split('-')[2])
-        h_sup, m_sup, s_sup = int(timestamp_end.split(' ')[1].split(':')[0]), \
-            int(timestamp_end.split(' ')[1].split(':')[1]), \
-            int(timestamp_end.split(' ')[1].split(':')[2])
-        timestamp_beg = datetime(y_inf, mt_inf, d_inf, h_inf, m_inf, s_inf)
-        timestamp_end = datetime(y_sup, mt_sup, d_sup, h_sup, m_sup, s_sup)
+        y_inf, mt_inf, d_inf = int(timestamp_inf.split(' ')[0].split('-')[0]), \
+            int(timestamp_inf.split(' ')[0].split('-')[1]), \
+            int(timestamp_inf.split(' ')[0].split('-')[2])
+        h_inf, m_inf, s_inf = int(timestamp_inf.split(' ')[1].split(':')[0]), \
+            int(timestamp_inf.split(' ')[1].split(':')[1]), \
+            int(timestamp_inf.split(' ')[1].split(':')[2])
+        y_sup, mt_sup, d_sup = int(timestamp_sup.split(' ')[0].split('-')[0]), \
+            int(timestamp_sup.split(' ')[0].split('-')[1]), \
+            int(timestamp_sup.split(' ')[0].split('-')[2])
+        h_sup, m_sup, s_sup = int(timestamp_sup.split(' ')[1].split(':')[0]), \
+            int(timestamp_sup.split(' ')[1].split(':')[1]), \
+            int(timestamp_sup.split(' ')[1].split(':')[2])
+        timestamp_inf = datetime(y_inf, mt_inf, d_inf, h_inf, m_inf, s_inf)
+        timestamp_sup = datetime(y_sup, mt_sup, d_sup, h_sup, m_sup, s_sup)
         # dict of holidays
         dict_holidays_raw = dict()
-        for y in range(timestamp_beg.year, timestamp_end.year + 1):
+        for y in range(timestamp_inf.year, timestamp_sup.year + 1):
             dict_holidays_raw[y] = self.holidays(y)
         dict_holidays_trt = dict()
         for k, v in dict_holidays_raw.items():
@@ -303,17 +303,17 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         # office hours for working days
         workday = businesstimedelta.WorkDayRule(
             start_time=time(int_hour_start_office),
-            end_time=time(int_hour_end_office),
+            end_time=time(int_hour_sup_office),
             list_wds=list_wds)
         lunchbreak = businesstimedelta.LunchTimeRule(
             start_time=time(int_hour_start_lunch),
-            end_time=time(int_hour_end_lunch),
+            end_time=time(int_hour_sup_lunch),
             list_wds=list_wds)
         holidays = businesstimedelta.HolidayRule(dict_holidays_trt)
         businesshrs = businesstimedelta.Rules(
             [workday, lunchbreak, holidays])
         # output
-        return businesshrs.difference(timestamp_beg, timestamp_end).timedelta
+        return businesshrs.difference(timestamp_inf, timestamp_sup).timedelta
 
     def last_wd_years(self, list_years:List[int]) -> List[datetime]:
         """
@@ -357,12 +357,21 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             )
         ])
 
-    def timestamp_float_to_datetime(self, timestamp_dt:datetime, 
-                                    format_output:Optional[str]='%Y-%m-%d %H:%M:%S') -> datetime:
-        if format_output is not None:
-            return datetime.fromtimestamp(timestamp_dt).strftime(format_output)
-        else:
-            return datetime.fromtimestamp(timestamp_dt)
+    def unix_timestamp_to_datetime(
+        self, 
+        unix_timestamp:Union[float, int], 
+        str_tz:str='UTC'
+    ) -> datetime:
+        tz_obj = timezone.utc if str_tz == 'UTC' else timezone(str_tz)
+        return datetime.fromtimestamp(unix_timestamp, tz=tz_obj)
+    
+    def unix_timestamp_to_date(
+        self, 
+        unix_timestamp:Union[float, int], 
+        str_tz:str='UTC'
+    ) -> datetime:
+        tz_obj = timezone.utc if str_tz == 'UTC' else timezone(str_tz)
+        return datetime.fromtimestamp(unix_timestamp, tz=tz_obj).date()
 
     def timestamp_to_date(self, timestamp:Union[str, int], substring_datetime:Optional[str]='T', 
                           format_output:str='YYYY-MM-DD') -> datetime:
@@ -378,13 +387,27 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         else:
             return pd.to_datetime(timestamp_dt, unit='s', utc=True).strftime('%Y%m%d')
 
-    def datetime_to_timestamp(self, dt_, bl_date_to_datetime:bool=False) -> date:
+    def datetime_to_timestamp(self, dt_:Union[date, datetime]) -> int:
+        """
+        Convert a datetime object to a timestamp (int)
+        Args:
+            - dt_ (datetime or date): datetime or date object to convert
+            - bl_date_to_datetime (bool): if True, convert a date object to a datetime object
+                before converting to a timestamp
+        Returns:
+            int: timestamp (seconds since the Unix epoch)
+        Raises:
+            ValueError: If the input is not a datetime or date object
+        """
         if \
-            (bl_date_to_datetime == True) \
-            and (isinstance(dt_, datetime.date)) \
-            and not (isinstance(dt_, datetime)):
-            dt_ = datetime.combine(dt_, datetime.min.time())
-        return dt_.timestamp()
+            (isinstance(dt_, date) == True) \
+            and (isinstance(dt_, datetime) == False):
+            dt_ = datetime.combine(dt_, time.min)
+        # handle timezone-naive dates (assume utc)
+        if dt_.tzinfo is None:
+            dt_ = dt_.replace(tzinfo=timezone.utc)
+        dt_ = dt_.astimezone(timezone.utc)
+        return int(dt_.timestamp())
 
     @property
     def current_timestamp_string(self, format_output:str='%Y%m%d_%H%M%S') -> str:

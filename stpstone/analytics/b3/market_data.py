@@ -1406,7 +1406,7 @@ class MDComDinheiro:
         # returning data
         return JsonFiles().send_json(json_)
     
-    def open_ended_funds_quotes(self, list_funds:List[str], dt_inf:datetime, dt_sup:datetime) -> List[Dict[str, Any]]:
+    def open_suped_funds_quotes(self, list_funds:List[str], dt_inf:datetime, dt_sup:datetime) -> List[Dict[str, Any]]:
         """
         DOCSTRING: CLOSING PRICE OF FUNDS' SHARE
         INPUTS:  FUNDS CNPJ (list), MATURITY CODE,
@@ -1436,7 +1436,7 @@ class MDComDinheiro:
             r' ', ''))
         return JsonFiles().send_json(json_)
 
-    def open_ended_funds_risk_infos(self, list_funds:List[str], dt_sup:datetime) -> List[Dict[str, Any]]:
+    def open_suped_funds_risk_infos(self, list_funds:List[str], dt_sup:datetime) -> List[Dict[str, Any]]:
         """
         DOCSTRING: RISK INFOS REGARDING HISTORICAL VOLATILITY AND REDEMPTION
         INPUTS:  FUNDS CNPJ (list), DATE SUPERIOR
@@ -1463,7 +1463,7 @@ class MDComDinheiro:
             r'\n', '').replace(r' ', ''))
         return JsonFiles().send_json(json_)
 
-    def open_ended_funds_sharpe_dd(
+    def open_suped_funds_sharpe_dd(
             self, 
             list_eins:List[str], 
             dt_inf:datetime, 
@@ -1502,7 +1502,7 @@ class MDComDinheiro:
         # returning data
         return JsonFiles().send_json(json_)
     
-    def open_ended_funds_infos(
+    def open_suped_funds_infos(
             self, 
             list_eins:List[str], 
             dt_inf:datetime, 

@@ -3,7 +3,7 @@
 from typing import Any, List
 
 
-def conditional_pipeline(data:Any, functions:List[tuple]) -> Any:
+def conditionalpipeline(data:Any, functions:List[tuple]) -> Any:
     """
     Applies functions conditionally based on a predicate
     Examples of usage:
@@ -26,5 +26,5 @@ if __name__ == "__main__":
     def triple(x): return x * 3
 
     steps = [(is_even, double), (lambda x: x > 10, triple)]
-    result = conditional_pipeline(6, steps)
+    result = conditionalpipeline(6, steps)
     print(result)

@@ -1,6 +1,7 @@
 ### VALIDATES DATA FORMATS ###
 
 from pydantic import validate_arguments, BaseModel, Field, ConfigDict
+from abc import ABCMeta
 from typing import get_type_hints
 import pandas as pd
 

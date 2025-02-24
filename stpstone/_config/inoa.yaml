@@ -15,7 +15,7 @@ alpha_tools:
     app: portfolio/get_portfolio_overview_date_range
     key_funds_ids: fund_ids
     key_start_dt: start_date
-    key_end_dt: end_date
+    key_sup_dt: end_date
     key_items: items
     col_fund_id: fund_id
     col_date: date

@@ -4,7 +4,7 @@ from typing import Callable, List, Any
 import pandas as pd
 
 
-def generic_pipeline(data:Any, functions:List[Callable]) -> Any:
+def genericpipeline(data:Any, functions:List[Callable]) -> Any:
     """
     Applies a sequence of functions to a given data object.
     Args:

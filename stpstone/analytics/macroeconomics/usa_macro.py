@@ -34,7 +34,7 @@ class USAMacro:
             'file_type': file_type,
             'api_key': api_key,
             'realtime_start': date_inf,
-            'realtime_end': date_sup
+            'realtime_sup': date_sup
         }
         # return fred data
         message_content = request('GET', url_root.format(
@@ -201,7 +201,7 @@ class USAMacro:
 
 # print(USAMacro().fred_request('ceaca22bd10bd67a93fca0a5cd4aa578', 'series', 'GNPCA'))
 # # output
-# {'realtime_start': '2020-12-07', 'realtime_end': '2020-12-07', 'seriess': [{'id': 'GNPCA', 'realtime_start': '2020-12-07', 'realtime_end': '2020-12-07', 'title': 'Real Gross National Product', 'observation_start': '1929-01-01', 'observation_end': '2019-01-01', 'frequency': 'Annual',
+# {'realtime_start': '2020-12-07', 'realtime_sup': '2020-12-07', 'seriess': [{'id': 'GNPCA', 'realtime_start': '2020-12-07', 'realtime_sup': '2020-12-07', 'title': 'Real Gross National Product', 'observation_start': '1929-01-01', 'observation_sup': '2019-01-01', 'frequency': 'Annual',
 #                                                                             'frequency_short': 'A', 'units': 'Billions of Chained 2012 Dollars', 'units_short': 'Bil. of Chn. 2012 $', 'seasonal_adjustment': 'Not Seasonally Adjusted', 'seasonal_adjustment_short': 'NSA', 'last_updated': '2020-07-30 07:57:33-05', 'popularity': 13, 'notes': 'BEA Account Code: A001RX\\n\\n'}]}
 
 # print(USAMacro().fred_request(

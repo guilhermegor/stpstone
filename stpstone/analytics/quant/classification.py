@@ -64,7 +64,7 @@ class Classification:
         # list of words to vectorizer - alphabetical order
         list_labels = HandlingLists().extend_lists(
             *[x.split() for x in list_corpus])
-        list_labels = [StrHandler().remove_end_period_marks(x).lower()
+        list_labels = [StrHandler().remove_sup_period_marks(x).lower()
                        for x in HandlingLists().remove_duplicates(list_labels)]
         list_labels.sort()
         # one hot vectorizer

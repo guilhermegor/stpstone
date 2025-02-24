@@ -737,7 +737,7 @@ class Monitoring(ConnectionApi):
 class SystemEventManagement(ConnectionApi):
 
     def report(self, int_working_days_before:int=1, int_working_days_after:int=0,
-               str_start_time:str='00:00', str_end_time:str='23:59', str_null:str='null',
+               str_start_time:str='00:00', str_sup_time:str='23:59', str_null:str='null',
                int_entity_type:int=3, method:str='POST',
                bl_parse_dict_params_data:str=True, float_secs_sleep:Optional[float]=None,
                app:str='/api/v1.0/systemEvent') -> Union[List[Dict[str, Any]], int]:
@@ -758,7 +758,7 @@ class SystemEventManagement(ConnectionApi):
             'documentCode': str_null,
             'accountCode': str_null,
             'startTime': str_start_time,
-            'endTime': str_end_time,
+            'endTime': str_sup_time,
             'startDate': DatesBR().sub_working_days(DatesBR().curr_date(),
                                                     int_working_days_before).strftime('%d/%m/%Y'),
             'endDate': DatesBR().add_working_days(DatesBR().curr_date(),

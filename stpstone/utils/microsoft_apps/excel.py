@@ -644,23 +644,23 @@ class ExcelWriter(object):
 
         return next_available_row
 
-    def getRangeByCells(self, cell_start_row, cell_start_col, cell_end_row, cell_end_col,
+    def getRangeByCells(self, cell_start_row, cell_start_col, cell_sup_row, cell_sup_col,
                         sheet=None):
         """Get a range defined by cell start and cell end e.g. (1,1) A1 and (7,2) B7"""
         if sheet is None:
             sheet = self.default_sheet
 
         return sheet.Range(sheet.Cells(cell_start_row, cell_start_col),
-                           sheet.Cells(cell_end_row, cell_end_col))
+                           sheet.Cells(cell_sup_row, cell_sup_col))
 
-    def fitCols(self, col_start, col_end, sheet=None):
+    def fitCols(self, col_start, col_sup, sheet=None):
         """
         Fit colums to contents.
         """
         if sheet is None:
             sheet = self.default_sheet
         col_n = col_start
-        while col_n <= col_end:
+        while col_n <= col_sup:
             self.fitCol(col_n, sheet)
             col_n = col_n + 1
 

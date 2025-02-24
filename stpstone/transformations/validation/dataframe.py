@@ -7,7 +7,7 @@ from numbers import Number
 from typing import Dict, Optional, List
 # local libs
 from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.utils.pipelines.generic import generic_pipeline
+from stpstone.utils.pipelines.generic import genericpipeline
 
 
 class DataFrameValidator:
@@ -37,12 +37,12 @@ class DataFrameValidator:
                     f"{len(out_of_bounds)} values in '{col}' out of range ({low} - {high})"
                 )
 
-    def validate_dates(self, col_start:str, col_end:str) -> None:
-        list_inv_dates = self.df_[self.df_[col_start] > self.df_[col_end]]
+    def validate_dates(self, col_start:str, col_sup:str) -> None:
+        list_inv_dates = self.df_[self.df_[col_start] > self.df_[col_sup]]
         if not list_inv_dates.empty:
             self.create_log.warnings(
                 self.logger, 
-                f'Found {len(list_inv_dates)} rows where {col_start} is after {col_end}.'
+                f'Found {len(list_inv_dates)} rows where {col_start} is after {col_sup}.'
             )
 
     def validate_categorical_values(self, col_:Optional[str]=None, 
@@ -54,8 +54,8 @@ class DataFrameValidator:
                 f"Found invalid values in '{col_}':", list_inv_values[col_].unique()
             )
 
-    def _pipeline(self, dict_rng_constraints:Dict[str, Tuple[Number, Number]]=None, 
-                  col_start:Optional[str]=None, col_end:Optional[str]=None, 
+    def pipeline(self, dict_rng_constraints:Dict[str, Tuple[Number, Number]]=None, 
+                  col_start:Optional[str]=None, col_sup:Optional[str]=None, 
                   list_tup_categorical_constraints:Optional[Tuple[str, List[str]]]=None):
         steps = [
             self.check_missing_values,
@@ -63,9 +63,9 @@ class DataFrameValidator:
         ]
         if dict_rng_constraints:
             steps.append(self.validate_ranges(dict_rng_constraints))
-        if col_start and col_end:
-            steps.append(self.validate_dates(col_start, col_end))
+        if col_start and col_sup:
+            steps.append(self.validate_dates(col_start, col_sup))
         if list_tup_categorical_constraints:
             col_, allowed_values = list_tup_categorical_constraints
             steps.append(self.validate_categorical_values(col_, allowed_values))
-        return generic_pipeline(self.df_, steps)
+        return genericpipeline(self.df_, steps)

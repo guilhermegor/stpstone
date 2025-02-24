@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 # local libs
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.pipelines.generic import generic_pipeline
+from stpstone.utils.pipelines.generic import genericpipeline
 from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone._config.global_slots import YAML_GEN
@@ -22,7 +22,7 @@ class DFStandardization(metaclass=TypeChecker):
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
         list_remove_duplicated_data:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
         type_error_action:str='raise', strt_keep_when_duplicated:str='first', 
-        str_data_fillna:str='-1', str_dt_fillna:Optional[str]=None
+        str_data_fillna:str='-1', str_dt_fillna:Optional[str]=None, str_tz:str='UTC'
     ):
         self.dict_dtypes = dict_dtypes
         self.cols_from_case = cols_from_case
@@ -39,9 +39,11 @@ class DFStandardization(metaclass=TypeChecker):
             '31122099' if self.str_fmt_dt == 'DDMMYYYY' else
             '311299' if self.str_fmt_dt == 'DDMMYY' else
             '20991231' if self.str_fmt_dt == 'YYYYMMDD' else
+            4102358400 if self.str_fmt_dt == 'unix_ts' else
             '31122099'
         )
         self.list_cols_dt = [key for key, value in dict_dtypes.items() if value == 'date']
+        self.str_tz = str_tz
 
     def check_if_empty(self, df_:pd.DataFrame) -> pd.DataFrame:
         if df_.empty == True:
@@ -84,10 +86,15 @@ class DFStandardization(metaclass=TypeChecker):
         # dates types
         for col_ in self.list_cols_dt:
             if col_ != YAML_GEN['audit_log_cols']['ref_date']:
-                df_[col_] = [DatesBR().str_date_to_datetime(d, self.str_fmt_dt) for d in df_[col_]]
+                str_fmt_dt = self.str_fmt_dt
             else:
-                df_[col_] = [DatesBR().str_date_to_datetime(
-                    d, YAML_GEN['audit_log_cols']['str_fmt_dt']) for d in df_[col_]]
+                str_fmt_dt = YAML_GEN['audit_log_cols']['str_fmt_dt']
+            df_[col_] = [
+                DatesBR().str_date_to_datetime(d, str_fmt_dt) 
+                if str_fmt_dt != 'unix_ts' 
+                else DatesBR().unix_timestamp_to_date(d, str_tz=self.str_tz)
+                for d in df_[col_]
+            ]
         # missing columns - leftovers from previous steps
         list_cols_missing = [
             c for c in list(df_.columns) 
@@ -116,19 +123,19 @@ class DFStandardization(metaclass=TypeChecker):
                                   keep=self.strt_keep_when_duplicated)
         return df_
 
-    def _pipeline(
+    def pipeline(
         self, df_:pd.DataFrame
     ) -> pd.DataFrame:
         steps = [
             self.check_if_empty,
-            self.column_names(df_),
-            self.completeness(df_),
-            self.change_dtypes(df_),
-            self.strip_all_obj_dtypes(df_),
+            self.column_names,
+            self.completeness,
+            self.change_dtypes,
+            self.strip_all_obj_dtypes,
             self.remove_duplicated_cols,
-            self.data_remove_dupl(df_)
+            self.data_remove_dupl
         ]
-        df_ = generic_pipeline(df_, steps)
+        df_ = genericpipeline(df_, steps)
         return df_
 
 
@@ -165,7 +172,7 @@ class DFStandardizationML(DFStandardization):
         num_cols = df_.select_dtypes(include=['number']).columns
         df_[num_cols] = scaler.fit_transform(df_[num_cols])
     
-    def _pipeline_ml(
+    def pipeline_ml(
         self, df_:pd.DataFrame, 
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None, 
         list_remove_duplicated_data:List[str]=None, str_fmt_dt:str='YYYY-MM-DD', 
@@ -185,8 +192,8 @@ class DFStandardizationML(DFStandardization):
             pd.DataFrame
         """
         steps = [
-            self._pipeline(df_, cols_from_case, cols_to_case, list_remove_duplicated_data, str_fmt_dt),
+            self.pipeline(df_, cols_from_case, cols_to_case, list_remove_duplicated_data, str_fmt_dt),
             self.handle_outliers(df_, method_handle_outliers),
             self.scale_numeric_data(df_, method_scale_numeric_data)
         ]
-        return generic_pipeline(df_, steps)
+        return genericpipeline(df_, steps)

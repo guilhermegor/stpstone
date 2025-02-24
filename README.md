@@ -48,6 +48,7 @@ stpstone
 │   │           │   ├── coinmarket.yaml
 │   │           │   └── coinpaprika.yaml
 │   │           └── markets
+│   │               ├── advfn.yaml
 │   │               └── fmp.yaml
 │   ├── generic.yaml
 │   ├── global_rates.yaml
@@ -157,6 +158,7 @@ stpstone
 │               │   ├── coinmarket.py
 │               │   └── coinpaprika.py
 │               └── markets
+│                   ├── advfn.py
 │                   └── fmp.py
 ├── transformations
 │   ├── cleaner

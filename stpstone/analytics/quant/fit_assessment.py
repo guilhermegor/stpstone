@@ -95,7 +95,7 @@ class FitPerformance:
                                             num_cross_validation_splitting_strategy=5,
                                             bl_return_train_score=True, bl_randomized_search=True):
         """
-        REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_end_to_end_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH, 
+        REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_sup_to_sup_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH, 
             https://towardsdatascience.com/machine-learning-gridsearchcv-randomizedsearchcv-d36b89231b10
         DOCSTRING: FIDDLE AN ESTIMATOR WITH A COMBINATION OF HYPERPARAMETHERS AND FINDING THE 
             OPTIMAL SOLUTION
