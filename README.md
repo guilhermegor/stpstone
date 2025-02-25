@@ -49,7 +49,8 @@ stpstone
 │   │           │   └── coinpaprika.yaml
 │   │           └── markets
 │   │               ├── advfn.yaml
-│   │               └── fmp.yaml
+│   │               ├── fmp.yaml
+│   │               └── investingcom.yaml
 │   ├── generic.yaml
 │   ├── global_rates.yaml
 │   ├── global_slots.py
@@ -159,7 +160,9 @@ stpstone
 │               │   └── coinpaprika.py
 │               └── markets
 │                   ├── advfn.py
-│                   └── fmp.py
+│                   ├── fmp.py
+│                   ├── investingcom.py
+│                   └── yf_ws.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py
@@ -194,12 +197,10 @@ stpstone
     │       ├── manager.py
     │       └── session.py
     ├── exchange
-    │   ├── br
-    │   │   ├── inoa.py
-    │   │   ├── line.py
-    │   │   └── margin_simulator_b3.py
-    │   └── ww
-    │       └── yf_provider.py
+    │   └── br
+    │       ├── inoa.py
+    │       ├── line.py
+    │       └── margin_simulator_b3.py
     ├── geography
     │   └── br.py
     ├── loggs

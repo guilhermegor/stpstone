@@ -21,7 +21,7 @@ YAML_WW_CRYPTO_COINMARKET = reading_yaml(os.path.join(root_path, 'countries/ww/e
 YAML_WW_CRYPTO_COINPAPRIKA = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/crypto/coinpaprika.yaml'))
 YAML_WW_CRYPTO_COINCAP = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/crypto/coincap.yaml'))
 YAML_WW_FMP = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/markets/fmp.yaml'))
-YAML_WW_ADVFN = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/markets/advfn.yaml'))
+YAML_WW_INVESTINGCOM = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/markets/investingcom.yaml'))
 
 # macroeconomics
 YAML_BR_PTAX_BCB = reading_yaml(os.path.join(root_path, 'countries/br/macroeconomics/currencies/ptax_bcb.yaml'))

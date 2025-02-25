@@ -64,6 +64,18 @@ class DFStandardization(metaclass=TypeChecker):
             list_cols = list(df_.columns)
         df_.columns = list_cols
         return df_
+    
+    def limit_columns_to_dtypes(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """
+        Limit the DataFrame columns to the keys of self.dict_dtypes
+        Args:
+            - df_ (pd.DataFrame): DataFrame to filter
+        Returns:
+            pd.DataFrame
+        """
+        list_cols = list(self.dict_dtypes.keys())
+        df_ = df_[list_cols]
+        return df_
 
     def completeness(self, df_:pd.DataFrame) -> pd.DataFrame:
         """
@@ -129,6 +141,7 @@ class DFStandardization(metaclass=TypeChecker):
         steps = [
             self.check_if_empty,
             self.column_names,
+            self.limit_columns_to_dtypes,
             self.completeness,
             self.change_dtypes,
             self.strip_all_obj_dtypes,

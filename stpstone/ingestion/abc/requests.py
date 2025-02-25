@@ -57,6 +57,8 @@ class HandleReqResponses(ABC):
             return self.handle_pdf_doc_response(req_resp, dict_regex_patterns, bl_debug)
         else:
             json_ = req_resp.json()
+            if isinstance(json_, dict) == True:
+                return pd.DataFrame([json_])
             return pd.DataFrame(json_)
 
     @abstractmethod

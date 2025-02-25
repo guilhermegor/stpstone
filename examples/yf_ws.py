@@ -4,7 +4,7 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.exchange.ww.yf_provider import YFinanceProvider
+from stpstone.ingestion.tradings.ww.exchange.markets.yf_ws import YFinanceProvider
 
 
 list_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA']

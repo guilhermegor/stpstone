@@ -2,7 +2,7 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.ww.exchange.markets.advfn import ADVFNWW
+from stpstone.ingestion.tradings.ww.exchange.markets.investingcom import InvestingCom
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 
@@ -15,13 +15,12 @@ session = ReqSession(
 ).session
 print(session.proxies)
 
-cls_adfn_ww = ADVFNWW(
-    session=None,
+cls_investingcom = InvestingCom(
+    session=session,
     dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 5),
     dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 0),
-    str_market='BOV', 
     str_ticker='PETR4'
 )
-df_ = cls_adfn_ww.source('daily_ohlcv', bl_fetch=True, bl_debug=False)
+df_ = cls_investingcom.source('daily_ohlcv', bl_fetch=True, bl_debug=False)
 print(f'DF OHLCV: \n{df_}')
 print(df_.info())

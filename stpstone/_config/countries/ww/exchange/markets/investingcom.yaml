@@ -1,0 +1,108 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://tvc4.investing.com/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ticker_id:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+    User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+    Referer: https://www.investing.com/
+    Accept: application/json, text/plain, */*
+    Accept-Language: en-US,en;q=0.9
+    Accept-Encoding: gzip, deflate, br
+    Connection: keep-alive
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: 725910b675af9252224ca6069a1e73cc/1631836267/1/1/8/symbols?symbol={{ticker}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: lower_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    NAME: str
+    EXCHANGE_TRADED: str
+    EXCHANGE_LISTED: str
+    TIMEZONE: str
+    PRICESCALE: int
+    POINTVALUE: int
+    TICKER: str
+    TYPE: str
+  df_read_params:
+
+daily_ohlcv:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+    Cookie: '__cf_bm=nRRDnUrSr8XE6CBF6GjtOBZuM78MLy9MSO9XR9EBcDo-1740432189-1.0.1.1-u8vwuoJ1OIpLNPy2DyVeyWGjK9tHelQO9IiWrEt4UGTO.GYUEzHbgRSJXv4ipWty97TXvIY5enidzia1ix1GdtOcZGWUd_n99RuRlq6sesM'
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: 725910b675af9252224ca6069a1e73cc/1631836267/1/1/8/history?symbol={{ticker_id}}&resolution=D&from={{dt_inf_unix_ts}}&to={{dt_sup_unix_ts}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: lower_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    NAME: str
+    EXCHANGE_TRADED: str
+    EXCHANGE_LISTED: str
+    TIMEZONE: str
+    PRICESCALE: int
+    POINTVALUE: int
+    TICKER: str
+    TYPE: str
+  df_read_params:

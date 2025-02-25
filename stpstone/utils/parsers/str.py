@@ -466,7 +466,10 @@ class StrHandler:
         elif from_case == 'kebab':
             words = str_.lower().split("-")
         elif from_case == 'upper_constant' or from_case == 'lower_constant':
-            words = str_.lower().split('_')
+            if '-' in str_:
+                words = str_.lower().split('-')
+            else:
+                words = str_.lower().split('_')
         elif from_case == 'upper_first':
             words = [str_[0].upper() + str_[1:].lower()]
         elif from_case == 'default':
