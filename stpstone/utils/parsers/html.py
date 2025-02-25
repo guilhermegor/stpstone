@@ -4,7 +4,7 @@ import logging
 import json
 from requests import HTTPError, request, Response
 from bs4 import BeautifulSoup
-from lxml import html
+from lxml import html, etree
 from typing import Optional, Union, List, Dict
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -47,6 +47,10 @@ class HtmlHndler:
         OUTPUTS: XPATH CONTENT
         """
         return html_content.xpath(str_xpath)
+    
+    def print_html_tree(self, html_root):
+        html_string = etree.tostring(html_root, pretty_print=True, encoding='unicode')
+        print(html_string)
 
     def to_txt(self, html_):
         """

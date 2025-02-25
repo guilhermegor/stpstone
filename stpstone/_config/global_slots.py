@@ -15,6 +15,7 @@ YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(os.path.join(root_path, 'countries/b
 YAML_B3_UP2DATA_REGISTRIES = reading_yaml(os.path.join(root_path, 'countries/br/exchange/up2data_registries.yaml'))
 YAML_B3_UP2DATA_VOLUMES_TRD = reading_yaml(os.path.join(root_path, 'countries/br/exchange/up2data_volumes_trd.yaml'))
 YAML_B3_SEARCH_BY_TRADING_SESSION = reading_yaml(os.path.join(root_path, 'countries/br/exchange/search_by_trading_session.yaml'))
+YAML_B3_BVMF_BOV = reading_yaml(os.path.join(root_path, 'countries/br/exchange/bvmf_bov.yaml'))
 YAML_US_ALPHAVANTAGE = reading_yaml(os.path.join(root_path, 'countries/us/exchange/alphavantage.yaml'))
 YAML_US_TIINGO = reading_yaml(os.path.join(root_path, 'countries/us/exchange/tiingo.yaml'))
 YAML_WW_CRYPTO_COINMARKET = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/crypto/coinmarket.yaml'))

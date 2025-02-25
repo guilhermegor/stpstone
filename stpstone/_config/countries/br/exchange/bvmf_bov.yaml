@@ -1,0 +1,63 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://bvmf.bmfbovespa.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+logs:
+  dtypes:
+    FILE_NAME: str
+    REF_DATE: date
+    URL: str
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+volumes:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: sig/FormConsultaNegociacoes.asp?strTipoResumo=RES_NEGOCIACOES&strSocEmissora=B3SA&strDtReferencia={{dt_ref_mm_yyyy}}&strIdioma=P&intCodNivel=1&intCodCtrl=100
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    MERCADO: str
+    NEGOCIACOES: int
+    VOLUME_BRL: float
+    NEGOCIACOES_12M: int
+    VOLUME_BRL_12M: float
+    PERIODO_REF: int
+  df_read_params:
+  xpaths:
+    data: //table[@bgcolor="#C0C0C0"][1]/tbody/tr[{}]/td[{}]

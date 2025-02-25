@@ -564,7 +564,6 @@ class ABCRequests(HandleReqResponses):
                 payload = StrHandler().fill_placeholders(payload, dict_instance_vars)
             else:
                 raise Exception('Payload must be either dict or str.')
-        print(f'PAYLOAD: {payload}')
         list_ignorable_exceptions = self.dict_metadata[str_resource].get(
             'list_ignorable_exceptions', list()
         ) if self.dict_metadata[str_resource].get(
