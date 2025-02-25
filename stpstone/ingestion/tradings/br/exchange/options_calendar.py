@@ -64,10 +64,12 @@ class OptionsCalendarB3(ABCRequests):
                 dict_ = HandlingDicts().merge_n_dicts(
                     dict(zip(list_th, list_td)),
                     {
-                    'Mês Referência': HtmlHndler().lxml_xpath(
-                        root, YAML_B3_OPTIONS_CALENDAR['settlement_dates']['xpaths']['mes_ref'].format(i)
-                    )[0].text
-                }
+                        'Mês Referência': HtmlHndler().lxml_xpath(
+                            root, YAML_B3_OPTIONS_CALENDAR['settlement_dates']['xpaths'][
+                                'mes_ref'].format(i)
+                        )[0].text, 
+                        'Ano Referência': DatesBR().year_number(DatesBR().curr_date)
+                    }
                 )
                 list_ser.append(dict_)
                 if (list_th is None) or (list_td is None):

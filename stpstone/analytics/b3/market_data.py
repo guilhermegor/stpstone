@@ -29,68 +29,6 @@ from stpstone.handling_data.numbers import NumHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 
 
-class CalendarB3:
-
-    @property
-    def options_exercise_dates(self) -> pd.DataFrame:
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # setting variables
-        list_ser = list()
-        # request html
-        bs_html = HtmlHndler().html_bs_parser(
-            YAML_B3['options_exercise_dates']['url'], 
-            bl_verify=YAML_B3['options_exercise_dates']['bl_verify']
-        )
-        # looping within li tag
-        for bs_li in bs_html.find_all('li'):
-            #   getting month
-            try:
-                str_month = bs_li.find('a').get_text()
-            except AttributeError:
-                continue
-            #   getting headers
-            list_headers = [x.get_text().upper() for x in bs_li.find_all('th')]
-            #   getting data
-            list_data = [x.get_text() for x in bs_li.find_all('td')]
-            #   checking headers and data list, in case of empty data continue
-            if len(list_headers) == 0 or len(list_data) == 0: continue
-            #   pair headers and data within a list
-            list_ser = HandlingDicts().pair_headers_with_data(
-                list_headers, 
-                list_data
-            )
-            #   adding month to serialized list
-            list_ser = HandlingDicts().add_k_v_serialized_list(
-                list_ser, 
-                YAML_B3['options_exercise_dates']['key_month'].upper(), 
-                str_month
-            )
-            #   exporting to serialized list
-            list_ser.extend(list_ser)
-        # exporting serialized list to dataframe
-        df_opt_xcr_dts = pd.DataFrame(list_ser)
-        # adding request date
-        df_opt_xcr_dts[YAML_B3['options_exercise_dates']['key_request_date'].upper()] = \
-            DatesBR().curr_date
-        # altering data types
-        df_opt_xcr_dts = df_opt_xcr_dts.astype({
-            YAML_B3['options_exercise_dates']['key_day'].upper(): int,
-            YAML_B3['options_exercise_dates']['key_details'].upper(): str,
-            YAML_B3['options_exercise_dates']['key_month'].upper(): str
-        })
-        # adding logging
-        df_opt_xcr_dts = DBLogs().audit_log(
-            df_opt_xcr_dts, YAML_B3['options_exercise_dates']['url'], 
-            DatesBR().utc_log_ts
-        )
-        # returning dataframe
-        return df_opt_xcr_dts
-
-
 class TradingHoursB3:
 
     def futures_generic(self, url:str, int_cols:int) -> list:

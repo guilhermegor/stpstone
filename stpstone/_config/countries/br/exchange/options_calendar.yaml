@@ -52,11 +52,10 @@ settlement_dates:
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    COL_1: date
-    COL_2: str
-    COL_3: int
-    COL_4: float
-    COL_5: category
+    DIA: int
+    DETALHE: str
+    MES_REFERENCIA: str
+    ANO_REFERENCIA: int
   df_read_params:
   xpaths:
     mes_ref: //li[@class="accordion-navigation active" or @class="accordion-navigation"][{}]/a
