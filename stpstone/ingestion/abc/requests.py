@@ -357,7 +357,7 @@ class ABCRequests(HandleReqResponses):
     # ! TODO: implement timeout
     @backoff.on_exception(
         backoff.constant,
-        exceptions.RequestException,
+        (exceptions.RequestException, exceptions.HTTPError),
         interval=10,
         max_tries=20,
     )

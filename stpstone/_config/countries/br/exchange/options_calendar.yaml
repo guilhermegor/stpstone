@@ -1,7 +1,7 @@
 ### CONFIGURATION TOOLS ###
 
 credentials:
-  host:
+  host: https://www.b3.com.br/
   headers:
   payload:
   token:
@@ -24,7 +24,7 @@ metadata:
 
 ### RESOURCES TO BE SCRAPED ###
 
-resource_example:
+settlement_dates:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -37,7 +37,7 @@ resource_example:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app:
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/calendario-de-negociacao/vencimentos/calendario-de-vencimentos-de-opcoes-sobre-acoes-e-indices/
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
@@ -58,24 +58,7 @@ resource_example:
     COL_4: float
     COL_5: category
   df_read_params:
-  xml_keys:
-    tags:
-      tag_parent:
-        - col1
-        - col2
-        - col3
-        - col4
-        - col5
-    attributes:
-      attrb: Attrb
-  regex_patterns:
-    event:
-      condition_1:
-        action_1: pattern_regex_1
-        action_2: pattern_regex_2
-      condition_2:
-        action_1: pattern_regex_1
-        action_2: pattern_regex_2
   xpaths:
-    name_1: xpath_1
-    name_2: xpath_2
+    mes_ref: //li[@class="accordion-navigation active" or @class="accordion-navigation"][{}]/a
+    list_th: //li[@class="accordion-navigation active" or @class="accordion-navigation"][{}]//table/thead/tr/th
+    list_td: //li[@class="accordion-navigation active" or @class="accordion-navigation"][{}]//table/tbody/tr/td

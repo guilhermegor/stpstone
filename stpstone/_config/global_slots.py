@@ -12,12 +12,17 @@ root_path = os.path.dirname(os.path.realpath(__file__))
 YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(os.path.join(root_path, 'countries/br/bylaws/investment_funds.yaml'))
 
 # exchange
+#   BR
 YAML_B3_UP2DATA_REGISTRIES = reading_yaml(os.path.join(root_path, 'countries/br/exchange/up2data_registries.yaml'))
 YAML_B3_UP2DATA_VOLUMES_TRD = reading_yaml(os.path.join(root_path, 'countries/br/exchange/up2data_volumes_trd.yaml'))
 YAML_B3_SEARCH_BY_TRADING_SESSION = reading_yaml(os.path.join(root_path, 'countries/br/exchange/search_by_trading_session.yaml'))
 YAML_B3_BVMF_BOV = reading_yaml(os.path.join(root_path, 'countries/br/exchange/bvmf_bov.yaml'))
+YAML_B3_OPTIONS_CALENDAR = reading_yaml(os.path.join(root_path, 'countries/br/exchange/options_calendar.yaml'))
+YAML_B3_WARRANTY = reading_yaml(os.path.join(root_path, 'countries/br/exchange/warranty.yaml'))
+#   US
 YAML_US_ALPHAVANTAGE = reading_yaml(os.path.join(root_path, 'countries/us/exchange/alphavantage.yaml'))
 YAML_US_TIINGO = reading_yaml(os.path.join(root_path, 'countries/us/exchange/tiingo.yaml'))
+#   WW
 YAML_WW_CRYPTO_COINMARKET = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/crypto/coinmarket.yaml'))
 YAML_WW_CRYPTO_COINPAPRIKA = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/crypto/coinpaprika.yaml'))
 YAML_WW_CRYPTO_COINCAP = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/crypto/coincap.yaml'))

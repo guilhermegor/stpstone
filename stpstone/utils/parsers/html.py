@@ -48,9 +48,13 @@ class HtmlHndler:
         """
         return html_content.xpath(str_xpath)
     
-    def print_html_tree(self, html_root):
+    def html_tree(self, html_root:html.HtmlElement, file_path:str=None) -> None:
         html_string = etree.tostring(html_root, pretty_print=True, encoding='unicode')
-        print(html_string)
+        if file_path:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(html_string)
+        else:
+            print(html_string)
 
     def to_txt(self, html_):
         """
