@@ -27,6 +27,7 @@ stpstone
 │   │   │   │   └── investment_funds.yaml
 │   │   │   ├── exchange
 │   │   │   │   ├── bvmf_bov.yaml
+│   │   │   │   ├── indexes_theor_portf.yaml
 │   │   │   │   ├── options_calendar.yaml
 │   │   │   │   ├── search_by_trading_session.yaml
 │   │   │   │   ├── trading_hours.yaml
@@ -150,6 +151,7 @@ stpstone
 │       ├── br
 │       │   └── exchange
 │       │       ├── bvmf_bov.py
+│       │       ├── indexes_theor_portf.py
 │       │       ├── options_calendar.py
 │       │       ├── search_by_trading_session.py
 │       │       ├── trading_hours.py

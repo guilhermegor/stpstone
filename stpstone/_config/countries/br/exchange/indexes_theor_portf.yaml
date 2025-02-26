@@ -1,0 +1,171 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://sistemaswebb3-listados.b3.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ibov:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQk9WIiwic2VnbWVudCI6IjEifQ==
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATE: date
+    SEGMENT: str
+    COD: str
+    ASSET: str
+    TYPE: category
+    PART: float
+    PART_ACUM: float
+    THEORICAL_QTY: int
+  df_read_params:
+
+ibrx100:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlhYIiwic2VnbWVudCI6IjEifQ==
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATE: date
+    SEGMENT: str
+    COD: str
+    ASSET: str
+    TYPE: category
+    PART: float
+    PART_ACUM: float
+    THEORICAL_QTY: int
+  df_read_params:
+
+ibrx50:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlhMIiwic2VnbWVudCI6IjEifQ==
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATE: date
+    SEGMENT: str
+    COD: str
+    ASSET: str
+    TYPE: category
+    PART: float
+    PART_ACUM: float
+    THEORICAL_QTY: int
+  df_read_params:
+
+ibra:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlJBIiwic2VnbWVudCI6IjEifQ==
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YY
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    DATE: date
+    SEGMENT: str
+    COD: str
+    ASSET: str
+    TYPE: category
+    PART: float
+    PART_ACUM: float
+    THEORICAL_QTY: int
+  df_read_params:
