@@ -190,33 +190,60 @@ class HandlingDicts:
         return groupby(list_ser, key=itemgetter('date'))
 
     def add_key_value_to_dicts(
-        self, list_ser:List[Dict[str, Union[int, float, str]]], key:str,
-        value:Union[Callable[..., Union[int, float, str]], Union[int, float, str]],
-        list_keys_for_function:Optional[List[str]]=None, 
-        kwargs_static:Optional[Dict[str, Union[int, float, str, None]]]=None
+        self, list_ser: List[Dict[str, Union[int, float, str]]],
+        key: Union[str, List[Dict[str, Union[int, float, str]]]],
+        value: Union[Callable[..., Union[int, float, str]], Union[int, float, str], None]=None,
+        list_keys_for_function: Optional[List[str]]=None,
+        kwargs_static: Optional[Dict[str, Union[int, float, str, None]]]=None
     ) -> List[Dict[str, Union[int, float, str]]]:
         """
-        DOCSTRING: ADDS A KEY AND VALUE TO EVERY DICTIONARY IN A LIST
-        INPUTS:
-            LIST_SER: A LIST OF DICTIONARIES TO BE UPDATED - LIST SERIALIZED
-            KEY: THE KEY TO ADD TO EACH DICTIONARY
-            VALUE: THE VALUE TO ASSOCIATE WITH THE KEY OR A FUNCTION TO COMPUTE THE VALUE
-            KEYS_FOR_FUNCTION: KEYS TO EXTRACT FROM THE DICTIONARY FOR THE VALUE FUNCTION (IF CALLABLE)
-        OUTPUTS:
-            LIST OF UPDATED DICTIONARIES.
+        Adds a key and value (or multiple key-value pairs) to every dictionary in a list.
+        Args:
+            - list_ser (List[Dict[str, Union[int, float, str]]]): A list of dictionaries to be updated.
+            - key (Union[str, List[Dict[str, Union[int, float, str]]]]): 
+                . If a string, the key to add to each dictionary
+                . If a list of dictionaries, each dictionary contains key-value pairs to add
+            - value (Union[Callable[..., Union[int, float, str]], Union[int, float, str], None]): 
+                . The value to associate with the key (if key is a string)
+                . Can be a static value or a function to compute the value dynamically
+                . Ignored if key is a list of dictionaries
+            - list_keys_for_function (Optional[List[str]]): 
+                . Keys to extract from the dictionary for the value function (if callable)
+                . Required if value is a function
+            - kwargs_static (Optional[Dict[str, Union[int, float, str, None]]]): 
+                . Static keyword arguments to pass to the function (if callable)
+        Returns:
+            List[Dict[str, Union[int, float, str]]]: The updated list of dictionaries.
+        Raises:
+            ValueError: if key is a string and value is None.
+            TypeError: if key is neither a string nor a list of dictionaries.
         """
-        for dict_ in list_ser:
-            if isinstance(dict_, dict):
-                #   check if the value is a function, otherwise assign the static value
-                if callable(value):
-                    args = [dict_.get(k) for k in list_keys_for_function] \
-                        if list_keys_for_function is not None else []
-                    if kwargs_static is not None:
-                        dict_[key] = value(*args, **kwargs_static)
+        # if key is a string, treat it as a single key-value pair
+        if isinstance(key, str):
+            if value is None:
+                raise ValueError("If key is a string, value must be provided.")
+            for dict_ in list_ser:
+                if isinstance(dict_, dict):
+                    if callable(value):
+                        args = [dict_.get(k) for k in list_keys_for_function] \
+                            if list_keys_for_function is not None else []
+                        if kwargs_static is not None:
+                            dict_[key] = value(*args, **kwargs_static)
+                        else:
+                            dict_[key] = value(*args)
                     else:
-                        dict_[key] = value(*args)
-                else:
-                    dict_[key] = value
+                        dict_[key] = value
+        # if key is a list of dictionaries, treat it as multiple key-value pairs
+        elif isinstance(key, list):
+            for dict_ in list_ser:
+                if isinstance(dict_, dict):
+                    for kv_pair in key:
+                        if isinstance(kv_pair, dict):
+                            for k, v in kv_pair.items():
+                                dict_[k] = v
+        else:
+            raise TypeError("key must be a string or a list of dictionaries.")
+        
         return list_ser
 
     def pair_headers_with_data(self, list_headers:List[str], list_data:List[Any]) \

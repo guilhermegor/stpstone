@@ -1,0 +1,177 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://sistemaswebb3-listados.b3.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+group_1:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+    - E
+    - I
+    - M
+    - Q
+    - U
+    - 'Y'
+    - c
+    - g
+    - k
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOj{{slug}}sInBhZ2VTaXplIjoiMjAifQ==
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CODE: str
+    TRADING_NAME: str
+    SERIE: str
+    STANDARD_DEVIATION_1: float
+    ANNUALIZED_VOLATILITY_1: float
+    STANDARD_DEVIATION_3: float
+    ANNUALIZED_VOLATILITY_3: float
+    STANDARD_DEVIATION_6: float
+    ANNUALIZED_VOLATILITY_6: float
+    STANDARD_DEVIATION_12: float
+    ANNUALIZED_VOLATILITY_12: float
+    PAGE_NUMBER: int
+    PAGE_SIZE: int
+    TOTAL_RECORDS: int
+    TOTAL_PAGES: int
+  df_read_params:
+
+group_2:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+    - w
+    - x
+    - 'y'
+    - z
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOjE{{slug}}LCJwYWdlU2l6ZSI6IjIwIn0=
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CODE: str
+    TRADING_NAME: str
+    SERIE: str
+    STANDARD_DEVIATION_1: float
+    ANNUALIZED_VOLATILITY_1: float
+    STANDARD_DEVIATION_3: float
+    ANNUALIZED_VOLATILITY_3: float
+    STANDARD_DEVIATION_6: float
+    ANNUALIZED_VOLATILITY_6: float
+    STANDARD_DEVIATION_12: float
+    ANNUALIZED_VOLATILITY_12: float
+    PAGE_NUMBER: int
+    PAGE_SIZE: int
+    TOTAL_RECORDS: int
+    TOTAL_PAGES: int
+  df_read_params:
+
+group_3:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+    - w
+    - x
+    - 'y'
+    - z
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOjI{{slug}}LCJwYWdlU2l6ZSI6IjIwIn0=
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CODE: str
+    TRADING_NAME: str
+    SERIE: str
+    STANDARD_DEVIATION_1: float
+    ANNUALIZED_VOLATILITY_1: float
+    STANDARD_DEVIATION_3: float
+    ANNUALIZED_VOLATILITY_3: float
+    STANDARD_DEVIATION_6: float
+    ANNUALIZED_VOLATILITY_6: float
+    STANDARD_DEVIATION_12: float
+    ANNUALIZED_VOLATILITY_12: float
+    PAGE_NUMBER: int
+    PAGE_SIZE: int
+    TOTAL_RECORDS: int
+    TOTAL_PAGES: int
+  df_read_params:

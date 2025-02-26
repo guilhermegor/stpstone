@@ -48,7 +48,7 @@ update_tree:
 update_readme: package_tree update_tree
 
 
-### SUPPORT ACTIONS ###
+### FACTORY METHODS ###
 
 scaffolding_ingestion_request:
 	bash cli/create_req_yaml.sh

@@ -2,7 +2,7 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.br.exchange.trading_hours import TradingHoursB3
+from stpstone.ingestion.registries.br.exchange.trading_hours import TradingHoursB3
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 

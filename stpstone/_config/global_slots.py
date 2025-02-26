@@ -21,6 +21,7 @@ YAML_B3_OPTIONS_CALENDAR = reading_yaml(os.path.join(root_path, 'countries/br/ex
 YAML_B3_WARRANTY = reading_yaml(os.path.join(root_path, 'countries/br/exchange/warranty.yaml'))
 YAML_B3_TRADING_HOURS_B3 = reading_yaml(os.path.join(root_path, 'countries/br/exchange/trading_hours.yaml'))
 YAML_B3_INDEXES_THEOR_PORTF = reading_yaml(os.path.join(root_path, 'countries/br/exchange/indexes_theor_portf.yaml'))
+YAML_B3_HISTORICAL_SIGMA = reading_yaml(os.path.join(root_path, 'countries/br/exchange/historical_sigma.yaml'))
 #   US
 YAML_US_ALPHAVANTAGE = reading_yaml(os.path.join(root_path, 'countries/us/exchange/alphavantage.yaml'))
 YAML_US_TIINGO = reading_yaml(os.path.join(root_path, 'countries/us/exchange/tiingo.yaml'))

@@ -32,7 +32,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 class HandleReqResponses(ABC):
 
-    def _handle_response(
+    def handle_response(
         self, 
         req_resp:Response, 
         dict_dtypes:Dict[str, Any], 
@@ -441,7 +441,7 @@ class ABCRequests(HandleReqResponses):
             req_method, url, bl_verify, tup_timeout, dict_headers, payload
         )
         # dealing with request content type
-        df_ = self._handle_response(
+        df_ = self.handle_response(
             req_resp, dict_dtypes, dict_regex_patterns, dict_df_read_params, bl_debug
         )
         # standardizing

@@ -96,6 +96,16 @@ class DFStandardization(metaclass=TypeChecker):
         df_[list_cols] = df_[list_cols].fillna(self.str_data_fillna)
         return df_
 
+    def replace_separators(self, df_):
+        for col in df_.columns:
+            if \
+                (df_[col].dtype == 'object') \
+                and (df_[col].str.contains(r'^\d{1,3}(?:\.\d{3})*(,\d+)?$', regex=True).any()):
+                df_[col] = df_[col].str.replace('.', '', regex=False)
+                df_[col] = df_[col].str.replace(',', '.', regex=False)
+                df_[col] = pd.to_numeric(df_[col], errors='coerce')
+        return df_
+
     def change_dtypes(self, df_:pd.DataFrame) -> pd.DataFrame:
         # general columns types
         dict_dtypes = {k: ('str' if v == 'date' else v) for k, v in self.dict_dtypes.items()}
@@ -149,6 +159,7 @@ class DFStandardization(metaclass=TypeChecker):
             self.limit_columns_to_dtypes,
             self.delete_empty_rows,
             self.completeness,
+            self.replace_separators,
             self.change_dtypes,
             self.strip_all_obj_dtypes,
             self.remove_duplicated_cols,

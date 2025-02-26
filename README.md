@@ -27,6 +27,7 @@ stpstone
 │   │   │   │   └── investment_funds.yaml
 │   │   │   ├── exchange
 │   │   │   │   ├── bvmf_bov.yaml
+│   │   │   │   ├── historical_sigma.yaml
 │   │   │   │   ├── indexes_theor_portf.yaml
 │   │   │   │   ├── options_calendar.yaml
 │   │   │   │   ├── search_by_trading_session.yaml
@@ -136,6 +137,8 @@ stpstone
 │   │           └── ptax_bcb.py
 │   ├── mtm
 │   │   └── br
+│   │       ├── exchange
+│   │       │   └── historical_sigma.py
 │   │       └── otc
 │   │           └── debentures.py
 │   ├── registries
@@ -143,7 +146,10 @@ stpstone
 │   │       ├── bylaws
 │   │       │   └── investment_funds.py
 │   │       ├── exchange
+│   │       │   ├── indexes_theor_portf.py
+│   │       │   ├── options_calendar.py
 │   │       │   ├── securities.py
+│   │       │   ├── trading_hours.py
 │   │       │   └── warranty.py
 │   │       └── taxation
 │   │           └── irsbr_records.py
@@ -151,10 +157,7 @@ stpstone
 │       ├── br
 │       │   └── exchange
 │       │       ├── bvmf_bov.py
-│       │       ├── indexes_theor_portf.py
-│       │       ├── options_calendar.py
 │       │       ├── search_by_trading_session.py
-│       │       ├── trading_hours.py
 │       │       └── volumes.py
 │       ├── us
 │       │   └── exchange
