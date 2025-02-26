@@ -448,7 +448,7 @@ class StrHandler:
             - UPPER_CONSTANT - 'upper_constant'
             - lower_constant - 'lower_constant'
             - UpperFirst - 'upper_first'
-            - Default (words separated by spaces) - 'default'
+            - Default (words separated by spaces or hyphens) - 'default'
         Args:
             - from_case (str): Current case of the string
             - to_case (str): Desired case of the string
@@ -473,6 +473,8 @@ class StrHandler:
         elif from_case == 'upper_first':
             words = [str_[0].upper() + str_[1:].lower()]
         elif from_case == 'default':
+            str_ = str_.replace(' - ', ' ')
+            str_ = str_.replace('-', ' ')
             words = str_.lower().split()
         else:
             raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']")

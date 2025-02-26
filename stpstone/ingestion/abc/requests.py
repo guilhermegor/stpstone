@@ -444,6 +444,18 @@ class ABCRequests(HandleReqResponses):
         df_ = self._handle_response(
             req_resp, dict_dtypes, dict_regex_patterns, dict_df_read_params, bl_debug
         )
+        # standardizing
+        cls_df_stdz = DFStandardization(
+            dict_dtypes, 
+            cols_from_case,
+            cols_to_case,
+            list_cols_drop_dupl,
+            str_fmt_dt, 
+            type_error_action, 
+            strt_keep_when_duplicated,
+        )
+        df_ = cls_df_stdz.pipeline(df_)
+        # audit logging
         if bl_debug == True:
             print(f'*** TRT REQ: \n{df_}')
         df_ = DBLogs().audit_log(
@@ -460,24 +472,6 @@ class ABCRequests(HandleReqResponses):
             print(f'*** COLS NAMES: {list(df_.columns)}')
         if self.logger is not None:
             CreateLog().infos(self.logger, f'Request completed successfully: {url}')
-        # standardizing
-        cls_df_stdz = DFStandardization(
-            HandlingDicts().merge_n_dicts(
-                dict_dtypes, 
-                {
-                    k: v 
-                    for k, v in self.dict_metadata['logs']['dtypes'].items() 
-                    if k in list(df_.columns)
-                }
-            ), 
-            cols_from_case,
-            cols_to_case,
-            list_cols_drop_dupl,
-            str_fmt_dt, 
-            type_error_action, 
-            strt_keep_when_duplicated,
-        )
-        df_ = cls_df_stdz.pipeline(df_)
         if bl_debug == True:
             print(f'*** TRT REQ - STANDARDIZATION: \n{df_}')
         return df_

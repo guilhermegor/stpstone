@@ -15,6 +15,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO, TextIOWrapper, BufferedReader
 from typing import Tuple, List, Union, Optional, Dict
 from requests import Session, Response
+from pathlib import Path
 # local libs
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -366,7 +367,6 @@ class DirFilesManagement:
             for file in files:
                 if any([fnmatch.fnmatch(file, name_like) == True for name_like in list_name_like]):
                     list_paths.append(os.path.join(directory, file))
-
         return list_paths
 
     def walk_folder_subfolder(self, root_directory):
@@ -418,6 +418,18 @@ class DirFilesManagement:
         OUTPUTS: LIST OF FILES OR SUBFOLDERS
         """
         return os.listdir(dir_path)
+
+    def find_project_root(self, marker:str='pyproject.toml') -> Path:
+        """
+        Traverse up the directory tree to find the project root
+        by looking for a marker file (e.g., pyproject.toml, README.md, .git).
+        """
+        current_path = Path(__file__).resolve()
+        while current_path != current_path.parent:  # Stop at the filesystem root
+            if (current_path / marker).exists():
+                return current_path
+            current_path = current_path.parent
+        raise FileNotFoundError(f"Could not find project root with marker: {marker}")
 
     def get_file_format_from_file_name(self, filename):
         """

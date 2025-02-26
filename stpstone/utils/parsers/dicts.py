@@ -219,7 +219,8 @@ class HandlingDicts:
                     dict_[key] = value
         return list_ser
 
-    def pair_headers_with_data(self, list_headers, list_data):
+    def pair_headers_with_data(self, list_headers:List[str], list_data:List[Any]) \
+        -> List[Dict[str, Any]]:
         """
         DOCSTRING: PAIR HEADERS AND DATA AS KEYS AND VALUES IN A SERIALIZED LIST
             - FOR EXAMPLE, IF LIST_HEADERS IS ['NAME', 'AGE'] AND LIST_DATA IS 

@@ -48,7 +48,6 @@ class OptionsCalendarB3(ABCRequests):
         list_ser = list()
         i = 1
         root = HtmlHndler().lxml_parser(req_resp)
-        HtmlHndler().html_tree(root, r"C:\Users\guiro\Downloads\html-tree-options-settlement-calendar_20250225_0936.txt")
         while i <= 20:
             try:
                 list_th = [

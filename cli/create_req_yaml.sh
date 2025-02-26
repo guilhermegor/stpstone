@@ -40,12 +40,6 @@ credentials:
     keys:
       token: token
 
-logs:
-  dtypes:
-    FILE_NAME: str
-    REF_DATE: date
-    URL: str
-
 metadata:
 
 

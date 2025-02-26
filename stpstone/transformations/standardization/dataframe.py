@@ -75,7 +75,13 @@ class DFStandardization(metaclass=TypeChecker):
         """
         list_cols = list(self.dict_dtypes.keys())
         df_ = df_[list_cols]
+        print('SAIU LIMIT COLUMNS TO DTYPES')
         return df_
+
+    def delete_empty_rows(self, df_: pd.DataFrame) -> pd.DataFrame:
+        list_mask = df_.apply(lambda row: row.isin([None, '']).all(), axis=1)
+        df_cleaned = df_[~list_mask]
+        return df_cleaned
 
     def completeness(self, df_:pd.DataFrame) -> pd.DataFrame:
         """
@@ -142,6 +148,7 @@ class DFStandardization(metaclass=TypeChecker):
             self.check_if_empty,
             self.column_names,
             self.limit_columns_to_dtypes,
+            self.delete_empty_rows,
             self.completeness,
             self.change_dtypes,
             self.strip_all_obj_dtypes,

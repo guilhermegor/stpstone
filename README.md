@@ -29,6 +29,7 @@ stpstone
 │   │   │   │   ├── bvmf_bov.yaml
 │   │   │   │   ├── options_calendar.yaml
 │   │   │   │   ├── search_by_trading_session.yaml
+│   │   │   │   ├── trading_hours.yaml
 │   │   │   │   ├── up2data_registries.yaml
 │   │   │   │   ├── up2data_volumes_trd.yaml
 │   │   │   │   └── warranty.yaml
@@ -151,6 +152,7 @@ stpstone
 │       │       ├── bvmf_bov.py
 │       │       ├── options_calendar.py
 │       │       ├── search_by_trading_session.py
+│       │       ├── trading_hours.py
 │       │       └── volumes.py
 │       ├── us
 │       │   └── exchange

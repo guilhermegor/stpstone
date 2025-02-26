@@ -1,0 +1,111 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://www.b3.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+stocks:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/#source=stocks&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    MERCADO: str
+    CANCELAMENTO_DE_OFERTAS_INICIO: str
+    CANCELAMENTO_DE_OFERTAS_FIM: str
+    PRE_ABERTURA_INICIO: str
+    PRE_ABERTURA_FIM: str
+    NEGOCIACAO_INICIO: str
+    NEGOCIACAO_FIM: str
+    CALL_DE_FECHAMENTO_INICIO: str
+    CALL_DE_FECHAMENTO_FIM: str
+    AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_INICIO: str
+    AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FIM: str
+    AFTER_MARKET_NEGOCIACAO_INICIO: str
+    AFTER_MARKET_NEGOCIACAO_FIM: str
+    AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_INICIO: str
+    AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_FIM: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+stock_options:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/#source=stock_options&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    MERCADO: str
+    EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_INICIO: str
+    EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_FIM: str
+    EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO: str
+    EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_FIM: str
+    ARQUIVO_DE_POSICOES_MAIS_IMBARQ_NO_VENCIMENTO: str
+    CONTRARY_EXERCISE_NO_VENCIMENTO_INICIO: str
+    CONTRARY_EXERCISE_NO_VENCIMENTO_FIM: str
+    EXERCICIO_AUTOMATICO_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
