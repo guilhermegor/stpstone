@@ -109,3 +109,453 @@ stock_options:
     bl_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
+
+pmi_future:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/#source=pmi_future&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    ORDER_CANCELLATION_OPENING: str
+    ORDER_CANCELLATION_CLOSING: str
+    ELECTRONIC_CALL_OPENING: str
+    ORDER_CANCELLATION_EOD_OPENING: str
+    ORDER_CANCELLATION_EOD_CLOSING: str
+    EXTENDED_HOURS_T_0_OPENING: str
+    EXTENDED_HOURS_T_0_CLOSING: str
+    AFTER_HOURS_T_1_OPENING: str
+    AFTER_HOURS_T_1_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+stock_index_futures:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/#source=stock_index_futures&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    ORDER_CANCELLATION_OPENING: str
+    ORDER_CANCELLATION_CLOSING: str
+    ELECTRONIC_CALL_OPENING: str
+    ORDER_CANCELLATION_EOD_OPENING: str
+    ORDER_CANCELLATION_EOD_CLOSING: str
+    EXTENDED_HOURS_T_0_OPENING: str
+    EXTENDED_HOURS_T_0_CLOSING: str
+    AFTER_HOURS_T_1_OPENING: str
+    AFTER_HOURS_T_1_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+interest_rates:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/#source=interest_rates&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    ORDER_CANCELLATION_OPENING: str
+    ORDER_CANCELLATION_CLOSING: str
+    ELECTRONIC_CALL_OPENING: str
+    ORDER_CANCELLATION_EOD_OPENING: str
+    ORDER_CANCELLATION_EOD_CLOSING: str
+    EXTENDED_HOURS_T_0_OPENING: str
+    EXTENDED_HOURS_T_0_CLOSING: str
+    AFTER_HOURS_T_1_OPENING: str
+    AFTER_HOURS_T_1_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+usd_interest_rates:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/#source=usd_interest_rates&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    ORDER_CANCELLATION_OPENING: str
+    ORDER_CANCELLATION_CLOSING: str
+    ELECTRONIC_CALL_OPENING: str
+    ORDER_CANCELLATION_EOD_OPENING: str
+    ORDER_CANCELLATION_EOD_CLOSING: str
+    EXTENDED_HOURS_T_0_OPENING: str
+    EXTENDED_HOURS_T_0_CLOSING: str
+    AFTER_HOURS_T_1_OPENING: str
+    AFTER_HOURS_T_1_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+commodities:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/#source=commodities&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    AFTER_HOURS_T_1_OPENING: str
+    AFTER_HOURS_T_1_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+crypto:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/#source=crypto&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRATO: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    ORDER_CANCELLATION_OPENING: str
+    ORDER_CANCELLATION_CLOSING: str
+    ELECTRONIC_CALL_OPENING: str
+    ORDER_CANCELLATION_EOD_OPENING: str
+    ORDER_CANCELLATION_EOD_CLOSING: str
+    EXTENDED_HOURS_T_0_OPENING: str
+    EXTENDED_HOURS_T_0_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+foreign_exchange_and_dollar_spot:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/#source=foreign_exchange_and_dollar_spot&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    REGULAR_HOURS_OPENING: str
+    REGULAR_HOURS_CLOSING: str
+    ORDER_CANCELLATION_OPENING: str
+    ORDER_CANCELLATION_CLOSING: str
+    ELECTRONIC_CALL_OPENING: str
+    ORDER_CANCELLATION_EOD_OPENING: str
+    ORDER_CANCELLATION_EOD_CLOSING: str
+    EXTENDED_HOURS_T_0_OPENING: str
+    EXTENDED_HOURS_T_0_CLOSING: str
+    AFTER_HOURS_T_1_OPENING: str
+    AFTER_HOURS_T_1_CLOSING: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+otc:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/balcao-organizado/#source=otc&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    MERCADO: str
+    CANCELAMENTO_DE_OFERTAS_INICIO: str
+    CANCELAMENTO_DE_OFERTAS_FIM: str
+    PRE_ABERTURA_INICIO: str
+    PRE_ABERTURA_FIM: str
+    NEGOCIACAO_INICIO: str
+    NEGOCIACAO_FIM: str
+    EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_INICIO: str
+    EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_FIM: str
+    EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_INICIO: str
+    EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_FIM: str
+    EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_INICIO: str
+    EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_FIM: str
+    CALL_DE_FECHAMENTO_INICIO: str
+    CALL_DE_FECHAMENTO_FIM: str
+    CANCELAMENTO_DE_OFERTAS_EOD_INICIO: str
+    CANCELAMENTO_DE_OFERTAS_EOD_FIM: str
+    AFTER_MARKET_NEGOCIACAO_INICIO: str
+    AFTER_MARKET_NEGOCIACAO_FIM: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //*[@id="conteudo-principal"]/div[4]/div/div/table/thead/tr/th
+    list_td: //table/tbody/tr/td
+
+opf_before_exc:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/#source=opf_before_exc_date&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    EXERCISE: str
+    PURCHASE_FOR_BLOCKING_WITH_EXERCISE_RISK: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td
+
+opf_after_exc:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/#source=opf_after_exc_date&bl_debug=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keeping_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CONTRACT: str
+    TICKER: str
+    EXERCISE: str
+    BLOCKING_WITHOUT_EXERCISE_RISK: str
+    BLOCKING_HOLDER: str
+  df_read_params:
+  xpaths:
+    bl_debug_html: True
+    list_th: //table[@class="responsive"]/thead/tr/th
+    list_td: //table[@class="responsive"]/tbody/tr/td

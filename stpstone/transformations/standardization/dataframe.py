@@ -75,7 +75,6 @@ class DFStandardization(metaclass=TypeChecker):
         """
         list_cols = list(self.dict_dtypes.keys())
         df_ = df_[list_cols]
-        print('SAIU LIMIT COLUMNS TO DTYPES')
         return df_
 
     def delete_empty_rows(self, df_: pd.DataFrame) -> pd.DataFrame:

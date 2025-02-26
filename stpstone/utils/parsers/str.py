@@ -475,6 +475,9 @@ class StrHandler:
         elif from_case == 'default':
             str_ = str_.replace(' - ', ' ')
             str_ = str_.replace('-', ' ')
+            str_ = str_.replace('+', ' ')
+            str_ = str_.replace(' (', ' ')
+            str_ = str_.replace(') ', ' ')
             words = str_.lower().split()
         else:
             raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']")

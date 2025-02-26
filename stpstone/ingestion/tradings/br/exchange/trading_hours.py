@@ -86,6 +86,166 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 195
             int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=pmi_future*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing',
+                list_th[4] + ' - Opening',
+                list_th[5] + ' EOD - Opening',
+                list_th[5] + ' EOD - Closing',
+                list_th[6] + ' - Opening',
+                list_th[6] + ' - Closing',
+                list_th[7] + ' - Opening',
+                list_th[7] + ' - Closing',
+            ]
+            int_init_td = 0
+            int_end_td = 52
+        elif StrHandler().match_string_like(req_resp.url, '*#source=stock_index_futures*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing',
+                list_th[4] + ' - Opening',
+                list_th[5] + ' EOD - Opening',
+                list_th[5] + ' EOD - Closing',
+                list_th[6] + ' - Opening',
+                list_th[6] + ' - Closing',
+                list_th[7] + ' - Opening',
+                list_th[7] + ' - Closing',
+            ]
+            int_init_td = 52
+            int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=interest_rates*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing',
+                list_th[4] + ' - Opening',
+                list_th[5] + ' EOD - Opening',
+                list_th[5] + ' EOD - Closing',
+                list_th[6] + ' - Opening',
+                list_th[6] + ' - Closing',
+                list_th[7] + ' - Opening',
+                list_th[7] + ' - Closing',
+            ]
+            int_init_td = 0
+            int_end_td = 130
+        elif StrHandler().match_string_like(req_resp.url, '*#source=usd_interest_rates*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing',
+                list_th[4] + ' - Opening',
+                list_th[5] + ' EOD - Opening',
+                list_th[5] + ' EOD - Closing',
+                list_th[6] + ' - Opening',
+                list_th[6] + ' - Closing',
+                list_th[7] + ' - Opening',
+                list_th[7] + ' - Closing',
+            ]
+            int_init_td = 130
+            int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=commodities*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing'
+            ]
+            int_init_td = 0
+            int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=crypto*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing',
+                list_th[4] + ' - Opening',
+                list_th[5] + ' EOD - Opening',
+                list_th[5] + ' EOD - Closing',
+                list_th[6] + ' - Opening',
+                list_th[6] + ' - Closing'
+            ]
+            int_init_td = 0
+            int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=foreign_exchange_and_dollar_spot*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2] + ' - Opening',
+                list_th[2] + ' - Closing',
+                list_th[3] + ' - Opening',
+                list_th[3] + ' - Closing',
+                list_th[4] + ' - Opening',
+                list_th[5] + ' EOD - Opening',
+                list_th[5] + ' EOD - Closing',
+                list_th[6] + ' - Opening',
+                list_th[6] + ' - Closing',
+                list_th[7] + ' - Opening',
+                list_th[7] + ' - Closing',
+            ]
+            int_init_td = 0
+            int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=otc*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1] + ' - Início', 
+                list_th[1] + ' - Fim',
+                list_th[2] + ' - Início',
+                list_th[2] + ' - Fim',
+                list_th[3] + ' - Início',
+                list_th[3] + ' - Fim',
+                list_th[10] + ' - Antes do Vencimento - Exercício de Posição Titular - Início',
+                list_th[10] + ' - Antes do Vencimento - Exercício de Posição Titular - Fim',
+                list_th[10] + ' - No Vencimento - Encerramento de Posição - Início',
+                list_th[10] + ' - No Vencimento - Encerramento de Posição - Fim',
+                list_th[10] + ' - No Vencimento - Exercício de Posição Titular - Início',
+                list_th[10] + ' - No Vencimento - Exercício de Posição Titular - Fim',
+                list_th[4] + ' - Opening',
+                list_th[4] + ' - Closing',
+                list_th[6] + ' EOD - Opening',
+                list_th[6] + ' EOD - Closing',
+                list_th[5] + ' - Opening',
+                list_th[5] + ' - Closing',
+            ]
+            int_init_td = 0
+            int_end_td = None
+        elif StrHandler().match_string_like(req_resp.url, '*#source=opf_before_exc_date*') == True:
+            list_headers = [
+                list_th[0], 
+                list_th[1], 
+                list_th[2],
+                list_th[3]
+            ]
+            int_init_td = 0
+            int_end_td = 32
+        elif StrHandler().match_string_like(req_resp.url, '*#source=opf_after_exc_date*') == True:
+            list_headers = [
+                list_th[4], 
+                list_th[5], 
+                list_th[6],
+                list_th[7] + ' Without Exercise Risk',
+                list_th[7] + ' Holder'
+            ]
+            int_init_td = 32
+            int_end_td = None
         else:
             if self.logger is not None:
                 CreateLog().warnings(
@@ -93,6 +253,9 @@ class TradingHoursB3(ABCRequests):
                     'No source found in url, for HTML webscraping, please revisit the code'
                     + f' if it is an unexpected behaviour - URL: {req_resp.url}'
                 )
+            else:
+                print('No source found in url, for HTML webscraping, please revisit the code'
+                    + f' if it is an unexpected behaviour - URL: {req_resp.url}')
         return list_headers, int_init_td, int_end_td
 
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
@@ -114,12 +277,15 @@ class TradingHoursB3(ABCRequests):
                 root, YAML_B3_TRADING_HOURS_B3['stocks']['xpaths']['list_td']
             )
         ]
+        if bl_debug == True:
+            print(f'LIST TH RAW: {list_th}')
+            print(f'LIST TD RAW: {list_td}')
         # deal with data/headers specificity for the project
         list_headers, int_init_td, int_end_td = self.td_th_parser(req_resp, list_th)
         if bl_debug == True:
-            print(list_headers)
+            print(f'LIST TH TRT: {list_headers}')
             print(f'LEN LIST HEADERS: {len(list_headers)}')
-            print(list_td[int_init_td:int_end_td])
+            print(f'LIST TD TRT: {list_td[int_init_td:int_end_td]}')
             print(f'LEN LIST TD: {len(list_td[int_init_td:int_end_td])}')
         list_ser = HandlingDicts().pair_headers_with_data(
             list_headers, 
