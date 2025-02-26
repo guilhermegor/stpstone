@@ -53,3 +53,7 @@ update_readme: package_tree update_tree
 scaffolding_ingestion_request:
 	bash cli/create_req_yaml.sh
 	bash cli/create_req_cls_py.sh
+
+scaffolding_ingestion_request_html_parser:
+	bash cli/html_parser_create_req_yaml.sh
+	bash cli/html_parser_create_req_cls_py.sh
