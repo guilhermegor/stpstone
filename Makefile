@@ -57,3 +57,12 @@ scaffolding_ingestion_request:
 scaffolding_ingestion_request_html_parser:
 	bash cli/html_parser_create_req_yaml.sh
 	bash cli/html_parser_create_req_cls_py.sh
+
+
+### GIT ###
+
+git_pull_force:
+	bash cli/git_pull_force.sh
+
+git_keep_just_main:
+	bash cli/git_keep_just_main.sh
