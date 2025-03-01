@@ -6,7 +6,7 @@ sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python\Packages')
 from stpstone.finance.performance_apprraisal.financial_math import FinancialMath
 
 
-class ValuingStocks:
+class DataDeltas:
 
     def continuous_return(self, stock_d0, stock_d1):
         """
@@ -35,10 +35,10 @@ class ValuingStocks:
         OUPUTS: LIST OF RETURNS
         """
         if type_return == 'ln_return':
-            return [ValuingStocks().continuous_return(list_prices[i - 1], list_prices[i])
+            return [self.continuous_return(list_prices[i - 1], list_prices[i])
                     for i in range(1, len(list_prices))]
         elif type_return == 'stnd_return':
-            return [ValuingStocks().stnd_return(list_prices[i - 1], list_prices[i])
+            return [self.stnd_return(list_prices[i - 1], list_prices[i])
                     for i in range(1, len(list_prices))]
         else:
             raise Exception(
@@ -91,7 +91,7 @@ class ValuingStocks:
             return {
                 'mtm': (float(short_price) - float(long_price)) * float(leverage) - float(
                     operational_costs),
-                'pct_retun': ValuingStocks().continuous_return(float(short_price), float(long_price)),
+                'pct_retun': self.continuous_return(float(short_price), float(long_price)),
                 'notional': float(short_price)
             }
         elif type_return == 'stnd_return':
@@ -106,7 +106,7 @@ class ValuingStocks:
                 'Type of return calculation ought be ln_return or stnd_return')
 
 
-# print(ValuingStocks().calc_returns_from_prices(
+# print(self.calc_returns_from_prices(
 #     np.array([2.13, 5.7, 3.1, 4.35, 9.2, 3.7, 4.8])))
 # # output
 # [0.9843441951191709, -0.6090640633494039, 0.3387737336094921, 0.7490276389544019, -0.9108706644048157, 0.26028309826366636]
