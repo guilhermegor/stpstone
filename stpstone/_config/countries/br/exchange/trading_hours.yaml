@@ -39,7 +39,7 @@ stocks:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -88,7 +88,7 @@ stock_options:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -131,7 +131,7 @@ pmi_future:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -178,7 +178,7 @@ stock_index_futures:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -225,7 +225,7 @@ interest_rates:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -272,7 +272,7 @@ usd_interest_rates:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -319,7 +319,7 @@ commodities:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -359,7 +359,7 @@ crypto:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -404,7 +404,7 @@ foreign_exchange_and_dollar_spot:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -451,7 +451,7 @@ otc:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -504,7 +504,7 @@ opf_before_exc:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -542,7 +542,7 @@ opf_after_exc:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:

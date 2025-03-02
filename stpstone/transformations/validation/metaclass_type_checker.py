@@ -16,15 +16,15 @@ class TypeChecker(type):
                 #   use get_type_hints to inspect function signature
                 type_hints = get_type_hints(attr_value)
                 #   check if any argument or return type is a DataFrame
-                has_dataframe = False
+                bl_df = False
                 for hint in type_hints.values():
                     #   handle generics
                     origin = getattr(hint, '__origin__', hint)
                     #   check dataframe or dataframe model
                     if origin is pd.DataFrame or origin is DataFrameModel:
-                        has_dataframe = True
+                        bl_df = True
                         break
-                if has_dataframe:
+                if bl_df == True:
                   #   use pydantic validate_arguments
                   dct[attr_name] = validate_arguments(
                       attr_value, 

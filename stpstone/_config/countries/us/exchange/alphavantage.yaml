@@ -45,7 +45,7 @@ ohlcv_not_adjusted:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name: us_alphav_ohlcv_not_adjusted
   bl_insert_or_ignore: False

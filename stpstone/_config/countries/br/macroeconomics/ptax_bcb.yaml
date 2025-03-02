@@ -48,7 +48,7 @@ ids:
   list_cols_drop_dupl:
   str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name:
   bl_insert_or_ignore: False
@@ -80,7 +80,7 @@ available_currencies:
   list_cols_drop_dupl:
   str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name:
   bl_insert_or_ignore: False
@@ -129,7 +129,7 @@ close_currency_rates:
   list_cols_drop_dupl:
   str_fmt_dt: DDMMYYYY
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
     - ValueError
     - TypeError

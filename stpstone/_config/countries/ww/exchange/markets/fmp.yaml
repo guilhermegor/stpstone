@@ -45,7 +45,7 @@ mkt_hours_exchanges_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name: ww_fmp_mkts_hours_yesterday
   bl_insert_or_ignore: False
@@ -80,7 +80,7 @@ crypto_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name: ww_fmp_crypto_ohlcv_yesterday
   bl_insert_or_ignore: False
@@ -125,7 +125,7 @@ stocks_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name: ww_fmp_stocks_ohlcv_yesterday
   bl_insert_or_ignore: False
@@ -170,7 +170,7 @@ etfs_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name: us_fmp_etfs_ohlcv_yesterday
   bl_insert_or_ignore: False
@@ -202,7 +202,7 @@ commodities_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   schema: raw
   table_name: us_fmp_commodities_ohlcv_yesterday
   bl_insert_or_ignore: False

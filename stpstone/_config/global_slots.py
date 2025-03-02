@@ -33,10 +33,13 @@ YAML_WW_FMP = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/market
 YAML_WW_INVESTINGCOM = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/markets/investingcom.yaml'))
 
 # macroeconomics
-YAML_BR_PTAX_BCB = reading_yaml(os.path.join(root_path, 'countries/br/macroeconomics/currencies/ptax_bcb.yaml'))
+YAML_BR_PTAX_BCB = reading_yaml(os.path.join(root_path, 'countries/br/macroeconomics/ptax_bcb.yaml'))
 
 # otc
 YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'countries/br/otc/debentures.yaml'))
+
+# registries
+YAML_BR_REGISTRIES_FINANCIAL_ADVS_CVM = reading_yaml(os.path.join(root_path, 'countries/br/registries/financial_advs_cvm.yaml'))
 
 # taxation
 YAML_IRSBR = reading_yaml(os.path.join(root_path, 'countries/br/taxation/irsbr.yaml'))
@@ -49,7 +52,6 @@ YAML_SESSION = reading_yaml(os.path.join(root_path, 'netops/session.yaml'))
 YAML_ANBIMA = reading_yaml(os.path.join(root_path, 'anbima.yaml'))
 YAML_B3 = reading_yaml(os.path.join(root_path, 'b3.yaml'))
 YAML_BR_TRS = reading_yaml(os.path.join(root_path, 'br_treasury.yaml'))
-YAML_CD = reading_yaml(os.path.join(root_path, 'comdinheiro.yaml'))
 YAML_GEN = reading_yaml(os.path.join(root_path, 'generic.yaml'))
 YAML_WGBD = reading_yaml(os.path.join(root_path, 'world_gov_bonds.yaml'))
 YAML_GLB_RT = reading_yaml(os.path.join(root_path, 'global_rates.yaml'))

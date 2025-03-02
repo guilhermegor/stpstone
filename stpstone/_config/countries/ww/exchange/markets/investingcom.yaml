@@ -51,7 +51,7 @@ ticker_id:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -90,7 +90,7 @@ daily_ohlcv:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keeping_when_duplicated: first
+  strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
