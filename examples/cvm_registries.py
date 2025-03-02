@@ -3,7 +3,7 @@ import os
 import sys
 
 # local libs
-sys.path.append(os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.realpath(__file__), "..", "..")))
 from stpstone.ingestion.countries.br.registries.cvm import CVMRegistries
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -46,6 +46,6 @@ cls_ = CVMRegistries(session=None, cls_db=None)
 # print(f'\n*** DF CROWDFUNDING - CVM: \n{df_}')
 # df_.info()
 
-df_ = cls_.source('funds_registries', bl_fetch=True, bl_debug=False)
-print(f'\n*** DF FUNDS REGISTRIES - CVM: \n{df_}')
+df_ = cls_.source("funds_registries", bl_fetch=True, bl_debug=False)
+print(f"\n*** DF FUNDS REGISTRIES - CVM: \n{df_}")
 df_.info()

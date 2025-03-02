@@ -264,10 +264,10 @@ These instructions will get you a copy of the project running on your local mach
 
 #### Makefile:
 
-* Windows: 
+* Windows:
     - download MinGW - [Minimalist GNU for Windows](https://sourceforge.net/projects/mingw/)
     - add C:\MinGW\bin\ (or respective installation directory) to environment variables, from the OS
-    - run cli for installation and checking wheter it was succesful: 
+    - run cli for installation and checking wheter it was succesful:
     ```bash
     (bash)
     mingw-get install mingw32-make
@@ -366,7 +366,7 @@ poetry run python tests.markowitz-portfolios.py
 
 ## Authors
 
-**Guilherme Rodrigues** 
+**Guilherme Rodrigues**
 * [GitHub](https://github.com/guilhermegor)
 * [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
