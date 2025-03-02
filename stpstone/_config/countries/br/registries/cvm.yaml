@@ -35,7 +35,7 @@ pubicly_traded_cos:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -114,7 +114,7 @@ independent_fin_advs:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -166,7 +166,7 @@ fiduciary_agents:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -215,7 +215,7 @@ foreign_cos:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -296,7 +296,7 @@ incentivized_cos:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -362,6 +362,189 @@ incentivized_cos:
     EMAIL_RESP: str
     CNPJ_AUDITOR: str
     AUDITOR: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+securities_consultants:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/CONSULTOR_VLMOB/CAD/DADOS/cad_consultor_vlmob.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_securities_consultants
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CNPJ: str
+    DIRETOR: str
+    DIRETOR_DEFAULT: category
+    NOME: str
+    DT_REG: date
+    DT_CANCEL: date
+    MOTIVO_CANCEL: category
+    SIT: category
+    DT_INI_SIT: date
+    SITE_ADMIN: str
+    DENOM_SOCIAL: str
+    DENOM_COMERC: str
+    CONTROLE_ACIONARIO: category
+    TP_ENDER: category
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    MUN: str
+    UF: category
+    CEP: str
+    DDD: category
+    TEL: str
+    EMAIL: str
+    RESP: str
+    TP_RESP: category
+    SOCIOS: str
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+crowdfunding:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/CROWDFUNDING/CAD/DADOS/cad_crowdfunding.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_crowdfunding
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CNPJ: str
+    DENOM_SOCIAL: str
+    DENOM_COMERC: str
+    DT_REG: date
+    SIT: category
+    DT_INI_SIT: date
+    WEBSITE: str
+    EMAIL: str
+    TP_ENDER: category
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    MUN: str
+    UF: category
+    CEP: str
+    DDD: category
+    TEL: str
+    ADM_RESP: str
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+funds_registries:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/FI/CAD/DADOS/cad_fi.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_crowdfunding
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TP_FUNDO: category
+    CNPJ_FUNDO: str
+    DENOM_SOCIAL: str
+    DT_REG: date
+    DT_CONST: date
+    CD_CVM: int
+    DT_CANCEL: date
+    SIT: category
+    DT_INI_SIT: date
+    DT_INI_ATIV: date
+    DT_INI_EXERC: date
+    DT_FIM_EXERC: date
+    CLASSE: category
+    DT_INI_CLASSE: date
+    RENTAB_FUNDO: str
+    CONDOM: category
+    FUNDO_COTAS: str
+    FUNDO_EXCLUSIVO: str
+    TRIB_LPRAZO: category
+    PUBLICO_ALVO: category
+    ENTID_INVEST: str
+    TAXA_PERFM: float
+    INF_TAXA_PERFM: str
+    TAXA_ADM: float
+    INF_TAXA_ADM: str
+    VL_PATRIM_LIQ: float
+    DT_PATRIM_LIQ: date
+    DIRETOR: str
+    CNPJ_ADMIN: str
+    ADMIN: str
+    PF_PJ_GESTOR: str
+    CPF_CNPJ_GESTOR: str
+    GESTOR: str
+    CNPJ_AUDITOR: str
+    AUDITOR: str
+    CNPJ_CUSTODIANTE: str
+    CUSTODIANTE: str
+    CNPJ_CONTROLADOR: str
+    CONTROLADOR: str
+    INVEST_CEMPR_EXTER: str
+    CLASSE_ANBIMA: category
   df_read_params:
     sep: ';'
     encoding: latin-1

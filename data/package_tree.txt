@@ -5,7 +5,6 @@ stpstone
 │   ├── b3.yaml
 │   ├── br_macro.yaml
 │   ├── br_treasury.yaml
-│   ├── comdinheiro.yaml
 │   ├── countries
 │   │   ├── br
 │   │   │   ├── bylaws
@@ -21,10 +20,11 @@ stpstone
 │   │   │   │   ├── up2data_volumes_trd.yaml
 │   │   │   │   └── warranty.yaml
 │   │   │   ├── macroeconomics
-│   │   │   │   └── currencies
-│   │   │   │       └── ptax_bcb.yaml
+│   │   │   │   └── ptax_bcb.yaml
 │   │   │   ├── otc
 │   │   │   │   └── debentures.yaml
+│   │   │   ├── registries
+│   │   │   │   └── cvm.yaml
 │   │   │   └── taxation
 │   │   │       └── irsbr.yaml
 │   │   ├── us
@@ -56,13 +56,9 @@ stpstone
 │   │   ├── abimadata_api.py
 │   │   ├── anbima_mtm.py
 │   │   └── anbima_stats.py
-│   ├── auditing
-│   │   └── earnings_manipulation.py
 │   ├── b3
 │   │   ├── market_data.py
 │   │   └── search_by_trading.py
-│   ├── comdinheiro
-│   │   └── api_request.py
 │   ├── cvm
 │   │   ├── cvm_data.py
 │   │   └── cvm_web.py
@@ -73,20 +69,21 @@ stpstone
 │   │   ├── global_rates.py
 │   │   ├── usa_macro.py
 │   │   └── world_gov_bonds.py
-│   ├── performance_apprraisal
-│   │   ├── company_return.py
-│   │   └── financial_math.py
+│   ├── perf_metrics
+│   │   ├── data_deltas.py
+│   │   ├── earnings_quality.py
+│   │   ├── financial_math.py
+│   │   └── roe_decomposition.py
 │   ├── pricing
 │   │   ├── debentures
 │   │   │   └── pricing.py
 │   │   ├── derivatives
+│   │   │   ├── american_options.py
+│   │   │   ├── european_options.py
 │   │   │   ├── forward.py
-│   │   │   ├── futures.py
-│   │   │   └── options
-│   │   │       ├── american.py
-│   │   │       └── european.py
-│   │   └── tesouro_direto
-│   │       ├── calculadora.py
+│   │   │   └── futures.py
+│   │   └── sovereign_bonds
+│   │       ├── br.py
 │   │       └── consulta_dados.py
 │   ├── quant
 │   │   ├── calculus.py
@@ -103,47 +100,39 @@ stpstone
 │   │   └── stats_charts.py
 │   ├── reuters
 │   │   └── api_request.py
-│   ├── risk_assessment
-│   │   ├── capital.py
-│   │   ├── liquidity.py
-│   │   ├── market.py
-│   │   └── yield.py
-│   └── spot
-│       └── stocks.py
+│   └── risk_assessment
+│       ├── capital.py
+│       ├── liquidity.py
+│       ├── market.py
+│       └── yield.py
 ├── dsa
 │   └── trees
 │       └── b_tree.py
 ├── ingestion
 │   ├── abc
 │   │   └── requests.py
-│   ├── macroeconomics
-│   │   └── br
-│   │       └── currencies
-│   │           └── ptax_bcb.py
-│   ├── mtm
-│   │   └── br
-│   │       ├── exchange
-│   │       │   └── historical_sigma.py
-│   │       └── otc
-│   │           └── debentures.py
-│   ├── registries
-│   │   └── br
-│   │       ├── bylaws
-│   │       │   └── investment_funds.py
-│   │       ├── exchange
-│   │       │   ├── indexes_theor_portf.py
-│   │       │   ├── options_calendar.py
-│   │       │   ├── securities.py
-│   │       │   ├── trading_hours.py
-│   │       │   └── warranty.py
-│   │       └── taxation
-│   │           └── irsbr_records.py
-│   └── tradings
+│   └── countries
 │       ├── br
-│       │   └── exchange
-│       │       ├── bvmf_bov.py
-│       │       ├── search_by_trading_session.py
-│       │       └── volumes.py
+│       │   ├── bylaws
+│       │   │   └── investment_funds.py
+│       │   ├── exchange
+│       │   │   ├── bvmf_bov.py
+│       │   │   ├── historical_sigma.py
+│       │   │   ├── indexes_theor_portf.py
+│       │   │   ├── options_calendar.py
+│       │   │   ├── search_by_trading_session.py
+│       │   │   ├── securities.py
+│       │   │   ├── trading_hours.py
+│       │   │   ├── volumes.py
+│       │   │   └── warranty.py
+│       │   ├── macroeconomics
+│       │   │   └── ptax_bcb.py
+│       │   ├── otc
+│       │   │   └── debentures.py
+│       │   ├── registries
+│       │   │   └── cvm.py
+│       │   └── taxation
+│       │       └── irsbr_records.py
 │       ├── us
 │       │   └── exchange
 │       │       ├── alphavantage.py
@@ -192,11 +181,6 @@ stpstone
     │   └── netops
     │       ├── manager.py
     │       └── session.py
-    ├── exchange
-    │   └── br
-    │       ├── inoa.py
-    │       ├── line.py
-    │       └── margin_simulator_b3.py
     ├── geography
     │   └── br.py
     ├── loggs
@@ -238,6 +222,11 @@ stpstone
     │   ├── mp_helper.py
     │   ├── parallel.py
     │   └── streaming.py
+    ├── providers
+    │   └── br
+    │       ├── inoa.py
+    │       ├── line_b3.py
+    │       └── margin_simulator_b3.py
     ├── trading_platforms
     │   └── mt5.py
     └── webhooks
