@@ -1,0 +1,367 @@
+### CONFIGURATION TOOLS ###
+### METADATA: https://dados.cvm.gov.br/dados/ ###
+
+credentials:
+  host: https://dados.cvm.gov.br/
+  headers:
+    Referer: https://dados.cvm.gov.br/
+    Upgrade-Insecure-Requests: '1'
+    User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36
+    sec-ch-ua: '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"'
+    sec-ch-ua-mobile: '?0'
+    sec-ch-ua-platform: "Windows"
+    Cookie: Path=/
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+pubicly_traded_cos:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/CIA_ABERTA/CAD/DADOS/cad_cia_aberta.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_pubicly_traded_cos
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CNPJ_CIA: str
+    DENOM_SOCIAL: str
+    DENOM_COMERC: str
+    DT_REG: date
+    DT_CONST: date
+    DT_CANCEL: date
+    MOTIVO_CANCEL: category
+    SIT: category
+    DT_INI_SIT: date
+    CD_CVM: str
+    SETOR_ATIV: str
+    TP_MERC: str
+    CATEG_REG: category
+    DT_INI_CATEG: date
+    SIT_EMISSOR: category
+    DT_INI_SIT_EMISSOR: date
+    CONTROLE_ACIONARIO: str
+    TP_ENDER: category
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    MUN: str
+    UF: category
+    PAIS: category
+    CEP: str
+    DDD_TEL: category
+    TEL: str
+    DDD_FAX: category
+    FAX: str
+    EMAIL: str
+    TP_RESP: category
+    RESP: str
+    DT_INI_RESP: date
+    LOGRADOURO_RESP: str
+    COMPL_RESP: str
+    BAIRRO_RESP: str
+    MUN_RESP: str
+    UF_RESP: category
+    PAIS_RESP: category
+    CEP_RESP: str
+    DDD_TEL_RESP: category
+    TEL_RESP: str
+    DDD_FAX_RESP: category
+    FAX_RESP: int
+    EMAIL_RESP: str
+    CNPJ_AUDITOR: str
+    AUDITOR: str
+  df_read_params:
+    sep: ;
+    encoding: latin-1
+
+independent_fin_advs:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/AGENTE_AUTON/CAD/DADOS/cad_agente_auton.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_independent_fin_advs
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    NOME: str
+    DT_REG: date
+    DT_CANCEL: date
+    MOTIVO_CANCEL: category
+    SIT: category
+    DT_INI_SIT: date
+    CNPJ: str
+    DENOM_SOCIAL: str
+    TP_ENDER: category
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    MUN: str
+    UF: category
+    CEP: str
+    DDD: category
+    TEL: str
+    EMAIL: str
+    SITE_ADMIN: str
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+fiduciary_agents:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/AGENTE_FIDUC/CAD/DADOS/cad_agente_fiduc.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_fiduciary_agents
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    AGENTE_FIDUC: str
+    DT_REG: date
+    DT_CANCEL: date
+    SIT: category
+    DT_INI_SIT: date
+    CNPJ: str
+    DENOM_SOCIAL: str
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    MUN: str
+    UF: category
+    PAIS: category
+    CEP: str
+    DDD_TEL: category
+    TEL: str
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+foreign_cos:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_foreign_cos
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CNPJ: str
+    DENOM_SOCIAL: str
+    DENOM_COMERC: str
+    PAIS_ORIGEM: category
+    DT_REG: date
+    DT_CONST: date
+    DT_CANCEL: date
+    MOTIVO_CANCEL: category
+    SIT: category
+    DT_INI_SIT: date
+    CD_CVM: str
+    SETOR_ATIV: category
+    CATEG_REG: category
+    DT_INI_CATEG: date
+    SIT_EMISSOR: category
+    DT_INI_SIT_EMISSOR: date
+    CONTROLE_ACIONARIO: str
+    TP_ENDER: category
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    CIDADE: str
+    ESTADO: category
+    PAIS: category
+    CEP: str
+    CD_PAIS_TEL: category
+    DDD_TEL: category
+    TEL: str
+    CD_PAIS_FAX: category
+    DDD_FAX: category
+    FAX: str
+    EMAIL: str
+    TP_RESP: category
+    RESP: str
+    DT_INI_RESP: date
+    LOGRADOURO_RESP: str
+    COMPL_RESP: str
+    BAIRRO_RESP: str
+    MUN_RESP: str
+    UF_RESP: category
+    PAIS_RESP: category
+    CEP_RESP: str
+    DDD_TEL_RESP: category
+    TEL_RESP: str
+    DDD_FAX_RESP: category
+    FAX_RESP: int
+    EMAIL_RESP: str
+    CNPJ_AUDITOR: str
+    AUDITOR: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+incentivized_cos:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders: 
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/CIA_INCENT/CAD/DADOS/cad_cia_incent.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strt_keep_when_duplicated: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_foreign_cos
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    CNPJ: str
+    ST_CIA_INCENT_REG: category
+    DENOM_SOCIAL: str
+    DENOM_COMERC: str
+    DT_REG: date
+    DT_CONST: date
+    DT_CANCEL: date
+    MOTIVO_CANCEL: category
+    SIT: category
+    DT_INI_SIT: date
+    CD_CVM: str
+    SETOR_ATIV: category
+    CATEG_REG: category
+    DT_INI_CATEG: date
+    SIT_EMISSOR: category
+    DT_INI_SIT_EMISSOR: date
+    CONTROLE_ACIONARIO: str
+    TP_ENDER: category
+    LOGRADOURO: str
+    COMPL: str
+    BAIRRO: str
+    MUN: str
+    UF: category
+    PAIS: category
+    CEP: str
+    DDD_TEL: category
+    TEL: str
+    DDD_FAX: category
+    FAX: str
+    EMAIL: str
+    TP_RESP: category
+    RESP: str
+    DT_INI_RESP: date
+    LOGRADOURO_RESP: str
+    COMPL_RESP: str
+    BAIRRO_RESP: str
+    MUN_RESP: str
+    UF_RESP: category
+    PAIS_RESP: category
+    CEP_RESP: str
+    DDD_TEL_RESP: category
+    TEL_RESP: str
+    DDD_FAX_RESP: category
+    FAX_RESP: int
+    EMAIL_RESP: str
+    CNPJ_AUDITOR: str
+    AUDITOR: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1

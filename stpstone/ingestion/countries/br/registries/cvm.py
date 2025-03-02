@@ -1,4 +1,4 @@
-### REGISTRIES INDEPENDENT FINANCIAL ADVISORS CVM INGESTION REQUEST ###
+### CVM REGISTRIES INGESTION REQUEST ###
 
 # pypi.org libs
 import pandas as pd
@@ -9,13 +9,13 @@ from logging import Logger
 from requests import Response
 from time import sleep
 # project modules
-from stpstone._config.global_slots import YAML_BR_REGISTRIES_FINANCIAL_ADVS_CVM
+from stpstone._config.global_slots import YAML_BR_CVM_REGISTRIES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class IndpFinAdvsCVM(ABCRequests):
+class CVMRegistries(ABCRequests):
 
     def __init__(
         self,
@@ -27,7 +27,7 @@ class IndpFinAdvsCVM(ABCRequests):
         list_slugs:Optional[List[str]]=None
     ) -> None:
         super().__init__(
-            dict_metadata=YAML_BR_REGISTRIES_FINANCIAL_ADVS_CVM,
+            dict_metadata=YAML_BR_CVM_REGISTRIES,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,

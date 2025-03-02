@@ -39,7 +39,7 @@ YAML_BR_PTAX_BCB = reading_yaml(os.path.join(root_path, 'countries/br/macroecono
 YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'countries/br/otc/debentures.yaml'))
 
 # registries
-YAML_BR_REGISTRIES_FINANCIAL_ADVS_CVM = reading_yaml(os.path.join(root_path, 'countries/br/registries/financial_advs_cvm.yaml'))
+YAML_BR_CVM_REGISTRIES = reading_yaml(os.path.join(root_path, 'countries/br/registries/cvm.yaml'))
 
 # taxation
 YAML_IRSBR = reading_yaml(os.path.join(root_path, 'countries/br/taxation/irsbr.yaml'))
