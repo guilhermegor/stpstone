@@ -311,7 +311,7 @@ incentivized_cos:
   strt_keep_when_duplicated: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_cvm_foreign_cos
+  table_name: br_cvm_incentivized_cos
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
