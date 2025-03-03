@@ -129,7 +129,7 @@ loan_balance:
   cols_to_case: upper_constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: b3_loan_balance
   bl_insert_or_ignore: False
@@ -158,7 +158,7 @@ lending_open_position:
   cols_to_case: upper_constant
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: b3_loan_balance
   bl_insert_or_ignore: False

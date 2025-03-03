@@ -1,15 +1,16 @@
 ### GENERIC PIPELINES ###
 
-from typing import Callable, List, Any
+from typing import Any, Callable, List
+
 import pandas as pd
 
 
-def genericpipeline(data:Any, functions:List[Callable]) -> Any:
+def generic_pipeline(data: Any, functions: List[Callable]) -> Any:
     """
     Applies a sequence of functions to a given data object.
     Args:
-        - data (Any): Initial data input (pandas DataFrame, string, number, list, etc.).
-        - functions (List[Callable]): A list of functions to apply sequentially.
+        data (Any): Initial data input (pandas DataFrame, string, number, list, etc.).
+        functions (List[Callable]): A list of functions to apply sequentially.
     Returns:
         Any: The final processed data after applying all functions.
     """
@@ -21,6 +22,6 @@ def genericpipeline(data:Any, functions:List[Callable]) -> Any:
             elif not isinstance(data, pd.DataFrame):
                 data = func(data)
         except Exception as e:
-            print(f'Error in {func.__name__}: {e}')
+            print(f"Error in {func.__name__}: {e}")
             break
     return data

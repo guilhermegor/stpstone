@@ -54,8 +54,8 @@ class ScaffoldingReq(ABCRequests):
         session:Optional[ReqSession]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
-        token:Optional[str]=None, 
+        logger:Optional[Logger]=None,
+        token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
         super().__init__(
@@ -63,34 +63,34 @@ class ScaffoldingReq(ABCRequests):
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
-            logger=logger, 
-            token=token, 
+            logger=logger,
+            token=token,
             list_slugs=list_slugs
         )
         self.session = session
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token, 
+        self.token = token
         self.list_slugs = list_slugs
-    
+
     def td_th_parser(self, req_resp:Response, list_th:List[Any]) \
         -> Tuple[List[Any], int, Optional[int]]:
         list_headers = list_th.copy()
         int_init_td = 0
         int_end_td = None
-        # for using this workaround, please pass a dummy variable to the url, within the YAML file, 
+        # for using this workaround, please pass a dummy variable to the url, within the YAML file,
         #   like https://example.com/app/#source=dummy_1&bl_debug=True
         if StrHandler().match_string_like(req_resp.url, '*#source=dummy_1*') == True:
             list_headers = [
-                list_th[0], 
+                list_th[0],
                 list_th[...]
             ]
             int_init_td = 0
             int_end_td = 200
         elif StrHandler().match_string_like(req_resp.url, '*#source=dummy_2*') == True:
             list_headers = [
-                list_th[0], 
+                list_th[0],
                 list_th[...]
             ]
             int_init_td = 200
@@ -98,7 +98,7 @@ class ScaffoldingReq(ABCRequests):
         else:
             if self.logger is not None:
                 CreateLog().warnings(
-                    self.logger, 
+                    self.logger,
                     'No source found in url, for HTML webscraping, please revisit the code'
                     + f' if it is an unexpected behaviour - URL: {req_resp.url}'
                 )
@@ -131,7 +131,7 @@ class ScaffoldingReq(ABCRequests):
             print(list_td[int_init_td:int_end_td])
             print(f'LEN LIST TD: {len(list_td[int_init_td:int_end_td])}')
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_headers, 
+            list_headers,
             list_td[int_init_td:int_end_td]
         )
         return pd.DataFrame(list_ser)

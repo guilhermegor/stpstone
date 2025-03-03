@@ -54,10 +54,13 @@ resource_example:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
   app:
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -66,7 +69,7 @@ resource_example:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:

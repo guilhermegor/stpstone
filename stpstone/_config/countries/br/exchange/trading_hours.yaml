@@ -27,7 +27,7 @@ stocks:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -39,7 +39,7 @@ stocks:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -76,7 +76,7 @@ stock_options:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -88,7 +88,7 @@ stock_options:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -119,7 +119,7 @@ pmi_future:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -131,7 +131,7 @@ pmi_future:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -166,7 +166,7 @@ stock_index_futures:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -178,7 +178,7 @@ stock_index_futures:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -213,7 +213,7 @@ interest_rates:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -225,7 +225,7 @@ interest_rates:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -260,7 +260,7 @@ usd_interest_rates:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -272,7 +272,7 @@ usd_interest_rates:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -307,7 +307,7 @@ commodities:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -319,7 +319,7 @@ commodities:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -347,7 +347,7 @@ crypto:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -359,7 +359,7 @@ crypto:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -392,7 +392,7 @@ foreign_exchange_and_dollar_spot:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -404,7 +404,7 @@ foreign_exchange_and_dollar_spot:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -439,7 +439,7 @@ otc:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -451,7 +451,7 @@ otc:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -492,7 +492,7 @@ opf_before_exc:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -504,7 +504,7 @@ opf_before_exc:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:
@@ -530,7 +530,7 @@ opf_after_exc:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -542,7 +542,7 @@ opf_after_exc:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name:

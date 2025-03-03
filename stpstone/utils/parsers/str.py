@@ -1,17 +1,18 @@
 ### METHODS TO HANDLE STRINGS ###
 
 import json
-import uuid
 import re
-import ftfy
+import uuid
 from base64 import b64encode
-from basicauth import encode
-from unidecode import unidecode
-from unicodedata import normalize, combining
-from string import ascii_uppercase, ascii_lowercase, digits
 from fnmatch import fnmatch
+from string import ascii_lowercase, ascii_uppercase, digits
+from typing import Any, Dict
+from unicodedata import combining, normalize
+
+import ftfy
+from basicauth import encode
 from bs4 import BeautifulSoup
-from typing import Dict, Any
+from unidecode import unidecode
 
 
 class StrHandler:
@@ -20,22 +21,23 @@ class StrHandler:
     def multi_map_reference(self):
         """
         REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”
-        DOCSTRING: TRANSFORM SOME WESTERN TYPOGRAPHICAL SYMBOLS INTO ASCII, BUILDING MAPPING TABLE 
+        DOCSTRING: TRANSFORM SOME WESTERN TYPOGRAPHICAL SYMBOLS INTO ASCII, BUILDING MAPPING TABLE
             FOR CHAR-TO-CHAR REPLACEMENT
         INPUTS: -
         OUTPUT: DICT
         """
-        single_map = str.maketrans(
-            """‚ƒ„†ˆ‹‘’“”•–—˜›""', '""'f"*^<''""---~>""")
-        multi_map = str.maketrans({
-            '€': '<euro>',
-            '…': '...',
-            'OE': 'OE',
-            '™': '(TM)',
-            'oe': 'oe',
-            '‰': '<per mille>',
-            '‡': '**',
-        })
+        single_map = str.maketrans("""‚ƒ„†ˆ‹‘’“”•–—˜›""', '""'f"*^<''""---~>""")
+        multi_map = str.maketrans(
+            {
+                "€": "<euro>",
+                "…": "...",
+                "OE": "OE",
+                "™": "(TM)",
+                "oe": "oe",
+                "‰": "<per mille>",
+                "‡": "**",
+            }
+        )
         return multi_map.update(single_map)
 
     def find_between(self, s, first, last):
@@ -73,7 +75,7 @@ class StrHandler:
         INPUTS: STRING
         OUTPUTS: CORRECTED STRING
         """
-        return str_.encode('latin1').decode('utf-8')
+        return str_.encode("latin1").decode("utf-8")
 
     def decode_special_characters_ftfy(self, str_):
         """
@@ -95,48 +97,49 @@ class StrHandler:
         """
         DOCSTRING: CORRECTING SPECIAL CHARACTERS
         INPUTS: STRING
-        OUTPUTS: CORRECTED STRING        
+        OUTPUTS: CORRECTED STRING
         """
-        return str_.encode('latin1').decode('ISO-8859-1')
+        return str_.encode("latin1").decode("ISO-8859-1")
 
     def remove_diacritics(self, str_):
         """
-        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 
+        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015
         LUCIANO RAMALHO, 978-1-491-94600-8.”
-        DOCSITRNGS: REMOVE ALL DIACRITICS FROM A STRING, SUCH AS ACCENTS, CEDILLAS, ETC, FROM LATIN 
+        DOCSITRNGS: REMOVE ALL DIACRITICS FROM A STRING, SUCH AS ACCENTS, CEDILLAS, ETC, FROM LATIN
             AND NON-LATIN ALPHABET, LIKE GREEK.
         INPUTS: STRING
         OUTPUTS: STRING
         """
-        norm_txt = normalize('NFD', str_)
-        shaved = ''.join(c for c in norm_txt if not combining(c))
-        return normalize('NFC', shaved)
+        norm_txt = normalize("NFD", str_)
+        shaved = "".join(c for c in norm_txt if not combining(c))
+        return normalize("NFC", shaved)
 
-    def remove_diacritics_nfkd(self, str_:str, bl_lower_case:bool=True) -> str:
-        if bl_lower_case == True: str_ = str_.lower()
-        str_ = str_.replace('\n', '')
-        return ''.join(c for c in normalize('NFKD', str_) if not combining(c))
+    def remove_diacritics_nfkd(self, str_: str, bl_lower_case: bool = True) -> str:
+        if bl_lower_case == True:
+            str_ = str_.lower()
+        str_ = str_.replace("\n", "")
+        return "".join(c for c in normalize("NFKD", str_) if not combining(c))
 
     def normalize_text(self, str_):
-        return normalize('NFKD', str_).encode('ascii', 'ignore').decode('utf-8')
+        return normalize("NFKD", str_).encode("ascii", "ignore").decode("utf-8")
 
-    def remove_sup_period_marks(self, corpus, patterns='[!.?+]'):
+    def remove_sup_period_marks(self, corpus, patterns="[!.?+]"):
         """
         DOCSTRING: REMOVE END PERIOD MARKS
         INPUTS: CORPUS AND PATTERNS (DEFAULT)
         OUTPUTS: STRING
         """
-        return re.sub(patterns, '', corpus)
+        return re.sub(patterns, "", corpus)
 
     def remove_only_latin_diacritics(self, str_, latin_base=False):
         """
-        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 
-            LUCIANO RAMALHO, 978-1-491-94600-8.”        
+        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015
+            LUCIANO RAMALHO, 978-1-491-94600-8.”
         DOCSTRING: REMOVE ALL DISCRITIC MARKS FROM LATIN BASE CHARACTERS
         INPUTS: STRING, LATIN BASE (FALSE AS DEFAULT)
         OUTPUTS: STRING
         """
-        norm_txt = normalize('NFD', str_)
+        norm_txt = normalize("NFD", str_)
         keepers = []
         for c in norm_txt:
             if combining(c) and latin_base:
@@ -145,12 +148,12 @@ class StrHandler:
             # if it isn't combining char, it's a new base char
             if not combining(c):
                 latin_base = c in str_.ascii_letters
-        shaved = ''.join(keepers)
-        return normalize('NFC', shaved)
+        shaved = "".join(keepers)
+        return normalize("NFC", shaved)
 
     def dewinize(self, str_):
         """
-        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”        
+        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”
         DOCSTRING: REPLACE WIN1252 SYMBOLS WITH ASCII CHARS OR SEQUENCES
         INPUTS: STRING
         OUTPUTS: STRING
@@ -159,15 +162,15 @@ class StrHandler:
 
     def asciize(self, str_):
         """
-        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”        
-        DOCSTRING: APPLY NFKC NORMALIZATION TO COMPOSE CHARACTERS WITH THEIR COMPATIBILITY CODE 
+        REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”
+        DOCSTRING: APPLY NFKC NORMALIZATION TO COMPOSE CHARACTERS WITH THEIR COMPATIBILITY CODE
             POINTS IN ASCII SYSTEM
         INPUTS: STRING
         OUTPUTS: STRING
         """
         no_marks = self.remove_only_latin_diacritics(self.dewinize(str_))
-        no_marks = no_marks.replace('ß', 'ss')
-        return normalize('NFKC', no_marks)
+        no_marks = no_marks.replace("ß", "ss")
+        return normalize("NFKC", no_marks)
 
     def remove_substr(self, str_, substr_):
         """
@@ -175,7 +178,7 @@ class StrHandler:
         INPUTS: STRING AND SUBSTRING
         OUTPUTS: STRING WITHOUT SUBSTRING
         """
-        return str_.replace(substr_, '')
+        return str_.replace(substr_, "")
 
     def get_string_until_substr(self, str_, substring):
         """
@@ -201,7 +204,7 @@ class StrHandler:
         """
         return encode(userid, password)
 
-    def base64_str_encode(self, str_, code_method='ascii'):
+    def base64_str_encode(self, str_, code_method="ascii"):
         """
         DOCSTRING:
         INPUTS:
@@ -226,17 +229,21 @@ class StrHandler:
         uuid_identifier = uuid.uuid4()
         # return uudi
         return {
-            'uuid': uuid_identifier,
-            'uuid_hex_digits_str': str(uuid_identifier),
-            'uuid_32_character_hexadecimal_str': uuid_identifier.hex
+            "uuid": uuid_identifier,
+            "uuid_hex_digits_str": str(uuid_identifier),
+            "uuid_32_character_hexadecimal_str": uuid_identifier.hex,
         }
 
-    def letters_to_numbers(self, letters_in_alphabet=21, first_letter_alphabet='f',
-                           list_not_in_range=['i', 'l', 'o', 'p', 'r', 's', 't', 'w', 'y']):
+    def letters_to_numbers(
+        self,
+        letters_in_alphabet=21,
+        first_letter_alphabet="f",
+        list_not_in_range=["i", "l", "o", "p", "r", "s", "t", "w", "y"],
+    ):
         """
         DOCSTRING: JSON CORRELATING LETTERS AND NUMBERS
-        INPUTS: LETTERS IN ALPHABET FROM THE FIRST ONE (21 AS DEFAULT), 
-            FIRST LETTER IN ALPHABET (F AS DEFAULT), LIST NOT IN RANGE (I, L, O, P, R, S, T, W, Y 
+        INPUTS: LETTERS IN ALPHABET FROM THE FIRST ONE (21 AS DEFAULT),
+            FIRST LETTER IN ALPHABET (F AS DEFAULT), LIST NOT IN RANGE (I, L, O, P, R, S, T, W, Y
             AS DEFAULT)
         OUTPUTS: JSON WITH LETTERS IN LOWER CASE AS KEYS
         """
@@ -245,7 +252,9 @@ class StrHandler:
         i_aux = 0
 
         # dictionary correlating letters and numbers
-        for i in range(ord(first_letter_alphabet), ord(first_letter_alphabet) + letters_in_alphabet):
+        for i in range(
+            ord(first_letter_alphabet), ord(first_letter_alphabet) + letters_in_alphabet
+        ):
             if chr(i) not in list_not_in_range:
                 dict_message[chr(i)] = i - 101 - i_aux
             else:
@@ -254,21 +263,23 @@ class StrHandler:
         # json to export
         return json.loads(json.dumps(dict_message))
 
-    def alphabetic_range(self, case='upper'):
+    def alphabetic_range(self, case="upper"):
         """
         DOCSTRING: ALPHABETIC RANGE IN UPPER OR LOWER CASE
         INPUTS: CASE
         OUTPUTS: LIST
         """
-        if case == 'upper':
+        if case == "upper":
             return list(ascii_uppercase)
-        elif case == 'lower':
+        elif case == "lower":
             return list(ascii_lowercase)
         else:
-            raise Exception('Case ought be upper or lower, although {} was given, '.format(case)
-                            + 'please revisit the case variable')
+            raise Exception(
+                "Case ought be upper or lower, although {} was given, ".format(case)
+                + "please revisit the case variable"
+            )
 
-    def regex_match_alphanumeric(self, str_, regex_match='^[a-zA-Z0-9_]+$'):
+    def regex_match_alphanumeric(self, str_, regex_match="^[a-zA-Z0-9_]+$"):
         """
         DOCSTRING:
         INPUTS:
@@ -282,29 +293,31 @@ class StrHandler:
         INPUTS:
         OUTPUTS: BOOLEAN
         """
-        return bool(re.search(r'\d', str_))
+        return bool(re.search(r"\d", str_))
 
     def nfc_equal(self, str1, str2):
         """
         REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”
-        DOCSTRING: UNICODE EQUIVALENCE TO IDENTIFY ENCODING STARDARDS THAT REPRESENT ESSENTIALLY 
+        DOCSTRING: UNICODE EQUIVALENCE TO IDENTIFY ENCODING STARDARDS THAT REPRESENT ESSENTIALLY
             THE SAME CHARACTER
         INPUTS: STRING 1 AND 2
         OUTPUTS: BOOLEAN
         """
-        return normalize('NFC', str1) == normalize('NFC', str2)
+        return normalize("NFC", str1) == normalize("NFC", str2)
 
     def casefold_equal(self, str1, str2):
         """
         REFERENCES: “FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.”
-        DOCSTRING: UNICODE EQUIVALENCE TO IDENTIFY ENCODING STARDARDS THAT REPRESENT ESSENTIALLY 
+        DOCSTRING: UNICODE EQUIVALENCE TO IDENTIFY ENCODING STARDARDS THAT REPRESENT ESSENTIALLY
             THE SAME CASEFOLD FOR A GIVEN CHARACTER
         INPUTS: STRING 1 AND 2
         OUTPUTS: BOOLEAN
         """
-        return normalize('NFC', str1).casefold() == normalize('NFC', str2).casefold()
+        return normalize("NFC", str1).casefold() == normalize("NFC", str2).casefold()
 
-    def remove_non_alphanumeric_chars(self, str_, str_pattern_maintain=r'[\W_]', str_replace=''):
+    def remove_non_alphanumeric_chars(
+        self, str_, str_pattern_maintain=r"[\W_]", str_replace=""
+    ):
         """
         Remove non-alphanumeric characters from a string.
         Args:
@@ -323,7 +336,7 @@ class StrHandler:
         INPUTS: STRING
         OUTPUTS: STRING
         """
-        def_remove_digits = str.maketrans('', '', digits)
+        def_remove_digits = str.maketrans("", "", digits)
         return str_.translate(def_remove_digits)
 
     def is_capitalized(self, str_, bl_simple_validation=True):
@@ -344,14 +357,16 @@ class StrHandler:
                 else:
                     return False
             else:
-                if (str_[0].isupper() == True) and (all([l.islower() for l in str_[1:]])):
+                if (str_[0].isupper() == True) and (
+                    all([l.islower() for l in str_[1:]])
+                ):
                     return True
                 else:
                     return False
         except:
             return False
 
-    def split_re(self, str_, re_split=r'[;,\s]\s*'):
+    def split_re(self, str_, re_split=r"[;,\s]\s*"):
         """
         DOCSTRING:
         INPUTS:
@@ -374,6 +389,7 @@ class StrHandler:
         INPUTS: WORD
         OUTPUTS: STRING
         """
+
         def replace(m):
             str_ = m.group()
             if str_.isupper():
@@ -384,6 +400,7 @@ class StrHandler:
                 return str_.capitalize()
             else:
                 return str_
+
         return replace
 
     def replace_respecting_case(self, str_, str_replaced, str_replace):
@@ -393,7 +410,9 @@ class StrHandler:
         INPUTS: WORD
         OUTPUTS: STRING
         """
-        return re.sub(str_replaced, self.matchcase(str_replace), str_, flags=re.IGNORECASE)
+        return re.sub(
+            str_replaced, self.matchcase(str_replace), str_, flags=re.IGNORECASE
+        )
 
     def replace_all(self, str_, dict_replacers):
         """
@@ -411,7 +430,7 @@ class StrHandler:
         INPUTS:
         OUTPUTS:
         """
-        soup = BeautifulSoup(html_, features='lxml')
+        soup = BeautifulSoup(html_, features="lxml")
         return soup(html_)
 
     def extract_urls(self, str_):
@@ -421,7 +440,7 @@ class StrHandler:
         OUTPUTS: LIST
         """
         # define a regular expression pattern to match URLs
-        url_pattern = re.compile(r'https?://\S+|www\.\S+')
+        url_pattern = re.compile(r"https?://\S+|www\.\S+")
         # find all matches in the given str_
         list_urls = re.findall(url_pattern, str_)
         # return urls list
@@ -438,8 +457,8 @@ class StrHandler:
             return False
         except ValueError:
             return True
-        
-    def convert_case(self, str_:str, from_case:str, to_case:str) -> str:
+
+    def convert_case(self, str_: str, from_case: str, to_case: str) -> str:
         """
         Converts a string between different naming conventions:
             - camelCase - 'camel'
@@ -450,76 +469,84 @@ class StrHandler:
             - UpperFirst - 'upper_first'
             - Default (words separated by spaces or hyphens) - 'default'
         Args:
-            - from_case (str): Current case of the string
-            - to_case (str): Desired case of the string
+            from_case (str): Current case of the string
+            to_case (str): Desired case of the string
         Returns:
             str: Transformed string
         """
         # from case
-        if from_case == 'camel':
-            words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_)
-            words = re.sub(r'([a-zA-Z])(\d)', r'\1_\2', words)
-            words = re.sub(r'(\d)([a-zA-Z])', r'\1_\2', words)
-            words = words.lower().split('_')
-        elif from_case == 'pascal':
-            words = re.sub(r'([a-z])([A-Z])', r'\1_\2', str_).lower().split('_')
-        elif from_case == 'kebab':
+        if from_case == "camel":
+            words = re.sub(r"([a-z])([A-Z])", r"\1_\2", str_)
+            words = re.sub(r"([a-zA-Z])(\d)", r"\1_\2", words)
+            words = re.sub(r"(\d)([a-zA-Z])", r"\1_\2", words)
+            words = words.lower().split("_")
+        elif from_case == "pascal":
+            words = re.sub(r"([a-z])([A-Z])", r"\1_\2", str_).lower().split("_")
+        elif from_case == "kebab":
             words = str_.lower().split("-")
-        elif from_case == 'upper_constant' or from_case == 'lower_constant':
-            if '-' in str_:
-                words = str_.lower().split('-')
+        elif from_case == "upper_constant" or from_case == "lower_constant":
+            if "-" in str_:
+                words = str_.lower().split("-")
             else:
-                words = str_.lower().split('_')
-        elif from_case == 'upper_first':
+                words = str_.lower().split("_")
+        elif from_case == "upper_first":
             words = [str_[0].upper() + str_[1:].lower()]
-        elif from_case == 'default':
-            str_ = str_.replace(' - ', ' ')
-            str_ = str_.replace('-', ' ')
-            str_ = str_.replace('+', ' ')
-            str_ = str_.replace(' (', ' ')
-            str_ = str_.replace(') ', ' ')
+        elif from_case == "default":
+            str_ = str_.replace(" - ", " ")
+            str_ = str_.replace("-", " ")
+            str_ = str_.replace("+", " ")
+            str_ = str_.replace(" (", " ")
+            str_ = str_.replace(") ", " ")
             words = str_.lower().split()
         else:
-            raise ValueError("Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']")
+            raise ValueError(
+                "Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']"
+            )
         # converting to case
-        if to_case == 'camel':
-            return words[0] + ''.join(word.capitalize() for word in words[1:])
-        elif to_case == 'pascal':
-            return ''.join(word.capitalize() for word in words)
-        elif to_case == 'snake':
-            return '_'.join(words).lower()
-        elif to_case == 'kebab':
+        if to_case == "camel":
+            return words[0] + "".join(word.capitalize() for word in words[1:])
+        elif to_case == "pascal":
+            return "".join(word.capitalize() for word in words)
+        elif to_case == "snake":
+            return "_".join(words).lower()
+        elif to_case == "kebab":
             return "-".join(words).lower()
-        elif to_case == 'upper_constant':
-            return '_'.join(words).upper()
-        elif to_case == 'lower_constant':
-            return '_'.join(words).lower()
-        elif to_case == 'upper_first':
+        elif to_case == "upper_constant":
+            return "_".join(words).upper()
+        elif to_case == "lower_constant":
+            return "_".join(words).lower()
+        elif to_case == "upper_first":
             return words[0].capitalize()
         else:
-            raise ValueError("Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']")
-    
-    def extract_info_between_braces(self, str_:str, str_pattern:str=r'\{\{(.*?)\}\}') -> str:
+            raise ValueError(
+                "Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 'upper_first']"
+            )
+
+    def extract_info_between_braces(
+        self, str_: str, str_pattern: str = r"\{\{(.*?)\}\}"
+    ) -> str:
         return re.findall(str_pattern, str_)
-    
-    def fill_placeholders(self, str_:str, dict_placeholders:Dict[str, Any]) -> str:
+
+    def fill_placeholders(self, str_: str, dict_placeholders: Dict[str, Any]) -> str:
         """
         Fill fstr named placeholders
         Args:
-            - str_ (str): fstr
-            - dict_placeholders (Dict[str, Any]): named placeholders
+            str_ (str): fstr
+            dict_placeholders (Dict[str, Any]): named placeholders
         Returns:
             str
         """
         list_placeholders = self.extract_info_between_braces(str_)
         for placeholder in list_placeholders:
             if placeholder in dict_placeholders:
-                str_ = str_.replace(f"{{{{{placeholder}}}}}", str(dict_placeholders[placeholder]))
+                str_ = str_.replace(
+                    f"{{{{{placeholder}}}}}", str(dict_placeholders[placeholder])
+                )
             else:
                 str_ = str_.replace(f"{{{{{placeholder}}}}}", f"{{{{{placeholder}}}}}")
         return str_
 
-    def fill_zeros(self, str_prefix:str, int_num:int, total_length:int=11) -> str:
+    def fill_zeros(self, str_prefix: str, int_num: int, total_length: int = 11) -> str:
         str_num = str(int_num)
         required_zeros = total_length - len(str_prefix) - len(str_num)
         if required_zeros < 0:

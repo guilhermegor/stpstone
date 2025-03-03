@@ -34,7 +34,7 @@ ids:
   headers:
   payload:
     method: exibeFormularioConsultaBoletim
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -48,7 +48,7 @@ ids:
   list_cols_drop_dupl:
   str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name:
   bl_insert_or_ignore: False
@@ -66,7 +66,7 @@ available_currencies:
   host: http://www4.bcb.gov.br/
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -80,7 +80,7 @@ available_currencies:
   list_cols_drop_dupl:
   str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name:
   bl_insert_or_ignore: False
@@ -112,9 +112,9 @@ close_currency_rates:
   headers:
   payload:
     method: gerarCSVFechamentoMoedaNoPeriodo
-    DATAINI: '{{dt_inf_ddmmyyyy}}' 
+    DATAINI: '{{dt_inf_ddmmyyyy}}'
     DATAFIM: '{{dt_sup_ddmmyyyy}}'
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
@@ -129,7 +129,7 @@ close_currency_rates:
   list_cols_drop_dupl:
   str_fmt_dt: DDMMYYYY
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
     - ValueError
     - TypeError

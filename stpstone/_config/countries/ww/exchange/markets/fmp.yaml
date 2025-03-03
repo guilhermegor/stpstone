@@ -33,7 +33,7 @@ mkt_hours_exchanges_yesterday:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -45,7 +45,7 @@ mkt_hours_exchanges_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_mkts_hours_yesterday
   bl_insert_or_ignore: False
@@ -65,7 +65,7 @@ crypto_ohlcv_yesterday:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -80,7 +80,7 @@ crypto_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_crypto_ohlcv_yesterday
   bl_insert_or_ignore: False
@@ -111,7 +111,7 @@ stocks_ohlcv_yesterday:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -125,7 +125,7 @@ stocks_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_stocks_ohlcv_yesterday
   bl_insert_or_ignore: False
@@ -156,7 +156,7 @@ etfs_ohlcv_yesterday:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -170,7 +170,7 @@ etfs_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: us_fmp_etfs_ohlcv_yesterday
   bl_insert_or_ignore: False
@@ -188,7 +188,7 @@ commodities_ohlcv_yesterday:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -202,7 +202,7 @@ commodities_ohlcv_yesterday:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: us_fmp_commodities_ohlcv_yesterday
   bl_insert_or_ignore: False

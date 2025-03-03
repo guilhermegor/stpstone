@@ -49,8 +49,8 @@ class ScaffoldingReq(ABCRequests):
         session:Optional[ReqSession]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
-        token:Optional[str]=None, 
+        logger:Optional[Logger]=None,
+        token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
         super().__init__(
@@ -58,17 +58,17 @@ class ScaffoldingReq(ABCRequests):
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
-            logger=logger, 
-            token=token, 
+            logger=logger,
+            token=token,
             list_slugs=list_slugs
         )
         self.session = session
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token, 
+        self.token = token
         self.list_slugs = list_slugs
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         return None
 EOF

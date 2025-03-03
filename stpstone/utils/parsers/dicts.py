@@ -1,13 +1,13 @@
 ### HANDLING DICTIONARIES ISSUES ###
 
 import re
-from operator import itemgetter
-from itertools import groupby
+from collections import Counter, OrderedDict, defaultdict
 from functools import cmp_to_key
-from collections import defaultdict, Counter, OrderedDict
-from heapq import nsmallest, nlargest
-from typing import Dict, Union, List, Any, Callable, Optional
+from heapq import nlargest, nsmallest
+from itertools import groupby
 from numbers import Number
+from operator import itemgetter
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 class HandlingDicts:
@@ -54,22 +54,25 @@ class HandlingDicts:
         REFERENCES: https://stackoverflow.com/questions/1143671/how-to-sort-objects-by-multiple-keys-in-python,
             https://stackoverflow.com/questions/28502774/typeerror-cmp-is-an-invalid-keyword-argument-for-this-function
         DOCSTRING: SORT A LIST OF DICTIONARIES
-        INPUTS: LIST OF DICTS AND LIST OF COLUMNS, IF THERE IS A NEGATIVE (-) SIGN ON KEY, 
+        INPUTS: LIST OF DICTS AND LIST OF COLUMNS, IF THERE IS A NEGATIVE (-) SIGN ON KEY,
             IT WIL BE ORDERED IN REVERSE
         OUTPUTS: LIST OF DICTIONARIES
         """
         comparers = [
-            ((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(
-                col.strip()), 1))
+            (
+                (itemgetter(col[1:].strip()), -1)
+                if col.startswith("-")
+                else (itemgetter(col.strip()), 1)
+            )
             for col in columns
         ]
 
         def comparer(left, right):
             comparer_iter = (
-                self.cmp(fn(left), fn(right)) * mult
-                for fn, mult in comparers
+                self.cmp(fn(left), fn(right)) * mult for fn, mult in comparers
             )
             return next((result for result in comparer_iter if result), 0)
+
         return sorted(items, key=cmp_to_key(comparer))
 
     def merge_dicts(self, list_ser, list_keys_merge=None, bl_sum_values_key=True):
@@ -91,7 +94,10 @@ class HandlingDicts:
                     else:
                         dict_export[key] = value
             if bl_sum_values_key == True:
-                return {k: (sum(v) if isinstance(v, list) else v) for k, v in dict_export.items()}
+                return {
+                    k: (sum(v) if isinstance(v, list) else v)
+                    for k, v in dict_export.items()
+                }
             else:
                 return dict_export
         else:
@@ -99,37 +105,45 @@ class HandlingDicts:
                 list_counter_dicts.append(Counter(dict_))
             return dict(sum(list_counter_dicts))
 
-    def filter_list_ser(self, list_ser:List[Dict[str, Any]], foreigner_key:str, k_value:Number, 
-                        str_filter_type:str='equal') -> List[Dict[str, Any]]:
+    def filter_list_ser(
+        self,
+        list_ser: List[Dict[str, Any]],
+        foreigner_key: str,
+        k_value: Number,
+        str_filter_type: str = "equal",
+    ) -> List[Dict[str, Any]]:
         """
         Filter list of dictionaries
         Args:
-            - list_ser (List[Dict[str, Any]]): List of dictionaries to filter
-            - foreigner_key (str): Foreigner key to filter
-            - k_value (Number): Value of foreigner key of interest
-            - str_filter_type (str): Type of filter to apply
+            list_ser (List[Dict[str, Any]]): List of dictionaries to filter
+            foreigner_key (str): Foreigner key to filter
+            k_value (Number): Value of foreigner key of interest
+            str_filter_type (str): Type of filter to apply
         Returns:
             List[Dict[str, Any]]: Filtered list of dictionaries
         """
-        if str_filter_type == 'equal':
+        if str_filter_type == "equal":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] == k_value]
-        elif str_filter_type == 'not_equal':
+        elif str_filter_type == "not_equal":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] != k_value]
-        elif str_filter_type == 'less_than':
+        elif str_filter_type == "less_than":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] < k_value]
-        elif str_filter_type == 'greater_than':
+        elif str_filter_type == "greater_than":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] > k_value]
-        elif str_filter_type == 'less_than_or_equal_to':
+        elif str_filter_type == "less_than_or_equal_to":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] <= k_value]
-        elif str_filter_type == 'greater_than_or_equal_to':
+        elif str_filter_type == "greater_than_or_equal_to":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] >= k_value]
-        elif str_filter_type == 'isin':
+        elif str_filter_type == "isin":
             return [dict_ for dict_ in list_ser if dict_[foreigner_key] in k_value]
         else:
             raise ValueError(
-                'str_filter_type must be "equal", "not_equal", "less_than" or "greater_than"')
+                'str_filter_type must be "equal", "not_equal", "less_than" or "greater_than"'
+            )
 
-    def merge_values_foreigner_keys(self, list_ser, foreigner_key, list_keys_merge_dict):
+    def merge_values_foreigner_keys(
+        self, list_ser, foreigner_key, list_keys_merge_dict
+    ):
         """
         REFERECES: https://stackoverflow.com/questions/50167565/python-how-to-merge-dict-in-list-of-dicts-based-on-value
         DOCSTRING: MERGE DICTS ACCORDINGLY TO A FOREIGNER KEY IN THE LIST OF DICTS
@@ -141,16 +155,15 @@ class HandlingDicts:
         list_foreinger_keys = list()
         list_ser_export = list()
         # get values from foreinger key
-        list_foreinger_keys = list(
-            set([dict_[foreigner_key] for dict_ in list_ser]))
+        list_foreinger_keys = list(set([dict_[foreigner_key] for dict_ in list_ser]))
         # iterating through list of foreigner key and merging values of interest
         for key in list_foreinger_keys:
             # filter dicts for the given foreinger key
-            list_filtered_dicts = self.filter_list_ser(
-                list_ser, foreigner_key, key)
+            list_filtered_dicts = self.filter_list_ser(list_ser, foreigner_key, key)
             # merge dictionaries accordingly to given keys
-            list_ser_export.append(self.merge_dicts(
-                list_filtered_dicts, list_keys_merge_dict))
+            list_ser_export.append(
+                self.merge_dicts(list_filtered_dicts, list_keys_merge_dict)
+            )
         # return final result
         return list_ser_export
 
@@ -185,33 +198,36 @@ class HandlingDicts:
         OUTPUTS:
         """
         # sort by the desired field first
-        list_ser.sort(key=itemgetter('date'))
+        list_ser.sort(key=itemgetter("date"))
         # return iteration in groups
-        return groupby(list_ser, key=itemgetter('date'))
+        return groupby(list_ser, key=itemgetter("date"))
 
     def add_key_value_to_dicts(
-        self, list_ser: List[Dict[str, Union[int, float, str]]],
+        self,
+        list_ser: List[Dict[str, Union[int, float, str]]],
         key: Union[str, List[Dict[str, Union[int, float, str]]]],
-        value: Union[Callable[..., Union[int, float, str]], Union[int, float, str], None]=None,
-        list_keys_for_function: Optional[List[str]]=None,
-        kwargs_static: Optional[Dict[str, Union[int, float, str, None]]]=None
+        value: Union[
+            Callable[..., Union[int, float, str]], Union[int, float, str], None
+        ] = None,
+        list_keys_for_function: Optional[List[str]] = None,
+        kwargs_static: Optional[Dict[str, Union[int, float, str, None]]] = None,
     ) -> List[Dict[str, Union[int, float, str]]]:
         """
         Adds a key and value (or multiple key-value pairs) to every dictionary in a list.
         Args:
-            - list_ser (List[Dict[str, Union[int, float, str]]]): A list of dictionaries to be updated.
-            - key (Union[str, List[Dict[str, Union[int, float, str]]]]): 
-                . If a string, the key to add to each dictionary
-                . If a list of dictionaries, each dictionary contains key-value pairs to add
-            - value (Union[Callable[..., Union[int, float, str]], Union[int, float, str], None]): 
-                . The value to associate with the key (if key is a string)
-                . Can be a static value or a function to compute the value dynamically
-                . Ignored if key is a list of dictionaries
-            - list_keys_for_function (Optional[List[str]]): 
-                . Keys to extract from the dictionary for the value function (if callable)
-                . Required if value is a function
-            - kwargs_static (Optional[Dict[str, Union[int, float, str, None]]]): 
-                . Static keyword arguments to pass to the function (if callable)
+            list_ser (List[Dict[str, Union[int, float, str]]]): A list of dictionaries to be updated.
+            key (Union[str, List[Dict[str, Union[int, float, str]]]]):
+                - If a string, the key to add to each dictionary
+                - If a list of dictionaries, each dictionary contains key-value pairs to add
+            value (Union[Callable[..., Union[int, float, str]], Union[int, float, str], None]):
+                - The value to associate with the key (if key is a string)
+                - Can be a static value or a function to compute the value dynamically
+                - Ignored if key is a list of dictionaries
+            list_keys_for_function (Optional[List[str]]):
+                - Keys to extract from the dictionary for the value function (if callable)
+                - Required if value is a function
+            kwargs_static (Optional[Dict[str, Union[int, float, str, None]]]):
+                - Static keyword arguments to pass to the function (if callable)
         Returns:
             List[Dict[str, Union[int, float, str]]]: The updated list of dictionaries.
         Raises:
@@ -225,8 +241,11 @@ class HandlingDicts:
             for dict_ in list_ser:
                 if isinstance(dict_, dict):
                     if callable(value):
-                        args = [dict_.get(k) for k in list_keys_for_function] \
-                            if list_keys_for_function is not None else []
+                        args = (
+                            [dict_.get(k) for k in list_keys_for_function]
+                            if list_keys_for_function is not None
+                            else []
+                        )
                         if kwargs_static is not None:
                             dict_[key] = value(*args, **kwargs_static)
                         else:
@@ -243,15 +262,16 @@ class HandlingDicts:
                                 dict_[k] = v
         else:
             raise TypeError("key must be a string or a list of dictionaries.")
-        
+
         return list_ser
 
-    def pair_headers_with_data(self, list_headers:List[str], list_data:List[Any]) \
-        -> List[Dict[str, Any]]:
+    def pair_headers_with_data(
+        self, list_headers: List[str], list_data: List[Any]
+    ) -> List[Dict[str, Any]]:
         """
         DOCSTRING: PAIR HEADERS AND DATA AS KEYS AND VALUES IN A SERIALIZED LIST
-            - FOR EXAMPLE, IF LIST_HEADERS IS ['NAME', 'AGE'] AND LIST_DATA IS 
-                ['JOHN', 25, 'ALICE', 30], THE FUNCTION WILL RETURN [{'NAME': 'JOHN', 'AGE': 25}, 
+            - FOR EXAMPLE, IF LIST_HEADERS IS ['NAME', 'AGE'] AND LIST_DATA IS
+                ['JOHN', 25, 'ALICE', 30], THE FUNCTION WILL RETURN [{'NAME': 'JOHN', 'AGE': 25},
                 {'NAME': 'ALICE', 'AGE': 30}]
         INPUTS: LIST HEADERS, LIST DATA
         OUTPUTS: LIST
@@ -261,35 +281,40 @@ class HandlingDicts:
         # ensuring the list_data length is a multiple of list_headers length
         if len(list_data) % len(list_headers) != 0:
             raise ValueError(
-                'The length of list_data is not a multiple of the length of list_headers.')
+                "The length of list_data is not a multiple of the length of list_headers."
+            )
         # iterate over the list_data in chunks equal to the length of list_headers
         for i in range(0, len(list_data), len(list_headers)):
             # create a dictionary for each chunk
-            entry = {list_headers[j]: list_data[i + j] for j in range(len(list_headers))}
+            entry = {
+                list_headers[j]: list_data[i + j] for j in range(len(list_headers))
+            }
             list_ser.append(entry)
         # returning list of dictionaries
         return list_ser
 
-    def fill_placeholders(self, dict_base:Dict[str, Any], dict_replacer:Dict[str, Any]) \
-        -> Dict[str, Any]:
+    def fill_placeholders(
+        self, dict_base: Dict[str, Any], dict_replacer: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Replaces placeholders in the base dictionary with values from the replacement dictionary
         Args:
-            - dict_base (Dict[str, Any]): The dictionary containing placeholders
-            - dict_replacer (Dict[str, Any]): The dictionary providing replacement values
+            dict_base (Dict[str, Any]): The dictionary containing placeholders
+            dict_replacer (Dict[str, Any]): The dictionary providing replacement values
         Returns:
             Dict[str, Any]: The updated dictionary with placeholders replaced.
         """
         placeholder_pattern = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
         def replace_value(value):
             if isinstance(value, dict):
                 return {k: replace_value(v) for k, v in value.items()}
             elif isinstance(value, str):
                 return placeholder_pattern.sub(
-                    lambda m: str(dict_replacer.get(m.group(1), m.group(0))), 
-                    value
+                    lambda m: str(dict_replacer.get(m.group(1), m.group(0))), value
                 )
             elif isinstance(value, list):
                 return [replace_value(v) for v in value]
             return value
+
         return {key: replace_value(value) for key, value in dict_base.items()}

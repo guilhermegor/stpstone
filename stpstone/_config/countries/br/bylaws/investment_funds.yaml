@@ -41,7 +41,7 @@ funds_infos:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name:
   bl_insert_or_ignore: False
@@ -56,27 +56,27 @@ funds_infos:
     company_id:
       xp_1:
         name: (?i)termo\s*de\s*apura[cç][aã]o\s*da\s*consulta\s*formal\s*para\s+assembleia\s*geral\s*(extraordin[aá]ria|ordin[aá]ria)?\s*de\s*cotistas\s*do\s*([^*]+?)\s*cnpj
-        ein_number: | 
+        ein_number: |
           (?i)cnpj(?: n.)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
       xp_2:
         name: (?i)ata\s+da\s+assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+do\s+([^*]+?)\s+cnpj
-        ein_number: | 
+        ein_number: |
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}(?=\s*\(.Fundo.\))
       xp_3:
         name: (?i)assembleia\s+geral\s+(extraordin.ria|ordinaria)\s+de\s+cotistas\s+do\s+([^*]+?)\s+cnpj
-        ein_number: | 
+        ein_number: |
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}(?=\s*\(.Fundo.\))
       xp_4:
         name: (?i)instrumento\s+particular\s+de\s+altera[cç][aã]o\s+do\s+regulamento\s+do\s+([^*]+?)\s+a\s+xp
-        ein_number: | 
+        ein_number: |
           (?i)cnpj\s+sob\s+o\s+nº\s+(\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2})
       xp_5:
         name: (?i)termo\s*de\s*apura[cç][aã]o\s*da\s*consulta\s*formal\s*para\s+assembleia\s*geral\s*(extraordin[aá]ria|ordin[aá]ria)?\s*de\s*cotistas\s*do\s*([^*]+?)\s*cnpj
-        ein_number: | 
+        ein_number: |
           (?i)cnpj(?: n.*)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
       modal_1:
         name: (?i)ata\s+de\s+assembleia\s+geral\s+de\s+cotistas\s+do\s+([^*]+?)\s+cnpj
-        ein_number: | 
+        ein_number: |
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
       bny_mellon_1:
         name: (?i)^(?:.*\n)*?(.*?)\s*CNPJ\s*nº\s*\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
@@ -84,7 +84,7 @@ funds_infos:
           (?i)cnpj(?: n.)?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})
       vortx_1:
         name: (?i)termo\s+de\s+apura[cç][aã]o\s+da\s+consulta\s+formal\s+(?:do|da)\s+([^*]+?)\s+CNPJ\s+SOB\s+O\s+n.
-        ein_number: | 
+        ein_number: |
           (?i)\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}
     fund_structure:
       xp_1:

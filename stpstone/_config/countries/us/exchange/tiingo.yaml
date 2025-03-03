@@ -35,7 +35,7 @@ ohlcv_adjusted:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
@@ -47,7 +47,7 @@ ohlcv_adjusted:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: us_tiingo_ohlcv_adjusted
   bl_insert_or_ignore: False

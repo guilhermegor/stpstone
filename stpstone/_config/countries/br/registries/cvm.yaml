@@ -7,7 +7,7 @@ credentials:
     Referer: https://dados.cvm.gov.br/
     Upgrade-Insecure-Requests: '1'
     User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36
-    sec-ch-ua: '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"'
+    sec-ch-ua: '"Not(A:Brand";v="99 "Google Chrome";v="133 "Chromium";v="133"'
     sec-ch-ua-mobile: '?0'
     sec-ch-ua-platform: "Windows"
     Cookie: Path=/
@@ -47,7 +47,7 @@ pubicly_traded_cos:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_pubicly_traded_cos
@@ -126,7 +126,7 @@ independent_fin_advs:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_independent_fin_advs
@@ -178,7 +178,7 @@ fiduciary_agents:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_fiduciary_agents
@@ -227,7 +227,7 @@ foreign_cos:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_foreign_cos
@@ -308,7 +308,7 @@ incentivized_cos:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_incentivized_cos
@@ -387,7 +387,7 @@ securities_consultants:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_securities_consultants
@@ -446,7 +446,7 @@ crowdfunding:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_crowdfunding
@@ -497,7 +497,7 @@ funds_registries:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_crowdfunding
@@ -525,7 +525,7 @@ funds_registries:
     TRIB_LPRAZO: category
     PUBLICO_ALVO: category
     ENTID_INVEST: str
-    TAXA_PERFM: float
+    TAXA_PERFM: str
     INF_TAXA_PERFM: str
     TAXA_ADM: float
     INF_TAXA_ADM: str
@@ -548,3 +548,366 @@ funds_registries:
   df_read_params:
     sep: ';'
     encoding: latin-1
+
+funds_daily_infos:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{{month_ref}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_crowdfunding
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TP_FUNDO_CLASSE: category
+    CNPJ_FUNDO_CLASSE: str
+    ID_SUBCLASSE: str
+    DT_COMPTC: date
+    VL_TOTAL: float
+    VL_QUOTA: float
+    VL_PATRIM_LIQ: float
+    CAPTC_DIA: float
+    RESG_DIA: float
+    NR_COTST: int
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+
+funds_fact_sheet:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  app: dados/FI/DOC/LAMINA/DADOS/lamina_fi_{{month_ref_mm1}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_crowdfunding
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TP_FUNDO_CLASSE: category
+    CNPJ_FUNDO_CLASSE: str
+    ID_SUBCLASSE: str
+    DENOM_SOCIAL: str
+    DT_COMPTC: date
+    NM_FANTASIA: str
+    ENDER_ELETRONICO: str
+    PUBLICO_ALVO: category
+    RESTR_INVEST: str
+    OBJETIVO: str
+    POLIT_INVEST: str
+    PR_PL_ATIVO_EXTERIOR: float
+    PR_PL_ATIVO_CRED_PRIV: float
+    PR_PL_ALAVANC: float
+    PR_ATIVO_EMISSOR: str
+    DERIV_PROTECAO_CARTEIRA: category
+    RISCO_PERDA: category
+    RISCO_PERDA_NEGATIVO: category
+    PR_PL_APLIC_MAX_FUNDO_UNICO: float
+    INVEST_INICIAL_MIN: float
+    INVEST_ADIC: float
+    RESGATE_MIN: float
+    HORA_APLIC_RESGATE: str
+    VL_MIN_PERMAN: float
+    QT_DIA_CAREN: int
+    CONDIC_CAREN: str
+    CONVERSAO_COTA_COMPRA: str
+    QT_DIA_CONVERSAO_COTA_COMPRA: int
+    CONVERSAO_COTA_CANC: str
+    QT_DIA_CONVERSAO_COTA_RESGATE: int
+    TP_DIA_PAGTO_RESGATE: str
+    QT_DIA_PAGTO_RESGATE: int
+    TP_TAXA_ADM: str
+    TAXA_ADM: float
+    TAXA_ADM_MIN: float
+    TAXA_ADM_MAX: float
+    TAXA_ADM_OBS: str
+    TAXA_ENTR: float
+    CONDIC_ENTR: str
+    QT_DIA_SAIDA: int
+    TAXA_SAIDA: float
+    CONDIC_SAIDA: str
+    TAXA_PERFM: str
+    PR_PL_DESPESA: float
+    DT_INI_DESPESA: date
+    DT_FIM_DESPESA: date
+    ENDER_ELETRONICO_DESPESA: str
+    VL_PATRIM_LIQ: float
+    CLASSE_RISCO_ADMIN: category
+    PR_RENTAB_FUNDO_5ANO: float
+    INDICE_REFER: str
+    PR_VARIACAO_INDICE_REFER_5ANO: float
+    QT_ANO_PERDA: int
+    DT_INI_ATIV_5ANO: date
+    ANO_SEM_RENTAB: str
+    CALC_RENTAB_FUNDO_GATILHO: str
+    PR_VARIACAO_PERFM: float
+    CALC_RENTAB_FUNDO: str
+    RENTAB_GATILHO: str
+    DS_RENTAB_GATILHO: str
+    ANO_EXEMPLO: int
+    ANO_ANTER_EXEMPLO: int
+    VL_RESGATE_EXEMPLO: float
+    VL_IMPOSTO_EXEMPLO: float
+    VL_TAXA_ENTR_EXEMPLO: float
+    VL_TAXA_SAIDA_EXEMPLO: float
+    VL_AJUSTE_PERFM_EXEMPLO: float
+    VL_DESPESA_EXEMPLO: float
+    VL_DESPESA_3ANO: float
+    VL_DESPESA_5ANO: float
+    VL_RETORNO_3ANO: float
+    VL_RETORNO_5ANO: float
+    REMUN_DISTRIB: str
+    DISTRIB_GESTOR_UNICO: str
+    CONFLITO_VENDA: str
+    TEL_SAC: str
+    ENDER_ELETRONICO_RECLAMACAO: str
+    INF_SAC: str
+    TP_ATIVO: category
+    PR_PL_ATIVO: float
+    ANO_RENTAB: int
+    PR_RENTAB_ANO: float
+    PR_VARIACAO_INDICE_REFER_ANO: float
+    PR_PERFM_INDICE_REFER_ANO: float
+    RENTAB_ANO_OBS: str
+    MES_RENTAB: int
+    PR_RENTAB_MES: float
+    PR_VARIACAO_INDICE_REFER_MES: float
+    PR_PERFM_INDICE_REFER_MES: float
+    RENTAB_MES_OBS: str
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+    on_bad_lines: skip
+
+funds_monthly_profile:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: dados/FI/DOC/PERFIL_MENSAL/DADOS/perfil_mensal_fi_{{month_ref_mm1}}.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_crowdfunding
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TP_FUNDO_CLASSE: category
+    CNPJ_FUNDO_CLASSE: str
+    DENOM_SOCIAL: str
+    DT_COMPTC: date
+    VERSAO: int
+    NR_COTST_PF_PB: int
+    NR_COTST_PF_VAREJO: int
+    NR_COTST_PJ_NAO_FINANC_PB: int
+    NR_COTST_PJ_NAO_FINANC_VAREJO: int
+    NR_COTST_BANCO: int
+    NR_COTST_CORRETORA_DISTRIB: int
+    NR_COTST_PJ_FINANC: int
+    NR_COTST_INVNR: int
+    NR_COTST_EAPC: int
+    NR_COTST_EFPC: int
+    NR_COTST_RPPS: int
+    NR_COTST_SEGUR: int
+    NR_COTST_CAPITALIZ: int
+    NR_COTST_FI_CLUBE: int
+    NR_COTST_DISTRIB: int
+    NR_COTST_OUTRO: int
+    PR_PL_COTST_PF_PB: float
+    PR_PL_COTST_PF_VAREJO: float
+    PR_PL_COTST_PJ_NAO_FINANC_PB: float
+    PR_PL_COTST_PJ_NAO_FINANC_VAREJO: float
+    PR_PL_COTST_BANCO: float
+    PR_PL_COTST_CORRETORA_DISTRIB: float
+    PR_PL_COTST_PJ_FINANC: float
+    PR_PL_COTST_INVNR: float
+    PR_PL_COTST_EAPC: float
+    PR_PL_COTST_EFPC: float
+    PR_PL_COTST_RPPS: float
+    PR_PL_COTST_SEGUR: float
+    PR_PL_COTST_CAPITALIZ: float
+    PR_PL_COTST_FI_CLUBE: float
+    PR_PL_COTST_DISTRIB: float
+    PR_PL_COTST_OUTRO: float
+    VOTO_ADMIN_ASSEMB: str
+    JUSTIF_VOTO_ADMIN_ASSEMB: str
+    PR_VAR_CARTEIRA: float
+    MOD_VAR: category
+    PRAZO_CARTEIRA_TITULO: str
+    DELIB_ASSEMB: str
+    VL_CONTRATO_COMPRA_DOLAR: float
+    VL_CONTRATO_VENDA_DOLAR: float
+    PR_VARIACAO_DIARIA_COTA: float
+    FPR: category
+    CENARIO_FPR_IBOVESPA: category
+    CENARIO_FPR_JUROS: category
+    CENARIO_FPR_CUPOM: category
+    CENARIO_FPR_DOLAR: category
+    CENARIO_FPR_OUTRO: category
+    PR_VARIACAO_DIARIA_COTA_ESTRESSE: float
+    PR_VARIACAO_DIARIA_PL_TAXA_ANUAL: float
+    PR_VARIACAO_DIARIA_PL_TAXA_CAMBIO: float
+    PR_VARIACAO_DIARIA_PL_IBOVESPA: float
+    FATOR_RISCO_OUTRO: category
+    PR_VARIACAO_DIARIA_OUTRO: float
+    PR_COLATERAL_DERIV: float
+    FATOR_RISCO_NOCIONAL: category
+    VL_FATOR_RISCO_NOCIONAL_LONG_IBOVESPA: float
+    VL_FATOR_RISCO_NOCIONAL_LONG_JUROS: float
+    VL_FATOR_RISCO_NOCIONAL_LONG_CUPOM: float
+    VL_FATOR_RISCO_NOCIONAL_LONG_DOLAR: float
+    VL_FATOR_RISCO_NOCIONAL_LONG_OUTRO: float
+    VL_FATOR_RISCO_NOCIONAL_SHORT_IBOVESPA: float
+    VL_FATOR_RISCO_NOCIONAL_SHORT_JUROS: float
+    VL_FATOR_RISCO_NOCIONAL_SHORT_CUPOM: float
+    VL_FATOR_RISCO_NOCIONAL_SHORT_DOLAR: float
+    VL_FATOR_RISCO_NOCIONAL_SHORT_OUTRO: float
+    PF_PJ_COMITENTE_1: category
+    CPF_CNPJ_COMITENTE_1: str
+    COMITENTE_LIGADO_1: category
+    PR_COMITENTE_1: float
+    PF_PJ_COMITENTE_2: category
+    CPF_CNPJ_COMITENTE_2: str
+    COMITENTE_LIGADO_2: category
+    PR_COMITENTE_2: float
+    PF_PJ_COMITENTE_3: category
+    CPF_CNPJ_COMITENTE_3: str
+    COMITENTE_LIGADO_3: category
+    PR_COMITENTE_3: float
+    PR_ATIVO_EMISSOR_LIGADO: float
+    PF_PJ_EMISSOR_1: category
+    CPF_CNPJ_EMISSOR_1: str
+    EMISSOR_LIGADO_1: category
+    PR_EMISSOR_1: float
+    PF_PJ_EMISSOR_2: category
+    CPF_CNPJ_EMISSOR_2: str
+    EMISSOR_LIGADO_2: category
+    PR_EMISSOR_2: float
+    PF_PJ_EMISSOR_3: category
+    CPF_CNPJ_EMISSOR_3: str
+    EMISSOR_LIGADO_3: category
+    PR_EMISSOR_3: float
+    PR_ATIVO_CRED_PRIV: float
+    VEDAC_TAXA_PERFM: category
+    DT_COTA_TAXA_PERFM: date
+    VL_COTA_TAXA_PERFM: float
+    VL_DIREITO_DISTRIB: float
+    NR_COTST_ENTID_PREVID_COMPL: int
+    PR_COTST_ENTID_PREVID_COMPL: float
+    PR_PATRIM_LIQ_MAIOR_COTST: float
+    NR_DIA_CINQU_PERC: int
+    NR_DIA_CEM_PERC: int
+    ST_LIQDEZ: str
+    PR_PATRIM_LIQ_CONVTD_CAIXA: float
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+    on_bad_lines: skip
+
+funds_abs:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: dados/FIDC/DOC/INF_MENSAL/DADOS/inf_mensal_fidc_{{month_ref_mm1}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_cvm_crowdfunding
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TP_FUNDO_CLASSE: category
+    CNPJ_FUNDO_CLASSE: str
+    DENOM_SOCIAL: str
+    DT_COMPTC: date
+    CLASSE_UNICA: category
+    CNPJ_ADMIN: str
+    ADMIN: str
+    CLASSE: category
+    CNPJ_CLASSE: str
+    CONDOM: category
+    FUNDO_EXCLUSIVO: category
+    COTST_INTERESSE: category
+    PRAZO_CONVERSAO_COTA: int
+    TP_PRAZO_CONVERSAO_COTA: category
+    PRAZO_PAGTO_RESGATE: int
+    TP_PRAZO_PAGTO_RESGATE: category
+    FILE_NAME: str
+  df_read_params:
+    sep: ';'
+    encoding: latin-1
+    on_bad_lines: skip

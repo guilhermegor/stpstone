@@ -49,7 +49,7 @@ ohlcv_latest:
   host:
   headers:
   payload:
-  # iteratively_get_data placeholders: 
+  # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}}
   slugs:
@@ -64,7 +64,7 @@ ohlcv_latest:
   list_cols_drop_dupl:
   str_fmt_dt: YYYY-MM-DD
   type_error_action: raise
-  strt_keep_when_duplicated: first
+  strategy_keep_when_dupl: first
   schema: raw
   table_name: coinpaprika_ohlcv_latest
   bl_insert_or_ignore: False
