@@ -1,28 +1,25 @@
 ### ABSTRACT BASE CLASS - REQUESTS ###
 
 # pypi.org libs
-import os
 import re
+import backoff
+import fitz
+import pdfplumber
+import pandas as pd
 from abc import ABC, abstractmethod
 from datetime import datetime
-from getpass import getuser
 from io import BytesIO, StringIO, TextIOWrapper
 from logging import Logger
 from typing import Any, Dict, List, Optional, Tuple, Union
 from zipfile import ZipFile
-
-import backoff
-import fitz
-import pandas as pd
 from requests import Request, Response, Session, exceptions, request
-
-from stpstone.transformations.standardization.dataframe import \
-    DFStandardization
+from urllib.parse import urlparse, parse_qs
+# project modules
+from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
-# project modules
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.json import JsonFiles
@@ -61,7 +58,7 @@ class HandleReqResponses(ABC):
         elif str_file_extension == "json":
             return self.handle_json_response(req_resp)
         elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
-            return self.handle_pdf_doc_response(req_resp, dict_regex_patterns, bl_debug)
+            return self.handle_pdf_doc_response(req_resp, dict_regex_patterns)
         else:
             json_ = req_resp.json()
             if isinstance(json_, dict) == True:
@@ -119,9 +116,7 @@ class HandleReqResponses(ABC):
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 elif str_file_extension == "pdf":
-                    df_ = self.handle_pdf_doc_response(
-                        file, dict_regex_patterns, bl_debug
-                    )
+                    df_ = self.handle_pdf_doc_response(file, dict_regex_patterns)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 else:
@@ -196,142 +191,107 @@ class HandleReqResponses(ABC):
         df_ = pd.DataFrame(list_ser)
         return df_
 
-    def handle_pdf_doc_response(
+    def _pdf_doc_tables_response(
+        self, 
+        bytes_pdf: BytesIO
+    ) -> pd.DataFrame:
+        list_ser = list()
+        with pdfplumber.open(bytes_pdf) as pdf:
+            for page in pdf.pages:
+                list_ = page.extract_tables()
+                list_ser.extend(HandlingDicts().pair_keys_with_values(list_[0][0], list_[0][1:]))
+        return pd.DataFrame(list_ser)
+
+    def _pdf_doc_regex(
         self,
         req_resp: Response,
-        dict_regex_patterns: Dict[str, Dict[str, str]],
-        bl_debug: bool = False,
-    ) -> pd.DataFrame:
-        # setting variables
+        bytes_pdf: BytesIO,
+        dict_regex_patterns: Dict[str, Dict[str, Any]],
+        int_pgs_join: int = 2
+    ):
         list_pages = list()
         list_matches = list()
         dict_count_matches = dict()
-        dict_actions_per_event = {
-            evnt: len(dict_l2)
-            for evnt, dict_l1 in dict_regex_patterns.items()
-            for _, dict_l2 in dict_l1.items()
-        }
-        # reading pdf/doc
-        bytes_pdf = BytesIO(req_resp.content)
         doc_pdf = fitz.open(
             stream=bytes_pdf,
             filetype=DirFilesManagement().get_file_extension(req_resp.url),
         )
-        # join 2 pages at a time, in order to find infos that are separated due to page break
-        for i in range(0, len(doc_pdf), 2):
+        # create list of concatenated pages
+        for i in range(0, len(doc_pdf), int_pgs_join):
             text1 = doc_pdf[i].get_text("text") if i < len(doc_pdf) else ""
             text2 = doc_pdf[i + 1].get_text("text") if i + 1 < len(doc_pdf) else ""
             list_pages.append(text1 + "\n" + text2)
-        # loop through each page looking for regex pattern, where event is the info that is targeted,
-        #   condition is a case of match found previously, and action is the subclass of action with
-        #   an associated regex
         for i, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
-            if bl_debug == True:
-                print("PG {}/{}".format(i + 1, len(list_pages)))
-                print("DICT ACTIONS PER EVENT: ", dict_actions_per_event)
-                print("DICT COUNT MATCHES: ", dict_count_matches)
-                print("LEN COUNT MATHCES: ", len(dict_count_matches))
-                if i == 10:
-                    print(str_page)
-                    root_path = os.path.abspath(
-                        os.path.join(
-                            os.path.dirname(os.path.realpath(__file__)),
-                            "..",
-                            "..",
-                            "..",
-                        )
-                    )
-                    path_json = os.path.join(
-                        root_path,
-                        "data/test-str-page_{}_{}_{}.json".format(
-                            getuser(),
-                            DatesBR().curr_date.strftime("%Y%m%d"),
-                            DatesBR().curr_time.strftime("%H%M%S"),
-                        ),
-                    )
-                    JsonFiles().dump_message(str_page, path_json)
-            #   if, for every event, all the actions have at least one match, then break the loop
-            if (len(dict_count_matches) > 0) and (
-                all(
-                    [
-                        len(
-                            [
-                                _
-                                for _, count in dict_count_matches[evnt].items()
-                                if count > 0
-                            ]
-                        )
-                        >= num_actions
-                        for evnt, num_actions in dict_actions_per_event.items()
-                        if evnt in dict_count_matches
-                    ]
-                )
-                == True
-            ):
-                break
-            #   looping within pages to find regex matches for every event/action
+            #   break if every event has at least one match
+            if \
+                (len(dict_count_matches) > 0) \
+                and (len([count for count in dict_count_matches[str_event] if count > 0]) 
+                    >= len(list(dict_regex_patterns.keys()))): break
             for str_event, dict_l1 in dict_regex_patterns.items():
-                if bl_debug == True:
-                    print(f"EVENT: {str_event}")
-                for str_condition, dict_l2 in dict_l1.items():
-                    if bl_debug == True:
-                        print(f"CONDITION: {str_condition}")
-                    for str_action, pattern_regex in dict_l2.items():
-                        #   checking wheter should stop at first match
-                        if str_event not in dict_count_matches:
-                            dict_count_matches[str_event] = dict()
-                        if str_action not in dict_count_matches[str_event]:
-                            dict_count_matches[str_event][str_action] = 0
-                        if (
-                            all(
-                                [
-                                    dict_count_matches[str_event][k] >= 1
-                                    for k in list(dict_count_matches[str_event].keys())
-                                ]
-                            )
-                            == True
-                        ):
-                            break
-                        pattern_regex = StrHandler().remove_diacritics_nfkd(
-                            pattern_regex, bl_lower_case=False
-                        )
-                        if bl_debug == True:
-                            print(str_action, pattern_regex)
-                        regex_match = re.search(
-                            pattern_regex,
-                            str_page,
-                            # flags=re.DOTALL | re.MULTILINE
-                        )
-                        if regex_match is not None:
-                            dict_count_matches[str_event][str_action] += 1
-                            dict_ = {
+                for str_condition, pattern_regex in dict_l1.items():
+                    if str_event not in dict_count_matches:
+                        dict_count_matches[str_event] = 0
+                    if dict_count_matches[str_event] > 0: break
+                    pattern_regex = StrHandler().remove_diacritics_nfkd(
+                        pattern_regex, bl_lower_case=False)
+                    regex_match = re.search(
+                        pattern_regex,
+                        str_page,
+                        # flags=re.DOTALL | re.MULTILINE
+                    )
+                    if regex_match is not None:
+                        dict_count_matches[str_event] += 1
+                        dict_ = {
+                            "EVENT": str_event.upper(),
+                            "CONDITION": str_condition.upper(),
+                            "PATTERN_REGEX": pattern_regex,
+                        }
+                        for i_match in range(0, len(regex_match.groups()) + 1):
+                            regex_group = regex_match.group(i_match).replace("\n", " ")
+                            regex_group = re.sub(r"\s+", " ", regex_group).strip()
+                            dict_[f"REGEX_GROUP_{i_match}"] = regex_group
+                        list_matches.append(dict_)
+                    else:
+                        list_matches.append(
+                            {
                                 "EVENT": str_event.upper(),
-                                "CONDITION": str_condition.upper(),
-                                "ACTION": str_action.upper(),
-                                "PATTERN_REGEX": pattern_regex,
+                                "CONDITION": "N/A",
+                                "PATTERN_REGEX": "zzN/A",
+                                "REGEX_GROUP_0": "N/A",
                             }
-                            for i_match in range(0, len(regex_match.groups()) + 1):
-                                regex_group = regex_match.group(i_match).replace(
-                                    "\n", " "
-                                )
-                                #   remove double spaces and trim the string
-                                regex_group = re.sub(r"\s+", " ", regex_group).strip()
-                                dict_[f"REGEX_GROUP_{i_match}"] = regex_group
-                            list_matches.append(dict_)
-                        else:
-                            list_matches.append(
-                                {
-                                    "EVENT": str_event.upper(),
-                                    "CONDITION": "N/A",
-                                    "ACTION": str_action.upper(),
-                                    "PATTERN_REGEX": "zzN/A",
-                                    "REGEX_GROUP_0": "N/A",
-                                }
-                            )
+                        )
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
-        return df_
+
+    def _get_int_pgs_join(self, url: str) -> Union[int, None]:
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.fragment)
+        int_pgs_join = query_params.get('int_pgs_join', [None])[0]
+        if int_pgs_join is not None:
+            return int(int_pgs_join)
+        else:
+            return None
+
+    def handle_pdf_doc_response(
+        self,
+        req_resp: Response,
+        dict_regex_patterns: Dict[str, Dict[str, str]],
+        default_int_pgs_join: int = 2
+    ) -> pd.DataFrame:
+        # reading pdf/doc
+        bytes_pdf = BytesIO(req_resp.content)
+        # checking wheter to read tables or use regex
+        if StrHandler().match_string_like(req_resp.url,'*#feat=read_tables*') == True:
+            return self._pdf_doc_tables_response(bytes_pdf)
+        else:
+            if StrHandler().match_string_like(req_resp.url,'*#int_pgs_join*') == True:
+                int_pgs_join = self._get_int_pgs_join(req_resp.url) \
+                    if self._get_int_pgs_join(req_resp.url) is not None else default_int_pgs_join
+            else:
+                int_pgs_join = default_int_pgs_join
+            return self._pdf_doc_regex(
+                req_resp, bytes_pdf, dict_regex_patterns, int_pgs_join)
 
 
 class ABCRequests(HandleReqResponses):

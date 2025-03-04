@@ -66,16 +66,14 @@ class HandlingDicts:
             )
             for col in columns
         ]
-
         def comparer(left, right):
             comparer_iter = (
                 self.cmp(fn(left), fn(right)) * mult for fn, mult in comparers
             )
             return next((result for result in comparer_iter if result), 0)
-
         return sorted(items, key=cmp_to_key(comparer))
 
-    def merge_dicts(self, list_ser, list_keys_merge=None, bl_sum_values_key=True):
+    def sum_values_selected_keys(self, list_ser, list_keys_merge=None, bl_sum_values_key=True):
         """
         DOCSTRING: MERGE DICTS FOR EVERY KEY REPETITION
         INPUTS: FOREIGNER KEY, DICTS
@@ -162,7 +160,7 @@ class HandlingDicts:
             list_filtered_dicts = self.filter_list_ser(list_ser, foreigner_key, key)
             # merge dictionaries accordingly to given keys
             list_ser_export.append(
-                self.merge_dicts(list_filtered_dicts, list_keys_merge_dict)
+                self.sum_values_selected_keys(list_filtered_dicts, list_keys_merge_dict)
             )
         # return final result
         return list_ser_export
@@ -262,7 +260,31 @@ class HandlingDicts:
                                 dict_[k] = v
         else:
             raise TypeError("key must be a string or a list of dictionaries.")
-
+        return list_ser
+    
+    def pair_keys_with_values(
+        self, list_keys: List[str], list_lists: List[List[Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Pair each sublist with the list of keys and return a list of dictionaries
+        Args:
+            list_keys (List[str]): The list of keys to pair with the sublists
+            list_lists (List[List[Any]]): The list of sublists to pair with the keys
+        Returns:
+            List[Dict[str, Any]]: A list of dictionaries, where each dictionary is a pairing of 
+                a sublist with the list of keys
+        Raises:
+            ValueError: If the length of a sublist does not match the length of list_keys
+        """
+        list_ser = []
+        for sublist in list_lists:
+            if len(sublist) != len(list_keys):
+                raise ValueError(
+                    f"The length of the sublist {sublist} does not match the length of list_keys."
+                )
+            # Pair keys with values from the sublist
+            dict_entry = {key: value for key, value in zip(list_keys, sublist)}
+            list_ser.append(dict_entry)
         return list_ser
 
     def pair_headers_with_data(
@@ -305,7 +327,6 @@ class HandlingDicts:
             Dict[str, Any]: The updated dictionary with placeholders replaced.
         """
         placeholder_pattern = re.compile(r"\{\{\s*(\w+)\s*\}\}")
-
         def replace_value(value):
             if isinstance(value, dict):
                 return {k: replace_value(v) for k, v in value.items()}
@@ -316,5 +337,4 @@ class HandlingDicts:
             elif isinstance(value, list):
                 return [replace_value(v) for v in value]
             return value
-
         return {key: replace_value(value) for key, value in dict_base.items()}

@@ -58,8 +58,9 @@ slack = "^0.0.2"
 pymysql = "1.1.1"
 pytest = "8.3.4"
 pydantic = "2.10.6"
-pymupdf = "1.25.3"
 openpyxl = "3.1.5"
+pymupdf = "1.25.3"
+pdfplumber = "0.11.5"
 fitz = "0.0.1.dev2"
 
 

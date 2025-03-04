@@ -3,7 +3,6 @@
 import re
 import bisect
 import numpy as np
-from heapq import heappush, heappop
 from collections import OrderedDict, Counter
 from itertools import chain, tee, product
 from stpstone.utils.parsers.json import JsonFiles
@@ -378,34 +377,6 @@ class HandlingLists:
         """
         return [x for xs in list_ for x in xs]
 
-class PriorityQueue:
-    """
-    REFERENCES: PYTHON COOKBOOK - DAVID BEASZLEY, BRIAN K. JONES
-    DOCSTRING: CREATE A PRIORITY QUEUE LIST
-    INPUTS: -
-    OUTPUTS: -
-    """
-
-    def __init__(self):
-        self._queue = []
-        self._index = 0
-
-    def push(self, item, priority):
-        """
-        DOCSTRING: PUSH ITEMS TO LIST
-        INPUTS: ITEM, PRIORITY
-        OUTPUTS: -
-        """
-        heappush(self._queue, (-priority, self._index, item))
-        self._index += 1
-
-    def pop(self):
-        """
-        DOCSTRING: REMOVE LAST ITEM FROM LIST
-        INPUTS: -
-        OUTPUTS: OBJECT
-        """
-        return heappop(self._queue)[-1]
 
 # sorted_list = [10, 30, 52, 73, 90, 113, 133, 154, 175, 197, 219, 240, 303, 365, 427, 492, 554, 617, 678,
 #                742, 803, 864, 927, 993, 1057, 1118, 1179, 1245, 1310, 1432, 1560, 1811, 2060, 2310, 2563, 3066, 3566]

@@ -40,6 +40,7 @@ YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'countries/br/otc/debentu
 
 # registries
 YAML_BR_CVM_REGISTRIES = reading_yaml(os.path.join(root_path, 'countries/br/registries/cvm.yaml'))
+YAML_BR_BCB_BRAZILLIAN_BANKS_REGISTRY = reading_yaml(os.path.join(root_path, 'countries/br/registries/brazillian_banks.yaml'))
 
 # taxation
 YAML_IRSBR = reading_yaml(os.path.join(root_path, 'countries/br/taxation/irsbr.yaml'))

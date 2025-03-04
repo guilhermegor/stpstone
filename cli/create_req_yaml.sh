@@ -93,13 +93,12 @@ resource_example:
     attributes:
       attrb: Attrb
   regex_patterns:
-    event:
-      condition_1:
-        action_1: pattern_regex_1
-        action_2: pattern_regex_2
-      condition_2:
-        action_1: pattern_regex_1
-        action_2: pattern_regex_2
+    event_1:
+      condition_1: pattern_regex_1
+      condition_2: pattern_regex_2
+    event_2:
+      condition_1: pattern_regex_1
+      condition_2: pattern_regex_2
   xpaths:
     name_1: xpath_1
     name_2: xpath_2

@@ -498,6 +498,7 @@ class StrHandler:
             str_ = str_.replace("+", " ")
             str_ = str_.replace(" (", " ")
             str_ = str_.replace(") ", " ")
+            str_ = str_.replace(r"\n", " ")
             words = str_.lower().split()
         else:
             raise ValueError(

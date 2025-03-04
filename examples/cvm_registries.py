@@ -1,7 +1,6 @@
 # pypi.org libs
 import os
 import sys
-
 # local libs
 sys.path.append(os.path.abspath(os.path.join(os.path.realpath(__file__), "..", "..")))
 from stpstone.ingestion.countries.br.registries.cvm import CVMRegistries
