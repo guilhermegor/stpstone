@@ -44,7 +44,8 @@ class CVMRegistries(ABCRequests):
         self.token = token
         self.list_slugs = list_slugs
         self.month_ref = self.dt_ref.strftime("%Y%m")
-        self.month_ref_mm1 = DatesBR().add_months(self.dt_ref, -1).strftime("%Y%m")
+        self.month_ref = DatesBR().add_months(self.dt_ref, -1).strftime("%Y%m")
+        self.year_ref = DatesBR().year_number(self.dt_ref)
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         return None

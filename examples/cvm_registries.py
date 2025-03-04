@@ -62,6 +62,18 @@ cls_ = CVMRegistries(session=None, cls_db=None)
 # print(f"\n*** DF FUNDS MONTHLY PROFILE - CVM: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("funds_abs", bl_fetch=True, bl_debug=False)
-print(f"\n*** DF FUNDS ABS - CVM: \n{df_}")
+# df_ = cls_.source("funds_abs", bl_fetch=True, bl_debug=False)
+# print(f"\n*** DF FUNDS ABS - CVM: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("specially_constitued_investment_fund", bl_fetch=True, bl_debug=False)
+# print(f"\n*** DF SPECIALLY CONSTITUED INVESTMENT FUND - CVM: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("reits_monthly_profile", bl_fetch=True, bl_debug=False)
+# print(f"\n*** DF REITS MONTHLY PROFILE - CVM: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("banks_registry", bl_fetch=True, bl_debug=False)
+print(f"\n*** DF BANKS REGISTRY - CVM: \n{df_}")
 df_.info()

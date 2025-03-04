@@ -123,7 +123,7 @@ class StrHandler:
     def normalize_text(self, str_):
         return normalize("NFKD", str_).encode("ascii", "ignore").decode("utf-8")
 
-    def remove_sup_period_marks(self, corpus, patterns="[!.?+]"):
+    def remove_sup_period_marks(self, corpus, patterns=r"[!.?+]"):
         """
         DOCSTRING: REMOVE END PERIOD MARKS
         INPUTS: CORPUS AND PATTERNS (DEFAULT)
@@ -316,7 +316,7 @@ class StrHandler:
         return normalize("NFC", str1).casefold() == normalize("NFC", str2).casefold()
 
     def remove_non_alphanumeric_chars(
-        self, str_, str_pattern_maintain=r"[\W_]", str_replace=""
+        self, str_, str_pattern_maintain=r'[\W_]', str_replace=''
     ):
         """
         Remove non-alphanumeric characters from a string.
@@ -467,7 +467,7 @@ class StrHandler:
             - UPPER_CONSTANT - 'upper_constant'
             - lower_constant - 'lower_constant'
             - UpperFirst - 'upper_first'
-            - Default (words separated by spaces or hyphens) - 'default'
+            - Default (words separated by spaces, hyphens or underscores) - 'default'
         Args:
             from_case (str): Current case of the string
             to_case (str): Desired case of the string
@@ -494,6 +494,7 @@ class StrHandler:
         elif from_case == "default":
             str_ = str_.replace(" - ", " ")
             str_ = str_.replace("-", " ")
+            str_ = str_.replace("_", " ")
             str_ = str_.replace("+", " ")
             str_ = str_.replace(" (", " ")
             str_ = str_.replace(") ", " ")
