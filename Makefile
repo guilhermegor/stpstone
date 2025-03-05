@@ -50,11 +50,11 @@ update_readme: package_tree update_tree
 
 ### FACTORY METHODS ###
 
-scaffolding_ingestion_request:
+concrete_product_ingestion_request:
 	bash cli/create_req_yaml.sh
 	bash cli/create_req_cls_py.sh
 
-scaffolding_ingestion_request_html_parser:
+concrete_product_ingestion_request_html_parser:
 	bash cli/html_parser_create_req_yaml.sh
 	bash cli/html_parser_create_req_cls_py.sh
 
@@ -64,5 +64,8 @@ scaffolding_ingestion_request_html_parser:
 git_pull_force:
 	bash cli/git_pull_force.sh
 
-git_keep_just_main:
+git_keep_just_main_builds:
 	bash cli/git_keep_just_main.sh
+
+git_merge_branches:
+	bash cli/git_merge_branches.sh
