@@ -11,7 +11,7 @@ logs:
 metadata:
   company_size:
     schema: raw
-    table_name: irsbr_company_size
+    table_name: br_irsbr_metadata_company_size
     data:
       - CODE: '00'
         DESCRIPTION: N/A

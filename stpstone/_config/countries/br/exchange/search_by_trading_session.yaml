@@ -1,4 +1,8 @@
 ### CONFIGURATION TOOLS ###
+### METADATA:
+###   - https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/boletins-diarios/pesquisa-por-pregao/pesquisa-por-pregao/ ###
+###   - FILES LAYOUT: https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/boletins-diarios/pesquisa-por-pregao/layout-dos-arquivos/ ####
+###   - FILES DECRIPTION: https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/boletins-diarios/pesquisa-por-pregao/descricao-dos-arquivos/ ####
 
 credentials:
   host: https://www.b3.com.br/
@@ -13,17 +17,147 @@ credentials:
     keys:
       token: token
 
-logs:
-  dtypes:
-    FILE_NAME: str
-    REF_DATE: date
-    URL: str
-
 metadata:
+  standardized_instruments_groups:
+    schema: raw
+    table_name: br_b3_metadata_standardized_instruments_groups
+    data:
+      - ORIGEM_INSTRUMENTO: '4'
+        DECODE_INSTRUMENTO: ISIN
+      - ORIGEM_INSTRUMENTO: '8'
+        DECODE_INSTRUMENTO: SYMBOL
+      - ORIGEM_INSTRUMENTO: 'H'
+        DECODE_INSTRUMENTO: CLEARINGHOUSE
+    dtypes:
+      ORIGEM_INSTRUMENTO: str
+      DECODE_INSTRUMENTO: str
 
 
 ### RESOURCES TO BE SCRAPED ###
 
+# Standardized Instruments Groups
+standardized_instruments_groups:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=AI{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_standardized_instruments_groups
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TIPO: int
+    ID_GRUPO_INSTRUMENTOS: int
+    ID_CAMARA: str
+    ID_INSTRUMENTO: str
+    ORIGEM_INSTRUMENTO: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - TIPO
+      - ID_GRUPO_INSTRUMENTOS
+      - ID_CAMARA
+      - ID_INSTRUMENTO
+      - ORIGEM_INSTRUMENTO
+    sep: ";"
+
+# BVBG.087.01 IndexReport
+index_report:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=IR{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_standardized_instruments_groups
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TCKR_SYMB: str
+    ID: int
+    PRTRY: str
+    MKT_IDR_CD: str
+    OPNG_PRIC: float
+    MIN_PRIC: float
+    MAX_PRIC: float
+    TRAD_AVRG_PRIC: float
+    PRVS_DAY_CLSG_PRIC: float
+    CLSG_PRIC: float
+    INDX_VAL: float
+    OSCN_VAL: float
+    ASST_DESC: str
+    STTLM_VAL: float
+    RSNG_SHRS_NB: int
+    FLNG_SHRS_NB: int
+    STBL_SHRS_NB: int
+    CCY: str
+    FILE_NAME: str
+  df_read_params:
+  xml_keys:
+    tags:
+      IndxInf:
+        - TckrSymb
+        - Id
+        - Prtry
+        - MktIdrCd
+        - OpngPric
+        - MinPric
+        - MaxPric
+        - TradAvrgPric
+        - PrvsDayClsgPric
+        - ClsgPric
+        - IndxVal
+        - OscnVal
+        - AsstDesc
+        - SttlmVal
+        - RsngShrsNb
+        - FlngShrsNb
+        - StblShrsNb
+    attributes:
+      currency: Ccy
+
+# BVBG.086.01 PriceReport
 price_report:
   req_method: GET
   # if host is not defined within credentials, use the source one
@@ -37,7 +171,10 @@ price_report:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: pesquisapregao/download?filelist=PR{{dt_ref_yymmdd}}.zip,
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=PR{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -73,6 +210,8 @@ price_report:
     VARTN_PTS: float
     MAX_TRAD_LMT: float
     MIN_TRAD_LMT: float
+    CCY: str
+    FILE_NAME: str
   df_read_params:
   xml_keys:
     tags:

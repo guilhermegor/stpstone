@@ -107,7 +107,7 @@ class HandleReqResponses(ABC):
                     df_ = self.handle_excel_response(file, dict_df_read_params)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
-                elif str_file_extension == ".xml":
+                elif str_file_extension == "xml":
                     df_ = self.handle_xml_response(file, dict_xml_keys)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
@@ -122,9 +122,9 @@ class HandleReqResponses(ABC):
                 else:
                     if self.logger is not None:
                         CreateLog().warnings(
-                            self.logger, f"Unsupported file type: {req_resp.url}"
+                            self.logger, f"Unsupported file type: {str_file_extension}"
                         )
-                    raise ValueError(f"Unsupported file type: {req_resp.url}")
+                    raise ValueError(f"Unsupported file type: {str_file_extension}")
         if list_:
             return pd.DataFrame(list_)
         else:
@@ -165,7 +165,6 @@ class HandleReqResponses(ABC):
                 for tag in list_tags:
                     try:
                         tag_ = soup_content.find(tag)
-                        print(tag_)
                         dict_[tag] = tag_.get_text()
                         for key_attrb_xml in dict_xml_keys["attributes"]:
                             if (
@@ -192,7 +191,7 @@ class HandleReqResponses(ABC):
         return df_
 
     def _pdf_doc_tables_response(
-        self, 
+        self,
         bytes_pdf: BytesIO
     ) -> pd.DataFrame:
         list_ser = list()
@@ -226,7 +225,7 @@ class HandleReqResponses(ABC):
             #   break if every event has at least one match
             if \
                 (len(dict_count_matches) > 0) \
-                and (len([count for count in dict_count_matches[str_event] if count > 0]) 
+                and (len([count for count in dict_count_matches[str_event] if count > 0])
                     >= len(list(dict_regex_patterns.keys()))): break
             for str_event, dict_l1 in dict_regex_patterns.items():
                 for str_condition, pattern_regex in dict_l1.items():
@@ -506,7 +505,7 @@ class ABCRequests(HandleReqResponses):
             type_error_action=type_error_action,
             strategy_keep_when_dupl=strategy_keep_when_dupl,
             encoding=(
-                dict_df_read_params["encoding"]
+                dict_df_read_params.get("encoding", "latin-1")
                 if dict_df_read_params is not None
                 else "latin-1"
             ),
@@ -519,11 +518,7 @@ class ABCRequests(HandleReqResponses):
         df_ = DBLogs().audit_log(
             df_,
             url,
-            DatesBR().build_date(
-                DatesBR().year_number(self.dt_ref),
-                DatesBR().month_number(self.dt_ref, bl_month_mm=False),
-                1,
-            ),
+            self.dt_ref,
         )
         if bl_debug == True:
             print(f"*** TRT REQ - AUDIT LOG: \n{df_}")
