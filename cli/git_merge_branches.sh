@@ -1,7 +1,7 @@
 #!/biin/bash
 
 DEFAULT_OUTDATED_BRANCH="main"
-DEFAULT_UPDATED_BRANCH=$(git branch --show-currrent)
+DEFAULT_UPDATED_BRANCH=$(git branch --show-current)
 
 branch_exists() {
     git show-ref --verify --quiet refs/heads/"$1"
