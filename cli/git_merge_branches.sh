@@ -29,12 +29,14 @@ for branch in "${branches[@]}"; do
     fi
 done
 
-# check for uncommitted changes in the outdated branch
-git checkout "$outdated_branch" > /dev/null 2>&1
-if has_uncommitted_changes; then
-    echo "Error: There are uncommitted changes in the outdated branch '$outdated_branch'. Please commit or stash them before proceeding."
-    exit 1
-fi
+# check for uncommitted changes
+for branch in "${branches[@]}"; do
+    git checkout "$branch" > /dev/null 2>&1
+    if has_uncommitted_changes; then
+        echo "Error: There are uncommitted changes in the branch '$branch'. Please commit or stash them before proceeding."
+        exit 1
+    fi
+done
 
 # confirm before merging
 read -p "Are you sure you want to merge '$updated_branch' into '$outdated_branch'? This will overwrite any changes in '$outdated_branch'. (y/n): " confirm
