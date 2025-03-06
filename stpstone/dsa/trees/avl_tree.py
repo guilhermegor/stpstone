@@ -1,6 +1,7 @@
 ### AVL TREE ###
 ### REFERENCE: https://medium.com/pythoneers/master-avl-tree-in-python-7e756f72d07b ###
 
+
 class CacheObliviousAVLNode:
     def __init__(self, key):
         self.key = key
@@ -8,13 +9,15 @@ class CacheObliviousAVLNode:
         self.right = None
         self.height = 1
 
+
 class CacheObliviousAVLTree:
     """
-    Cache-oblivious AVL trees optimize memory access patterns to improve performance across different 
-    levels of the memory hierarchy. By exploiting cache locality and minimizing cache misses, 
-    cache-oblivious AVL trees can achieve operations even without explicit knowledge og the cache 
+    Cache-oblivious AVL trees optimize memory access patterns to improve performance across different
+    levels of the memory hierarchy. By exploiting cache locality and minimizing cache misses,
+    cache-oblivious AVL trees can achieve operations even without explicit knowledge og the cache
     size or cache line length
     """
+
     def __init__(self):
         self.root = None
 
@@ -36,7 +39,7 @@ class CacheObliviousAVLTree:
         than the left subtree.
         Args:
             node: The node whose balance factor is to be computed.
-        Returns: 
+        Returns:
             The balance factor of the given node.
         """
         if not node:
