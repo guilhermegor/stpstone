@@ -585,7 +585,7 @@ fee_monthly_unit_cost:
     attributes:
       currency: Ccy
 
-# primitive risk factors (FPRs)
+# Primitive Risk Factors (FPRs)
 primitive_risk_factors:
   req_method: GET
   # if host is not defined within credentials, use the source one
@@ -645,7 +645,7 @@ primitive_risk_factors:
       - CRITERIO_CAPITALIZACAO
     sep: ";"
 
-# risk formulas
+# Risk Formulas
 risk_formulas:
   req_method: GET
   # if host is not defined within credentials, use the source one
@@ -673,34 +673,18 @@ risk_formulas:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_b3_fprs
+  table_name: br_b3_risk_formulas
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
     TIPO: int
-    ID_FPR: int
-    NOME_FPR: str
-    FORMATO_VARIACAO: int
-    ID_GRUPO_FPR: int
-    ID_CAMARA_INDICADOR: str
-    ID_INSTRUMENTO_INDICADOR: str
-    ORIGEM_INSTRUMENTO_INDICADO: str
-    BASE: int
-    BASE_INTERPOLACAO: int
-    CRITERIO_CAPITALIZACAO: int
+    ID_FORMULA_RISCO: int
+    NOME_FORMULA_RISCO: str
     FILE_NAME: str
   df_read_params:
     skiprows: 1
     names:
       - TIPO
-      - ID_FPR
-      - NOME_FPR
-      - FORMATO_VARIACAO
-      - ID_GRUPO_FPR
-      - ID_CAMARA_INDICADOR
-      - ID_INSTRUMENTO_INDICADOR
-      - ORIGEM_INSTRUMENTO_INDICADO
-      - BASE
-      - BASE_INTERPOLACAO
-      - CRITERIO_CAPITALIZACAO
+      - ID_FORMULA_RISCO
+      - NOME_FORMULA_RISCO
     sep: ";"
