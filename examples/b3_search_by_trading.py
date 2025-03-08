@@ -29,6 +29,18 @@ cls_ = SearchByTradingB3(
 # print(f"DF INDEX REPORT B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("price_report", bl_fetch=True, bl_debug=False)
-print(f"DF PRICE REPORT B3: \n{df_}")
+# df_ = cls_.source("price_report", bl_fetch=True, bl_debug=False)
+# print(f"DF PRICE REPORT B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("instruments_file", bl_fetch=True, bl_debug=False)
+# print(f"DF INSTRUMENTS FILE B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("registration_indicator_instruments", bl_fetch=True, bl_debug=False)
+# print(f"DF REGISTRATION INDICATOR INSTRUMENTS FILE B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("fee_daily_unit_cost", bl_fetch=True, bl_debug=False)
+print(f"DF FEE DAILY UNIT COST FILE B3: \n{df_}")
 df_.info()

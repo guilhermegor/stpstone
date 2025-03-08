@@ -110,7 +110,7 @@ index_report:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_b3_standardized_instruments_groups
+  table_name: br_b3_index_report
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -185,7 +185,7 @@ price_report:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: b3_price_report
+  table_name: br_b3_price_report
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -237,5 +237,249 @@ price_report:
         - VartnPts
         - MaxTradLmt
         - MinTradLmt
+    attributes:
+      currency: Ccy
+
+# BVBG.028.02
+instruments_file:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=IN{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_instruments_file
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    ID: str
+    PRTRY: str
+    ISSR: str
+    DT: date
+    MKT_IDR_CD: str
+    ASST: str
+    ASST_DESC: str
+    MKT: int
+    SGMT: int
+    DESC: str
+    SCTY_CTGY: int
+    ISIN: str
+    DSTRBTN_ID: str
+    CFICD: str
+    SPCFCTN_CD: str
+    CRPN_NM: str
+    TCKR_SYMB: str
+    PMT_TP: int
+    ALLCN_RND_LOT: int
+    PRIC_FCTR: int
+    TRADG_START_DT: date
+    TRADG_END_DT: date
+    CORP_ACTN_START_DT: date
+    EXDSTRBTN_NB: int
+    CTDY_TRTMNT_TP: int
+    TRADG_CCY: str
+    MKT_CPTLSTN: int
+    LAST_PRIC: float
+    FRST_PRIC: float
+    DAYS_TO_STTLM: int
+    RGHTS_ISSE_PRIC: float
+    CCY: str
+    FILE_NAME: str
+  df_read_params:
+  xml_keys:
+    tags:
+      BizGrp:
+        - Id
+        - Prtry
+        - Issr
+        - Dt
+        - MktIdrCd
+        - Asst
+        - AsstDesc
+        - Mkt
+        - Sgmt
+        - Desc
+        - SctyCtgy
+        - ISIN
+        - DstrbtnId
+        - CFICd
+        - SpcfctnCd
+        - CrpnNm
+        - TckrSymb
+        - PmtTp
+        - AllcnRndLot
+        - PricFctr
+        - TradgStartDt
+        - TradgEndDt
+        - CorpActnStartDt
+        - EXDstrbtnNb
+        - CtdyTrtmntTp
+        - TradgCcy
+        - MktCptlstn
+        - LastPric
+        - FrstPric
+        - DaysToSttlm
+        - RghtsIssePric
+    attributes:
+      currency: Ccy
+
+# BVBG.029.02
+registration_indicator_instruments:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=II{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_registration_indicator_instruments
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    ID: str
+    PRTRY: int
+    ISSR: int
+    ACTVTY_IND: str
+    FRQCY: str
+    NET_POS_ID: str
+    DT: date
+    UPD_TP: str
+    MKT_IDR_CD: str
+    INSTRM_NM: str
+    DESC: str
+    SGMT: int
+    MKT: int
+    ASST: str
+    SCTY_CTGY: int
+    TP_CD: int
+    ECNC_IND_DESC: str
+    BASE_CD: int
+    VAL_TP_CD: int
+    NTRY_REF_CD: int
+    DCML_PRCSN: int
+    MTRTY: int
+    FILE_NAME: str
+  df_read_params:
+  xml_keys:
+    tags:
+      BizGrp:
+        - Id
+        - Prtry
+        - Issr
+        - ActvtyInd
+        - Frqcy
+        - NetPosId
+        - Dt
+        - UpdTp
+        - MktIdrCd
+        - InstrmNm
+        - Desc
+        - Sgmt
+        - Mkt
+        - Asst
+        - SctyCtgy
+        - TpCd
+        - EcncIndDesc
+        - BaseCd
+        - ValTpCd
+        - NtryRefCd
+        - DcmlPrcsn
+        - Mtrty
+
+# BVBG.044.01
+fee_daily_unit_cost:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=DI{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_fee_daily_unit_cost
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SGMT: int
+    MKT: int
+    ASST: str
+    XPRTN_CD: str
+    DAY_TRAD_IND: str
+    TRAD_TX_TP: int
+    AMT: float
+    # REGN_FEE_UNIT_COST_AMT: float
+    CCY: str
+    FILE_NAME: str
+  df_read_params:
+  xml_keys:
+    tags:
+      FeeInstrmInf:
+        - Sgmt
+        - Mkt
+        - Asst
+        - XprtnCd
+        - DayTradInd
+        - TradTxTp
+        - XchgFeeUnitCost:
+          - Amt
+        - RegnFeeUnitCost:
+          - Amt
     attributes:
       currency: Ccy

@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
 from logging import Logger
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, Type
 from zipfile import ZipFile
 from requests import Request, Response, Session, exceptions, request
 from urllib.parse import urlparse, parse_qs
@@ -152,6 +152,26 @@ class HandleReqResponses(ABC):
             file = StringIO(file.text)
         return pd.read_excel(file, **dict_df_read_params)
 
+    def _xml_find(
+        self,
+        soup_content: Type[XMLFiles],
+        tag:str,
+        tag_name: str,
+        dict_xml_keys: Dict[str, Any]
+    ) -> Dict[str, Union[str, float, int]]:
+        dict_ = dict()
+        soup_tag = soup_content.find(tag)
+        dict_[tag_name] = soup_tag.get_text()
+        if "attributes" in dict_xml_keys:
+            for key_attrb_xml in dict_xml_keys["attributes"]:
+                if \
+                    (dict_xml_keys["attributes"][key_attrb_xml] is not None) \
+                    and (dict_xml_keys["attributes"][key_attrb_xml] in soup_tag.attrs):
+                    dict_[dict_xml_keys["attributes"][key_attrb_xml]] = (
+                        soup_tag.attrs[dict_xml_keys["attributes"][key_attrb_xml]]
+                    )
+        return dict_
+
     def handle_xml_response(
         self, file: Union[BytesIO, TextIOWrapper], dict_xml_keys: Dict[str, Any]
     ) -> pd.DataFrame:
@@ -161,24 +181,24 @@ class HandleReqResponses(ABC):
         soup_xml = XMLFiles().memory_parser(file)
         for key, list_tags in dict_xml_keys["tags"].items():
             for soup_content in soup_xml.find_all(key):
-                dict_ = dict()
                 for tag in list_tags:
-                    try:
-                        tag_ = soup_content.find(tag)
-                        dict_[tag] = tag_.get_text()
-                        for key_attrb_xml in dict_xml_keys["attributes"]:
-                            if (
-                                dict_xml_keys["attributes"][key_attrb_xml] is not None
-                            ) and (
-                                dict_xml_keys["attributes"][key_attrb_xml] in tag_.attrs
-                            ):
-                                dict_[dict_xml_keys["attributes"][key_attrb_xml]] = (
-                                    tag_.attrs[
-                                        dict_xml_keys["attributes"][key_attrb_xml]
-                                    ]
-                                )
-                    except AttributeError:
-                        continue
+                    if isinstance(tag, str):
+                        dict_l1 = self._xml_find(soup_content, tag, tag, dict_xml_keys)
+                        if ("dict_" in locals()) and (isinstance(dict_, dict)):
+                            dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l1)
+                        else:
+                            dict_ = dict_l1
+                    elif isinstance(tag, dict):
+                        key_ = list(tag.keys())[0]
+                        list_values = list(tag.values())[0]
+                        for soup_l2 in soup_content.find_all(key_):
+                            for tag_l2 in list_values:
+                                dict_l2 = self._xml_find(soup_l2, tag_l2, f"{key_}{tag_l2}",
+                                                       dict_xml_keys)
+                                if ("dict_" in locals()) and (isinstance(dict_, dict)):
+                                    dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l2)
+                                else:
+                                    dict_ = dict_l2
                 list_ser.append(dict_)
         return pd.DataFrame(list_ser)
 
