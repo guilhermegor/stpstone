@@ -61,6 +61,10 @@ cls_ = SearchByTradingB3(
 # print(f"DF FEE VARIABLES B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("daily_liquidity_limit", bl_fetch=True, bl_debug=False)
-print(f"DF DAILY LIQUIDITY LIMIT B3: \n{df_}")
+# df_ = cls_.source("daily_liquidity_limit", bl_fetch=True, bl_debug=False)
+# print(f"DF DAILY LIQUIDITY LIMIT B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("daily_liquidity_limit_other_limits", bl_fetch=True, bl_debug=False)
+print(f"DF DAILY LIQUIDITY LIMIT - OTHER LIMITS B3: \n{df_}")
 df_.info()
