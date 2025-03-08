@@ -44,8 +44,7 @@ class CVMDATA:
         reader = pd.read_csv(url, sep=';', encoding='latin1', decimal='.', thousands=',')
         df_funds_register = pd.DataFrame(reader)
         # validate the content of dataframe
-        if \
-            (df_funds_register.empty == True) \
+        if (df_funds_register.empty == True) \
             and (self.logger is not None):
             CreateLog().errors(
                 self.logger, 'Error reading funds register within url: {}'.format(url))

@@ -510,8 +510,7 @@ class MarkowitzEff:
                 #   reseting variables
                 array_w = np.zeros(int_n_assets)
                 #   check if it's the nth try or all the combinations are greater than one
-                if \
-                    (i_attempts >= nth_try)\
+                if (i_attempts >= nth_try)\
                     or (all([sum(comb) >= 1.0 for comb in list_combs])):
                     #   return a weight array with one asset having weight 1.0 and others 0.0
                     array_w = np.zeros(int_n_assets)

@@ -53,8 +53,7 @@ class PTAXBCB(ABCRequests):
     
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         tup_parsed_url = urlparse(req_resp.url)
-        if \
-            (f'{tup_parsed_url.scheme}://{tup_parsed_url.hostname}/' 
+        if (f'{tup_parsed_url.scheme}://{tup_parsed_url.hostname}/' 
              == YAML_BR_PTAX_BCB['ids']['host']) \
             and ('&' not in tup_parsed_url.query):
             root = HtmlHndler().lxml_parser(req_resp)

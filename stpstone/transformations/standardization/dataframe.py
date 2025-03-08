@@ -163,8 +163,7 @@ class DFStandardization(metaclass=TypeChecker):
             if v in ['int64', 'float64', 'int32', 'float32', int, float]
         ]
         for col in list_cols_numerical:
-            if \
-                (df_[col].dtype == 'object') \
+            if (df_[col].dtype == 'object') \
                 and (df_[col].str.contains(r'^\d{1,3}(?:\.\d{3})*(,\d+)?$', regex=True).any()):
                 df_[col] = df_[col].str.replace('.', '', regex=False)
                 df_[col] = df_[col].str.replace(',', '.', regex=False)

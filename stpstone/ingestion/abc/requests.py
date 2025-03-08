@@ -161,11 +161,14 @@ class HandleReqResponses(ABC):
     ) -> Dict[str, Union[str, float, int]]:
         dict_ = dict()
         soup_tag = soup_content.find(tag)
-        dict_[tag_name] = soup_tag.get_text()
+        if soup_tag is None:
+            dict_[tag_name] = None
+        else:
+            dict_[tag_name] = soup_tag.get_text()
         if "attributes" in dict_xml_keys:
             for key_attrb_xml in dict_xml_keys["attributes"]:
-                if \
-                    (dict_xml_keys["attributes"][key_attrb_xml] is not None) \
+                if (soup_tag is not None) \
+                    and (dict_xml_keys["attributes"][key_attrb_xml] is not None) \
                     and (dict_xml_keys["attributes"][key_attrb_xml] in soup_tag.attrs):
                     dict_[dict_xml_keys["attributes"][key_attrb_xml]] = (
                         soup_tag.attrs[dict_xml_keys["attributes"][key_attrb_xml]]
@@ -243,8 +246,7 @@ class HandleReqResponses(ABC):
         for i, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
             #   break if every event has at least one match
-            if \
-                (len(dict_count_matches) > 0) \
+            if (len(dict_count_matches) > 0) \
                 and (len([count for count in dict_count_matches[str_event] if count > 0])
                     >= len(list(dict_regex_patterns.keys()))): break
             for str_event, dict_l1 in dict_regex_patterns.items():

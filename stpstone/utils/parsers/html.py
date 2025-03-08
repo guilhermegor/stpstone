@@ -204,8 +204,7 @@ class SeleniumWD:
         service = Service(executable_path=self.path_webdriver)
         web_driver = webdriver.Chrome(service=service, options=browser_options)
         # open minimized
-        if \
-            (self.bl_opn_min == True) \
+        if (self.bl_opn_min == True) \
             and (self.bl_headless == False):
             web_driver.minimize_window()
         # open the provided url

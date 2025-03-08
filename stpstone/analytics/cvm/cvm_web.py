@@ -325,8 +325,7 @@ class CVMWeb_WS_Funds:
                 self.key_fund_daily_infos_url: url_fund_daily_infos,
             } for d in list_dts
         ]
-        if \
-            (self.cls_db is not None) \
+        if (self.cls_db is not None) \
             and (len(list_avl_dts_fund) > 0):
             self.cls_db.insert(
                 list_avl_dts_fund, 
@@ -430,8 +429,7 @@ class CVMWeb_WS_Funds:
         # ))
         # print(f'URL: {url_daily_report_fund}')
         # raise Exception('BREAK')
-        if \
-            (len(list_str_dts) == 0) \
+        if (len(list_str_dts) == 0) \
             or (len(HtmlHndler().html_lxml_xpath(html_content_gen, 
                 str_xpath_dropdown_box)) == 0): 
             return []
@@ -499,8 +497,7 @@ class CVMWeb_WS_Funds:
             url_fund_daily_infos, html_content_gen, str_fund_code, list_ftd_dts)
         # print(f'LIST_SER_CVMWEB_DAILY_INFOS: \n{list_ser}')
         # backup in db, if is user's will
-        if \
-            (self.cls_db is not None) \
+        if (self.cls_db is not None) \
             and (len(list_ser) > 0):
             self.cls_db.insert(
                 list_ser, 
@@ -532,8 +529,7 @@ class CVMWeb_WS_Funds:
             for i, str_dt in enumerate(list_dts):
                 if DatesBR().check_date_datetime_format(str_dt) == True:
                     list_dts[i] = str_dt.strftime(str_dt_fmt_1)
-                elif \
-                    (StrHandler().match_string_like(str_dt, '*-*') == True) \
+                elif (StrHandler().match_string_like(str_dt, '*-*') == True) \
                     and (isinstance(str_dt, str) == True):
                     list_dts[i] = DatesBR().str_date_to_datetime(
                         str_dt, format=str_dt_fmt_1).strftime(str_strftime_format)

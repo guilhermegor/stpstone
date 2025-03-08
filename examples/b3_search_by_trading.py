@@ -53,6 +53,10 @@ cls_ = SearchByTradingB3(
 # print(f"DF PRIMITIVE RISK FACTORS B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("risk_formulas", bl_fetch=True, bl_debug=False)
-print(f"DF RISK FORMULAS B3: \n{df_}")
+# df_ = cls_.source("risk_formulas", bl_fetch=True, bl_debug=False)
+# print(f"DF RISK FORMULAS B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("variable_fees_monthly_updt", bl_fetch=True, bl_debug=False)
+print(f"DF FEE VARIABLES B3: \n{df_}")
 df_.info()
