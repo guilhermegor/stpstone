@@ -42,6 +42,8 @@ class SearchByTradingB3(ABCRequests):
         self.token = token, 
         self.list_slugs = list_slugs
         self.dt_ref_yymmdd = self.dt_ref.strftime('%y%m%d')
+        self.dt_inf_month = DatesBR().dates_inf_sup_month(self.dt_ref)[0]
+        self.dt_inf_month_yymmdd = self.dt_inf_month.strftime('%y%m%d')
     
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         return None

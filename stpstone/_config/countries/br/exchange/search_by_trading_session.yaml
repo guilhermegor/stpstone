@@ -463,8 +463,8 @@ fee_daily_unit_cost:
     XPRTN_CD: str
     DAY_TRAD_IND: str
     TRAD_TX_TP: int
-    AMT: float
-    # REGN_FEE_UNIT_COST_AMT: float
+    XCHG_FEE_UNIT_COST_AMT: float
+    REGN_FEE_UNIT_COST_AMT: float
     CCY: str
     FILE_NAME: str
   df_read_params:
@@ -475,6 +475,63 @@ fee_daily_unit_cost:
         - Mkt
         - Asst
         - XprtnCd
+        - DayTradInd
+        - TradTxTp
+        - XchgFeeUnitCost:
+          - Amt
+        - RegnFeeUnitCost:
+          - Amt
+    attributes:
+      currency: Ccy
+
+# BVBG.043.01
+fee_monthly_unit_cost:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=UN{{dt_inf_month_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_fee_monthly_unit_cost
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    SGMT: int
+    MKT: int
+    ASST: str
+    DAY_TRAD_IND: str
+    TRAD_TX_TP: int
+    XCHG_FEE_UNIT_COST_AMT: float
+    REGN_FEE_UNIT_COST_AMT: float
+    CCY: str
+    FILE_NAME: str
+  df_read_params:
+  xml_keys:
+    tags:
+      FeeInstrmInf:
+        - Sgmt
+        - Mkt
+        - Asst
         - DayTradInd
         - TradTxTp
         - XchgFeeUnitCost:

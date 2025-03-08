@@ -41,6 +41,11 @@ cls_ = SearchByTradingB3(
 # print(f"DF REGISTRATION INDICATOR INSTRUMENTS FILE B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("fee_daily_unit_cost", bl_fetch=True, bl_debug=False)
-print(f"DF FEE DAILY UNIT COST FILE B3: \n{df_}")
+# df_ = cls_.source("fee_daily_unit_cost", bl_fetch=True, bl_debug=False)
+# print(f"DF FEE DAILY UNIT COST FILE B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("fee_monthly_unit_cost", bl_fetch=True, bl_debug=False)
+print(f"DF FEE MONTHLY UNIT COST FILE B3: \n{df_}")
 df_.info()
+
