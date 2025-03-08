@@ -22,15 +22,59 @@ metadata:
     schema: raw
     table_name: br_b3_metadata_standardized_instruments_groups
     data:
-      - ORIGEM_INSTRUMENTO: '4'
+      - ORIGEM_INSTRUMENTO: 4
         DECODE_INSTRUMENTO: ISIN
-      - ORIGEM_INSTRUMENTO: '8'
+      - ORIGEM_INSTRUMENTO: 8
         DECODE_INSTRUMENTO: SYMBOL
-      - ORIGEM_INSTRUMENTO: 'H'
+      - ORIGEM_INSTRUMENTO: H
         DECODE_INSTRUMENTO: CLEARINGHOUSE
     dtypes:
       ORIGEM_INSTRUMENTO: str
       DECODE_INSTRUMENTO: str
+  primitive_risk_factors:
+    schema: raw
+    table_name: br_b3_metadata_primitive_risk_factors
+    data:
+      - NOME_CAMPO: FORMATO DE VARIAÇÃO
+        ID: 1
+        DECODE: PERCENTUAL
+      - NOME_CAMPO: FORMATO DE VARIAÇÃO
+        ID: 2
+        DECODE: BASIS POINTS
+      - NOME_CAMPO: ORIGEM DO INSTRUMENTO INDICADO
+        ID: 4
+        DECODE: ISIN
+      - NOME_CAMPO: ORIGEM DO INSTRUMENTO INDICADO
+        ID: 8
+        DECODE: SYMBOL
+      - NOME_CAMPO: ORIGEM DO INSTRUMENTO INDICADO
+        ID: H
+        DECODE: CLEARINGHOUSE
+      - NOME_CAMPO: BASE
+        ID: 252
+        DECODE: N/A
+      - NOME_CAMPO: BASE
+        ID: 360
+        DECODE: N/A
+      - NOME_CAMPO: BASE_INTERPOLACAO
+        ID: 252
+        DECODE: N/A
+      - NOME_CAMPO: BASE_INTERPOLACAO
+        ID: 360
+        DECODE: N/A
+      - NOME_CAMPO: CRITERIO_CAPITALIZACAO
+        ID: 0
+        DECODE: EXPONENCIAL
+      - NOME_CAMPO: CRITERIO_CAPITALIZACAO
+        ID: 1
+        DECODE: LINEAR
+      - NOME_CAMPO: CRITERIO_CAPITALIZACAO
+        ID: 2
+        DECODE: PREÇO
+    dtypes:
+      NOME_CAMPO: str
+      ID: str
+      DECODE: str
 
 
 ### RESOURCES TO BE SCRAPED ###
@@ -540,3 +584,123 @@ fee_monthly_unit_cost:
           - Amt
     attributes:
       currency: Ccy
+
+# primitive risk factors (FPRs)
+primitive_risk_factors:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=FP{{dt_inf_month_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_fprs
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TIPO: int
+    ID_FPR: int
+    NOME_FPR: str
+    FORMATO_VARIACAO: int
+    ID_GRUPO_FPR: int
+    ID_CAMARA_INDICADOR: str
+    ID_INSTRUMENTO_INDICADOR: str
+    ORIGEM_INSTRUMENTO_INDICADO: str
+    BASE: int
+    BASE_INTERPOLACAO: int
+    CRITERIO_CAPITALIZACAO: int
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - TIPO
+      - ID_FPR
+      - NOME_FPR
+      - FORMATO_VARIACAO
+      - ID_GRUPO_FPR
+      - ID_CAMARA_INDICADOR
+      - ID_INSTRUMENTO_INDICADOR
+      - ORIGEM_INSTRUMENTO_INDICADO
+      - BASE
+      - BASE_INTERPOLACAO
+      - CRITERIO_CAPITALIZACAO
+    sep: ";"
+
+# risk formulas
+risk_formulas:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=FR{{dt_inf_month_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_fprs
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    TIPO: int
+    ID_FPR: int
+    NOME_FPR: str
+    FORMATO_VARIACAO: int
+    ID_GRUPO_FPR: int
+    ID_CAMARA_INDICADOR: str
+    ID_INSTRUMENTO_INDICADOR: str
+    ORIGEM_INSTRUMENTO_INDICADO: str
+    BASE: int
+    BASE_INTERPOLACAO: int
+    CRITERIO_CAPITALIZACAO: int
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - TIPO
+      - ID_FPR
+      - NOME_FPR
+      - FORMATO_VARIACAO
+      - ID_GRUPO_FPR
+      - ID_CAMARA_INDICADOR
+      - ID_INSTRUMENTO_INDICADOR
+      - ORIGEM_INSTRUMENTO_INDICADO
+      - BASE
+      - BASE_INTERPOLACAO
+      - CRITERIO_CAPITALIZACAO
+    sep: ";"
