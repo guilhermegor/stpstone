@@ -161,7 +161,7 @@ index_report:
     TCKR_SYMB: str
     ID: int
     PRTRY: str
-    MKT_IDR_CD: str
+    MKT_IDR_CD: category
     OPNG_PRIC: float
     MIN_PRIC: float
     MAX_PRIC: float
@@ -237,7 +237,7 @@ price_report:
     TCKR_SYMB: str
     ID: str
     PRTRY: str
-    MKT_IDR_CD: str
+    MKT_IDR_CD: category
     TRAD_QTY: int
     OPN_INTRST: float
     FIN_INSTRM_QTY: int
@@ -320,7 +320,7 @@ instruments_file:
     PRTRY: str
     ISSR: str
     DT: date
-    MKT_IDR_CD: str
+    MKT_IDR_CD: category
     ASST: str
     ASST_DESC: str
     MKT: int
@@ -427,7 +427,7 @@ registration_indicator_instruments:
     NET_POS_ID: str
     DT: date
     UPD_TP: str
-    MKT_IDR_CD: str
+    MKT_IDR_CD: category
     INSTRM_NM: str
     DESC: str
     SGMT: int
@@ -622,9 +622,9 @@ primitive_risk_factors:
     NOME_FPR: str
     FORMATO_VARIACAO: int
     ID_GRUPO_FPR: int
-    ID_CAMARA_INDICADOR: str
+    ID_CAMARA_INDICADOR: category
     ID_INSTRUMENTO_INDICADOR: str
-    ORIGEM_INSTRUMENTO_INDICADO: str
+    ORIGEM_INSTRUMENTO_INDICADO: category
     BASE: int
     BASE_INTERPOLACAO: int
     CRITERIO_CAPITALIZACAO: int
@@ -717,7 +717,7 @@ variable_fees_monthly_updt:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_b3_fee_monthly_unit_cost
+  table_name: br_b3_variable_fees_monthly_updt
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -728,7 +728,7 @@ variable_fees_monthly_updt:
     CONVS_IND_VAL: float
     ID: int
     PRTRY: int
-    MKT_IDR_CD: str
+    MKT_IDR_CD: category
     FILE_NAME: str
   df_read_params:
   xml_keys:
@@ -744,3 +744,57 @@ variable_fees_monthly_updt:
         - MktIdrCd
     attributes:
       currency: Ccy
+
+# Daily Liquidity Limit
+daily_liquidity_limit:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=LD{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_daily_liquidity_limit
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    ID_CAMARA: category
+    ORIGIEM_INSTRUMENTO: category
+    ID_INSTRUMENTO: str
+    SIMBOLO_INSTRUMENTO: str
+    LIMITE_LIQUIDEZ: float
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - ID_CAMARA
+      - ORIGIEM_INSTRUMENTO
+      - ID_INSTRUMENTO
+      - SIMBOLO_INSTRUMENTO
+      - LIMITE_LIQUIDEZ
+    sep: ";"
+    usecols:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
