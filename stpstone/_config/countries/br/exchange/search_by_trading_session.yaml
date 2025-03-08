@@ -848,3 +848,174 @@ daily_liquidity_limit_other_limits:
       - N_A
       - LIMITE_LIQUIDEZ
     sep: ";"
+
+# Tradable Security List
+tradable_security_list:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=SecurityList{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_tradable_security_list
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions_zip:
+    - tmp
+    - log
+    - bak
+    - json
+  dtypes:
+    SYMBOL: str
+    SECURITY_ID: int
+    SECURITY_ID_SOURCE: category
+    SECURITY_EXCHANGE: category
+    NO_APPL_IDS: category
+    APPL_ID: str
+    PUT_OR_CALL: category
+    PRODUCT: category
+    CFI_CODE: category
+    SECURITY_GROUP: str
+    SECURITY_TYPE: category
+    SECURITY_SUB_TYPE: category
+    MATURITY_MONTH_YEAR: int
+    MATURITY_DATE: date
+    ISSUE_DATE: date
+    COUNTRY_OF_ISSUE: category
+    STRIKE_PRICE: float
+    STRIKE_CURRENCY: category
+    EXERCISE_STYLE: category
+    CONTRACT_MULTIPLIER: float
+    SECURITY_DESC: str
+    CONTRACT_SETTL_MONTH: int
+    DATED_DATE: int
+    SETTL_TYPE: category
+    SETTL_DATE: date
+    PRICE_DIVISOR: int
+    MIN_PRICE_INCREMENT: float
+    TICK_SIZE_DENOMINATOR: int
+    MIN_ORDER_QTY: int
+    MAX_ORDER_QTY: int
+    MULTI_LEG_MODEL: int
+    MULTI_LEG_PRICE_METHOD: int
+    INDEX_PCT: str
+    NO_INSTR_ATTRIB: int
+    INSTR_ATTRIB_TYPE: str
+    INSTR_ATTRIB_VALUE: str
+    START_DATE: str
+    END_DATE: str
+    NO_UNDERLYINGS: int
+    UNDERLYING_SYMBOL: str
+    UNDERLYING_SECURITY_ID: str
+    UNDERLYING_SECURITY_ID_SOURCE: str
+    UNDERLYING_SECURITY_EXCHANGE: category
+    INDEX_THEORETICAL_QTY: str
+    CURRENCY: category
+    SETTL_CURRENCY: category
+    SECURITY_STRATEGY_TYPE: category
+    ASSET: category
+    NO_SHARES_ISSUED: int
+    SECURITY_VALIDITY_TIMESTAMP: str
+    MARKET_SEGMENT_ID: int
+    GOVERNANCE_INDICATOR: category
+    CORPORATE_ACTION_EVENT_ID: int
+    SECURITY_MATCH_TYPE: int
+    NO_LEGS: int
+    LEG_SYMBOL: str
+    LEG_SECURITY_ID: str
+    LEG_SECURITY_ID_SOURCE: str
+    LEG_SECURITY_TYPE: category
+    LEG_SECURITY_EXCHANGE: category
+    LEG_RATIO_QTY: category
+    LEG_SIDE: category
+    NO_TICK_RULES: str
+    NO_LOT_TYPE_RULES: int
+    LOT_TYPE: category
+    MIN_LOT_SIZE: int
+    IMPLIED_MARKET_INDICATOR: category
+    MIN_CROSS_QTY: int
+    ISIN_NUMBER: str
+    CLEARING_HOUSE_ID: int
+    FILE_NAME: str
+  df_read_params:
+    sep: ","
+
+# Mapping OTC Instrument Groups
+mapping_otc_instrument_groups:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=MO{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_mapping_otc_instrument_groups
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions_zip:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    TIPO: str
+    ID_GRUPO_INSTRUMENTOS: int
+    ID_CAMARA_ATIVO_OBJETO: category
+    ID_INSTRUMENTO_ATIVO_OBJETO: int
+    ORIGEM_INSTRUMENTO_ATIVO_OBJETO: category
+    ID_FORMULA_RISCO: int
+    ID_FPR: int
+    ID_QUALIFICADOR: int
+    DESCRICAO_QUALIFICADOR: category
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - TIPO
+      - ID_GRUPO_INSTRUMENTOS
+      - ID_CAMARA_ATIVO_OBJETO
+      - ID_INSTRUMENTO_ATIVO_OBJETO
+      - ORIGEM_INSTRUMENTO_ATIVO_OBJETO
+      - ID_FORMULA_RISCO
+      - ID_FPR
+      - ID_QUALIFICADOR
+      - DESCRICAO_QUALIFICADOR
+    sep: ";"

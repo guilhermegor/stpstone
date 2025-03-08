@@ -65,6 +65,18 @@ cls_ = SearchByTradingB3(
 # print(f"DF DAILY LIQUIDITY LIMIT B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("daily_liquidity_limit_other_limits", bl_fetch=True, bl_debug=False)
-print(f"DF DAILY LIQUIDITY LIMIT - OTHER LIMITS B3: \n{df_}")
+# df_ = cls_.source("daily_liquidity_limit_other_limits", bl_fetch=True, bl_debug=False)
+# print(f"DF DAILY LIQUIDITY LIMIT - OTHER LIMITS B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("tradable_security_list", bl_fetch=True, bl_debug=False)
+# print(f"DF TRADABLE SECURITY LIST B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("tradable_security_list", bl_fetch=True, bl_debug=False)
+# print(f"DF TRADABLE SECURITY LIST B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("mapping_otc_instrument_groups", bl_fetch=True, bl_debug=False)
+print(f"DF MAPPING OTC INSTRUMENT GROUPS B3: \n{df_}")
 df_.info()

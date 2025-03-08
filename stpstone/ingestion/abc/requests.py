@@ -36,29 +36,31 @@ class HandleReqResponses(ABC):
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
+        list_ignored_file_extensions_zip: Optional[List[str]] = [],
         bl_debug: bool = False,
     ) -> pd.DataFrame:
         str_file_extension = DirFilesManagement().get_file_extension(req_resp.url)
         if self.req_trt_injection(req_resp) is not None:
             return self.req_trt_injection(req_resp)
         elif str_file_extension == "zip":
-            return self.handle_zip_response(
+            return self._handle_zip_response(
                 req_resp,
                 dict_xml_keys,
                 dict_regex_patterns,
                 dict_df_read_params,
+                list_ignored_file_extensions_zip,
                 bl_debug,
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
-            return self.handle_csv_response(req_resp, dict_df_read_params)
+            return self._handle_csv_response(req_resp, dict_df_read_params)
         elif str_file_extension == "xlsx":
-            return self.handle_excel_response(req_resp, dict_df_read_params)
+            return self._handle_excel_response(req_resp, dict_df_read_params)
         elif str_file_extension == "xml":
-            return self.handle_xml_response(req_resp, dict_xml_keys)
+            return self._handle_xml_response(req_resp, dict_xml_keys)
         elif str_file_extension == "json":
-            return self.handle_json_response(req_resp)
+            return self._handle_json_response(req_resp)
         elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
-            return self.handle_pdf_doc_response(req_resp, dict_regex_patterns)
+            return self._handle_pdf_doc_response(req_resp, dict_regex_patterns)
         else:
             json_ = req_resp.json()
             if isinstance(json_, dict) == True:
@@ -69,27 +71,31 @@ class HandleReqResponses(ABC):
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         return None
 
-    def handle_zip_response(
+    def _handle_zip_response(
         self,
         req_resp: Response,
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
-        bl_debug: bool = False,
+        list_ignored_file_extensions_zip: Optional[List[str]] = [],
+        bl_debug: bool = False
     ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
         for file_name in zipfile.namelist():
             with zipfile.open(file_name) as file:
                 str_file_extension = DirFilesManagement().get_file_extension(file_name)
-                if str_file_extension == "zip":
+                if str_file_extension in list_ignored_file_extensions_zip: 
+                    continue
+                elif str_file_extension == "zip":
                     nested_zip_response = Response()
                     nested_zip_response._content = file.read()
-                    nested_df = self.handle_zip_response(
+                    nested_df = self._handle_zip_response(
                         nested_zip_response,
                         dict_xml_keys,
                         dict_regex_patterns,
                         dict_df_read_params,
+                        list_ignored_file_extensions_zip,
                         bl_debug,
                     )
                     if isinstance(nested_df, pd.DataFrame):
@@ -100,23 +106,23 @@ class HandleReqResponses(ABC):
                             df_["FILE_NAME"] = file_name
                         list_.extend(nested_df)
                 elif (str_file_extension == "csv") or (str_file_extension == "txt"):
-                    df_ = self.handle_csv_response(file, dict_df_read_params)
+                    df_ = self._handle_csv_response(file, dict_df_read_params)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 elif str_file_extension == "xlsx":
-                    df_ = self.handle_excel_response(file, dict_df_read_params)
+                    df_ = self._handle_excel_response(file, dict_df_read_params)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 elif str_file_extension == "xml":
-                    df_ = self.handle_xml_response(file, dict_xml_keys)
+                    df_ = self._handle_xml_response(file, dict_xml_keys)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 elif str_file_extension == "json":
-                    df_ = self.handle_json_response(file)
+                    df_ = self._handle_json_response(file)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 elif str_file_extension == "pdf":
-                    df_ = self.handle_pdf_doc_response(file, dict_regex_patterns)
+                    df_ = self._handle_pdf_doc_response(file, dict_regex_patterns)
                     df_["FILE_NAME"] = file_name
                     list_.extend(df_.to_dict(orient="records"))
                 else:
@@ -130,7 +136,7 @@ class HandleReqResponses(ABC):
         else:
             return pd.DataFrame()
 
-    def handle_csv_response(
+    def _handle_csv_response(
         self,
         file: Union[BytesIO, TextIOWrapper, Response],
         dict_df_read_params: Optional[Dict[str, Any]],
@@ -141,7 +147,7 @@ class HandleReqResponses(ABC):
             file = StringIO(file.text)
         return pd.read_csv(file, **dict_df_read_params)
 
-    def handle_excel_response(
+    def _handle_excel_response(
         self,
         file: Union[BytesIO, TextIOWrapper, Response],
         dict_df_read_params: Optional[Dict[str, Any]],
@@ -175,7 +181,7 @@ class HandleReqResponses(ABC):
                     )
         return dict_
 
-    def handle_xml_response(
+    def _handle_xml_response(
         self, file: Union[BytesIO, TextIOWrapper], dict_xml_keys: Dict[str, Any]
     ) -> pd.DataFrame:
         list_ser = list()
@@ -205,7 +211,7 @@ class HandleReqResponses(ABC):
                 list_ser.append(dict_)
         return pd.DataFrame(list_ser)
 
-    def handle_json_response(self, file: Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+    def _handle_json_response(self, file: Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
         if isinstance(file, BytesIO):
             file.seek(0)
         json_file = file.read()
@@ -294,7 +300,7 @@ class HandleReqResponses(ABC):
         else:
             return None
 
-    def handle_pdf_doc_response(
+    def _handle_pdf_doc_response(
         self,
         req_resp: Response,
         dict_regex_patterns: Dict[str, Dict[str, str]],
@@ -497,6 +503,7 @@ class ABCRequests(HandleReqResponses):
         strategy_keep_when_dupl: str = "first",
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
+        list_ignored_file_extensions_zip: Optional[List[str]] = [],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         bl_debug: bool = False,
     ) -> pd.DataFrame:
@@ -513,7 +520,8 @@ class ABCRequests(HandleReqResponses):
             print(f"*** DF READ PARAMS: {dict_df_read_params}")
         # dealing with request content type
         df_ = self.handle_response(
-            req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params, bl_debug
+            req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params, 
+            list_ignored_file_extensions_zip, bl_debug
         )
         if bl_debug == True:
             print(f"*** TRT REQ BEFORE STANDARDIZATION: \n{df_}")
@@ -683,6 +691,7 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
                 self.dict_metadata[str_resource].get("regex_patterns", None),
                 self.dict_metadata[str_resource].get("df_read_params", None),
+                self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
                 self.dict_metadata[str_resource].get("xml_keys", None),
                 bl_debug,
             )
@@ -802,12 +811,9 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get(
-                                "regex_patterns", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "df_read_params", None
-                            ),
+                            self.dict_metadata[str_resource].get("regex_patterns", None),
+                            self.dict_metadata[str_resource].get("df_read_params", None),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         )
@@ -871,12 +877,9 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get(
-                                "regex_patterns", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "df_read_params", None
-                            ),
+                            self.dict_metadata[str_resource].get("regex_patterns", None),
+                            self.dict_metadata[str_resource].get("df_read_params", None),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         )
@@ -938,12 +941,9 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get(
-                                "regex_patterns", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "df_read_params", None
-                            ),
+                            self.dict_metadata[str_resource].get("regex_patterns", None),
+                            self.dict_metadata[str_resource].get("df_read_params", None),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         ).to_dict(orient="records")

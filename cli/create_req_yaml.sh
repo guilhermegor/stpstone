@@ -75,6 +75,10 @@ resource_example:
   table_name:
   bl_insert_or_ignore: False
   bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
   dtypes:
     COL_1: date
     COL_2: str
