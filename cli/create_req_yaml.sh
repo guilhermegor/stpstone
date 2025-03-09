@@ -33,6 +33,7 @@ credentials:
   payload:
   token:
     host:
+    app:
     get:
       req_method: GET
       bl_verify: False
@@ -51,6 +52,7 @@ resource_example:
   host:
   headers:
   payload:
+  # list of slugs (complementary descriptive text to access a web pages)
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:

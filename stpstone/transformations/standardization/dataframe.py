@@ -28,7 +28,7 @@ class DFStandardization(metaclass=TypeChecker):
         cols_from_case:Optional[str]=None, cols_to_case:Optional[str]=None,
         list_cols_drop_dupl:List[str]=None, str_fmt_dt:str='YYYY-MM-DD',
         type_error_action:str='raise', strategy_keep_when_dupl:str='first',
-        str_data_fillna:str='-1', str_dt_fillna:Optional[str]=None, str_tz:str='UTC',
+        str_data_fillna:str='-99999', str_dt_fillna:Optional[str]=None, str_tz:str='UTC',
         encoding:str='latin-1', bl_debug:bool=False, logger:Optional[Logger]=None
     ):
         self.dict_dtypes = dict_dtypes
@@ -76,18 +76,6 @@ class DFStandardization(metaclass=TypeChecker):
                 x = x.encode(self.encoding, errors='ignore').decode(self.encoding)
             return x
         return df_.apply(clean_cell)
-
-    def strip_hidden_characters(self, df_:pd.DataFrame) -> pd.DataFrame:
-        """
-        Strips hidden characters (e.g., zero-width spaces) from string columns.
-        Args:
-            df_ (pd.DataFrame): The DataFrame to clean.
-        Returns:
-            pd.DataFrame: A DataFrame with hidden characters removed.
-        """
-        for col in df_.select_dtypes(include=['object']).columns:
-            df_[col] = df_[col].str.replace(r'[\u200B\u200C\u200D\uFEFF]', '', regex=True)
-        return df_
 
     def column_names(self, df_:pd.DataFrame) -> List[str]:
         if all([x is not None for x in [self.cols_from_case, self.cols_to_case]]):
@@ -162,12 +150,12 @@ class DFStandardization(metaclass=TypeChecker):
             v for k, v in self.dict_dtypes.items()
             if v in ['int64', 'float64', 'int32', 'float32', int, float]
         ]
-        for col in list_cols_numerical:
-            if (df_[col].dtype == 'object') \
-                and (df_[col].str.contains(r'^\d{1,3}(?:\.\d{3})*(,\d+)?$', regex=True).any()):
-                df_[col] = df_[col].str.replace('.', '', regex=False)
-                df_[col] = df_[col].str.replace(',', '.', regex=False)
-                df_[col] = pd.to_numeric(df_[col], errors='coerce')
+        for col_ in list_cols_numerical:
+            if (df_[col_].dtype == 'object') \
+                and (df_[col_].str.contains(r'^\d{1,3}(?:\.\d{3})*(,\d+)?$', regex=True).any()):
+                df_[col_] = df_[col_].str.replace('.', '', regex=False)
+                df_[col_] = df_[col_].str.replace(',', '.', regex=False)
+                df_[col_] = pd.to_numeric(df_[col_], errors='coerce')
         return df_
 
     def change_dtypes(self, df_:pd.DataFrame) -> pd.DataFrame:
@@ -201,6 +189,21 @@ class DFStandardization(metaclass=TypeChecker):
             df_[list_cols_missing] = df_[list_cols_missing].astype(str)
         return df_
 
+    def strip_hidden_characters(self, df_:pd.DataFrame) -> pd.DataFrame:
+        """
+        Strips hidden characters (e.g., zero-width spaces) from string columns.
+        Args:
+            df_ (pd.DataFrame): The DataFrame to clean.
+        Returns:
+            pd.DataFrame: A DataFrame with hidden characters removed.
+        """
+        for col_ in [
+            c for c in df_.select_dtypes(include=["object", "category"]).columns 
+            if c not in self.list_cols_dt
+        ]:
+            df_[col_] = df_[col_].str.replace(r'[\u200B\u200C\u200D\uFEFF]', '', regex=True)
+        return df_
+
     def strip_all_obj_dtypes(self, df_:pd.DataFrame) -> pd.DataFrame:
         list_cols = [col_ for col_ in list(df_.select_dtypes(['object']).columns) if col_
             not in self.list_cols_dt]
@@ -226,13 +229,13 @@ class DFStandardization(metaclass=TypeChecker):
         steps = [
             self.check_if_empty,
             self.clean_encoding_issues,
-            self.strip_hidden_characters,
             self.column_names,
             self.limit_columns_to_dtypes,
             self.delete_empty_rows,
             self.completeness,
             self.replace_separators,
             self.change_dtypes,
+            self.strip_hidden_characters,
             self.strip_all_obj_dtypes,
             self.remove_duplicated_cols,
             self.data_remove_dupl
@@ -251,15 +254,15 @@ class DFStandardizationML(DFStandardization):
         Returns:
             pd.DataFrame
         """
-        for col in df_.select_dtypes(include=['number']).columns:
+        for col_ in df_.select_dtypes(include=['number']).columns:
             if method == 'iqr':
-                q1, q3 = df_[col].quantile([0.25, 0.75])
+                q1, q3 = df_[col_].quantile([0.25, 0.75])
                 iqr = q3 - q1
                 lower_bound, upper_bound = q1 - 1.5 * iqr, q3 + 1.5 * iqr
-                df_[col] = np.clip(df_[col], lower_bound, upper_bound)
+                df_[col_] = np.clip(df_[col_], lower_bound, upper_bound)
             elif method == 'zscore':
-                mean, std = df_[col].mean(), df_[col].std()
-                df_[col] = np.clip(df_[col], mean - 3 * std, mean + 3 * std)
+                mean, std = df_[col_].mean(), df_[col_].std()
+                df_[col_] = np.clip(df_[col_], mean - 3 * std, mean + 3 * std)
         return df_
 
     def scale_numeric_data(self, df_:pd.DataFrame, method='minmax') -> pd.DataFrame:

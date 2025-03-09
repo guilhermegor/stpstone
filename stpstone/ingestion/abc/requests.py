@@ -390,31 +390,28 @@ class ABCRequests(HandleReqResponses):
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = (
-            token
-            if token is not None
-            else (
-                self.access_token
-                if self.dict_metadata["credentials"]["token"]["host"] is not None
-                else None
-            )
-        )
         self.list_slugs = list_slugs
-        self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
+        self.pattern_special_http_chars =  r'["<>#%{}|\\^~\[\]` ]'
+        self.token = token if token is not None else (
+            self.access_token
+            if self.dict_metadata["credentials"]["token"]["host"] is not None
+            else None
+        )
 
     @property
     def access_token(self):
         dict_instance_vars = self.get_instance_variables
-        url_token = StrHandler().fill_placeholders(
-            self.dict_metadata["credentials"]["token"]["host"], dict_instance_vars
-        )
+        url_token = self.dict_metadata["credentials"]["token"]["host"] \
+            + self.dict_metadata["credentials"]["token"]["app"] \
+            if self.dict_metadata["credentials"]["token"]["app"] is not None \
+            else self.dict_metadata["credentials"]["token"]["host"]
+        url_token = StrHandler().fill_placeholders(url_token, dict_instance_vars)
         req_resp = self.generic_req(
             self.dict_metadata["credentials"]["token"]["get"]["req_method"],
             url_token,
             self.dict_metadata["credentials"]["token"]["get"]["bl_verify"],
             self.dict_metadata["credentials"]["token"]["get"]["timeout"],
         )
-        req_resp.raise_for_status()
         return req_resp.json()[
             self.dict_metadata["credentials"]["token"]["keys"]["token"]
         ]

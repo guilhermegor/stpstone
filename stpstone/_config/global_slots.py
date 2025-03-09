@@ -33,16 +33,21 @@ YAML_WW_FMP = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/market
 YAML_WW_INVESTINGCOM = reading_yaml(os.path.join(root_path, 'countries/ww/exchange/markets/investingcom.yaml'))
 
 # macroeconomics
+# BR
 YAML_BR_PTAX_BCB = reading_yaml(os.path.join(root_path, 'countries/br/macroeconomics/ptax_bcb.yaml'))
 
 # otc
+# BR
 YAML_DEBENTURES = reading_yaml(os.path.join(root_path, 'countries/br/otc/debentures.yaml'))
 
 # registries
+# BR
 YAML_BR_CVM_REGISTRIES = reading_yaml(os.path.join(root_path, 'countries/br/registries/cvm.yaml'))
 YAML_BR_BCB_BRAZILLIAN_BANKS_REGISTRY = reading_yaml(os.path.join(root_path, 'countries/br/registries/brazillian_banks.yaml'))
+YAML_B3_TRD_SEC = reading_yaml(os.path.join(root_path, 'countries/br/registries/b3_trd_sec.yaml'))
 
 # taxation
+# BR
 YAML_IRSBR = reading_yaml(os.path.join(root_path, 'countries/br/taxation/irsbr.yaml'))
 
 # netops

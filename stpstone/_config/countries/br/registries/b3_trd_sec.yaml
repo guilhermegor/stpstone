@@ -1,0 +1,114 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://arquivos.b3.com.br/
+  headers:
+  payload:
+  token:
+    host: https://arquivos.b3.com.br/
+    app: api/download/requestname?fileName=InstrumentsConsolidatedFile&date={{dt_ref}}&recaptchaToken=
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+instruments_list:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: api/download/?token={{token}}#format=.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    RPT_DT: date
+    TCKR_SYMB: str
+    ASST: category
+    ASST_DESC: category
+    SGMT_NM: category
+    MKT_NM: category
+    SCTY_CTGY_NM: category
+    XPRTN_DT: date
+    XPRTN_CD: category
+    TRADG_START_DT: date
+    TRADG_END_DT: date
+    BASE_CD: category
+    CONVS_CRIT_NM: category
+    MTRTY_DT_TRGT_PT: category
+    REQRD_CONVS_IND: category
+    ISIN: str
+    CFICD: category
+    DLVRY_NTCE_START_DT: date
+    DLVRY_NTCE_END_DT: date
+    OPTN_TP: category
+    CTRCT_MLTPLR: float
+    ASST_QTN_QTY: int
+    ALLCN_RND_LOT: int
+    TRADG_CCY: category
+    DLVRY_TP_NM: category
+    WDRWL_DAYS: int
+    WRKG_DAYS: int
+    CLNR_DAYS: int
+    RLVR_BASE_PRIC_NM: category
+    OPNG_FUTR_POS_DAY: int
+    SD_TP_CD1: category
+    UNDRLYG_TCKR_SYMB1: str
+    SD_TP_CD2: category
+    UNDRLYG_TCKR_SYMB2: str
+    PURE_GOLD_WGHT: float
+    EXRC_PRIC: float
+    OPTN_STYLE: category
+    VAL_TP_NM: category
+    PRM_UPFRNT_IND: category
+    OPNG_POS_LMT_DT: date
+    DSTRBTN_ID: category
+    PRIC_FCTR: int
+    DAYS_TO_STTLM: int
+    SRS_TP_NM: category
+    PRTCN_FLG: category
+    AUTOMTC_EXRC_IND: category
+    SPCFCTN_CD: category
+    CRPN_NM: str
+    CORP_ACTN_START_DT: date
+    CTDY_TRTMNT_TP_NM: category
+    MKT_CPTLSTN: float
+    CORP_GOVN_LVL_NM: category
+  df_read_params:
+    sep: ";"
+    skiprows: 1
+    thousands: "."
+    decimal: ","
