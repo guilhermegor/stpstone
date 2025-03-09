@@ -85,7 +85,7 @@ class HandleReqResponses(ABC):
         for file_name in zipfile.namelist():
             with zipfile.open(file_name) as file:
                 str_file_extension = DirFilesManagement().get_file_extension(file_name)
-                if str_file_extension in list_ignored_file_extensions_zip: 
+                if str_file_extension in list_ignored_file_extensions_zip:
                     continue
                 elif str_file_extension == "zip":
                     nested_zip_response = Response()
@@ -146,7 +146,7 @@ class HandleReqResponses(ABC):
     def _read_csv_with_error(self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]) \
         -> Union[BytesIO, TextIOWrapper, StringIO]:
         """
-        Reads a file (BytesIO, TextIOWrapper, StringIO, ZipExtFile), corrects problematic lines, 
+        Reads a file (BytesIO, TextIOWrapper, StringIO, ZipExtFile), corrects problematic lines,
         and returns the corrected content in the same file type as the input
 
         Args:
@@ -259,7 +259,8 @@ class HandleReqResponses(ABC):
                                     dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l2)
                                 else:
                                     dict_ = dict_l2
-                list_ser.append(dict_)
+            dict_ = HandlingDicts().add_key_value_to_dicts(dict_, "ROOT_TAG", key)
+            list_ser.append(dict_)
         return pd.DataFrame(list_ser)
 
     def _handle_json_response(self, file: Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
@@ -571,7 +572,7 @@ class ABCRequests(HandleReqResponses):
             print(f"*** DF READ PARAMS: {dict_df_read_params}")
         # dealing with request content type
         df_ = self.handle_response(
-            req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params, 
+            req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params,
             list_ignored_file_extensions_zip, bl_debug
         )
         if bl_debug == True:

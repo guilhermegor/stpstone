@@ -33,9 +33,9 @@ cls_ = SearchByTradingB3(
 # print(f"DF PRICE REPORT B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("instruments_file", bl_fetch=True, bl_debug=False)
-# print(f"DF INSTRUMENTS FILE B3: \n{df_}")
-# df_.info()
+df_ = cls_.source("instruments_file", bl_fetch=True, bl_debug=False)
+print(f"DF INSTRUMENTS FILE B3: \n{df_}")
+df_.info()
 
 # df_ = cls_.source("registration_indicator_instruments", bl_fetch=True, bl_debug=False)
 # print(f"DF REGISTRATION INDICATOR INSTRUMENTS FILE B3: \n{df_}")
@@ -88,7 +88,3 @@ cls_ = SearchByTradingB3(
 # df_ = cls_.source("mtm_b3", bl_fetch=True, bl_debug=False)
 # print(f"DF MTM B3: \n{df_}")
 # df_.info()
-
-df_ = cls_.source("options_tradable_b3", bl_fetch=True, bl_debug=False)
-print(f"DF OPTIONS TRADABLE B3: \n{df_}")
-df_.info()
