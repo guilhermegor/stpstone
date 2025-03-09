@@ -4869,6 +4869,27 @@ files = [
 ]
 
 [[package]]
+name = "wmi"
+version = "1.5.1"
+description = "Windows Management Instrumentation"
+optional = false
+python-versions = "*"
+files = [
+    {file = "WMI-1.5.1-py2.py3-none-any.whl", hash = "sha256:1d6b085e5c445141c475476000b661f60fff1aaa19f76bf82b7abb92e0ff4942"},
+    {file = "WMI-1.5.1.tar.gz", hash = "sha256:b6a6be5711b1b6c8d55bda7a8befd75c48c12b770b9d227d31c1737dbf0d40a6"},
+]
+
+[package.dependencies]
+pywin32 = "*"
+
+[package.extras]
+all = ["pytest", "sphinx", "twine", "wheel"]
+dev = ["pytest", "sphinx", "twine", "wheel"]
+docs = ["sphinx"]
+package = ["twine", "wheel"]
+tests = ["pytest"]
+
+[[package]]
 name = "workalendar"
 version = "17.0.0"
 description = "Worldwide holidays and working days helper and toolkit."
@@ -4945,4 +4966,4 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12.8,<3.14"
-content-hash = "fb64349a89270e3109f724fec7e9102afa28e081ee369bc61758f4aca53f480e"
+content-hash = "1d715c82ab2b23db50e5e7a3f0b043953470621e5295ddfa5eb87b82dd1a05a2"

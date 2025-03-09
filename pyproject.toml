@@ -63,6 +63,7 @@ pymupdf = "1.25.3"
 pdfplumber = "0.11.5"
 fitz = "0.0.1.dev2"
 psutil = "7.0.0"
+wmi = "1.5.1"
 
 
 [tool.poetry.group.dev.dependencies]
