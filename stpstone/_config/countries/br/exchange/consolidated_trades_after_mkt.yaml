@@ -1,0 +1,77 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://arquivos.b3.com.br/
+  headers:
+  payload:
+  token:
+    host: https://arquivos.b3.com.br/
+    app: api/download/requestname?fileName=TradeInformationConsolidatedAfterHoursFile&date={{dt_ref}}&recaptchaToken=
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+consolidated_trades_information_after_mkt:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: api/download/?token={{token}}#format=.csv
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    RPT_DT: date
+    TCKR_SYMB: str
+    ISIN: str
+    SGMT_NM: category
+    MIN_PRIC: float
+    MAX_PRIC: float
+    TRAD_AVRG_PRIC: float
+    LAST_PRIC: float
+    OSCN_PCTG: float
+    ADJSTD_QT: float
+    ADJSTD_QT_TAX: float
+    REF_PRIC: float
+    TRAD_QTY: int
+    FIN_INSTRM_QTY: int
+    NTL_FIN_VOL: float
+  df_read_params:
+    sep: ";"
+    skiprows: 1
+    thousands: "."
+    decimal: ","
