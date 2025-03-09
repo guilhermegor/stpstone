@@ -11,7 +11,7 @@ from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
 from logging import Logger
 from typing import Any, Dict, List, Optional, Tuple, Union, Type
-from zipfile import ZipFile
+from zipfile import ZipFile, ZipExtFile
 from requests import Request, Response, Session, exceptions, request
 from urllib.parse import urlparse, parse_qs
 # project modules
@@ -136,6 +136,48 @@ class HandleReqResponses(ABC):
         else:
             return pd.DataFrame()
 
+    def _columns_length(self, list_lines:List[Any]) -> int:
+        dict_columns_count = {}
+        for line in list_lines:
+            num_columns = len(line.split(";"))
+            dict_columns_count[num_columns] = dict_columns_count.get(num_columns, 0) + 1
+        return max(dict_columns_count, key=dict_columns_count.get)
+
+    def _read_csv_with_error(self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]) \
+        -> Union[BytesIO, TextIOWrapper, StringIO]:
+        """
+        Reads a file (BytesIO, TextIOWrapper, StringIO, ZipExtFile), corrects problematic lines, 
+        and returns the corrected content in the same file type as the input
+
+        Args:
+            file (Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]): The file to read.
+
+        Returns:
+            Union[BytesIO, TextIOWrapper, StringIO]: The corrected content in the same file type.
+        """
+        # reset the pointer to the beginning
+        file.seek(0)
+        if isinstance(file, BytesIO):
+            content = file.read().decode('utf-8')
+            list_lines = content.splitlines()
+        elif isinstance(file, (TextIOWrapper, StringIO)):
+            list_lines = file.readlines()
+        elif isinstance(file, ZipExtFile):
+            list_lines = [line.decode("utf-8") for line in file.readlines()]
+        else:
+            raise ValueError("Unsupported file type. Expected BytesIO or TextIOWrapper.")
+        list_corrected_lines = [line for line in list_lines if len(line.split(";")) \
+                                == self._columns_length(list_lines)]
+        corrected_content = "\n".join(list_corrected_lines)
+        if isinstance(file, BytesIO):
+            return BytesIO(corrected_content.encode("utf-8"))
+        elif isinstance(file, TextIOWrapper):
+            return TextIOWrapper(BytesIO(corrected_content.encode("utf-8")))
+        elif isinstance(file, StringIO):
+            return StringIO(corrected_content)
+        elif isinstance(file, ZipExtFile):
+            return BytesIO(corrected_content.encode("utf-8"))
+
     def _handle_csv_response(
         self,
         file: Union[BytesIO, TextIOWrapper, Response],
@@ -145,7 +187,16 @@ class HandleReqResponses(ABC):
             file.seek(0)
         elif isinstance(file, Response):
             file = StringIO(file.text)
-        return pd.read_csv(file, **dict_df_read_params)
+        try:
+            return pd.read_csv(file, **dict_df_read_params)
+        except pd.errors.ParserError:
+            file = self._read_csv_with_error(file)
+            if dict_df_read_params is not None:
+                dict_df_read_corrected_params = dict_df_read_params.copy()
+                dict_df_read_corrected_params.pop("skiprows", None)
+            else:
+                dict_df_read_corrected_params = dict()
+            return pd.read_csv(file, **dict_df_read_corrected_params)
 
     def _handle_excel_response(
         self,

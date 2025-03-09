@@ -77,6 +77,18 @@ cls_ = SearchByTradingB3(
 # print(f"DF TRADABLE SECURITY LIST B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("mapping_otc_instrument_groups", bl_fetch=True, bl_debug=False)
-print(f"DF MAPPING OTC INSTRUMENT GROUPS B3: \n{df_}")
+# df_ = cls_.source("mapping_otc_instrument_groups", bl_fetch=True, bl_debug=False)
+# print(f"DF MAPPING OTC INSTRUMENT GROUPS B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("mapping_standardized_instrument_groups", bl_fetch=True, bl_debug=False)
+# print(f"DF MAPPING STANDARDIZED INSTRUMENT GROUPS B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("mtm_b3", bl_fetch=True, bl_debug=False)
+# print(f"DF MTM B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("options_tradable_b3", bl_fetch=True, bl_debug=False)
+print(f"DF OPTIONS TRADABLE B3: \n{df_}")
 df_.info()

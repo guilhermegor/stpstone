@@ -160,7 +160,7 @@ index_report:
   dtypes:
     TCKR_SYMB: str
     ID: int
-    PRTRY: str
+    PRTRY: int
     MKT_IDR_CD: category
     OPNG_PRIC: float
     MIN_PRIC: float
@@ -236,7 +236,7 @@ price_report:
     DT: date
     TCKR_SYMB: str
     ID: str
-    PRTRY: str
+    PRTRY: int
     MKT_IDR_CD: category
     TRAD_QTY: int
     OPN_INTRST: float
@@ -317,7 +317,7 @@ instruments_file:
   bl_schema: True
   dtypes:
     ID: str
-    PRTRY: str
+    PRTRY: int
     ISSR: str
     DT: date
     MKT_IDR_CD: category
@@ -384,6 +384,102 @@ instruments_file:
         - FrstPric
         - DaysToSttlm
         - RghtsIssePric
+    attributes:
+      currency: Ccy
+
+# BVBG.028.02 - OPTIONS
+options_tradable_b3:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=IN{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: pascal
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_options_tradable
+  bl_insert_or_ignore: False
+  bl_schema: True
+  dtypes:
+    ISIN: str
+    DSTRBTN_ID: str
+    CFICD: str
+    MKT_IDR_CD: category
+    PRTRY: int
+    ALLCN_RND_LOT: int
+    PRIC_FCTR: int
+    EXRC_PRIC: float
+    OPTN_STYLE: str
+    XPRTN_DT: date
+    OPTN_TP: int
+    TRADG_START_DT: date
+    TRADG_CCY: str
+    TCKR_SYMB: str
+    CCY: str
+    FILE_NAME: str
+  df_read_params:
+  xml_keys:
+    tags:
+      OptnOnEqtsInf:
+        - ISIN
+        - TckrSymb
+        - SctyCtgy
+        - DstrbtnId
+        - CFICd
+        - MktIdrCd
+        - Prtry
+        - PmtTp
+        - AllcnRndLot
+        - PricFctr
+        - ExrcPric
+        - ExrcStyle
+        - OptnStyle
+        - XprtnDt
+        - XprtnCd
+        - OptnTp
+        - TradgStartDt
+        - TradgEndDt
+        - DaysToSttlm
+        - TradgCcy
+        - DlvryTp
+        - AutomtcExrcInd
+        - SrsTp
+      OptnOnSpotAndFutrsInf:
+        - ISIN
+        - TckrSymb
+        - ExrcPric
+        - ExrcStyle
+        - XprtnDt
+        - XprtnCd
+        - OptnTp
+        - CtrctMltplr
+        - AsstQtnQty
+        - PmtTp
+        - AllcnRndLot
+        - CFICd
+        - UnderlygInstrmId:
+          - Id
+          - Prtry
+          - MktIdrCd
+        
     attributes:
       currency: Ccy
 
@@ -1018,4 +1114,118 @@ mapping_otc_instrument_groups:
       - ID_FPR
       - ID_QUALIFICADOR
       - DESCRICAO_QUALIFICADOR
+    sep: ";"
+
+# Mapping Standardized Instrument Groups
+mapping_standardized_instrument_groups:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=MP{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_mapping_standardized_instrument_groups
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions_zip:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    TIPO: str
+    ID_GRUPO_INSTRUMENTOS: int
+    ID_FORMULA_RISCO: int
+    ID_FPR: int
+    ID_QUALIFICADOR: int
+    DESCRICAO_QUALIFICADOR: category
+    DATA_INICIAL_INTERVALO_VENCIMENTOS: date
+    DATA_FINAL_INTERVALO_VENCIMENTOS: date
+    INDICADOR_FPR_INDEPENDENTE: int
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - TIPO
+      - ID_GRUPO_INSTRUMENTOS
+      - ID_FORMULA_RISCO
+      - ID_FPR
+      - ID_QUALIFICADOR
+      - DESCRICAO_QUALIFICADOR
+      - DATA_INICIAL_INTERVALO_VENCIMENTOS
+      - DATA_FINAL_INTERVALO_VENCIMENTOS
+      - INDICADOR_FPR_INDEPENDENTE
+    sep: ";"
+
+# Maximum Theoretical Margin for Open Positions and the Mininimum Values of Assets Pledged as Collateral
+mtm_b3:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_mtm_b3
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions_zip:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    INSTRUMENT_MTM: str
+    HOLDING_DAY: str
+    MTM_MAX_C_PHI1: str
+    MTM_MAX_V_PHI1: str
+    MIN_MARGIN_CREDIT_COLLATERAL_PHI1: float
+    MIN_MARGIN_CREDIT_COLLATERAL_PHI2: str
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - INSTRUMENT_MTM
+      - HOLDING_DAY
+      - MTM_MAX_C_PHI1
+      - MTM_MAX_V_PHI1
+      - MIN_MARGIN_CREDIT_COLLATERAL_PHI1
+      - MIN_MARGIN_CREDIT_COLLATERAL_PHI2
     sep: ";"
