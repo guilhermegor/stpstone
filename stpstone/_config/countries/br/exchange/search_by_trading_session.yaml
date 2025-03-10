@@ -96,6 +96,11 @@ standardized_instruments_groups:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=AI{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -143,6 +148,11 @@ index_report:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=IR{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -218,6 +228,11 @@ price_report:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PR{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -284,108 +299,7 @@ price_report:
     attributes:
       currency: Ccy
 
-# BVBG.028.02
-instruments_file:
-  req_method: GET
-  # if host is not defined within credentials, use the source one
-  host:
-  headers:
-  payload:
-  slugs:
-  # use this argument only if {{chunk_slugs}} is passed to app
-  int_chunk_slugs:
-  # iteratively_get_data placeholders:
-  #   - i (int): https://example.com/{{i}}
-  #   - slug (str): https://example.com/{{slug}} - slugs in list format
-  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  # non-iteratively_get_data placeholders:
-  #   - {{replacer}}: https://example.com/{{replacer}}
-  #     note: the replacer can be any variable referenced within concrete product class
-  app: pesquisapregao/download?filelist=IN{{dt_ref_yymmdd}}.zip
-  bl_verify: False
-  timeout: (12.0, 12.0)
-  cols_from_case: pascal
-  cols_to_case: upper_constant
-  list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
-  type_error_action: raise
-  strategy_keep_when_dupl: first
-  list_ignorable_exceptions:
-  schema: raw
-  table_name: br_b3_instruments_file
-  bl_insert_or_ignore: False
-  bl_schema: True
-  dtypes:
-    ID: str
-    PRTRY: int
-    ISSR: str
-    DT: date
-    MKT_IDR_CD: category
-    ASST: str
-    ASST_DESC: str
-    MKT: int
-    SGMT: int
-    DESC: str
-    SCTY_CTGY: int
-    ISIN: str
-    DSTRBTN_ID: str
-    CFICD: str
-    SPCFCTN_CD: str
-    CRPN_NM: str
-    TCKR_SYMB: str
-    PMT_TP: int
-    ALLCN_RND_LOT: int
-    PRIC_FCTR: int
-    TRADG_START_DT: date
-    TRADG_END_DT: date
-    CORP_ACTN_START_DT: date
-    EXDSTRBTN_NB: int
-    CTDY_TRTMNT_TP: int
-    TRADG_CCY: str
-    MKT_CPTLSTN: int
-    LAST_PRIC: float
-    FRST_PRIC: float
-    DAYS_TO_STTLM: int
-    RGHTS_ISSE_PRIC: float
-    CCY: str
-    FILE_NAME: str
-  df_read_params:
-  xml_keys:
-    tags:
-      BizGrp:
-        - Id
-        - Prtry
-        - Issr
-        - Dt
-        - MktIdrCd
-        - Asst
-        - AsstDesc
-        - Mkt
-        - Sgmt
-        - Desc
-        - SctyCtgy
-        - ISIN
-        - DstrbtnId
-        - CFICd
-        - SpcfctnCd
-        - CrpnNm
-        - TckrSymb
-        - PmtTp
-        - AllcnRndLot
-        - PricFctr
-        - TradgStartDt
-        - TradgEndDt
-        - CorpActnStartDt
-        - EXDstrbtnNb
-        - CtdyTrtmntTp
-        - TradgCcy
-        - MktCptlstn
-        - LastPric
-        - FrstPric
-        - DaysToSttlm
-        - RghtsIssePric
-    attributes:
-      currency: Ccy
+# BVBG.028.02 - b3 tradable securities information available in b3_trd_sec.py
 
 # BVBG.029.02
 registration_indicator_instruments:
@@ -404,6 +318,11 @@ registration_indicator_instruments:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=II{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -486,6 +405,11 @@ fee_daily_unit_cost:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=DI{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -545,6 +469,11 @@ fee_monthly_unit_cost:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=UN{{dt_inf_month_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -602,6 +531,11 @@ primitive_risk_factors:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=FP{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -662,6 +596,11 @@ risk_formulas:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=FR{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -706,6 +645,11 @@ variable_fees_monthly_updt:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=VA{{dt_inf_month_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -762,6 +706,11 @@ daily_liquidity_limit:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=LD{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -816,6 +765,11 @@ daily_liquidity_limit_other_limits:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=LA{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -866,6 +820,11 @@ tradable_security_list:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=SecurityList{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -880,7 +839,7 @@ tradable_security_list:
   table_name: br_b3_tradable_security_list
   bl_insert_or_ignore: False
   bl_schema: True
-  ignored_file_extensions_zip:
+  ignored_file_extensions:
     - tmp
     - log
     - bak
@@ -977,6 +936,11 @@ mapping_otc_instrument_groups:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MO{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -991,7 +955,7 @@ mapping_otc_instrument_groups:
   table_name: br_b3_mapping_otc_instrument_groups
   bl_insert_or_ignore: False
   bl_schema: True
-  ignored_file_extensions_zip:
+  ignored_file_extensions:
     - tmp
     - log
     - bak
@@ -1037,6 +1001,11 @@ mapping_standardized_instrument_groups:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MP{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -1051,7 +1020,7 @@ mapping_standardized_instrument_groups:
   table_name: br_b3_mapping_standardized_instrument_groups
   bl_insert_or_ignore: False
   bl_schema: True
-  ignored_file_extensions_zip:
+  ignored_file_extensions:
     - tmp
     - log
     - bak
@@ -1097,6 +1066,11 @@ mtm_b3:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip
   bl_verify: False
   timeout: (12.0, 12.0)
@@ -1111,7 +1085,7 @@ mtm_b3:
   table_name: br_b3_mtm_b3
   bl_insert_or_ignore: False
   bl_schema: True
-  ignored_file_extensions_zip:
+  ignored_file_extensions:
     - tmp
     - log
     - bak
@@ -1132,4 +1106,66 @@ mtm_b3:
       - MTM_MAX_V_PHI1
       - MIN_MARGIN_CREDIT_COLLATERAL_PHI1
       - MIN_MARGIN_CREDIT_COLLATERAL_PHI2
+    sep: ";"
+
+# Equities Market - Equities Option Reference Premiums
+option_theor_premiums:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=PE{{dt_ref_yymmdd}}.ex_
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_mtm_b3
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    TICKER_SYMBOL: str
+    OPTION_TYPE: str
+    OPTION_STYLE: str
+    EXPIRY_DATE: int
+    EXERCISE_PRICE: float
+    REFERENCE_PREMIUM: float
+    IMPLIED_VOLATILITY: float
+    FILE_NAME: str
+  df_read_params:
+    skiprows: 1
+    names:
+      - TICKER_SYMBOL
+      - OPTION_TYPE
+      - OPTION_STYLE
+      - EXPIRY_DATE
+      - EXERCISE_PRICE
+      - REFERENCE_PREMIUM
+      - IMPLIED_VOLATILITY
+      - FILE_NAME
     sep: ";"

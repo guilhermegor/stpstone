@@ -36,6 +36,11 @@ consolidated_trades_information_after_mkt:
   # non-iteratively_get_data placeholders:
   #   - {{replacer}}: https://example.com/{{replacer}}
   #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension={{.file_extension}}
+  #   - start with a commentary hash and separate params with &
   app: api/download/?token={{token}}#format=.csv
   bl_verify: False
   timeout: (12.0, 12.0)

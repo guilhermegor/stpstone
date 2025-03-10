@@ -1,6 +1,9 @@
 ### ABSTRACT BASE CLASS - REQUESTS ###
 
 # pypi.org libs
+import os
+import subprocess
+import tempfile
 import re
 import backoff
 import fitz
@@ -28,122 +31,50 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.xml import XMLFiles
 
 
-class HandleReqResponses(ABC):
+class UtilsRequests(ABC):
 
-    def handle_response(
-        self,
-        req_resp: Response,
-        dict_xml_keys: Optional[Dict[str, Any]] = None,
-        dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
-        dict_df_read_params: Optional[Dict[str, Any]] = None,
-        list_ignored_file_extensions_zip: Optional[List[str]] = [],
-        bl_debug: bool = False,
-    ) -> pd.DataFrame:
-        str_file_extension = DirFilesManagement().get_file_extension(req_resp.url)
-        if self.req_trt_injection(req_resp) is not None:
-            return self.req_trt_injection(req_resp)
-        elif str_file_extension == "zip":
-            return self._handle_zip_response(
-                req_resp,
-                dict_xml_keys,
-                dict_regex_patterns,
-                dict_df_read_params,
-                list_ignored_file_extensions_zip,
-                bl_debug,
-            )
-        elif str_file_extension in ["csv", "txt", "asp", "do"]:
-            return self._handle_csv_response(req_resp, dict_df_read_params)
-        elif str_file_extension == "xlsx":
-            return self._handle_excel_response(req_resp, dict_df_read_params)
-        elif str_file_extension == "xml":
-            return self._handle_xml_response(req_resp, dict_xml_keys)
-        elif str_file_extension == "json":
-            return self._handle_json_response(req_resp)
-        elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
-            return self._handle_pdf_doc_response(req_resp, dict_regex_patterns)
-        else:
-            json_ = req_resp.json()
-            if isinstance(json_, dict) == True:
-                return pd.DataFrame([json_])
-            return pd.DataFrame(json_)
+    def mock_response(
+        self, 
+        file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile], 
+        file_name: str
+    ) -> Response:
+        mock_resp = Response()
+        mock_resp._content = file.read()
+        mock_resp.url = file_name
+        mock_resp.status_code = 200
+        return mock_resp
 
-    @abstractmethod
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        return None
-
-    def _handle_zip_response(
-        self,
-        req_resp: Response,
-        dict_xml_keys: Optional[Dict[str, Any]] = None,
-        dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
-        dict_df_read_params: Optional[Dict[str, Any]] = None,
-        list_ignored_file_extensions_zip: Optional[List[str]] = [],
-        bl_debug: bool = False
-    ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
-        zipfile = ZipFile(BytesIO(req_resp.content))
-        list_ = []
-        for file_name in zipfile.namelist():
-            with zipfile.open(file_name) as file:
-                str_file_extension = DirFilesManagement().get_file_extension(file_name)
-                if str_file_extension in list_ignored_file_extensions_zip:
-                    continue
-                elif str_file_extension == "zip":
-                    nested_zip_response = Response()
-                    nested_zip_response._content = file.read()
-                    nested_df = self._handle_zip_response(
-                        nested_zip_response,
-                        dict_xml_keys,
-                        dict_regex_patterns,
-                        dict_df_read_params,
-                        list_ignored_file_extensions_zip,
-                        bl_debug,
-                    )
-                    if isinstance(nested_df, pd.DataFrame):
-                        nested_df["FILE_NAME"] = file_name
-                        list_.extend(nested_df.to_dict(orient="records"))
-                    elif isinstance(nested_df, list):
-                        for df_ in nested_df:
-                            df_["FILE_NAME"] = file_name
-                        list_.extend(nested_df)
-                elif (str_file_extension == "csv") or (str_file_extension == "txt"):
-                    df_ = self._handle_csv_response(file, dict_df_read_params)
-                    df_["FILE_NAME"] = file_name
-                    list_.extend(df_.to_dict(orient="records"))
-                elif str_file_extension == "xlsx":
-                    df_ = self._handle_excel_response(file, dict_df_read_params)
-                    df_["FILE_NAME"] = file_name
-                    list_.extend(df_.to_dict(orient="records"))
-                elif str_file_extension == "xml":
-                    df_ = self._handle_xml_response(file, dict_xml_keys)
-                    df_["FILE_NAME"] = file_name
-                    list_.extend(df_.to_dict(orient="records"))
-                elif str_file_extension == "json":
-                    df_ = self._handle_json_response(file)
-                    df_["FILE_NAME"] = file_name
-                    list_.extend(df_.to_dict(orient="records"))
-                elif str_file_extension == "pdf":
-                    df_ = self._handle_pdf_doc_response(file, dict_regex_patterns)
-                    df_["FILE_NAME"] = file_name
-                    list_.extend(df_.to_dict(orient="records"))
-                else:
-                    if self.logger is not None:
-                        CreateLog().warnings(
-                            self.logger, f"Unsupported file type: {str_file_extension}"
-                        )
-                    raise ValueError(f"Unsupported file type: {str_file_extension}")
-        if list_:
-            return pd.DataFrame(list_)
-        else:
-            return pd.DataFrame()
-
-    def _columns_length(self, list_lines:List[Any]) -> int:
+    def columns_length(self, list_lines:List[Any]) -> int:
         dict_columns_count = {}
         for line in list_lines:
             num_columns = len(line.split(";"))
             dict_columns_count[num_columns] = dict_columns_count.get(num_columns, 0) + 1
         return max(dict_columns_count, key=dict_columns_count.get)
 
-    def _read_csv_with_error(self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]) \
+    def xml_find(
+        self,
+        soup_content: Type[XMLFiles],
+        tag:str,
+        tag_name: str,
+        dict_xml_keys: Dict[str, Any]
+    ) -> Dict[str, Union[str, float, int]]:
+        dict_ = dict()
+        soup_tag = soup_content.find(tag)
+        if soup_tag is None:
+            dict_[tag_name] = None
+        else:
+            dict_[tag_name] = soup_tag.get_text()
+        if "attributes" in dict_xml_keys:
+            for key_attrb_xml in dict_xml_keys["attributes"]:
+                if (soup_tag is not None) \
+                    and (dict_xml_keys["attributes"][key_attrb_xml] is not None) \
+                    and (dict_xml_keys["attributes"][key_attrb_xml] in soup_tag.attrs):
+                    dict_[dict_xml_keys["attributes"][key_attrb_xml]] = (
+                        soup_tag.attrs[dict_xml_keys["attributes"][key_attrb_xml]]
+                    )
+        return dict_
+
+    def read_csv_with_error(self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]) \
         -> Union[BytesIO, TextIOWrapper, StringIO]:
         """
         Reads a file (BytesIO, TextIOWrapper, StringIO, ZipExtFile), corrects problematic lines,
@@ -167,7 +98,7 @@ class HandleReqResponses(ABC):
         else:
             raise ValueError("Unsupported file type. Expected BytesIO or TextIOWrapper.")
         list_corrected_lines = [line for line in list_lines if len(line.split(";")) \
-                                == self._columns_length(list_lines)]
+                                == self.columns_length(list_lines)]
         corrected_content = "\n".join(list_corrected_lines)
         if isinstance(file, BytesIO):
             return BytesIO(corrected_content.encode("utf-8"))
@@ -178,100 +109,7 @@ class HandleReqResponses(ABC):
         elif isinstance(file, ZipExtFile):
             return BytesIO(corrected_content.encode("utf-8"))
 
-    def _handle_csv_response(
-        self,
-        file: Union[BytesIO, TextIOWrapper, Response],
-        dict_df_read_params: Optional[Dict[str, Any]],
-    ) -> pd.DataFrame:
-        if isinstance(file, BytesIO):
-            file.seek(0)
-        elif isinstance(file, Response):
-            file = StringIO(file.text)
-        try:
-            return pd.read_csv(file, **dict_df_read_params)
-        except pd.errors.ParserError:
-            file = self._read_csv_with_error(file)
-            if dict_df_read_params is not None:
-                dict_df_read_corrected_params = dict_df_read_params.copy()
-                dict_df_read_corrected_params.pop("skiprows", None)
-            else:
-                dict_df_read_corrected_params = dict()
-            return pd.read_csv(file, **dict_df_read_corrected_params)
-
-    def _handle_excel_response(
-        self,
-        file: Union[BytesIO, TextIOWrapper, Response],
-        dict_df_read_params: Optional[Dict[str, Any]],
-    ) -> pd.DataFrame:
-        if isinstance(file, BytesIO):
-            file.seek(0)
-        elif isinstance(file, Response):
-            file = StringIO(file.text)
-        return pd.read_excel(file, **dict_df_read_params)
-
-    def _xml_find(
-        self,
-        soup_content: Type[XMLFiles],
-        tag:str,
-        tag_name: str,
-        dict_xml_keys: Dict[str, Any]
-    ) -> Dict[str, Union[str, float, int]]:
-        dict_ = dict()
-        soup_tag = soup_content.find(tag)
-        if soup_tag is None:
-            dict_[tag_name] = None
-        else:
-            dict_[tag_name] = soup_tag.get_text()
-        if "attributes" in dict_xml_keys:
-            for key_attrb_xml in dict_xml_keys["attributes"]:
-                if (soup_tag is not None) \
-                    and (dict_xml_keys["attributes"][key_attrb_xml] is not None) \
-                    and (dict_xml_keys["attributes"][key_attrb_xml] in soup_tag.attrs):
-                    dict_[dict_xml_keys["attributes"][key_attrb_xml]] = (
-                        soup_tag.attrs[dict_xml_keys["attributes"][key_attrb_xml]]
-                    )
-        return dict_
-
-    def _handle_xml_response(
-        self, file: Union[BytesIO, TextIOWrapper], dict_xml_keys: Dict[str, Any]
-    ) -> pd.DataFrame:
-        list_ser = list()
-        if isinstance(file, BytesIO):
-            file.seek(0)
-        soup_xml = XMLFiles().memory_parser(file)
-        for key, list_tags in dict_xml_keys["tags"].items():
-            for soup_content in soup_xml.find_all(key):
-                for tag in list_tags:
-                    if isinstance(tag, str):
-                        dict_l1 = self._xml_find(soup_content, tag, tag, dict_xml_keys)
-                        if ("dict_" in locals()) and (isinstance(dict_, dict)):
-                            dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l1)
-                        else:
-                            dict_ = dict_l1
-                    elif isinstance(tag, dict):
-                        key_ = list(tag.keys())[0]
-                        list_values = list(tag.values())[0]
-                        for soup_l2 in soup_content.find_all(key_):
-                            for tag_l2 in list_values:
-                                dict_l2 = self._xml_find(soup_l2, tag_l2, f"{key_}{tag_l2}",
-                                                       dict_xml_keys)
-                                if ("dict_" in locals()) and (isinstance(dict_, dict)):
-                                    dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l2)
-                                else:
-                                    dict_ = dict_l2
-            dict_ = HandlingDicts().add_key_value_to_dicts(dict_, "ROOT_TAG", key)
-            list_ser.append(dict_)
-        return pd.DataFrame(list_ser)
-
-    def _handle_json_response(self, file: Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
-        if isinstance(file, BytesIO):
-            file.seek(0)
-        json_file = file.read()
-        list_ser = JsonFiles().loads_message_like(json_file)
-        df_ = pd.DataFrame(list_ser)
-        return df_
-
-    def _pdf_doc_tables_response(
+    def pdf_doc_tables_response(
         self,
         bytes_pdf: BytesIO
     ) -> pd.DataFrame:
@@ -282,7 +120,7 @@ class HandleReqResponses(ABC):
                 list_ser.extend(HandlingDicts().pair_keys_with_values(list_[0][0], list_[0][1:]))
         return pd.DataFrame(list_ser)
 
-    def _pdf_doc_regex(
+    def pdf_doc_regex(
         self,
         req_resp: Response,
         bytes_pdf: BytesIO,
@@ -343,7 +181,7 @@ class HandleReqResponses(ABC):
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
 
-    def _get_int_pgs_join(self, url: str) -> Union[int, None]:
+    def get_int_pgs_join(self, url: str) -> Union[int, None]:
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.fragment)
         int_pgs_join = query_params.get('int_pgs_join', [None])[0]
@@ -351,6 +189,178 @@ class HandleReqResponses(ABC):
             return int(int_pgs_join)
         else:
             return None
+
+
+class HandleReqResponses(UtilsRequests):
+
+    def handle_response(
+        self,
+        req_resp: Response,
+        dict_xml_keys: Optional[Dict[str, Any]] = None,
+        dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
+        dict_df_read_params: Optional[Dict[str, Any]] = None,
+        list_ignored_file_extensions: Optional[List[str]] = [],
+        bl_debug: bool = False,
+    ) -> pd.DataFrame:
+        print(f"URL: {req_resp.url}")
+        str_file_extension = DirFilesManagement().get_file_extension(req_resp.url)
+        print(f"FILE EXTENSION: {str_file_extension}")
+        file_name = os.path.basename(req_resp.url) if hasattr(req_resp, "url") else ""
+        if self.req_trt_injection(req_resp) is not None:
+            df_ = self.req_trt_injection(req_resp)
+        elif str_file_extension == "zip":
+            df_ = self._handle_zip_response(
+                req_resp,
+                dict_xml_keys,
+                dict_regex_patterns,
+                dict_df_read_params,
+                list_ignored_file_extensions,
+                bl_debug,
+            )
+        elif str_file_extension == "ex_":
+            df_ = self._handle_ex_extension(
+                req_resp,
+                dict_xml_keys,
+                dict_regex_patterns,
+                dict_df_read_params,
+                list_ignored_file_extensions,
+                bl_debug,
+            )
+        elif str_file_extension in ["csv", "txt", "asp", "do"]:
+            df_ = self._handle_csv_response(req_resp, dict_df_read_params)
+        elif str_file_extension == "xlsx":
+            df_ = self._handle_excel_response(req_resp, dict_df_read_params)
+        elif str_file_extension == "xml":
+            df_ = self._handle_xml_response(req_resp, dict_xml_keys)
+        elif str_file_extension == "json":
+            df_ = self._handle_json_response(req_resp)
+        elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
+            df_ = self._handle_pdf_doc_response(req_resp, dict_regex_patterns)
+        else:
+            try:
+                json_ = req_resp.json()
+            except exceptions.JSONDecodeError:
+                raise Exception("File extension not expected in the handle response method: "
+                                + f"{str_file_extension}, please revisit the if-statement")
+            if isinstance(json_, dict) == True:
+                df_ = pd.DataFrame([json_])
+            else:
+                df_ = pd.DataFrame(json_)
+            return pd.DataFrame(json_)
+        if (file_name is not None) and ("FILE_NAME" not in df_.columns) and (df_.empty == False):
+            df_["FILE_NAME"] = file_name
+        return df_
+
+    @abstractmethod
+    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+        return None
+
+    def _handle_zip_response(
+        self,
+        req_resp: Response,
+        dict_xml_keys: Optional[Dict[str, Any]] = None,
+        dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
+        dict_df_read_params: Optional[Dict[str, Any]] = None,
+        list_ignored_file_extensions: Optional[List[str]] = [],
+        bl_debug: bool = False
+    ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
+        zipfile = ZipFile(BytesIO(req_resp.content))
+        list_ = []
+        for file_name in zipfile.namelist():
+            with zipfile.open(file_name) as file:
+                str_file_extension = DirFilesManagement().get_file_extension(file_name)
+                if str_file_extension in list_ignored_file_extensions: continue
+                mock_resp = self.mock_response(file, file_name)
+                df_ = self.handle_response(
+                    mock_resp,
+                    dict_xml_keys,
+                    dict_regex_patterns,
+                    dict_df_read_params,
+                    list_ignored_file_extensions,
+                    bl_debug,
+                )
+                if df_.empty == True: continue
+                elif isinstance(df_, pd.DataFrame):
+                    list_.extend(df_.to_dict(orient="records"))
+                elif isinstance(df_, list):
+                    for df_nested in df_:
+                        list_.extend(df_nested.to_dict(orient="records"))
+        if list_:
+            return pd.DataFrame(list_)
+        else:
+            return pd.DataFrame()
+
+    def _handle_csv_response(
+        self,
+        file: Union[BytesIO, TextIOWrapper, Response],
+        dict_df_read_params: Optional[Dict[str, Any]],
+    ) -> pd.DataFrame:
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        elif isinstance(file, Response):
+            file = StringIO(file.text)
+        try:
+            return pd.read_csv(file, **dict_df_read_params)
+        except pd.errors.ParserError:
+            file = self.read_csv_with_error(file)
+            if dict_df_read_params is not None:
+                dict_df_read_corrected_params = dict_df_read_params.copy()
+                dict_df_read_corrected_params.pop("skiprows", None)
+            else:
+                dict_df_read_corrected_params = dict()
+            return pd.read_csv(file, **dict_df_read_corrected_params)
+
+    def _handle_excel_response(
+        self,
+        file: Union[BytesIO, TextIOWrapper, Response],
+        dict_df_read_params: Optional[Dict[str, Any]],
+    ) -> pd.DataFrame:
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        elif isinstance(file, Response):
+            file = StringIO(file.text)
+        return pd.read_excel(file, **dict_df_read_params)
+
+    def _handle_xml_response(
+        self, file: Union[BytesIO, TextIOWrapper, Response], dict_xml_keys: Dict[str, Any]
+    ) -> pd.DataFrame:
+        list_ser = list()
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        if isinstance(file, Response):
+            file = StringIO(file.text)
+        soup_xml = XMLFiles().memory_parser(file)
+        for key, list_tags in dict_xml_keys["tags"].items():
+            for soup_content in soup_xml.find_all(key):
+                for tag in list_tags:
+                    if isinstance(tag, str):
+                        dict_l1 = self.xml_find(soup_content, tag, tag, dict_xml_keys)
+                        if ("dict_" in locals()) and (isinstance(dict_, dict)):
+                            dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l1)
+                        else:
+                            dict_ = dict_l1
+                    elif isinstance(tag, dict):
+                        key_ = list(tag.keys())[0]
+                        list_values = list(tag.values())[0]
+                        for soup_l2 in soup_content.find_all(key_):
+                            for tag_l2 in list_values:
+                                dict_l2 = self.xml_find(soup_l2, tag_l2, f"{key_}{tag_l2}",
+                                                       dict_xml_keys)
+                                if ("dict_" in locals()) and (isinstance(dict_, dict)):
+                                    dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l2)
+                                else:
+                                    dict_ = dict_l2
+            dict_ = HandlingDicts().add_key_value_to_dicts(dict_, "ROOT_TAG", key)
+            list_ser.append(dict_)
+        return pd.DataFrame(list_ser)
+
+    def _handle_json_response(self, file: Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+        if isinstance(file, BytesIO):
+            file.seek(0)
+        json_file = file.read()
+        list_ser = JsonFiles().loads_message_like(json_file)
+        df_ = pd.DataFrame(list_ser)
+        return df_
 
     def _handle_pdf_doc_response(
         self,
@@ -361,16 +371,49 @@ class HandleReqResponses(ABC):
         # reading pdf/doc
         bytes_pdf = BytesIO(req_resp.content)
         # checking wheter to read tables or use regex
-        if StrHandler().match_string_like(req_resp.url,'*#feat=read_tables*') == True:
-            return self._pdf_doc_tables_response(bytes_pdf)
+        if StrHandler().match_string_like(req_resp.url,'*feat=read_tables*') == True:
+            return self.pdf_doc_tables_response(bytes_pdf)
         else:
-            if StrHandler().match_string_like(req_resp.url,'*#int_pgs_join*') == True:
-                int_pgs_join = self._get_int_pgs_join(req_resp.url) \
-                    if self._get_int_pgs_join(req_resp.url) is not None else default_int_pgs_join
+            if StrHandler().match_string_like(req_resp.url,'*int_pgs_join=*') == True:
+                int_pgs_join = self.get_int_pgs_join(req_resp.url) \
+                    if self.get_int_pgs_join(req_resp.url) is not None else default_int_pgs_join
             else:
                 int_pgs_join = default_int_pgs_join
-            return self._pdf_doc_regex(
+            return self.pdf_doc_regex(
                 req_resp, bytes_pdf, dict_regex_patterns, int_pgs_join)
+
+    def _handle_ex_extension(
+        self,
+        req_resp: Response,
+        dict_xml_keys: Optional[Dict[str, Any]] = None,
+        dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
+        dict_df_read_params: Optional[Dict[str, Any]] = None,
+        list_ignored_file_extensions: Optional[List[str]] = [],
+    ) -> pd.DataFrame:
+        list_ser = List[Dict[str, Any]]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            ex_file_path = os.path.join(temp_dir, "temp_file.ex_")
+            exe_file_path = os.path.join(temp_dir, "temp_file.exe")
+        with open(ex_file_path, "wb") as ex_file:
+            ex_file.write(req_resp.content)
+        os.rename(ex_file_path, exe_file_path)
+        subprocess.run([exe_file_path], check=True)
+        list_files = [f for f in os.listdir(temp_dir) if not f.endswith((".ex_", ".exe"))]
+        if len(list_files) == 0:
+            raise FileNotFoundError("The executable did not generate any output files.")
+        for file_name in list_files:
+            file_path = os.path.join(temp_dir, file_name)
+            with open(file_path, "rb") as file:
+                mock_resp = self.mock_response(file, file_name)
+                df_ = self.handle_response(
+                    mock_resp,
+                    dict_xml_keys,
+                    dict_regex_patterns,
+                    dict_df_read_params,
+                    list_ignored_file_extensions,
+                )
+                list_ser.extend(df_.to_dict(orient="records"))
+        return pd.DataFrame(list_ser)
 
 
 class ABCRequests(HandleReqResponses):
@@ -552,7 +595,7 @@ class ABCRequests(HandleReqResponses):
         strategy_keep_when_dupl: str = "first",
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
-        list_ignored_file_extensions_zip: Optional[List[str]] = [],
+        list_ignored_file_extensions: Optional[List[str]] = [],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         bl_debug: bool = False,
     ) -> pd.DataFrame:
@@ -570,7 +613,7 @@ class ABCRequests(HandleReqResponses):
         # dealing with request content type
         df_ = self.handle_response(
             req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params,
-            list_ignored_file_extensions_zip, bl_debug
+            list_ignored_file_extensions, bl_debug
         )
         if bl_debug == True:
             print(f"*** TRT REQ BEFORE STANDARDIZATION: \n{df_}")
@@ -740,7 +783,7 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
                 self.dict_metadata[str_resource].get("regex_patterns", None),
                 self.dict_metadata[str_resource].get("df_read_params", None),
-                self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
+                self.dict_metadata[str_resource].get("ignored_file_extensions", []),
                 self.dict_metadata[str_resource].get("xml_keys", None),
                 bl_debug,
             )
@@ -862,7 +905,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
                             self.dict_metadata[str_resource].get("regex_patterns", None),
                             self.dict_metadata[str_resource].get("df_read_params", None),
-                            self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         )
@@ -928,7 +971,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
                             self.dict_metadata[str_resource].get("regex_patterns", None),
                             self.dict_metadata[str_resource].get("df_read_params", None),
-                            self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         )
@@ -992,7 +1035,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
                             self.dict_metadata[str_resource].get("regex_patterns", None),
                             self.dict_metadata[str_resource].get("df_read_params", None),
-                            self.dict_metadata[str_resource].get("ignored_file_extensions_zip", []),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         ).to_dict(orient="records")
