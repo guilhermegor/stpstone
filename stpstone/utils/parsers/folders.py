@@ -12,10 +12,11 @@ import wget
 import py7zr
 import hashlib
 import tarfile
+import chardet
 from datetime import datetime
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO, TextIOWrapper, BufferedReader
-from typing import Tuple, List, Union, Iterable
+from typing import Tuple, List, Union, Iterable, Optional
 from requests import Response
 from pathlib import Path
 # local libs
@@ -465,8 +466,8 @@ class RemoteFiles(DirFilesManagement):
             zip_file.write(req_resp.content)
         self.recursive_extract_zip(zip_file_path, path_dir)
         ex_file_path = None
-        for root_path, _, files in os.walk(path_dir):
-            for file in files:
+        for root_path, _, list_files in os.walk(path_dir):
+            for file in list_files:
                 if file.endswith(tup_endswith):
                     ex_file_path = os.path.join(root_path, file)
                     break
@@ -474,7 +475,7 @@ class RemoteFiles(DirFilesManagement):
                 break
         if not ex_file_path:
             raise ValueError("No file found in the extracted .zip archive. "
-                             + f"- considerer extensions: {tup_endswith}")
+                             + f"- considerered extensions: {tup_endswith}")
         return ex_file_path
 
     def get_zip_from_web_in_memory(
@@ -571,6 +572,23 @@ class RemoteFiles(DirFilesManagement):
         """
         for chunk in req_resp.iter_content(chunk_size=chunk_size):
             yield chunk
+
+    def check_separator_consistency(
+        self, 
+        req_content: bytes, 
+        int_skip_rows: int = 0, 
+        list_sep: Optional[List[str]] = [',', ';', '\t']
+    ) -> bool:
+        result = chardet.detect(req_content)
+        encoding = result['encoding']
+        decoded_content = req_content.decode(encoding)
+        list_lines = decoded_content.splitlines()
+        list_lines = list_lines[int_skip_rows:]
+        for sep in list_sep:
+            list_sep_counts = [len(line.split(sep)) for line in list_lines]
+            if (len(set(list_sep_counts)) == 1) and (all(x > 1 for x in  list_sep_counts)):
+                return True
+        return False
 
 
 class FoldersTree:

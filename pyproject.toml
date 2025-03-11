@@ -64,6 +64,7 @@ pdfplumber = "0.11.5"
 fitz = "0.0.1.dev2"
 psutil = "7.0.0"
 wmi = "1.5.1"
+chardet = "5.2.0"
 
 
 [tool.poetry.group.dev.dependencies]

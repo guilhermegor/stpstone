@@ -89,6 +89,22 @@ cls_ = SearchByTradingB3(
 # print(f"DF OPTIONS THEORETICAL PREMIUMS B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("fx_markets_traded_rates", bl_fetch=True, bl_debug=False)
-print(f"DF FX MARKETS TRADED RATES B3: \n{df_}")
+# df_ = cls_.source("fx_markets_traded_rates", bl_fetch=True, bl_debug=False)
+# print(f"DF FX MARKETS TRADED RATES B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("fx_market_volume_settled", bl_fetch=True, bl_debug=False)
+# print(f"DF FX MARKETS VOLUMES SETTLED B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("list_isin_numbers_swaps", bl_fetch=True, bl_debug=False)
+# print(f"DF LIST ISIN NUMBER SWAPS B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("swap_market_rates", bl_fetch=True, bl_debug=False)
+# print(f"DF SWAP MARKET RATES B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("instrument_group_parameters", bl_fetch=True, bl_debug=False)
+print(f"DF INSTRUMENT GROUP PARAMETERS B3: \n{df_}")
 df_.info()

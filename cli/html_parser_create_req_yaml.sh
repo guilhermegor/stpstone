@@ -58,6 +58,14 @@ resource_example:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
   app:
@@ -74,6 +82,10 @@ resource_example:
   table_name:
   bl_insert_or_ignore: False
   bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
   dtypes:
     COL_1: date
     COL_2: str
@@ -92,17 +104,22 @@ resource_example:
     attributes:
       attrb: Attrb
   regex_patterns:
-    event:
-      condition_1:
-        action_1: pattern_regex_1
-        action_2: pattern_regex_2
-      condition_2:
-        action_1: pattern_regex_1
-        action_2: pattern_regex_2
+    event_1:
+      condition_1: pattern_regex_1
+      condition_2: pattern_regex_2
+    event_2:
+      condition_1: pattern_regex_1
+      condition_2: pattern_regex_2
   xpaths:
-    bl_debug_html: True
-    list_th: PLEASE_FILL
-    list_td: PLEASE_FILL
+    name_1: xpath_1
+    name_2: xpath_2
+  fixed_width_layout:
+    - field: NAME_FIELD_1
+      start: 0
+      end: 6
+    - field: NAME_FIELD_1
+      start: 6
+      end: 9
 EOF
 
 echo "File succesfully created at: $full_dir_path/$file_name.yaml"

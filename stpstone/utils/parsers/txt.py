@@ -1,6 +1,7 @@
 ### HANDLING TXT FILES ###
 
 from re import sub
+from typing import List, Optional
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -55,3 +56,16 @@ class HandlingTXTFiles:
         with open(file_complete_path, method) as file_output:
             file_output.write(data_content)
         return DirFilesManagement().object_exists(file_complete_path)
+
+    def check_separator_consistency(
+            self, file_path: str, list_sep: Optional[List[str]] = [',', ';', '\t']) -> bool:
+        with open(file_path, 'r') as file:
+            list_lines = file.readlines()
+        for sep in list_sep:
+            field_counts = [len(line.split(sep)) for line in list_lines]
+            list_unique_field_counts = set(field_counts)
+            if len(list_unique_field_counts) == 1:
+                print(f"The file has a consistent separator: '{sep}'")
+                return True
+        print("The file does not have a consistent separator.")
+        return False

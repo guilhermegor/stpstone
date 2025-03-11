@@ -113,6 +113,13 @@ resource_example:
   xpaths:
     name_1: xpath_1
     name_2: xpath_2
+  fixed_width_layout:
+    - field: NAME_FIELD_1
+      start: 0
+      end: 6
+    - field: NAME_FIELD_1
+      start: 6
+      end: 9
 EOF
 
 echo "File succesfully created at: $full_dir_path/$file_name.yaml"

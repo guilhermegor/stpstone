@@ -1278,3 +1278,461 @@ fx_markets_traded_rates:
     - field: VALOR_OPERACOES_CONTRATADAS_REAIS
       start: 126
       end: 139
+
+# FX Market - Volume Settled on a Net Basis
+fx_market_volume_settled:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=CV{{dt_ref_yymmdd}}.zip#file_extension=.fwf
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_fx_volume_settled
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    ID_TRANSACAO: str
+    DATA_REFERENCIA: date
+    DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO: date
+    VALOR_LIQUIDO_COMPENSADO_DOLAR: float
+    VALOR_LIQUIDO_COMPENSADO_REAL: float
+    FILE_NAME: str
+  df_read_params:
+  fixed_width_layout:
+    - field: ID_TRANSACAO
+      start: 0
+      end: 8
+    - field: DATA_REFERENCIA
+      start: 8
+      end: 16
+    - field: DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO
+      start: 16
+      end: 24
+    - field: VALOR_LIQUIDO_COMPENSADO_DOLAR
+      start: 24
+      end: 37
+    - field: VALOR_LIQUIDO_COMPENSADO_REAL
+      start: 37
+      end: 50
+
+# Derivatives - List of ISIN Numbers for Swaps
+list_isin_numbers_swaps:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=IS{{dt_ref_yymmdd}}.ex_
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_list_isin_numbers_swaps
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    DATA_CADASTRO: date
+    CONTRATO: str
+    NOME_CONTRATO: str
+    CODIGO_ISIN: str
+  df_read_params:
+  fixed_width_layout:
+    - field: DATA_CADASTRO
+      start: 0
+      end: 8
+    - field: CONTRATO
+      start: 8
+      end: 13
+    - field: NOME_CONTRATO
+      start: 8
+      end: 63
+    - field: CODIGO_ISIN
+      start: 63
+      end: 75
+
+# Derivatives Market - IDxUS Dollar Swap - Mark to Market
+id_us_dollar_swap_mtm:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=MM{{dt_ref_yymmdd}}.ex_
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_id_us_dollar_swap_mtm
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    ID_TRANSACAO: int
+    COMPLEMENTO_TRANSACAO: int
+    TIPO_REGISTRO: int
+    DATA_GERACAO_ARQUIVO: date
+    REFERENCIA: str
+    CODIGO_PRODUTO: str
+    SERIE: str
+    INDICADOR_AJUSTE_PERIODICO: str
+    DATA_VENCIMENTO: date
+    PRAZO_DIAS_CORRIDOS: int
+    SINAL_TAXA_MERCADO: str
+    TAXA_MERCADO: int
+    FATOR_DESCONTO: int
+    VALOR_MERCADO: int
+    TAXA_OPERACIONAL_BASICA: int
+  df_read_params:
+  fixed_width_layout:
+    - field: ID_TRANSACAO
+      start: 0
+      end: 6
+    - field: COMPLEMENTO_TRANSACAO
+      start: 6
+      end: 9
+    - field: TIPO_REGISTRO
+      start: 9
+      end: 11
+    - field: DATA_GERACAO_ARQUIVO
+      start: 11
+      end: 19
+    - field: REFERENCIA
+      start: 19
+      end: 25
+    - field: CODIGO_PRODUTO
+      start: 25
+      end: 28
+    - field: SERIE
+      start: 28
+      end: 32
+    - field: INDICADOR_AJUSTE_PERIODICO
+      start: 32
+      end: 33
+    - field: DATA_VENCIMENTO
+      start: 33
+      end: 41
+    - field: PRAZO_DIAS_CORRIDOS
+      start: 41
+      end: 46
+    - field: SINAL_TAXA_MERCADO
+      start: 46
+      end: 47
+    - field: TAXA_MERCADO
+      start: 47
+      end: 59
+    - field: FATOR_DESCONTO
+      start: 59
+      end: 75
+    - field: VALOR_MERCADO
+      start: 75
+      end: 97
+    - field: TAXA_OPERACIONAL_BASICA
+      start: 97
+      end: 113
+
+# Derivatives Market - Swap Market Rates
+swap_market_rates:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=TS{{dt_ref_yymmdd}}.ex_
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_swap_market_rates
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    ID_TRANSACAO: int
+    COMPLEMENTO_TRANSACAO: int
+    TIPO_REGISTRO: int
+    DATA_GERACAO_ARQUIVO: date
+    CODIGO_CURVAS_TERMO: str
+    CODIGO_TAXA: str
+    DESCRICAO_TAXA: str
+    NUMERO_DIAS_CORRIDOS_TAXA_JURO: int
+    NUMERO_SAQUES_TAXA_JURO: int
+    SINAL_TAXA_TEORICA: str
+    TAXA_TEORICA: int
+    CARACTERISTICA_VERTICE: str
+    CODIGO_VERTICE: int
+  df_read_params:
+  fixed_width_layout:
+    - field: ID_TRANSACAO
+      start: 0
+      end: 6
+    - field: COMPLEMENTO_TRANSACAO
+      start: 6
+      end: 9
+    - field: TIPO_REGISTRO
+      start: 9
+      end: 11
+    - field: DATA_GERACAO_ARQUIVO
+      start: 11
+      end: 19
+    - field: CODIGO_CURVAS_TERMO
+      start: 19
+      end: 21
+    - field: CODIGO_TAXA
+      start: 21
+      end: 26
+    - field: DESCRICAO_TAXA
+      start: 26
+      end: 41
+    - field: NUMERO_DIAS_CORRIDOS_TAXA_JURO
+      start: 41
+      end: 46
+    - field: NUMERO_SAQUES_TAXA_JURO
+      start: 46
+      end: 51
+    - field: SINAL_TAXA_TEORICA
+      start: 51
+      end: 52
+    - field: TAXA_TEORICA
+      start: 52
+      end: 66
+    - field: CARACTERISTICA_VERTICE
+      start: 66
+      end: 67
+    - field: CODIGO_VERTICE
+      start: 67
+      end: 72
+
+# Securities Market - Government Securities Reference Prices
+brazillian_sovereign_bonds:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=PU{{dt_ref_yymmdd}}.ex_
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_brazillian_sovereign_bonds
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    TIPO_REGISTRO: int
+    CODIGO_TITULO: str
+    DESCRICAO_TITULO: category
+    DATA_EMISSAO_TITULO: date
+    DATA_VENCIMENTO_TITULO: date
+    PU: float
+    PU_ESTRESSE: float
+    PU_D_MAIS_1: float
+  df_read_params:
+    sep: ";"
+    skiprows: 1
+    names:
+      - TIPO_REGISTRO
+      - CODIGO_TITULO
+      - DESCRICAO_TITULO
+      - DATA_EMISSAO_TITULO
+      - DATA_VENCIMENTO_TITULO
+      - PU
+      - PU_ESTRESSE
+      - PU_D_MAIS_1
+
+# Instrument Group Parameters
+instrument_group_parameters:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=PG{{dt_ref_yymmdd}}.zip
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_instrument_group_parameters
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    TIPO_REGISTRO: int
+    ID_GRUPO_INSTRUMENTOS: int
+    MERCADO: int
+    NOME_CLASSIFICACAO: category
+    PRAZO_MINIMO_ENCERRAMENTO: int
+    LIMITE_LIQUIDEZ: float
+    PRAZO_SUBCARTEIRA_2: int
+    PRAZO_LIQUIDACAO: int
+    PRAZO_LIQUIDACAO_VENCIMENTO: int
+    DATA_INICIAL_INTERVALO_VENCIMENTOS: date
+    DATA_FINAL_INTERVALO_VENCIMENTOS: date
+    INDICADOR_MODELO_GENERICO: int
+  df_read_params:
+    sep: ";"
+    skiprows: 1
+    names:
+      - TIPO_REGISTRO
+      - ID_GRUPO_INSTRUMENTOS
+      - MERCADO
+      - NOME_CLASSIFICACAO
+      # holding period - hp
+      - PRAZO_MINIMO_ENCERRAMENTO
+      - LIMITE_LIQUIDEZ
+      - PRAZO_SUBCARTEIRA_2
+      - PRAZO_LIQUIDACAO
+      - PRAZO_LIQUIDACAO_VENCIMENTO
+      - DATA_INICIAL_INTERVALO_VENCIMENTOS
+      - DATA_FINAL_INTERVALO_VENCIMENTOS
+      - INDICADOR_MODELO_GENERICO

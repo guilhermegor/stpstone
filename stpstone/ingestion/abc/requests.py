@@ -8,6 +8,7 @@ import re
 import backoff
 import fitz
 import pdfplumber
+import chardet
 import pandas as pd
 from pathlib import Path
 from abc import ABC, abstractmethod
@@ -206,7 +207,7 @@ class HandleReqResponses(UtilsRequests):
     ) -> pd.DataFrame:
         print(f"URL: {req_resp.url}")
         str_file_extension = DirFilesManagement().get_last_file_extension(req_resp.url)
-        print(f"FILE EXTENSION: {str_file_extension}")
+        # print(f"FILE EXTENSION: {str_file_extension}")
         file_name = os.path.basename(req_resp.url) if hasattr(req_resp, "url") else ""
         if self.req_trt_injection(req_resp) is not None:
             df_ = self.req_trt_injection(req_resp)
@@ -226,9 +227,14 @@ class HandleReqResponses(UtilsRequests):
                 dict_regex_patterns,
                 dict_df_read_params,
                 list_ignored_file_extensions,
+                list_ser_fixed_width_layout
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
-            df_ = self._handle_csv_response(req_resp, dict_df_read_params)
+            if RemoteFiles().check_separator_consistency(
+                req_resp.content, dict_df_read_params.get("skiprows", 0)) == True:
+                df_ = self._handle_csv_response(req_resp, dict_df_read_params)
+            else:
+                df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
         elif str_file_extension == "xlsx":
             df_ = self._handle_excel_response(req_resp, dict_df_read_params)
         elif str_file_extension == "xml":
@@ -427,9 +433,21 @@ class HandleReqResponses(UtilsRequests):
     ) -> pd.DataFrame:
         list_colspecs = [(dict_["start"], dict_["end"]) for dict_ in list_ser_fixed_width_layout]
         list_colnames = [dict_["field"] for dict_ in list_ser_fixed_width_layout]
-        with tempfile.TemporaryDirectory() as temp_dir_path:
-            file_path = RemoteFiles().get_file_from_zip(req_resp, temp_dir_path, (".fwf", ".dat", ""))
-            return pd.read_fwf(file_path, colspecs=list_colspecs, names=list_colnames)
+        if (req_resp.headers is not None) \
+            and ("application/zip" in req_resp.headers.get("Content-Type", "")) \
+            and (".zip" in req_resp.headers.get("Content-Disposition")):
+            with tempfile.TemporaryDirectory() as temp_dir_path:
+                file_path = RemoteFiles().get_file_from_zip(req_resp, temp_dir_path, 
+                                                            (".fwf", ".dat", ".txt", ""))
+                return pd.read_fwf(file_path, colspecs=list_colspecs, names=list_colnames)
+        else:
+            try:
+                encoding = chardet.detect(req_resp.content)['encoding']
+            except:
+                encoding = 'latin-1'
+            decoded_content = req_resp.content.decode(encoding)
+            return pd.read_fwf(
+                StringIO(decoded_content), colspecs=list_colspecs, names=list_colnames)
 
 
 class ABCRequests(HandleReqResponses):
