@@ -66,7 +66,7 @@ resource_example:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app:
   bl_verify: False

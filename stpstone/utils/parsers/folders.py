@@ -10,11 +10,13 @@ import os
 import fnmatch
 import wget
 import py7zr
+import hashlib
+import tarfile
 from datetime import datetime
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO, TextIOWrapper, BufferedReader
-from typing import Tuple, List, Union, Optional, Dict
-from requests import Session, Response
+from typing import Tuple, List, Union, Iterable
+from requests import Response
 from pathlib import Path
 # local libs
 from stpstone.utils.parsers.str import StrHandler
@@ -189,11 +191,15 @@ class DirFilesManagement:
             t[1] = t[1][1:]
         return t
     
-    def get_file_extension(self, url: str) -> str:
-        match = re.search(r'\.([a-zA-Z0-9_]+)(?:[\?#]|$)', url)
-        if match:
-            return match.group(1)
-        return ""
+    def get_file_extensions(self, file_path: str) -> List[Union[str, None]]:
+        return re.findall(r'\.([a-zA-Z0-9_]+)(?:[\?#]|$)', file_path)
+    
+    def get_last_file_extension(self, file_path: str) -> str:
+        list_ = self.get_file_extensions(file_path)
+        if len(list_) > 0:
+            return list_[-1]
+        else:
+            return None
 
     def download_web_file(self, url, filepath=None):
         """
@@ -227,29 +233,6 @@ class DirFilesManagement:
             _ = self.removing_file(filepath)
             wget.download(url, filepath)
             return self.object_exists(filepath)
-
-    def get_zip_from_web_in_memory(self, req_resp:Response, 
-                                   bl_io_interpreting:bool=False) \
-            -> Union[TextIOWrapper, BufferedReader, List[BufferedReader]]:
-        """
-        REFERENCES: https://stackoverflow.com/questions/5710867/downloading-and-unzipping-a-zip-file-without-writing-to-disk
-        DOCSTRING: DOWNLOAD A ZIP AND UNZIP IT, HANDLING FILE IN MEMORY
-        INPUTS: FILE URL
-        OUTPUTS: LIST OF OPENNED FILES UNZIPPED
-        """
-        zipfile = ZipFile(BytesIO(req_resp.content))
-        # defining names of files from extraction
-        zip_names = zipfile.namelist()
-        # check wheter the exported content is a file or a list of files
-        if len(zip_names) == 1:
-            file_name = zip_names.pop()
-            extracted_file = zipfile.open(file_name)
-            #   decode stream to string, if is the user will, through io module
-            if bl_io_interpreting == True:
-                return TextIOWrapper(extracted_file)
-            else:
-                return extracted_file
-        return [zipfile.open(file_name) for file_name in zip_names]
 
     def unzip_files_from_dir(self, destination_path):
         """
@@ -446,6 +429,148 @@ class DirFilesManagement:
         OUTPUTS: FLOAT
         """
         return os.path.getsize(filename)
+
+    def recursive_extract_zip(self, zip_file_path: str, extract_dir: str) -> None:
+        """
+        Recursively extracts the contents of a ZIP file and any nested ZIP files to a target 
+        directory, until no ZIP file is available
+
+        Args:
+            zip_file_path (str): The path to the ZIP file to be extracted.
+            extract_dir (str): The directory where the contents of the ZIP file should be extracted.
+
+        Returns:
+            None
+        """
+        with ZipFile(zip_file_path, "r") as zip_ref:
+            zip_ref.extractall(extract_dir)
+        os.remove(zip_file_path)
+        for root_path, _, files in os.walk(extract_dir):
+            for file in files:
+                if file.endswith(".zip"):
+                    nested_zip_path = os.path.join(root_path, file)
+                    self.recursive_extract_zip(nested_zip_path, root_path)
+
+
+class RemoteFiles(DirFilesManagement):
+
+    def get_file_from_zip(
+        self, 
+        req_resp: Response, 
+        path_dir: Union[str, tempfile.TemporaryDirectory, Path], 
+        tup_endswith: Tuple[str]
+    ) -> str:
+        zip_file_path = os.path.join(path_dir, "archive.zip")
+        with open(zip_file_path, "wb") as zip_file:
+            zip_file.write(req_resp.content)
+        self.recursive_extract_zip(zip_file_path, path_dir)
+        ex_file_path = None
+        for root_path, _, files in os.walk(path_dir):
+            for file in files:
+                if file.endswith(tup_endswith):
+                    ex_file_path = os.path.join(root_path, file)
+                    break
+            if ex_file_path:
+                break
+        if not ex_file_path:
+            raise ValueError("No file found in the extracted .zip archive. "
+                             + f"- considerer extensions: {tup_endswith}")
+        return ex_file_path
+
+    def get_zip_from_web_in_memory(
+        self, 
+        req_resp: Response, 
+        bl_io_interpreting: bool = False
+    ) -> Union[TextIOWrapper, BufferedReader, List[BufferedReader]]:
+        zipfile = ZipFile(BytesIO(req_resp.content))
+        zip_names = zipfile.namelist()
+        if len(zip_names) == 1:
+            file_name = zip_names.pop()
+            extracted_file = zipfile.open(file_name)
+            if bl_io_interpreting == True:
+                return TextIOWrapper(extracted_file)
+            else:
+                return extracted_file
+        return [zipfile.open(file_name) for file_name in zip_names]
+    
+    def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> str:
+        hash_func = getattr(hashlib, algorithm)()
+        with open(file_path, "rb") as file:
+            for chunk in iter(lambda: file.read(4096), b""):
+                hash_func.update(chunk)
+        return hash_func.hexdigest()
+
+    def validate_file_hash(
+        self, file_path: Union[str, Path], expected_hash: str, algorithm: str = "sha256") -> bool:
+        """
+        Validates the integrity of a file by comparing its hash with an expected value.
+        
+        Args:
+            file_path (Union[str, Path]): The path to the file.
+            expected_hash (str): The expected hash value.
+            algorithm (str): The hashing algorithm to use (e.g., "md5", "sha256").
+        
+        Returns:
+            bool: True if the hash matches, False otherwise.
+        """
+        hash_func = getattr(hashlib, algorithm)()
+        with open(file_path, "rb") as file:
+            for chunk in iter(lambda: file.read(4096), b""):
+                hash_func.update(chunk)
+        return hash_func.hexdigest() == expected_hash
+
+    def extract_file(self, archive_path: Union[str, Path], extract_dir: Union[str, Path], 
+                     format: str = "zip") -> bool:
+        """
+        Extracts files from an archive to a specified directory.
+        
+        Args:
+            archive_path (Union[str, Path]): The path to the archive file.
+            extract_dir (Union[str, Path]): The directory where files should be extracted.
+            format (str): The format of the archive (e.g., "zip", "tar", "7z").
+        
+        Returns:
+            bool: True if extraction was successful, False otherwise.
+        """
+        try:
+            if format == "zip":
+                with ZipFile(archive_path, "r") as zip_ref:
+                    zip_ref.extractall(extract_dir)
+            elif format == "tar":
+                with tarfile.open(archive_path, "r:*") as tar_ref:
+                    tar_ref.extractall(extract_dir)
+            elif format == "7z":
+                with py7zr.SevenZipFile(archive_path, mode="r") as seven_zip_ref:
+                    seven_zip_ref.extractall(extract_dir)
+            else:
+                raise ValueError(f"Unsupported archive format: {format}")
+            return True
+        except Exception as e:
+            print(f"Failed to extract archive: {e}")
+            return False
+    
+    def get_file_metadata(self, file_path: Union[str, Path]) -> dict:
+        stat = os.stat(file_path)
+        return {
+            "size": stat.st_size,
+            "creation_time": datetime.fromtimestamp(stat.st_birthtime),
+            "modification_time": datetime.fromtimestamp(stat.st_mtime),
+            "access_time": datetime.fromtimestamp(stat.st_atime),
+        }
+
+    def stream_file(self, req_resp: Response, chunk_size: int = 8192) -> Iterable[bytes]:
+        """
+        Streams a file from a remote URL in chunks.
+        
+        Args:
+            url (str): The URL of the file to stream.
+            chunk_size (int): The size of each chunk in bytes.
+        
+        Returns:
+            Iterable[bytes]: An iterable yielding file chunks.
+        """
+        for chunk in req_resp.iter_content(chunk_size=chunk_size):
+            yield chunk
 
 
 class FoldersTree:

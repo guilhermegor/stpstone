@@ -85,6 +85,10 @@ cls_ = SearchByTradingB3(
 # print(f"DF MTM B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("option_theor_premiums", bl_fetch=True, bl_debug=False)
-print(f"DF OPTIONS THEORETICAL PREMIUMS B3: \n{df_}")
+# df_ = cls_.source("option_theor_premiums", bl_fetch=True, bl_debug=False)
+# print(f"DF OPTIONS THEORETICAL PREMIUMS B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("fx_markets_traded_rates", bl_fetch=True, bl_debug=False)
+print(f"DF FX MARKETS TRADED RATES B3: \n{df_}")
 df_.info()

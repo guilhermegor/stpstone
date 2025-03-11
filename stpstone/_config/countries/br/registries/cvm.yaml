@@ -735,7 +735,7 @@ funds_monthly_profile:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FI/DOC/PERFIL_MENSAL/DADOS/perfil_mensal_fi_{{month_ref}}.csv
   bl_verify: False
@@ -883,7 +883,7 @@ funds_abs:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FIDC/DOC/INF_MENSAL/DADOS/inf_mensal_fidc_{{month_ref}}.zip
   bl_verify: False
@@ -941,7 +941,7 @@ specially_constitued_investment_fund:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FIE/MEDIDAS/DADOS/medidas_mes_fie_{{month_ref}}.csv
   bl_verify: False
@@ -988,7 +988,7 @@ reits_monthly_profile:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FII/DOC/INF_MENSAL/DADOS/inf_mensal_fii_{{year_ref}}.zip
   bl_verify: False
@@ -1141,7 +1141,7 @@ banks_registry:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/INTERMED/CAD/DADOS/cad_intermed.zip
   bl_verify: False
@@ -1214,7 +1214,7 @@ public_distribution_offerings:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/OFERTA/DISTRIB/DADOS/oferta_distribuicao.zip
   bl_verify: False

@@ -135,7 +135,7 @@ class CVMDATA:
         # url
         url = f'{self.str_host_cvm}{str_app}'
         # downloading zip file into memory
-        list_main_zip = DirFilesManagement().get_zip_from_web_in_memory(
+        list_main_zip = RemoteFiles().get_zip_from_web_in_memory(
             url, 
             bl_io_interpreting=False,
             bl_verify=False

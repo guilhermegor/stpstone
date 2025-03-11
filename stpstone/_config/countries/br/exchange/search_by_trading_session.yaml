@@ -99,7 +99,7 @@ standardized_instruments_groups:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=AI{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -151,7 +151,7 @@ index_report:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=IR{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -231,7 +231,7 @@ price_report:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PR{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -321,7 +321,7 @@ registration_indicator_instruments:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=II{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -408,7 +408,7 @@ fee_daily_unit_cost:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=DI{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -472,7 +472,7 @@ fee_monthly_unit_cost:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=UN{{dt_inf_month_yymmdd}}.zip
   bl_verify: False
@@ -534,7 +534,7 @@ primitive_risk_factors:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=FP{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -599,7 +599,7 @@ risk_formulas:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=FR{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -648,7 +648,7 @@ variable_fees_monthly_updt:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=VA{{dt_inf_month_yymmdd}}.zip
   bl_verify: False
@@ -709,7 +709,7 @@ daily_liquidity_limit:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=LD{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -768,7 +768,7 @@ daily_liquidity_limit_other_limits:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=LA{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -823,7 +823,7 @@ tradable_security_list:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=SecurityList{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -939,7 +939,7 @@ mapping_otc_instrument_groups:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MO{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -1004,7 +1004,7 @@ mapping_standardized_instrument_groups:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MP{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -1069,7 +1069,7 @@ mtm_b3:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip
   bl_verify: False
@@ -1128,7 +1128,7 @@ option_theor_premiums:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PE{{dt_ref_yymmdd}}.ex_
   bl_verify: False
@@ -1141,7 +1141,7 @@ option_theor_premiums:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_b3_mtm_b3
+  table_name: br_b3_option_theor_premiums
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -1169,3 +1169,112 @@ option_theor_premiums:
       - IMPLIED_VOLATILITY
       - FILE_NAME
     sep: ";"
+
+# FX Market - Traded Rates, Opening Parameters and Contracted Transactions
+fx_markets_traded_rates:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pesquisapregao/download?filelist=CT{{dt_ref_yymmdd}}.zip#file_extension=.fwf
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_fx_markets_traded_rates
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    ID_TRANSACAO: str
+    DATA_REFERENCIA: date
+    DATA_CONTRATACAO_TXS_PRATICADAS: date
+    DATA_LIQUIDACAO_TXS_PRATICADAS: date
+    TX_PRATICADA_MX: float
+    TX_PRATICADA_MIN: float
+    TX_PRATICADA_MEDIA: float
+    DATA_CONTRATACAO_PARAMETROS_ABERTURA: date
+    DATA_LIQUIDACAO_PARAMETROS_ABERTURA: date
+    TAXA_ABERTURA: float
+    PERCENTAUL_GARANTIDO: float
+    DATA_CONTRATACAO_OPERACOES_CONTRATADAS: date
+    DATA_LIQUIDACAO_OPERACOES_CONTRATADAS: date
+    NUMERO_OPERACOES_CONTRATADAS: int
+    VALOR_OPERACOES_CONTRATADAS_DOLAR: float
+    VALOR_OPERACOES_CONTRATADAS_REAIS: float
+    FILE_NAME: str
+  df_read_params:
+  fixed_width_layout:
+    - field: ID_TRANSACAO
+      start: 0
+      end: 8
+    - field: DATA_REFERENCIA
+      start: 8
+      end: 16
+    - field: DATA_CONTRATACAO_TXS_PRATICADAS
+      start: 16
+      end: 24
+    - field: DATA_LIQUIDACAO_TXS_PRATICADAS
+      start: 24
+      end: 32
+    - field: TX_PRATICADA_MX
+      start: 32
+      end: 41
+    - field: TX_PRATICADA_MIN
+      start: 41
+      end: 50
+    - field: TX_PRATICADA_MEDIA
+      start: 50
+      end: 59
+    - field: DATA_CONTRATACAO_PARAMETROS_ABERTURA
+      start: 59
+      end: 67
+    - field: DATA_LIQUIDACAO_PARAMETROS_ABERTURA
+      start: 67
+      end: 75
+    - field: TAXA_ABERTURA
+      start: 75
+      end: 84
+    - field: PERCENTAUL_GARANTIDO
+      start: 84
+      end: 89
+    - field: DATA_CONTRATACAO_OPERACOES_CONTRATADAS
+      start: 89
+      end: 97
+    - field: DATA_LIQUIDACAO_OPERACOES_CONTRATADAS
+      start: 97
+      end: 105
+    - field: NUMERO_OPERACOES_CONTRATADAS
+      start: 105
+      end: 113
+    - field: VALOR_OPERACOES_CONTRATADAS_DOLAR
+      start: 113
+      end: 126
+    - field: VALOR_OPERACOES_CONTRATADAS_REAIS
+      start: 126
+      end: 139

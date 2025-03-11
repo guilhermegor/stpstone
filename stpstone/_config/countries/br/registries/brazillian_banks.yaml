@@ -37,7 +37,7 @@ bcb_registry:
   # expected comments to app, within url:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
-  #   - file_extension={{.file_extension}}
+  #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: Fis/CODCOMPE/Tabela.pdf#feat=read_tables&int_pgs_join=3
   bl_verify: False

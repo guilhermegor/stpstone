@@ -54,7 +54,7 @@ class TradingFilesB3:
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
                                                      self.int_wd_bef).strftime('%y%m%d'))
         # carga para a memória margens teóricas máximas b3
-        zipfile = DirFilesManagement().get_zip_from_web_in_memory(
+        zipfile = RemoteFiles().get_zip_from_web_in_memory(
             url, bl_io_interpreting=YAML_B3[
                 'options_traded_b3']['bl_io_interpreting'],
             bl_verify=YAML_B3['options_traded_b3']['bl_verify']
@@ -242,7 +242,7 @@ class TradingFilesB3:
             'url'].format(DatesBR().sub_working_days(DatesBR().curr_date,
                                                      self.int_wd_bef).strftime('%y%m%d'))
         # carga para a memória margens teóricas máximas b3
-        zipfile = DirFilesManagement().get_zip_from_web_in_memory(
+        zipfile = RemoteFiles().get_zip_from_web_in_memory(
             url_mtm, bl_io_interpreting=YAML_B3[
                 'margens_teoricas_maximas_b3']['bl_io_interpreting'],
             bl_verify=YAML_B3['margens_teoricas_maximas_b3']['bl_verify'])
@@ -431,7 +431,7 @@ class TradingFilesB3:
             'data_files_collateral_acc_spot_bov_b3'] + \
             url_acoes_units_etfs_aceitos_garantia_b3
         # openning zip in memory
-        list_unzipped_files = DirFilesManagement().get_zip_from_web_in_memory(
+        list_unzipped_files = RemoteFiles().get_zip_from_web_in_memory(
             url_acoes_units_etfs_aceitos_garantia_b3, bl_verify=False)
         if str(type(list_unzipped_files)) != "<class 'list'>":
             list_unzipped_files = [list_unzipped_files]
@@ -499,7 +499,7 @@ class TradingFilesB3:
             DatesBR().sub_working_days(DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_curva'][
                 'tipo_curva']['self.int_wd_bef']).strftime('%y%m%d'))
         # baixando em memória zip com cenário de tipo curva da b3
-        list_txts_tipos_curva_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
+        list_txts_tipos_curva_cenarios = RemoteFiles().get_zip_from_web_in_memory(
             url_cenarios_tipo_curva, bl_verify=YAML_B3['cenarios_risco_tipo_curva']['bl_verify'],
             bl_io_interpreting=YAML_B3['cenarios_risco_tipo_curva']['bl_io_interpreting'],
             timeout=YAML_B3['cenarios_risco_tipo_curva']['tipo_curva']['timeout'])
@@ -569,7 +569,7 @@ class TradingFilesB3:
             DatesBR().sub_working_days(DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_spot'][
                 'tipo_curva']['self.int_wd_bef']).strftime('%y%m%d'))
         # baixando em memória zip com cenário de tipo curva da b3
-        list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
+        list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
             url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'],
             bl_io_interpreting=YAML_B3['cenarios_risco_tipo_spot']['bl_io_interpreting'],
             timeout=YAML_B3['cenarios_risco_tipo_spot']['tipo_curva']['timeout'])
@@ -793,7 +793,7 @@ class TradingFilesB3:
                     DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_spot'][
                         'tipo_curva']['self.int_wd_beferiores']).strftime('%y%m%d'))
             # baixando em memória zip com cenário de tipo curva da b3
-            list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
+            list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
                 url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'],
                 bl_io_interpreting=YAML_B3['cenarios_risco_tipo_spot']['bl_io_interpreting'],
                 timeout=YAML_B3['cenarios_risco_tipo_spot']['tipo_curva']['timeout'])
@@ -802,7 +802,7 @@ class TradingFilesB3:
                 'tipo_curva']['url'].format(
             DatesBR().sub_working_days(DatesBR().curr_date, (YAML_B3['cenarios_risco_tipo_spot'][
                 'tipo_curva']['self.int_wd_beferiores'] + 1)).strftime('%y%m%d'))
-            list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
+            list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
                 url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'],
                 bl_io_interpreting=YAML_B3['cenarios_risco_tipo_spot']['bl_io_interpreting'],
                 timeout=YAML_B3['cenarios_risco_tipo_spot']['tipo_curva']['timeout'])

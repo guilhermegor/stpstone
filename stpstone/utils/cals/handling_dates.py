@@ -77,6 +77,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             )
         elif format_input == "DDMMYYYY":
             return date(int(date_str[-4:]), int(date_str[2:4]), int(date_str[0:2]))
+        elif format_input == "YYYYMMDD":
+            return date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:]))
         elif format_input == "YYYY-MM-DD":
             return date(int(date_str[0:4]), int(date_str[5:7]), int(date_str[-2:]))
         elif format_input == "YYMMDD":

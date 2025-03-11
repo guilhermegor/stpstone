@@ -25,7 +25,7 @@ from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.folders import DirFilesManagement, RemoteFiles
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.utils.parsers.str import StrHandler
@@ -133,7 +133,7 @@ class UtilsRequests(ABC):
         dict_count_matches = dict()
         doc_pdf = fitz.open(
             stream=bytes_pdf,
-            filetype=DirFilesManagement().get_file_extension(req_resp.url),
+            filetype=DirFilesManagement().get_last_file_extension(req_resp.url),
         )
         # create list of concatenated pages
         for i in range(0, len(doc_pdf), int_pgs_join):
@@ -190,28 +190,7 @@ class UtilsRequests(ABC):
             return int(int_pgs_join)
         else:
             return None
-    
-    def get_ex_file_from_zip(
-        self, 
-        req_resp: Response, 
-        path_dir: Union[str, tempfile.TemporaryDirectory, Path]
-    ):
-        zip_file_path = os.path.join(path_dir, "archive.zip")
-        with open(zip_file_path, "wb") as zip_file:
-            zip_file.write(req_resp.content)
-        with ZipFile(zip_file_path, "r") as zip_ref:
-            zip_ref.extractall(path_dir)
-        ex_file_path = None
-        for root, _, files in os.walk(path_dir):
-            for file in files:
-                if file.endswith(".ex_"):
-                    ex_file_path = os.path.join(root, file)
-                    break
-            if ex_file_path:
-                break
-        if not ex_file_path:
-            raise ValueError("No .ex_ file found in the extracted .zip archive.")
-        return ex_file_path
+
 
 class HandleReqResponses(UtilsRequests):
 
@@ -222,10 +201,11 @@ class HandleReqResponses(UtilsRequests):
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
+        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         bl_debug: bool = False,
     ) -> pd.DataFrame:
         print(f"URL: {req_resp.url}")
-        str_file_extension = DirFilesManagement().get_file_extension(req_resp.url)
+        str_file_extension = DirFilesManagement().get_last_file_extension(req_resp.url)
         print(f"FILE EXTENSION: {str_file_extension}")
         file_name = os.path.basename(req_resp.url) if hasattr(req_resp, "url") else ""
         if self.req_trt_injection(req_resp) is not None:
@@ -257,6 +237,8 @@ class HandleReqResponses(UtilsRequests):
             df_ = self._handle_json_response(req_resp)
         elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
             df_ = self._handle_pdf_doc_response(req_resp, dict_regex_patterns)
+        elif str_file_extension in ["fwf", "dat"]:
+            df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
         else:
             try:
                 json_ = req_resp.json()
@@ -283,13 +265,14 @@ class HandleReqResponses(UtilsRequests):
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
+        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         bl_debug: bool = False
     ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
         for file_name in zipfile.namelist():
             with zipfile.open(file_name) as file:
-                str_file_extension = DirFilesManagement().get_file_extension(file_name)
+                str_file_extension = DirFilesManagement().get_last_file_extension(file_name)
                 if str_file_extension in list_ignored_file_extensions: continue
                 mock_resp = self.mock_response(file, file_name)
                 df_ = self.handle_response(
@@ -298,6 +281,7 @@ class HandleReqResponses(UtilsRequests):
                     dict_regex_patterns,
                     dict_df_read_params,
                     list_ignored_file_extensions,
+                    list_ser_fixed_width_layout,
                     bl_debug,
                 )
                 if df_.empty == True: continue
@@ -410,10 +394,11 @@ class HandleReqResponses(UtilsRequests):
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
+        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
     ) -> pd.DataFrame:
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
-            ex_file_path = self.get_ex_file_from_zip(req_resp, temp_dir_path)
+            ex_file_path = RemoteFiles().get_file_from_zip(req_resp, temp_dir_path, (".ex_"))
             os.chmod(ex_file_path, 0o755)
             subprocess.run([ex_file_path], cwd=temp_dir_path, check=True)
             list_files = [
@@ -430,9 +415,21 @@ class HandleReqResponses(UtilsRequests):
                         dict_regex_patterns,
                         dict_df_read_params,
                         list_ignored_file_extensions,
+                        list_ser_fixed_width_layout,
                     )
                     list_ser.extend(df_.to_dict(orient="records"))
             return pd.DataFrame(list_ser)
+
+    def _handle_fwf_response(
+        self,
+        req_resp: Response,
+        list_ser_fixed_width_layout: List[Dict[str, Any]]
+    ) -> pd.DataFrame:
+        list_colspecs = [(dict_["start"], dict_["end"]) for dict_ in list_ser_fixed_width_layout]
+        list_colnames = [dict_["field"] for dict_ in list_ser_fixed_width_layout]
+        with tempfile.TemporaryDirectory() as temp_dir_path:
+            file_path = RemoteFiles().get_file_from_zip(req_resp, temp_dir_path, (".fwf", ".dat", ""))
+            return pd.read_fwf(file_path, colspecs=list_colspecs, names=list_colnames)
 
 
 class ABCRequests(HandleReqResponses):
@@ -615,6 +612,7 @@ class ABCRequests(HandleReqResponses):
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
+        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         bl_debug: bool = False,
     ) -> pd.DataFrame:
@@ -632,7 +630,7 @@ class ABCRequests(HandleReqResponses):
         # dealing with request content type
         df_ = self.handle_response(
             req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params,
-            list_ignored_file_extensions, bl_debug
+            list_ignored_file_extensions, list_ser_fixed_width_layout, bl_debug
         )
         if bl_debug == True:
             print(f"*** TRT REQ BEFORE STANDARDIZATION: \n{df_}")
@@ -803,6 +801,7 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource].get("regex_patterns", None),
                 self.dict_metadata[str_resource].get("df_read_params", None),
                 self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                 self.dict_metadata[str_resource].get("xml_keys", None),
                 bl_debug,
             )
@@ -925,6 +924,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource].get("regex_patterns", None),
                             self.dict_metadata[str_resource].get("df_read_params", None),
                             self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         )
@@ -991,6 +991,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource].get("regex_patterns", None),
                             self.dict_metadata[str_resource].get("df_read_params", None),
                             self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         )
@@ -1055,6 +1056,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource].get("regex_patterns", None),
                             self.dict_metadata[str_resource].get("df_read_params", None),
                             self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             bl_debug,
                         ).to_dict(orient="records")
