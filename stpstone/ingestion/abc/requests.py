@@ -9,6 +9,7 @@ import backoff
 import fitz
 import pdfplumber
 import pandas as pd
+from pathlib import Path
 from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
@@ -189,7 +190,28 @@ class UtilsRequests(ABC):
             return int(int_pgs_join)
         else:
             return None
-
+    
+    def get_ex_file_from_zip(
+        self, 
+        req_resp: Response, 
+        path_dir: Union[str, tempfile.TemporaryDirectory, Path]
+    ):
+        zip_file_path = os.path.join(path_dir, "archive.zip")
+        with open(zip_file_path, "wb") as zip_file:
+            zip_file.write(req_resp.content)
+        with ZipFile(zip_file_path, "r") as zip_ref:
+            zip_ref.extractall(path_dir)
+        ex_file_path = None
+        for root, _, files in os.walk(path_dir):
+            for file in files:
+                if file.endswith(".ex_"):
+                    ex_file_path = os.path.join(root, file)
+                    break
+            if ex_file_path:
+                break
+        if not ex_file_path:
+            raise ValueError("No .ex_ file found in the extracted .zip archive.")
+        return ex_file_path
 
 class HandleReqResponses(UtilsRequests):
 
@@ -218,13 +240,12 @@ class HandleReqResponses(UtilsRequests):
                 bl_debug,
             )
         elif str_file_extension == "ex_":
-            df_ = self._handle_ex_extension(
+            df_ = self._handle_ex_response(
                 req_resp,
                 dict_xml_keys,
                 dict_regex_patterns,
                 dict_df_read_params,
                 list_ignored_file_extensions,
-                bl_debug,
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
             df_ = self._handle_csv_response(req_resp, dict_df_read_params)
@@ -382,7 +403,7 @@ class HandleReqResponses(UtilsRequests):
             return self.pdf_doc_regex(
                 req_resp, bytes_pdf, dict_regex_patterns, int_pgs_join)
 
-    def _handle_ex_extension(
+    def _handle_ex_response(
         self,
         req_resp: Response,
         dict_xml_keys: Optional[Dict[str, Any]] = None,
@@ -390,30 +411,28 @@ class HandleReqResponses(UtilsRequests):
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
     ) -> pd.DataFrame:
-        list_ser = List[Dict[str, Any]]
-        with tempfile.TemporaryDirectory() as temp_dir:
-            ex_file_path = os.path.join(temp_dir, "temp_file.ex_")
-            exe_file_path = os.path.join(temp_dir, "temp_file.exe")
-        with open(ex_file_path, "wb") as ex_file:
-            ex_file.write(req_resp.content)
-        os.rename(ex_file_path, exe_file_path)
-        subprocess.run([exe_file_path], check=True)
-        list_files = [f for f in os.listdir(temp_dir) if not f.endswith((".ex_", ".exe"))]
-        if len(list_files) == 0:
-            raise FileNotFoundError("The executable did not generate any output files.")
-        for file_name in list_files:
-            file_path = os.path.join(temp_dir, file_name)
-            with open(file_path, "rb") as file:
-                mock_resp = self.mock_response(file, file_name)
-                df_ = self.handle_response(
-                    mock_resp,
-                    dict_xml_keys,
-                    dict_regex_patterns,
-                    dict_df_read_params,
-                    list_ignored_file_extensions,
-                )
-                list_ser.extend(df_.to_dict(orient="records"))
-        return pd.DataFrame(list_ser)
+        list_ser = list()
+        with tempfile.TemporaryDirectory() as temp_dir_path:
+            ex_file_path = self.get_ex_file_from_zip(req_resp, temp_dir_path)
+            os.chmod(ex_file_path, 0o755)
+            subprocess.run([ex_file_path], cwd=temp_dir_path, check=True)
+            list_files = [
+                f for f in os.listdir(temp_dir_path) 
+                if f != os.path.basename(ex_file_path) and not f.endswith(".zip")
+            ]
+            for file_name in list_files:
+                file_path = os.path.join(temp_dir_path, file_name)
+                with open(file_path, "rb") as file:
+                    mock_resp = self.mock_response(file, file_name)
+                    df_ = self.handle_response(
+                        mock_resp,
+                        dict_xml_keys,
+                        dict_regex_patterns,
+                        dict_df_read_params,
+                        list_ignored_file_extensions,
+                    )
+                    list_ser.extend(df_.to_dict(orient="records"))
+            return pd.DataFrame(list_ser)
 
 
 class ABCRequests(HandleReqResponses):
