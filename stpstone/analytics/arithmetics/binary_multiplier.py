@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class BinaryMultiplier(metaclass=TypeChecker):
+class BinaryMultiplier(metaclass = TypeChecker):
 
     def __init__(self, a: int, b: int) -> None:
         """

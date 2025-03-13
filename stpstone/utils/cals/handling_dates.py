@@ -20,7 +20,7 @@ from stpstone.utils.cals.br_bzdays import BrazilBankCalendar
 from stpstone.utils.parsers.str import StrHandler
 
 
-class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
+class DatesBR(BrazilBankCalendar, metaclass = TypeChecker):
 
     def build_date(self, year: int, month: int, day: int) -> date:
         return date(year=year, month=month, day=day)

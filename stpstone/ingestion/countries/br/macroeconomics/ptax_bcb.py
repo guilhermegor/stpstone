@@ -78,8 +78,13 @@ class PTAXBCB(ABCRequests):
         - left merge with the ids dataframe to add the CURRENCY_ID;
         - fetches the close currency rates, and performs left-join to add CURRENCY_NAME, 
             COUNTRY_CODE and COUNTRY_NAME 
-        Args: None
-        Returns: pd.DataFrame
+
+        Args: 
+            None
+
+        Returns: 
+            pd.DataFrame
+        
         Metadata: https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes
         """
         df_available_currencies = super().source(
