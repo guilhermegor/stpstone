@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class HalfSubtractor(metaclass=TypeChecker):
+class HalfSubtractor(metaclass = TypeChecker):
 
     def __init__(self, a: int, b: int) -> None:
         """
@@ -45,7 +45,7 @@ class HalfSubtractor(metaclass=TypeChecker):
         return not self.a and self.b
 
 
-class FullSubtractor(metaclass=TypeChecker):
+class FullSubtractor(metaclass = TypeChecker):
 
     def __init__(self, a: int, b: int, borrow_in: int) -> None:
         """

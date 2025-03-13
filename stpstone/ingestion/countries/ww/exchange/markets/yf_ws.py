@@ -13,7 +13,7 @@ from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
-class YFinanceWS(metaclass=TypeChecker):
+class YFinanceWS(metaclass = TypeChecker):
 
     def __init__(
         self, 

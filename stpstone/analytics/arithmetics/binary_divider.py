@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class BinaryDivider(metaclass=TypeChecker):
+class BinaryDivider(metaclass = TypeChecker):
 
     def __init__(self, dividend: int, divisor: int) -> None:
         """

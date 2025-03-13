@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class HalfAdder(metaclass=TypeChecker):
+class HalfAdder(metaclass = TypeChecker):
 
     def __init__(self, a: int, b: int) -> None:
         """
@@ -47,7 +47,7 @@ class HalfAdder(metaclass=TypeChecker):
         return self.a & self.b
 
 
-class FullAdder(metaclass=TypeChecker):
+class FullAdder(metaclass = TypeChecker):
 
     def __init__(self, a: int, b: int, carry_in: int) -> None:
         """
@@ -96,7 +96,7 @@ class FullAdder(metaclass=TypeChecker):
         return (self.a & self.b) | (self.carry_in & (self.a ^ self.b))
 
 
-class EightBitFullAdder(metaclass=TypeChecker):
+class EightBitFullAdder(metaclass = TypeChecker):
 
     def __init__(self, a: int, b: int) -> None:
         """

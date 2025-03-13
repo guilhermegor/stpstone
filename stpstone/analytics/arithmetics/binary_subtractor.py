@@ -2,7 +2,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.analytics.arithmetics.bit_subtractor import FullSubtractor
 
 
-class BinarySubtractor(metaclass=TypeChecker):
+class BinarySubtractor(metaclass = TypeChecker):
     def __init__(self, minuend: str, subtrahend: str) -> None:
         """
         Initialize the BinarySubtractor with two binary numbers as strings.
