@@ -37,7 +37,7 @@ class TypeChecker(type):
 
 if __name__ == '__main__':
 
-    class MyClass(metaclass = TypeChecker):
+    class MyClass(metaclass=TypeChecker):
 
         def method_one(self, x: int, y: int) -> int:
             return x + y

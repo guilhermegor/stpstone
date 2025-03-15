@@ -4,7 +4,7 @@ from typing import List, Tuple
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class FinancialMath(metaclass = TypeChecker):
+class FinancialMath(metaclass=TypeChecker):
 
     def compound_r(self, float_ytm: float, int_nper: int, int_compound_n: int) -> float:
         return float((1.0 + float_ytm) ** (float(int_nper) / float(int_compound_n))) - 1.0

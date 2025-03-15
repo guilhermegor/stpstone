@@ -15,7 +15,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.json import JsonFiles
 
 
-class ConnectionApi(metaclass = TypeChecker):
+class ConnectionApi(metaclass=TypeChecker):
     """
     Metadata:
         - http://www.b3.com.br/data/files/2E/95/28/F1/EBD17610515A8076AC094EA8/GUIDE-TO-LINE-5.0-API.pdf,

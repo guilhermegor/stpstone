@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class Converter(metaclass = TypeChecker):
+class Converter(metaclass=TypeChecker):
 
     def binary_to_decimal(self, binary: str) -> int:
         """

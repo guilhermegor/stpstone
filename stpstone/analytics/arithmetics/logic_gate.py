@@ -3,7 +3,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class NANDGate(metaclass = TypeChecker):
+class NANDGate(metaclass=TypeChecker):
     def __init__(self, a: bool, b: bool) -> None:
         self.a = a
         self.b = b
@@ -26,7 +26,7 @@ class NANDGate(metaclass = TypeChecker):
         return f"NANDGate(a={self.a}, b={self.b}, output={bool(self)})"
 
 
-class NORGate(metaclass = TypeChecker):
+class NORGate(metaclass=TypeChecker):
     def __init__(self, a: bool, b: bool) -> None:
         self.a = a
         self.b = b
@@ -49,7 +49,7 @@ class NORGate(metaclass = TypeChecker):
         return f"NORGate(a={self.a}, b={self.b}, output={bool(self)})"
 
 
-class XORGate(metaclass = TypeChecker):
+class XORGate(metaclass=TypeChecker):
     def __init__(self, a: bool, b: bool) -> None:
         self.a = a
         self.b = b

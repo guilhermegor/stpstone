@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class BinaryComparator(metaclass = TypeChecker):
+class BinaryComparator(metaclass=TypeChecker):
     def __init__(self, a: int, b: int) -> None:
         """Initialize the Binary Comparator with two binary inputs."""
         self.a = a

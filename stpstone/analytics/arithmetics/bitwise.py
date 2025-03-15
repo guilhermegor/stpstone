@@ -1,7 +1,7 @@
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class Utilities(metaclass = TypeChecker):
+class Utilities(metaclass=TypeChecker):
 
     def bitwise_and(self, a: int, b: int) -> int:
         return a & b

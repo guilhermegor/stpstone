@@ -1,5 +1,5 @@
 from unittest import TestCase, main
-from stpstone.analytics.risk.duration import BondDuration
+from stpstone.analytics.risk.yield_ import BondDuration
 
 
 class TestBondDuration(TestCase):

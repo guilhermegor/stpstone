@@ -20,7 +20,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
 
 
-class DFStandardization(metaclass = TypeChecker):
+class DFStandardization(metaclass=TypeChecker):
 
     def __init__(
         self,

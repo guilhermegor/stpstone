@@ -6,7 +6,7 @@ from stpstone.transformations.validation.metaclass_type_checker import \
     TypeChecker
 
 
-class Fraction(metaclass = TypeChecker):
+class Fraction(metaclass=TypeChecker):
     def __init__(self, numerator: int, denominator: int) -> None:
         if denominator == 0:
             raise ValueError("Denominator cannot be zero.")
