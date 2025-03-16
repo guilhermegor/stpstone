@@ -62,8 +62,16 @@ class MarkowitzPortf(metaclass=TypeChecker):
         self.float_lambda = float_lambda
         self.array_r = Arrays().to_array(array_r)
         self.array_w = Arrays().to_array(array_w)
-        if (bl_validate_w == True) and (not np.isclose(np.sum(self.array_w), 1.0, atol=float_atol)):
-            raise ValueError("Portfolio weights must sum to 1.")
+        if bl_validate_w == True:
+            if self.array_w.ndim == 1:
+                if not np.isclose(np.sum(self.array_w), 1.0, atol=float_atol):
+                    raise ValueError("Portfolio weights must sum to 1.")
+            elif self.array_w.ndim == 2:
+                for i, row in enumerate(self.array_w):
+                    if not np.isclose(np.sum(row), 1.0, atol=float_atol):
+                        raise ValueError(f"Portfolio weights in row {i} must sum to 1.")
+            else:
+                raise ValueError("Portfolio weights must be either 1D or 2D array.")
     
     @property
     def mu(self) -> float:
@@ -94,7 +102,15 @@ class MarkowitzPortf(metaclass=TypeChecker):
 
     @property
     def sigma(self) -> float:
-        return np.dot(self.array_w.T, np.dot(self.cov, self.array_w))
+        if self.array_w.ndim == 1:
+            return np.dot(self.array_w.T, np.dot(self.cov, self.array_w))
+        elif self.array_w.ndim == 2:
+            array_sigmas = np.zeros(self.array_w.shape[0])
+            for i, array_new_w in enumerate(self.array_w):
+                array_sigmas[i] = np.dot(array_new_w.T, np.dot(self.cov, array_new_w))
+            return float(array_sigmas[0])
+        else:
+            raise ValueError("Portfolio weights must be either 1D or 2D array.")
     
     def sharpe_ratio(self, float_rf: float) -> float:
         return (self.mu - float_rf) / self.sigma
@@ -127,7 +143,7 @@ class VaR(metaclass=TypeChecker):
         self, 
         float_shock: float, 
         str_shock_type: Literal["absolute", "relative"] = "relative"
-    ):
+    ) -> float:
         if str_shock_type == "relative":
             array_r_shock = self.array_r * (1 + float_shock)
         elif str_shock_type == "absolute":
@@ -203,7 +219,7 @@ class VaR(metaclass=TypeChecker):
         array_portfs_nv = float_portf_nv * np.cumprod(1 + array_simulated_r, axis=1)
         array_portfs_nv = np.sort(array_portfs_nv)
         int_percentile_idx = int((1 - self.float_cl) * int_simulations)
-        return float_portf_nv - array_portfs_nv[int_percentile_idx]
+        return float(float_portf_nv - array_portfs_nv[int_percentile_idx].item())
 
 
 class RiskMeasures(VaR):
@@ -228,7 +244,7 @@ class RiskMeasures(VaR):
     @property
     def drawdown(self) -> float:
         array_cum_r = np.cumprod(1 + self.array_r)
-        array_cummax_r = array_cum_r.cummax()
+        array_cummax_r = np.maximum.accumulate(array_cum_r)
         array_drawdown = (array_cum_r - array_cummax_r) / array_cummax_r
         return np.min(array_drawdown)
     
