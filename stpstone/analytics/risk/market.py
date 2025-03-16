@@ -3,11 +3,12 @@ import numpy as np
 from scipy.stats import norm
 from typing import List, Union, Optional, Literal, Dict
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.parsers.arrays import Arrays
 
 
 class RiskStats(metaclass=TypeChecker):
 
-    def __init__(self, array_r: Union[np.ndarray, pd.Series, List[float]]):
+    def __init__(self, array_r: Union[np.ndarray, pd.Series, List[float]]) -> None:
         """
         Initializer for RiskStats class
         
@@ -16,10 +17,7 @@ class RiskStats(metaclass=TypeChecker):
                 ordered by dates in descending order, which can be a 
                 numpy array, pandas Series, list of floats, or a single float.
         """
-        self.array_r = array_r if isinstance(array_r, np.ndarray) else (
-            np.array(array_r) if isinstance(array_r, list) 
-            else (array_r.to_numpy() if isinstance(array_r, pd.Series) else None)
-        )
+        self.array_r = Arrays().to_array(array_r)
     
     def variance_ewma(self, float_lambda: Optional[float] = 0.94) -> float:
         """
@@ -40,27 +38,14 @@ class RiskStats(metaclass=TypeChecker):
         array_ewma = np.zeros_like(self.array_r)
         array_ewma[0] = self.array_r[0]
         for t in range(1, len(self.array_r)):
-            array_ewma[t] = float_lambda * self.array_r[t -1] + (1 - float_lambda) * array_ewma[t - 1]
+            array_ewma[t] = float_lambda * self.array_r[t] + (1 - float_lambda) * array_ewma[t - 1]
         return np.sum(array_ewma)
-    
-    @property
-    def skewness(self) -> float:
-        return np.sum((self.array_r - np.mean(self.array_r)) ** 3)
-    
-    @property
-    def kurtosis(self) -> float:
-        return np.sum((self.array_r - np.mean(self.array_r)) ** 4)
 
     def descriptive_stats(self, float_lambda: Optional[float] = 0.94) -> Dict[str, float]:
         return {
             "mu": np.mean(self.array_r),
             "std": np.std(self.array_r),
-            "ewma_std": np.sqrt(self.variance_ewma(float_lambda)), 
-            "skewness": self.skewness,
-            "kurtosis": self.kurtosis, 
-            "excess_kurtosis": self.kurtosis - 3, 
-            "min": np.min(self.array_r),
-            "max": np.max(self.array_r)
+            "ewma_std": np.sqrt(self.variance_ewma(float_lambda)),
         }
 
 
@@ -75,18 +60,14 @@ class MarkowitzPortf(metaclass=TypeChecker):
         float_atol: Optional[float] = 1e-4
     ) -> None:
         self.float_lambda = float_lambda
-        self.array_r = array_r if isinstance(array_r, np.ndarray) else (
-            array_r.to_numpy() if isinstance(array_r, pd.DataFrame) else None
-        )
-        self.array_w = array_w if isinstance(array_w, np.ndarray) else (
-            array_w.to_numpy() if isinstance(array_w, pd.DataFrame) else None
-        )
+        self.array_r = Arrays().to_array(array_r)
+        self.array_w = Arrays().to_array(array_w)
         if (bl_validate_w == True) and (not np.isclose(np.sum(self.array_w), 1.0, atol=float_atol)):
             raise ValueError("Portfolio weights must sum to 1.")
     
     @property
     def mu(self) -> float:
-        return np.mean(np.dot(self.array_r, self.array_w.T), axis=0)
+        return np.mean(np.sum(self.array_r * self.array_w, axis=1))
     
     @property
     def cov(self) -> np.ndarray:
@@ -135,11 +116,8 @@ class VaR(metaclass=TypeChecker):
         self.float_cl = float_cl
         self.int_t = int_t
         self.float_lambda = float_lambda
-        self.array_r = array_r if isinstance(array_r, np.ndarray) else (
-            np.array(array_r) if isinstance(array_r, list) 
-            else (array_r.to_numpy() if isinstance(array_r, pd.Series) else None)
-        )
-        self.z = norm.ppf(float_cl)
+        self.array_r = Arrays().to_array(array_r)
+        self.float_z = norm.ppf(float_cl)
 
     @property
     def historic_var(self) -> float:
@@ -244,14 +222,11 @@ class RiskMeasures(VaR):
         self.float_cl = float_cl
         self.int_t = int_t
         self.float_lambda = float_lambda
-        self.array_r = array_r if isinstance(array_r, np.ndarray) else (
-            np.array(array_r) if isinstance(array_r, list) 
-            else (array_r.to_numpy() if isinstance(array_r, pd.Series) else None)
-        )
-        self.z = norm.ppf(float_cl)
+        self.array_r = Arrays().to_array(array_r)
+        self.float_z = norm.ppf(float_cl)
 
     @property
-    def drawdown(self):
+    def drawdown(self) -> float:
         array_cum_r = np.cumprod(1 + self.array_r)
         array_cummax_r = array_cum_r.cummax()
         array_drawdown = (array_cum_r - array_cummax_r) / array_cummax_r
@@ -274,26 +249,19 @@ class RiskMeasures(VaR):
         Returns:
             float: The tracking error, which is the standard deviation of the active returns.
         """
-        array_portf_r = array_portf_r if isinstance(array_portf_r, np.ndarray) else (
-            np.array(array_portf_r) if isinstance(array_portf_r, list) 
-            else (array_portf_r.to_numpy() if isinstance(array_portf_r, pd.Series) else None)
-        )
-        array_benchmark_r = array_benchmark_r if isinstance(array_benchmark_r, np.ndarray) else (
-            np.array(array_benchmark_r) if isinstance(array_benchmark_r, list) 
-            else (array_benchmark_r.to_numpy() if isinstance(array_benchmark_r, pd.Series) else None)
-        )
+        array_portf_r = Arrays().to_array(array_portf_r)
+        array_benchmark_r = Arrays().to_array(array_benchmark_r)
         array_active_r = array_portf_r - array_benchmark_r
         return np.std(array_active_r, ddof=float_ddof)
     
     def sharpe(self, float_rf: float) -> float:
         return (self.float_mu - float_rf) / self.float_sigma
     
-    def beta(self, array_market_r: Union[np.ndarray, pd.Series, List[float]]):
-        array_market_r = array_market_r if isinstance(array_market_r, np.ndarray) else (
-            np.array(array_market_r) if isinstance(array_market_r, list) 
-            else (array_market_r.to_numpy() if isinstance(array_market_r, pd.Series) else None)
-        )
-        return np.cov(array_market_r, self.array_r)[0, 1] / np.var(array_market_r)
+    def beta(self, array_market_r: Union[np.ndarray, pd.Series, List[float]], 
+        float_ddof: Optional[float] = 1) -> float:
+        array_market_r = Arrays().to_array(array_market_r)
+        array_cov = np.cov(self.array_r, array_market_r, ddof=float_ddof)
+        return array_cov[0, 1] / array_cov[1, 1]
 
 
 class QuoteVar(VaR):
@@ -308,7 +276,7 @@ class QuoteVar(VaR):
     ) -> None:
         self.dict_desc_stats = RiskStats(array_r).descriptive_stats(float_lambda=float_lambda)
         super().__init__(
-            float_mu=np.mean(array_r),
+            float_mu=self.dict_desc_stats["mu"],
             float_sigma=self.dict_desc_stats[str_method_str],
             array_r=array_r,
             float_cl=float_cl,
@@ -329,6 +297,8 @@ class PortfVar(VaR):
         bl_validate_w: Optional[bool] = True, 
         float_atol: Optional[float] = 1e-4
     ) -> None:
+        if (array_w.shape[0] > 1) and (array_r.shape != array_w.shape):
+            raise ValueError("Return and weight arrays must have the same shape.")
         self.cls_markowitz = MarkowitzPortf(array_r, array_w, float_lambda, bl_validate_w, float_atol)
         super().__init__(
             float_mu=self.cls_markowitz.mu,
