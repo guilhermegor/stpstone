@@ -41,7 +41,7 @@ update_tree:
 			while ((getline line > 0) && (line !~ /^```/)) {} \
 		} \
 		!section_found {print} \
-		section_found && /^```/ {section_found=0}' README.md > README.md.tmp
+		section_found && /^```/ {section_found=0}' README.md > README.md.tmp && rm -rf README.md.tmp
 	@echo "README.md updated successfully."
 
 update_readme: package_tree update_tree
