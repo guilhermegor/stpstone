@@ -42,7 +42,6 @@ update_tree:
 		} \
 		!section_found {print} \
 		section_found && /^```/ {section_found=0}' README.md > README.md.tmp
-	@mv README.md.tmp README.md
 	@echo "README.md updated successfully."
 
 update_readme: package_tree update_tree

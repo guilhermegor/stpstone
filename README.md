@@ -26,6 +26,8 @@ stpstone
 │   │   │   │   └── investment_funds.yaml
 │   │   │   ├── exchange
 │   │   │   │   ├── bvmf_bov.yaml
+│   │   │   │   ├── consolidated_trades.yaml
+│   │   │   │   ├── consolidated_trades_after_mkt.yaml
 │   │   │   │   ├── historical_sigma.yaml
 │   │   │   │   ├── indexes_theor_portf.yaml
 │   │   │   │   ├── options_calendar.yaml
@@ -39,6 +41,8 @@ stpstone
 │   │   │   ├── otc
 │   │   │   │   └── debentures.yaml
 │   │   │   ├── registries
+│   │   │   │   ├── b3_trd_sec.yaml
+│   │   │   │   ├── brazillian_banks.yaml
 │   │   │   │   └── cvm.yaml
 │   │   │   └── taxation
 │   │   │       └── irsbr.yaml
@@ -71,6 +75,17 @@ stpstone
 │   │   ├── abimadata_api.py
 │   │   ├── anbima_mtm.py
 │   │   └── anbima_stats.py
+│   ├── arithmetics
+│   │   ├── binary_comparator.py
+│   │   ├── binary_converter.py
+│   │   ├── binary_divider.py
+│   │   ├── binary_multiplier.py
+│   │   ├── binary_subtractor.py
+│   │   ├── bit_adders.py
+│   │   ├── bit_subtractor.py
+│   │   ├── bitwise.py
+│   │   ├── fraction.py
+│   │   └── logic_gate.py
 │   ├── b3
 │   │   ├── market_data.py
 │   │   └── search_by_trading.py
@@ -89,6 +104,8 @@ stpstone
 │   │   ├── earnings_quality.py
 │   │   ├── financial_math.py
 │   │   └── roe_decomposition.py
+│   ├── portfolio_alloc
+│   │   └── eff.py
 │   ├── pricing
 │   │   ├── debentures
 │   │   │   └── pricing.py
@@ -115,13 +132,16 @@ stpstone
 │   │   └── stats_charts.py
 │   ├── reuters
 │   │   └── api_request.py
-│   └── risk_assessment
+│   └── risk
 │       ├── capital.py
 │       ├── liquidity.py
 │       ├── market.py
-│       └── yield.py
+│       └── yield_.py
 ├── dsa
+│   ├── queues
+│   │   └── priority_queues.py
 │   └── trees
+│       ├── avl_tree.py
 │       └── b_tree.py
 ├── ingestion
 │   ├── abc
@@ -132,6 +152,8 @@ stpstone
 │       │   │   └── investment_funds.py
 │       │   ├── exchange
 │       │   │   ├── bvmf_bov.py
+│       │   │   ├── consolidated_trades.py
+│       │   │   ├── consolidated_trades_after_mkt.py
 │       │   │   ├── historical_sigma.py
 │       │   │   ├── indexes_theor_portf.py
 │       │   │   ├── options_calendar.py
@@ -145,6 +167,8 @@ stpstone
 │       │   ├── otc
 │       │   │   └── debentures.py
 │       │   ├── registries
+│       │   │   ├── b3_trd_sec.py
+│       │   │   ├── brazillian_banks.py
 │       │   │   └── cvm.py
 │       │   └── taxation
 │       │       └── irsbr_records.py
@@ -212,6 +236,7 @@ stpstone
     │   └── airflow
     │       └── plugins.py
     ├── parsers
+    │   ├── arrays.py
     │   ├── dicts.py
     │   ├── folders.py
     │   ├── html.py
@@ -242,6 +267,8 @@ stpstone
     │       ├── inoa.py
     │       ├── line_b3.py
     │       └── margin_simulator_b3.py
+    ├── system
+    │   └── drives.py
     ├── trading_platforms
     │   └── mt5.py
     └── webhooks

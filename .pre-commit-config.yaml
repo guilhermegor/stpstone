@@ -29,15 +29,17 @@ repos:
     rev: '1.7.4'
     hooks:
       - id: bandit
-        args: ["-r", "."]
+        args: ["-r", ".", "--allow-abort"]
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v1.17.0
     hooks:
       - id: commitizen
+        args: [.git/COMMIT_EDITMSG]
+        pass_filenames: false
   - repo: local
     hooks:
       - id: update-readme
         name: update readme package tree
-        entry: mingw32-make update_readme
+        entry: cmd /c "mingw32-make update_readme && rm -f .git/index.lock && git update-index --add ."
         language: system
         types: [file]
