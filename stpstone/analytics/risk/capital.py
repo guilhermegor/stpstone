@@ -1,18 +1,16 @@
-### CAPITAL RISK ASSESSMENT ###
+### A CLASS TO CALCULATE CAPITAL REQUIREMENT 1 (CR1) FOR FINANCIAL INSTRUMENTS ###
+
+from typing import Dict
+
 
 class CR1Calculator:
-    """
-    DOCSTRING: A CLASS TO CALCULATE CAPITAL REQUIREMENT 1 (CR1) FOR FINANCIAL INSTRUMENTS
-    INPUTS: EAD, PD, LGD
-    OUTPUTS: K, CR1
-    """
-    def __init__(self, float_ead: float, float_pd: float, float_lgd: float):
+
+    def __init__(self, float_ead: float, float_pd: float, float_lgd: float) -> None:
         """
-        DOCSTRING: INITIALIZE THE CALCULATION WITH BASIC PARAMETERS
-        INPUTS:
-            - EXPOSURE AT DEFAULT (EAD) IN MONETARY UNITS
-            - PROBABILITY OF DEFAULT (PD) AS A FRACTION
-            - LOSS GIVEN DEFAULT (LGD) AS A FRACTION
+        Args:
+            float_ead (float): Exposure at Default.
+            float_pd (float): Probability of Default.
+            float_lgd (float): Loss Given Default.
         """
         self.float_ead = float_ead
         self.float_pd = float_pd
@@ -21,28 +19,36 @@ class CR1Calculator:
     @property
     def calculate_k(self) -> float:
         """
-        DOCSTRING: CALCULATE THE RISK FACTOR (K) BASED ON THE PARAMETERS
-        INPUTS: -
-        OUTPUTS: FLOAT
+        Calculates the capital requirement k, which is the product of the loss given default (LGD) 
+        and the probability of default (PD).
+        
+        Returns:
+            float: The capital requirement k.
         """
-        # Simplified calculation for K, regulatory adjustments (R) can be added accordingly
         return self.float_lgd * self.float_pd
 
     @property
     def calculate_cr1(self) -> float:
         """
-        DOCSTRING: CALCULATE THE CAPITAL REQUIREMENT 1 (CR1)
-        INPUTS: -
-        OUTPUTS: VALUE OF CR1 IN MONETARY UNITS.
+        Calculates the capital requirement 1 (CR1) by multiplying the exposure at default (EAD) 
+        by the capital requirement k, which is the product of the loss given default (LGD) and 
+        the probability of default (PD), and then by 12.5.
+        
+        Returns:
+            float: The capital requirement 1 (CR1).
         """
         return 12.5 * self.calculate_k * self.float_ead
 
     @property
-    def summary(self) -> dict:
+    def summary(self) -> Dict[str, float]:
         """
-        DOCSTRING: RETURN A SUMMARY OF THE PARAMETERS AND CALCULATIONS.
-        INPUTS: - 
-        OUTPUTS: DICTIONARY CONTAINING EAD, PD, LGD, K, AND CR1.
+        A summary of all the values used to calculate the capital requirement 1 (CR1)
+        
+        Returns:
+            Dict[str, float]: A dictionary containing the exposure at default (EAD), 
+            the probability of default (PD), 
+            the loss given default (LGD), the capital requirement k, and the capital 
+            requirement 1 (CR1).
         """
         return {
             'EAD': self.float_ead,

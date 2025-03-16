@@ -7,12 +7,12 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 class RiskStats(metaclass=TypeChecker):
 
-    def __init__(self, array_r: Union[np.ndarray, pd.Series, float, List[float]]):
+    def __init__(self, array_r: Union[np.ndarray, pd.Series, List[float]]):
         """
         Initializer for RiskStats class
         
         Args:
-            array_r (Union[np.ndarray, pd.Series, float, List[float]]): A sequence of returns, 
+            array_r (Union[np.ndarray, pd.Series, List[float]]): A sequence of returns, 
                 ordered by dates in descending order, which can be a 
                 numpy array, pandas Series, list of floats, or a single float.
         """
@@ -64,15 +64,77 @@ class RiskStats(metaclass=TypeChecker):
         }
 
 
-class VaR(RiskStats):
+class MarkowitzPortf(metaclass=TypeChecker):
 
-    def __init__(self, float_mu: float, float_sigma: float, 
-                 array_r: Union[np.ndarray, pd.Series, float, List[float]], 
-                 float_cl: Optional[float] = 0.95, int_t: Optional[int] = 1) -> None:
+    def __init__(
+        self, 
+        array_r: Union[np.ndarray, pd.DataFrame],
+        array_w: Union[np.ndarray, pd.DataFrame], 
+        float_lambda: Optional[float] = 0.94,
+        bl_validate_w: Optional[bool] = True, 
+        float_atol: Optional[float] = 1e-4
+    ) -> None:
+        self.float_lambda = float_lambda
+        self.array_r = array_r if isinstance(array_r, np.ndarray) else (
+            array_r.to_numpy() if isinstance(array_r, pd.DataFrame) else None
+        )
+        self.array_w = array_w if isinstance(array_w, np.ndarray) else (
+            array_w.to_numpy() if isinstance(array_w, pd.DataFrame) else None
+        )
+        if (bl_validate_w == True) and (not np.isclose(np.sum(self.array_w), 1.0, atol=float_atol)):
+            raise ValueError("Portfolio weights must sum to 1.")
+    
+    @property
+    def mu(self) -> float:
+        return np.mean(np.dot(self.array_r, self.array_w.T), axis=0)
+    
+    @property
+    def cov(self) -> np.ndarray:
+        """
+        The covariance matrix of the portfolio. If float_lambda is None, then a regular
+        covariance matrix is computed. Otherwise, the exponentially weighted moving
+        average (EWMA) of the covariance matrix is computed.
+
+        Formula:
+            Covt = λ * Covt-1 + (1 - λ) * Rt * Rt.T
+
+        Metadata:
+            https://www.ime.usp.br/~rvicente/Aula2_VaROverviewParte2.pdf, page 27
+        """
+        array_cov = np.cov(self.array_r, rowvar=False)
+        if self.float_lambda is None:
+            return array_cov
+        else:
+            for t in range(1, self.array_r.shape[0]):
+                array_r_t = self.array_r[t]
+                array_cov = self.float_lambda * array_cov + (1 - self.float_lambda) \
+                    * np.dot(array_r_t, array_r_t.T)
+            return array_cov
+
+    @property
+    def sigma(self) -> float:
+        return np.dot(self.array_w.T, np.dot(self.cov, self.array_w))
+    
+    def sharpe_ratio(self, float_rf: float) -> float:
+        return (self.mu - float_rf) / self.sigma
+
+
+class VaR(metaclass=TypeChecker):
+
+    def __init__(
+        self, 
+        float_mu: float, 
+        float_sigma: float,
+        array_r: Optional[Union[np.ndarray, pd.Series, List[float]]] = None,
+        float_cl: Optional[float] = 0.95, 
+        int_t: Optional[int] = 1, 
+        float_lambda: Optional[float] = 0.94
+    ) -> None:
         self.float_mu = float_mu
         self.float_sigma = float_sigma
         self.float_cl = float_cl
         self.int_t = int_t
+        self.float_lambda = float_lambda
         self.array_r = array_r if isinstance(array_r, np.ndarray) else (
             np.array(array_r) if isinstance(array_r, list) 
             else (array_r.to_numpy() if isinstance(array_r, pd.Series) else None)
@@ -82,6 +144,19 @@ class VaR(RiskStats):
     @property
     def historic_var(self) -> float:
         return np.percentile(self.array_r, (1 - self.float_cl) * 100)
+
+    def historic_var_stress_test(
+        self, 
+        float_shock: float, 
+        str_shock_type: Literal["absolute", "relative"] = "relative"
+    ):
+        if str_shock_type == "relative":
+            array_r_shock = self.array_r * (1 + float_shock)
+        elif str_shock_type == "absolute":
+            array_r_shock = self.array_r + float_shock
+        else:
+            raise ValueError(f"Invalid shock type {str_shock_type}. Must be 'relative' or 'absolute'")
+        return np.percentile(array_r_shock, (1 - self.float_cl) * 100)
 
     @property
     def parametric_var(self) -> float:
@@ -153,33 +228,27 @@ class VaR(RiskStats):
         return float_portf_nv - array_portfs_nv[int_percentile_idx]
 
 
-class QuotePortfolioRiskAssessment(VaR):
+class RiskMeasures(VaR):
 
     def __init__(
         self, 
-        array_portf_r: Union[np.ndarray, pd.Series, float, List[float]], 
-        array_benchmark_r: Optional[Union[np.ndarray, pd.Series, float, List[float]]] = None, 
+        float_mu: float, 
+        float_sigma: float,
+        array_r: Optional[Union[np.ndarray, pd.Series, List[float]]] = None, 
         float_cl: Optional[float] = 0.95, 
         int_t: Optional[int] = 1, 
-        float_lambda: Optional[float] = 0.94, 
-        str_method_sigmna_calc: Optional[Literal["std", "ewma_std"]] = "ewma_std"
+        float_lambda: Optional[float] = 0.94
     ) -> None:
-        self.array_portf_r = array_portf_r if isinstance(array_portf_r, np.ndarray) else (
-            np.array(array_portf_r) if isinstance(array_portf_r, list) 
-            else (array_portf_r.to_numpy() if isinstance(array_portf_r, pd.Series) else None)
-        )
-        self.array_benchmark_r = array_benchmark_r if isinstance(array_benchmark_r, np.ndarray) else (
-            np.array(array_benchmark_r) if isinstance(array_benchmark_r, list) 
-            else (array_benchmark_r.to_numpy() if isinstance(array_benchmark_r, pd.Series) else None)
-        )
-        self.array_r = array_portf_r
+        self.float_mu = float_mu
+        self.float_sigma = float_sigma
         self.float_cl = float_cl
         self.int_t = int_t
         self.float_lambda = float_lambda
-        self.str_method_sigmna_calc = str_method_sigmna_calc
-        self.dict_stats = self.descriptive_stats(self.float_lambda)
-        self.float_mu = self.dict_stats["mu"]
-        self.float_sigma = self.dict_stats[self.str_method_sigmna_calc]
+        self.array_r = array_r if isinstance(array_r, np.ndarray) else (
+            np.array(array_r) if isinstance(array_r, list) 
+            else (array_r.to_numpy() if isinstance(array_r, pd.Series) else None)
+        )
+        self.z = norm.ppf(float_cl)
 
     @property
     def drawdown(self):
@@ -188,7 +257,12 @@ class QuotePortfolioRiskAssessment(VaR):
         array_drawdown = (array_cum_r - array_cummax_r) / array_cummax_r
         return np.min(array_drawdown)
     
-    def tracking_error(self, float_ddof: Optional[float] = 1) -> float:
+    def tracking_error(
+        self, 
+        array_portf_r: Union[np.ndarray, pd.Series, List[float]], 
+        array_benchmark_r: Union[np.ndarray, pd.Series, List[float]], 
+        float_ddof: Optional[float] = 1
+    ) -> float:
         """
         Calculates the tracking error between a portfolio and a benchmark.
 
@@ -200,70 +274,67 @@ class QuotePortfolioRiskAssessment(VaR):
         Returns:
             float: The tracking error, which is the standard deviation of the active returns.
         """
-        array_active_r = self.array_portf_r - self.array_benchmark_r
-        return np.std(array_active_r, ddof=float_ddof)
-
-
-class QuoteBenchmarkRiskAssessment(VaR):
-
-    def __init__(
-        self, 
-        array_portf_r: Union[np.ndarray, pd.Series, float, List[float]], 
-        array_benchmark_r: Optional[Union[np.ndarray, pd.Series, float, List[float]]] = None, 
-        float_cl: Optional[float] = 0.95, 
-        int_t: Optional[int] = 1, 
-        float_lambda: Optional[float] = 0.94, 
-        str_method_sigmna_calc: Optional[Literal["std", "ewma_std"]] = "ewma_std", 
-        str_method_bvar_calc: Optional[Literal["historic", "parametric", "monte_carlo"]] = "parametric"
-    ) -> None:
-        self.array_portf_r = array_portf_r if isinstance(array_portf_r, np.ndarray) else (
+        array_portf_r = array_portf_r if isinstance(array_portf_r, np.ndarray) else (
             np.array(array_portf_r) if isinstance(array_portf_r, list) 
             else (array_portf_r.to_numpy() if isinstance(array_portf_r, pd.Series) else None)
         )
-        self.array_benchmark_r = array_benchmark_r if isinstance(array_benchmark_r, np.ndarray) else (
+        array_benchmark_r = array_benchmark_r if isinstance(array_benchmark_r, np.ndarray) else (
             np.array(array_benchmark_r) if isinstance(array_benchmark_r, list) 
             else (array_benchmark_r.to_numpy() if isinstance(array_benchmark_r, pd.Series) else None)
         )
-        self.array_r = array_benchmark_r
-        self.float_cl = float_cl
-        self.int_t = int_t
-        self.float_lambda = float_lambda
-        self.str_method_sigmna_calc = str_method_sigmna_calc
-        self.str_method_bvar_calc = str_method_bvar_calc
-        self.dict_stats = self.descriptive_stats(self.float_lambda)
-        self.float_mu = self.dict_stats["mu"]
-        self.float_sigma = self.dict_stats[self.str_method_sigmna_calc]
-
-    @property
-    def drawdown(self):
-        array_cum_r = np.cumprod(1 + self.array_r)
-        array_cummax_r = array_cum_r.cummax()
-        array_drawdown = (array_cum_r - array_cummax_r) / array_cummax_r
-        return np.min(array_drawdown)
-    
-    def tracking_error(self, float_ddof: Optional[float] = 1) -> float:
-        """
-        Calculates the tracking error between a portfolio and a benchmark.
-
-        Args:
-            float_ddof (float, optional): The delta degrees of freedom, with a default value of 1, 
-            representing the N - ddof in the denominator of the standard deviation calculation.
-            Use 0 for population standard deviation and 1 for sample standard deviation.
-
-        Returns:
-            float: The tracking error, which is the standard deviation of the active returns.
-        """
-        array_active_r = self.array_portf_r - self.array_benchmark_r
+        array_active_r = array_portf_r - array_benchmark_r
         return np.std(array_active_r, ddof=float_ddof)
     
-    @property
-    def bvar(self):
-        if self.str_method_bvar_calc == "historic":
-            return self.historic_var
-        elif self.str_method_bvar_calc == "parametric":
-            return self.parametric_var
-        elif self.str_method_bvar_calc == "monte_carlo":
-            return self.monte_carlo_var
-        else:
-            raise ValueError("Unknown method for calculating bvar. Please choose from "
-                             + "'historic', 'parametric', or 'monte_carlo'")
+    def sharpe(self, float_rf: float) -> float:
+        return (self.float_mu - float_rf) / self.float_sigma
+    
+    def beta(self, array_market_r: Union[np.ndarray, pd.Series, List[float]]):
+        array_market_r = array_market_r if isinstance(array_market_r, np.ndarray) else (
+            np.array(array_market_r) if isinstance(array_market_r, list) 
+            else (array_market_r.to_numpy() if isinstance(array_market_r, pd.Series) else None)
+        )
+        return np.cov(array_market_r, self.array_r)[0, 1] / np.var(array_market_r)
+
+
+class QuoteVar(VaR):
+
+    def __init__(
+        self,
+        array_r: Union[np.ndarray, pd.Series, List[float]], 
+        str_method_str: Literal["std", "ewma_std"] = "std",
+        float_cl: Optional[float] = 0.95,
+        int_t: Optional[int] = 1, 
+        float_lambda: Optional[float] = 0.94
+    ) -> None:
+        self.dict_desc_stats = RiskStats(array_r).descriptive_stats(float_lambda=float_lambda)
+        super().__init__(
+            float_mu=np.mean(array_r),
+            float_sigma=self.dict_desc_stats[str_method_str],
+            array_r=array_r,
+            float_cl=float_cl,
+            int_t=int_t,
+            float_lambda=float_lambda
+        )
+
+
+class PortfVar(VaR):
+
+    def __init__(
+        self,
+        array_r: Union[np.ndarray, pd.DataFrame],
+        array_w: Union[np.ndarray, pd.DataFrame],
+        float_cl: Optional[float] = 0.95,
+        int_t: Optional[int] = 1, 
+        float_lambda: Optional[float] = 0.94, 
+        bl_validate_w: Optional[bool] = True, 
+        float_atol: Optional[float] = 1e-4
+    ) -> None:
+        self.cls_markowitz = MarkowitzPortf(array_r, array_w, float_lambda, bl_validate_w, float_atol)
+        super().__init__(
+            float_mu=self.cls_markowitz.mu,
+            float_sigma=self.cls_markowitz.sigma,
+            array_r=array_r,
+            float_cl=float_cl,
+            int_t=int_t,
+            float_lambda=float_lambda
+        )
