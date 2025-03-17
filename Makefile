@@ -68,3 +68,9 @@ git_keep_just_main_builds:
 
 git_merge_branches:
 	bash cli/git_merge_branches.sh
+
+
+### REQUIREMENTS - DEV ###
+
+vscode_install_extensions:
+	bash cli/install_vscode_extensions.sh
