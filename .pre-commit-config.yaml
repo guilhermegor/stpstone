@@ -43,3 +43,13 @@ repos:
         entry: cmd /c "mingw32-make update_readme && rm -f .git/index.lock && git update-index --add ."
         language: system
         types: [file]
+      - id: export-dependencies
+        name: export dependencies
+        entry: |
+          cmd /c '
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          code --list-extensions | sed "s/^/vscode:/" > requirements-dev.txt
+          '
+        language: system
+        types: [file]
+        pass_filenames: false
