@@ -45,7 +45,7 @@ repos:
         types: [file]
       - id: export-dependencies
         name: export dependencies
-        entry: cmd /c "poetry export -f requirements.txt --output requirements.txt --without-hashes && code --list-extensions > requirements-dev.txt && git update-index --add ."
+        entry: cmd /c "poetry export -f requirements.txt --output requirements.txt --without-hashes && (for /f %i in ('code --list-extensions') do @echo vscode:%i) > requirements-dev.txt && git add requirements.txt requirements-dev.txt"
         language: system
         types: [file]
         pass_filenames: false
