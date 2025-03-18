@@ -92,9 +92,9 @@ class ProbabilityDistributions:
     def chi_squared(self, p, df, probability_func='ppf', x_axis_inf_range=None,
                     x_axis_sup_range=None, x_axis_pace=None):
         """
-        DOCSTRING: CHI SQUARED PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY 
+        DOCSTRING: CHI SQUARED PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY
             DENSITY FUNCTION (PDF), AND PROBABILITY CUMULATIVE FUNCTION (CDF)
-        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS 
+        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS
             PDF AND CDF ARE POSSIBLE AS WELL)
         OUTPUTS: FLOAT
         """
@@ -114,10 +114,10 @@ class ProbabilityDistributions:
 
     def t_student(self, p, df, probability_func='ppf', x_axis_inf_range=None,
                   x_axis_sup_range=None, x_axis_pace=None):
-        """ 
-        DOCSTRING: T STUDENT PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY 
+        """
+        DOCSTRING: T STUDENT PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY
             DENSITY FUNCTION (PDF), AND PROBABILITY CUMULATIVE FUNCTION (CDF)
-        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS 
+        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS
             PDF AND CDF ARE POSSIBLE AS WELL)
         OUTPUTS: FLOAT
         """
@@ -138,9 +138,9 @@ class ProbabilityDistributions:
     def f_fisher_snedecor(self, dfn, dfd, mu, p=None, probability_func='ppf', x_axis_inf_range=None,
                           x_axis_sup_range=None, x_axis_pace=None):
         """
-        DOCSTRING: F-SNEDECOR PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY 
+        DOCSTRING: F-SNEDECOR PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY
             DENSITY FUNCTION (PDF), AND PROBABILITY CUMULATIVE FUNCTION (CDF)
-        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS 
+        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS
             PDF AND CDF ARE POSSIBLE AS WELL)
         OUTPUTS: FLOAT
         """
@@ -241,7 +241,7 @@ class NormalDistribution:
     def ecdf(self, data):
         """
         REFERENCES: https://campus.datacamp.com/courses/statistical-thinking-in-python-part-1/graphical-exploratory-data-analysis?ex=12
-        DOCSTRING: COMPUTE ECDF FOR A ONE-DIMENSIONAL ARRAY OF MEASUREMENTS AN EMPIRICAL 
+        DOCSTRING: COMPUTE ECDF FOR A ONE-DIMENSIONAL ARRAY OF MEASUREMENTS AN EMPIRICAL
             CUMULATIVE DISTRIBUTION FUNCTION (ECDF)
         INPUTS: DATA
         OUTPUTS: X-AXIS AND Y-AXIS

@@ -10,7 +10,7 @@ from stpstone.utils.parsers.json import JsonFiles
 
 class MarginSimulatorB3:
 
-    def __init__(self, dict_payload:List[Dict[str, Union[str, int, float]]], 
+    def __init__(self, dict_payload:List[Dict[str, Union[str, int, float]]],
                  token:str='79a4413f55d7d982b61c669e6dd35eea',
                  host:str='https://simulador.b3.com.br/api/cors-app'):
         """

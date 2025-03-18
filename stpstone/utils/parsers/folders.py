@@ -191,10 +191,10 @@ class DirFilesManagement:
         if t[1]:
             t[1] = t[1][1:]
         return t
-    
+
     def get_file_extensions(self, file_path: str) -> List[Union[str, None]]:
         return re.findall(r'\.([a-zA-Z0-9_]+)(?:[\?#]|$)', file_path)
-    
+
     def get_last_file_extension(self, file_path: str) -> str:
         list_ = self.get_file_extensions(file_path)
         if len(list_) > 0:
@@ -433,7 +433,7 @@ class DirFilesManagement:
 
     def recursive_extract_zip(self, zip_file_path: str, extract_dir: str) -> None:
         """
-        Recursively extracts the contents of a ZIP file and any nested ZIP files to a target 
+        Recursively extracts the contents of a ZIP file and any nested ZIP files to a target
         directory, until no ZIP file is available
 
         Args:
@@ -456,9 +456,9 @@ class DirFilesManagement:
 class RemoteFiles(DirFilesManagement):
 
     def get_file_from_zip(
-        self, 
-        req_resp: Response, 
-        path_dir: Union[str, tempfile.TemporaryDirectory, Path], 
+        self,
+        req_resp: Response,
+        path_dir: Union[str, tempfile.TemporaryDirectory, Path],
         tup_endswith: Tuple[str]
     ) -> str:
         zip_file_path = os.path.join(path_dir, "archive.zip")
@@ -479,8 +479,8 @@ class RemoteFiles(DirFilesManagement):
         return ex_file_path
 
     def get_zip_from_web_in_memory(
-        self, 
-        req_resp: Response, 
+        self,
+        req_resp: Response,
         bl_io_interpreting: bool = False
     ) -> Union[TextIOWrapper, BufferedReader, List[BufferedReader]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
@@ -493,7 +493,7 @@ class RemoteFiles(DirFilesManagement):
             else:
                 return extracted_file
         return [zipfile.open(file_name) for file_name in zip_names]
-    
+
     def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> str:
         hash_func = getattr(hashlib, algorithm)()
         with open(file_path, "rb") as file:
@@ -505,12 +505,12 @@ class RemoteFiles(DirFilesManagement):
         self, file_path: Union[str, Path], expected_hash: str, algorithm: str = "sha256") -> bool:
         """
         Validates the integrity of a file by comparing its hash with an expected value.
-        
+
         Args:
             file_path (Union[str, Path]): The path to the file.
             expected_hash (str): The expected hash value.
             algorithm (str): The hashing algorithm to use (e.g., "md5", "sha256").
-        
+
         Returns:
             bool: True if the hash matches, False otherwise.
         """
@@ -520,16 +520,16 @@ class RemoteFiles(DirFilesManagement):
                 hash_func.update(chunk)
         return hash_func.hexdigest() == expected_hash
 
-    def extract_file(self, archive_path: Union[str, Path], extract_dir: Union[str, Path], 
+    def extract_file(self, archive_path: Union[str, Path], extract_dir: Union[str, Path],
                      format: str = "zip") -> bool:
         """
         Extracts files from an archive to a specified directory.
-        
+
         Args:
             archive_path (Union[str, Path]): The path to the archive file.
             extract_dir (Union[str, Path]): The directory where files should be extracted.
             format (str): The format of the archive (e.g., "zip", "tar", "7z").
-        
+
         Returns:
             bool: True if extraction was successful, False otherwise.
         """
@@ -549,7 +549,7 @@ class RemoteFiles(DirFilesManagement):
         except Exception as e:
             print(f"Failed to extract archive: {e}")
             return False
-    
+
     def get_file_metadata(self, file_path: Union[str, Path]) -> dict:
         stat = os.stat(file_path)
         return {
@@ -562,11 +562,11 @@ class RemoteFiles(DirFilesManagement):
     def stream_file(self, req_resp: Response, chunk_size: int = 8192) -> Iterable[bytes]:
         """
         Streams a file from a remote URL in chunks.
-        
+
         Args:
             url (str): The URL of the file to stream.
             chunk_size (int): The size of each chunk in bytes.
-        
+
         Returns:
             Iterable[bytes]: An iterable yielding file chunks.
         """
@@ -574,9 +574,9 @@ class RemoteFiles(DirFilesManagement):
             yield chunk
 
     def check_separator_consistency(
-        self, 
-        req_content: bytes, 
-        int_skip_rows: int = 0, 
+        self,
+        req_content: bytes,
+        int_skip_rows: int = 0,
         list_sep: Optional[List[str]] = [',', ';', '\t']
     ) -> bool:
         result = chardet.detect(req_content)
@@ -592,7 +592,7 @@ class RemoteFiles(DirFilesManagement):
 
 
 class FoldersTree:
-    def __init__(self, str_path, bl_ignore_dot_folders=False, list_ignored_folders=None, 
+    def __init__(self, str_path, bl_ignore_dot_folders=False, list_ignored_folders=None,
                  bl_add_linebreak_markdown=False):
         """
         DOCSTRING: INITIALIZE THE CLASS
@@ -604,11 +604,11 @@ class FoldersTree:
         self.list_ignored_folders = list_ignored_folders or ['__pycache__']
         self.bl_add_linebreak_markdown = bl_add_linebreak_markdown
 
-    def generate_tree(self, str_curr_path=None, bl_is_last=True, str_prefix='', bl_include_root=True, 
+    def generate_tree(self, str_curr_path=None, bl_is_last=True, str_prefix='', bl_include_root=True,
                       str_tree_structure=''):
         """
         DOCSTRING: GENERATE A TREE STRUCTURE OF THE DIRECTORY
-        INPUTS: CURRENT PATH (OPTIONAL), IS LAST ENTRY (OPTIONAL), PREFIX (OPTIONAL), 
+        INPUTS: CURRENT PATH (OPTIONAL), IS LAST ENTRY (OPTIONAL), PREFIX (OPTIONAL),
             INCLUDE ROOT (OPTIONAL)
         OUTPUTS: A string representation of the directory tree structure.
         """
@@ -645,9 +645,9 @@ class FoldersTree:
                 # Recursively add subdirectories
                 str_new_prefix = str_prefix + ('    ' if bl_is_last_entry else '│   ')
                 str_tree_structure += self.generate_tree(
-                    str_entry_path, 
-                    bl_is_last=bl_is_last_entry, 
-                    str_prefix=str_new_prefix, 
+                    str_entry_path,
+                    bl_is_last=bl_is_last_entry,
+                    str_prefix=str_new_prefix,
                     bl_include_root=False
                 )
         # return the tree structure

@@ -7,7 +7,7 @@ exchange_rates_yahoo:
 
 # sidra
 sidra:
-  st_indicators: 
+  st_indicators:
     url: https://www.ibge.gov.br/calendario-indicadores-novoportal.html
     bl_verify: False
     format_input_dt: 'DD/MM/YYYY'

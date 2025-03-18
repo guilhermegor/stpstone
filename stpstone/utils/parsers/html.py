@@ -47,7 +47,7 @@ class HtmlHndler:
         OUTPUTS: XPATH CONTENT
         """
         return html_content.xpath(str_xpath)
-    
+
     def html_tree(self, html_root:html.HtmlElement, file_path:str=None) -> None:
         html_string = etree.tostring(html_root, pretty_print=True, encoding='unicode')
         if file_path:
@@ -132,21 +132,21 @@ class HtmlHndler:
 
 class SeleniumWD:
 
-    def __init__(self, url:str, path_webdriver:str, 
-                 int_port:int, str_user_agent:str='Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36', 
-                 int_wait_load:int=10, 
+    def __init__(self, url:str, path_webdriver:str,
+                 int_port:int, str_user_agent:str='Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36',
+                 int_wait_load:int=10,
                  int_delay:int=10,
                  str_proxy:str=None,
-                 bl_opn_min:bool=False, 
+                 bl_opn_min:bool=False,
                  bl_headless:bool=False,
                  bl_incognito:bool=False,
                  dict_args:Optional[List[str]]=None) -> None:
         """
-        REFERENCES: 
+        REFERENCES:
             1. LIST OF CHROMIUM COMMAND LINE SWITCHES: https://gist.github.com/dodying/34ea4760a699b47825a766051f47d43b
             2. LIST OF USER AGENTS: https://gist.github.com/pzb/b4b6f57144aea7827ae4
         DOCSTRING: SELENIUM INTEGRATION
-        INPUTS: 
+        INPUTS:
             - URL:STR
             - PATH_WEBDRIVER:STR
             - PORT:INT
@@ -185,7 +185,7 @@ class SeleniumWD:
         if str_proxy is not None:
             self.dict_default_args.append(f'--proxy-server={str_proxy}')
         self.web_driver = self.get_web_driver
-    
+
     @property
     def get_web_driver(self) -> WebDriver:
         """
@@ -283,7 +283,7 @@ class SeleniumWD:
         # returning data
         return list_events
 
-    def find_element(self, selector:Union[WebElement, WebDriver], str_element_interest:str, 
+    def find_element(self, selector:Union[WebElement, WebDriver], str_element_interest:str,
                      selector_type:str='XPATH') -> WebElement:
         """
         DOCSTRING: FINDING ELEMENT IN HTML BY SELECTOR TYPE
@@ -350,7 +350,7 @@ class HtmlBuilder:
         """
         REFERENCES: - FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.
         DOCSTRINGS: HTML TAG CONSTRUCTOR
-        INPUTS: *ARGUMENTS, AND **ATTRIBUTES, BESIDE A CLS WORKAROUND SINCE CLASS IS A SPECIAL 
+        INPUTS: *ARGUMENTS, AND **ATTRIBUTES, BESIDE A CLS WORKAROUND SINCE CLASS IS A SPECIAL
             WORD FOR PYTHON
         OUTPUTS: STRING
         """

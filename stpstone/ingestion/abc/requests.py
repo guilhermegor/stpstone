@@ -1,25 +1,21 @@
-### ABSTRACT BASE CLASS - REQUESTS ###
-
-# pypi.org libs
-import os
-import subprocess
-import tempfile
-import re
 import backoff
+import chardet
 import fitz
 import pdfplumber
-import chardet
+import urllib3
+import os
+import re
+import subprocess
+import tempfile
 import pandas as pd
-from pathlib import Path
 from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
 from logging import Logger
-from typing import Any, Dict, List, Optional, Tuple, Union, Type
-from zipfile import ZipFile, ZipExtFile
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from urllib.parse import parse_qs, urlparse
+from zipfile import ZipExtFile, ZipFile
 from requests import Request, Response, Session, exceptions, request
-from urllib.parse import urlparse, parse_qs
-# project modules
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -32,13 +28,13 @@ from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.xml import XMLFiles
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class UtilsRequests(ABC):
 
     def mock_response(
-        self, 
-        file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile], 
-        file_name: str
+        self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile], file_name: str
     ) -> Response:
         mock_resp = Response()
         mock_resp._content = file.read()
@@ -46,7 +42,7 @@ class UtilsRequests(ABC):
         mock_resp.status_code = 200
         return mock_resp
 
-    def columns_length(self, list_lines:List[Any]) -> int:
+    def columns_length(self, list_lines: List[Any]) -> int:
         dict_columns_count = {}
         for line in list_lines:
             num_columns = len(line.split(";"))
@@ -56,9 +52,9 @@ class UtilsRequests(ABC):
     def xml_find(
         self,
         soup_content: Type[XMLFiles],
-        tag:str,
+        tag: str,
         tag_name: str,
-        dict_xml_keys: Dict[str, Any]
+        dict_xml_keys: Dict[str, Any],
     ) -> Dict[str, Union[str, float, int]]:
         dict_ = dict()
         soup_tag = soup_content.find(tag)
@@ -68,16 +64,19 @@ class UtilsRequests(ABC):
             dict_[tag_name] = soup_tag.get_text()
         if "attributes" in dict_xml_keys:
             for key_attrb_xml in dict_xml_keys["attributes"]:
-                if (soup_tag is not None) \
-                    and (dict_xml_keys["attributes"][key_attrb_xml] is not None) \
-                    and (dict_xml_keys["attributes"][key_attrb_xml] in soup_tag.attrs):
-                    dict_[dict_xml_keys["attributes"][key_attrb_xml]] = (
-                        soup_tag.attrs[dict_xml_keys["attributes"][key_attrb_xml]]
-                    )
+                if (
+                    (soup_tag is not None)
+                    and (dict_xml_keys["attributes"][key_attrb_xml] is not None)
+                    and (dict_xml_keys["attributes"][key_attrb_xml] in soup_tag.attrs)
+                ):
+                    dict_[dict_xml_keys["attributes"][key_attrb_xml]] = soup_tag.attrs[
+                        dict_xml_keys["attributes"][key_attrb_xml]
+                    ]
         return dict_
 
-    def read_csv_with_error(self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]) \
-        -> Union[BytesIO, TextIOWrapper, StringIO]:
+    def read_csv_with_error(
+        self, file: Union[BytesIO, TextIOWrapper, StringIO, ZipExtFile]
+    ) -> Union[BytesIO, TextIOWrapper, StringIO]:
         """
         Reads a file (BytesIO, TextIOWrapper, StringIO, ZipExtFile), corrects problematic lines,
         and returns the corrected content in the same file type as the input
@@ -91,16 +90,21 @@ class UtilsRequests(ABC):
         # reset the pointer to the beginning
         file.seek(0)
         if isinstance(file, BytesIO):
-            content = file.read().decode('utf-8')
+            content = file.read().decode("utf-8")
             list_lines = content.splitlines()
         elif isinstance(file, (TextIOWrapper, StringIO)):
             list_lines = file.readlines()
         elif isinstance(file, ZipExtFile):
             list_lines = [line.decode("utf-8") for line in file.readlines()]
         else:
-            raise ValueError("Unsupported file type. Expected BytesIO or TextIOWrapper.")
-        list_corrected_lines = [line for line in list_lines if len(line.split(";")) \
-                                == self.columns_length(list_lines)]
+            raise ValueError(
+                "Unsupported file type. Expected BytesIO or TextIOWrapper."
+            )
+        list_corrected_lines = [
+            line
+            for line in list_lines
+            if len(line.split(";")) == self.columns_length(list_lines)
+        ]
         corrected_content = "\n".join(list_corrected_lines)
         if isinstance(file, BytesIO):
             return BytesIO(corrected_content.encode("utf-8"))
@@ -111,15 +115,14 @@ class UtilsRequests(ABC):
         elif isinstance(file, ZipExtFile):
             return BytesIO(corrected_content.encode("utf-8"))
 
-    def pdf_doc_tables_response(
-        self,
-        bytes_pdf: BytesIO
-    ) -> pd.DataFrame:
+    def pdf_doc_tables_response(self, bytes_pdf: BytesIO) -> pd.DataFrame:
         list_ser = list()
         with pdfplumber.open(bytes_pdf) as pdf:
             for page in pdf.pages:
                 list_ = page.extract_tables()
-                list_ser.extend(HandlingDicts().pair_keys_with_values(list_[0][0], list_[0][1:]))
+                list_ser.extend(
+                    HandlingDicts().pair_keys_with_values(list_[0][0], list_[0][1:])
+                )
         return pd.DataFrame(list_ser)
 
     def pdf_doc_regex(
@@ -127,7 +130,7 @@ class UtilsRequests(ABC):
         req_resp: Response,
         bytes_pdf: BytesIO,
         dict_regex_patterns: Dict[str, Dict[str, Any]],
-        int_pgs_join: int = 2
+        int_pgs_join: int = 2,
     ):
         list_pages = list()
         list_matches = list()
@@ -144,16 +147,20 @@ class UtilsRequests(ABC):
         for i, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
             #   break if every event has at least one match
-            if (len(dict_count_matches) > 0) \
-                and (len([count for count in dict_count_matches[str_event] if count > 0])
-                    >= len(list(dict_regex_patterns.keys()))): break
+            if (len(dict_count_matches) > 0) and (
+                len([count for count in dict_count_matches[str_event] if count > 0])
+                >= len(list(dict_regex_patterns.keys()))
+            ):
+                break
             for str_event, dict_l1 in dict_regex_patterns.items():
                 for str_condition, pattern_regex in dict_l1.items():
                     if str_event not in dict_count_matches:
                         dict_count_matches[str_event] = 0
-                    if dict_count_matches[str_event] > 0: break
+                    if dict_count_matches[str_event] > 0:
+                        break
                     pattern_regex = StrHandler().remove_diacritics_nfkd(
-                        pattern_regex, bl_lower_case=False)
+                        pattern_regex, bl_lower_case=False
+                    )
                     regex_match = re.search(
                         pattern_regex,
                         str_page,
@@ -186,7 +193,7 @@ class UtilsRequests(ABC):
     def get_int_pgs_join(self, url: str) -> Union[int, None]:
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.fragment)
-        int_pgs_join = query_params.get('int_pgs_join', [None])[0]
+        int_pgs_join = query_params.get("int_pgs_join", [None])[0]
         if int_pgs_join is not None:
             return int(int_pgs_join)
         else:
@@ -227,11 +234,15 @@ class HandleReqResponses(UtilsRequests):
                 dict_regex_patterns,
                 dict_df_read_params,
                 list_ignored_file_extensions,
-                list_ser_fixed_width_layout
+                list_ser_fixed_width_layout,
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
-            if RemoteFiles().check_separator_consistency(
-                req_resp.content, dict_df_read_params.get("skiprows", 0)) == True:
+            if (
+                RemoteFiles().check_separator_consistency(
+                    req_resp.content, dict_df_read_params.get("skiprows", 0)
+                )
+                == True
+            ):
                 df_ = self._handle_csv_response(req_resp, dict_df_read_params)
             else:
                 df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
@@ -249,14 +260,20 @@ class HandleReqResponses(UtilsRequests):
             try:
                 json_ = req_resp.json()
             except exceptions.JSONDecodeError:
-                raise Exception("File extension not expected in the handle response method: "
-                                + f"{str_file_extension}, please revisit the if-statement")
+                raise Exception(
+                    "File extension not expected in the handle response method: "
+                    + f"{str_file_extension}, please revisit the if-statement"
+                )
             if isinstance(json_, dict) == True:
                 df_ = pd.DataFrame([json_])
             else:
                 df_ = pd.DataFrame(json_)
             return pd.DataFrame(json_)
-        if (file_name is not None) and ("FILE_NAME" not in df_.columns) and (df_.empty == False):
+        if (
+            (file_name is not None)
+            and ("FILE_NAME" not in df_.columns)
+            and (df_.empty == False)
+        ):
             df_["FILE_NAME"] = file_name
         return df_
 
@@ -272,14 +289,17 @@ class HandleReqResponses(UtilsRequests):
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
-        bl_debug: bool = False
+        bl_debug: bool = False,
     ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
         for file_name in zipfile.namelist():
             with zipfile.open(file_name) as file:
-                str_file_extension = DirFilesManagement().get_last_file_extension(file_name)
-                if str_file_extension in list_ignored_file_extensions: continue
+                str_file_extension = DirFilesManagement().get_last_file_extension(
+                    file_name
+                )
+                if str_file_extension in list_ignored_file_extensions:
+                    continue
                 mock_resp = self.mock_response(file, file_name)
                 df_ = self.handle_response(
                     mock_resp,
@@ -290,7 +310,8 @@ class HandleReqResponses(UtilsRequests):
                     list_ser_fixed_width_layout,
                     bl_debug,
                 )
-                if df_.empty == True: continue
+                if df_.empty == True:
+                    continue
                 elif isinstance(df_, pd.DataFrame):
                     list_.extend(df_.to_dict(orient="records"))
                 elif isinstance(df_, list):
@@ -333,7 +354,9 @@ class HandleReqResponses(UtilsRequests):
         return pd.read_excel(file, **dict_df_read_params)
 
     def _handle_xml_response(
-        self, file: Union[BytesIO, TextIOWrapper, Response], dict_xml_keys: Dict[str, Any]
+        self,
+        file: Union[BytesIO, TextIOWrapper, Response],
+        dict_xml_keys: Dict[str, Any],
     ) -> pd.DataFrame:
         list_ser = list()
         if isinstance(file, BytesIO):
@@ -355,17 +378,22 @@ class HandleReqResponses(UtilsRequests):
                         list_values = list(tag.values())[0]
                         for soup_l2 in soup_content.find_all(key_):
                             for tag_l2 in list_values:
-                                dict_l2 = self.xml_find(soup_l2, tag_l2, f"{key_}{tag_l2}",
-                                                       dict_xml_keys)
+                                dict_l2 = self.xml_find(
+                                    soup_l2, tag_l2, f"{key_}{tag_l2}", dict_xml_keys
+                                )
                                 if ("dict_" in locals()) and (isinstance(dict_, dict)):
-                                    dict_ = HandlingDicts().merge_n_dicts(dict_, dict_l2)
+                                    dict_ = HandlingDicts().merge_n_dicts(
+                                        dict_, dict_l2
+                                    )
                                 else:
                                     dict_ = dict_l2
             dict_ = HandlingDicts().add_key_value_to_dicts(dict_, "ROOT_TAG", key)
             list_ser.append(dict_)
         return pd.DataFrame(list_ser)
 
-    def _handle_json_response(self, file: Union[BytesIO, TextIOWrapper]) -> pd.DataFrame:
+    def _handle_json_response(
+        self, file: Union[BytesIO, TextIOWrapper]
+    ) -> pd.DataFrame:
         if isinstance(file, BytesIO):
             file.seek(0)
         json_file = file.read()
@@ -377,21 +405,25 @@ class HandleReqResponses(UtilsRequests):
         self,
         req_resp: Response,
         dict_regex_patterns: Dict[str, Dict[str, str]],
-        default_int_pgs_join: int = 2
+        default_int_pgs_join: int = 2,
     ) -> pd.DataFrame:
         # reading pdf/doc
         bytes_pdf = BytesIO(req_resp.content)
         # checking wheter to read tables or use regex
-        if StrHandler().match_string_like(req_resp.url,'*feat=read_tables*') == True:
+        if StrHandler().match_string_like(req_resp.url, "*feat=read_tables*") == True:
             return self.pdf_doc_tables_response(bytes_pdf)
         else:
-            if StrHandler().match_string_like(req_resp.url,'*int_pgs_join=*') == True:
-                int_pgs_join = self.get_int_pgs_join(req_resp.url) \
-                    if self.get_int_pgs_join(req_resp.url) is not None else default_int_pgs_join
+            if StrHandler().match_string_like(req_resp.url, "*int_pgs_join=*") == True:
+                int_pgs_join = (
+                    self.get_int_pgs_join(req_resp.url)
+                    if self.get_int_pgs_join(req_resp.url) is not None
+                    else default_int_pgs_join
+                )
             else:
                 int_pgs_join = default_int_pgs_join
             return self.pdf_doc_regex(
-                req_resp, bytes_pdf, dict_regex_patterns, int_pgs_join)
+                req_resp, bytes_pdf, dict_regex_patterns, int_pgs_join
+            )
 
     def _handle_ex_response(
         self,
@@ -404,11 +436,14 @@ class HandleReqResponses(UtilsRequests):
     ) -> pd.DataFrame:
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
-            ex_file_path = RemoteFiles().get_file_from_zip(req_resp, temp_dir_path, (".ex_"))
+            ex_file_path = RemoteFiles().get_file_from_zip(
+                req_resp, temp_dir_path, (".ex_")
+            )
             os.chmod(ex_file_path, 0o755)
             subprocess.run([ex_file_path], cwd=temp_dir_path, check=True)
             list_files = [
-                f for f in os.listdir(temp_dir_path) 
+                f
+                for f in os.listdir(temp_dir_path)
                 if f != os.path.basename(ex_file_path) and not f.endswith(".zip")
             ]
             for file_name in list_files:
@@ -427,27 +462,33 @@ class HandleReqResponses(UtilsRequests):
             return pd.DataFrame(list_ser)
 
     def _handle_fwf_response(
-        self,
-        req_resp: Response,
-        list_ser_fixed_width_layout: List[Dict[str, Any]]
+        self, req_resp: Response, list_ser_fixed_width_layout: List[Dict[str, Any]]
     ) -> pd.DataFrame:
-        list_colspecs = [(dict_["start"], dict_["end"]) for dict_ in list_ser_fixed_width_layout]
+        list_colspecs = [
+            (dict_["start"], dict_["end"]) for dict_ in list_ser_fixed_width_layout
+        ]
         list_colnames = [dict_["field"] for dict_ in list_ser_fixed_width_layout]
-        if (req_resp.headers is not None) \
-            and ("application/zip" in req_resp.headers.get("Content-Type", "")) \
-            and (".zip" in req_resp.headers.get("Content-Disposition")):
+        if (
+            (req_resp.headers is not None)
+            and ("application/zip" in req_resp.headers.get("Content-Type", ""))
+            and (".zip" in req_resp.headers.get("Content-Disposition"))
+        ):
             with tempfile.TemporaryDirectory() as temp_dir_path:
-                file_path = RemoteFiles().get_file_from_zip(req_resp, temp_dir_path, 
-                                                            (".fwf", ".dat", ".txt", ""))
-                return pd.read_fwf(file_path, colspecs=list_colspecs, names=list_colnames)
+                file_path = RemoteFiles().get_file_from_zip(
+                    req_resp, temp_dir_path, (".fwf", ".dat", ".txt", "")
+                )
+                return pd.read_fwf(
+                    file_path, colspecs=list_colspecs, names=list_colnames
+                )
         else:
             try:
-                encoding = chardet.detect(req_resp.content)['encoding']
+                encoding = chardet.detect(req_resp.content)["encoding"]
             except:
-                encoding = 'latin-1'
+                encoding = "latin-1"
             decoded_content = req_resp.content.decode(encoding)
             return pd.read_fwf(
-                StringIO(decoded_content), colspecs=list_colspecs, names=list_colnames)
+                StringIO(decoded_content), colspecs=list_colspecs, names=list_colnames
+            )
 
 
 class ABCRequests(HandleReqResponses):
@@ -468,20 +509,26 @@ class ABCRequests(HandleReqResponses):
         self.cls_db = cls_db
         self.logger = logger
         self.list_slugs = list_slugs
-        self.pattern_special_http_chars =  r'["<>#%{}|\\^~\[\]` ]'
-        self.token = token if token is not None else (
-            self.access_token
-            if self.dict_metadata["credentials"]["token"]["host"] is not None
-            else None
+        self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
+        self.token = (
+            token
+            if token is not None
+            else (
+                self.access_token
+                if self.dict_metadata["credentials"]["token"]["host"] is not None
+                else None
+            )
         )
 
     @property
     def access_token(self):
         dict_instance_vars = self.get_instance_variables
-        url_token = self.dict_metadata["credentials"]["token"]["host"] \
-            + self.dict_metadata["credentials"]["token"]["app"] \
-            if self.dict_metadata["credentials"]["token"]["app"] is not None \
+        url_token = (
+            self.dict_metadata["credentials"]["token"]["host"]
+            + self.dict_metadata["credentials"]["token"]["app"]
+            if self.dict_metadata["credentials"]["token"]["app"] is not None
             else self.dict_metadata["credentials"]["token"]["host"]
+        )
         url_token = StrHandler().fill_placeholders(url_token, dict_instance_vars)
         req_resp = self.generic_req(
             self.dict_metadata["credentials"]["token"]["get"]["req_method"],
@@ -632,6 +679,7 @@ class ABCRequests(HandleReqResponses):
         list_ignored_file_extensions: Optional[List[str]] = [],
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
+        dict_fillna_strt: Optional[Dict[str, str]] = {},
         bl_debug: bool = False,
     ) -> pd.DataFrame:
         # building url and requesting
@@ -647,8 +695,13 @@ class ABCRequests(HandleReqResponses):
             print(f"*** DF READ PARAMS: {dict_df_read_params}")
         # dealing with request content type
         df_ = self.handle_response(
-            req_resp, dict_xml_keys, dict_regex_patterns, dict_df_read_params,
-            list_ignored_file_extensions, list_ser_fixed_width_layout, bl_debug
+            req_resp,
+            dict_xml_keys,
+            dict_regex_patterns,
+            dict_df_read_params,
+            list_ignored_file_extensions,
+            list_ser_fixed_width_layout,
+            bl_debug,
         )
         if bl_debug == True:
             print(f"*** TRT REQ BEFORE STANDARDIZATION: \n{df_}")
@@ -658,6 +711,7 @@ class ABCRequests(HandleReqResponses):
             cols_from_case=cols_from_case,
             cols_to_case=cols_to_case,
             list_cols_drop_dupl=list_cols_drop_dupl,
+            dict_fillna_strt=dict_fillna_strt,
             str_fmt_dt=str_fmt_dt,
             type_error_action=type_error_action,
             strategy_keep_when_dupl=strategy_keep_when_dupl,
@@ -821,6 +875,7 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource].get("ignored_file_extensions", []),
                 self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                 self.dict_metadata[str_resource].get("xml_keys", None),
+                self.dict_metadata[str_resource].get("fillna_strt", {}),
                 bl_debug,
             )
         except tuple(list_ignorable_exceptions) as e:
@@ -939,11 +994,20 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get("regex_patterns", None),
-                            self.dict_metadata[str_resource].get("df_read_params", None),
-                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
-                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
+                            self.dict_metadata[str_resource].get(
+                                "regex_patterns", None
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "df_read_params", None
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "ignored_file_extensions", []
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "fixed_width_layout", [{}]
+                            ),
                             self.dict_metadata[str_resource].get("xml_keys", None),
+                            self.dict_metadata[str_resource].get("fillna_strt", {}),
                             bl_debug,
                         )
                         df_["SLUG_URL"] = str_slug
@@ -1006,11 +1070,20 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get("regex_patterns", None),
-                            self.dict_metadata[str_resource].get("df_read_params", None),
-                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
-                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
+                            self.dict_metadata[str_resource].get(
+                                "regex_patterns", None
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "df_read_params", None
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "ignored_file_extensions", []
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "fixed_width_layout", [{}]
+                            ),
                             self.dict_metadata[str_resource].get("xml_keys", None),
+                            self.dict_metadata[str_resource].get("fillna_strt", {}),
                             bl_debug,
                         )
                         df_["SLUG_URL"] = str_chunk_slugs
@@ -1071,11 +1144,20 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get("regex_patterns", None),
-                            self.dict_metadata[str_resource].get("df_read_params", None),
-                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
-                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
+                            self.dict_metadata[str_resource].get(
+                                "regex_patterns", None
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "df_read_params", None
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "ignored_file_extensions", []
+                            ),
+                            self.dict_metadata[str_resource].get(
+                                "fixed_width_layout", [{}]
+                            ),
                             self.dict_metadata[str_resource].get("xml_keys", None),
+                            self.dict_metadata[str_resource].get("fillna_strt", {}),
                             bl_debug,
                         ).to_dict(orient="records")
                     )

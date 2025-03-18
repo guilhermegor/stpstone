@@ -25,8 +25,8 @@ class InputsClassification:
 
     def fetch_sklearn_database(self, database_name='mnist_784', version=1, bl_asframe=False):
         """
-        DOCSTRING: DATASET FROM SCIKIT-LEARN, WHICH NORMALLY HAVE A SIMILAR DICTIONARY 
-            STRUCTURE: DESCR (DESCRIPTION OF THE DATASET), DATA (ARRAY WITH ONE ROW PER 
+        DOCSTRING: DATASET FROM SCIKIT-LEARN, WHICH NORMALLY HAVE A SIMILAR DICTIONARY
+            STRUCTURE: DESCR (DESCRIPTION OF THE DATASET), DATA (ARRAY WITH ONE ROW PER
             INSTANCE AND ONE COLUMN PER FEATURE), AND TARGET (AN ARRAY WITH LABELS)
         INPUTS: DATABASE NAME (MNIST_784 AS DEFAULT) AND VERSION
         OUTPUTS: DICTIONARY WITH DATA, TARGET, FEATURE NAMES, DESCR, DETAILS, CATEGORIES AND
@@ -78,12 +78,12 @@ class Classification:
 
     def sgd_classifier(self, array_x, array_y, int_random_state_seed=5):
         """
-        DOCSTRING: TRAINING A BINARY CLASSIFIER WITH STOCHASTIC GRADIENT DESCENT (SGD), 
-            TO EAVLUATE WHTEHER OR NOT A NEW ELEMENT BELONGS TO THE SUBSET, WHICH 
+        DOCSTRING: TRAINING A BINARY CLASSIFIER WITH STOCHASTIC GRADIENT DESCENT (SGD),
+            TO EAVLUATE WHTEHER OR NOT A NEW ELEMENT BELONGS TO THE SUBSET, WHICH
             HAS THE ADVANTAGE OF BEING CAPABLE OF HANDLING VERY LARGE DATASETS EFFICIENTLY
         INPUTS: ARRAY DATA, ARRAY TARGET, LIST OF DATA TO PREDICT AND RANDOM STATE SEED
             (5 AS DEFAULT)
-        OUTPUTS: DICTIONARY WITH KEYS model AND PREDICTIONS (DATALABEL AND WHETHER IT 
+        OUTPUTS: DICTIONARY WITH KEYS model AND PREDICTIONS (DATALABEL AND WHETHER IT
             BELONGS TO THE ARRAY DATA OR NOT, CONSIDERING A CLASSIFICATION METHOD)
         """
         # estimator
@@ -95,7 +95,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),
@@ -108,11 +108,11 @@ class Classification:
             multiclass_classification_strategy='best',
             gamma='auto', int_random_state_seed=42):
         """
-        DOCSTRING: SUPPORT VECTOR MACHINE CLASSIFICATION TO PREDICT, USING ONE VERSUS ONE 
-            STRATEGY, TRAINING BINARY CLASSIFIERS, GETTING THEIR DECISION SCORES FOR THE DATA, 
-            AND CHOOSING THE MODEL WHICH HAS AN OPTIMIZED RESPONSE, MATCHING TARGET CLASSIFICATION 
+        DOCSTRING: SUPPORT VECTOR MACHINE CLASSIFICATION TO PREDICT, USING ONE VERSUS ONE
+            STRATEGY, TRAINING BINARY CLASSIFIERS, GETTING THEIR DECISION SCORES FOR THE DATA,
+            AND CHOOSING THE MODEL WHICH HAS AN OPTIMIZED RESPONSE, MATCHING TARGET CLASSIFICATION
             IN MOST CASES
-        INPUTS: ARRAY X, ARRAY Y, KERNEL (LINEAR OR RBF ARE THE MOST COMMON), REGUALARIZATION 
+        INPUTS: ARRAY X, ARRAY Y, KERNEL (LINEAR OR RBF ARE THE MOST COMMON), REGUALARIZATION
             PARAMETER (1 AS DEFAULT), MULTICLASS CLASSIFICATION STRATEGY, GAMMA AND RANDOM STATE SEED
         OUTPUTS: DICT
         """
@@ -143,7 +143,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),
@@ -151,16 +151,16 @@ class Classification:
             'classes': model.classes_,
         }
 
-    def decision_tree(self, array_x, array_y, impurity_crit='gini', 
+    def decision_tree(self, array_x, array_y, impurity_crit='gini',
                       float_max_depth=None, int_random_state_seed=42):
         """
         REFERENCES: https://www.datacamp.com/tutorial/decision-tree-classification-python
         DOCSTRING: DECISION TREE CLASSIFIER
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS: 
+        OUTPUTS:
         """
         # classifier
-        model = DecisionTreeClassifier(criterion=impurity_crit, max_depth=float_max_depth, 
+        model = DecisionTreeClassifier(criterion=impurity_crit, max_depth=float_max_depth,
                                        random_state=int_random_state_seed)
         # fitting model
         model.fit(array_x, array_y)
@@ -169,7 +169,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),
@@ -182,7 +182,7 @@ class Classification:
         REFERENCES: https://www.datacamp.com/tutorial/random-forests-classifier-python
         DOCSTRING: RANDOM FOREST CLASSIFIER, A.K.A. DECISION TREE ENSEMBLED
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS: 
+        OUTPUTS:
         """
         # fitting model
         model = RandomForestClassifier(random_state=int_random_state_seed, n_estimators=n_estimators)
@@ -193,7 +193,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),
@@ -205,7 +205,7 @@ class Classification:
         """
         DOCSTRING: K NEIGHBORS CLASSIFIER
         INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS: 
+        OUTPUTS:
         """
         # classifier
         model = KNeighborsClassifier(n_neighbors=int_n_neighbors)
@@ -216,7 +216,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),
@@ -229,7 +229,7 @@ class Classification:
         REFERENCES: https://www.hashtagtreinamentos.com/k-means-para-clusterizar-ciencia-dados?gad_source=1&gclid=Cj0KCQjwlZixBhCoARIsAIC745Bm8VTK5AMNUKTlV3TpYm6RB6ag2IGUIMEvNNYTmKmAfqN7O5vA6mwaAi6FEALw_wcB
         DOCSTRING: K-MEANS CLUSTERING FOR LABELED DATA
         INPUTS:
-        OUTPUTS: DICT (LABELS - INDENTIFICATIONS OF RESPECTIVE CLUSTER, AND ADJUSTED RAND, WHICH 
+        OUTPUTS: DICT (LABELS - INDENTIFICATIONS OF RESPECTIVE CLUSTER, AND ADJUSTED RAND, WHICH
             INDICATES THE SCORE OF CLUSTERIZATION N_CLUSTERS-WISE)
         """
         # classifier
@@ -241,7 +241,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),
@@ -264,7 +264,7 @@ class Classification:
         # returning model fitted and predictions
         return {
             'model_fitted': model,
-            'predictions': array_y_hat, 
+            'predictions': array_y_hat,
             'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
             'score': model.score(array_x, array_y),
             'accuracy_score': accuracy_score(array_y, array_y_hat),

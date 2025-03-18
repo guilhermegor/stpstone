@@ -59,9 +59,9 @@ class CVMWeb_WS_Funds:
     ):
         """
         DOCSTRING: CVM WEB SERVICE - BRAZILLIAN SEC INPUTS
-        INPUTS: COOKIE CAN BE CATCH TRACKING NETWORK WHEN LOGGING WITH THE GOV.BR ACCOUNT IN 
+        INPUTS: COOKIE CAN BE CATCH TRACKING NETWORK WHEN LOGGING WITH THE GOV.BR ACCOUNT IN
             https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw (SEARCH FOR ouvidor=0)
-        OUTPUTS: - 
+        OUTPUTS: -
         """
         self.str_id = str_id
         self.str_passw = str_passw
@@ -104,7 +104,7 @@ class CVMWeb_WS_Funds:
         self.str_host_ex_fund = str_host_ex_fund
         self.str_host_post_fund = str_host_post_fund
 
-    def cookie_govbr(self, 
+    def cookie_govbr(self,
         str_id:str,
         str_passw:str,
         webdriver_path:str,
@@ -112,7 +112,7 @@ class CVMWeb_WS_Funds:
         time_wait_page_load:int=30,
         time_wait_el:int=30,
         bl_open_minimized:bool=False,
-        url:str='https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw', 
+        url:str='https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw',
         str_frame_name:str='Main',
         xpath_click_login:str='//*[@id="linkGovBr"]/img',
         xpath_fill_tin_br:str='//*[@id="accountId"]',
@@ -125,9 +125,9 @@ class CVMWeb_WS_Funds:
         """
         cls_selenium = SeleniumWD()
         # create driver element, wait until page is loaded and the login button is available
-        driver = cls_selenium.selenium_web_driver(url, webdriver_path, port, time_wait_page_load, 
+        driver = cls_selenium.selenium_web_driver(url, webdriver_path, port, time_wait_page_load,
             bl_open_minimized)
-        cls_selenium.selenium_element_is_clickable(driver, xpath_click_login, 
+        cls_selenium.selenium_element_is_clickable(driver, xpath_click_login,
             frame_name=str_frame_name)
         # click login button
         cls_selenium.selenium_find_element(driver, xpath_click_login).click()
@@ -142,7 +142,7 @@ class CVMWeb_WS_Funds:
         print(list_events)
         raise Exception('BREAK')
 
-    def generic_req(self, str_method:str, url:str, str_header_ref:str, dict_data:dict={}, 
+    def generic_req(self, str_method:str, url:str, str_header_ref:str, dict_data:dict={},
         bl_allow_redirects:bool=True, tup_timeout:Tuple[float, float]=(12.0, 21.0)) -> html.HtmlElement:
         """
         DOCSTRING:
@@ -167,10 +167,10 @@ class CVMWeb_WS_Funds:
             'sec-ch-ua-platform': '"Windows"'
         }
         req_resp = request(
-            method=str_method, 
-            url=url, 
-            headers=dict_headers, 
-            data=dict_data, 
+            method=str_method,
+            url=url,
+            headers=dict_headers,
+            data=dict_data,
             cookies=self.dict_cookie,
             allow_redirects=bl_allow_redirects,
             timeout=tup_timeout
@@ -187,7 +187,7 @@ class CVMWeb_WS_Funds:
         max_tries=20,
     )
     def available_funds(
-        self, 
+        self,
         str_table_nane:str='RAW_CVMWEB_COD_FUNDS',
         str_header_ref:str='CReservd.asp',
         str_app:str='SelecPartic.aspx?CD_TP_INFORM=15',
@@ -204,7 +204,7 @@ class CVMWeb_WS_Funds:
         # setting variables
         list_ser = list()
         # request html
-        html_content = self.generic_req(str_method, self.str_host_ex_fund + str_app, 
+        html_content = self.generic_req(str_method, self.str_host_ex_fund + str_app,
                                         str_header_ref, bl_allow_redirects=bl_allow_redirects)
         # print(f'HTML CONTENT: \n{html_content}')
         # print('OPTION FUND: {}'.format(HtmlHndler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
@@ -213,7 +213,7 @@ class CVMWeb_WS_Funds:
             #   get text and split into fund's ein and name
             try:
                 str_option_fund_raw = HtmlHndler().html_lxml_xpath(el_option_fund, './text()')
-                if len(str_option_fund_raw) == 0: 
+                if len(str_option_fund_raw) == 0:
                     continue
                 else:
                     str_option_fund_raw = str_option_fund_raw[0]
@@ -238,7 +238,7 @@ class CVMWeb_WS_Funds:
                 str_fund_ein, str_fund_name =  str_option_fund_trt.split(' - ')
             except ValueError:
                 raise Exception(
-                    '** ERROR: FUND EIN AND NAME NOT FOUND \n\t' 
+                    '** ERROR: FUND EIN AND NAME NOT FOUND \n\t'
                     + '- COMMON ERROR IS AN UNEXPECTED "-" CHARACTER, PROVIDED THE CODE'
                     + ' EXPECTS ONLY ONE SEPARATOR FOR FUND EIN AND NAME \n\t'
                     + '- raw DROP DOWN OPTION FUND: {} \n\t'.format(str_option_fund_raw)
@@ -264,10 +264,10 @@ class CVMWeb_WS_Funds:
         df_funds[self.key_fund_ein_unm] = DocumentsNumbersBR(
             df_funds[self.key_fund_ein].tolist()).unmask_docs
         # loading in db, if is user's will
-        if self.cls_db is not None: 
+        if self.cls_db is not None:
             self.cls_db.insert(
-                df_funds.to_dict(orient='records'), 
-                str_table_nane, 
+                df_funds.to_dict(orient='records'),
+                str_table_nane,
                 bl_insert_or_ignore=self.bl_insert_or_ignore
             )
         # returning dataframe
@@ -290,9 +290,9 @@ class CVMWeb_WS_Funds:
         # print(f'URL: {self.str_host_post_fund + str_app.format(str_fund_code)}')
         return \
             self.generic_req(
-                str_method, 
-                self.str_host_post_fund + str_app.format(str_fund_code), 
-                str_header_ref, 
+                str_method,
+                self.str_host_post_fund + str_app.format(str_fund_code),
+                str_header_ref,
                 dict_data,
                 bl_allow_redirects=bl_allow_redirects,
             ), \
@@ -313,8 +313,8 @@ class CVMWeb_WS_Funds:
         OUTPUTS: LIST
         """
         list_dts = [
-            el_ 
-            for el_ in HtmlHndler().html_lxml_xpath(html_content, xpath_avl_dates) 
+            el_
+            for el_ in HtmlHndler().html_lxml_xpath(html_content, xpath_avl_dates)
             if el_ != ''
         ]
         # print(f'**\nFUND_CODE: {str_fund_code} / LIST_DATAS_CVM: {list_dts}')
@@ -328,14 +328,14 @@ class CVMWeb_WS_Funds:
         if (self.cls_db is not None) \
             and (len(list_avl_dts_fund) > 0):
             self.cls_db.insert(
-                list_avl_dts_fund, 
-                str_table_nane, 
+                list_avl_dts_fund,
+                str_table_nane,
                 bl_insert_or_ignore=self.bl_insert_or_ignore
             )
         return list_dts
 
     def fund_daily_reports_raw(
-        self, 
+        self,
         html_content_gen:str,
         str_fund_code:str,
         list_str_dts:list,
@@ -353,9 +353,9 @@ class CVMWeb_WS_Funds:
         bl_allow_redirects:bool=False
     ):
         """
-        DOCSTRING: SIMULATION OF JAVASCRIPT CODE EXECUTION WHEN THE REFERENCE DATE IS CHANGED IN THE 
+        DOCSTRING: SIMULATION OF JAVASCRIPT CODE EXECUTION WHEN THE REFERENCE DATE IS CHANGED IN THE
             DROP DOWN MENU, IN ORDER TO RETRIEVE THE FUND DAILY REPORTS FOR DATES OF INTEREST
-        INPUTS: 
+        INPUTS:
         OUTPUTS:
         """
         # setting variables
@@ -368,9 +368,9 @@ class CVMWeb_WS_Funds:
                 el_eventtarget: str_event_target,
                 el_eventargument: '',
                 el_lastfocus: '',
-                el_viewstate: HtmlHndler().html_lxml_xpath(html_content_gen, 
+                el_viewstate: HtmlHndler().html_lxml_xpath(html_content_gen,
                     str_xpath_event_el_like.format(el_viewstate)),
-                el_eventvalidation: HtmlHndler().html_lxml_xpath(html_content_gen, 
+                el_eventvalidation: HtmlHndler().html_lxml_xpath(html_content_gen,
                     str_xpath_event_el_like.format(el_eventvalidation)),
                 el_viewstategen: HtmlHndler().html_lxml_xpath(html_content_gen, str_xpath_event_el_like.format(
                     el_viewstategen)),
@@ -380,17 +380,17 @@ class CVMWeb_WS_Funds:
             # print(f'DICT_PARAMS_DAILY_INFOS: {dict_data}')
             #   request html for a specific date of fund report and serialize it
             # html_content = self.generic_req(
-            #     str_method_fund_report_dt, 
-            #     self.str_host_post_fund + str_app.format(str_fund_code), 
-            #     str_header_ref, 
+            #     str_method_fund_report_dt,
+            #     self.str_host_post_fund + str_app.format(str_fund_code),
+            #     str_header_ref,
             #     dict_data,
             #     bl_allow_redirects=bl_allow_redirects,
             # )
             req_resp = request(
-                method=str_method_fund_report_dt, 
+                method=str_method_fund_report_dt,
                 url=self.str_host_post_fund + str_app.format(str_fund_code),
-                allow_redirects=False, 
-                data=dict_data, 
+                allow_redirects=False,
+                data=dict_data,
                 cookies=self.dict_cookie
             )
             req_resp.raise_for_status()
@@ -401,7 +401,7 @@ class CVMWeb_WS_Funds:
         return dict_html_contents_dts
 
     def fund_daily_report_trt(
-        self, 
+        self,
         url_daily_report_fund:str,
         html_content_gen:str,
         str_fund_code:str,
@@ -424,14 +424,14 @@ class CVMWeb_WS_Funds:
         list_ser = list()
         # in case of no available dates, return an empty list
         # print('DROPDOWN_EL: {}'.format(
-        #     len(HtmlHndler().html_lxml_xpath(html_content_gen, 
+        #     len(HtmlHndler().html_lxml_xpath(html_content_gen,
         #         str_xpath_dropdown_box)) == 0
         # ))
         # print(f'URL: {url_daily_report_fund}')
         # raise Exception('BREAK')
         if (len(list_str_dts) == 0) \
-            or (len(HtmlHndler().html_lxml_xpath(html_content_gen, 
-                str_xpath_dropdown_box)) == 0): 
+            or (len(HtmlHndler().html_lxml_xpath(html_content_gen,
+                str_xpath_dropdown_box)) == 0):
             return []
         # daily reports for a given set of fund and dates
         dict_html_contents_dts = self.fund_daily_reports_raw(
@@ -453,7 +453,7 @@ class CVMWeb_WS_Funds:
             try:
                 dict_daily_infos = {
                     self.__dict__[f'key_{k}']: str(
-                        HtmlHndler().html_lxml_xpath(html_content_dt, v)[0]).replace(',', '.') 
+                        HtmlHndler().html_lxml_xpath(html_content_dt, v)[0]).replace(',', '.')
                     for k, v in dict_xpaths.items()
                 }
             except IndexError:
@@ -483,12 +483,12 @@ class CVMWeb_WS_Funds:
         # generic request for the given fund code
         html_content_gen, url_fund_daily_infos = self.fund_daily_report_gen(str_fund_code)
         # dates of daily report available
-        list_str_dts_reports = self.available_dates_report_fund(html_content_gen, 
+        list_str_dts_reports = self.available_dates_report_fund(html_content_gen,
             str_fund_code, url_fund_daily_infos)
         # filtering dates of interest with daily reports available
         list_ftd_dts = [
-            d 
-            for d in dict_dts_funds[str_fund_code] 
+            d
+            for d in dict_dts_funds[str_fund_code]
             if d in list_str_dts_reports
         ]
         # print(f'\n** FUND_CODE: {str_fund_code} / LIST_FLTD_DTS: {list_ftd_dts}')
@@ -500,8 +500,8 @@ class CVMWeb_WS_Funds:
         if (self.cls_db is not None) \
             and (len(list_ser) > 0):
             self.cls_db.insert(
-                list_ser, 
-                str_table_nane, 
+                list_ser,
+                str_table_nane,
                 bl_insert_or_ignore=self.bl_insert_or_ignore
             )
         # wait for the next iteration, if is user's will
@@ -539,7 +539,7 @@ class CVMWeb_WS_Funds:
             #   preparing task arguments
             list_task_args = [
                 (
-                    (str_fund_code, dict_dts_funds, str_code_version), 
+                    (str_fund_code, dict_dts_funds, str_code_version),
                     {}
                 )
                 for str_fund_code in list(dict_dts_funds.keys())
@@ -550,8 +550,8 @@ class CVMWeb_WS_Funds:
                     str_fund_code,
                     dict_dts_funds,
                     str_code_version
-                ), 
-                list_task_args, 
+                ),
+                list_task_args,
                 int_ncpus=self.int_ncpus
             )
             #   flattening list
@@ -586,8 +586,8 @@ class CVMWeb_WS_Funds:
             self.key_fund_daily_infos_url: str
         })
         cols_greatest_shareholders = [
-            c 
-            for c in df_funds_daily_reports.columns 
+            c
+            for c in df_funds_daily_reports.columns
             if StrHandler().match_string_like(c, self.key_greatest_shareholders_like) == True
         ]
         df_funds_daily_reports[cols_greatest_shareholders] = df_funds_daily_reports[

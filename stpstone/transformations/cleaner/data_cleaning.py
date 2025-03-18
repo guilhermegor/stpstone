@@ -17,8 +17,8 @@ class DataCleaning:
 
     def test_set_check_hash(self, identifier, test_ratio):
         """
-        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.
         DOCSTRING: SET HASH FROM THE ROW IDENTIFIER TO REMAIN A TEST SAMPLE STABLE EVEN THOUGH ITS
             AN UPDATE IN THE CONSULTED DATABASE FETCHED TO MEMORY
@@ -29,26 +29,26 @@ class DataCleaning:
 
     def split_train_test(self, df_data, test_ratio=0.2, random_seed=42, stratify_col=None):
         """
-        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.
-        DOCSTRING: CREATE A DATASET RANDOMLY WITHOUT DISTINGUISH OF ID HASH, SO WHEN THE DATASET 
+        DOCSTRING: CREATE A DATASET RANDOMLY WITHOUT DISTINGUISH OF ID HASH, SO WHEN THE DATASET
             IS REFRESHED IT WOULD BE A CHANGE IN THE TESTING AND TRAINING SETS
         INPUTS: DATAFRAME DATA, TEST RATIO AND RANDOM SEED
         OUTPUTS: TUPLE OF DATAFRAMES WITH TRAINING SET AND TEST SET
         """
-        return train_test_split(df_data, test_size=test_ratio, random_state=random_seed, 
+        return train_test_split(df_data, test_size=test_ratio, random_state=random_seed,
                                 stratify=stratify_col)
 
     def split_stratified_train_test(self, df_data, col_name, n_splits=1, test_size=0.2,
                                     random_state_seed=42):
         """
-        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.
-        DOCSTRING: STRATIFIED TECHNIQUE TO CREATE SAMPLES FROM THE ORIGINAL DATASET BY COL NAME, 
+        DOCSTRING: STRATIFIED TECHNIQUE TO CREATE SAMPLES FROM THE ORIGINAL DATASET BY COL NAME,
             AIMING TO NOT BE CHANGED BY A NEW FLOW OF DATA
-        INPUTS: ORIGINAL DATAFRAME, ID COLUMN (STR), NUMBER OF SPLITS (1 AS DEFAULT), 
+        INPUTS: ORIGINAL DATAFRAME, ID COLUMN (STR), NUMBER OF SPLITS (1 AS DEFAULT),
             TEST SIZE (0.2 AS DEFAULT) AND RANDOM STATE SEED (42 AS DEFAULT)
         OUTPUTS: TRAIN AND TEST SET DATAFRAMES
         """
@@ -59,18 +59,18 @@ class DataCleaning:
             df_strat_train_set = df_data.loc[train_index]
             df_strat_test_set = df_data.loc[test_index]
         return df_strat_train_set, df_strat_test_set
-    
+
     def split_train_test_by_id(self, df_data, test_ratio, id_column):
         """
-        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.
-        DOCSTRING: TEST SAMPLE OF DATA, RANDOMLY CHOSEN, TRYING TO PRESERVE ITS FEATURES 
-            TO PERFORM STATISTICAL TESTS IN ORDER TO EXPLAIN BEAHVIOURS OF THE POPULATION, WHEREAS 
-            THE TRAIN PORTION IS REMAINIG DATA PROVIDED TO ENHANCE THE CONCLUSIONS OF THE MODEL 
+        DOCSTRING: TEST SAMPLE OF DATA, RANDOMLY CHOSEN, TRYING TO PRESERVE ITS FEATURES
+            TO PERFORM STATISTICAL TESTS IN ORDER TO EXPLAIN BEAHVIOURS OF THE POPULATION, WHEREAS
+            THE TRAIN PORTION IS REMAINIG DATA PROVIDED TO ENHANCE THE CONCLUSIONS OF THE MODEL
             PROPOSED. SPLITTING BY ID USES INSTANCE'S IDENTIFIERS
-        INPUTS: DF DATA, TEST RATIO AND ID_COLUMN (WHEN ITS NOT AVAILABLE IN THE DATA FRAME THERE 
-            ARE TWO OPTIONS: USING THE RESET_INDEX() METHOD IN PANDAS OR STABLE FEATURES AS 
+        INPUTS: DF DATA, TEST RATIO AND ID_COLUMN (WHEN ITS NOT AVAILABLE IN THE DATA FRAME THERE
+            ARE TWO OPTIONS: USING THE RESET_INDEX() METHOD IN PANDAS OR STABLE FEATURES AS
             FOREIGNER KEYS)
         OUTPUTS: TUPLE OF DATAFRAMES WITH TRAINING SET AND TEST SET
         """
@@ -107,8 +107,8 @@ class DataCleaning:
 
     def dataframe_id_column_prportions(self, df_data, id_column):
         """
-        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.
         DOCSTRING: DATAFRAME PROPORTIONS BY UNIQUE VALUES IN COLUMN ID
         INPUTS: DF_DATA AND ID COLUMN
@@ -120,12 +120,12 @@ class DataCleaning:
     def compare_stratified_random_samples_propotions(self, df_data_original, df_data_random_set,
                                                      df_data_stratified_set, id_column):
         """
-        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.
         DOCSTRING: COMPARE STRATIFIED AND RANDOM SAMPLES PORPOTIONS REGARDING ORIGINAL DATASET
         INPUTS: DF_DATA, TEST RATIO, ID COLUMN, RANDOM SEED(42 AS DEFAULT), N SPLITS (1 AS DEFAULT)
-        OUTPUTS: DATAFRAME WITH PROPORTIONS FOR EACH SAMPLING METHOD (STRATIFIED AND RANDOM) 
+        OUTPUTS: DATAFRAME WITH PROPORTIONS FOR EACH SAMPLING METHOD (STRATIFIED AND RANDOM)
             REGARDING THE ORIGINAL DATA BASE
         """
         # comparing porpotions for each sample
@@ -144,11 +144,11 @@ class DataCleaning:
 
     def replace_nan_values(self, array_data, strategy=None, missing_values=np.nan, n_neighbors=None):
         """
-        DOCSTRING: REPLACE NAN WITH VALUES WITH DESIRED STRATEGY (MEAN, MEDIAN OR MOST FREQUENT), 
+        DOCSTRING: REPLACE NAN WITH VALUES WITH DESIRED STRATEGY (MEAN, MEDIAN OR MOST FREQUENT),
             AS 0 PLACEMENT, MEDIAN, OR MEAN
         INPUTS: DATAFRAME OF INTEREST, AND STRATEGY
-        OUTPUTS: DICTIONARY WITH STRATEGY, ARRAY REPLACERS, SAMPLE INCOMPLETE ROWS BEFORE CHANGES, 
-            SAMPLE INCOMPLETE ROWS AFTER CHANGES, DATAFRAME BEFORE ADJUSTMENTS AND DATAFRAME AFTER 
+        OUTPUTS: DICTIONARY WITH STRATEGY, ARRAY REPLACERS, SAMPLE INCOMPLETE ROWS BEFORE CHANGES,
+            SAMPLE INCOMPLETE ROWS AFTER CHANGES, DATAFRAME BEFORE ADJUSTMENTS AND DATAFRAME AFTER
             ADJUSTMENTS
         """
         # creating a copy of the original data just with numbers, since text will trigger an error
@@ -175,11 +175,11 @@ class DataCleaning:
                                                  encoder_strategy='one_hot_encoder'):
         """
         DOCSTRING: CONVERT CATEGORIES FROM STRING TO NUMBERS
-        INPUTS: ARRAY OF DATA TO BE ENCODED - STRATEGIES HANDLED: ONE_HOT_ENCODER (UNIQUE 
-            IDENTIFICATION ARRAY WITH N X N DIMENSION, BEING N THE NUMBER OF DIFERENT CATEGORIES), 
-            ORDINAL_ENCODER (ORDINAL NUMBERS FROM 0 TO N_CLASS-1), 
+        INPUTS: ARRAY OF DATA TO BE ENCODED - STRATEGIES HANDLED: ONE_HOT_ENCODER (UNIQUE
+            IDENTIFICATION ARRAY WITH N X N DIMENSION, BEING N THE NUMBER OF DIFERENT CATEGORIES),
+            ORDINAL_ENCODER (ORDINAL NUMBERS FROM 0 TO N_CLASS-1),
             LABEL_ENCODER (ORDINAL NUMBERS FROM 0 TO N_CLASS-1)
-        OUTPUTS: DICTIONARY WITH KEYS ARRAY LABELS, ARRAY DATA CATEGORIZED IN NUMBERS AND 
+        OUTPUTS: DICTIONARY WITH KEYS ARRAY LABELS, ARRAY DATA CATEGORIZED IN NUMBERS AND
             ARRAY DATA CATEGORIZED IN STRINGS
         """
         # checking wheter or not the array is a one hot encoding, when the category has one success
@@ -195,7 +195,7 @@ class DataCleaning:
                 ('encoders', OrdinalEncoder(), list_idx_target_cols)
             ], remainder='passthrough')
         elif encoder_strategy == 'label_encoder':
-            #   column transformer - the label encoder is usually used for logistic regressions in 
+            #   column transformer - the label encoder is usually used for logistic regressions in
             #       order to configure the dependent variable as either 0 or 1
             ct = LabelEncoder()
         # paramether bl_one_hot_encoding ought be a boolean, in case another value is given
@@ -213,14 +213,14 @@ class DataCleaning:
 
     def feature_scaling(self, array_data, type_scaler='normalization', tup_feature_range=(0,1)):
         """
-        REFERENCES:  “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
-            978-1-492-03264-9.”, 
+        REFERENCES:  “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
+            978-1-492-03264-9.”,
             https://stackoverflow.com/questions/40758562/can-anyone-explain-me-standardscaler
-        DOCSTRING: FEATURE SCALING NORMALIZATION (MIN-MAX SCALING, WITH A 0 TO 1 RANGE) OR 
+        DOCSTRING: FEATURE SCALING NORMALIZATION (MIN-MAX SCALING, WITH A 0 TO 1 RANGE) OR
             STANDARDISATION (Z SCORE, WITH A -3 TO 3 RANGE, LESS INFLUENCED BY OUTLIERS)-WISE
         INPUTS: ARRAY DATA AND TYPE OF FEATURE SCALER
-        OUTPUTS: DICTIONARY WITH DATA MAX, DATA MIN, SCALE, N SAMPLES, ARRAY WITH ORIGINAL DATA AND 
+        OUTPUTS: DICTIONARY WITH DATA MAX, DATA MIN, SCALE, N SAMPLES, ARRAY WITH ORIGINAL DATA AND
             ARRAY WITH SCALED DATA
         """
         # checking wheter the array is unidimensional and reshaping it
@@ -244,11 +244,11 @@ class DataCleaning:
             'array_original_data': array_data,
             'array_scaled_data': array_data_transformed
         }
-        
+
     def remove_noise_from_data(self, data_test, data_train):
         """
         REFERENCES: (MULTIOUTPUT CLASSIFICATION) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=utQpplj4fGwa
-        DOCSTRING: CLEAR NOISE AIMMING TO HELP ESTIMATORS TO FIT A DATASET AND PREDICT A PIXEL 
+        DOCSTRING: CLEAR NOISE AIMMING TO HELP ESTIMATORS TO FIT A DATASET AND PREDICT A PIXEL
             TO A TARGET LABEL
         INPUTS: DATA TEST AND DATA TRAIN
         OUTPUTS: TUPLE WITH DATA TEST AND TRAINING, ORIGINAL AND ENHANCED
@@ -269,7 +269,7 @@ class DataCleaning:
     def shift_image(self, image, dx, dy):
         """
         REFERENCES: (DATA AUGMENTATION) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=vkIfY1tAfGwf
-        DOCSTRING: SHIFT IMAGE POSITION FOR DATA AUGMENTATION, OR TRAINING SET EXPANSION, IN ORDER 
+        DOCSTRING: SHIFT IMAGE POSITION FOR DATA AUGMENTATION, OR TRAINING SET EXPANSION, IN ORDER
             TO ENHANCE THE MODEL ESTIMATOR PERFORMANCE
         INPUTS: IMAGE, DX AND DY MOVEMENTS
         OUTPUTS: IMAGE

@@ -11,9 +11,9 @@ session = ReqSession(bl_new_proxy=False).session
 
 class_ptax = PTAXBCB(
     session=session,
-    dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 5), 
-    dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
-    cls_db=None, 
+    dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 5),
+    dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+    cls_db=None,
     bl_debug=False
 )
 df_composition_ptax = class_ptax.composition_currency

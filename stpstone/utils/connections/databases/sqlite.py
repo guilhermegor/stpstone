@@ -44,7 +44,7 @@ class SQLiteDB:
         interval=10,
         max_tries=20,
     )
-    def read(self, str_query:str, dict_dtypes:Dict[str, Any], 
+    def read(self, str_query:str, dict_dtypes:Dict[str, Any],
         list_cols_dt:Optional[List[str]]=None) -> pd.DataFrame:
         """
         DOCSTRING:
@@ -65,7 +65,7 @@ class SQLiteDB:
         interval=10,
         max_tries=20,
     )
-    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
+    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str,
         bl_insert_or_ignore:bool=False) -> None:
         """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
@@ -90,8 +90,8 @@ class SQLiteDB:
             self.conn.commit()
             if self.logger is not None:
                 CreateLog().infos(
-                    self.logger, 
-                    f'Succesful commit in db {self.db_path} ' 
+                    self.logger,
+                    f'Succesful commit in db {self.db_path} '
                     + f'/ table {str_table_name}.'
                 )
         except Exception as e:
@@ -99,7 +99,7 @@ class SQLiteDB:
             self.close
             if self.logger is not None:
                 CreateLog().errors(
-                    self.logger, 
+                    self.logger,
                     'ERROR WHILE INSERTING DATA\n'
                     + f'DB_PATH: {self.db_path}\n'
                     + f'TABLE_NAME: {str_table_name}\n'

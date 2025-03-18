@@ -28,8 +28,10 @@ class NetworkInfo:
     def is_port_in_use(self, port):
         """
         Checks if a specific port is in use on the local machine.
+
         Args:
             port (int): The port number to check.
+
         Returns:
             bool: True if the port is in use, False otherwise.
         """
@@ -47,6 +49,7 @@ class NetworkInfo:
     def get_available_port(self):
         """
         Finds and returns an available port on the local machine.
+
         Returns:
             int: An available port number.
         """

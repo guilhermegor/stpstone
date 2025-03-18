@@ -20,6 +20,7 @@ class ConnectionApi(metaclass=TypeChecker):
     Metadata:
         - http://www.b3.com.br/data/files/2E/95/28/F1/EBD17610515A8076AC094EA8/GUIDE-TO-LINE-5.0-API.pdf,
         - https://line.bvmfnet.com.br/#/endpoints
+
     Notes: Please contact CAU manager account to request a service user
     """
 

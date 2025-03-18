@@ -1,13 +1,9 @@
-### CRYPTO - COIN MAKET INGESTION REQUEST ###
-
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
-# project modules
 from stpstone._config.global_slots import YAML_WW_CRYPTO_COINMARKET
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -21,7 +17,7 @@ class CoinMarket(ABCRequests):
         session:Optional[ReqSession]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
+        logger:Optional[Logger]=None,
         token:Optional[str]=None
     ) -> None:
         self.session = session
@@ -34,10 +30,10 @@ class CoinMarket(ABCRequests):
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
-            logger=logger, 
+            logger=logger,
             token=token
         )
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         list_ser = list()
         json_ = req_resp.json()
@@ -49,10 +45,10 @@ class CoinMarket(ABCRequests):
                 'PRICE': dict_['quote']['USD']['price'],
                 'MARKET_CAP': dict_['quote']['USD']['market_cap'],
                 'VOLUME': dict_['quote']['USD']['volume_24h'],
-                'SLUG': dict_['slug'], 
+                'SLUG': dict_['slug'],
                 'TOTAL_SUPPLY': dict_['total_supply'],
                 'CMC_RANK': dict_['cmc_rank'],
                 'NUM_MARKET_PAIRS': dict_['num_market_pairs'],
-                'LAST_UPDATE': dict_['last_updated'], 
+                'LAST_UPDATE': dict_['last_updated'],
             })
         return pd.DataFrame(list_ser)

@@ -18,8 +18,8 @@ from stpstone.handling_data.handling_lists import HandlingLists
 
 
 class NotionalFromPV:
-    
-    def general_pricing(self, float_pv, float_size, float_qty, float_xcg_rt_1, 
+
+    def general_pricing(self, float_pv, float_size, float_qty, float_xcg_rt_1,
                         float_xcg_rt_2=1):
         """
         DOCSTRING:
@@ -28,12 +28,12 @@ class NotionalFromPV:
         """
         return float_pv * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
 
-    def dap(self, float_pv, float_qty, float_pmi_idx_mm1, float_pmi_ipca_rt_hat, dt_pmi_last, 
+    def dap(self, float_pv, float_qty, float_pmi_idx_mm1, float_pmi_ipca_rt_hat, dt_pmi_last,
             dt_pmi_follw, wd_bef_ref=0, float_size=0.00025, str_format_dt_input='YYYY-MM-DD'):
         """
         DOCSTRING: PRICING DAP CONTRACT - FUTURE OF BRAZILLIAN PMI MAIN CORE
         INPUTS: PRESENT VALUE OF DAP, QUANTITY, PMI INDEX MONTH MINUS 1, PMI IPCA RATE EXPECTED (
-            ACCORING TO ANBIMA), LAST DATE OF PMI IPCA RELEASE, FOLLOWING DATE OF PMI IPCA RELEASE, 
+            ACCORING TO ANBIMA), LAST DATE OF PMI IPCA RELEASE, FOLLOWING DATE OF PMI IPCA RELEASE,
             WORKING DAYS BEFORE (REFERENCE DATE), AND SIZE (0.00025 STANDARD)
         OUTPUTS: FLOAT
         """
@@ -64,11 +64,11 @@ class NotionalFromPV:
 
 class NotionalFromRt:
 
-    def di1(self, float_nominal_rt, dt_xpt, int_wd_bef=0, float_fv=100000.0, 
+    def di1(self, float_nominal_rt, dt_xpt, int_wd_bef=0, float_fv=100000.0,
             int_wddy=252, int_wd_cap=1, str_format_dt_input='YYYY-MM-DD'):
         """
         DOCSTRING: DI1 CONTRACT PRICING - CONSIDERS DAYTRADE AND SWING TRADE PRICING
-        INPUTS: NOMINAL RATE, DATE OF SETTLEMENT, WORKING DAYS BEFORE, FUTURE VALUE, WORKING DAYS 
+        INPUTS: NOMINAL RATE, DATE OF SETTLEMENT, WORKING DAYS BEFORE, FUTURE VALUE, WORKING DAYS
             WITHIN A YEAR, WORKING DAYS OF CAPITALIZATION (1 AS STANDARD), DATE FORMAT INPUT
         OUTPUTS:
         """
@@ -243,7 +243,7 @@ class TSIR:
         """
         REFERENCES: https://nelson-siegel-svensson.readthedocs.io/en/latest/readme.html#calibration
         DOCSTRING: TERM STRUCTURE OF INTEREST RATES
-        INPUTS: DICT WITH NPER (AS KEY) AND RATES (AS VALUES), AS WELL AS FIRST ASSUMPTION 
+        INPUTS: DICT WITH NPER (AS KEY) AND RATES (AS VALUES), AS WELL AS FIRST ASSUMPTION
             FOR TAU AND NUMBER OF SAMPLES WITHIN THE RANGE
         OUTPUTS: DICTIONARY WITH RATE (Y), PERIOD (T)
         """

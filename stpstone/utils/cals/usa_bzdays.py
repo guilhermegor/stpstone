@@ -23,7 +23,7 @@ class WorkCalendar:
 
     def is_weekend(self, date:datetime) -> bool:
         return date.weekday() >= 5
-    
+
     def diff_working_days(self, dt_bgn:datetime, dt_sup:datetime) -> int:
         current_date = dt_bgn
         working_days = 0

@@ -9,7 +9,7 @@ from stpstone._config.global_slots import YAML_LLMS
 
 class GPT():
 
-    def __init__(self, api_key:str, str_model:str, int_max_tokens:int=100, 
+    def __init__(self, api_key:str, str_model:str, int_max_tokens:int=100,
                  str_context:Optional[str]=None, bl_stream:bool=False) -> None:
         """
         REFERENCES:
@@ -29,7 +29,7 @@ class GPT():
     def run_prompt(self, list_tuple:List[tuple]) -> ChatCompletion:
         """
         DOCSTRING: RUN LLM WITH PROMPT
-        INPUTS: 
+        INPUTS:
             - LIST_TUPLE:LIST[TUPLE] IN ORDER TO CREATE A PROMPT TO REQUEST THE LLM
         OUTPUTS: STR
         """
@@ -59,9 +59,9 @@ class GPT():
         if self.str_context is not None:
             list_prompt = [
                 {
-                    'role': 'system', 
+                    'role': 'system',
                     'content': self.str_context
-                }, 
+                },
                 dict_content
             ]
         else:

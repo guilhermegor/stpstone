@@ -1,6 +1,3 @@
-### ALPHA VANTAGE INGESTION REQUEST ###
-
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional, List
@@ -8,7 +5,6 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-# project modules
 from stpstone._config.global_slots import YAML_US_ALPHAVANTAGE
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -22,7 +18,7 @@ class AlphaVantageUS(ABCRequests):
         session:Optional[ReqSession]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
+        logger:Optional[Logger]=None,
         token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
@@ -37,11 +33,11 @@ class AlphaVantageUS(ABCRequests):
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
-            logger=logger, 
+            logger=logger,
             token=token,
             list_slugs=list_slugs
         )
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         list_ = list()
         sleep(10)

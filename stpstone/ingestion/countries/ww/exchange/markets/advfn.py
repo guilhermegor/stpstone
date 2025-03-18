@@ -1,6 +1,3 @@
-### SCAFFOLDING INGESTION REQUEST ###
-
-# pypi.org libs
 import re
 import pandas as pd
 from datetime import datetime
@@ -9,7 +6,6 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-# project modules
 from stpstone._config.global_slots import YAML_WW_ADVFN
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -23,20 +19,20 @@ class ADVFNWW(ABCRequests):
         self,
         session:Optional[ReqSession]=None,
         dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-        dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 0), 
-        str_market:str='BOV', 
+        dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 0),
+        str_market:str='BOV',
         str_ticker:str='PETR4',
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
-        token:Optional[str]=None, 
+        logger:Optional[Logger]=None,
+        token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
         super().__init__(
             dict_metadata=YAML_WW_ADVFN,
             session=session,
             cls_db=cls_db,
-            logger=logger, 
-            token=token, 
+            logger=logger,
+            token=token,
             list_slugs=list_slugs
         )
         self.session = session
@@ -44,13 +40,13 @@ class ADVFNWW(ABCRequests):
         self.dt_sup = dt_sup
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token, 
+        self.token = token,
         self.list_slugs = list_slugs
         self.market = str_market
         self.ticker = str_ticker
         self.dt_inf_unix_ts = DatesBR().datetime_to_timestamp(dt_inf)
         self.dt_sup_unix_ts = DatesBR().datetime_to_timestamp(dt_sup)
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         re_pattern = r'\^([^ ]+)'
         json_ = req_resp.json()
@@ -60,8 +56,8 @@ class ADVFNWW(ABCRequests):
         else:
             ticker = json_['result']['symbol']
         list_ser = HandlingDicts().add_key_value_to_dicts(
-            json_['result']['rows'], 
-            key='ticker', 
+            json_['result']['rows'],
+            key='ticker',
             value=ticker
         )
         return pd.DataFrame(list_ser)

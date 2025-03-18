@@ -14,7 +14,7 @@ euribor_rates:
 central_banks_rates:
   bl_verify: False
   url: https://www.global-rates.com/en/interest-rates/central-banks/
-  rate_outlook_desc: 
+  rate_outlook_desc:
     fa-circle-down: DOWNWARD
     fa-circle-up: UPWARD
   col_direction: DIRECTION

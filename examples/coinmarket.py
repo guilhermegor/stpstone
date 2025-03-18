@@ -11,8 +11,8 @@ from stpstone.utils.connections.netops.session import ReqSession
 session = ReqSession(bl_new_proxy=True).session
 df_ = CoinMarket(
     session=session,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5), 
-    cls_db=None, 
+    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5),
+    cls_db=None,
     token=get_password('COIN_MARKET', 'API_KEY')
 ).source('ohlcv_latest', bl_debug=False, bl_fetch=True)
 print(f'DF MKTDATA COIN MARKET: \n{df_}')

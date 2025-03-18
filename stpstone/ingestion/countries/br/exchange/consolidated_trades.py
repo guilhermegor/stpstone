@@ -1,6 +1,3 @@
-### CONSOLIDATED TRADES B3 INGESTION REQUEST ###
-
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional, List
@@ -8,7 +5,6 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-# project modules
 from stpstone._config.global_slots import YAML_B3_CONSOLIDATED_TRDS
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession

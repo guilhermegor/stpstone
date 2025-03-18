@@ -11,25 +11,25 @@ class RiskStats(metaclass=TypeChecker):
     def __init__(self, array_r: Union[np.ndarray, pd.Series, List[float]]) -> None:
         """
         Initializer for RiskStats class
-        
+
         Args:
-            array_r (Union[np.ndarray, pd.Series, List[float]]): A sequence of returns, 
-                ordered by dates in descending order, which can be a 
+            array_r (Union[np.ndarray, pd.Series, List[float]]): A sequence of returns,
+                ordered by dates in descending order, which can be a
                 numpy array, pandas Series, list of floats, or a single float.
         """
         self.array_r = Arrays().to_array(array_r)
-    
+
     def variance_ewma(self, float_lambda: Optional[float] = 0.94) -> float:
         """
-        Exponentially Weighted Moving Average(EWMA) is a type of moving average that gives more 
+        Exponentially Weighted Moving Average(EWMA) is a type of moving average that gives more
         weight to recent observations.
-        
-        Formula: 
+
+        Formula:
             EWMAt = λ * Rt + (1 - λ) * EWMAt-1
 
         Args:
             float_lambda (float): The smoothing factor, typically between 0 and 1, defaulting to 0.94
-        
+
         Returns:
             np.ndarray: The exponentially weighted moving average of the input array.
 
@@ -52,11 +52,11 @@ class RiskStats(metaclass=TypeChecker):
 class MarkowitzPortf(metaclass=TypeChecker):
 
     def __init__(
-        self, 
+        self,
         array_r: Union[np.ndarray, pd.DataFrame],
-        array_w: Union[np.ndarray, pd.DataFrame], 
+        array_w: Union[np.ndarray, pd.DataFrame],
         float_lambda: Optional[float] = 0.94,
-        bl_validate_w: Optional[bool] = True, 
+        bl_validate_w: Optional[bool] = True,
         float_atol: Optional[float] = 1e-4
     ) -> None:
         self.float_lambda = float_lambda
@@ -72,11 +72,11 @@ class MarkowitzPortf(metaclass=TypeChecker):
                         raise ValueError(f"Portfolio weights in row {i} must sum to 1.")
             else:
                 raise ValueError("Portfolio weights must be either 1D or 2D array.")
-    
+
     @property
     def mu(self) -> float:
         return np.mean(np.sum(self.array_r * self.array_w, axis=1))
-    
+
     @property
     def cov(self) -> np.ndarray:
         """
@@ -111,7 +111,7 @@ class MarkowitzPortf(metaclass=TypeChecker):
             return float(array_sigmas[0])
         else:
             raise ValueError("Portfolio weights must be either 1D or 2D array.")
-    
+
     def sharpe_ratio(self, float_rf: float) -> float:
         return (self.mu - float_rf) / self.sigma
 
@@ -119,12 +119,12 @@ class MarkowitzPortf(metaclass=TypeChecker):
 class VaR(metaclass=TypeChecker):
 
     def __init__(
-        self, 
-        float_mu: float, 
+        self,
+        float_mu: float,
         float_sigma: float,
         array_r: Optional[Union[np.ndarray, pd.Series, List[float]]] = None,
-        float_cl: Optional[float] = 0.95, 
-        int_t: Optional[int] = 1, 
+        float_cl: Optional[float] = 0.95,
+        int_t: Optional[int] = 1,
         float_lambda: Optional[float] = 0.94
     ) -> None:
         self.float_mu = float_mu
@@ -140,8 +140,8 @@ class VaR(metaclass=TypeChecker):
         return np.percentile(self.array_r, (1 - self.float_cl) * 100)
 
     def historic_var_stress_test(
-        self, 
-        float_shock: float, 
+        self,
+        float_shock: float,
         str_shock_type: Literal["absolute", "relative"] = "relative"
     ) -> float:
         if str_shock_type == "relative":
@@ -169,11 +169,11 @@ class VaR(metaclass=TypeChecker):
             float: The parametric VaR.
         """
         return (self.float_mu - self.float_z * self.float_sigma) * np.sqrt(self.int_t)
-    
+
     @property
     def cvar(self) -> float:
         """
-        Calculates the conditional value at risk (CVaR), also known as the Expected Shortfall, 
+        Calculates the conditional value at risk (CVaR), also known as the Expected Shortfall,
         for a given portfolio.
 
         Args:
@@ -190,28 +190,28 @@ class VaR(metaclass=TypeChecker):
         array_cvar = self.array_r[self.array_r <= float_var]
         return np.mean(array_cvar)
 
-    def monte_carlo_var(self, int_simulations: Optional[int] = 10_000, 
+    def monte_carlo_var(self, int_simulations: Optional[int] = 10_000,
                         float_portf_nv: Optional[float] = 1_000_000) -> float:
         """
         Calculates the Monte Carlo Value at Risk (VaR) for a given portfolio.
 
         Args:
-            float_cl (float, optional): The confidence level for the VaR calculation, 
+            float_cl (float, optional): The confidence level for the VaR calculation,
                 with a default value of 0.95.
-            str_std_methd (Literal["std", "ewma_std"], optional): The method to use for 
-                calculating the standard deviation, either "std" or "ewma_std", with a 
+            str_std_methd (Literal["std", "ewma_std"], optional): The method to use for
+                calculating the standard deviation, either "std" or "ewma_std", with a
                 default of "std".
-            float_lambda (float, optional): The smoothing factor for EWMA, defaulting 
+            float_lambda (float, optional): The smoothing factor for EWMA, defaulting
                 to 0.94.
-            int_t (int, optional): The time horizon for the VaR calculation, with a 
+            int_t (int, optional): The time horizon for the VaR calculation, with a
                 default value of 1.
-            int_simulations (int, optional): The number of simulations to perform for 
+            int_simulations (int, optional): The number of simulations to perform for
                 the Monte Carlo analysis, with a default value of 10,000.
-            float_portf_nv (float, optional): The notional value of the portfolio, 
+            float_portf_nv (float, optional): The notional value of the portfolio,
                 defaulting to 1,000,000.
 
         Returns:
-            float: The Monte Carlo VaR of the portfolio, representing the potential 
+            float: The Monte Carlo VaR of the portfolio, representing the potential
             loss in portfolio value at the specified confidence level.
         """
         array_simulated_r = np.random.normal(
@@ -225,12 +225,12 @@ class VaR(metaclass=TypeChecker):
 class RiskMeasures(VaR):
 
     def __init__(
-        self, 
-        float_mu: float, 
+        self,
+        float_mu: float,
         float_sigma: float,
-        array_r: Optional[Union[np.ndarray, pd.Series, List[float]]] = None, 
-        float_cl: Optional[float] = 0.95, 
-        int_t: Optional[int] = 1, 
+        array_r: Optional[Union[np.ndarray, pd.Series, List[float]]] = None,
+        float_cl: Optional[float] = 0.95,
+        int_t: Optional[int] = 1,
         float_lambda: Optional[float] = 0.94
     ) -> None:
         self.float_mu = float_mu
@@ -247,18 +247,18 @@ class RiskMeasures(VaR):
         array_cummax_r = np.maximum.accumulate(array_cum_r)
         array_drawdown = (array_cum_r - array_cummax_r) / array_cummax_r
         return np.min(array_drawdown)
-    
+
     def tracking_error(
-        self, 
-        array_portf_r: Union[np.ndarray, pd.Series, List[float]], 
-        array_benchmark_r: Union[np.ndarray, pd.Series, List[float]], 
+        self,
+        array_portf_r: Union[np.ndarray, pd.Series, List[float]],
+        array_benchmark_r: Union[np.ndarray, pd.Series, List[float]],
         float_ddof: Optional[float] = 1
     ) -> float:
         """
         Calculates the tracking error between a portfolio and a benchmark.
 
         Args:
-            float_ddof (float, optional): The delta degrees of freedom, with a default value of 1, 
+            float_ddof (float, optional): The delta degrees of freedom, with a default value of 1,
             representing the N - ddof in the denominator of the standard deviation calculation.
             Use 0 for population standard deviation and 1 for sample standard deviation.
 
@@ -269,11 +269,11 @@ class RiskMeasures(VaR):
         array_benchmark_r = Arrays().to_array(array_benchmark_r)
         array_active_r = array_portf_r - array_benchmark_r
         return np.std(array_active_r, ddof=float_ddof)
-    
+
     def sharpe(self, float_rf: float) -> float:
         return (self.float_mu - float_rf) / self.float_sigma
-    
-    def beta(self, array_market_r: Union[np.ndarray, pd.Series, List[float]], 
+
+    def beta(self, array_market_r: Union[np.ndarray, pd.Series, List[float]],
         float_ddof: Optional[float] = 1) -> float:
         array_market_r = Arrays().to_array(array_market_r)
         array_cov = np.cov(self.array_r, array_market_r, ddof=float_ddof)
@@ -284,10 +284,10 @@ class QuoteVar(VaR):
 
     def __init__(
         self,
-        array_r: Union[np.ndarray, pd.Series, List[float]], 
+        array_r: Union[np.ndarray, pd.Series, List[float]],
         str_method_str: Literal["std", "ewma_std"] = "std",
         float_cl: Optional[float] = 0.95,
-        int_t: Optional[int] = 1, 
+        int_t: Optional[int] = 1,
         float_lambda: Optional[float] = 0.94
     ) -> None:
         self.dict_desc_stats = RiskStats(array_r).descriptive_stats(float_lambda=float_lambda)
@@ -308,9 +308,9 @@ class PortfVar(VaR):
         array_r: Union[np.ndarray, pd.DataFrame],
         array_w: Union[np.ndarray, pd.DataFrame],
         float_cl: Optional[float] = 0.95,
-        int_t: Optional[int] = 1, 
-        float_lambda: Optional[float] = 0.94, 
-        bl_validate_w: Optional[bool] = True, 
+        int_t: Optional[int] = 1,
+        float_lambda: Optional[float] = 0.94,
+        bl_validate_w: Optional[bool] = True,
         float_atol: Optional[float] = 1e-4
     ) -> None:
         if (array_w.shape[0] > 1) and (array_r.shape != array_w.shape):

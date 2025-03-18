@@ -4,7 +4,7 @@ from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 
 
 class TestFinancialMath(TestCase):
-    
+
     def setUp(self):
         self.cls_fm = FinancialMath()
 

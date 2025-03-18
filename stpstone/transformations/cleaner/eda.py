@@ -13,7 +13,7 @@ class ExploratoryDataAnalysis:
         DOCSTRING: FRAUD DETECTION MODEL, WHICH EVALUATES THE NUMBER OF FIRST DIGITS OCCURRENCIES
             IN A SAMPLE AND THE EXPECTED SET
         INPUTS: LIST OF NUMBERS AND BOOLEAN WHICH INDICATES WHETHER THE LIST IS A SAMPLE OF REAL
-            DATA OR THE NUMBER OF INTEGER FIRST NUMBERS FROM A REAL SAMPLE IN ASCENDING ORDER 
+            DATA OR THE NUMBER OF INTEGER FIRST NUMBERS FROM A REAL SAMPLE IN ASCENDING ORDER
             DISCARDING ZEROS
         OUTPUTS: DICT (BENFORD EXPECTED ARRAY AND REAL NUMBERS OBSERVED ARRAY KEYS)
         """
@@ -53,9 +53,9 @@ class ExploratoryDataAnalysis:
 
     def is_monotonic(self, array_data):
         """
-        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
+        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py,
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
-        DOCSTRING: MONOTONIC IS A FUNCTION BETWEEN ORDERED SETS THAT PRESERVES OR REVERSES THE GIVEN 
+        DOCSTRING: MONOTONIC IS A FUNCTION BETWEEN ORDERED SETS THAT PRESERVES OR REVERSES THE GIVEN
             ORDER
         INPUTS:
         OUTPUTS:
@@ -69,12 +69,12 @@ class ExploratoryDataAnalysis:
                      remark_binned_forcefully='binned forcefully',
                      remark_binned_error='could not bin'):
         """
-        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
+        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py,
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
-        DOCSTRING: BIN METHOD - 1. EQUI-SPACED BINS WITH AT LEAST 5% OF TOTAL OBSERVATIONS IN EACH 
-            BIN; 2. TO ENSURE 5% SAMPLE IN EACH CLASS A MAXIMUM OF 20 BINS CAN BE SET; 3. EVENT RATE 
-            FOR EACH BIN WILL BE MONOTONICALLY INCREASING OF MONOTONICALLY DECREASINGM IF A 
-            MONOTONOUS TREND IS NOT OBSERVED, A FEW OF THE BINS CAN BE COMBINED ACCORDINGLY TO 
+        DOCSTRING: BIN METHOD - 1. EQUI-SPACED BINS WITH AT LEAST 5% OF TOTAL OBSERVATIONS IN EACH
+            BIN; 2. TO ENSURE 5% SAMPLE IN EACH CLASS A MAXIMUM OF 20 BINS CAN BE SET; 3. EVENT RATE
+            FOR EACH BIN WILL BE MONOTONICALLY INCREASING OF MONOTONICALLY DECREASINGM IF A
+            MONOTONOUS TREND IS NOT OBSERVED, A FEW OF THE BINS CAN BE COMBINED ACCORDINGLY TO
             ACHIEVE MONOTIONICITY; 4. SEPARATE BINS WILL BE CREATED FOR MISSING VALUES
         INPUTS:
         OUTPUTS:
@@ -108,10 +108,10 @@ class ExploratoryDataAnalysis:
         else:
             remarks = remark_binned_error
             return c_i, remarks, df[[c_i, target_col]].copy()
-    
+
     def reshape_1d_arrays(self, array_data):
         """
-        DOCSTRING: RESHAPE A 1D ARRAY TO 2D IN ORDER TO APPLY FEATUR SCALING, OR LINEARITY TESTS, 
+        DOCSTRING: RESHAPE A 1D ARRAY TO 2D IN ORDER TO APPLY FEATUR SCALING, OR LINEARITY TESTS,
             FOR INSTANCE
         INPUTS: ARRAY DATA
         OUTPUTS: ARRAY

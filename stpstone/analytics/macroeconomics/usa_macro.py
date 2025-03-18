@@ -65,9 +65,9 @@ class USAMacro:
         'Cookie': 'ASP.NET_SessionId=dp3ziqlcjny45xqehrow1v2a; TEServer=TEIIS'
         }
         # requesting response
-        req_resp = request(YAML_USA_MACRO['non_farm_payroll']['req_method'], 
-                           YAML_USA_MACRO['non_farm_payroll']['url'], headers=dict_headers, 
-                           data=dict_payload, 
+        req_resp = request(YAML_USA_MACRO['non_farm_payroll']['req_method'],
+                           YAML_USA_MACRO['non_farm_payroll']['url'], headers=dict_headers,
+                           data=dict_payload,
                            verify=YAML_USA_MACRO['non_farm_payroll']['bl_verify'])
         # status code different from 2xx raise error
         req_resp.raise_for_status()
@@ -91,7 +91,7 @@ class USAMacro:
             td.get_text()
                 .strip()
             for td in bs_html.find_all(
-                'td', 
+                'td',
                 style='text-align: left; padding-left: 10px; white-space: nowrap;'
             )
         ]
@@ -107,12 +107,12 @@ class USAMacro:
         ]
         for i in range(len(list_td3)):
             list_td.extend([
-                list_td2[i], list_td3[i], list_td4[i], list_td1[i+i*3], list_td1[i+1+i*3], 
+                list_td2[i], list_td3[i], list_td4[i], list_td1[i+i*3], list_td1[i+1+i*3],
                 list_td1[i+2+i*3], list_td1[i+3+i*3]
             ])
         # creating list of dictionaries
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_th_0, 
+            list_th_0,
             list_td
         )
         # serialized list into dataframe
@@ -139,7 +139,7 @@ class USAMacro:
                     for th in bs_table.find_all('th')
                 ]
             else:
-                raise Exception('Table of payroll not supported for data treatment, ' 
+                raise Exception('Table of payroll not supported for data treatment, '
                                 + 'please revisit the parameter')
             #   data
             list_td = [
@@ -151,28 +151,28 @@ class USAMacro:
             #   creating list of dictionaries
             if i == 1:
                 list_ser_1 = HandlingDicts().pair_headers_with_data(
-                    list_th_1, 
+                    list_th_1,
                     list_td
                 )
             elif i == 2:
                 list_ser_2 = HandlingDicts().pair_headers_with_data(
-                    list_th_2, 
+                    list_th_2,
                     list_td
                 )
                 # print(list_ser_2)
             else:
-                raise Exception('Table of payroll not supported for data treatment, ' 
+                raise Exception('Table of payroll not supported for data treatment, '
                                 + 'please revisit the parameter')
         # serialized list into dataframe
         df_payrolls = pd.DataFrame(list_ser_1)
-        df_payrolls = df_payrolls[[c for c in list(df_payrolls.columns) 
+        df_payrolls = df_payrolls[[c for c in list(df_payrolls.columns)
                                    if (c not in list_th_0) and (c not in list_th_2)]]
         df_usa_labour_data = pd.DataFrame(list_ser_2)
         df_usa_labour_data = df_usa_labour_data[[c for c in list(
             df_usa_labour_data.columns) if (c not in list_th_1) and (c not in list_th_0)]]
         # looping through dataframes
         for i, df_ in enumerate([
-            df_payrolls, 
+            df_payrolls,
             df_usa_labour_data
         ]):
             #   dropping rows that are empty
@@ -186,13 +186,13 @@ class USAMacro:
             }, inplace=True)
             #   adding logging
             df_ = DBLogs().audit_log(
-                df_, 
+                df_,
                 YAML_USA_MACRO['non_farm_payroll']['url'],
                 DatesBR().utc_from_dt(DatesBR().curr_date)
             )
         # adding logging to the last dataframe
         df_hist_nf_payroll = DBLogs().audit_log(
-            df_hist_nf_payroll, 
+            df_hist_nf_payroll,
             YAML_USA_MACRO['non_farm_payroll']['url'],
             DatesBR().utc_from_dt(DatesBR().curr_date)
         )

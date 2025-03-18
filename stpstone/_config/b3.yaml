@@ -159,10 +159,10 @@ price_report:
   bl_io_interpreting: False
   bl_verify: False
   col_currency: 'Currency'
-  tags: 
-    PricRpt: ['Dt', 'TckrSymb', 'Id', 'Prtry', 'MktIdrCd', 'TradQty', 
-      'OpnIntrst', 'FinInstrmQty', 'OscnPctg', 'NtlFinVol', 'IntlFinVol', 
-      'BestBidPric', 'BestAskPric', 'FrstPric', 'MinPric', 'MaxPric', 
+  tags:
+    PricRpt: ['Dt', 'TckrSymb', 'Id', 'Prtry', 'MktIdrCd', 'TradQty',
+      'OpnIntrst', 'FinInstrmQty', 'OscnPctg', 'NtlFinVol', 'IntlFinVol',
+      'BestBidPric', 'BestAskPric', 'FrstPric', 'MinPric', 'MaxPric',
       'TradAvrgPric', 'LastPric', 'VartnPts', 'MaxTradLmt', 'MinTradLmt']
   attrb_currency: 'Ccy'
 
@@ -174,10 +174,10 @@ options_traded_b3:
   placeholder_num_re: '\d*'
   dt_input_format: 'YYYY-MM-DD'
   tags:
-    OptnOnEqtsInf: ['ISIN', 'DstrbtnId', 'CFICd', 'MktIdrCd', 'AllcnRndLot', 'PricFctr', 
+    OptnOnEqtsInf: ['ISIN', 'DstrbtnId', 'CFICd', 'MktIdrCd', 'AllcnRndLot', 'PricFctr',
       'ExrcPric', 'OptnStyle', 'XprtnDt', 'OptnTp', 'TradgStartDt', 'TradgCcy', 'TckrSymb']
     OptnOnSpotAndFutrsInf: ['ISIN', 'ExrcPric', 'ExrcStyle', 'XprtnDt', 'XprtnCd', 'OptnTp',
-      'CtrctMltplr', 'AsstQtnQty', 'AllcnRndLot', 'CFICd', 'TradgStartDt', 'TradgEndDt', 
+      'CtrctMltplr', 'AsstQtnQty', 'AllcnRndLot', 'CFICd', 'TradgStartDt', 'TradgEndDt',
       'OpngPosLmtDt', 'TradgCcy', 'WdrwlDays', 'WrkgDays', 'ClnrDays', 'TckrSymb']
   keys:
     close: 'Close'
@@ -200,13 +200,13 @@ options_traded_b3:
 # cenários de risco - tipo spot
 cenarios_risco_tipo_spot:
   bl_io_interpreting: False
-  bl_verify: False  
+  bl_verify: False
   sep_instancias: ';'
-  tipo_curva: 
+  tipo_curva:
     du_anteriores: 1
     url: 'https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip'
     timeout: 1500
-  cols_cenarios_tipo_curvas: ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO', 
+  cols_cenarios_tipo_curvas: ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO',
     'DIAS_HOLDING_PERIOD', 'VALOR_PHI_1', 'VALOR_PHI_2']
   col_criar_nome_tipo_cenario: 'NOME_TIPO_CENARIO'
   fill_na_padrao: -1
@@ -226,7 +226,7 @@ trading_report:
   url: 'https://www.b3.com.br/pesquisapregao/download?filelist=PR{}.zip'
   du_anteriores: 1
   bl_io_interpreting: False
-  bl_verify: False 
+  bl_verify: False
 
 # margens teóricas b3
 margens_teoricas_maximas_b3:
@@ -272,14 +272,14 @@ collateral_acc_spot_bov_b3:
 # cenários de risco - tipo curva
 cenarios_risco_tipo_curva:
   bl_io_interpreting: False
-  bl_verify: False  
+  bl_verify: False
   sep_instancias: ';'
   tipo_curva:
     du_anteriores: 1
     url: 'https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoCurva{}.zip'
     timeout: 1500
-  cols_cenarios_tipo_curvas: ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO', 
-    'DIAS_HOLDING_PERIOD', 'DIAS_CORRIDOS_VERTICE', 'DIAS_SAQUE_VERTICE', 'VALOR_PHI_1', 
+  cols_cenarios_tipo_curvas: ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO',
+    'DIAS_HOLDING_PERIOD', 'DIAS_CORRIDOS_VERTICE', 'DIAS_SAQUE_VERTICE', 'VALOR_PHI_1',
     'VALOR_PHI_2']
   fill_na_padrao: -1
   orient_df: 'records'
@@ -302,7 +302,7 @@ up2data_b3:
     receipts: ['WARRANTS', 'WARRANT', 'RIGHTS', 'RECEIPTS']
     forwards: ['COMMON EQUITIES FORWARD', 'FORWARD RATE AGREEMENT']
     bdrs: ['BDR']
-    etfs: ['ETF EQUITIES', 'ETF FOREIGN INDEX', 'FIXED INCOME TRADABLE INSTRUMENTS', 
+    etfs: ['ETF EQUITIES', 'ETF FOREIGN INDEX', 'FIXED INCOME TRADABLE INSTRUMENTS',
       'ETF PRIMARY MARKET', 'GROSS SETTLEMENT', 'FIXED INCOME TRADABLE INSTRUMENT T1']
     futures: ['FUTURE', 'ROLLOVER', 'STOCK FUTURE', 'FORW/FUT GOLD']
     options_equities: ['OPTION ON EQUITIES']
@@ -411,7 +411,7 @@ instruments_register_row:
     CTDY_TRTMT_TP_NM: str
     MKT_CPTLSTN: float
     CORP_GOVN_LVL_NM: str
-  cols_date: 
+  cols_date:
     - RPT_DT
     - TRADG_START_DT
     - TRADG_END_DT

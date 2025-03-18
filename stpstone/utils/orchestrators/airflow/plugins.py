@@ -11,8 +11,10 @@ class AirflowPlugins:
     def validate_working_day(self, **kwargs: Dict[str, Any]) -> None:
         """
         Validates whether the provided date (`kwargs['ds']`) is a working day, otherwise stop the DAG.
+
         Args:
             kwargs (dict): Airflow context dictionary. Must include 'ds' key.
+
         Returns:
             None
         """

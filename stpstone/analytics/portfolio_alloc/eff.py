@@ -13,20 +13,20 @@ from stpstone.finance.b3.search_by_trading import TradingFilesB3
 class MarkowitzEff:
     """
     REFERENCES: https://www.linkedin.com/pulse/python-aplicado-markowitz-e-teoria-nem-tão-moderna-de-paulo-rodrigues/?originalSubdomain=pt
-    DOCSTRING: MARKOWITZ RISK-RETURN PLOT OF RANDOM PORTFOLIOS, AIMING TO FIND THE BEST ALLOCATION 
+    DOCSTRING: MARKOWITZ RISK-RETURN PLOT OF RANDOM PORTFOLIOS, AIMING TO FIND THE BEST ALLOCATION
         WITH THE ASSETS PROVIDED
     INPUTS: -
     OUTPUTS: -
     """
 
     def __init__(
-            self, df_mktdata:pd.DataFrame, int_n_portfolios:int, float_prtf_notional:float, 
-            float_rf:float, col_ticker:str='ticker', col_close:str='close', col_dt:datetime='dt_date', 
-            col_returns:str='daily_return', col_last_close:str='last_close', col_min_w:str='min_w', 
-            col_max_date:str='max_date', bl_constraints:bool=True, bl_opt_possb_comb:bool=False, 
-            bl_progress_printing_opt:bool=False, nth_try:str=100, n_attempts_opt_prf:int=10000, 
-            int_wdy:int=252, int_round_close:int=2, path_fig:Optional[str]=None, 
-            bl_debug_mode:bool=True, bl_show_plot:bool=True, bl_non_zero_w_eff:bool=False, 
+            self, df_mktdata:pd.DataFrame, int_n_portfolios:int, float_prtf_notional:float,
+            float_rf:float, col_ticker:str='ticker', col_close:str='close', col_dt:datetime='dt_date',
+            col_returns:str='daily_return', col_last_close:str='last_close', col_min_w:str='min_w',
+            col_max_date:str='max_date', bl_constraints:bool=True, bl_opt_possb_comb:bool=False,
+            bl_progress_printing_opt:bool=False, nth_try:str=100, n_attempts_opt_prf:int=10000,
+            int_wdy:int=252, int_round_close:int=2, path_fig:Optional[str]=None,
+            bl_debug_mode:bool=True, bl_show_plot:bool=True, bl_non_zero_w_eff:bool=False,
             title_text:str='Markowitz Risk x Return Portfolios',
             yaxis_title:str='Return (%)', xaxis_title:str='Risk (%)'
         ) -> None:
@@ -64,12 +64,12 @@ class MarkowitzEff:
         # minimum w per asset
         if self.col_min_w not in self.df_mktdata.columns:
             self.df_mktdata[self.col_min_w] = self.df_mktdata.groupby([
-                self.col_ticker, 
+                self.col_ticker,
                 self.col_max_date
             ])[col_close].transform('last') / self.float_prtf_notional
         # last closing prices
         self.df_mktdata[self.col_last_close] = self.df_mktdata.groupby([
-            self.col_ticker, 
+            self.col_ticker,
             self.col_max_date
         ])[col_close].transform('last')
         self.array_close = np.array([
@@ -81,20 +81,20 @@ class MarkowitzEff:
         self.array_mus, self.array_sigmas, self.array_sharpes, self.array_weights, \
             self.array_returns, self.list_uuids = \
                 self.random_portfolios(
-                    self.df_mktdata, int_n_portfolios, self.col_ticker, self.col_close, 
-                    self.col_dt, self.col_returns, self.float_prtf_notional, self.col_min_w, 
-                    self.float_rf, self.bl_constraints, self.bl_opt_possb_comb, self.nth_try, 
+                    self.df_mktdata, int_n_portfolios, self.col_ticker, self.col_close,
+                    self.col_dt, self.col_returns, self.float_prtf_notional, self.col_min_w,
+                    self.float_rf, self.bl_constraints, self.bl_opt_possb_comb, self.nth_try,
                     self.int_wdy
                 )
         # optimal portfolios
         self.array_eff_weights, self.array_eff_returns, self.array_eff_risks = \
             self.optimal_portfolios(
-                self.array_returns, self.n_attempts_opt_prf, self.bl_progress_printing_opt, 
+                self.array_returns, self.n_attempts_opt_prf, self.bl_progress_printing_opt,
                 self.int_wdy
             )
         # efficient frontier
         self.df_eff, self.df_porf = self.eff_frontier(
-            self.array_eff_risks, self.array_eff_returns, self.array_weights, self.array_mus, 
+            self.array_eff_risks, self.array_eff_returns, self.array_weights, self.array_mus,
             self.array_sigmas, self.float_rf
         )
 
@@ -117,7 +117,7 @@ class MarkowitzEff:
         # returning portfolio standard deviation
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
-    def returns_min_w_uids(self, df_assets:pd.DataFrame, col_dt:str, col_id:str, 
+    def returns_min_w_uids(self, df_assets:pd.DataFrame, col_dt:str, col_id:str,
                            col_returns:str, col_min_w:str) \
                             -> Tuple[np.ndarray, np.ndarray, List[str]]:
         """
@@ -148,9 +148,9 @@ class MarkowitzEff:
         # return arrays of interet
         return array_returns, array_min_w, list_uids
 
-    def random_weights(self, int_n_assets:int, bl_constraints:bool=False, bl_opt_possb_comb:bool=False, 
-                       array_min_w:np.array=None, nth_try:int=100, int_idx_val:int=2, 
-                       bl_valid_weights:bool=False, i_attempts:int=0, 
+    def random_weights(self, int_n_assets:int, bl_constraints:bool=False, bl_opt_possb_comb:bool=False,
+                       array_min_w:np.array=None, nth_try:int=100, int_idx_val:int=2,
+                       bl_valid_weights:bool=False, i_attempts:int=0,
                        float_atol_sum:float=1e-4, float_atol_w:float=10000.0) -> np.array:
         """
         DOCSTRING: RANDOM WEIGHTS - WITH OR WITHOUT CONSTRAINTS
@@ -159,7 +159,7 @@ class MarkowitzEff:
             - BL_CONSTRAINTS: BOOLEAN FLAG TO APPLY CONSTRAINTS OR NOT
             - MIN_INVEST_PER_ASSET: A LIST OF MINIMUM WEIGHTS/INVESTMENTS FOR EACH ASSET
         OUTPUTS:
-            - A LIST OF WEIGHTS FOR THE ASSETS THAT SATISFY THE GIVEN CONSTRAINTS, 
+            - A LIST OF WEIGHTS FOR THE ASSETS THAT SATISFY THE GIVEN CONSTRAINTS,
                 WHERE SUM OF WEIGHTS = 1
         """
         # adjusting number of assets within the portfolio
@@ -184,8 +184,8 @@ class MarkowitzEff:
             #   initializing variables
             bl_valid_weights = False
             list_combs = [
-                comb 
-                for r in range(2, int_idx_val + 1) 
+                comb
+                for r in range(2, int_idx_val + 1)
                 for comb in combinations(array_min_w, r)
             ]
             #   recursive call to get valid weights
@@ -202,7 +202,7 @@ class MarkowitzEff:
                     int_idx = np.random.randint(0, int_n_assets)
                     array_w[int_idx] = 1.0
                     return array_w
-                #   if multiplier is enabled, build a list of possible indexes combinations in 
+                #   if multiplier is enabled, build a list of possible indexes combinations in
                 #       order to sum 1.0 or less
                 if bl_opt_possb_comb == True:
                     #   combinations where sum is less than 1.0 - flatten list
@@ -220,21 +220,21 @@ class MarkowitzEff:
                 for i in list_i:
                     #   randomly building a float weight
                     float_upper_tol = max(
-                        float_atol_w * (1.0 - sum(array_w)), 
+                        float_atol_w * (1.0 - sum(array_w)),
                         1.0
                     )
-                    #   building the float weight with any given value above the minimum or a 
+                    #   building the float weight with any given value above the minimum or a
                     #       multiple of the minimum
                     if bl_opt_possb_comb == True:
                         int_max_mult = max(
-                            int((1.0 - sum(array_w)) // array_min_w[i]), 
+                            int((1.0 - sum(array_w)) // array_min_w[i]),
                             1
                         )
                         int_rand_mult = np.random.randint(0, int_max_mult + 1)
                         float_weight = float(int_rand_mult * array_min_w[i])
                     else:
                         float_upper_tol = max(
-                            float_atol_w * (1.0 - sum(array_w)), 
+                            float_atol_w * (1.0 - sum(array_w)),
                             1.0
                         )
                         random_integer = np.random.randint(
@@ -260,13 +260,13 @@ class MarkowitzEff:
                 #       3 - the minimum must be respected, or zero for a given asset
                 #       4 - some weight must be positive
                 bl_valid_weights = (
-                    np.all(array_w >= 0) 
-                    and np.isclose(np.sum(array_w), 1, atol=float_atol_sum) 
+                    np.all(array_w >= 0)
+                    and np.isclose(np.sum(array_w), 1, atol=float_atol_sum)
                     and all([
                         (array_w[i] >= array_min_w[i]) \
                             or (array_w[i] == 0)
                         for i in range(int_n_assets)
-                    ]) 
+                    ])
                     and np.any(array_w > 0)
                     and np.all(array_w != 1)
                 )
@@ -276,8 +276,8 @@ class MarkowitzEff:
             k = np.random.rand(int_n_assets)
             return k / sum(k)
 
-    def random_portfolio(self, array_returns:np.ndarray, float_rf:float, bl_constraints:bool=False, 
-                        bl_opt_possb_comb:bool=False, array_min_w:Optional[np.ndarray]=None, 
+    def random_portfolio(self, array_returns:np.ndarray, float_rf:float, bl_constraints:bool=False,
+                        bl_opt_possb_comb:bool=False, array_min_w:Optional[np.ndarray]=None,
                         nth_try:int=100, int_wdy:int=252) \
                             -> Tuple[np.ndarray, np.ndarray, np.ndarray, str]:
         """
@@ -289,7 +289,7 @@ class MarkowitzEff:
         array_r = np.asmatrix(array_returns)
         float_rf = float(float_rf)
         # random wieghts for the current portfolio
-        array_weights = self.random_weights(array_r.shape[0], bl_constraints, bl_opt_possb_comb, 
+        array_weights = self.random_weights(array_r.shape[0], bl_constraints, bl_opt_possb_comb,
                                             array_min_w, nth_try)
         # mean returns for assets
         array_returns = np.asmatrix(np.mean(array_r, axis=1))
@@ -304,12 +304,12 @@ class MarkowitzEff:
         # returning portfolio infos
         return array_mus, array_sigmas, array_sharpes, array_weights
 
-    def random_portfolios(self, df_assets:pd.DataFrame, int_n_portfolios:int, col_id:str, 
-                          col_close:str, col_dt:datetime, col_returns:str, 
-                          float_prtf_notional:float, col_min_w:str='min_w', float_rf:float=0.0, 
-                          bl_constraints:bool=False, bl_opt_possb_comb:bool=False, 
+    def random_portfolios(self, df_assets:pd.DataFrame, int_n_portfolios:int, col_id:str,
+                          col_close:str, col_dt:datetime, col_returns:str,
+                          float_prtf_notional:float, col_min_w:str='min_w', float_rf:float=0.0,
+                          bl_constraints:bool=False, bl_opt_possb_comb:bool=False,
                           nth_try:int=100, int_wdy:int=252) \
-                            -> Tuple[np.ndarray, np.ndarray, np.ndarray, 
+                            -> Tuple[np.ndarray, np.ndarray, np.ndarray,
                                      np.ndarray, np.ndarray, List[str]]:
         """
         DOCSTRING: RETURNS THE MEAN AND STANDARD DEVIATION OF RETURNS FROM A RANDOM PORTFOLIO
@@ -387,10 +387,10 @@ class MarkowitzEff:
         # returning weights, returns, and sigma from efficient frontier
         return np.asarray(wt), array_returns, array_sigmas
 
-    def eff_frontier(self, array_eff_risks:np.array, array_eff_returns:np.array, 
-                     array_weights:np.array, array_mus:np.array, array_sigmas:np.array, 
-                     float_rf:float, col_sigma:str='sigma', col_mu:str='float_mu', 
-                     col_w:str='weights', col_sharpe:str='sharpe', 
+    def eff_frontier(self, array_eff_risks:np.array, array_eff_returns:np.array,
+                     array_weights:np.array, array_mus:np.array, array_sigmas:np.array,
+                     float_rf:float, col_sigma:str='sigma', col_mu:str='float_mu',
+                     col_w:str='weights', col_sharpe:str='sharpe',
                      atol:float=1e-2, int_pace_atol:int=5) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
         DOCSTRING:
@@ -405,7 +405,7 @@ class MarkowitzEff:
         for _, eff_risk in zip(array_eff_returns, array_eff_risks):
             while True:
                 try:
-                    #   find the indices in sigmas that correspond to the current risk using 
+                    #   find the indices in sigmas that correspond to the current risk using
                     #       np.isclose
                     list_idx_sigma = np.where(np.isclose(array_sigmas, eff_risk, atol=atol))
                     #   get the highest return for the given datasets
@@ -425,24 +425,24 @@ class MarkowitzEff:
         df_eff = pd.DataFrame(array_eff_weights, columns=columns)
         df_eff[col_mu] = array_eff_returns
         df_eff[col_sigma] = array_eff_risks
-        # calculate sharpe as the difference between array_eff_returns and float_rf 
+        # calculate sharpe as the difference between array_eff_returns and float_rf
         #   divided by array_eff_risks
         df_eff[col_sharpe] = (df_eff[col_mu] - float_rf) / df_eff[col_sigma]
         # create a pandas dataframe with returns, weights and mus from the original porfolios
         df_porf = pd.DataFrame({col_mu: array_mus, col_sigma: array_sigmas, col_w: array_weights})
         # output the results
         return df_eff, df_porf
-    
+
     @property
     def plot_risk_return_portfolio(self) -> None:
         """
-        REFERENCES: https://plotly.com/python/reference/layout/, 
-            https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html, 
+        REFERENCES: https://plotly.com/python/reference/layout/,
+            https://plotly.com/python-api-reference/generated/plotly.graph_objects.Scatter.html,
             https://plotly.com/python/builtin-colorscales/
         DOCSTRING: PLOT MARKOWITZ'S EFFICIENT FRONTIER FOR PORTFOLIO MANAGEMENT
-        INPUTS: ARRAY WEIGHTS, ARRAY MUS (MEAN RETURNS FOR EACH GIVEN PORTFOLIO, BASED ON EXPCTED 
-            RETURNS FOR EACH SECURITY, GIVEN ITS WEIGHT ON THE SYNTHETIC PORTFOLIO), ARRAY OF SHARPES, 
-            ARRAY OF EFFECTIVE RISKS, ARRAY OF EFFECTIVE RETURN FOR ALL SECURITIES IN A PORTFOLIO, 
+        INPUTS: ARRAY WEIGHTS, ARRAY MUS (MEAN RETURNS FOR EACH GIVEN PORTFOLIO, BASED ON EXPCTED
+            RETURNS FOR EACH SECURITY, GIVEN ITS WEIGHT ON THE SYNTHETIC PORTFOLIO), ARRAY OF SHARPES,
+            ARRAY OF EFFECTIVE RISKS, ARRAY OF EFFECTIVE RETURN FOR ALL SECURITIES IN A PORTFOLIO,
             TITLE, YAXIS NAME AND XAXIS NAME
         OUTPUTS: PLOT
         """
@@ -498,7 +498,7 @@ class MarkowitzEff:
             go.Scatter(
                 x=self.array_eff_risks,
                 y=self.array_eff_returns,
-                mode='lines+markers', 
+                mode='lines+markers',
                 line=dict(color='red', width=2),
                 name='Efficient Frontier',
                 hovertemplate=(
@@ -537,10 +537,10 @@ class MarkowitzEff:
         }
         # legend
         dict_leg = {
-            'orientation': 'h', 
+            'orientation': 'h',
             'yanchor': 'bottom',
             'y': -0.2,
-            'xanchor': 'center', 
+            'xanchor': 'center',
             'x': 0.5
         }
         # launching figure with plotly
@@ -574,10 +574,10 @@ class MarkowitzEff:
         if self.path_fig is not None:
             fig_extension = self.path_fig.split('.')[-1]
             fig.write_image(
-                self.path_fig, 
-                format=fig_extension, 
-                scale=2, 
-                width=1280, 
+                self.path_fig,
+                format=fig_extension,
+                scale=2,
+                width=1280,
                 height=720
             )
         # display plot
@@ -611,7 +611,7 @@ class MarkowitzEff:
         array_eff_sharpe = self.array_sharpes[self.array_sharpes.argmax()]
         # efficient quantities
         array_eff_quantities = [
-            round(float(w) * self.float_prtf_notional / self.array_close[i]) 
+            round(float(w) * self.float_prtf_notional / self.array_close[i])
             for i, w in enumerate(array_eff_w.split())
         ]
         # calculating notional (ensure array_eff_quantities is properly calculated as float)
@@ -642,7 +642,7 @@ class MarkowitzEff:
         OUTPUTS:
             - dict -> DICTIONARY CONTAINING INFORMATION ABOUT THE MINIMUM RISK PORTFOLIO
         """
-        
+
         # ensuring that all weights are non-zero, if is user's interest
         if self.bl_non_zero_w_eff:
             array_valid_indices = np.where((self.array_weights != 0).all(axis=1))[0]
@@ -657,7 +657,7 @@ class MarkowitzEff:
         array_eff_mu = self.array_mus[int_argmin_risk]
         # efficient quantities
         array_eff_quantities = [
-            round(float(w) * self.float_prtf_notional / self.array_close[i]) 
+            round(float(w) * self.float_prtf_notional / self.array_close[i])
             for i, w in enumerate(array_eff_w.split())
         ]
         # calculating notional (ensure array_eff_quantities is properly calculated as float)

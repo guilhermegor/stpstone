@@ -30,7 +30,7 @@ class Sidra:
         list_ser = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            YAML_BR_MACRO['sidra']['st_indicators']['url'], 
+            YAML_BR_MACRO['sidra']['st_indicators']['url'],
             bl_verify=YAML_BR_MACRO['sidra']['st_indicators']['bl_verify']
         )
         # looping within short-term indicators raw
@@ -46,7 +46,7 @@ class Sidra:
                     YAML_BR_MACRO['sidra']['st_indicators']['col_pool_name']: str_pool_name,
                     YAML_BR_MACRO['sidra']['st_indicators']['col_release_dt']: \
                         DatesBR().str_date_to_datetime(
-                            StrHandler().get_string_until_substr(el, 'Refer'), 
+                            StrHandler().get_string_until_substr(el, 'Refer'),
                             YAML_BR_MACRO['sidra']['st_indicators']['format_input_dt']
                         ),
                     YAML_BR_MACRO['sidra']['st_indicators']['col_month_calc']: \
@@ -61,7 +61,7 @@ class Sidra:
         df_rl_dts_macro = df_rl_dts_macro[ds_id_dup]
         # adding logging
         df_rl_dts_macro = DBLogs().audit_log(
-            df_rl_dts_macro, YAML_BR_MACRO['sidra']['st_indicators']['url'], 
+            df_rl_dts_macro, YAML_BR_MACRO['sidra']['st_indicators']['url'],
             DatesBR().curr_date
         )
         # return dataframe
@@ -326,7 +326,7 @@ class BCB:
                 }
                 #   coverting to string payload and params
                 str_payload = '%40' + '&%40'.join(
-                    '{}={}'.format(k, v) for k, v in 
+                    '{}={}'.format(k, v) for k, v in
                     dict_params.items()) + '&%24' + '%24'.join(
                         '{}={}'.format(k, v) for k, v in dict_payload.items())
                 #   requesting currency exchange against brl
@@ -362,11 +362,11 @@ class BCB:
         return dict_export
 
     @property
-    def market_macro_expec(self, url='https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?$top=100000&$orderby=Data%20desc&$format=json&$select=Indicador,IndicadorDetalhe,Data,DataReferencia,Media,Mediana,Minimo,Maximo,numeroRespondentes', 
-        col_indicator='Indicador', col_detailed_indicator='IndicadorDetalhe', col_date='Data', col_ref_year='DataReferencia', 
+    def market_macro_expec(self, url='https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?$top=100000&$orderby=Data%20desc&$format=json&$select=Indicador,IndicadorDetalhe,Data,DataReferencia,Media,Mediana,Minimo,Maximo,numeroRespondentes',
+        col_indicator='Indicador', col_detailed_indicator='IndicadorDetalhe', col_date='Data', col_ref_year='DataReferencia',
         col_avg='Media', col_median='Mediana', col_min='Minimo', col_max='Maximo', col_num_answ='numeroRespondentes'):
         """
-        DOCSTRING: ANNUAL MARKET EXPECTATIONS FROM THE BRAZILIAN CENTRAL BANK, INCLUDING INDICATORS LIKE GDP 
+        DOCSTRING: ANNUAL MARKET EXPECTATIONS FROM THE BRAZILIAN CENTRAL BANK, INCLUDING INDICATORS LIKE GDP
             GROWTH AND INFLATION, WITH STATISTICS ON AVERAGE, MEDIAN, MIN, MAX VALUES, AND RESPONDENT COUNT.
         INPUTS: -
         OUTPUTS: DATAFRAME
@@ -462,7 +462,7 @@ class YFinanceMacroBR:
         # sort dataframe
         df_xcg.sort_values(
             [
-                YAML_BR_MACRO['exchange_rates_yahoo']['col_currency'], 
+                YAML_BR_MACRO['exchange_rates_yahoo']['col_currency'],
                 YAML_BR_MACRO['exchange_rates_yahoo']['col_date'].upper()
             ],
             ascending=[True, False],
@@ -470,7 +470,7 @@ class YFinanceMacroBR:
         )
         # adding logging to the last dataframe
         df_xcg = DBLogs().audit_log(
-            df_xcg, 
+            df_xcg,
             r'https://finance.yahoo.com/quote/',
             DatesBR().utc_from_dt(DatesBR().curr_date)
         )

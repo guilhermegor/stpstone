@@ -46,17 +46,17 @@ class MultipleRegressionHT:
             list_linearity.append(float_r_squared)
         # print(list_linearity)
         return {
-            'r_squared': {list_cols_iv[idx]: list_linearity[idx] for idx in 
+            'r_squared': {list_cols_iv[idx]: list_linearity[idx] for idx in
                           range(len(list_linearity))},
-            'h0': 'linear relationship between X and y', 
-            'bl_reject_h0': {list_cols_iv[idx]: list_linearity[idx] < r_squared_cut for idx in 
+            'h0': 'linear relationship between X and y',
+            'bl_reject_h0': {list_cols_iv[idx]: list_linearity[idx] < r_squared_cut for idx in
                           range(len(list_linearity))}
         }
 
     def vif_iv(self, vector_x, array_y):
         """
-        DOCSTRING: VARIANCE INFLATION FACTOR - INDEPENDENCE OF INDEPENDENT VARIABLES - VIOLATION: 
-            MULTICOLLINEARITY; ISSUE: INFLATED STANDARD ERRORS; DETECTION: VARIANCE INFLATION 
+        DOCSTRING: VARIANCE INFLATION FACTOR - INDEPENDENCE OF INDEPENDENT VARIABLES - VIOLATION:
+            MULTICOLLINEARITY; ISSUE: INFLATED STANDARD ERRORS; DETECTION: VARIANCE INFLATION
             FACTOR; CORRECTION: REVISE MODEL, INCREASE SAMPLE SIZE
         INPUTS
         """
@@ -68,11 +68,11 @@ class MultipleRegressionHT:
         float_vif = 1.0 / (1.0 - float_r_squared)
         # return vif
         return float_vif, float_r_squared
-    
+
     def calculate_vif_ivs(self, array_x, array_y, list_cols_iv, float_r_squared_mc_cut=0.8):
         """
-        DOCSTRING: VARIANCE INFLATION FACTOR - IF VIF SCORE FOR A VARIABLE X_J IS HIGH, THEN THE 
-            VARIANCE EXPLAINED BY THAT VARIABLE IS CAPTURED (ALMOST COMPLETELY) BY ALL OTHER 
+        DOCSTRING: VARIANCE INFLATION FACTOR - IF VIF SCORE FOR A VARIABLE X_J IS HIGH, THEN THE
+            VARIANCE EXPLAINED BY THAT VARIABLE IS CAPTURED (ALMOST COMPLETELY) BY ALL OTHER
             VARIABLES --> TEST FOR MULTICOLLINEARITY ASSUMPTION OF LINEAR REGRESSION
         INPUTS: ARRAY INDEPENDENT AND DEPENDENT
         OUTPUTS:
@@ -83,11 +83,11 @@ class MultipleRegressionHT:
         tups_vif_ivs = [self.vif_iv(array_x[:, idx], array_y) for idx in range(array_x.shape[1])]
         # return vif for ivs
         return {
-            'vif_ivs': {col_: tups_vif_ivs[idx][0] for idx, col_ in enumerate(list_cols_iv)}, 
-            'r_squared_mc_ivs': {col_: tups_vif_ivs[idx][1] for idx, col_ in 
-                                 enumerate(list_cols_iv)}, 
+            'vif_ivs': {col_: tups_vif_ivs[idx][0] for idx, col_ in enumerate(list_cols_iv)},
+            'r_squared_mc_ivs': {col_: tups_vif_ivs[idx][1] for idx, col_ in
+                                 enumerate(list_cols_iv)},
             'h0': 'lack of multicollinearity',
-            'bl_reject_h0': {col_: tups_vif_ivs[idx][0] > float_r_squared_mc_cut for idx, col_ in 
+            'bl_reject_h0': {col_: tups_vif_ivs[idx][0] > float_r_squared_mc_cut for idx, col_ in
                                  enumerate(list_cols_iv)}
         }
 
@@ -106,18 +106,18 @@ class MultipleRegressionHT:
     def breusch_godfrey(self, array_x, array_y, p=None):
         """
         REFERENCES: https://en.wikipedia.org/wiki/Breusch%E2%80%93Godfrey_test
-        DOCSTRING: BREUSCH GODFREY TEST ASSESS INDEPENDENCE (ABSENSE OF SERIAL CORRELATION, OR 
-            AUTOCORRELATION); IF REJECTED, IT WOULD MEAN THAT INCORRECT CONCLUSIONS WOULD BE DRAWN 
+        DOCSTRING: BREUSCH GODFREY TEST ASSESS INDEPENDENCE (ABSENSE OF SERIAL CORRELATION, OR
+            AUTOCORRELATION); IF REJECTED, IT WOULD MEAN THAT INCORRECT CONCLUSIONS WOULD BE DRAWN
             FROM OTHER TESTS OR THAT SUB-OPTIMAL ESTIMATES OF MODEL PARAMETERS WOULD BE OBTAINED
-            - THE REGRESSION MODELS TO WHICH THE TEST CAN BE APPLIED INCLUDE CASES WHERE LAGGED 
-                VALUESOF THE DEPENDENT VARIABLES ARE USED AS INDEPENDENT VARIABLES IN THE MODEL'S 
+            - THE REGRESSION MODELS TO WHICH THE TEST CAN BE APPLIED INCLUDE CASES WHERE LAGGED
+                VALUESOF THE DEPENDENT VARIABLES ARE USED AS INDEPENDENT VARIABLES IN THE MODEL'S
                 REPRESENTATION FOR LATER OBSERVATIONS
             - TEST FOR AUTOCORRELATION IN THE ERRORS OF A REGRESSION MODEL
             - H0: NO SERIAL CORRELATION OF ANY ORDER UP TO P
             - HA: SERIAL CORRELATION OF ANY ORDER UP TO P
         INPUTS: ARRAY INDEPENDENT, DEPENDENT
-        OUTPUTS: DICTIONARY WITH BREUSH GODFREY TEST OUTPUT (TUPPLE, BEING THE FIRST VALUE THE TEST 
-            STATISTIC AND THE SECOND THE P-VALUE, WHICH OUGHT BE LESS THAN THE TEST STATISTIC TO 
+        OUTPUTS: DICTIONARY WITH BREUSH GODFREY TEST OUTPUT (TUPPLE, BEING THE FIRST VALUE THE TEST
+            STATISTIC AND THE SECOND THE P-VALUE, WHICH OUGHT BE LESS THAN THE TEST STATISTIC TO
             ACCEPT THE H0 HYPOTHESIS)
         """
         # checking wheter the array is unidimensional and reshaping it
@@ -132,28 +132,28 @@ class MultipleRegressionHT:
         # return dictionary
         return {
             'breush_godfrey_tup': tup_dg,
-            'h0': 'no serial correlation of any order up to p', 
+            'h0': 'no serial correlation of any order up to p',
             'bl_reject_h0': tup_dg[0] < tup_dg[1]
         }
 
     def durbin_watson_test(self, array_x, array_y):
         """
         REFERENCES: https://www.statology.org/durbin-watson-test-python/
-        DOCSTRING: DURBIN-WATSON SERIAL CORRELATION: ONE OF THE ASSUMPTIONS OF LINEAR REGRESSION 
-            IS THAT THERE IS NO CORRELATION BETWEEN THE RESIDUALS (ASSUMED TO BE INDEPENDENT), 
-            ONE WAY TO DETERMINE WHETER THIS ASSUMPTION IS MET IS TO PERFORM A 
-            DURBIN-WATSON TEST, WHICH IS USED TO DETECT THE PRESENCE OF AUTOCORRELATION IN 
+        DOCSTRING: DURBIN-WATSON SERIAL CORRELATION: ONE OF THE ASSUMPTIONS OF LINEAR REGRESSION
+            IS THAT THERE IS NO CORRELATION BETWEEN THE RESIDUALS (ASSUMED TO BE INDEPENDENT),
+            ONE WAY TO DETERMINE WHETER THIS ASSUMPTION IS MET IS TO PERFORM A
+            DURBIN-WATSON TEST, WHICH IS USED TO DETECT THE PRESENCE OF AUTOCORRELATION IN
             THE RESIDUALS OF A REGRESSION
             A. H0: NO CORRELATION AMONG THE RESIDUALS
             B. HA: THE RESIDUALS ARE AUTOCORRELATED
-            C. VALUES: 0 TO 4, WHERE A TEST STATISTIC OF 2 INDICATES NO SERIAL CORRELATION, 
-                THE CLOSER THE TEST STATISTIC IS TO 0, THE MORE EVIDENCE OF POSITIVE SERIAL 
-                CORRELATION, THE CLOSER THE TEST STATISTIC IS TO 4, THE MORE EVIDENCE OF NEGATIVE 
+            C. VALUES: 0 TO 4, WHERE A TEST STATISTIC OF 2 INDICATES NO SERIAL CORRELATION,
+                THE CLOSER THE TEST STATISTIC IS TO 0, THE MORE EVIDENCE OF POSITIVE SERIAL
+                CORRELATION, THE CLOSER THE TEST STATISTIC IS TO 4, THE MORE EVIDENCE OF NEGATIVE
                 SERIAL CORRELATION
-            D. RULE OF THUMB: TEST STATISTIC VALUES BETWEEN 1.5 AND 2.5 ARE CONSIDERED NORMAL, 
-                HOWEVER, VALUES OUTSIDE OF THIS RANGE COULD INDICATE THAT AUTOCORRELATION IS A 
+            D. RULE OF THUMB: TEST STATISTIC VALUES BETWEEN 1.5 AND 2.5 ARE CONSIDERED NORMAL,
+                HOWEVER, VALUES OUTSIDE OF THIS RANGE COULD INDICATE THAT AUTOCORRELATION IS A
                 PROBLEM
-            E. DURBIN-WATSON IS A TEST OF SERIAL CORRELATION  
+            E. DURBIN-WATSON IS A TEST OF SERIAL CORRELATION
         INPUTS: ARRAY INDEPENDENT AND DEPENDENT
         OUTPUTS: DICTIONARY
         """
@@ -163,7 +163,7 @@ class MultipleRegressionHT:
         float_dw_test_value = durbin_watson(model_fitted.resid)
         # test
         return {
-            'test_value': float_dw_test_value, 
+            'test_value': float_dw_test_value,
             'h0': 'no autocorrelation among the residuals',
             'bl_reject_h0': (float_dw_test_value <= 1.5) or (float_dw_test_value >= 2.5)
         }
@@ -171,7 +171,7 @@ class MultipleRegressionHT:
     def breusch_pagan_test(self, array_x, array_y, alpha=0.05):
         """
         REFERENCES: https://stackoverflow.com/questions/30061054/ols-breusch-pagan-test-in-python
-        DOCSTRING: BREUSCH-PAGAN: TEST WHETER HETEROSCEDASTICITY EXISTS IN REGRESSION ANALYSIS, DEFINED 
+        DOCSTRING: BREUSCH-PAGAN: TEST WHETER HETEROSCEDASTICITY EXISTS IN REGRESSION ANALYSIS, DEFINED
             AS THE UNEQUAL SCATTERING OF RESIDUALS
             A. H0: HOMOSCEDASTICITY - EQUAL VARIANCE AMONG RESIDUALS
             B. HA: HETEROSKEDASTICITY - UNEQUAL VARIANCE AMONG RESIDUALS
@@ -197,7 +197,7 @@ class MultipleRegressionHT:
         lm.fit(array_x, array_y)
         # calculate the squared errors
         err = (array_y - lm.predict(array_x))**2
-        # fit an auxiliary regression to the squared errors to estimate the variance 
+        # fit an auxiliary regression to the squared errors to estimate the variance
         #   in err explained by array_x
         lm.fit(array_x, err)
         pred_err = lm.predict(array_x)
@@ -217,19 +217,19 @@ class MultipleRegressionHT:
         bl_resject_h0 = alpha > pval
         # returning results
         return {
-            'lagrange_multiplier': lagrange_multiplier, 
-            'p_value': pval, 
+            'lagrange_multiplier': lagrange_multiplier,
+            'p_value': pval,
             'h0': 'homoscedasticity',
             'bl_reject_h0': bl_resject_h0
         }
-    
+
     def cooks_distance(self, array_x, array_y):
         """
-        DOCSTRING: COOK'S DISTANCE DETECTS OUTLIERS, WHICH EXCLUSION MAY CAUSE SUBSTANTIAL 
-            CHANGES IN THE ESTIMATED REGRESSION FUNCTION - METRIC FOR IDENTIFYING INFLUENTIAL 
+        DOCSTRING: COOK'S DISTANCE DETECTS OUTLIERS, WHICH EXCLUSION MAY CAUSE SUBSTANTIAL
+            CHANGES IN THE ESTIMATED REGRESSION FUNCTION - METRIC FOR IDENTIFYING INFLUENTIAL
             DATA POINTS
             A. TUPLE OF ARRAYS WITH COOK'S DISTANCE AND P-VALUE
-            B. LARGE COOK'S D INFLUENCE: 
+            B. LARGE COOK'S D INFLUENCE:
                 B.1. D > 0.5 MAY BE INFLUENTIAL
                 B.2. D > 1 LIKELY TO BE INFLUENTIAL
                 B.3. D > 2 / SQRT(K / N) - LARGE SAMPLES
@@ -246,7 +246,7 @@ class MultipleRegressionHT:
     def test_joint_coeff(self, sse_r, sse_unr, q, n, k):
         """
         DOCSTRING: F-STAT TEST FOR JOINT COEFFICIENTS
-        INPUTS: SSE RESTRICTED, SSE UNRESTRICTED, Q (NUMBER OF RESTRICTIONS), 
+        INPUTS: SSE RESTRICTED, SSE UNRESTRICTED, Q (NUMBER OF RESTRICTIONS),
             N (NUMBER OF OBSERVATIONS), K (NUMBER OF INDEPENDENT VARIABLES)
         OUTPUTS: FLOAT
         """
@@ -351,7 +351,7 @@ class NormalityHT:
 
     def shapiro_wilk(self, array_data, alpha=0.05):
         """
-        REFERENCES: http://www.portalaction.com.br/inferencia/64-teste-de-shapiro-wilk, 
+        REFERENCES: http://www.portalaction.com.br/inferencia/64-teste-de-shapiro-wilk,
             https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.shapiro.html
         DOCSTRING: TEST OF HYPOTHESIS SHAPIRO-WALK TO CHECK WHETER THE NORMAL DISTRIBUTIONS
             FITS A SAMPLE OF DATA
@@ -396,10 +396,10 @@ class CorrelationHT:
     def pearsons_correlation_coefficient(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: PEARSON'S CORRELATION COEFFICIENT, TESTING WHETER TWO SAMPLES HAVE A LINEAR 
-            RELATIONSHIP - ASSUMPTIONS: I) INDEPENDENT AND EQUALLY DISTRIBUTED, II) NORMALLITY, 
-            III) OBSERVATIONS IN EACH SAMPLE HAVE THE SAME VARIANCE - INTERPRETATION: H0: THE TWO 
-            SAMPLES ARE INDEPENDENT, H1: THERE IS A DEPENDECY 
+        DOCSTRING: PEARSON'S CORRELATION COEFFICIENT, TESTING WHETER TWO SAMPLES HAVE A LINEAR
+            RELATIONSHIP - ASSUMPTIONS: I) INDEPENDENT AND EQUALLY DISTRIBUTED, II) NORMALLITY,
+            III) OBSERVATIONS IN EACH SAMPLE HAVE THE SAME VARIANCE - INTERPRETATION: H0: THE TWO
+            SAMPLES ARE INDEPENDENT, H1: THERE IS A DEPENDECY
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
         """
@@ -417,9 +417,9 @@ class CorrelationHT:
     def spearmans_rank_correlation(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: SPEARMAN'S RANK CORRELATION, TESTING WHETER TWO SAMPLES HAVE A MONOTONIC 
-            RELATIONSHIP, WITH THE ASSUMPTIONS OF OBSERVATIONS IN EACH SAMPLE BEING INDEPENDET AND 
-            IDENTICALLY DISTRIBUTED (IID), AS WELL, AS RANKABLE - INTERPRETATION: H0: THE TWO 
+        DOCSTRING: SPEARMAN'S RANK CORRELATION, TESTING WHETER TWO SAMPLES HAVE A MONOTONIC
+            RELATIONSHIP, WITH THE ASSUMPTIONS OF OBSERVATIONS IN EACH SAMPLE BEING INDEPENDET AND
+            IDENTICALLY DISTRIBUTED (IID), AS WELL, AS RANKABLE - INTERPRETATION: H0: THE TWO
             SAMPLES ARE INDEPENDENT, H1: THERE IS A DEPENDENCY BETWEEN THE SAMPLES
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -438,9 +438,9 @@ class CorrelationHT:
     def kendalls_rank_correlation(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: KENDALL'S RANK CORRELATION, TESTING WHETER TWO SAMPLES HAVE A MONOTONIC 
-            RELATIONSHIP, WITH THE ASSUMPTIONS OF OBSERVATIONS IN EACH SAMPLE BEING INDEPENDET AND 
-            IDENTICALLY DISTRIBUTED (IID), AS WELL, AS RANKABLE - INTERPRETATION: H0: THE TWO 
+        DOCSTRING: KENDALL'S RANK CORRELATION, TESTING WHETER TWO SAMPLES HAVE A MONOTONIC
+            RELATIONSHIP, WITH THE ASSUMPTIONS OF OBSERVATIONS IN EACH SAMPLE BEING INDEPENDET AND
+            IDENTICALLY DISTRIBUTED (IID), AS WELL, AS RANKABLE - INTERPRETATION: H0: THE TWO
             SAMPLES ARE INDEPENDENT, H1: THERE IS A DEPENDENCY BETWEEN THE SAMPLES
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -459,9 +459,9 @@ class CorrelationHT:
     def chi_squared_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: CHI-SQUARED TEST, TESTING WHETER TWO CATEGORICAL VARIABLES ARE RELATED OR 
-            INDEPENDENT, WITH THE ASSUMPTIONS OF OBSERVATIONS USED IN THE CALCULATION OF THE 
-            CONTINGENCY TABLE BEING INDEPENDENT, AND 25 OR MORE EXAMPLES IN EACH CELL OF THE 
+        DOCSTRING: CHI-SQUARED TEST, TESTING WHETER TWO CATEGORICAL VARIABLES ARE RELATED OR
+            INDEPENDENT, WITH THE ASSUMPTIONS OF OBSERVATIONS USED IN THE CALCULATION OF THE
+            CONTINGENCY TABLE BEING INDEPENDENT, AND 25 OR MORE EXAMPLES IN EACH CELL OF THE
             CONTINGENCY TABLE - INTERPRETATION: H0: THE TWO SAMPLES ARE INDEPENDET, H1: THERE IS A
             DEPENDENCY BETWEEN THE SAMPLES
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
@@ -485,8 +485,8 @@ class StationaryHT:
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
         DOCSTRING: TESTS WHETER A TIME SERIES HAS A UNIT ROOT, E.G. HAS A TREND OR MORE GENERALLY
-            IS AUTOREGRESSIVE - ASSUMPTIONS: OBSERVATIONS ARE TEMPORALLY ORDERED - INTERPRETATION: 
-            - H0: A UNIT ROOT IS PRESENT (SERIES IS NON-COVARIANCE STATIONARY, SO IS A RANDOM WALK); 
+            IS AUTOREGRESSIVE - ASSUMPTIONS: OBSERVATIONS ARE TEMPORALLY ORDERED - INTERPRETATION:
+            - H0: A UNIT ROOT IS PRESENT (SERIES IS NON-COVARIANCE STATIONARY, SO IS A RANDOM WALK);
             - HA: A UNIT ROOT IS NOT PRESENT (SERIES IS COVARIANCE STATIONARY)
         INPUTS: TIME SERIES DATA (A NUMPY ARRAY, FOR INSTANCE) AND ALPHA (0.05 AS DEFAULT)
         OUTPUTS: DICTIONARY WITH P-VALUE AND OR NOT WE OUGHT REJECT THE NON-STATIONARITY HYPOTHESIS
@@ -507,8 +507,8 @@ class StationaryHT:
     def kwiatkowski_phillips_schmidt_shin(self, array_x, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: TESTS WHETER A TIME SERIES IS TREND STATIONARY OR NOT - ASSUMPTIONS: 
-            OBSERVATIONS ARE TEMPORALLY ORDERED - INTERPRETATION: H0: THE TIME SERIES IS 
+        DOCSTRING: TESTS WHETER A TIME SERIES IS TREND STATIONARY OR NOT - ASSUMPTIONS:
+            OBSERVATIONS ARE TEMPORALLY ORDERED - INTERPRETATION: H0: THE TIME SERIES IS
             TREND-STATIONARY, H1: THE TIME SERIES IS NOT TREND-STATIONARY
         INPUTS: TIME SERIES DATA (A NUMPY ARRAY, FOR INSTANCE) AND ALPHA (0.05 AS DEFAULT)
         OUTPUTS: DICTIONARY WITH P-VALUE AND OR NOT WE OUGHT REJECT THE NON-STATIONARITY HYPOTHESIS
@@ -532,9 +532,9 @@ class MeansHT:
     def student_s_t_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: TESTS WHETER THE MEANS OF TWO INDEPENDENT SAMPLES ARE SIGNIFICANTLY DIFFERENT - 
+        DOCSTRING: TESTS WHETER THE MEANS OF TWO INDEPENDENT SAMPLES ARE SIGNIFICANTLY DIFFERENT -
             ASSUMPTIONS: OBSERVATIONS IN EACH SAMPLE ARE INDEPENDENT AND IDENTICALLY DISTRIBUTED (
-            IID), ARE NORMALLY DISTRIBUTED AND HAVE THE SAME VARIANCE - INTERPRETATION: H0: THE 
+            IID), ARE NORMALLY DISTRIBUTED AND HAVE THE SAME VARIANCE - INTERPRETATION: H0: THE
             MEANS OF THE SAMPLES ARE EQUAL, H1: THE MEANS OF THE SAMPLES ARE UNEQUAL
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -553,9 +553,9 @@ class MeansHT:
     def paired_student_s_t_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: TESTS WHETER THE MEANS OF TWO INDEPENDENT SAMPLES ARE SIGNIFICANTLY DIFFERENT - 
+        DOCSTRING: TESTS WHETER THE MEANS OF TWO INDEPENDENT SAMPLES ARE SIGNIFICANTLY DIFFERENT -
             ASSUMPTIONS: OBSERVATIONS IN EACH SAMPLE ARE INDEPENDENT AND IDENTICALLY DISTRIBUTED (
-            IID), ARE NORMALLY DISTRIBUTED AND HAVE THE SAME VARIANCE - INTERPRETATION: H0: THE 
+            IID), ARE NORMALLY DISTRIBUTED AND HAVE THE SAME VARIANCE - INTERPRETATION: H0: THE
             MEANS OF THE SAMPLES ARE EQUAL, H1: THE MEANS OF THE SAMPLES ARE UNEQUAL
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -577,10 +577,10 @@ class StatisticalDistributionsHT:
     def mann_whitney_u_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/nonparametric-statistical-significance-tests-in-python/
-        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT - 
+        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT -
             ASSUMPTIONS: OBSERVATIONS IN EACH SAMPLE ARE INDEPENDENT AND IDENTICALLY DISTRIBUTED (
-            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION: 
-            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES 
+            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION:
+            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES
             ARE NOT EQUAL
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -599,10 +599,10 @@ class StatisticalDistributionsHT:
     def wilcoxon_signed_rank_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT - 
+        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT -
             ASSUMPTIONS: OBSERVATIONS IN EACH SAMPLE ARE INDEPENDENT AND IDENTICALLY DISTRIBUTED (
-            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION: 
-            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES 
+            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION:
+            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES
             ARE NOT EQUAL
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -621,10 +621,10 @@ class StatisticalDistributionsHT:
     def kruskal_wallis_h_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT - 
+        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT -
             ASSUMPTIONS: OBSERVATIONS IN EACH SAMPLE ARE INDEPENDENT AND IDENTICALLY DISTRIBUTED (
-            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION: 
-            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES 
+            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION:
+            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES
             ARE NOT EQUAL
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT
@@ -643,10 +643,10 @@ class StatisticalDistributionsHT:
     def friedman_test(self, x1_array, x2_array, alpha=0.05):
         """
         REFERENCES: https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
-        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT - 
+        DOCSTRING: TESTS WHETER THE DISTRIBUTIONS OF TWO PAIRED SAMPLES ARE EQUAL OR NOT -
             ASSUMPTIONS: OBSERVATIONS IN EACH SAMPLE ARE INDEPENDENT AND IDENTICALLY DISTRIBUTED (
-            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION: 
-            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES 
+            IID), CAN BE RANKED AND OBSERVATIONS ACCROSS EACH SAMPLE ARE PAIRED - INTERPRETATION:
+            H0: THE DISTRIBUTIONS OF BOTH SAMPLES ARE EQUAL, H1: THE DISTRIBUTIONS OF BOTH SAMPLES
             ARE NOT EQUAL
         INPUTS: LISTS OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)
         OUTPUTS: DICT WITH ALPHA, P-VALUE AND WHETHER REJECT H0 OR NOT

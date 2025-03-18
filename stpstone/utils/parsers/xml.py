@@ -55,7 +55,7 @@ class XMLFiles:
         """
         DOCSTRING: GET A LIST OF ELEMENTS IN SOUP XML THAT RESPECT A GIVEN TAG
         INPUTS: SOUP_XML, TAG
-        OUTPUTS: XML ELEMENT        
+        OUTPUTS: XML ELEMENT
         """
         return soup_xml.find_all(tag)
 

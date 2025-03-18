@@ -36,14 +36,14 @@ class WGBD:
         list_ser = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            YAML_WGBD['10y_rr']['url'], 
+            YAML_WGBD['10y_rr']['url'],
             bl_verify=YAML_WGBD['10y_rr']['bl_verify']
         )
         # getting last update date
         str_last_update = StrHandler().get_string_after_substr(
             bs_html.find('article').find(
                 'div', class_=YAML_WGBD['10y_rr']['class_div_last_update']
-            ).get_text(), 
+            ).get_text(),
             YAML_WGBD['10y_rr']['data_last_update']
         ).strip()
         # looping within tables
@@ -75,7 +75,7 @@ class WGBD:
             ]
             #   building consolidated headers' list
             list_th = [
-                list_th_2[1], 
+                list_th_2[1],
                 list_th_1[0] + '_' + list_th_2[2],
                 list_th_1[1] + '_' + list_th_2[3],
                 list_th_1[2] + '_' + list_th_2[5],
@@ -96,7 +96,7 @@ class WGBD:
                     if (len(el.get_text()) > 1) & (el.get_text() != '')
                 ]
                 list_td = [x for x in list_td if len(x) > 0]
-                #   case when len of tds is less than ths, then check the s&p rating, if is not a 
+                #   case when len of tds is less than ths, then check the s&p rating, if is not a
                 #       string add an error tag
                 if len(list_th) > len(list_td):
                     if StrHandler().bl_has_numbers(list_td[1]) == True:
@@ -106,7 +106,7 @@ class WGBD:
                                         + 'validate the code')
                 #   creating list of dictionaries
                 list_ser = HandlingDicts().pair_headers_with_data(
-                    list_th, 
+                    list_th,
                     list_td
                 )
         # creating dataframe
@@ -115,12 +115,12 @@ class WGBD:
         df_b10_rr.drop_duplicates(inplace=True)
         # adding logging
         df_b10_rr = DBLogs().audit_log(
-            df_b10_rr, YAML_WGBD['10y_rr']['url'], 
+            df_b10_rr, YAML_WGBD['10y_rr']['url'],
             self.parse_utc_dt_str(str_last_update)
         )
         # returning dataframe
         return df_b10_rr
-    
+
     @property
     def inv_yc_economies(self):
         """
@@ -130,13 +130,13 @@ class WGBD:
         """
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            YAML_WGBD['inv_yc_ec']['url'], 
+            YAML_WGBD['inv_yc_ec']['url'],
             bl_verify=YAML_WGBD['inv_yc_ec']['bl_verify']
         )
         # getting last update date
         str_last_update = StrHandler().get_string_after_substr(
                 bs_html.find('article').find(
-                    'p', class_='-f14').get_text(), 
+                    'p', class_='-f14').get_text(),
                 YAML_WGBD['inv_yc_ec']['data_last_update']
             ).strip()
         # looping within tables
@@ -158,15 +158,15 @@ class WGBD:
                     str_rating = list_[0]
                     #   consolidating level of invertion
                     for str_lvl_inv, list_ in [
-                        (YAML_WGBD['inv_yc_ec']['data_tot_inv'], 
+                        (YAML_WGBD['inv_yc_ec']['data_tot_inv'],
                          [x.strip() for x in list_[1].split(YAML_WGBD['inv_yc_ec'][
-                             'split_countries_lvl_inv'])]), 
-                        (YAML_WGBD['inv_yc_ec']['data_prt_inv'], 
+                             'split_countries_lvl_inv'])]),
+                        (YAML_WGBD['inv_yc_ec']['data_prt_inv'],
                          [x.strip() for x in list_[1].split(YAML_WGBD['inv_yc_ec'][
-                             'split_countries_lvl_inv'])]), 
-                        (YAML_WGBD['inv_yc_ec']['data_min_inv'], 
+                             'split_countries_lvl_inv'])]),
+                        (YAML_WGBD['inv_yc_ec']['data_min_inv'],
                          [x.strip() for x in list_[1].split(YAML_WGBD['inv_yc_ec'][
-                             'split_countries_lvl_inv'])]), 
+                             'split_countries_lvl_inv'])]),
                     ]:
                         list_ser.extend([
                             {
@@ -208,7 +208,7 @@ class WGBD:
                     if StrHandler().match_string_like(
                         el.get_text()\
                             .replace('\n', '')\
-                            .strip(), 
+                            .strip(),
                         '* bp'
                     ) == True
                     #   collecting other data, such as country name
@@ -223,7 +223,7 @@ class WGBD:
                 ]
                 #   creating list of dictionaries
                 list_ser = HandlingDicts().pair_headers_with_data(
-                    list_th, 
+                    list_th,
                     list_td
                 )
                 #   import list serialized to dadtaframe
@@ -240,12 +240,12 @@ class WGBD:
         ]:
             #   adding logging
             df_ = DBLogs().audit_log(
-                df_, YAML_WGBD['inv_yc_ec']['url'], 
+                df_, YAML_WGBD['inv_yc_ec']['url'],
                 self.parse_utc_dt_str(str_last_update)
             )
         #   returning dataframes
         return df_inv_yc_ec, df_inv_yc_spreads
-    
+
     @property
     def yield_spreads_nations(self):
         """
@@ -257,7 +257,7 @@ class WGBD:
         list_td = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            YAML_WGBD['yield_spreads_nations']['url'], 
+            YAML_WGBD['yield_spreads_nations']['url'],
             bl_verify=YAML_WGBD['yield_spreads_nations']['bl_verify']
         )
         # getting last update date
@@ -268,7 +268,7 @@ class WGBD:
                     el.get_text(),
                     YAML_WGBD['yield_spreads_nations']['data_last_update_like']
                 )
-            ][0], 
+            ][0],
             YAML_WGBD['yield_spreads_nations']['data_last_update']
         ).strip()
         # getting headers
@@ -306,7 +306,7 @@ class WGBD:
             elif StrHandler().match_string_like(
                     el.get_text()\
                         .replace('\n', '')\
-                        .strip(), 
+                        .strip(),
                     '* bp'
                 ) == True:
                 list_td.append(float(
@@ -319,7 +319,7 @@ class WGBD:
             elif StrHandler().match_string_like(
                     el.get_text()\
                         .replace('\n', '')\
-                        .strip(), 
+                        .strip(),
                     '*%'
             ) == True:
                 list_td.append(float(
@@ -337,7 +337,7 @@ class WGBD:
                 )
         # creating list of dictionaries
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_th, 
+            list_th,
             list_td
         )
         # import list serialized to dadtaframe
@@ -346,12 +346,12 @@ class WGBD:
         df_spreads_nations.drop_duplicates(inplace=True)
         # adding logging
         df_spreads_nations = DBLogs().audit_log(
-            df_spreads_nations, YAML_WGBD['yield_spreads_nations']['url'], 
+            df_spreads_nations, YAML_WGBD['yield_spreads_nations']['url'],
             self.parse_utc_dt_str(str_last_update)
         )
         # returning dataframe
         return df_spreads_nations
-    
+
     @property
     def ratings(self):
         """
@@ -363,7 +363,7 @@ class WGBD:
         list_td = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            YAML_WGBD['yield_spreads_nations']['url'], 
+            YAML_WGBD['yield_spreads_nations']['url'],
             bl_verify=YAML_WGBD['yield_spreads_nations']['bl_verify']
         )
         # getting last update date
@@ -374,12 +374,12 @@ class WGBD:
                     el.get_text(),
                     YAML_WGBD['yield_spreads_nations']['data_last_update_like']
                 )
-            ][0], 
+            ][0],
             YAML_WGBD['yield_spreads_nations']['data_last_update']
         ).strip()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            YAML_WGBD['credit_rating_nations']['url'], 
+            YAML_WGBD['credit_rating_nations']['url'],
             bl_verify=YAML_WGBD['credit_rating_nations']['bl_verify']
         )
         # getting headers
@@ -401,7 +401,7 @@ class WGBD:
         # getting data
         for el in bs_html.find('table').find('tbody').find_all('td'):
             #   check whether info is empty, in this case continue
-            if len(el.get_text().strip()) == 0: 
+            if len(el.get_text().strip()) == 0:
                 bl_country = True
                 continue
             #   appending info regarding country and current rating
@@ -423,7 +423,7 @@ class WGBD:
                     bl_country = False
         # creating list of dictionaries
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_th, 
+            list_th,
             list_td
         )
         # import list serialized to dadtaframe
@@ -432,7 +432,7 @@ class WGBD:
         df_ratings.drop_duplicates(inplace=True)
         # adding logging
         df_ratings = DBLogs().audit_log(
-            df_ratings, YAML_WGBD['credit_rating_nations']['url'], 
+            df_ratings, YAML_WGBD['credit_rating_nations']['url'],
             self.parse_utc_dt_str(str_last_update)
         )
         # returning dataframe

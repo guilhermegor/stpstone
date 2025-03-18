@@ -47,19 +47,19 @@ class TestRiskStats(TestCase):
 class TestMarkowitzPortf(TestCase):
 
     def setUp(self):
-        self.markowitz = MarkowitzPortf(array_r, array_w, float_lambda=0.94, bl_validate_w=True, 
+        self.markowitz = MarkowitzPortf(array_r, array_w, float_lambda=0.94, bl_validate_w=True,
                                         float_atol=1e-4)
 
     def test_mu(self):
         float_mu = self.markowitz.mu
         self.assertIsInstance(float_mu, float)
         self.assertAlmostEqual(float_mu, 0.006, places=4)
-    
+
     def test_sigma(self):
         float_sigma = self.markowitz.sigma
         self.assertIsInstance(float_sigma, float)
         self.assertAlmostEqual(float_sigma, 0.0005055, places=4)
-    
+
     def test_cov(self):
         array_cov = self.markowitz.cov
         self.assertIsInstance(array_cov, np.ndarray)
@@ -71,7 +71,7 @@ class TestMarkowitzPortf(TestCase):
             [0.00030498, 0.00052271, 0.00061811, 0.00024138, 0.00084073]
         ]), rtol=1e-5, atol=1e-8)
         self.assertEqual(array_cov.shape, (5, 5))
-    
+
     def test_sharpe_ratio(self):
         float_sharpe = self.markowitz.sharpe_ratio(float_rf=0.02)
         self.assertIsInstance(float_sharpe, float)

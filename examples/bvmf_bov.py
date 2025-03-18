@@ -8,8 +8,8 @@ from stpstone.utils.connections.netops.session import ReqSession
 
 
 # session = ReqSession(
-#     bl_new_proxy=True, 
-#     bl_use_timer=True, 
+#     bl_new_proxy=True,
+#     bl_use_timer=True,
 #     float_min_ratio_times_alive_dead=0.02,
 #     float_max_timeout=600
 # ).session

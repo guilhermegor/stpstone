@@ -32,7 +32,7 @@ from stpstone.utils.loggs.db_logs import DBLogs
 class MDB3:
 
     @property
-    def financial_indicators_b3(self, method:str='GET', float_pct_factor:float=100.0, 
+    def financial_indicators_b3(self, method:str='GET', float_pct_factor:float=100.0,
                                 dt_input_fmt:str='DD/MM/YYYY') -> pd.DataFrame:
         """
         DOCSTRING:
@@ -55,7 +55,7 @@ class MDB3:
             YAML_B3['financial_indicators']['col_last_up']: str,
         })
         df_fin_ind[YAML_B3['financial_indicators']['col_last_up']] = [
-            DatesBR().str_date_to_datetime(x, dt_input_fmt) if x is not math.nan else 0 
+            DatesBR().str_date_to_datetime(x, dt_input_fmt) if x is not math.nan else 0
             for x in df_fin_ind[YAML_B3['financial_indicators']['col_last_up']]
         ]
         for col_ in [
@@ -63,7 +63,7 @@ class MDB3:
             YAML_B3['financial_indicators']['col_rate']
         ]:
             df_fin_ind[col_] = [
-                float(x.replace(',', '.')) if x != '' else 0 
+                float(x.replace(',', '.')) if x != '' else 0
                 for x in df_fin_ind[col_]
             ]
         df_fin_ind[YAML_B3['financial_indicators']['col_rate']] = [
@@ -78,7 +78,7 @@ class MDB3:
         ]
         # adding logging
         df_fin_ind = DBLogs().audit_log(
-            df_fin_ind, 
+            df_fin_ind,
             YAML_B3['financial_indicators']['url'],
             DatesBR().utc_from_dt(DatesBR().curr_date)
         )

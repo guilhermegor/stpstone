@@ -13,11 +13,11 @@ from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 class DimensionalityReduction:
 
-    def backward_elimination(self, array_x, array_y, str_estimator='linear_regression', int_cv=5, 
+    def backward_elimination(self, array_x, array_y, str_estimator='linear_regression', int_cv=5,
                              int_verbose=0):
         """
-        REFERENCES: 
-            https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#sequentialfeatureselector, 
+        REFERENCES:
+            https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#sequentialfeatureselector,
             https://rasbt.github.io/mlxtend/user_guide/feature_selection/SequentialFeatureSelector/
         DOCSTRING:
         INPUTS:
@@ -38,26 +38,26 @@ class DimensionalityReduction:
             ))
         # running the backward feature selection
         feature_selection = SequentialFeatureSelector(
-            class_estimator, 
+            class_estimator,
             k_features=(1, array_x.shape[1]),
             forward=False,
-            floating=False, 
+            floating=False,
             verbose=int_verbose,
-            scoring=scoring, 
+            scoring=scoring,
             cv=int_cv
         ).fit(array_x, array_y)
         # returning the most relevant columns
         return {
-            'dr_feature_names': feature_selection.k_feature_names_, 
+            'dr_feature_names': feature_selection.k_feature_names_,
             'dr_feature_indexes': feature_selection.k_feature_idx_,
             'dr_score': feature_selection.k_score_
         }
-    
-    def forward_elimination(self, array_x, array_y, str_estimator='linear_regression', int_cv=5, 
+
+    def forward_elimination(self, array_x, array_y, str_estimator='linear_regression', int_cv=5,
                             int_verbose=0):
         """
-        REFERENCES: 
-            https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#sequentialfeatureselector, 
+        REFERENCES:
+            https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#sequentialfeatureselector,
             https://rasbt.github.io/mlxtend/user_guide/feature_selection/SequentialFeatureSelector/
         DOCSTRING:
         INPUTS:
@@ -78,25 +78,25 @@ class DimensionalityReduction:
             ))
         # running the backward feature selection
         feature_selection = SequentialFeatureSelector(
-            class_estimator, 
+            class_estimator,
             k_features=(1, array_x.shape[1]),
             forward=True,
-            floating=False, 
+            floating=False,
             verbose=int_verbose,
-            scoring=scoring, 
+            scoring=scoring,
             cv=int_cv
         ).fit(array_x, array_y)
         # returning the most relevant columns
         return {
-            'dr_feature_names': feature_selection.k_feature_names_, 
+            'dr_feature_names': feature_selection.k_feature_names_,
             'dr_feature_indexes': feature_selection.k_feature_idx_,
             'dr_score': feature_selection.k_score_
         }
-    
-    def exhaustive_feature_selection(self, array_x, array_y, str_estimator='linear_regression', 
+
+    def exhaustive_feature_selection(self, array_x, array_y, str_estimator='linear_regression',
                                      max_features=None, int_cv=5):
         """
-        REFERENCES: 
+        REFERENCES:
             https://rasbt.github.io/mlxtend/api_subpackages/mlxtend.feature_selection/#exhaustivefeatureselector
         DOCSTRING:
         INPUTS:
@@ -120,7 +120,7 @@ class DimensionalityReduction:
             ))
         # running the backward feature selection
         feature_selection = ExhaustiveFeatureSelector(
-            class_estimator, 
+            class_estimator,
             min_features=1,
             max_features=max_features,
             scoring=scoring,
@@ -129,11 +129,11 @@ class DimensionalityReduction:
         ).fit(array_x, array_y)
         # returning the most relevant columns
         return {
-            'dr_feature_names': feature_selection.best_feature_names_ , 
+            'dr_feature_names': feature_selection.best_feature_names_ ,
             'dr_feature_indexes': feature_selection.best_idx_,
-            'dr_score': feature_selection.best_score_ 
+            'dr_score': feature_selection.best_score_
         }
-    
+
     def iv_woe_iter(self, df_binned, target_col, class_col, name_missing_data='Missing',
                     name_bins='_bins', col_min='min', col_max='max',
                     col_non_event_count='non_event_count', col_sample_class='sample_class',
@@ -145,12 +145,12 @@ class DimensionalityReduction:
                     col_pct_event='pct_event', col_first='first', col_count='count',
                     col_sum='sum', col_mean='mean', col_woe='woe', col_iv='iv'):
         """
-        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
+        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py,
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
-        DOCSTRING: INFORMATION VALUE (IV) AND WEIGHT OF EVIDENCE (WOE) USED TO UNDERSTAND 
-            THE RELATION BETWEEN DEPENDENT AND INDEPENDENT VARIABLES - PROVIDE THE STRENGTH OF 
+        DOCSTRING: INFORMATION VALUE (IV) AND WEIGHT OF EVIDENCE (WOE) USED TO UNDERSTAND
+            THE RELATION BETWEEN DEPENDENT AND INDEPENDENT VARIABLES - PROVIDE THE STRENGTH OF
             A PREDICTOR TO MEASURE BINARY OUTCOMES
-        INPUTS: 
+        INPUTS:
         OUTPUTS:
         """
         # replacing bins column names
@@ -234,9 +234,9 @@ class DimensionalityReduction:
                  min_bins_monotonic=2, col_feature='feature', col_remarks='remarks',
                  name_categorical='categorical', orient_str='records'):
         """
-        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
+        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py,
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
-        DOCSTRING: ITERATE OVER ALL FEATURES, CALCULATE WOE AND IV FOR THE CLASSES, AND 
+        DOCSTRING: ITERATE OVER ALL FEATURES, CALCULATE WOE AND IV FOR THE CLASSES, AND
             APPEND TO ONE DATAFRAME WOE_IV OF EXPORTATION
         INPUTS:
         OUTPUTS:
@@ -279,9 +279,9 @@ class DimensionalityReduction:
                    col_iv='iv', col_remarks='remarks', col_number_classes='number_of_classes',
                    col_feature_null_pct='feature_null_percent', col_iv_sum='iv_sum'):
         """
-        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
+        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py,
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
-        DOCSTRING: AFTER GETTING WOE AND IV FOR ALL CLASSES OF FEATURES, CALCULATE THE AGGREGATED 
+        DOCSTRING: AFTER GETTING WOE AND IV FOR ALL CLASSES OF FEATURES, CALCULATE THE AGGREGATED
             IV VALUES FOR FEATURES
         INPUTS:
         OUTPUTS:
@@ -318,7 +318,7 @@ class DimensionalityReduction:
 
     def iv_label_predictive_power(self, df_iv, col_iv='iv', col_predictive_power='predictive_power'):
         """
-        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py, 
+        REFERENCES: https://github.com/pankajkalania/IV-WOE/blob/main/iv_woe_code.py,
             https://gaurabdas.medium.com/weight-of-evidence-and-information-value-in-python-from-scratch-a8953d40e34#:~:text=Information%20Value%20gives%20us%20the,as%20good%20and%20bad%20customers.
         DOCSTRING: LABEL PREDICTIVE POWER OF EACH FEATURE
         INPUTS: DATAFRAME INFORMATION VALUE(IV)
@@ -346,7 +346,7 @@ class DimensionalityReduction:
         REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         DOCSTRING: PRINCIPAL COMPONENTS ANALYSIS
         INPUTS: DEPENDENT AND INDEPENDENT VARIABLES
-        OUTPUTS: 
+        OUTPUTS:
         """
         # pca fiiting model
         model_fitted = PCA(n_components=len(array_data)).fit(array_data)

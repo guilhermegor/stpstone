@@ -17,9 +17,9 @@ class ProbStatsCharts:
     def confusion_mtx_2x2(self, x_array_real_numbers, y_vector_real_numbers,
                           c_positive_floating_point_number=1.0):
         """
-        DOCSTRING: CONFUSION MATRIX WITH PREDICTIONS (Y-AXIS) AND ACTUAL TARGETS (X-DATA) OF 
+        DOCSTRING: CONFUSION MATRIX WITH PREDICTIONS (Y-AXIS) AND ACTUAL TARGETS (X-DATA) OF
             THE DATA TESTED
-        INPUTS: X AND Y ARRAIES OF REAL NUMBERS, AS WELL AS C POSITIVE FLOATING-POINT NUMBER 
+        INPUTS: X AND Y ARRAIES OF REAL NUMBERS, AS WELL AS C POSITIVE FLOATING-POINT NUMBER
             THAT DEFINES THE RELATIVE STRENGTH OF REGULARIZATION; SMALLER VALUES INDICATE STRONGER
             REGULARIZATION, FITTING-WISE ITS POORLY FITTED
         OUTPUTS: -
@@ -42,9 +42,9 @@ class ProbStatsCharts:
     def confusion_mtx_nxn(self, conf_mx, cmap=plt.get_cmap('gray'), bl_focus_errors=True,
                           complete_saving_path=None, int_fill_non_error_values=0):
         """
-        DOCSTRING: HEATMAP OF CONFUSION MATRIX FOR COMPLEX MODELS, IN GRAY SCALE, BEING 
+        DOCSTRING: HEATMAP OF CONFUSION MATRIX FOR COMPLEX MODELS, IN GRAY SCALE, BEING
             WHITER AN INDICATIVE OF HIGH NUMBER OF OCCURRENCES
-        INPUTS: CONFUSION MATRIX, CMAP(GRAY AS DEFAULT), BOOLEAN FOCUS ON ERRORS, COMPLETE 
+        INPUTS: CONFUSION MATRIX, CMAP(GRAY AS DEFAULT), BOOLEAN FOCUS ON ERRORS, COMPLETE
             SAVING PATH, NUMBER TO BE FILLED IN NON ERROR VALUES (DIAGONAL)
         OUTPUTS: -
         """
@@ -64,7 +64,7 @@ class ProbStatsCharts:
     def ecdf_chart(self, list_ser_data, legend_position='lower right'):
         """
         DOCSTRING: DISPLAY A EMPIRICAL CUMULATIVE DISTRIBUTION FUNCTION CHART
-        INPUTS: LIST OF DICTIONARIES WITH DATA, X_LABEL, Y_LABEL AND LEGEND KEYS, BESIDE 
+        INPUTS: LIST OF DICTIONARIES WITH DATA, X_LABEL, Y_LABEL AND LEGEND KEYS, BESIDE
             LEGEND POSITION
         OUTPUTS: -
         """
@@ -117,7 +117,7 @@ class ProbStatsCharts:
                                  complete_saving_path=None):
         """
         DOCSTRING: EXPLORATORY DATA ANALYSIS OF DATAFRAME COLUMNS FROM PANDAS
-        INPUTS: DATAFRAME, BINS (NONE AS DEFAULT), FIGSIZE (((20,15) TUPLE AS DEFAULT)), 
+        INPUTS: DATAFRAME, BINS (NONE AS DEFAULT), FIGSIZE (((20,15) TUPLE AS DEFAULT)),
             COMPLETE SAVING PATH (NONE AS DEFAULT)
         OUTPUTS: -
         """
@@ -147,9 +147,9 @@ class ProbStatsCharts:
         REFERENCES: (BINARY CLASSIFIER) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
         DOCSTRING: PLOT TO COMPARE PRECISION-RECALL TRADE-OFF, CLASSIFICATION-WISE IN SUPERVISED
             LEARNING TASKS FOR MACHINE LEARNING MODELS
-        INPUTS: MODEL FITTED, ARRAY DATA, ARRAY TARGET, CROSS VALIDATION FOLDS, SCORING METHODS, 
-            LOCALIZATION OF THE LEGEND, LABEL PRECISION CURVE, LABEL RECALL CURVE, LINE STYLE 
-            PRECISION, LIBE STYLE RECALL, LINE WIDTH, LABEL AXIS X, LABEL AXIS Y, FONT SIZE, 
+        INPUTS: MODEL FITTED, ARRAY DATA, ARRAY TARGET, CROSS VALIDATION FOLDS, SCORING METHODS,
+            LOCALIZATION OF THE LEGEND, LABEL PRECISION CURVE, LABEL RECALL CURVE, LINE STYLE
+            PRECISION, LIBE STYLE RECALL, LINE WIDTH, LABEL AXIS X, LABEL AXIS Y, FONT SIZE,
             BOOLEAN GRID, TUPPLE FIGURE SIZE AND COMPLETE SAVING PATH (NONE AS DEFAULT)
         OUTPUTS: -
         """
@@ -188,11 +188,11 @@ class ProbStatsCharts:
                        bl_grid=True, tup_fig_size=(8, 4), complete_saving_path=None):
         """
         REFERENCES: (ROC CURVES) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
-        DOCSTRING: RECEIVER OPERATING CHARACTERISTIC (ROC) CRUVE PLOTS SENSITIVITY (RECALL) VERSUS 
-            1 - SPECIFICITY (TRUE NEGATIVE RATIO, OR THE RATIO OF NEGATIVE INSTANCES THAT ARE 
+        DOCSTRING: RECEIVER OPERATING CHARACTERISTIC (ROC) CRUVE PLOTS SENSITIVITY (RECALL) VERSUS
+            1 - SPECIFICITY (TRUE NEGATIVE RATIO, OR THE RATIO OF NEGATIVE INSTANCES THAT ARE
             CORRECTLY CLASSIFIED AS NEGATIVE)
-        INPUTS: MODEL FIITED, ARRAY DATA, ARRAY TARGET, CROSS VALIDATION FOLDS, SCORING METHOD, 
-            PLOT TITLE, LABEL X AXIS, LABEL Y AXIS, FONT SIZE, BL GRID, TUP FIGURE SIZE, AND 
+        INPUTS: MODEL FIITED, ARRAY DATA, ARRAY TARGET, CROSS VALIDATION FOLDS, SCORING METHOD,
+            PLOT TITLE, LABEL X AXIS, LABEL Y AXIS, FONT SIZE, BL GRID, TUP FIGURE SIZE, AND
             COMPLETE SAVING PATH OF THE FIGURE
         OUTPUTS: -
         """
@@ -337,15 +337,15 @@ class ProbStatsCharts:
             y_label='Root Mean Squared Error (RMSE)', plt_label='Model Perform',
             legend_plot_position='upper right', int_font_size=14):
         """
-        REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW, 
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S., 
+        REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
+            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
             978-1-492-03264-9.”
-        DOCSTRING: LEARNING CURVES TO INFERE WHETER A MODEL PERFORMS WELL ON THE TRAINING SET AND 
+        DOCSTRING: LEARNING CURVES TO INFERE WHETER A MODEL PERFORMS WELL ON THE TRAINING SET AND
             GENERALIZES ACCORDINLGY TO THE VALIDATION SET
         INPUTS: ARRAY DATA, ARRAY TARGET AND COMPLETE PATH NAME TO SAVE THE FIGURE (NONE AS DEFAULT)
         OUTPUTS: -
-        OBSERVATION: A GAP BETWEEN TRAINING AND VALIDATION DATA IS THE HALLMARK OF OVERFITTING 
-            MODELS - A WORKAROUND IS TO FEED MORE TRAINING DATA UNITL THE VALIDATION ERROR REACHES 
+        OBSERVATION: A GAP BETWEEN TRAINING AND VALIDATION DATA IS THE HALLMARK OF OVERFITTING
+            MODELS - A WORKAROUND IS TO FEED MORE TRAINING DATA UNITL THE VALIDATION ERROR REACHES
             THE TRAINING ERROR
         """
         # creating test-training sets
@@ -384,7 +384,7 @@ class ProbStatsCharts:
         # show plot
         plt.show()
 
-    def classification_plot_2d_ivs(self, cls_scaler, array_x, array_y, cls_model_fiited, 
+    def classification_plot_2d_ivs(self, cls_scaler, array_x, array_y, cls_model_fiited,
                             label_yes, label_no, str_title,
                             str_xlabel, str_ylabel, complete_path_save_figure=None,
                             str_color_negative='salmon', str_color_positive='dodgerblue'):
@@ -398,7 +398,7 @@ class ProbStatsCharts:
         X_set, y_set = cls_scaler.inverse_transform(array_x), array_y
         # linear interpolation of iv's
         X1, X2 = np.meshgrid(
-            np.arange(start = X_set[:, 0].min() - 10, stop = X_set[:, 0].max() + 10, step = 0.25), 
+            np.arange(start = X_set[:, 0].min() - 10, stop = X_set[:, 0].max() + 10, step = 0.25),
             np.arange(start = X_set[:, 1].min() - 1000, stop = X_set[:, 1].max() + 1000, step = 0.25)
         )
         # calculating predictions
@@ -420,11 +420,11 @@ class ProbStatsCharts:
                 raise Exception('Label for the data {] not defined'.format(i))
             #   scatter plot binary result
             plt.scatter(
-                X_set[y_set == j, 0], 
-                X_set[y_set == j, 1], 
+                X_set[y_set == j, 0],
+                X_set[y_set == j, 1],
                 c = ListedColormap(
                     (str_color_negative, str_color_positive)
-                )(i), 
+                )(i),
                 label = label
             )
         # define title

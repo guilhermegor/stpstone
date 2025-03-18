@@ -12,13 +12,13 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 class CVMDATA:
 
     def __init__(
-        self, 
+        self,
         str_host_cvm:str='https://dados.cvm.gov.br/dados/',
         logger:object=None,
-        str_dt_error:str='2100-01-01', 
+        str_dt_error:str='2100-01-01',
         str_format_dt_input:str='YYYY-MM-DD',
         int_val_err:int=0,
-        dict_fund_class_subclass_register:dict=Dict[str, Any]=None
+        dict_fund_class_subclass_register:Dict[str, Any]=None
     ):
         self.str_host_cvm = str_host_cvm
         self.logger = logger
@@ -30,7 +30,7 @@ class CVMDATA:
 
     @property
     def funds_register(
-        self, 
+        self,
         str_app:str='FI/CAD/DADOS/cad_fi.csv'
     ):
         """
@@ -60,7 +60,7 @@ class CVMDATA:
             'DT_INI_SIT',
             'DT_INI_ATIV',
             'DT_INI_EXERC',
-            'DT_FIM_EXERC', 
+            'DT_FIM_EXERC',
             'DT_INI_CLASSE',
             'DT_PATRIM_LIQ'
         ]
@@ -114,7 +114,7 @@ class CVMDATA:
         })
         for col_dt in list_cols_dts:
             df_funds_register[col_dt] = [
-                DatesBR().str_date_to_datetime(d, self.str_format_dt_input) 
+                DatesBR().str_date_to_datetime(d, self.str_format_dt_input)
                 for d in df_funds_register[col_dt]
             ]
         # return the dataframe
@@ -122,7 +122,7 @@ class CVMDATA:
 
     @property
     def funds_classes_subclasses_register_raw(
-        self, 
+        self,
         str_app:str='FI/CAD/DADOS/registro_fundo_classe.zip'
     ):
         """
@@ -136,7 +136,7 @@ class CVMDATA:
         url = f'{self.str_host_cvm}{str_app}'
         # downloading zip file into memory
         list_main_zip = RemoteFiles().get_zip_from_web_in_memory(
-            url, 
+            url,
             bl_io_interpreting=False,
             bl_verify=False
         )
@@ -177,7 +177,7 @@ class CVMDATA:
         df_ = df_.astype(dict_cols_types)
         for col_dt in list_cols_dts:
             df_[col_dt] = [
-                DatesBR().str_date_to_datetime(d, self.str_format_dt_input) 
+                DatesBR().str_date_to_datetime(d, self.str_format_dt_input)
                 for d in df_[col_dt]
             ]
         # return the dataframe

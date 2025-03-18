@@ -1,16 +1,10 @@
-### CVM REGISTRIES INGESTION REQUEST ###
-
-# pypi.org libs
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
 from datetime import datetime
 from logging import Logger
 from time import sleep
 from typing import List, Optional
-
-import pandas as pd
-from requests import Response
-from sqlalchemy.orm import Session
-
-# project modules
 from stpstone._config.global_slots import YAML_BR_CVM_REGISTRIES
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR

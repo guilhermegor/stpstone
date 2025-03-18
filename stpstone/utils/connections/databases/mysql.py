@@ -30,10 +30,10 @@ class MySQLDatabase:
         try:
             #   making MySQL connection
             conn = pymysql.connect(
-                host=host, 
-                port=port, 
-                user=user, 
-                password=password, 
+                host=host,
+                port=port,
+                user=user,
+                password=password,
                 database=database
             )
             cur = conn.cursor()
@@ -78,20 +78,20 @@ class MySQLDatabase:
                 values_list = []
                 for record_dict in record_list:
                     values = [
-                        f"'{str(val).replace('\'', '\'\'')}'" if isinstance(val, str) 
-                        else str(val) 
+                        f"'{str(val).replace('\'', '\'\'')}'" if isinstance(val, str)
+                        else str(val)
                         for val in record_dict.values()
                     ]
                     values_list.append(f"({', '.join(values)})")
-                
+
                 sql_string += ', '.join(values_list) + ';'
             # perform insertion
             try:
                 conn = pymysql.connect(
-                    host=host, 
-                    port=port, 
-                    user=user, 
-                    password=password, 
+                    host=host,
+                    port=port,
+                    user=user,
+                    password=password,
                     database=database
                 )
                 cur = conn.cursor()

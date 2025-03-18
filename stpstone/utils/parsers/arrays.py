@@ -12,15 +12,15 @@ class Arrays(metaclass=TypeChecker):
         return array_data if isinstance(array_data, np.ndarray) else (
             array_data.to_numpy() if isinstance(array_data, pd.DataFrame) else None
         )
-    
+
     def to_array_vector(self, array_data: Union[np.ndarray, pd.Series, List[float]]) -> np.ndarray:
         if len(array_data) == 0:
             raise ValueError("Return array is empty.")
         return array_data if isinstance(array_data, np.ndarray) else (
-            np.array(array_data) if isinstance(array_data, list) 
+            np.array(array_data) if isinstance(array_data, list)
             else (array_data.to_numpy() if isinstance(array_data, pd.Series) else None)
         )
-    
+
     def to_array(self, array_data: Union[np.ndarray, pd.DataFrame, pd.Series, List[float]]) \
         -> np.ndarray:
         if isinstance(array_data, (np.ndarray, pd.DataFrame)):

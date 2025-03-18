@@ -212,6 +212,7 @@ class HandlingDicts:
     ) -> List[Dict[str, Union[int, float, str]]]:
         """
         Adds a key and value (or multiple key-value pairs) to every dictionary in a list.
+
         Args:
             list_ser (List[Dict[str, Union[int, float, str]]]): A list of dictionaries to be updated.
             key (Union[str, List[Dict[str, Union[int, float, str]]]]):
@@ -226,8 +227,10 @@ class HandlingDicts:
                 - Required if value is a function
             kwargs_static (Optional[Dict[str, Union[int, float, str, None]]]):
                 - Static keyword arguments to pass to the function (if callable)
+
         Returns:
             List[Dict[str, Union[int, float, str]]]: The updated list of dictionaries.
+
         Raises:
             ValueError: if key is a string and value is None.
             TypeError: if key is neither a string nor a list of dictionaries.
@@ -261,7 +264,7 @@ class HandlingDicts:
         else:
             raise TypeError("key must be a string or a list of dictionaries.")
         return list_ser
-    
+
     def pair_keys_with_values(
         self, list_keys: List[str], list_lists: List[List[Any]]
     ) -> List[Dict[str, Any]]:
@@ -271,7 +274,7 @@ class HandlingDicts:
             list_keys (List[str]): The list of keys to pair with the sublists
             list_lists (List[List[Any]]): The list of sublists to pair with the keys
         Returns:
-            List[Dict[str, Any]]: A list of dictionaries, where each dictionary is a pairing of 
+            List[Dict[str, Any]]: A list of dictionaries, where each dictionary is a pairing of
                 a sublist with the list of keys
         Raises:
             ValueError: If the length of a sublist does not match the length of list_keys

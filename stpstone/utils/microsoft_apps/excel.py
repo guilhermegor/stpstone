@@ -157,7 +157,7 @@ class DealingExcel:
     def delete_entire_column(self, nome_plan, str_range, excel_app, active_wb):
         """
         DOCSTRING: DELETAR COLUNA DE UMA PLANILHA EXCEL
-        INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) , 
+        INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ,
         XL APP E WORKBOOK ATIVO
         OUTPUTS: -
         """
@@ -248,7 +248,7 @@ class DealingExcel:
 
     def conf_title(self, nome_plan, str_range, excel_app, active_wb):
         """
-        DOCSTRING: CONFIGURE 
+        DOCSTRING: CONFIGURE
         INPUTS: NOME COMPLETO DO ARQUIVO, PLAN DE INTERESSE, RANGE DE INTERESSE (COLUNA) ANTES DA QUAL
         SERÁ CRIADA A COLUNA, XL APP E WORKBOOK ATIVO
         OUTPUTS: -
@@ -689,7 +689,7 @@ class ExcelWriter(object):
         To get the value of Excel Constants such as xlEdgeLeft (7) or xlThin (2)
         type e.g. Debug.Print xlEdgeLeft in the Immediate window of the VBA editor and press enter.
         http://www.ureader.com/message/33389340.aspx
-        For changing the pallete of 56 colours ref: http://www.cpearson.com/excel/colors.htm    
+        For changing the pallete of 56 colours ref: http://www.cpearson.com/excel/colors.htm
         """
         if style == STYLE_HEADING1:
             range.Font.Bold = True

@@ -86,6 +86,9 @@ resource_example:
     - tmp
     - log
     - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
   dtypes:
     COL_1: date
     COL_2: str

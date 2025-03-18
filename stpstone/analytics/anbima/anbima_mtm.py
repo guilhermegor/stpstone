@@ -66,14 +66,14 @@ class AnbimaMTM:
             list_headers[14]: str
         })
         df_br_tb = DBLogs().audit_log(
-            df_br_tb, 
+            df_br_tb,
             url,
             DatesBR().utc_from_dt(
                 self.dt_ref
             )
         )
         return df_br_tb
-    
+
     @property
     def corporate_bonds(self):
         url = YAML_ANBIMA['sec_mkt_prcs']['corporate_bonds']['url'].format(
@@ -93,19 +93,19 @@ class AnbimaMTM:
             list_headers[9]: float, ## indicative min range
             list_headers[10]: float, ## indicative max range
             list_headers[11]: float, ## present value (pv)
-            list_headers[12]: float, ## pv @ par / VNE (future value - fv - or valor nominal 
+            list_headers[12]: float, ## pv @ par / VNE (future value - fv - or valor nominal
                                      ##     de emissão, pt-br)
             list_headers[13]: float, ## duration
         })
         df_br_tb = DBLogs().audit_log(
-            df_br_tb, 
+            df_br_tb,
             url,
             DatesBR().utc_from_dt(
                 self.dt_ref
             )
         )
         return df_br_tb
-    
+
     @property
     def ima(self):
         """
@@ -116,8 +116,8 @@ class AnbimaMTM:
         dict_list_ser = dict()
         str_sep='@'
         req_resp = request(
-            YAML_ANBIMA['sec_mkt_prcs']['ima']['method'], 
-            YAML_ANBIMA['sec_mkt_prcs']['ima']['url'], 
+            YAML_ANBIMA['sec_mkt_prcs']['ima']['method'],
+            YAML_ANBIMA['sec_mkt_prcs']['ima']['url'],
             YAML_ANBIMA['sec_mkt_prcs']['ima']['bl_verify']
         )
         req_resp.raise_for_status()
@@ -148,7 +148,7 @@ class AnbimaMTM:
         # adding logging
         for df_ in [df_ima_pvs, df_ima_th_portf]:
             df_ = DBLogs().audit_log(
-                df_, 
+                df_,
                 YAML_ANBIMA['sec_mkt_prcs']['ima']['url'],
                 DatesBR().utc_from_dt(DatesBR().curr_date)
             )

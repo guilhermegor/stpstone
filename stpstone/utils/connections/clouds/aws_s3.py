@@ -14,7 +14,7 @@ from stpstone.utils.loggs.create_logs import CreateLog
 
 class S3Client:
 
-    def __init__(self, str_default_region:str='us-west-1', logger:Optional[Logger]=None, 
+    def __init__(self, str_default_region:str='us-west-1', logger:Optional[Logger]=None,
                  bl_debug_mode:bool=False) -> None:
         """
         DOCSTRING:

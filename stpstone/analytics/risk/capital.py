@@ -19,9 +19,9 @@ class CR1Calculator:
     @property
     def calculate_k(self) -> float:
         """
-        Calculates the capital requirement k, which is the product of the loss given default (LGD) 
+        Calculates the capital requirement k, which is the product of the loss given default (LGD)
         and the probability of default (PD).
-        
+
         Returns:
             float: The capital requirement k.
         """
@@ -30,10 +30,10 @@ class CR1Calculator:
     @property
     def calculate_cr1(self) -> float:
         """
-        Calculates the capital requirement 1 (CR1) by multiplying the exposure at default (EAD) 
-        by the capital requirement k, which is the product of the loss given default (LGD) and 
+        Calculates the capital requirement 1 (CR1) by multiplying the exposure at default (EAD)
+        by the capital requirement k, which is the product of the loss given default (LGD) and
         the probability of default (PD), and then by 12.5.
-        
+
         Returns:
             float: The capital requirement 1 (CR1).
         """
@@ -43,11 +43,11 @@ class CR1Calculator:
     def summary(self) -> Dict[str, float]:
         """
         A summary of all the values used to calculate the capital requirement 1 (CR1)
-        
+
         Returns:
-            Dict[str, float]: A dictionary containing the exposure at default (EAD), 
-            the probability of default (PD), 
-            the loss given default (LGD), the capital requirement k, and the capital 
+            Dict[str, float]: A dictionary containing the exposure at default (EAD),
+            the probability of default (PD),
+            the loss given default (LGD), the capital requirement k, and the capital
             requirement 1 (CR1).
         """
         return {

@@ -8,7 +8,7 @@ class WebhookTeams:
     def __init__(self, url_webhook:str) -> None:
         self.url_webhook = url_webhook
 
-    def send_message(self, str_msg:str, str_title:str='ROUTINE_CONCLUSION', 
+    def send_message(self, str_msg:str, str_title:str='ROUTINE_CONCLUSION',
                            bl_print_message:bool=False) -> None:
         """
         DOCSTRING: SEND PLAIN MESSAGE WITH TEXT AND TITLE

@@ -1,6 +1,3 @@
-### BVMF BOV INGESTION REQUEST ###
-
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional, List
@@ -8,7 +5,6 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-# project modules
 from stpstone._config.global_slots import YAML_B3_BVMF_BOV
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -26,8 +22,8 @@ class BVMFBOV(ABCRequests):
         session:Optional[ReqSession]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
-        token:Optional[str]=None, 
+        logger:Optional[Logger]=None,
+        token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
         super().__init__(
@@ -35,18 +31,18 @@ class BVMFBOV(ABCRequests):
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
-            logger=logger, 
-            token=token, 
+            logger=logger,
+            token=token,
             list_slugs=list_slugs
         )
         self.session = session
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token, 
+        self.token = token,
         self.list_slugs = list_slugs
         self.dt_ref_mm_yyyy = dt_ref.strftime('%m/%Y')
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         # setting variables
         list_th = list()
@@ -54,12 +50,12 @@ class BVMFBOV(ABCRequests):
         # format month and year to string
         url = YAML_B3_BVMF_BOV['credentials']['host'] \
             + StrHandler().fill_placeholders(
-                YAML_B3_BVMF_BOV['volumes']['app'], 
+                YAML_B3_BVMF_BOV['volumes']['app'],
                 {'dt_ref_mm_yyyy': self.dt_ref_mm_yyyy}
             )
         # request html
         bs_html = HtmlHndler().bs_parser(
-            url, 
+            url,
             bl_verify=YAML_B3_BVMF_BOV['volumes']['bl_verify']
         )
         # table
@@ -128,7 +124,7 @@ class BVMFBOV(ABCRequests):
         ]
         # pair headers and data within a list
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_th, 
+            list_th,
             list_td
         )
         # turning into dataframe

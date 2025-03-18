@@ -13,7 +13,7 @@ class DocumentsNumbersBR:
 
     def validate(self, doc='CNPJ'):
         """
-        DOCSTRING: BOOLEAN TO VALDIATE WHETER OR NOT THE NUMBER CLASSIFIES A CORRECT ID FOR A GIVEN 
+        DOCSTRING: BOOLEAN TO VALDIATE WHETER OR NOT THE NUMBER CLASSIFIES A CORRECT ID FOR A GIVEN
             DOCUMENT
         INPUTS: DOC NATURE
         OUTPUTS: BOOLEAN LIST
@@ -84,7 +84,7 @@ class DocumentsNumbersBR:
     def get_public_info_cnpj(self, url='https://receitaws.com.br/v1/cnpj/{}',
                              method='GET'):
         """
-        DOCSTRING: GET PUBLIC AVAILABLE BRAZILLIAN INTERNAL REVENUE SERVICE (IRS) REGARDING 
+        DOCSTRING: GET PUBLIC AVAILABLE BRAZILLIAN INTERNAL REVENUE SERVICE (IRS) REGARDING
             A CNPJ (DOMESTIC DOCUMENT FOR COMPANIES)
         INPUTS: CNPJ NUMBER
         OUTPUTS: JSON

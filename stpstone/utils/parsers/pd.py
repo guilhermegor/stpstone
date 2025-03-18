@@ -33,6 +33,7 @@ class DealingPd:
     ) -> None:
         """
         Append dataframe to Excel
+
         Args:
             filename (str): Path to Excel file
             list_tup_df_sheet_name (List[Tuple[pd.DataFrame, str]]): List of tuples with dataframe and sheet name
@@ -42,6 +43,7 @@ class DealingPd:
             label_sensitivity (str): Label sensitivity
             bl_set_sensitivity_label (bool): Whether to set sensitivity label
             bl_debug_mode (bool): Whether to print debug messages
+
         Returns:
             None
         """
@@ -73,6 +75,7 @@ class DealingPd:
     ) -> bool:
         """
         Export dataframe to Excel
+
         Args:
             - logger (logging.Logger): Logger object
             - path_xlsx (str): Path to Excel file
@@ -80,6 +83,7 @@ class DealingPd:
             - range_columns (str): Range of columns to autofit
             - bl_adjust_layout (bool): Whether to adjust layout of Excel file
             - bl_debug_mode (bool): Whether to print debug messages
+
         Returns:
             bool
         """
@@ -114,10 +118,12 @@ class DealingPd:
     ) -> None:
         """
         Setting up pandas options
+
         Args:
             int_decimal_places (int): Number of decimal places to display in output
             bl_wrap_repr (bool): Whether to wrap repr(DataFrame) across additional lines
             int_max_rows (int): Maximum number of rows to display in output
+
         Returns:
             None
         """
@@ -133,10 +139,12 @@ class DealingPd:
     ) -> pd.DataFrame:
         """
         Convert datetime columns
+
         Args:
             df_ (pandas.DataFrame): DataFrame to convert
             list_col_date (list): List of columns to convert
             bl_pandas_convertion (bool): Whether to use pandas conversion or excel format
+
         Returns:
             pd.DataFrame
         """
@@ -168,10 +176,12 @@ class DealingPd:
     ) -> pd.DataFrame:
         """
         Merging two dataframes and removing their intersections into a list of columns
+
         Args:
             df_1 (pandas.DataFrame): First dataframe to merge
             df_2 (pandas.DataFrame): Second dataframe to merge
             list_cols (list): List of columns to merge
+
         Returns:
             pd.DataFrame
         """
@@ -195,8 +205,10 @@ class DealingPd:
     def max_chrs_per_column(df_: pd.DataFrame) -> Dict[str, int]:
         """
         Calculate the maximum number of characters per column
+
         Args:
             df_ (pandas.DataFrame): DataFrame to calculate
+
         Returns:
             Dict[str, int
         """

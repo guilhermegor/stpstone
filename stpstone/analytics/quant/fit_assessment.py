@@ -31,8 +31,8 @@ class FitPerformance:
 
     def aic(self, array_x, array_y, array_y_hat):
         """
-        DOCSTRING: AKAIKE'S INFORMATION CRITERION (AIC) EVALUATES A COLLECTION OF MODELS 
-            THAT EXPLAINS THE SAME DV - THE LOWER THE BETTER - BETTER THAN BIC FOR PREDICTION 
+        DOCSTRING: AKAIKE'S INFORMATION CRITERION (AIC) EVALUATES A COLLECTION OF MODELS
+            THAT EXPLAINS THE SAME DV - THE LOWER THE BETTER - BETTER THAN BIC FOR PREDICTION
             PURPOSES
         INTPUTS: MODEL FITTED
         OUTPUTS: FLOAT
@@ -43,14 +43,14 @@ class FitPerformance:
         llf = self.max_llf(array_x, array_y, array_y_hat)
         # return aic metric
         return -2.0 * llf + 2.0 * p
-    
+
     def bic(self, array_x, array_y, array_y_hat):
         """
         REFERENCES: https://en.wikipedia.org/wiki/Bayesian_information_criterion
-        DOCSTRING: SCHWARTZ'S BAYESIAN INFORMATION CRITERION (BIC) - THE LOWER THE BETTER - BETTER 
+        DOCSTRING: SCHWARTZ'S BAYESIAN INFORMATION CRITERION (BIC) - THE LOWER THE BETTER - BETTER
             THAN AIC WHEN GOODNESS OF FIT MODEL IS PREFERRED
-            - AIC AND BIC ARE TWO LOSS METRICS THAT EVALUATE MODELS ON HOW WELL THEY 
-                DESCRIBE/PREDICT BEHAVIOR AS WELL AS BASED ON THE NUMBER OF FREE PARAMETERS 
+            - AIC AND BIC ARE TWO LOSS METRICS THAT EVALUATE MODELS ON HOW WELL THEY
+                DESCRIBE/PREDICT BEHAVIOR AS WELL AS BASED ON THE NUMBER OF FREE PARAMETERS
                 THE MODEL HAS
         INTPUTS: MODEL FITTED
         OUTPUTS: FLOAT
@@ -95,15 +95,15 @@ class FitPerformance:
                                             num_cross_validation_splitting_strategy=5,
                                             bl_return_train_score=True, bl_randomized_search=True):
         """
-        REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_sup_to_sup_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH, 
+        REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_sup_to_sup_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH,
             https://towardsdatascience.com/machine-learning-gridsearchcv-randomizedsearchcv-d36b89231b10
-        DOCSTRING: FIDDLE AN ESTIMATOR WITH A COMBINATION OF HYPERPARAMETHERS AND FINDING THE 
+        DOCSTRING: FIDDLE AN ESTIMATOR WITH A COMBINATION OF HYPERPARAMETHERS AND FINDING THE
             OPTIMAL SOLUTION
-        INPUTS: MODEL ESTIMATOR (NORMALLY FROM SKLEARN), PARAMETERS GRID, SCORING METHOD, 
-            X ARRAY OF REAL NUMBERS, Y ARRAY OF REAL NUMBERS, NUMBER OF CROSS VALIDATION SPLITTING 
+        INPUTS: MODEL ESTIMATOR (NORMALLY FROM SKLEARN), PARAMETERS GRID, SCORING METHOD,
+            X ARRAY OF REAL NUMBERS, Y ARRAY OF REAL NUMBERS, NUMBER OF CROSS VALIDATION SPLITTING
             STRATEGY, BOOLEAN TO WHETER RETURN OF NOT TRAINNING SCORE AND RADOMIZED SEARCH BOOLEAN
-        OUTPUTS: DICTIONARY WITH BEST PARAMETERS, SCORE, BEST ESTIMATOR, CV RESULTS (RETURN A 
-            LIST OF TUPLES WITH RMSE, OR ROOT MEAN SQUARED ERROR, IN WHICH LOWER IS BETTER, AND THE 
+        OUTPUTS: DICTIONARY WITH BEST PARAMETERS, SCORE, BEST ESTIMATOR, CV RESULTS (RETURN A
+            LIST OF TUPLES WITH RMSE, OR ROOT MEAN SQUARED ERROR, IN WHICH LOWER IS BETTER, AND THE
             PARAMETHERS CONSIDERED), AND THE MODEL REGRESSION WITH THE INPUTS OPTIMIZED
         """
         # fiddle estimator with hyperparameters until finding the optimal combination
@@ -140,25 +140,25 @@ class FitPerformance:
             'rmse': np.sqrt(self.mean_squared_error(array_y_real_numbers,
                                                     best_model_prediction))
         }
-    
+
     def accuracy_predictions(self, model, array_y, array_x,
                              cross_validation_folds=3, scoring_method='accuracy',
                              cross_val_model='score', key_scores='scores',
                              f1_score_average='macro'):
         """
         REFERENCES: (BINARY CLASSIFIERS + ROC CURVE) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
-        DOCSTRING: CROSS VALIDATION, CONFUSION MATRIX, INSTEAD OF RETURNING THE EVALUATION SCORE, 
-            IT RETURNS THE PREDICTIONS MADE ON EACH TEST FOLD OF THE CROSS VALIDATION, PLACED 
+        DOCSTRING: CROSS VALIDATION, CONFUSION MATRIX, INSTEAD OF RETURNING THE EVALUATION SCORE,
+            IT RETURNS THE PREDICTIONS MADE ON EACH TEST FOLD OF THE CROSS VALIDATION, PLACED
             IN A MATRIX OF TRUE AND FALSE POSITIVES AND NEGATIVES
-        INPUTS: MODEL FITTED, ARRAY WITH DATA, TARGET, CROSS VALIDATION FOLDS, SCORING METHOD, 
-            CROSS VALIDATION MODEL (SCORE AS DEFAULT), KEY SCORES (SCORES AS DEFAULT), AND 
-            F1 SCORE AVERAGE (MACRO AS DEFAULT, BUT IF THE DATASET HAS MORE INSTANCES OF ONE 
+        INPUTS: MODEL FITTED, ARRAY WITH DATA, TARGET, CROSS VALIDATION FOLDS, SCORING METHOD,
+            CROSS VALIDATION MODEL (SCORE AS DEFAULT), KEY SCORES (SCORES AS DEFAULT), AND
+            F1 SCORE AVERAGE (MACRO AS DEFAULT, BUT IF THE DATASET HAS MORE INSTANCES OF ONE
             TARGET LABEL ONE MAY WANT TO USE WEIGHTED INSTEAD OF MACRO)
-        OUTPUTS: CROSS VALIDATION, CONFUSION MATRIX (2X2 MATRIX WITH TRUE NEGATIVE AND TRUE 
-            POSITIVE VALUES IN THE MAIN DIAGONAL, AND FALSE POSITIVE AND FALSE NEGATIVE IN THE 
+        OUTPUTS: CROSS VALIDATION, CONFUSION MATRIX (2X2 MATRIX WITH TRUE NEGATIVE AND TRUE
+            POSITIVE VALUES IN THE MAIN DIAGONAL, AND FALSE POSITIVE AND FALSE NEGATIVE IN THE
             AUXILIARY DIAGONAL), PRECISION SCORE (TP / (TP + FP)), RECALL (TP / (TP + FN)),
-            F1 (HARMONIC MEAN OF PRECISION AND RECALL) AND RERCEIVER OPERATING CHARACTERISTC - 
-            AREA UNDER THE CURVE (ROC - AUC), BEING THE ESTIMATOR CLOSER TO 1 BEST IN THIS SCORE 
+            F1 (HARMONIC MEAN OF PRECISION AND RECALL) AND RERCEIVER OPERATING CHARACTERISTC -
+            AREA UNDER THE CURVE (ROC - AUC), BEING THE ESTIMATOR CLOSER TO 1 BEST IN THIS SCORE
             BETTER
         """
         # cross validation scores
@@ -178,22 +178,22 @@ class FitPerformance:
             'precision_score': precision_score(array_y, array_cross_validation_scores),
             'recall_score': recall_score(array_y, array_cross_validation_scores),
             'f1_score': f1_score(array_y, array_cross_validation_scores,
-                                 average=f1_score_average), 
+                                 average=f1_score_average),
             'roc_auc_score': roc_auc_score(array_y, array_cross_validation_scores)
         }
-    
+
     def fitting_perf_eval(self, array_y, array_y_hat):
         """
         REFERENCES: https://medium.com/@maxgrossman10/accuracy-recall-precision-f1-score-with-python-4f2ee97e0d6
-        DOCSTRING: FITTING PERFOMANCE EVALUATION METRICS - F1 USED WHEN THERE IS AN INBALANCE BETWEEN 
+        DOCSTRING: FITTING PERFOMANCE EVALUATION METRICS - F1 USED WHEN THERE IS AN INBALANCE BETWEEN
             ERRORS TYPE I AND II, OTHERWISE ACCURACY WOULD BE USED
         INPUTS: Y ARRAY AND Y HAT ARRAY
         OUTPUTS: DICTIONARY
         """
         return {
-            'accuracy': accuracy_score(array_y, array_y_hat), 
-            'precision': precision_score(array_y, array_y_hat), 
-            'recall_sensitivity': recall_score(array_y, array_y_hat), 
-            'f1_score': f1_score(array_y, array_y_hat), 
+            'accuracy': accuracy_score(array_y, array_y_hat),
+            'precision': precision_score(array_y, array_y_hat),
+            'recall_sensitivity': recall_score(array_y, array_y_hat),
+            'f1_score': f1_score(array_y, array_y_hat),
             'r2_score': r2_score(array_y, array_y_hat)
         }

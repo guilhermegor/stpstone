@@ -18,10 +18,12 @@ class DBLogs:
     ) -> pd.DataFrame:
         """
         Adds audit columns to the DataFrame for logging.
+
         Args:
             - df_ (pandas.DataFrame): DataFrame to update.
             - str_url (str): URL to insert into the DataFrame.
             - dt_last_update (str): Timestamp of the last update.
+
         Returns:
             - pd.DataFrame: DataFrame with audit log information.
         """
@@ -33,9 +35,11 @@ class DBLogs:
     def insert_user_info(self, df_: pd.DataFrame, user_id: str) -> pd.DataFrame:
         """
         Inserts user information into the dataframe for traceability.
+
         Args:
             df_ (pandas.DataFrame): DataFrame to update.
             user_id (str): ID of the user responsible for the update.
+
         Returns:
             pd.DataFrame: Updated DataFrame with user information.
         """
@@ -45,8 +49,10 @@ class DBLogs:
     def insert_host_info(self, df_: pd.DataFrame) -> pd.DataFrame:
         """
         Inserts the host name (machine) where the data is being processed into the dataframe.
+
         Args:
             df_ (pandas.DataFrame): DataFrame to update.
+
         Returns:
             pd.DataFrame: Updated DataFrame with host information.
         """
@@ -56,9 +62,11 @@ class DBLogs:
     def insert_error_info(self, df_: pd.DataFrame, error_msg: str) -> pd.DataFrame:
         """
         Inserts error information into the dataframe to track the issues.
+
         Args:
             df_ (pandas.DataFrame): DataFrame to update.
             error_msg (str): Error message to insert.
+
         Returns:
             pd.DataFrame: Updated DataFrame with error information.
         """
@@ -70,10 +78,12 @@ class DBLogs:
     ) -> pd.DataFrame:
         """
         Inserts logging information for data insertions into the dataframe.
+
         Args:
             df_ (pandas.DataFrame): DataFrame to update.
             action_type (str): Type of action (insert, update, delete).
             dt_action (str): Timestamp of the action.
+
         Returns:
             pd.DataFrame: Updated DataFrame with logging information.
         """

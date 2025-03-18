@@ -468,9 +468,11 @@ class StrHandler:
             - lower_constant - 'lower_constant'
             - UpperFirst - 'upper_first'
             - Default (words separated by spaces, hyphens or underscores) - 'default'
+
         Args:
             from_case (str): Current case of the string
             to_case (str): Desired case of the string
+
         Returns:
             str: Transformed string
         """
@@ -532,9 +534,11 @@ class StrHandler:
     def fill_placeholders(self, str_: str, dict_placeholders: Dict[str, Any]) -> str:
         """
         Fill fstr named placeholders
+
         Args:
             str_ (str): fstr
             dict_placeholders (Dict[str, Any]): named placeholders
+
         Returns:
             str
         """

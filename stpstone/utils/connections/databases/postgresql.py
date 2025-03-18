@@ -13,12 +13,12 @@ from stpstone.utils.loggs.create_logs import CreateLog
 
 class PostgreSQLDB:
 
-    def __init__(self, dbname:str, user:str, password:str, host:str, port:int, 
+    def __init__(self, dbname:str, user:str, password:str, host:str, port:int,
                  str_schema:str='public', logger:Optional[Logger]=None) \
         -> None:
         """
         DOCSTRING: INITIALIZES THE CONNECTION TO THE POSTGRESQL DATABASE
-        INPUTS: 
+        INPUTS:
             - DBNAME:STR
             - USER:STR
             - PASSWORD:STR
@@ -54,7 +54,7 @@ class PostgreSQLDB:
         """
         self.cursor.execute(str_query)
 
-    def read(self, str_query:str, dict_type_cols:Optional[Dict[str, Any]]=None, 
+    def read(self, str_query:str, dict_type_cols:Optional[Dict[str, Any]]=None,
               list_cols_dt:Optional[List[str]]=None, str_fmt_dt:Optional[str]=None) -> pd.DataFrame:
         """
         DOCSTRING: RUN QUERY AND RETURN RESULTS AS DATAFRAME
@@ -71,7 +71,7 @@ class PostgreSQLDB:
         # return dataframe
         return df_
 
-    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str, 
+    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str,
         bl_insert_or_ignore:bool=False) -> None:
         """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A POSTGRESQL TABLE
@@ -98,8 +98,8 @@ class PostgreSQLDB:
             self.conn.commit()
             if self.logger is not None:
                 CreateLog().infos(
-                    self.logger, 
-                    f'Successful commit in db {self.dict_db_config["dbname"]} ' 
+                    self.logger,
+                    f'Successful commit in db {self.dict_db_config["dbname"]} '
                     + f'/ table {str_table_name}.'
                 )
         except Exception as e:
@@ -107,7 +107,7 @@ class PostgreSQLDB:
             self.close
             if self.logger is not None:
                 CreateLog().errors(
-                    self.logger, 
+                    self.logger,
                     'ERROR WHILE INSERTING DATA\n'
                     + f'DB_CONFIG: {self.dict_db_config}\n'
                     + f'TABLE_NAME: {str_table_name}\n'
@@ -130,11 +130,11 @@ class PostgreSQLDB:
         OUTPUTS: -
         """
         self.conn.close()
-    
+
     def _bkp_db(self, str_backup_dir:str, str_bkp_name:str=None) -> str:
         """
         DOCSTRING: BACKUP DATABASE - NEED PG_DUMP TO BE CONFIGURED WITHIN ENVIRONMENT VARIABLES
-        INPUTS: 
+        INPUTS:
             - BACKUP_DIR (STR): DIRECTORY WHERE THE BACKUP FILE WILL BE SAVED
         OUTPUTS: STR: PATH TO THE BACKUP FILE, OR AN ERROR MESSAGE.
         """

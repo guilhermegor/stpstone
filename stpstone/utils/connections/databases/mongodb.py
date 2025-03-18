@@ -23,7 +23,7 @@ class MongoConn:
             cls._instance._collection = None
         return cls._instance
 
-    def __init__(self, str_host:str='localhost', int_port:int=27017, str_dbname:str='test', str_collection:str='data', 
+    def __init__(self, str_host:str='localhost', int_port:int=27017, str_dbname:str='test', str_collection:str='data',
                  logger:Optional[Logger]=None) -> None:
         """
         DOCSTRING: INITIALIZES THE CONNECTION TO MONGODB
@@ -88,7 +88,7 @@ class MongoConn:
         """
         return self
 
-    def __exit__(self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException], 
+    def __exit__(self, exc_type: Optional[type[BaseException]], exc_val: Optional[BaseException],
                  exc_tb: Optional[BaseException]) -> None:
         """
         DOCSTRING: CLOSES THE CONNECTION WHEN EXITING THE CONTEXT

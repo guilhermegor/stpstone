@@ -11,7 +11,7 @@ from stpstone.utils.connections.netops.session import ReqSession
 
 cls_ = IndexesTheorPortfB3(
     session=None,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
+    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 1),
     cls_db=None
 )
 

@@ -22,7 +22,7 @@ class GlobalRates:
         list_outlooks = list()
         # request html
         bs_html = HtmlHndler().html_bs_parser(
-            url, 
+            url,
             bl_verify
         )
         # table
@@ -78,7 +78,7 @@ class GlobalRates:
             for div in bs_table.find_all('div', class_='table-normal text-end'):
                 try:
                     str_outlook = StrHandler().replace_all(
-                        div.find('i')['class'][1], 
+                        div.find('i')['class'][1],
                         YAML_GLB_RT['central_banks_rates']['rate_outlook_desc']
                     )
                     list_outlooks.append(str_outlook)
@@ -93,15 +93,15 @@ class GlobalRates:
             pass
         # creating list of dictionaries
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_th, 
+            list_th,
             list_td
         )
         # turning into dataframe
         df_ = pd.DataFrame(list_ser)
         # adding logging
         df_ = DBLogs().audit_log(
-            df_, 
-            DatesBR().utc_from_dt(DatesBR().curr_date), 
+            df_,
+            DatesBR().utc_from_dt(DatesBR().curr_date),
             DatesBR().utc_log_ts
         )
         # return dataframe
@@ -115,7 +115,7 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['libor_rates']['url'], 
+            YAML_GLB_RT['libor_rates']['url'],
             YAML_GLB_RT['libor_rates']['bl_verify']
         )
 
@@ -127,10 +127,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['euribor_rates']['url'], 
+            YAML_GLB_RT['euribor_rates']['url'],
             YAML_GLB_RT['euribor_rates']['bl_verify']
         )
-    
+
     @property
     def central_banks(self):
         """
@@ -139,10 +139,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['central_banks_rates']['url'], 
+            YAML_GLB_RT['central_banks_rates']['url'],
             YAML_GLB_RT['central_banks_rates']['bl_verify']
         )
-    
+
     @property
     def ester(self):
         """
@@ -151,10 +151,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['ester']['url'], 
+            YAML_GLB_RT['ester']['url'],
             YAML_GLB_RT['ester']['bl_verify']
         )
-    
+
     @property
     def sonia(self):
         """
@@ -163,10 +163,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['sonia']['url'], 
+            YAML_GLB_RT['sonia']['url'],
             YAML_GLB_RT['sonia']['bl_verify']
         )
-    
+
     @property
     def sofr(self):
         """
@@ -175,10 +175,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['sofr']['url'], 
+            YAML_GLB_RT['sofr']['url'],
             YAML_GLB_RT['sofr']['bl_verify']
         )
-    
+
     @property
     def usa_cpi(self):
         """
@@ -187,10 +187,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['usa_cpi']['url'], 
+            YAML_GLB_RT['usa_cpi']['url'],
             YAML_GLB_RT['usa_cpi']['bl_verify']
         )
-    
+
     @property
     def uk_cpi(self):
         """
@@ -199,10 +199,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['uk_cpi']['url'], 
+            YAML_GLB_RT['uk_cpi']['url'],
             YAML_GLB_RT['uk_cpi']['bl_verify']
         )
-    
+
     @property
     def can_cpi(self):
         """
@@ -211,10 +211,10 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['can_cpi']['url'], 
+            YAML_GLB_RT['can_cpi']['url'],
             YAML_GLB_RT['can_cpi']['bl_verify']
         )
-    
+
     @property
     def eur_cpi(self):
         """
@@ -223,6 +223,6 @@ class GlobalRates:
         OUTPUTS:
         """
         return self.generic_req(
-            YAML_GLB_RT['eur_cpi']['url'], 
+            YAML_GLB_RT['eur_cpi']['url'],
             YAML_GLB_RT['eur_cpi']['bl_verify']
         )

@@ -8,8 +8,8 @@ from stpstone.utils.connections.netops.session import ReqSession
 
 
 session = ReqSession(
-    bl_new_proxy=True, 
-    bl_use_timer=True, 
+    bl_new_proxy=True,
+    bl_use_timer=True,
     float_min_ratio_times_alive_dead=0.02,
     float_max_timeout=600
 ).session
@@ -19,7 +19,7 @@ cls_adfn_ww = ADVFNWW(
     session=None,
     dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 5),
     dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 0),
-    str_market='BOV', 
+    str_market='BOV',
     str_ticker='PETR4'
 )
 df_ = cls_adfn_ww.source('daily_ohlcv', bl_fetch=True, bl_debug=False)

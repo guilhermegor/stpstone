@@ -9,8 +9,8 @@ folder_path=${folder_path:-./ingestion}
 
 # ensure the folder path is within the project directory
 if [[ "$folder_path" != ./* ]]; then
-  echo "Error: The folder path must be within the project directory."
-  exit 1
+    echo "Error: The folder path must be within the project directory."
+    exit 1
 fi
 
 # construct the full directory path
@@ -25,8 +25,6 @@ file_name=${file_name:-request_config}
 
 # create yaml file
 cat <<EOF > "$full_dir_path/$file_name.py"
-### SCAFFOLDING INGESTION REQUEST ###
-
 # pypi.org libs
 import pandas as pd
 from datetime import datetime
@@ -46,12 +44,12 @@ class ScaffoldingReq(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None,
-        token:Optional[str]=None,
-        list_slugs:Optional[List[str]]=None
+        session: Optional[ReqSession] = None,
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        cls_db: Optional[Session] = None,
+        logger: Optional[Logger] = None,
+        token: Optional[str] = None,
+        list_slugs: Optional[List[str]] = None
     ) -> None:
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
@@ -68,7 +66,7 @@ class ScaffoldingReq(ABCRequests):
         self.logger = logger
         self.list_slugs = list_slugs
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         return None
 EOF
 

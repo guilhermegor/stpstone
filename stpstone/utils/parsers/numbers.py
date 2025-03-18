@@ -161,8 +161,8 @@ class NumHandler:
         INPUTS:
         OUTPUTS:
         """
-        return [float(x) / float_epsilon for x in range(int(float_inf * float_epsilon), 
-                                                        int(float_sup * float_epsilon), 
+        return [float(x) / float_epsilon for x in range(int(float_inf * float_epsilon),
+                                                        int(float_sup * float_epsilon),
                                                         int(float_pace * float_epsilon))]
 
     def clamp(self, n, minn, maxn):

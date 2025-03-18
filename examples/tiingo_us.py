@@ -9,10 +9,10 @@ from stpstone.utils.cals.handling_dates import DatesBR
 
 df_ = TiingoUS(
     session=None,
-    dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 52), 
-    dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1), 
-    cls_db=None, 
-    token=get_password('TIINGO', 'API_KEY'), 
+    dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 52),
+    dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+    cls_db=None,
+    token=get_password('TIINGO', 'API_KEY'),
     list_slugs=['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META']
 ).source('ohlcv_adjusted', bl_debug=False, bl_fetch=True)
 print(f'DF TIINGO: \n{df_}')

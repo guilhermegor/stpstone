@@ -1,12 +1,8 @@
-### SECURITIES ACCEPTED AS WARRANT BY BRAZILIAN SECURITIES EXCHANGE ###
-
-# pypi.org libs
 import pandas as pd
 from typing import Optional
 from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
-# project modules
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
@@ -16,7 +12,7 @@ class BondIssuersWB3(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None, 
+        session:Optional[ReqSession]=None,
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
@@ -29,7 +25,7 @@ class BondIssuersWB3(ABCRequests):
             cls_db=cls_db,
             logger=logger
         )
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         return None
 

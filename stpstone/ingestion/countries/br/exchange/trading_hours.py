@@ -1,6 +1,3 @@
-### TRADING HOURS B3 INGESTION REQUEST ###
-
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional, List, Any, Tuple
@@ -8,7 +5,6 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-# project modules
 from stpstone._config.global_slots import YAML_B3_TRADING_HOURS_B3
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -27,8 +23,8 @@ class TradingHoursB3(ABCRequests):
         session:Optional[ReqSession]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
-        logger:Optional[Logger]=None, 
-        token:Optional[str]=None, 
+        logger:Optional[Logger]=None,
+        token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
         super().__init__(
@@ -36,17 +32,17 @@ class TradingHoursB3(ABCRequests):
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
-            logger=logger, 
-            token=token, 
+            logger=logger,
+            token=token,
             list_slugs=list_slugs
         )
         self.session = session
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token, 
+        self.token = token,
         self.list_slugs = list_slugs
-    
+
     def td_th_parser(self, req_resp:Response, list_th:List[Any]) \
         -> Tuple[List[Any], int, Optional[int]]:
         list_headers = list_th.copy()
@@ -54,7 +50,7 @@ class TradingHoursB3(ABCRequests):
         int_end_td = None
         if StrHandler().match_string_like(req_resp.url, '*#source=stocks*') == True:
             list_headers = [
-                list_th[0], 
+                list_th[0],
                 list_th[1] + ' Início',
                 list_th[1] + ' Fim',
                 list_th[2] + ' Início',
@@ -74,7 +70,7 @@ class TradingHoursB3(ABCRequests):
             int_end_td = 195
         elif StrHandler().match_string_like(req_resp.url, '*#source=stock_options*') == True:
             list_headers = [
-                list_th[9], 
+                list_th[9],
                 list_th[13] + ' Antes do Vencimento - Início',
                 list_th[13] + ' Antes do Vencimento - Fim',
                 list_th[13] + ' No Vencimento - Início',
@@ -88,8 +84,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=pmi_future*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -106,8 +102,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = 52
         elif StrHandler().match_string_like(req_resp.url, '*#source=stock_index_futures*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -124,8 +120,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=interest_rates*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -142,8 +138,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = 130
         elif StrHandler().match_string_like(req_resp.url, '*#source=usd_interest_rates*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -160,8 +156,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=commodities*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -171,8 +167,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=crypto*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -187,8 +183,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=foreign_exchange_and_dollar_spot*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2] + ' - Opening',
                 list_th[2] + ' - Closing',
                 list_th[3] + ' - Opening',
@@ -205,8 +201,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=otc*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1] + ' - Início', 
+                list_th[0],
+                list_th[1] + ' - Início',
                 list_th[1] + ' - Fim',
                 list_th[2] + ' - Início',
                 list_th[2] + ' - Fim',
@@ -229,8 +225,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         elif StrHandler().match_string_like(req_resp.url, '*#source=opf_before_exc_date*') == True:
             list_headers = [
-                list_th[0], 
-                list_th[1], 
+                list_th[0],
+                list_th[1],
                 list_th[2],
                 list_th[3]
             ]
@@ -238,8 +234,8 @@ class TradingHoursB3(ABCRequests):
             int_end_td = 32
         elif StrHandler().match_string_like(req_resp.url, '*#source=opf_after_exc_date*') == True:
             list_headers = [
-                list_th[4], 
-                list_th[5], 
+                list_th[4],
+                list_th[5],
                 list_th[6],
                 list_th[7] + ' Without Exercise Risk',
                 list_th[7] + ' Holder'
@@ -249,7 +245,7 @@ class TradingHoursB3(ABCRequests):
         else:
             if self.logger is not None:
                 CreateLog().warnings(
-                    self.logger, 
+                    self.logger,
                     'No source found in url, for HTML webscraping, please revisit the code'
                     + f' if it is an unexpected behaviour - URL: {req_resp.url}'
                 )
@@ -288,7 +284,7 @@ class TradingHoursB3(ABCRequests):
             print(f'LIST TD TRT: {list_td[int_init_td:int_end_td]}')
             print(f'LEN LIST TD: {len(list_td[int_init_td:int_end_td])}')
         list_ser = HandlingDicts().pair_headers_with_data(
-            list_headers, 
+            list_headers,
             list_td[int_init_td:int_end_td]
         )
         return pd.DataFrame(list_ser)

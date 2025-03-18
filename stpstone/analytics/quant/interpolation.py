@@ -41,7 +41,7 @@ class Interpolation:
 
     def divided_diff_newton_polynomial_interpolation(self, array_x, array_y):
         """
-        REFERENCES: PYTHON PROGRAMMING AND NUMERICAL METHODS - A GUIDE FOR ENGINEERS AND SCIENTISTS; 
+        REFERENCES: PYTHON PROGRAMMING AND NUMERICAL METHODS - A GUIDE FOR ENGINEERS AND SCIENTISTS;
             QINGKAI KON, TIMMY SIAUW AND ALEXANDRE M. BAYERN
             https://pythonnumericalmethods.berkeley.edu/notebooks/chapter17.05-Newtons-Polynomial-Interpolation.html
         DOCSTRING: FUNCTION TO CALCULATE THE DIVIDED DIFFERENCE TABLE

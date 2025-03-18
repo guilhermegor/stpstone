@@ -19,7 +19,7 @@ class HandlingTXTFiles:
     def generator_file(self, complete_path, method='r', regex='[^A-Za-z0-9-.*-:-<-=-\s]+',
                        non_matching_regex_characaters='|'):
         """
-        DOCSTRING: 
+        DOCSTRING:
         INPUTS:
         OUTPUTS:
         """
@@ -39,7 +39,7 @@ class HandlingTXTFiles:
     def remove_first_n_lines(self, complete_path, n=1):
         """
         DOCSTRING: REMOVE THE FIRST N LINES OF A TXT FILE
-        INPUTS: COMPLETE PATH AND N FROM NUMBER OF LINES (1 AS DEFAULT) 
+        INPUTS: COMPLETE PATH AND N FROM NUMBER OF LINES (1 AS DEFAULT)
         OUTPUTS: ORIGINAL CONTENT WITHOUT THE FIRST N LINES
         """
         with open(complete_path, 'r') as file_in:

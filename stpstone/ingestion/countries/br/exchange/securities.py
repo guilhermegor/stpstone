@@ -1,13 +1,9 @@
-### BRAZILLIAN SECURITIES EXCHANGE REGISTRATION ###
-
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
-# project modules
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -21,7 +17,7 @@ class ExchRegBR(ABCRequests):
     def __init__(
         self,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        session:Optional[ReqSession]=None, 
+        session:Optional[ReqSession]=None,
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
@@ -35,7 +31,7 @@ class ExchRegBR(ABCRequests):
             cls_db=cls_db,
             logger=logger
         )
-    
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         # setting variables
         list_ser = list()

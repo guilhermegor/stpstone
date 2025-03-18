@@ -13,15 +13,15 @@ session = None
 
 if session is not None:
     cls_yf = YFinanceProvider(
-        list_tickers=list_tickers, 
-        dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 52), 
+        list_tickers=list_tickers,
+        dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 52),
         dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         session=session
     )
 else:
     cls_yf = YFinanceProvider(
-        list_tickers=list_tickers, 
-        dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 52), 
+        list_tickers=list_tickers,
+        dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 52),
         dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1)
     )
 

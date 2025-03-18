@@ -165,10 +165,10 @@ class HandlingLists:
         # list index for for lower and upper bound
         if (value_to_put_in_between in sorted_list) and sorted_list[-1] != value_to_put_in_between:
             list_idx_lower_upper_bound = [bisect.bisect_left(sorted_list, value_to_put_in_between),
-                                          bisect.bisect_left(sorted_list, 
+                                          bisect.bisect_left(sorted_list,
                                                              value_to_put_in_between) + 1]
         else:
-            list_idx_lower_upper_bound = [bisect.bisect_left(sorted_list, 
+            list_idx_lower_upper_bound = [bisect.bisect_left(sorted_list,
                                                              value_to_put_in_between) - 1,
                                           bisect.bisect_left(sorted_list, value_to_put_in_between)]
         # dictionary with responses
@@ -201,7 +201,7 @@ class HandlingLists:
         """
         return sorted_list[min(range(len(sorted_list)), key=lambda i:
                                abs(sorted_list[i] - value_to_put_in_between))]
-    
+
     def closest_number_within_list(list_, number_):
         """
         DOCSTRING: CLOSEST NUMBER TO NUMBER_ WITHIN A LIST
