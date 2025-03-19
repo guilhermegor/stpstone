@@ -17,6 +17,7 @@ from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.lists import HandlingLists
 
 
 class GlobalRates(ABCRequests):
@@ -85,21 +86,36 @@ class GlobalRates(ABCRequests):
             pass
         return list_th_raw, list_td_raw, list_outlooks_raw
 
-    def td_th_parser(self, bs_table: BeautifulSoup, str_source: str) -> pd.DataFrame:
-        list_th_raw, list_td_raw, list_outlooks_raw = self.get_td_th_raw(bs_table)
+    def trt_td_th_raw(self, list_th_raw: List[Any], list_td_raw: List[Any], str_source: str) \
+        -> pd.DataFrame:
         list_th_dts = [x for x in list_th_raw if len(x) > 0]
         list_td_rts_names = [x for x in list_td_raw if isinstance(x, str)]
         list_td_rts_values = [x for x in list_td_raw if NumHandler().is_number(x) == True]
         list_rts_names = self.repeat_elements_in_sequence(list_td_rts_names, len(list_th_dts))
         list_rt_dts = self.repeat_list_n_times(list_th_dts, len(list_td_rts_names))
-        if str_source in ["ester"]:
+        if str_source in \
+            ["ester", "sonia", "sofr", "usa_cpi", "british_cpi", "canadian_cpi", "european_cpi"]:
             list_rt_dts = list_td_rts_names.copy()
             list_rts_names = [f"{str_source}".upper()] * len(list_td_rts_values)
-        return pd.DataFrame({
+        list_ser = {
             "DATE": list_rt_dts,
             "RATE_NAME": list_rts_names,
             "RATE_VALUE": list_td_rts_values
-        })
+        }
+        if str_source in ["central_banks"]:
+            list_cols = ["CENTRAL_BANK"] + HandlingLists().remove_duplicates(list_rt_dts)
+            list_data = HandlingLists().remove_consecutive_duplicates(list_rts_names)
+            for i_rt_val, i in enumerate(range(2, len(list_data) + len(list_td_rts_values) + 1, 6)):
+                i_rt_val_ = i_rt_val * 2
+                list_data.insert(i, list_td_rts_values[i_rt_val_])
+                list_data.insert(i + 2, list_td_rts_values[i_rt_val_ + 1])
+            list_ser = HandlingDicts().pair_headers_with_data(list_cols, list_data)
+        return list_ser
+
+    def td_th_parser(self, bs_table: BeautifulSoup, str_source: str) -> pd.DataFrame:
+        list_th_raw, list_td_raw, list_outlooks_raw = self.get_td_th_raw(bs_table)
+        list_ser = self.trt_td_th_raw(list_th_raw, list_td_raw, str_source)
+        return pd.DataFrame(list_ser)
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         bs_html = HtmlHndler().bs_parser(req_resp)

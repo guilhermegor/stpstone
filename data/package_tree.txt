@@ -49,7 +49,6 @@ stpstone
 │   │       └── macroeconomics
 │   │           └── global_rates.yaml
 │   ├── generic.yaml
-│   ├── global_rates.yaml
 │   ├── global_slots.py
 │   ├── inoa.yaml
 │   ├── llms.yaml
@@ -84,7 +83,6 @@ stpstone
 │   │   └── gpt.py
 │   ├── macroeconomics
 │   │   ├── br_macro.py
-│   │   ├── global_rates.py
 │   │   ├── usa_macro.py
 │   │   └── world_gov_bonds.py
 │   ├── perf_metrics
