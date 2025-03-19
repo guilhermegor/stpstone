@@ -57,9 +57,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
     def check_is_date(self, dt_: datetime) -> bool:
         return isinstance(dt_, date)
 
-    def str_date_to_datetime(
-        self, date_str: str, format_input: str = "DD/MM/YYYY"
-    ) -> datetime:
+    def str_date_to_datetime(self, date_str: str, format_input: str = "DD/MM/YYYY") -> datetime:
         """
         String date to datetime
         Args:
@@ -81,6 +79,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             return date(int(date_str[:4]), int(date_str[4:6]), int(date_str[6:]))
         elif format_input == "YYYY-MM-DD":
             return date(int(date_str[0:4]), int(date_str[5:7]), int(date_str[-2:]))
+        elif format_input == "MM-DD-YYYY":
+            return date(int(date_str[-4:]), int(date_str[0:2]), int(date_str[3:5]))
         elif format_input == "YYMMDD":
             return date(
                 int("20" + date_str[0:2]), int(date_str[2:4]), int(date_str[-2:])
@@ -92,9 +92,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         else:
             raise Exception(f"Not a valid date format {format_input}")
 
-    def list_wds(
-        self, dt_inf: datetime, dt_sup: datetime, int_wd_bef: int
-    ) -> List[int]:
+    def list_wds(self, dt_inf: datetime, dt_sup: datetime, int_wd_bef: int) -> List[int]:
         """
         List of working days between two dates
         Args:

@@ -18,16 +18,14 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class HtmlHndler:
 
-    def bs_parser(self, url:str, bl_verify:bool=True,
-                       method:str='GET', parser:str='html.parser') -> Union[BeautifulSoup, str]:
+    def bs_parser(self, req_resp: Response, parser:str='html.parser') -> Union[BeautifulSoup, str]:
         """
         DOCSTRING: HTML PARSER THROUGH BEAUTIFULSOUP
         INPUTS: HTML TEXT
         OUTPUTS: SOUP
         """
         try:
-            html_status_invest = request(method, url, verify=bl_verify).content
-            return BeautifulSoup(html_status_invest, parser)
+            return BeautifulSoup(req_resp.content, parser)
         except HTTPError as e:
             return 'HTTP Error: {}'.format(e)
 

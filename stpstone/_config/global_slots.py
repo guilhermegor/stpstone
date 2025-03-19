@@ -1,10 +1,6 @@
-### GLOBAL CONSTANTS ###
-
-# pypi.org libs
 import os
-
-# local libs
 from stpstone.utils.parsers.yaml import reading_yaml
+
 
 root_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -73,6 +69,9 @@ YAML_WW_FMP = reading_yaml(
 )
 YAML_WW_INVESTINGCOM = reading_yaml(
     os.path.join(root_path, "countries/ww/exchange/markets/investingcom.yaml")
+)
+YAML_WW_GR = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml")
 )
 
 # macroeconomics

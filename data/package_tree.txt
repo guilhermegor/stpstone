@@ -37,15 +37,17 @@ stpstone
 │   │   │       ├── alphavantage.yaml
 │   │   │       └── tiingo.yaml
 │   │   └── ww
-│   │       └── exchange
-│   │           ├── crypto
-│   │           │   ├── coincap.yaml
-│   │           │   ├── coinmarket.yaml
-│   │           │   └── coinpaprika.yaml
-│   │           └── markets
-│   │               ├── advfn.yaml
-│   │               ├── fmp.yaml
-│   │               └── investingcom.yaml
+│   │       ├── exchange
+│   │       │   ├── crypto
+│   │       │   │   ├── coincap.yaml
+│   │       │   │   ├── coinmarket.yaml
+│   │       │   │   └── coinpaprika.yaml
+│   │       │   └── markets
+│   │       │       ├── advfn.yaml
+│   │       │       ├── fmp.yaml
+│   │       │       └── investingcom.yaml
+│   │       └── macroeconomics
+│   │           └── global_rates.yaml
 │   ├── generic.yaml
 │   ├── global_rates.yaml
 │   ├── global_slots.py
@@ -164,16 +166,18 @@ stpstone
 │       │       ├── alphavantage.py
 │       │       └── tiingo.py
 │       └── ww
-│           └── exchange
-│               ├── crypto
-│               │   ├── coincap.py
-│               │   ├── coinmarket.py
-│               │   └── coinpaprika.py
-│               └── markets
-│                   ├── advfn.py
-│                   ├── fmp.py
-│                   ├── investingcom.py
-│                   └── yf_ws.py
+│           ├── exchange
+│           │   ├── crypto
+│           │   │   ├── coincap.py
+│           │   │   ├── coinmarket.py
+│           │   │   └── coinpaprika.py
+│           │   └── markets
+│           │       ├── advfn.py
+│           │       ├── fmp.py
+│           │       ├── investingcom.py
+│           │       └── yf_ws.py
+│           └── macroeconomics
+│               └── global_rates.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py

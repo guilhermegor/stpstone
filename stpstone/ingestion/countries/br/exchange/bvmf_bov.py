@@ -43,21 +43,11 @@ class BVMFBOV(ABCRequests):
         self.list_slugs = list_slugs
         self.dt_ref_mm_yyyy = dt_ref.strftime('%m/%Y')
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         # setting variables
         list_th = list()
         list_td = list()
-        # format month and year to string
-        url = YAML_B3_BVMF_BOV['credentials']['host'] \
-            + StrHandler().fill_placeholders(
-                YAML_B3_BVMF_BOV['volumes']['app'],
-                {'dt_ref_mm_yyyy': self.dt_ref_mm_yyyy}
-            )
-        # request html
-        bs_html = HtmlHndler().bs_parser(
-            url,
-            bl_verify=YAML_B3_BVMF_BOV['volumes']['bl_verify']
-        )
+        bs_html = HtmlHndler().bs_parser(req_resp)
         # table
         bs_table = bs_html.find_all('table')[11]
         # looping within rows

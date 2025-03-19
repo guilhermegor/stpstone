@@ -1,0 +1,203 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://www.global-rates.com/
+  headers:
+  payload:
+  token:
+    host:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+euribor:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+    'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7'
+    'priority': 'u=0, i'
+    'referer': 'https://www.global-rates.com/en/interest-rates/euribor/5/euribor-interest-1-week/'
+    'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"'
+    'sec-ch-ua-mobile': '?0'
+    'sec-ch-ua-platform': '"Windows"'
+    'sec-fetch-dest': 'document'
+    'sec-fetch-mode': 'navigate'
+    'sec-fetch-site': 'same-origin'
+    'sec-fetch-user': '?1'
+    'upgrade-insecure-requests': '1'
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'
+    'Cookie': '_ga=GA1.1.239459218.1742329830; cid-1=0; ARRAffinity=9e133e3a04594b9b2868092341399e8f17c86dbc1f0586f1fc7b2aea126b9eb2; ARRAffinitySameSite=9e133e3a04594b9b2868092341399e8f17c86dbc1f0586f1fc7b2aea126b9eb2; _ga_DK6VN1CCNV=GS1.1.1742329830.1.1.1742330232.0.0.0; cid-1=0'
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: en/interest-rates/euribor/#bl_debug=True&source=euribor
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: MM-DD-YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: ww_globalrates_euribor
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    DATE: date
+    RATE_NAME: str
+    RATE_VALUE: float
+  df_read_params:
+
+libor:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+    'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7'
+    'cache-control': 'max-age=0'
+    'priority': 'u=0, i'
+    'referer': 'https://www.global-rates.com/en/interest-rates/libor/american-dollar/historical/'
+    'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"'
+    'sec-ch-ua-mobile': '?0'
+    'sec-ch-ua-platform': '"Windows"'
+    'sec-fetch-dest': 'document'
+    'sec-fetch-mode': 'navigate'
+    'sec-fetch-site': 'same-origin'
+    'sec-fetch-user': '?1'
+    'upgrade-insecure-requests': '1'
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'
+    'Cookie': '_ga=GA1.1.239459218.1742329830; cid-1=0; ARRAffinity=9e133e3a04594b9b2868092341399e8f17c86dbc1f0586f1fc7b2aea126b9eb2; ARRAffinitySameSite=9e133e3a04594b9b2868092341399e8f17c86dbc1f0586f1fc7b2aea126b9eb2; _ga_DK6VN1CCNV=GS1.1.1742347312.2.1.1742347490.0.0.0; cid-1=0'
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: en/interest-rates/libor/#bl_debug=True&source=libor
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: MM-DD-YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: ww_globalrates_libor
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    DATE: date
+    RATE_NAME: str
+    RATE_VALUE: float
+  df_read_params:
+
+ester:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+    'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7'
+    'priority': 'u=0, i'
+    'referer': 'https://www.global-rates.com/en/interest-rates/sofr/'
+    'sec-ch-ua': '"Chromium";v="134", "Not:A-Brand";v="24", "Google Chrome";v="134"'
+    'sec-ch-ua-mobile': '?0'
+    'sec-ch-ua-platform': '"Windows"'
+    'sec-fetch-dest': 'document'
+    'sec-fetch-mode': 'navigate'
+    'sec-fetch-site': 'same-origin'
+    'sec-fetch-user': '?1'
+    'upgrade-insecure-requests': '1'
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'
+    'Cookie': '_ga=GA1.1.239459218.1742329830; cid-1=0; ARRAffinity=9e133e3a04594b9b2868092341399e8f17c86dbc1f0586f1fc7b2aea126b9eb2; ARRAffinitySameSite=9e133e3a04594b9b2868092341399e8f17c86dbc1f0586f1fc7b2aea126b9eb2; _ga_DK6VN1CCNV=GS1.1.1742347312.2.1.1742348183.0.0.0; cid-1=0'
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: en/interest-rates/ester//#bl_debug=True&source=ester
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: MM-DD-YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: ww_globalrates_libor
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    DATE: date
+    RATE_NAME: str
+    RATE_VALUE: float
+  df_read_params:

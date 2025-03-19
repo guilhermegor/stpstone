@@ -3,13 +3,13 @@
 import json
 import re
 import uuid
+import ftfy
 from base64 import b64encode
 from fnmatch import fnmatch
 from string import ascii_lowercase, ascii_uppercase, digits
-from typing import Any, Dict
+from typing import Any, Dict, Union, List
 from unicodedata import combining, normalize
-
-import ftfy
+from urllib.parse import urlparse, parse_qs
 from basicauth import encode
 from bs4 import BeautifulSoup
 from unidecode import unidecode
@@ -389,7 +389,6 @@ class StrHandler:
         INPUTS: WORD
         OUTPUTS: STRING
         """
-
         def replace(m):
             str_ = m.group()
             if str_.isupper():
@@ -400,7 +399,6 @@ class StrHandler:
                 return str_.capitalize()
             else:
                 return str_
-
         return replace
 
     def replace_respecting_case(self, str_, str_replaced, str_replace):
@@ -558,3 +556,27 @@ class StrHandler:
         if required_zeros < 0:
             raise ValueError("Total length is too small for the given inputs.")
         return f"{str_prefix}{'0' * required_zeros}{str_num}"
+
+    def get_url_query(self, url: str, bl_include_fragment: bool = False) \
+        -> Dict[str, Union[str, List[str]]]:
+        """
+        Extracts parameters from a URL's query string or fragment.
+
+        Args:
+            url (str): The URL to parse.
+            bl_include_fragment (bool): Whether to include parameters from the fragment (after #).
+            Defaults to False.
+
+        Returns:
+            Dict[str, Union[str, List[str]]]: A dictionary of parameters. Single-value parameters
+            are returned as strings, while multi-value parameters are returned as lists of strings.
+        """
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        if bl_include_fragment == True:
+            fragment_params = parse_qs(parsed_url.fragment)
+            query_params.update(fragment_params)
+        return {
+            key: value[0] if len(value) == 1 else value
+            for key, value in query_params.items()
+        }

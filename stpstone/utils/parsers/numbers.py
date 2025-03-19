@@ -5,6 +5,8 @@ import operator
 import functools
 from fractions import Fraction
 from math import gcd
+from numbers import Number
+from typing import Any
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -184,3 +186,6 @@ class NumHandler:
             return True
         except ValueError:
             return False
+
+    def is_number(self, value_: Any) -> bool:
+        return isinstance(value_, (Number)) and not isinstance(value_, bool)

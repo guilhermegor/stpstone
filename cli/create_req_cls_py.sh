@@ -25,7 +25,6 @@ file_name=${file_name:-request_config}
 
 # create yaml file
 cat <<EOF > "$full_dir_path/$file_name.py"
-# pypi.org libs
 import pandas as pd
 from datetime import datetime
 from typing import Optional, List
@@ -33,7 +32,6 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-# project modules
 from stpstone._config.global_slots import YAML_EXAMPLE
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
