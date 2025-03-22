@@ -1,6 +1,7 @@
 from collections import deque
 from typing import Any
 
+
 class Queue:
 
     def __init__(self):
