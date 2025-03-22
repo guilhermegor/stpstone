@@ -8,9 +8,9 @@ class JosephusSolver:
     where every k-th participant is removed until only one survivor remains.
     """
 
-    def __init__(self, list_: List[Any], steps: int) -> None:
+    def __init__(self, list_: List[Any], inst_steps: int) -> None:
         self.list_ = list_
-        self.steps = steps
+        self.inst_steps = inst_steps
 
     @property
     def last_survivor(self) -> Any:
@@ -18,7 +18,7 @@ class JosephusSolver:
         for item in self.list_:
             cls_queue.enqueue(item)
         while cls_queue.size > 1:
-            for _ in range(self.steps):
+            for _ in range(self.inst_steps):
                 cls_queue.enqueue(cls_queue.dequeue)
             cls_queue.dequeue
         return cls_queue.dequeue

@@ -127,6 +127,7 @@ stpstone
 ├── dsa
 │   ├── queues
 │   │   ├── priority_queues.py
+│   │   ├── simple_deque.py
 │   │   └── simple_queue.py
 │   ├── stacks
 │   │   └── simple_stack.py
