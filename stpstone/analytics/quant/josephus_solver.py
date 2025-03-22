@@ -12,12 +12,13 @@ class JosephusSolver:
         self.list_ = list_
         self.steps = steps
 
+    @property
     def last_survivor(self) -> Any:
         cls_queue = Queue()
         for item in self.list_:
             cls_queue.enqueue(item)
-        while cls_queue.size() > 1:
+        while cls_queue.size > 1:
             for _ in range(self.steps):
-                cls_queue.enqueue(cls_queue.dequeue())
-            cls_queue.dequeue()
-        return cls_queue.dequeue()
+                cls_queue.enqueue(cls_queue.dequeue)
+            cls_queue.dequeue
+        return cls_queue.dequeue
