@@ -126,6 +126,8 @@ stpstone
 ├── dsa
 │   ├── queues
 │   │   └── priority_queues.py
+│   ├── stacks
+│   │   └── simple_stack.py
 │   └── trees
 │       ├── avl_tree.py
 │       └── b_tree.py
