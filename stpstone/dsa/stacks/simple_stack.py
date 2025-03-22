@@ -20,7 +20,7 @@ class Stack:
 
     @property
     def pop(self) -> Any:
-        if self.is_empty():
+        if self.is_empty:
             raise IndexError("Pop from an empty stack")
         self._size -= 1
         item = self._items[self._size]
@@ -29,7 +29,7 @@ class Stack:
 
     @property
     def peek(self) -> Any:
-        if self.is_empty():
+        if self.is_empty:
             raise IndexError("Peek from an empty stack")
         return self._items[self._size - 1]
 
@@ -37,7 +37,6 @@ class Stack:
     def size(self) -> int:
         return self._size
 
-    @property
     def _resize(self, new_capacity: int) -> None:
         """
         Private method to resize the underlying array of the stack to the new capacity.

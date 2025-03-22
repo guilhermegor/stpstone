@@ -186,6 +186,7 @@ stpstone
 │   ├── standardization
 │   │   └── dataframe.py
 │   └── validation
+│       ├── balance_brackets.py
 │       ├── br_docs.py
 │       ├── dataframe.py
 │       └── metaclass_type_checker.py
