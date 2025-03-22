@@ -125,7 +125,8 @@ stpstone
 │       └── yield_.py
 ├── dsa
 │   ├── queues
-│   │   └── priority_queues.py
+│   │   ├── priority_queues.py
+│   │   └── simple_queue.py
 │   ├── stacks
 │   │   └── simple_stack.py
 │   └── trees
