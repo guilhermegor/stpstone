@@ -21,5 +21,4 @@ class Queue:
 
     @property
     def size(self) -> int:
-        """Get the number of items in the queue"""
         return len(self._items)
