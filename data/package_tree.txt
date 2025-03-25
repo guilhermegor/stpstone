@@ -201,6 +201,7 @@ stpstone
     ├── connections
     │   ├── clouds
     │   │   ├── aws_s3.py
+    │   │   ├── minio.py
     │   │   └── sendgrid.py
     │   ├── databases
     │   │   ├── dabricksCLI.py
