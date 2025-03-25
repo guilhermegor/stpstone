@@ -150,7 +150,7 @@ class VaR(metaclass=TypeChecker):
             array_r_shock = self.array_r + float_shock
         else:
             raise ValueError(f"Invalid shock type {str_shock_type}. Must be 'relative' or 'absolute'")
-        return np.percentile(array_r_shock, (1 - self.float_cl) * 100)
+        return np.percentile(array_r_shock, (1 - self.float_cl) * 100) * self.int_t
 
     @property
     def parametric_var(self) -> float:
@@ -162,13 +162,11 @@ class VaR(metaclass=TypeChecker):
             str_std_methd (str): The method to use for calculating the standard deviation,
                 either "std" or "ewma".
             float_lambda (float): The smoothing factor for EWMA, between 0 and 1, defaulting to 0.94.
-            int_t (int): Default = 1
-                - The time horizon for the VaR calculation.
 
         Returns:
             float: The parametric VaR.
         """
-        return (self.float_mu - self.float_z * self.float_sigma) * np.sqrt(self.int_t)
+        return self.float_mu * self.int_t - self.float_z * self.float_sigma * np.sqrt(self.int_t)
 
     @property
     def cvar(self) -> float:
@@ -188,7 +186,7 @@ class VaR(metaclass=TypeChecker):
         """
         float_var = np.percentile(self.array_r, (1 - self.float_cl) * 100)
         array_cvar = self.array_r[self.array_r <= float_var]
-        return np.mean(array_cvar)
+        return np.mean(array_cvar) * self.int_t
 
     def monte_carlo_var(self, int_simulations: Optional[int] = 10_000,
                         float_portf_nv: Optional[float] = 1_000_000) -> float:
@@ -219,7 +217,7 @@ class VaR(metaclass=TypeChecker):
         array_portfs_nv = float_portf_nv * np.cumprod(1 + array_simulated_r, axis=1)
         array_portfs_nv = np.sort(array_portfs_nv)
         int_percentile_idx = int((1 - self.float_cl) * int_simulations)
-        return float(float_portf_nv - array_portfs_nv[int_percentile_idx].item())
+        return float(float_portf_nv - array_portfs_nv[int_percentile_idx].item()) * self.int_t
 
 
 class RiskMeasures(VaR):
