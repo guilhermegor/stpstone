@@ -71,6 +71,7 @@ resource_example:
   app:
   bl_verify: False
   timeout: (12.0, 12.0)
+  cookies:
   cols_from_case: default
   cols_to_case: upper_constant
   list_cols_drop_dupl:

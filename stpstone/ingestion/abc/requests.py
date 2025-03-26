@@ -15,7 +15,9 @@ from logging import Logger
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 from urllib.parse import parse_qs, urlparse
 from zipfile import ZipExtFile, ZipFile
-from requests import Request, Response, Session, exceptions, request
+from requests import Request, Response, Session, request
+from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingError,
+                                 RequestException, HTTPError, JSONDecodeError)
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.session import ReqSession
@@ -259,7 +261,7 @@ class HandleReqResponses(UtilsRequests):
         else:
             try:
                 json_ = req_resp.json()
-            except exceptions.JSONDecodeError:
+            except JSONDecodeError:
                 raise Exception(
                     "File extension not expected in the handle response method: "
                     + f"{str_file_extension}, please revisit the if-statement"
@@ -560,31 +562,34 @@ class ABCRequests(HandleReqResponses):
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Union[str, Dict[str, str]]] = None,
+        cookies: Optional[Dict[str, str]] = None
     ) -> Response:
         if re.search(self.pattern_special_http_chars, url):
             #   prepare the request manually to preserve special characters
-            req_resp = Request(req_method, url, headers=dict_headers, params=payload)
+            req_resp = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
             req_preppped = self.session.prepare_request(req_resp)
             req_preppped.url = url
             req_resp = self.session.send(req_preppped, verify=bl_verify)
         else:
             if req_method == "GET":
                 req_resp = self.session.get(
-                    url, verify=bl_verify, headers=dict_headers, params=payload
+                    url, verify=bl_verify, headers=dict_headers, params=payload, cookies=cookies
                 )
             elif req_method == "POST":
                 req_resp = self.session.post(
-                    url, verify=bl_verify, headers=dict_headers, data=payload
+                    url, verify=bl_verify, headers=dict_headers, data=payload, cookies=cookies
                 )
         req_resp.raise_for_status()
         return req_resp
 
     # ! TODO: implement timeout
     @backoff.on_exception(
-        backoff.constant,
-        (exceptions.RequestException, exceptions.HTTPError),
-        interval=10,
+        backoff.expo,
+        (RequestException, HTTPError, ReadTimeout, ConnectTimeout, ChunkedEncodingError),
         max_tries=20,
+        base=2,
+        factor=2,
+        max_value=1200
     )
     def generic_req_wo_session(
         self,
@@ -594,30 +599,21 @@ class ABCRequests(HandleReqResponses):
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Dict[str, str]] = None,
+        cookies: Optional[Dict[str, str]] = None
     ) -> Response:
         if re.search(self.pattern_special_http_chars, url):
             #   prepare the request manually to preserve special characters
-            req = Request(req_method, url, headers=dict_headers, params=payload)
+            req = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
             req_preppped = req.prepare()
             with Session() as session:
                 req_resp = session.send(req_preppped, verify=bl_verify)
         else:
             if req_method == "GET":
-                req_resp = request(
-                    req_method,
-                    url,
-                    verify=bl_verify,
-                    headers=dict_headers,
-                    params=payload,
-                )
+                req_resp = request(req_method, url, verify=bl_verify, headers=dict_headers,
+                                   params=payload, cookies=cookies)
             elif req_method == "POST":
-                req_resp = request(
-                    req_method,
-                    url,
-                    verify=bl_verify,
-                    headers=dict_headers,
-                    data=payload,
-                )
+                req_resp = request(req_method, url, verify=bl_verify, headers=dict_headers,
+                                   data=payload, cookies=cookies)
         req_resp.raise_for_status()
         return req_resp
 
@@ -629,6 +625,7 @@ class ABCRequests(HandleReqResponses):
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Dict[str, str]] = None,
+        cookies: Optional[Dict[str, str]] = None
     ) -> Response:
         """
         Check wheter the request method is valid and do the request with distinctions for session and
@@ -654,7 +651,7 @@ class ABCRequests(HandleReqResponses):
         else:
             func_generic_req = self.generic_req_wo_session
         req_resp = func_generic_req(
-            req_method, url, bl_verify, tup_timeout, dict_headers, payload
+            req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
         )
         return req_resp
 
@@ -668,6 +665,7 @@ class ABCRequests(HandleReqResponses):
         app: Optional[str] = None,
         bl_verify: bool = False,
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
+        cookies: Optional[Dict[str, str]] = None,
         cols_from_case: Optional[str] = None,
         cols_to_case: Optional[str] = None,
         list_cols_drop_dupl: List[str] = None,
@@ -689,7 +687,7 @@ class ABCRequests(HandleReqResponses):
         else:
             print(f"Starting request to: {url}")
         req_resp = self.generic_req(
-            req_method, url, bl_verify, tup_timeout, dict_headers, payload
+            req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
         )
         if bl_debug == True:
             print(f"*** DF READ PARAMS: {dict_df_read_params}")
@@ -864,6 +862,7 @@ class ABCRequests(HandleReqResponses):
                 app_,
                 self.dict_metadata[str_resource]["bl_verify"],
                 self.dict_metadata[str_resource]["timeout"],
+                self.dict_metadata[str_resource].get("cookies", None),
                 self.dict_metadata[str_resource]["cols_from_case"],
                 self.dict_metadata[str_resource]["cols_to_case"],
                 self.dict_metadata[str_resource]["list_cols_drop_dupl"],
@@ -988,6 +987,7 @@ class ABCRequests(HandleReqResponses):
                             StrHandler().fill_placeholders(app_, {"slug": str_slug}),
                             self.dict_metadata[str_resource]["bl_verify"],
                             self.dict_metadata[str_resource]["timeout"],
+                            self.dict_metadata[str_resource].get("cookies", None),
                             self.dict_metadata[str_resource]["cols_from_case"],
                             self.dict_metadata[str_resource]["cols_to_case"],
                             self.dict_metadata[str_resource]["list_cols_drop_dupl"],
@@ -1064,6 +1064,7 @@ class ABCRequests(HandleReqResponses):
                             ),
                             self.dict_metadata[str_resource]["bl_verify"],
                             self.dict_metadata[str_resource]["timeout"],
+                            self.dict_metadata[str_resource].get("cookies", None),
                             self.dict_metadata[str_resource]["cols_from_case"],
                             self.dict_metadata[str_resource]["cols_to_case"],
                             self.dict_metadata[str_resource]["list_cols_drop_dupl"],
@@ -1138,6 +1139,7 @@ class ABCRequests(HandleReqResponses):
                             StrHandler().fill_placeholders(app_, {"i": i}),
                             self.dict_metadata[str_resource]["bl_verify"],
                             self.dict_metadata[str_resource]["timeout"],
+                            self.dict_metadata[str_resource].get("cookies", None),
                             self.dict_metadata[str_resource]["cols_from_case"],
                             self.dict_metadata[str_resource]["cols_to_case"],
                             self.dict_metadata[str_resource]["list_cols_drop_dupl"],
