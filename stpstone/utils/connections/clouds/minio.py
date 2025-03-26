@@ -155,11 +155,13 @@ class MinioClient:
     def list_objects(
         self,
         bucket_name: str,
+        bl_include_version: bool = False,
         prefix: Optional[str] = None,
         recursive: bool = False
     ) -> Optional[list]:
         try:
-            objects = self.client.list_objects(bucket_name, prefix=prefix, recursive=recursive)
+            objects = self.client.list_objects(bucket_name, include_version=bl_include_version,
+                                               prefix=prefix, recursive=recursive)
             return [obj.object_name for obj in objects]
         except S3Error as e:
             self._log_critical(f"Error listing objects in bucket '{bucket_name}': {e}")
