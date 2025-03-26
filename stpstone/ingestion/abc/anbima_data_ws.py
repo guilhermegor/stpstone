@@ -67,6 +67,8 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
                 "URL": url,
                 "STATUS_CODE": req_resp.status_code
             })
+        if self.cls_db is not None:
+            self.insert_db(list_ser)
         return list_ser
 
 
@@ -150,19 +152,20 @@ class AnbimaDataTrt(ABC):
 
     @property
     def get_re_matches(self) -> Dict[str, str]:
-        dict_matches = dict()
+        dict_re_matches = dict()
         for el_ in HtmlHndler().lxml_parser(self.html_content, self.xpath_script):
             for key, re_pattern in self.dict_re_patterns.items():
-                if key not in dict_matches: dict_matches[key] = list()
+                if key not in dict_re_matches: dict_re_matches[key] = list()
                 regex_match = re.search(re_pattern, el_)
                 if regex_match is not None:
                     for i_match in range(0, len(regex_match.groups()) + 1):
                         regex_group = regex_match.group(i_match).replace('\n', ' ')
                         regex_group = re.sub(r'\s+', ' ', regex_group).strip()
                         regex_group = regex_group.replace('\\', '').replace(r'\"', '"')
-                        if regex_group not in dict_matches[key]: dict_matches[key].append(regex_group)
-            dict_matches["url"] = self.url
-        return dict_matches
+                        if regex_group not in dict_re_matches[key]: \
+                            dict_re_matches[key].append(regex_group)
+            dict_re_matches["url"] = self.url
+        return dict_re_matches
 
     @abstractmethod
     def parse_info(self):
