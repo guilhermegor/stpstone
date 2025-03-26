@@ -29,7 +29,7 @@ credentials:
   host: https://data.anbima.com.br/
 
 raw_indicadores_fundos:
-  app: fundos/{slug}/indicadores
+  app: fundos/{{slug}}/indicadores
   bl_verify: False
 
 trt_indicadores_fundos:

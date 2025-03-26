@@ -120,8 +120,9 @@ class AnbimaDataFetcher(AnbimaDataUtils):
         )
 
     def _get_data(self, slug: str) -> Optional[html.HtmlElement]:
-        app_ = StrHandler().fill_placeholders(self.dict_metadata["app"], {"slug": slug})
-        url = self.dict_metadata["host"] + app_
+        app_ = StrHandler().fill_placeholders(
+            self.dict_metadata[self.resource]["app"], {"slug": slug})
+        url = self.dict_metadata["credentials"]["host"] + app_
         if self.session is None:
             req_resp = self._req_wo_session(url)
         else:
@@ -156,7 +157,7 @@ class AnbimaDataFetcher(AnbimaDataUtils):
                 )
                 self._log_info(f"Status Put Object - Bucket {self.str_bucket_name}: {blame_s3}")
             else:
-                self._log_info(f"Empty content, process continued without put action")
+                self._log_info(f"Empty content, process continued without put action - ID: {slug}")
 
 
 class AnbimaDataTrt(ABC):

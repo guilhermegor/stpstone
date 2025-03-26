@@ -1,6 +1,7 @@
 import pandas as pd
 from typing import Dict, Optional, Any, List, Union, Tuple
 from lxml import html
+from logging import Logger
 from stpstone.ingestion.abc.anbima_data_ws import AnbimaDataDecrypt, AnbimaDataFetcher, AnbimaDataTrt
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.utils.parsers.str import StrHandler
@@ -12,25 +13,29 @@ class FundsDecrypt(AnbimaDataDecrypt):
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
                  bl_schema: bool = True, str_tbl_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None,
-                 bl_insert_or_ignore: Optional[bool] = False) -> None:
+                 bl_insert_or_ignore: Optional[bool] = False,
+                 logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
         self.bl_schema = bl_schema
         self.str_tbl_name = str_tbl_name
         self.str_schema_name = str_schema_name
         self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.logger = logger
 
 
 class FundsFetcher(AnbimaDataFetcher):
 
     def __init__(self, resource: str, dict_metadata: Dict[str, Any], list_slugs: List[str],
-                 str_bucket_name: str, session: ReqSession, client_s3: Any) -> None:
+                 str_bucket_name: str, session: ReqSession, client_s3: Any,
+                 logger: Optional[Logger] = None) -> None:
         self.resource = resource
         self.dict_metadata = dict_metadata
         self.list_slugs = list_slugs
         self.str_bucket_name = str_bucket_name
         self.session = session
         self.client_s3 = client_s3
+        self.logger = logger
 
 
 class FundTrt(AnbimaDataTrt):
