@@ -31,4 +31,5 @@ build/
 
 # project files/folders
 data/*
+!data/.gitkeep
 data/anbima-avl-funds-cons.csv
