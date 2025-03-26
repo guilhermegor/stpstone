@@ -36,7 +36,7 @@ YAML_B3_CONSOLIDATED_TRDS_AFTER_MKT = reading_yaml(
 YAML_B3_FUTURES_CLOSING_ADJ = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/futures_closing_adj.yaml"))
 YAML_ANBIMA_DATA_FUNDS = reading_yaml(
-    os.path.join(root_path, "countries/br/exchange/futures_closing_adj.yaml"))
+    os.path.join(root_path, "countries/br/registries/anbima_data_funds.yaml"))
 #   US
 YAML_US_ALPHAVANTAGE = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/alphavantage.yaml"))
@@ -89,7 +89,6 @@ YAML_B3 = reading_yaml(os.path.join(root_path, "b3.yaml"))
 YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
 YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
 YAML_WGBD = reading_yaml(os.path.join(root_path, "world_gov_bonds.yaml"))
-YAML_GLB_RT = reading_yaml(os.path.join(root_path, "global_rates.yaml"))
 YAML_USA_MACRO = reading_yaml(os.path.join(root_path, "usa_macro.yaml"))
 YAML_BR_MACRO = reading_yaml(os.path.join(root_path, "br_macro.yaml"))
 YAML_MICROSOFT_APPS = reading_yaml(os.path.join(root_path, "microsoft_apps.yaml"))

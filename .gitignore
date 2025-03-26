@@ -1,7 +1,7 @@
-# Node.js
+# node.js
 node_modules/
 
-# Python
+# python
 __pycache__/
 *.pyc
 *.pyo
@@ -10,14 +10,14 @@ __pycache__/
 # IDEs
 .idea/
 
-# Operating System files
+# operating system files
 .DS_Store
 Thumbs.db
 
-# ENV
+# env
 *.env
 
-# VENV
+# venv
 .venv
 
 # logs
@@ -28,3 +28,7 @@ dist/
 build/
 *.egg-info/
 *.pypirc
+
+# project files/folders
+data/*
+data/anbima-avl-funds-cons.csv

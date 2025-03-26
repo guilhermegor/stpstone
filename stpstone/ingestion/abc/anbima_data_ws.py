@@ -1,5 +1,6 @@
 import backoff
 import re
+from logging import Logger
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, List, Any
 from requests import request, Response
@@ -8,20 +9,28 @@ from lxml import html
 from stpstone.utils.connections.netops.session import ReqSession
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class AnbimaDataUtils:
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
                  bl_schema: bool = True, str_tbl_name: Optional[str] = None,
-                 str_schema_name: Optional[str] = None,
-                 bl_insert_or_ignore: Optional[bool] = False) -> None:
+                 str_schema_name: Optional[str] = None, bl_insert_or_ignore: Optional[bool] = False,
+                 logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
         self.bl_schema = bl_schema
         self.str_tbl_name = str_tbl_name
         self.str_schema_name = str_schema_name
         self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.logger = logger
+
+    def _log_info(self, message: str):
+        if self.logger is not None:
+            CreateLog().info(self.logger, message)
+        else:
+            print(f"INFO: {message}")
 
     def get_property(self, property_: str, resource: Optional[str] = None) -> str:
         if resource is not None:
@@ -54,13 +63,20 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
         self.str_schema_name = str_schema_name
         self.bl_insert_or_ignore = bl_insert_or_ignore
 
-    def urls_builder(self, fstr_url: str, int_lower_bound: int, int_upper_bound: int, int_step: int,
-                     str_prefix: str, int_length: int) -> str:
+    def urls_builder(
+        self,
+        int_lower_bound: int = 0,
+        int_upper_bound: int = 1_000_000,
+        int_step: int = 1,
+        str_prefix: str = "C",
+        int_length: int = 11,
+        fstr_url: str = "https://data.anbima.com.br/fundos/{}/indicadores"
+    ) -> str:
         list_ser = list()
         for i in range(int_lower_bound, int_upper_bound, int_step):
             id_ = StrHandler().fill_zeros(str_prefix, i, int_length)
             url = fstr_url.format(id_)
-            req_resp = request("GET", headers=self.get_property("headers"),
+            req_resp = request("GET", url, headers=self.get_property("headers"),
                                cookies=self.get_property("cookies"))
             list_ser.append({
                 "COD_ANBIMA": id_,
@@ -75,13 +91,15 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
 class AnbimaDataFetcher(AnbimaDataUtils):
 
     def __init__(self, resource: str, dict_metadata: Dict[str, Any], list_slugs: List[str],
-                 str_bucket_name: str, session: ReqSession, client_nosql: Any) -> None:
+                 str_bucket_name: str, session: ReqSession, client_s3: Any,
+                 logger: Optional[Logger] = None) -> None:
         self.resource = resource
         self.dict_metadata = dict_metadata
         self.list_slugs = list_slugs
         self.str_bucket_name = str_bucket_name
         self.session = session
-        self.client_nosql = client_nosql
+        self.client_s3 = client_s3
+        self.logger = logger
 
     @backoff.on_exception(
         backoff.expo,
@@ -91,7 +109,7 @@ class AnbimaDataFetcher(AnbimaDataUtils):
         factor=2,
         max_value=1200
     )
-    def req_wo_session(self, url: str) -> Response:
+    def _req_wo_session(self, url: str) -> Response:
         return request(
             "GET",
             url,
@@ -101,11 +119,11 @@ class AnbimaDataFetcher(AnbimaDataUtils):
             cookies=self.get_property("cookies", self.resource),
         )
 
-    def get_data(self, slug: str) -> Optional[html.HtmlElement]:
+    def _get_data(self, slug: str) -> Optional[html.HtmlElement]:
         app_ = StrHandler().fill_placeholders(self.dict_metadata["app"], {"slug": slug})
         url = self.dict_metadata["host"] + app_
         if self.session is None:
-            req_resp = self.req_wo_session(url)
+            req_resp = self._req_wo_session(url)
         else:
             req_resp = self.session.get(
                 url,
@@ -120,25 +138,25 @@ class AnbimaDataFetcher(AnbimaDataUtils):
 
     @property
     def filtered_slugs(self) -> List[str]:
-        list_slugs_stored = self.client_nosql.list_objects(self.str_bucket_name)
+        list_slugs_stored = self.client_s3.list_objects(self.str_bucket_name)
         return [x for x in self.list_slugs if x not in list_slugs_stored]
 
     @property
-    def store_s3_data(self) -> Optional[bool]:
+    def store_s3_data(self) -> None:
         for slug in self.filtered_slugs:
-            html_content = self.get_data(slug)
+            html_content = self._get_data(slug)
             if html_content is not None:
                 html_str = html.tostring(html_content, encoding="unicode", pretty_print=True)
                 html_bytes = html_str.encode("utf-8")
-                blame_s3 = self.client_nosql.put_object_from_bytes(
-                    bucket_name="html",
+                blame_s3 = self.client_s3.put_object_from_bytes(
+                    bucket_name=self.str_bucket_name,
                     object_name=f"{slug}.html",
                     data=html_bytes,
                     content_type="text/html"
                 )
-                return blame_s3
+                self._log_info(f"Status Put Object - Bucket {self.str_bucket_name}: {blame_s3}")
             else:
-                return None
+                self._log_info(f"Empty content, process continued without put action")
 
 
 class AnbimaDataTrt(ABC):
@@ -153,7 +171,7 @@ class AnbimaDataTrt(ABC):
     @property
     def get_re_matches(self) -> Dict[str, str]:
         dict_re_matches = dict()
-        for el_ in HtmlHndler().lxml_parser(self.html_content, self.xpath_script):
+        for el_ in HtmlHndler().lxml_xpath(self.html_content, self.xpath_script):
             for key, re_pattern in self.dict_re_patterns.items():
                 if key not in dict_re_matches: dict_re_matches[key] = list()
                 regex_match = re.search(re_pattern, el_)
