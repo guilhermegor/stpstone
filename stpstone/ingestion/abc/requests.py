@@ -770,7 +770,7 @@ class ABCRequests(HandleReqResponses):
         elif str_resource == "metadata":
             for _, dict_ in self.dict_metadata[str_resource].items():
                 str_table_name = dict_["table_name"]
-                if bl_schema:
+                if bl_schema == False:
                     str_table_name = f"{dict_['schema']}_{str_table_name}"
                 self.cls_db.insert(
                     dict_["data"],
@@ -779,10 +779,8 @@ class ABCRequests(HandleReqResponses):
                 )
         else:
             str_table_name = self.dict_metadata[str_resource]["table_name"]
-            if bl_schema:
-                str_table_name = (
-                    f"{self.dict_metadata[str_resource]['schema']}_{str_table_name}"
-                )
+            if bl_schema == False:
+                str_table_name = f"{self.dict_metadata[str_resource]['schema']}_{str_table_name}"
             self.cls_db.insert(
                 list_ser,
                 str_table_name=str_table_name,
