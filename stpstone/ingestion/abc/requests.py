@@ -20,7 +20,7 @@ from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingErr
                                  RequestException, HTTPError, JSONDecodeError)
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -498,7 +498,7 @@ class ABCRequests(HandleReqResponses):
     def __init__(
         self,
         dict_metadata: Dict[str, Any],
-        session: Optional[ReqSession] = None,
+        session: Optional[ProxyScrape] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,

@@ -8,7 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 # local libs
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
@@ -19,7 +19,7 @@ class YFinanceWS(metaclass=TypeChecker):
         list_tickers:List[str],
         dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52).strftime('%Y-%m-%d'),
         dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1).strftime('%Y-%m-%d'),
-        session:Optional[ReqSession]=None
+        session:Optional[ProxyScrape]=None
     ) -> None:
         self.list_tickers = list_tickers
         self.session = session

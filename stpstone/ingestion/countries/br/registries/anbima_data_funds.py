@@ -3,7 +3,7 @@ from typing import Dict, Optional, Any, List, Union, Tuple
 from lxml import html
 from logging import Logger
 from stpstone.ingestion.abc.anbima_data_ws import AnbimaDataDecrypt, AnbimaDataFetcher, AnbimaDataTrt
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
 
@@ -27,7 +27,7 @@ class FundsDecrypt(AnbimaDataDecrypt):
 class FundsFetcher(AnbimaDataFetcher):
 
     def __init__(self, resource: str, dict_metadata: Dict[str, Any], list_slugs: List[str],
-                 str_bucket_name: str, session: ReqSession, client_s3: Any,
+                 str_bucket_name: str, session: ProxyScrape, client_s3: Any,
                  logger: Optional[Logger] = None) -> None:
         self.resource = resource
         self.dict_metadata = dict_metadata

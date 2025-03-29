@@ -6,7 +6,7 @@ from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_DEBENTURES
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
@@ -20,7 +20,7 @@ class DebenturesComBR(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None,
+        session:Optional[ProxyScrape]=None,
         dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 10),
         dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,

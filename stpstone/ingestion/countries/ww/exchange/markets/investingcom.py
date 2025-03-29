@@ -7,7 +7,7 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_WW_INVESTINGCOM
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
@@ -15,7 +15,7 @@ class InvestingCom(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None,
+        session:Optional[ProxyScrape]=None,
         dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 5),
         dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 0),
         str_ticker:str='PETR4',

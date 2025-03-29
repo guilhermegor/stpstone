@@ -2,13 +2,13 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.tradings.ww.exchange.markets.yf_ws import YFinanceProvider
 
 
 list_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA']
-# session = ReqSession(bl_new_proxy=True, bl_use_timer=True).session
+# session = ProxyScrape(bl_new_proxy=True, bl_use_timer=True).session
 session = None
 
 if session is not None:

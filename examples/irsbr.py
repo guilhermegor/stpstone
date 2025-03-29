@@ -4,10 +4,10 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.registries.br.taxation.irsbr_records import IRSBR
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 
 
-session = ReqSession(bl_new_proxy=True).session
+session = ProxyScrape(bl_new_proxy=True).session
 df_ = IRSBR(
     session=session,
     bl_create_session=False,

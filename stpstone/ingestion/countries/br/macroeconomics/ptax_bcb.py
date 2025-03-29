@@ -8,7 +8,7 @@ from time import sleep
 from urllib.parse import urlparse
 from stpstone._config.global_slots import YAML_BR_PTAX_BCB
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.html import HtmlHandler
 
@@ -17,7 +17,7 @@ class PTAXBCB(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None,
+        session:Optional[ProxyScrape]=None,
         dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 2),
         dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,

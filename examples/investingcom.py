@@ -4,10 +4,10 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.tradings.ww.exchange.markets.investingcom import InvestingCom
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 
 
-session = ReqSession(
+session = ProxyScrape(
     bl_new_proxy=True,
     bl_use_timer=True,
     float_min_ratio_times_alive_dead=0.02,

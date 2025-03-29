@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
@@ -12,7 +12,7 @@ class BondIssuersWB3(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ReqSession]=None,
+        session:Optional[ProxyScrape]=None,
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:

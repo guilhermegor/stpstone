@@ -8,7 +8,7 @@ from selenium.common.exceptions import NoSuchElementException, WebDriverExceptio
 from urllib3.exceptions import ReadTimeoutError
 sys.path.append(r'C:\Users\guiro\GitHub\stpstone')
 from stpstone.utils.parsers.html import SeleniumWD
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
@@ -20,7 +20,7 @@ int_max_retries = 100
 list_ser = list()
 
 # getting proxy
-cls_session = ReqSession(
+cls_session = ProxyScrape(
     bl_new_proxy=True,
     float_min_ratio_times_alive_dead=0.01,
     float_max_timeout=1000

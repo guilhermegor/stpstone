@@ -1,19 +1,16 @@
-### SESSION CONFIGURATION ###
-
-# pypi.org libs
 from requests.adapters import HTTPAdapter
 from requests import Session, request
 from requests.exceptions import ProxyError, ConnectTimeout, SSLError, ConnectionError
 from urllib3.util import Retry
 from typing import Dict, Union, Any, List, Tuple, Optional
 from random import shuffle
-# local libs
 from stpstone._config.global_slots import YAML_SESSION
 from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.connections.netops.sessions.abc import ABCSession
 from stpstone.utils.loggs.create_logs import conditional_timeit
 
 
-class ProxyServers:
+class ProxyUtils(ABCSession):
 
     @property
     def proxy_scrape_free(self):
@@ -68,11 +65,11 @@ class ProxyServers:
         ]
 
     @property
-    def available_proxies(self):
+    def _available_proxies(self):
         return self.proxy_scrape_free
 
 
-class ReqSession(ProxyServers):
+class ProxyScrape(ProxyUtils):
 
     def __init__(self, bl_new_proxy:bool=True, dict_proxies:Union[Dict[str, str], None]=None,
                  int_retries:int=10, int_backoff_factor:int=1, bl_alive:bool=True,
@@ -115,39 +112,16 @@ class ReqSession(ProxyServers):
             self._dict_proxy(proxy['ip'], proxy['port'])
             if proxy is not None else None
         )
-        return self.configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
+        return self._configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
         return {
             'http': 'http://{}:{}'.format(str_ip, str(int_port)),
             'https': 'http://{}:{}'.format(str_ip, str(int_port))
         }
 
-    def configure_session(self, dict_proxy:Union[Dict[str, str], None]=None,
+    def _configure_session(self, dict_proxy:Union[Dict[str, str], None]=None,
                           int_retries:int=10, int_backoff_factor:int=1) -> Session:
-        """
-        DOCSTRING: CONFIGURES AN HTTP SESSION WITH RETRY MECHANISM AND EXPONENTIAL BACKOFF
-        INPUTS: NONE
-        OUTPUTS: CONFIGURED HTTP SESSION OBJECT
-        OBS:
-            1. RETRY_STRATEGY OVERVIEW:
-                - TOTAL: TOTAL NUMBER OF RETRIES
-                - BACKOFF_FACTOR: EXPONENTIAL BACKOFF FACTOR
-                    . CALCULATED AS THE DEALAY BEFORE THE NEXT RETRY
-                    . DELAY = BACKOFF_FACTOR * (2 ** (RETRY_NUMBER - 1))
-                    . AFTER THE 1ST RETRY: DELAY = 1 * 2**0 = 1 SECOND
-                    . AFTER THE 2ND RETRY: DELAY = 1 * 2**1 = 4 SECONDS
-                    . IN THE AFORE EXAMPLE THE BACKOFF FACTOR IS 1
-                - STATUS_FORCELIST: LIST OF STATUS CODES TO RETRY
-            2. SESSION OBJECT OVERVIEW:
-                - MOUNT: MOUNTS THE RETRY STRATEGY TO THE SESSION, WITH THE GIVEN ADAPTER
-                - SESSION OBJECTS HAVE METHODS AS .GET() AND .POST()
-        """
         retry_strategy = Retry(
             total=int_retries,
             backoff_factor=int_backoff_factor,
@@ -163,11 +137,6 @@ class ReqSession(ProxyServers):
 
     def ip_infos(self, session:Session, bl_return_availability:bool=False,
                  tup_timeout:Tuple[int, int]=(5,5)) -> Union[List[Dict[str, Any]], None]:
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
         dict_payload = {}
         dict_headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -192,14 +161,14 @@ class ReqSession(ProxyServers):
         else:
             return req_resp.json()
 
-    def test_proxy(self, str_ip:str, int_port:int, bl_return_availability:bool=True) -> bool:
+    def _test_proxy(self, str_ip:str, int_port:int, bl_return_availability:bool=True) -> bool:
         """
         DOCSTRING:
         INPUTS:
         OUTPUTS:
         """
         try:
-            session = self.configure_session(
+            session = self._configure_session(
                 dict_proxy={
                     'http': 'http://{}:{}'.format(str_ip, str(int_port)),
                     'https': 'http://{}:{}'.format(str_ip, str(int_port))
@@ -212,13 +181,8 @@ class ReqSession(ProxyServers):
             return False
 
     @property
-    def _proxies(self) -> List[Dict[str, Union[str, int]]]:
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        list_ser = self.available_proxies
+    def _filter_proxies(self) -> List[Dict[str, Union[str, int]]]:
+        list_ser = self._available_proxies
         # filtering proxies
         for k_filt, v_filt, str_strategy in [
             ('bl_alive', self.bl_alive, 'equal'),
@@ -244,42 +208,32 @@ class ReqSession(ProxyServers):
         return list_ser
 
     @property
-    def get_proxy(self) -> Union[Dict[str, Any], None]:
-        """
-        DOCSTRING: RETRIEVES A VALID PROXY FROM THE FILTERED LIST, APPLYING THE TEST PROXY METHOD
-        INPUTS: -
-        OUTPUTS: DICT
-        """
+    def get_proxy(self) -> Dict[str, str]:
         @conditional_timeit(bl_use_timer=self.bl_use_timer)
         def retrieve_proxy():
-            list_ser = self._proxies
+            list_ser = self._filter_proxies
             shuffle(list_ser)
             for dict_proxy in list_ser:
                 str_ip = dict_proxy['ip']
                 int_port = dict_proxy['port']
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    if self.test_proxy(str_ip, int_port, bl_return_availability=True) == True:
+                    if self._test_proxy(str_ip, int_port, bl_return_availability=True) == True:
                         return {'ip': str_ip, 'port': int_port}
             return None
         return retrieve_proxy()
 
     @property
-    def get_proxies(self) -> Union[Dict[str, Any], None]:
-        """
-        DOCSTRING: RETRIEVES A VALID PROXY FROM THE FILTERED LIST, APPLYING THE TEST PROXY METHOD
-        INPUTS: -
-        OUTPUTS: DICT
-        """
+    def get_proxies(self) -> List[Dict[str, str]]:
         list_ = list()
         @conditional_timeit(bl_use_timer=self.bl_use_timer)
         def retrieve_proxy():
-            list_ser = self._proxies
+            list_ser = self._filter_proxies
             shuffle(list_ser)
             for dict_proxy in list_ser:
                 str_ip = dict_proxy['ip']
                 int_port = dict_proxy['port']
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    if self.test_proxy(str_ip, int_port, bl_return_availability=True) == True:
+                    if self._test_proxy(str_ip, int_port, bl_return_availability=True) == True:
                         list_.append({'ip': str_ip, 'port': int_port})
             if len(list_) > 0:
                 return list_
