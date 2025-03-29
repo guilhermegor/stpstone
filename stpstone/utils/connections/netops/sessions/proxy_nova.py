@@ -1,7 +1,6 @@
 import pandas as pd
 from requests import request
-from stpstone.utils.parsers.html import HtmlHandler, SeleniumWD
-from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.html import SeleniumWD
 
 
 class ProxyNova:
