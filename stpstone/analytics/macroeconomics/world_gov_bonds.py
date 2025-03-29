@@ -3,7 +3,7 @@
 import pandas as pd
 from datetime import datetime, timezone
 from stpstone._config.global_slots import YAML_WGBD
-from stpstone.handling_data.html import HtmlHndler
+from stpstone.handling_data.html import HtmlHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.db_logs import DBLogs
@@ -35,7 +35,7 @@ class WGBD:
         # setting variables
         list_ser = list()
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_WGBD['10y_rr']['url'],
             bl_verify=YAML_WGBD['10y_rr']['bl_verify']
         )
@@ -129,7 +129,7 @@ class WGBD:
         OUTPUTS: TUPLE OF DATAFRAMES
         """
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_WGBD['inv_yc_ec']['url'],
             bl_verify=YAML_WGBD['inv_yc_ec']['bl_verify']
         )
@@ -256,7 +256,7 @@ class WGBD:
         # setting variables
         list_td = list()
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_WGBD['yield_spreads_nations']['url'],
             bl_verify=YAML_WGBD['yield_spreads_nations']['bl_verify']
         )
@@ -362,7 +362,7 @@ class WGBD:
         # setting variables
         list_td = list()
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_WGBD['yield_spreads_nations']['url'],
             bl_verify=YAML_WGBD['yield_spreads_nations']['bl_verify']
         )
@@ -378,7 +378,7 @@ class WGBD:
             YAML_WGBD['yield_spreads_nations']['data_last_update']
         ).strip()
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_WGBD['credit_rating_nations']['url'],
             bl_verify=YAML_WGBD['credit_rating_nations']['bl_verify']
         )

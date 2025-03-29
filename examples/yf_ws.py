@@ -2,7 +2,7 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.tradings.ww.exchange.markets.yf_ws import YFinanceProvider
 

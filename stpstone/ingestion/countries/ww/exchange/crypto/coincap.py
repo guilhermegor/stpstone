@@ -6,7 +6,7 @@ from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_WW_CRYPTO_COINCAP
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 

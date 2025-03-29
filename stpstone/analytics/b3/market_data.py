@@ -24,7 +24,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.lists import HandlingLists
 from stpstone.document_numbers.br import DocumentsNumbersBR
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.handling_data.html import HtmlHndler
+from stpstone.handling_data.html import HtmlHandler
 from stpstone.handling_data.numbers import NumHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 

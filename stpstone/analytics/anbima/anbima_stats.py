@@ -8,7 +8,7 @@ from stpstone._config.global_slots import YAML_ANBIMA
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 
 
@@ -24,7 +24,7 @@ class AnbimaStats:
         # setting variables
         list_ser = list()
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_ANBIMA['anbima_stats']['url_price_indexes'],
             bl_verify=YAML_ANBIMA['anbima_stats']['bl_verify']
         )

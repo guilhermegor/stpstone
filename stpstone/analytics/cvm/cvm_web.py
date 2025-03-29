@@ -10,7 +10,7 @@ from time import sleep
 from lxml import html
 from typing import Tuple, Optional
 from random import shuffle
-from stpstone.handling_data.html import HtmlHndler, SeleniumWD
+from stpstone.handling_data.html import HtmlHandler, SeleniumWD
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.str import StrHandler
@@ -176,7 +176,7 @@ class CVMWeb_WS_Funds:
             timeout=tup_timeout
         )
         req_resp.raise_for_status()
-        html_content = HtmlHndler().html_lxml_parser(page=req_resp.text)
+        html_content = HtmlHandler().html_lxml_parser(page=req_resp.text)
         return html_content
 
     @property
@@ -207,12 +207,12 @@ class CVMWeb_WS_Funds:
         html_content = self.generic_req(str_method, self.str_host_ex_fund + str_app,
                                         str_header_ref, bl_allow_redirects=bl_allow_redirects)
         # print(f'HTML CONTENT: \n{html_content}')
-        # print('OPTION FUND: {}'.format(HtmlHndler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
+        # print('OPTION FUND: {}'.format(HtmlHandler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
         # looping within available funds and filling serialized list
-        for el_option_fund in HtmlHndler().html_lxml_xpath(html_content, str_xpath_funds):
+        for el_option_fund in HtmlHandler().html_lxml_xpath(html_content, str_xpath_funds):
             #   get text and split into fund's ein and name
             try:
-                str_option_fund_raw = HtmlHndler().html_lxml_xpath(el_option_fund, './text()')
+                str_option_fund_raw = HtmlHandler().html_lxml_xpath(el_option_fund, './text()')
                 if len(str_option_fund_raw) == 0:
                     continue
                 else:
@@ -247,7 +247,7 @@ class CVMWeb_WS_Funds:
                 )
             #   backup in db, if is user's will
             list_ser.append({
-                self.key_fund_code: HtmlHndler().html_lxml_xpath(
+                self.key_fund_code: HtmlHandler().html_lxml_xpath(
                     el_option_fund, str_xpath_value)[0],
                 self.key_fund_ein: str_fund_ein,
                 self.key_fund_name: str_fund_name,
@@ -314,7 +314,7 @@ class CVMWeb_WS_Funds:
         """
         list_dts = [
             el_
-            for el_ in HtmlHndler().html_lxml_xpath(html_content, xpath_avl_dates)
+            for el_ in HtmlHandler().html_lxml_xpath(html_content, xpath_avl_dates)
             if el_ != ''
         ]
         # print(f'**\nFUND_CODE: {str_fund_code} / LIST_DATAS_CVM: {list_dts}')
@@ -368,11 +368,11 @@ class CVMWeb_WS_Funds:
                 el_eventtarget: str_event_target,
                 el_eventargument: '',
                 el_lastfocus: '',
-                el_viewstate: HtmlHndler().html_lxml_xpath(html_content_gen,
+                el_viewstate: HtmlHandler().html_lxml_xpath(html_content_gen,
                     str_xpath_event_el_like.format(el_viewstate)),
-                el_eventvalidation: HtmlHndler().html_lxml_xpath(html_content_gen,
+                el_eventvalidation: HtmlHandler().html_lxml_xpath(html_content_gen,
                     str_xpath_event_el_like.format(el_eventvalidation)),
-                el_viewstategen: HtmlHndler().html_lxml_xpath(html_content_gen, str_xpath_event_el_like.format(
+                el_viewstategen: HtmlHandler().html_lxml_xpath(html_content_gen, str_xpath_event_el_like.format(
                     el_viewstategen)),
                 str_event_target: str_dt
             }
@@ -394,7 +394,7 @@ class CVMWeb_WS_Funds:
                 cookies=self.dict_cookie
             )
             req_resp.raise_for_status()
-            html_content = HtmlHndler().html_lxml_parser(page=req_resp.text)
+            html_content = HtmlHandler().html_lxml_parser(page=req_resp.text)
             # print(f'\nLIST_SER2_DAILY_INFOS: {list_ser_2}')
             dict_html_contents_dts[str_dt] = html_content
         # return html contents
@@ -424,13 +424,13 @@ class CVMWeb_WS_Funds:
         list_ser = list()
         # in case of no available dates, return an empty list
         # print('DROPDOWN_EL: {}'.format(
-        #     len(HtmlHndler().html_lxml_xpath(html_content_gen,
+        #     len(HtmlHandler().html_lxml_xpath(html_content_gen,
         #         str_xpath_dropdown_box)) == 0
         # ))
         # print(f'URL: {url_daily_report_fund}')
         # raise Exception('BREAK')
         if (len(list_str_dts) == 0) \
-            or (len(HtmlHndler().html_lxml_xpath(html_content_gen,
+            or (len(HtmlHandler().html_lxml_xpath(html_content_gen,
                 str_xpath_dropdown_box)) == 0):
             return []
         # daily reports for a given set of fund and dates
@@ -446,14 +446,14 @@ class CVMWeb_WS_Funds:
             dict_g_shareholders = {
                 self.fstr_greatest_shareholders.format(i): el_ein[0] if el_ein is not None else ''
                 for i, el_ein in enumerate(
-                    HtmlHndler().html_lxml_xpath(html_content_dt, str_xpath_greatest_shareholders)
+                    HtmlHandler().html_lxml_xpath(html_content_dt, str_xpath_greatest_shareholders)
                 )
             }
             #   daily infos
             try:
                 dict_daily_infos = {
                     self.__dict__[f'key_{k}']: str(
-                        HtmlHndler().html_lxml_xpath(html_content_dt, v)[0]).replace(',', '.')
+                        HtmlHandler().html_lxml_xpath(html_content_dt, v)[0]).replace(',', '.')
                     for k, v in dict_xpaths.items()
                 }
             except IndexError:

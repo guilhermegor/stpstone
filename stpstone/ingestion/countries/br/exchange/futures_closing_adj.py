@@ -8,11 +8,11 @@ from sqlalchemy.orm import Session
 from stpstone._config.global_slots import YAML_B3_FUTURES_CLOSING_ADJ
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -60,16 +60,16 @@ class FuturesClosingAdjB3(ABCRequests):
             if StrHandler().match_string_like(req_resp.url, "*bl_debug=True*") == True
             else False
         )
-        root = HtmlHndler().lxml_parser(req_resp)
+        root = HtmlHandler().lxml_parser(req_resp)
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(
                 marker="pyproject.toml"
             )
-            HtmlHndler().html_tree(root, file_path=rf"{path_project}\data\test.html")
+            HtmlHandler().html_tree(root, file_path=rf"{path_project}\data\test.html")
         list_th = [
             x.text.strip().replace("R$)", "BRL")
-            for x in HtmlHndler().lxml_xpath(
+            for x in HtmlHandler().lxml_xpath(
                 root,
                 YAML_B3_FUTURES_CLOSING_ADJ["futures_closing_adj"]["xpaths"]["list_th"],
             )
@@ -83,7 +83,7 @@ class FuturesClosingAdjB3(ABCRequests):
                 .replace(",", ".")
                 .strip()
             )
-            for x in HtmlHndler().lxml_xpath(
+            for x in HtmlHandler().lxml_xpath(
                 root,
                 YAML_B3_FUTURES_CLOSING_ADJ["futures_closing_adj"]["xpaths"]["list_td"],
             )

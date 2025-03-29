@@ -218,7 +218,10 @@ stpstone
     │   │   └── sqlserver.py
     │   └── netops
     │       ├── manager.py
-    │       └── session.py
+    │       ├── sessions
+    │       │   ├── proxy_nova.py
+    │       │   └── proxy_scrape.py
+    │       └── user_agents.py
     ├── conversions
     │   ├── base_converter.py
     │   └── expression_converter.py

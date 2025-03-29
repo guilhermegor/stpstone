@@ -12,7 +12,7 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.handling_data.txt import HandlingTXTFiles
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.finance.b3.up2data_web import UP2DATAB3
-from stpstone.handling_data.html import HtmlHndler
+from stpstone.handling_data.html import HtmlHandler
 from stpstone.handling_data.xml import XMLFiles
 from stpstone.finance.derivatives.options.european import EuropeanOptions
 from stpstone.finance.b3.market_data import MDB3
@@ -415,9 +415,9 @@ class TradingFilesB3:
         list_exportacao = list()
         # importing to memory html, in order to catch the url of the collateral accepted by b3,
         #   regarding spot bov
-        html_parser_acoes_units_etfs_aceitos_garantia_b3 = HtmlHndler().html_lxml_parser(
+        html_parser_acoes_units_etfs_aceitos_garantia_b3 = HtmlHandler().html_lxml_parser(
             YAML_B3['collateral_acc_spot_bov_b3']['url'], bl_verify=False)
-        url_acoes_units_etfs_aceitos_garantia_b3 = HtmlHndler().html_lxml_xpath(
+        url_acoes_units_etfs_aceitos_garantia_b3 = HtmlHandler().html_lxml_xpath(
             html_parser_acoes_units_etfs_aceitos_garantia_b3,
             YAML_B3['collateral_acc_spot_bov_b3'][
                 'xpath_url_acoes_units_etfs_aceitos_garantia_b3'])[0]

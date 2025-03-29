@@ -4,11 +4,11 @@ from logging import Logger
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, List, Any
 from requests import request, Response
-from requests.exceptions import ReadTimeout, ConnectTimeout, ChunkedEncodingError
+from requests.exceptions import ReadTimeout, ConnectTimeout, ChunkedEncodingError, ConnectionError
 from lxml import html
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -63,7 +63,7 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
         self.str_schema_name = str_schema_name
         self.bl_insert_or_ignore = bl_insert_or_ignore
 
-    def urls_builder(
+    def urls_funds_builder(
         self,
         int_lower_bound: int = 0,
         int_upper_bound: int = 1_000_000,
@@ -105,7 +105,7 @@ class AnbimaDataFetcher(AnbimaDataUtils):
 
     @backoff.on_exception(
         backoff.expo,
-        (ReadTimeout, ConnectTimeout, ChunkedEncodingError),
+        (ReadTimeout, ConnectTimeout, ChunkedEncodingError, ConnectionError),
         max_tries=20,
         base=2,
         factor=2,
@@ -137,7 +137,7 @@ class AnbimaDataFetcher(AnbimaDataUtils):
             )
         if req_resp.status_code == 200:
             return None
-        return HtmlHndler().lxml_parser(req_resp)
+        return HtmlHandler().lxml_parser(req_resp)
 
     @property
     def filtered_slugs(self) -> List[str]:
@@ -175,7 +175,7 @@ class AnbimaDataTrt(ABC):
     @property
     def get_re_matches(self) -> Dict[str, str]:
         dict_re_matches = dict()
-        for el_ in HtmlHndler().lxml_xpath(self.html_content, self.xpath_script):
+        for el_ in HtmlHandler().lxml_xpath(self.html_content, self.xpath_script):
             for key, re_pattern in self.dict_re_patterns.items():
                 if key not in dict_re_matches: dict_re_matches[key] = list()
                 regex_match = re.search(re_pattern, el_)

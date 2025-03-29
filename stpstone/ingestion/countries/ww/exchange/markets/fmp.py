@@ -7,7 +7,7 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_WW_FMP
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
 
 

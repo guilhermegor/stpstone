@@ -8,15 +8,15 @@ from time import sleep
 from bs4 import BeautifulSoup
 from stpstone._config.global_slots import YAML_WW_GR
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.lists import HandlingLists
 
 
@@ -118,7 +118,7 @@ class GlobalRates(ABCRequests):
         return pd.DataFrame(list_ser)
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        bs_html = HtmlHndler().bs_parser(req_resp)
+        bs_html = HtmlHandler().bs_parser(req_resp)
         str_source = StrHandler().get_url_query(req_resp.url, bl_include_fragment=True)["source"]
         bs_table = bs_html.find("table")
         return self.td_th_parser(bs_table, str_source)

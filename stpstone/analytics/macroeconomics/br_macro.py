@@ -11,7 +11,7 @@ from stpstone.handling_data.object import HandlingObjects
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.numbers import NumHandler
 from stpstone.utils.parsers.json import JsonFiles
-from stpstone.handling_data.html import HtmlHndler
+from stpstone.handling_data.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 
@@ -29,7 +29,7 @@ class Sidra:
         # setting variables
         list_ser = list()
         # request html
-        bs_html = HtmlHndler().html_bs_parser(
+        bs_html = HtmlHandler().html_bs_parser(
             YAML_BR_MACRO['sidra']['st_indicators']['url'],
             bl_verify=YAML_BR_MACRO['sidra']['st_indicators']['bl_verify']
         )

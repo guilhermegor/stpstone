@@ -7,9 +7,9 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_B3_OPTIONS_CALENDAR
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
 
 
@@ -43,23 +43,23 @@ class OptionsCalendarB3(ABCRequests):
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         list_ser = list()
         i = 1
-        root = HtmlHndler().lxml_parser(req_resp)
+        root = HtmlHandler().lxml_parser(req_resp)
         while i <= 20:
             try:
                 list_th = [
-                    x.text for x in HtmlHndler().lxml_xpath(
+                    x.text for x in HtmlHandler().lxml_xpath(
                         root, YAML_B3_OPTIONS_CALENDAR['settlement_dates']['xpaths']['list_th'].format(i)
                     )
                 ]
                 list_td = [
-                    x.text for x in HtmlHndler().lxml_xpath(
+                    x.text for x in HtmlHandler().lxml_xpath(
                         root, YAML_B3_OPTIONS_CALENDAR['settlement_dates']['xpaths']['list_td'].format(i)
                     )
                 ]
                 dict_ = HandlingDicts().merge_n_dicts(
                     dict(zip(list_th, list_td)),
                     {
-                        'Mês Referência': HtmlHndler().lxml_xpath(
+                        'Mês Referência': HtmlHandler().lxml_xpath(
                             root, YAML_B3_OPTIONS_CALENDAR['settlement_dates']['xpaths'][
                                 'mes_ref'].format(i)
                         )[0].text,

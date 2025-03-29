@@ -7,9 +7,9 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_B3_TRADING_HOURS_B3
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler
@@ -257,19 +257,19 @@ class TradingHoursB3(ABCRequests):
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         bl_debug = True if StrHandler().match_string_like(
             req_resp.url, '*&bl_debug=True*') == True else False
-        root = HtmlHndler().lxml_parser(req_resp)
+        root = HtmlHandler().lxml_parser(req_resp)
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
-            HtmlHndler().html_tree(root, file_path=rf'{path_project}\data\test.html')
+            HtmlHandler().html_tree(root, file_path=rf'{path_project}\data\test.html')
         list_th = [
-            x.text.strip() for x in HtmlHndler().lxml_xpath(
+            x.text.strip() for x in HtmlHandler().lxml_xpath(
                 root, YAML_B3_TRADING_HOURS_B3['stocks']['xpaths']['list_th']
             )
         ]
         list_td = [
             '' if x.text is None else x.text.replace('\xa0', '').strip()
-            for x in HtmlHndler().lxml_xpath(
+            for x in HtmlHandler().lxml_xpath(
                 root, YAML_B3_TRADING_HOURS_B3['stocks']['xpaths']['list_td']
             )
         ]

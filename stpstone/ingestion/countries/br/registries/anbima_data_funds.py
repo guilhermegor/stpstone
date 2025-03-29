@@ -3,7 +3,7 @@ from typing import Dict, Optional, Any, List, Union, Tuple
 from lxml import html
 from logging import Logger
 from stpstone.ingestion.abc.anbima_data_ws import AnbimaDataDecrypt, AnbimaDataFetcher, AnbimaDataTrt
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
 

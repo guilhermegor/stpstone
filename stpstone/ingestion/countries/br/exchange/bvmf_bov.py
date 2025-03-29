@@ -7,9 +7,9 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_B3_BVMF_BOV
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.numbers import NumHandler
@@ -47,7 +47,7 @@ class BVMFBOV(ABCRequests):
         # setting variables
         list_th = list()
         list_td = list()
-        bs_html = HtmlHndler().bs_parser(req_resp)
+        bs_html = HtmlHandler().bs_parser(req_resp)
         # table
         bs_table = bs_html.find_all('table')[11]
         # looping within rows

@@ -8,9 +8,9 @@ from time import sleep
 from urllib.parse import urlparse
 from stpstone._config.global_slots import YAML_BR_PTAX_BCB
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ReqSession
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ReqSession
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHndler
+from stpstone.utils.parsers.html import HtmlHandler
 
 
 class PTAXBCB(ABCRequests):
@@ -52,8 +52,8 @@ class PTAXBCB(ABCRequests):
         if (f'{tup_parsed_url.scheme}://{tup_parsed_url.hostname}/'
              == YAML_BR_PTAX_BCB['ids']['host']) \
             and ('&' not in tup_parsed_url.query):
-            root = HtmlHndler().lxml_parser(req_resp)
-            selectors_currency = HtmlHndler().lxml_xpath(
+            root = HtmlHandler().lxml_parser(req_resp)
+            selectors_currency = HtmlHandler().lxml_xpath(
                 root, YAML_BR_PTAX_BCB['ids']['xpaths']['currency_options']
             )
             list_ser = [
