@@ -1,5 +1,4 @@
 import pandas as pd
-from requests import request
 from stpstone.utils.parsers.html import SeleniumWD
 
 
