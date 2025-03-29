@@ -70,11 +70,13 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
         int_step: int = 1,
         str_prefix: str = "C",
         int_length: int = 11,
+        list_ids_ignore: Optional[List[str]] = None,
         fstr_url: str = "https://data.anbima.com.br/fundos/{}/indicadores"
-    ) -> str:
+    ) -> List[Dict[str, str]]:
         list_ser = list()
         for i in range(int_lower_bound, int_upper_bound, int_step):
             id_ = StrHandler().fill_zeros(str_prefix, i, int_length)
+            if id_ in list_ids_ignore: continue
             url = fstr_url.format(id_)
             req_resp = request("GET", url, headers=self.get_property("headers"),
                                cookies=self.get_property("cookies"))
@@ -139,7 +141,8 @@ class AnbimaDataFetcher(AnbimaDataUtils):
 
     @property
     def filtered_slugs(self) -> List[str]:
-        list_slugs_stored = self.client_s3.list_objects(self.str_bucket_name)
+        list_slugs_stored = [str(x).replace(".html", "") for x in
+                             self.client_s3.list_objects(self.str_bucket_name)]
         return [x for x in self.list_slugs if x not in list_slugs_stored]
 
     @property

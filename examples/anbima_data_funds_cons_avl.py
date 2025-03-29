@@ -8,6 +8,7 @@ for path_f in list_f:
     complete_path_f = rf"data/{path_f}"
     reader = pd.read_csv(complete_path_f, sep=",")
     df_ = pd.DataFrame(reader)
+    if df_.empty == True: continue
     list_ser.extend(df_.to_dict(orient="records"))
 
 df_cons_1 = pd.DataFrame(list_ser)

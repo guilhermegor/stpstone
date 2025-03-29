@@ -21,11 +21,19 @@ cls_funds_cons = FundsConsolidated(
 )
 df_ = cls_funds_cons.funds_infos_ts
 print(f"DF FUNDS CONSOLIDATED - ANBIMA DATA: n{df_}")
+path_orig_csv = "data/anbima-data-funds-trt_{}_{}_{}.csv".format(
+    getuser(),
+    DatesBR().curr_date.strftime('%Y%m%d'),
+    DatesBR().curr_time.strftime('%H%M%S')
+)
+path_destination_csv = r"C:\Users\guiro\OneDrive\Workspace\BASES\anbima-data-funds-trt_{}_{}_{}.csv".format(
+    getuser(),
+    DatesBR().curr_date.strftime('%Y%m%d'),
+    DatesBR().curr_time.strftime('%H%M%S')
+)
 df_.to_csv(
-    "data/anbima-data-funds-trt_{}_{}_{}.csv".format(
-        getuser(),
-        DatesBR().curr_date.strftime('%Y%m%d'),
-        DatesBR().curr_time.strftime('%H%M%S')
-    ),
+    path_orig_csv,
     index=False
 )
+
+_ = DirFilesManagement().copy_file(path_orig_csv, path_destination_csv)
