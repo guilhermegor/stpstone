@@ -4,9 +4,10 @@ from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 from stpstone.utils.parsers.html import SeleniumWD
+from stpstone.utils.connections.netops.sessions.abc import ABCSession
 
 
-class ProxyNova:
+class ProxyNova(ABCSession):
 
     def __init__(self, str_country_code: str) -> None:
         self.fstr_url = "https://www.proxynova.com/proxy-server-list/country-{}/"
