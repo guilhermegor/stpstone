@@ -71,7 +71,7 @@ debentures_registries:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: anbima_data_debentures_registries
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -149,3 +149,55 @@ debentures_registries:
     AGENTE_FIDUCIARIO: //*[@id="output__container--agenteFiduciario"]/div/span
     BANCO_MANDATARIO: //*[@id="output__container--bancoMandatorio"]/div/span
     GARANTIA: //*[@id="output__container--garantia"]/div/span
+
+debentures_available:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: busca/debentures?size=100&page=0#iter_max=100
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: anbima_data_debentures_available
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+  dtypes:
+    ATIVO: str
+    URL_ATIVO: str
+    PAGE: int
+  df_read_params:
+  xpaths:
+    ATIVO: //a[@id="item-title-{{iter}}"]
+    URL_ATIVO: //a[@id="item-title-0"]/@href
+    PAGE: //*[@id="pagination"]/div[3]/span/form/div/input/@value

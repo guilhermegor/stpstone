@@ -194,10 +194,10 @@ class UtilsRequests(ABC):
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
 
-    def get_int_pgs_join(self, url: str) -> Union[int, None]:
+    def get_query_params(self, url: str, param: str) -> Union[int, None]:
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.fragment)
-        int_pgs_join = query_params.get("int_pgs_join", [None])[0]
+        int_pgs_join = query_params.get(param, [None])[0]
         if int_pgs_join is not None:
             return int(int_pgs_join)
         else:
@@ -291,10 +291,29 @@ class HandleReqResponses(UtilsRequests):
         selenium_wd: SeleniumWD
     ) -> pd.DataFrame:
         try:
-            list_ser = [
-                {key: selenium_wd.find_element(web_driver, str_xpath)}
-                for key, str_xpath in dict_xpaths.items()
-            ]
+            if any(StrHandler().match_string_like(value, "*{{iter}}*") == True 
+                for value in dict_xpaths.values()):
+                if StrHandler().match_string_like(req_resp.url, "*iter_max=*") == True:
+                    int_iter_max = (
+                        self.get_query_params(req_resp.url, "iter_max")
+                        if self.get_query_params(req_resp.url, "iter_max") is not None
+                        else 100
+                    )
+                else:
+                    int_iter_max = 100
+                list_ser = [
+                    {
+                        key: selenium_wd.find_element(web_driver, 
+                        StrHandler().fill_placeholders(str_xpath, {"iter": i}))
+                    }
+                    for key, str_xpath in dict_xpaths.items()
+                    for i in range(0, int_iter_max)
+                ]
+            else:
+                list_ser = [
+                    {key: selenium_wd.find_element(web_driver, str_xpath)}
+                    for key, str_xpath in dict_xpaths.items()
+                ]
         finally:
             web_driver.quit()
         return pd.DataFrame(list_ser)
@@ -431,8 +450,8 @@ class HandleReqResponses(UtilsRequests):
         else:
             if StrHandler().match_string_like(req_resp.url, "*int_pgs_join=*") == True:
                 int_pgs_join = (
-                    self.get_int_pgs_join(req_resp.url)
-                    if self.get_int_pgs_join(req_resp.url) is not None
+                    self.get_query_params(req_resp.url, "int_pgs_join")
+                    if self.get_query_params(req_resp.url, "int_pgs_join") is not None
                     else default_int_pgs_join
                 )
             else:

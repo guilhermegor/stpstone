@@ -11,6 +11,10 @@ cls_ = AnbimaDataDebentures(
     str_user_agent=UserAgents().get_random_user_agent
 )
 
-df_deb_infos = cls_.source("debentures_registries", bl_fetch=True, bl_debug=False)
-print(f"DF: \n{df_deb_infos}")
-df_deb_infos.info()
+df_ = cls_.source("debentures_available", bl_fetch=True, bl_debug=False)
+print(f"DF DEBENTURES AVL: \n{df_}")
+df_.info()
+
+df_ = cls_.source("debentures_registries", bl_fetch=True, bl_debug=False)
+print(f"DF DEBENTURES REGISTRIES: \n{df_}")
+df_.info()
