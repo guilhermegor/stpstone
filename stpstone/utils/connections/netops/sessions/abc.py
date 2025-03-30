@@ -71,21 +71,29 @@ class ABCSession(ABC):
             if missing_keys:
                 raise ValueError(f"Missing required keys in proxy data: {missing_keys}")
 
-    def mins_ago_to_timestamp(self, mins_ago_str):
-        mins = int(mins_ago_str.split()[0])
-        past_time = datetime.now() - timedelta(minutes=mins)
+    def time_ago_to_timestamp(self, time_ago_str: str) -> float:
+        time_ = int(time_ago_str.split()[0])
+        time_measure = time_ago_str.split()[1]
+        if time_measure in ['min', 'mins', 'minute', 'minutes']:
+            past_time = datetime.now() - timedelta(minutes=time_)
+        elif time_measure in ['hour', 'hours']:
+            past_time = datetime.now() - timedelta(hours=time_)
+        elif time_measure in ['day', 'days']:
+            past_time = datetime.now() - timedelta(days=time_)
+        else:
+            raise ValueError(f"Unknown time measure: {time_measure}")
         timestamp = time.mktime(past_time.timetuple()) + past_time.microsecond / 1e6
         return timestamp
 
     def proxy_speed_to_float(self, str_speed: str) -> float:
-        str_speed = str_speed.split()[0]
+        int_speed = str_speed.split()[0]
         str_time_measure = str_speed.split()[-1]
         if str_time_measure == "ms":
-            return float(str_speed) / 1000.0
+            return float(int_speed) / 1000.0
         elif str_time_measure == "µs":
-            return float(str_speed) / 1000000.0
+            return float(int_speed) / 1000000.0
         elif str_time_measure == 's':
-            return float(str_speed)
+            return float(int_speed)
         else:
             raise ValueError(f"Unknown time measure: {str_time_measure}")
 
