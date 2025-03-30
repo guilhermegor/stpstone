@@ -67,6 +67,8 @@ wmi = "1.5.1"
 chardet = "5.2.0"
 minio = "7.2.15"
 webdriver-manager = "4.0.2"
+pycountry = "24.6.1"
+pycountry-convert = "0.7.2"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,3 +1,4 @@
+import time
 from random import shuffle
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -5,6 +6,7 @@ from requests.exceptions import ProxyError, ConnectTimeout, SSLError, Connection
 from typing import List, Dict, Union, Tuple, Any, Optional
 from abc import ABC, abstractmethod
 from urllib3.util import Retry
+from datetime import datetime, timedelta
 from stpstone._config.global_slots import YAML_SESSION
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.create_logs import conditional_timeit
@@ -68,6 +70,24 @@ class ABCSession(ABC):
             missing_keys = self.set_required_keys_avl_proxies - proxy.keys()
             if missing_keys:
                 raise ValueError(f"Missing required keys in proxy data: {missing_keys}")
+
+    def mins_ago_to_timestamp(self, mins_ago_str):
+        mins = int(mins_ago_str.split()[0])
+        past_time = datetime.now() - timedelta(minutes=mins)
+        timestamp = time.mktime(past_time.timetuple()) + past_time.microsecond / 1e6
+        return timestamp
+
+    def proxy_speed_to_float(self, str_speed: str) -> float:
+        str_speed = str_speed.split()[0]
+        str_time_measure = str_speed.split()[-1]
+        if str_time_measure == "ms":
+            return float(str_speed) / 1000.0
+        elif str_time_measure == "µs":
+            return float(str_speed) / 1000000.0
+        elif str_time_measure == 's':
+            return float(str_speed)
+        else:
+            raise ValueError(f"Unknown time measure: {str_time_measure}")
 
     @property
     @abstractmethod
