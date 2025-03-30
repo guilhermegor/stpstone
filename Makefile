@@ -49,11 +49,11 @@ update_readme: package_tree update_tree
 
 ### FACTORY METHODS ###
 
-concrete_product_ingestion_request:
+concrete_creator_ingestion_request:
 	bash cli/create_req_yaml.sh
 	bash cli/create_req_cls_py.sh
 
-concrete_product_ingestion_request_html_parser:
+concrete_creator_ingestion_request_html_parser:
 	bash cli/html_parser_create_req_yaml.sh
 	bash cli/html_parser_create_req_cls_py.sh
 
