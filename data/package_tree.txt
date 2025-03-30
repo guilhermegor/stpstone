@@ -27,6 +27,7 @@ stpstone
 │   │   │   ├── otc
 │   │   │   │   └── debentures.yaml
 │   │   │   ├── registries
+│   │   │   │   ├── anbima_data_debentures.yaml
 │   │   │   │   ├── anbima_data_funds.yaml
 │   │   │   │   ├── b3_trd_sec.yaml
 │   │   │   │   ├── brazillian_banks.yaml
@@ -161,6 +162,7 @@ stpstone
 │       │   ├── otc
 │       │   │   └── debentures.py
 │       │   ├── registries
+│       │   │   ├── anbima_data_debentures.py
 │       │   │   ├── anbima_data_funds.py
 │       │   │   ├── b3_trd_sec.py
 │       │   │   ├── brazillian_banks.py

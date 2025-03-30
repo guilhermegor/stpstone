@@ -19,31 +19,16 @@ from stpstone.utils.connections.netops.user_agents import UserAgents
 class HtmlHandler:
 
     def bs_parser(self, req_resp: Response, parser:str="html.parser") -> Union[BeautifulSoup, str]:
-        """
-        DOCSTRING: HTML PARSER THROUGH BEAUTIFULSOUP
-        INPUTS: HTML TEXT
-        OUTPUTS: SOUP
-        """
         try:
             return BeautifulSoup(req_resp.content, parser)
         except HTTPError as e:
             return "HTTP Error: {}".format(e)
 
     def lxml_parser(self, req_resp:Response) -> html.HtmlElement:
-        """
-        DOCSTRING: HTML PARSER FOR LXML PURPOSES
-        INPUTS: URL, METHOD (GET AS DEFAULT) AND BOOLEAN VERIFY (TRUE AS DEFAULT)
-        OUTPUTS: DOCUMENT WITH HTML CONTENT
-        """
         page = req_resp.content
         return html.fromstring(page)
 
     def lxml_xpath(self, html_content, str_xpath):
-        """
-        DOCSTRING: XPATH TO HANDLE LXML PARSER
-        INPUTS: HTML CONTENT AND STRING XPATH
-        OUTPUTS: XPATH CONTENT
-        """
         return html_content.xpath(str_xpath)
 
     def html_tree(self, html_root:html.HtmlElement, file_path:str=None) -> None:
@@ -55,22 +40,12 @@ class HtmlHandler:
             print(html_string)
 
     def to_txt(self, html_):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
         soup = BeautifulSoup(html_, features="lxml")
         return soup(html_)
 
     def parse_html_to_string(self, html_, parsing_lib="html.parser",
                              str_body_html="",
                              join_td_character="|", td_size_ajust_character=" "):
-        """
-        DOCSTRING: PARSE HTML BODY
-        INPUTS: HTML
-        OUTPUTS: STRING
-        """
         # setting variables
         list_ = list()
         list_tr_html = list()
@@ -136,14 +111,12 @@ class SeleniumWD:
         path_webdriver: Optional[str] = None,
         int_port: Optional[int] = None,
         str_user_agent: Optional[str] = None,
-        int_screen_width: int = 1920,
-        int_screen_height: int = 1080,
         int_wait_load: int = 10,
         int_delay: int = 10,
         str_proxy: Optional[str] = None,
         bl_headless: bool = False,
         bl_incognito: bool = False,
-        dict_args: Optional[List[str]] = None
+        list_args: Optional[List[str]] = None
     ) -> None:
         """
         Initialization of selenium web driver
@@ -159,7 +132,7 @@ class SeleniumWD:
             bl_opn_min (bool, optional): open in minimal mode. Defaults to False.
             bl_headless (bool, optional): open in headless mode. Defaults to False.
             bl_incognito (bool, optional): open in incognito mode. Defaults to False.
-            dict_args (Optional[List[str]], optional): webdriver arguments. Defaults to None.
+            list_args (Optional[List[str]], optional): webdriver arguments. Defaults to None.
 
         Returns:
             None
@@ -178,7 +151,7 @@ class SeleniumWD:
         self.int_delay = int_delay
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
-        self.dict_default_args = dict_args if dict_args is not None else [
+        self.list_default_args = list_args if list_args is not None else [
             "--no-sandbox",
             "--disable-gpu",
             "--disable-setuid-sandbox",
@@ -190,17 +163,17 @@ class SeleniumWD:
             "--disable-extensions",
             "--disable-popup-blocking",
             "--disable-notifications",
-            f"--window-size={str(int_screen_width), str(int_screen_height)}",
-            f"--window-position={str(0), str(0)}",
+            f"--window-size=1920,1080",
+            f"--window-position=0,0",
             f"--user-agent={str_user_agent}"
         ]
         # set headless mode for operations without graphical user interface (GUI) - if true
         if self.bl_headless == True:
-            self.dict_default_args.append("--headless=new")
+            self.list_default_args.append("--headless=new")
         if self.bl_incognito == True:
-            self.dict_default_args.append("--incognito")
+            self.list_default_args.append("--incognito")
         if str_proxy is not None:
-            self.dict_default_args.append(f"--proxy-server={str_proxy}")
+            self.list_default_args.append(f"--proxy-server={str_proxy}")
         self.web_driver = self.get_web_driver
 
     @property
@@ -208,7 +181,7 @@ class SeleniumWD:
         d = DesiredCapabilities.CHROME
         d["goog:loggingPrefs"] = {"performance": "ALL"}
         browser_options = webdriver.ChromeOptions()
-        for arg in self.dict_default_args:
+        for arg in self.list_default_args:
             browser_options.add_argument(arg)
         if (self.path_webdriver is None) and (self.int_port is not None):
             service = Service(executable_path=ChromeDriverManager().install())

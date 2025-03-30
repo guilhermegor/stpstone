@@ -34,7 +34,7 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_EXAMPLE
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.session import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.folders import DirFilesManagement

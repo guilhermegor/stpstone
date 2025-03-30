@@ -15,6 +15,7 @@ from logging import Logger
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 from urllib.parse import parse_qs, urlparse
 from zipfile import ZipExtFile, ZipFile
+from selenium.webdriver.remote.webdriver import WebDriver
 from requests import Request, Response, Session, request
 from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingError,
                                  RequestException, HTTPError, JSONDecodeError)
@@ -29,9 +30,10 @@ from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.xml import XMLFiles
+from stpstone.utils.parsers.html import SeleniumWD
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 
 class UtilsRequests(ABC):
 
@@ -206,28 +208,29 @@ class HandleReqResponses(UtilsRequests):
 
     def handle_response(
         self,
-        req_resp: Response,
+        req_resp: Union[Response, WebDriver],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
+        dict_xpaths: Optional[Dict[str, str]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
-        bl_debug: bool = False,
+        selenium_wd: SeleniumWD = None
     ) -> pd.DataFrame:
         print(f"URL: {req_resp.url}")
         str_file_extension = DirFilesManagement().get_last_file_extension(req_resp.url)
-        # print(f"FILE EXTENSION: {str_file_extension}")
         file_name = os.path.basename(req_resp.url) if hasattr(req_resp, "url") else ""
         if self.req_trt_injection(req_resp) is not None:
             df_ = self.req_trt_injection(req_resp)
+        elif type(req_resp) == WebDriver:
+            df_ = self._handle_web_driver_html(req_resp, dict_xpaths, selenium_wd)
         elif str_file_extension == "zip":
             df_ = self._handle_zip_response(
                 req_resp,
                 dict_xml_keys,
                 dict_regex_patterns,
                 dict_df_read_params,
-                list_ignored_file_extensions,
-                bl_debug,
+                list_ignored_file_extensions
             )
         elif str_file_extension == "ex_":
             df_ = self._handle_ex_response(
@@ -271,17 +274,30 @@ class HandleReqResponses(UtilsRequests):
             else:
                 df_ = pd.DataFrame(json_)
             return pd.DataFrame(json_)
-        if (
-            (file_name is not None)
-            and ("FILE_NAME" not in df_.columns)
-            and (df_.empty == False)
-        ):
+        if (file_name is not None) \
+            and ("FILE_NAME" not in df_.columns) \
+            and (df_.empty == False):
             df_["FILE_NAME"] = file_name
         return df_
 
     @abstractmethod
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         return None
+
+    def _handle_web_driver_html(
+        self,
+        web_driver: WebDriver,
+        dict_xpaths: Dict[str, str],
+        selenium_wd: SeleniumWD
+    ) -> pd.DataFrame:
+        try:
+            list_ser = [
+                {key: selenium_wd.find_element(web_driver, str_xpath)}
+                for key, str_xpath in dict_xpaths.items()
+            ]
+        finally:
+            web_driver.quit()
+        return pd.DataFrame(list_ser)
 
     def _handle_zip_response(
         self,
@@ -290,8 +306,7 @@ class HandleReqResponses(UtilsRequests):
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
-        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
-        bl_debug: bool = False,
+        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}]
     ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
@@ -310,7 +325,6 @@ class HandleReqResponses(UtilsRequests):
                     dict_df_read_params,
                     list_ignored_file_extensions,
                     list_ser_fixed_width_layout,
-                    bl_debug,
                 )
                 if df_.empty == True:
                     continue
@@ -504,6 +518,14 @@ class ABCRequests(HandleReqResponses):
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
         list_slugs: Optional[List[str]] = None,
+        path_webdriver: Optional[str] = None,
+        int_port: Optional[int] = None,
+        str_user_agent: Optional[str] = None,
+        int_wait_load: int = 10,
+        int_delay: int = 10,
+        bl_headless: bool = False,
+        bl_incognito: bool = False,
+        list_options_wd: Optional[List[str]] = None
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
@@ -511,6 +533,14 @@ class ABCRequests(HandleReqResponses):
         self.cls_db = cls_db
         self.logger = logger
         self.list_slugs = list_slugs
+        self.path_webdriver = path_webdriver
+        self.int_port = int_port
+        self.str_user_agent = str_user_agent
+        self.int_wait_load = int_wait_load
+        self.int_delay = int_delay
+        self.bl_headless = bl_headless
+        self.bl_incognito = bl_incognito
+        self.list_options_wd = list_options_wd
         self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
         self.token = (
             token
@@ -678,7 +708,6 @@ class ABCRequests(HandleReqResponses):
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_fillna_strt: Optional[Dict[str, str]] = {},
-        bl_debug: bool = False,
     ) -> pd.DataFrame:
         # building url and requesting
         url = host + app if app is not None else host
@@ -686,11 +715,29 @@ class ABCRequests(HandleReqResponses):
             CreateLog().infos(self.logger, f"Starting request to: {url}")
         else:
             print(f"Starting request to: {url}")
-        req_resp = self.generic_req(
-            req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
-        )
-        if bl_debug == True:
-            print(f"*** DF READ PARAMS: {dict_df_read_params}")
+        if self.dict_metadata["credentials"].get("web_driver", None) is not None:
+            dict_instance_vars = self.get_instance_variables
+            list_options_wd = [
+                StrHandler().fill_placeholders(x, dict_instance_vars) for x in self.list_options_wd
+            ]
+            if self.session is not None:
+                list_options_wd.append(f"--proxy-server={self.session.proxies}")
+            self.selenium_wd = SeleniumWD(
+                url, self.path_webdriver, self.int_port, self.str_user_agent, self.int_wait_load,
+                self.int_delay, self.session.proxies, self.bl_headless, self.bl_incognito,
+                self.list_options_wd
+            )
+            if self.dict_metadata["credentials"]["web_driver"].get(
+                "xpath_el_wait_until_loaded", None) is not None:
+                self.selenium_wd.wait_until_el_loaded(
+                    self.dict_metadata["credentials"]["web_driver"].get(
+                        "xpath_el_wait_until_loaded", None)
+                )
+            req_resp = self.selenium_wd.web_driver
+        else:
+            req_resp = self.generic_req(
+                req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
+            )
         # dealing with request content type
         df_ = self.handle_response(
             req_resp,
@@ -699,10 +746,7 @@ class ABCRequests(HandleReqResponses):
             dict_df_read_params,
             list_ignored_file_extensions,
             list_ser_fixed_width_layout,
-            bl_debug,
         )
-        if bl_debug == True:
-            print(f"*** TRT REQ BEFORE STANDARDIZATION: \n{df_}")
         # standardizing
         cls_df_stdz = DFStandardization(
             dict_dtypes=dict_dtypes,
@@ -721,21 +765,13 @@ class ABCRequests(HandleReqResponses):
             logger=self.logger,
         )
         df_ = cls_df_stdz.pipeline(df_)
-        # audit logging
-        if bl_debug == True:
-            print(f"*** TRT REQ: \n{df_}")
         df_ = DBLogs().audit_log(
             df_,
             url,
             self.dt_ref,
         )
-        if bl_debug == True:
-            print(f"*** TRT REQ - AUDIT LOG: \n{df_}")
-            print(f"*** COLS NAMES: {list(df_.columns)}")
         if self.logger is not None:
             CreateLog().infos(self.logger, f"Request completed successfully: {url}")
-        if bl_debug == True:
-            print(f"*** TRT REQ - STANDARDIZATION: \n{df_}")
         return df_
 
     def insert_table(
@@ -792,7 +828,6 @@ class ABCRequests(HandleReqResponses):
         str_resource: str,
         host: Optional[str] = None,
         bl_fetch: bool = False,
-        bl_debug: bool = False,
     ) -> Optional[pd.DataFrame]:
         """
         Non-iteratively get raw data
@@ -800,7 +835,6 @@ class ABCRequests(HandleReqResponses):
             str_resource (str): resource name
             host (Optional[str]): host name
             bl_fetch (bool): False as default
-            bl_debug (bool): False as default
         Returns:
             pd.DataFrame
         """
@@ -873,7 +907,6 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                 self.dict_metadata[str_resource].get("xml_keys", None),
                 self.dict_metadata[str_resource].get("fillna_strt", {}),
-                bl_debug,
             )
         except tuple(list_ignorable_exceptions) as e:
             if self.logger is not None:
@@ -902,7 +935,6 @@ class ABCRequests(HandleReqResponses):
         str_resource: str,
         host: Optional[str] = None,
         bl_fetch: bool = False,
-        bl_debug: bool = False,
     ) -> Optional[pd.DataFrame]:
         """
         Iteratively get raw data
@@ -910,7 +942,6 @@ class ABCRequests(HandleReqResponses):
             str_resource (str): resource name
             host (Optional[str]): host name
             bl_fetch (bool): False as default
-            bl_debug (bool): False as default
         Returns:
             Optional[pd.DataFrame]
         """
@@ -1006,7 +1037,6 @@ class ABCRequests(HandleReqResponses):
                             ),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
-                            bl_debug,
                         )
                         df_["SLUG_URL"] = str_slug
                         list_ser.extend(df_.to_dict(orient="records"))
@@ -1083,7 +1113,6 @@ class ABCRequests(HandleReqResponses):
                             ),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
-                            bl_debug,
                         )
                         df_["SLUG_URL"] = str_chunk_slugs
                         list_ser.extend(df_.to_dict(orient="records"))
@@ -1158,7 +1187,6 @@ class ABCRequests(HandleReqResponses):
                             ),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
-                            bl_debug,
                         ).to_dict(orient="records")
                     )
                     if self.cls_db is not None:
@@ -1204,7 +1232,6 @@ class ABCRequests(HandleReqResponses):
         str_resource: str,
         host: Optional[str] = None,
         bl_fetch: bool = False,
-        bl_debug: bool = False,
     ) -> Optional[pd.DataFrame]:
         """
         Get/load raw data - if a class database is passed, the data collected will be inserted into
@@ -1230,4 +1257,4 @@ class ABCRequests(HandleReqResponses):
             func_get_data = self.iteratively_get_data
         else:
             func_get_data = self.non_iteratively_get_data
-        return func_get_data(str_resource, host, bl_fetch, bl_debug)
+        return func_get_data(str_resource, host, bl_fetch)

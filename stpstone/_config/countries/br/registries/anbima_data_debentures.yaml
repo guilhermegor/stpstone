@@ -1,0 +1,151 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://data.anbima.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    app:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+  web_driver:
+    xpath_el_wait_until_loaded: //*[@id="output__container--remuneracao"]/span
+    options:
+      # - --headless=new
+      - --incognito
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-setuid-sandbox
+      - --disable-web-security
+      - --disable-dev-shm-usage
+      - --memory-pressure-off
+      - --ignore-certificate-errors
+      - --disable-features=site-per-process
+      - --disable-extensions
+      - --disable-popup-blocking
+      - --disable-notifications
+      - --windows-size=1920,1080
+      - --user-agent={{str_user_agent}}
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+debentures_registries:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: debentures/{{slug}}/caracteristicas
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+  dtypes:
+    ATIVO: str
+    SERIE: str
+    REMUNERACAO: str
+    DT_INICIO_RENTABILIDADE: date
+    NPER_CAPITALIZACAO: str
+    QTD_EMISSOES_SERIE: int
+    MOEDA: str
+    VOLUME_SERIE_DATA_EMISSAO: int
+    VNE: int
+    VNA: int
+    QTD_MERCADO_SEC_B3: int
+    ESTOQUE_MERCADO_B3: float
+    DT_EMISSAO: date
+    DT_VENCIMENTO: date
+    DT_PROXIMA_REPACTUACAO: date
+    PRAZO_EMISSAO: str
+    PRAZO_REMANESCENTE: str
+    BL_RESGATE_ANTECIPADO: str
+    ISIN: str
+    DT_PROXIMO_EVENTO: date
+    BL_INCENTIVO_LEI_12431: str
+    ARTIGO: str
+    EMISSAO: str
+    EMPRESA: str
+    SETOR: str
+    CNPJ: str
+    VOLUME_EMISSAO: int
+    QTD_EMISSAO: int
+    QTD_MERCADO_B3: int
+    COORDENADOR_LIDER: str
+    COORDENADORES: str
+    AGENTE_FIDUCIARIO: str
+    BANCO_MANDATARIO: str
+    GARANTIA: str
+  df_read_params:
+  xpaths:
+    ATIVO: //div[@class="card-content__container "]/h2[@class="title-normal"]
+    SERIE: //*[@id="root"]/main/div[3]/main/div/div[1]/article[1]/article/section/div/div[1]/h2
+    REMUNERACAO: //*[@id="output__container--remuneracao"]/div/span
+    DT_INICIO_RENTABILIDADE: //*[@id="output__container--dataInicioRentabilidade"]/div/span
+    NPER_CAPITALIZACAO: //*[@id="output__container--expressaoPapel"]/div/span
+    QTD_EMISSOES_SERIE: //*[@id="output__container--quantidadeSerieEmissao"]/div/span
+    VOLUME_SERIE_DATA_EMISSAO: //*[@id="output__container--volumeSerieEmissao"]/div/span
+    VNE: //*[@id="output__container--vne"]/div/span
+    VNA: //*[@class="anbima-ui-output__container--details"]/span/a
+    QTD_MERCADO_SEC_B3: //*[@id="output__container--quantidadeMercadoB3"]/div/span
+    ESTOQUE_MERCADO_B3: //*[@id="output__container--estoqueMercadoB3"]/div/span
+    DT_EMISSAO: //*[@id="output__container--dataEmissao"]/div/span
+    DT_VENCIMENTO: //*[@id="output__container--dataVencimento"]/div/span
+    DT_PROXIMA_REPACTUACAO: //*[@id="output__container--dataProximaRepactuacao"]/div/span
+    PRAZO_EMISSAO: //*[@id="output__container--prazoEmissao"]/div/span
+    PRAZO_REMANESCENTE: //*[@id="output__container--prazoRemanescente"]/div/span
+    BL_RESGATE_ANTECIPADO: //*[@id="output__container--resgateAntecipado"]/div/span
+    ISIN: //*[@id="output__container--isin"]/div/span
+    DT_PROXIMO_EVENTO: //*[@id="output__container--dataProximoEventoAgenda"]/div/span
+    BL_INCENTIVO_LEI_12431: //*[@id="output__container--lei12431"]/div/span
+    ARTIGO: //*[@id="output__container--artigo"]/div/span
+    EMISSAO: //*[@id="root"]/main/div[3]/main/div/div[1]/article[2]/article/section/div/div[1]/h2
+    EMPRESA: /*[@id="output__container--empresa"]/div/span
+    SETOR: /*[@id="output__container--setor"]/div/span
+    CNPJ: /*[@id="output__container--cnpj"]/div/span
+    VOLUME_EMISSAO: //*[@id="output__container--volumeEmissao"]/div/span
+    QTD_EMISSAO: //*[@id="output__container--quantidadeEmissao"]/div/span
+    QTD_MERCADO_B3: //*[@id="output__container--quantidadeMercadoB3Emissao"]/div/span
+    COORDENADOR_LIDER: //*[@id="output__container--coordenadorLider"]/div/span
+    COORDENADORES: //*[@id="output__container--coordenadores"]/div/span
+    AGENTE_FIDUCIARIO: //*[@id="output__container--agenteFiduciario"]/div/span
+    BANCO_MANDATARIO: //*[@id="output__container--bancoMandatorio"]/div/span
+    GARANTIA: //*[@id="output__container--garantia"]/div/span

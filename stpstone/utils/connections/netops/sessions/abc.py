@@ -19,7 +19,7 @@ class ABCSession(ABC):
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
-        list_anonimity_value: List[str] = ['anonymous', 'elite', 'transparent'],
+        list_anonimity_value: List[str] = ['anonymous', 'elite'],
         str_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
@@ -43,6 +43,31 @@ class ABCSession(ABC):
         self.float_max_timeout = float_max_timeout
         self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
+        self.set_required_keys_avl_proxies = {
+            "protocol", "bl_alive", "status", "alive_since", "anonymity",
+            "average_timeout", "first_seen", "ip_data", "ip_name", "timezone",
+            "continent", "continent_code", "country", "country_code", "city",
+            "district", "region_name", "zip", "bl_hosting", "isp", "latitude",
+            "longitude", "organization", "proxy", "ip", "port", "bl_ssl",
+            "timeout", "times_alive", "times_dead", "ratio_times_alive_dead",
+            "uptime"
+        }
+        """
+        Notes:
+            Proxy levels:
+                - Transparent: target server knows your IP address and it knows that you are connecting via a proxy server.
+                - Anonymous: target server does not know your IP address, but it knows that you're using a proxy.
+                - Elite or High anonymity: target server does not know your IP address, or that the request is relayed through a proxy server.
+        """
+
+    def _validate_proxy_structure(
+        self,
+        list_proxies: List[Dict[str, Union[str, int, float, bool]]]
+    ) -> None:
+        for proxy in list_proxies:
+            missing_keys = self.set_required_keys_avl_proxies - proxy.keys()
+            if missing_keys:
+                raise ValueError(f"Missing required keys in proxy data: {missing_keys}")
 
     @property
     @abstractmethod
@@ -126,6 +151,7 @@ class ABCSession(ABC):
     @property
     def _filter_proxies(self) -> List[Dict[str, Union[str, int]]]:
         list_ser = self._available_proxies
+        self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
             ('bl_alive', self.bl_alive, 'equal'),
             ('anonymity', self.list_anonimity_value, 'isin'),
