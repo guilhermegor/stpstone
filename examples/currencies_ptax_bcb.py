@@ -4,10 +4,10 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.macroeconomics.br.currencies.ptax_bcb import PTAXBCB
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 
 
-session = ProxyScrape(bl_new_proxy=False).session
+session = ProxyScrapeAll(bl_new_proxy=False).session
 
 class_ptax = PTAXBCB(
     session=session,

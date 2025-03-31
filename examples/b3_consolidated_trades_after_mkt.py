@@ -4,10 +4,10 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt import ConsolidatedTrdsAfterMktB3
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 
 
-# session = ProxyScrape(
+# session = ProxyScrapeAll(
 #     bl_new_proxy=True,
 #     bl_use_timer=True,
 #     float_min_ratio_times_alive_dead=0.02,

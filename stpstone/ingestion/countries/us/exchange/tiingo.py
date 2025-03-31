@@ -7,7 +7,7 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_US_TIINGO
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
@@ -15,7 +15,7 @@ class TiingoUS(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ProxyScrape]=None,
+        session:Optional[ProxyScrapeAll]=None,
         dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52),
         dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,

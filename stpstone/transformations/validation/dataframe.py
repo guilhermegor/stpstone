@@ -1,13 +1,7 @@
-### DATAFRAME VALIDATION ###
-
-# pypi.org libs
+import pandas as pd
 from logging import Logger, Tuple
 from numbers import Number
 from typing import Dict, List, Optional
-
-import pandas as pd
-
-# local libs
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.pipelines.generic import generic_pipeline
 

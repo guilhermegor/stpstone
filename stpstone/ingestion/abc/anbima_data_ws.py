@@ -6,7 +6,7 @@ from typing import Optional, Dict, List, Any
 from requests import request, Response
 from requests.exceptions import ReadTimeout, ConnectTimeout, ChunkedEncodingError, ConnectionError
 from lxml import html
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -93,7 +93,7 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
 class AnbimaDataFetcher(AnbimaDataUtils):
 
     def __init__(self, resource: str, dict_metadata: Dict[str, Any], list_slugs: List[str],
-                 str_bucket_name: str, session: ProxyScrape, client_s3: Any,
+                 str_bucket_name: str, session: ProxyScrapeAll, client_s3: Any,
                  logger: Optional[Logger] = None) -> None:
         self.resource = resource
         self.dict_metadata = dict_metadata

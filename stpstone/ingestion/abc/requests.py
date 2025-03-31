@@ -22,7 +22,7 @@ from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingErr
                                  RequestException, HTTPError, JSONDecodeError)
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -558,7 +558,7 @@ class ABCRequests(HandleReqResponses):
     def __init__(
         self,
         dict_metadata: Dict[str, Any],
-        session: Optional[ProxyScrape] = None,
+        session: Optional[ProxyScrapeAll] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
@@ -585,7 +585,8 @@ class ABCRequests(HandleReqResponses):
         self.int_delay = int_delay
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
-        self.list_options_wd = self.dict_metadata["credentials"]["web_driver"]["options"]
+        self.list_options_wd = self.dict_metadata.get("credentials", {}).get(
+            "web_driver", {}).get("options", None)
         self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
         self.token = (
             token
@@ -779,6 +780,7 @@ class ABCRequests(HandleReqResponses):
                 selenium_wd.wait_until_el_loaded(xpath_el_wait_until_loaded)
             req_resp = selenium_wd.web_driver
         else:
+            selenium_wd = None
             req_resp = self.generic_req(
                 req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
             )
@@ -1075,7 +1077,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
-                            self.dict_metadata[str_resource]["web_driver"].get(
+                            self.dict_metadata[str_resource].get("web_driver", {}).get(
                                 "xpath_el_wait_until_loaded", {}),
                             self.dict_metadata[str_resource].get("xpaths", [{}]),
                         )

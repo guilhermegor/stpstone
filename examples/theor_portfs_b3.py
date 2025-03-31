@@ -4,10 +4,10 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.registries.br.exchange.indexes_theor_portf import IndexesTheorPortfB3
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 
 
-# session = ProxyScrape(bl_new_proxy=True).session
+# session = ProxyScrapeAll(bl_new_proxy=True).session
 
 cls_ = IndexesTheorPortfB3(
     session=None,

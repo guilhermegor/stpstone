@@ -1,24 +1,26 @@
 from getpass import getuser
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import AnbimaDataDebentures
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeCountry, ProxyScrapeAll
+from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
 from stpstone.utils.connections.netops.user_agents import UserAgents
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
-cls_session = ProxyScrape(
+cls_session = ProxyNova(
     bl_new_proxy=True,
     str_country_code="BR",
     str_continent_code=None,
     bl_alive=True,
     list_anonimity_value=["elite", "anonymous"],
     list_protocol=["http", "https"],
-    bl_ssl=True,
+    bl_ssl=None,
     float_min_ratio_times_alive_dead=None,
-    float_max_timeout=600,
+    float_max_timeout=10000,
 )
 
 if cls_session.session.proxies == {}:
     raise Exception("No proxies available")
+print(f"Proxies available: {cls_session.session.proxies}")
 
 cls_ = AnbimaDataDebentures(
     session=cls_session.session,

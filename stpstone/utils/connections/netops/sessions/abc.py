@@ -7,10 +7,12 @@ from typing import List, Dict, Union, Tuple, Any, Optional
 from abc import ABC, ABCMeta, abstractmethod
 from urllib3.util import Retry
 from datetime import datetime, timedelta
+from logging import Logger
 from stpstone._config.global_slots import YAML_SESSION
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.create_logs import conditional_timeit
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class ABCMetaClass(TypeChecker, ABCMeta):
@@ -34,7 +36,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout:Optional[float] = 600,
         bl_use_timer: bool = False,
-        list_status_forcelist: list = [429, 500, 502, 503, 504]
+        list_status_forcelist: list = [429, 500, 502, 503, 504],
+        logger: Optional[Logger] = None
     ):
         self.bl_new_proxy = bl_new_proxy
         self.dict_proxies = dict_proxies
@@ -50,6 +53,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.float_max_timeout = float_max_timeout
         self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
+        self.logger = logger
         """
         Notes:
             Proxy levels:
@@ -57,6 +61,12 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 - Anonymous: target server does not know your IP address, but it knows that you"re using a proxy.
                 - Elite or High anonymity: target server does not know your IP address, or that the request is relayed through a proxy server.
         """
+
+    def _logger_infos(self, message: str) -> None:
+        if self.logger is not None:
+            CreateLog().infos(self.logger, message)
+        else:
+            print(f"INFO: {message}")
 
     def _validate_proxy_structure(
         self,
@@ -185,6 +195,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     @property
     def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:
         list_ser = self._available_proxies
+        self._logger_infos(f"Number of available proxies: {len(list_ser)}")
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
             ("bl_alive", self.bl_alive, "equal"),
@@ -197,12 +208,14 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             ("country_code", self.str_country_code, "equal")
         ]:
             if v_filt is not None:
+                self._logger_infos(f"Filtering proxies with {k_filt}={v_filt} / Length: {len(list_ser)}")
                 list_ser = HandlingDicts().filter_list_ser(
                     list_ser,
                     k_filt,
                     v_filt,
                     str_filter_type=str_strategy
                 )
+                self._logger_infos(f"Filtered proxies with {k_filt}={v_filt} / Length: {len(list_ser)}")
         return list_ser
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:

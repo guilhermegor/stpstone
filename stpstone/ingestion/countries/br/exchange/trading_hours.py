@@ -7,7 +7,7 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_B3_TRADING_HOURS_B3
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -20,7 +20,7 @@ class TradingHoursB3(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ProxyScrape]=None,
+        session:Optional[ProxyScrapeAll]=None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,

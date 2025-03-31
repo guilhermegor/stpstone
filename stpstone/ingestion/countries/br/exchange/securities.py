@@ -6,7 +6,7 @@ from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrape
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.lists import HandlingLists
@@ -17,7 +17,7 @@ class ExchRegBR(ABCRequests):
     def __init__(
         self,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        session:Optional[ProxyScrape]=None,
+        session:Optional[ProxyScrapeAll]=None,
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:

@@ -184,11 +184,10 @@ class DFStandardization(metaclass=TypeChecker):
             pd.DataFrame
         """
         list_cols_numerical = [
-            v
+            k
             for k, v in self.dict_dtypes.items()
             if v in ["int64", "float64", "int32", "float32", int, float, "int", "float"]
         ]
-        print(f"list_cols_numerical: {list_cols_numerical}")
         for col_ in list_cols_numerical:
             if (df_[col_].dtype == "object") and (
                 df_[col_]
