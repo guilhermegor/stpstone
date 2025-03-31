@@ -27,7 +27,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
         list_anonimity_value: List[str] = ["anonymous", "elite"],
-        str_protocol: str = "http",
+        list_protocol: List[str] = ["http", "https"],
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
         bl_ssl: Union[bool, None] = None,
@@ -42,7 +42,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.int_backoff_factor = int_backoff_factor
         self.bl_alive = bl_alive
         self.list_anonimity_value = list_anonimity_value
-        self.str_protocol = str_protocol
+        self.list_protocol = list_protocol
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
         self.bl_ssl = bl_ssl
@@ -84,6 +84,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             past_time = datetime.now() - timedelta(hours=time_)
         elif time_measure in ["day", "days"]:
             past_time = datetime.now() - timedelta(days=time_)
+        elif time_measure in ["secs", "seconds", "sec"]:
+            past_time = datetime.now() - timedelta(seconds=time_)
         else:
             raise ValueError(f"Unknown time measure: {time_measure}")
         timestamp = time.mktime(past_time.timetuple()) + past_time.microsecond / 1e6
@@ -124,7 +126,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     def get_proxy(self) -> Dict[str, str]:
         @conditional_timeit(bl_use_timer=self.bl_use_timer)
         def retrieve_proxy():
-            list_ser = self._filter_proxies
+            list_ser = self._filtered_proxies
             shuffle(list_ser)
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
@@ -140,7 +142,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         list_ = list()
         @conditional_timeit(bl_use_timer=self.bl_use_timer)
         def retrieve_proxy():
-            list_ser = self._filter_proxies
+            list_ser = self._filtered_proxies
             shuffle(list_ser)
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
@@ -181,13 +183,13 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             return req_resp.json()
 
     @property
-    def _filter_proxies(self) -> List[Dict[str, Union[str, int]]]:
+    def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:
         list_ser = self._available_proxies
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
             ("bl_alive", self.bl_alive, "equal"),
             ("anonymity", self.list_anonimity_value, "isin"),
-            ("protocol", self.str_protocol, "equal"),
+            ("protocol", self.list_protocol, "isin"),
             ("bl_ssl", self.bl_ssl, "equal"),
             ("ratio_times_alive_dead", self.float_min_ratio_times_alive_dead, "greater_than_or_equal_to"),
             ("timeout", self.float_max_timeout, "less_than_or_equal_to"),
@@ -195,16 +197,12 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             ("country_code", self.str_country_code, "equal")
         ]:
             if v_filt is not None:
-                try:
-                    list_ser = HandlingDicts().filter_list_ser(
-                        list_ser,
-                        k_filt,
-                        v_filt,
-                        str_filter_type=str_strategy
-                    )
-                except KeyError as e:
-                    print(list_ser)
-                    raise Exception(e)
+                list_ser = HandlingDicts().filter_list_ser(
+                    list_ser,
+                    k_filt,
+                    v_filt,
+                    str_filter_type=str_strategy
+                )
         return list_ser
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:

@@ -157,15 +157,16 @@ class DFStandardization(metaclass=TypeChecker):
         list_cols = [
             col_ for col_ in list(df_.columns) if col_ not in self.list_cols_dt
         ]
-        for col_, strt_fill_na in self.dict_fillna_strt.items():
-            if col_ not in list_cols:
-                continue
-            elif strt_fill_na == "ffill":
-                df_[col_] = df_[col_].ffill()
-            elif strt_fill_na == "bfill":
-                df_[col_] = df_[col_].bfill()
-            else:
-                raise Exception(f"Invalid fillna strategy: {strt_fill_na}")
+        if self.dict_fillna_strt is not None:
+            for col_, strt_fill_na in self.dict_fillna_strt.items():
+                if col_ not in list_cols:
+                    continue
+                elif strt_fill_na == "ffill":
+                    df_[col_] = df_[col_].ffill()
+                elif strt_fill_na == "bfill":
+                    df_[col_] = df_[col_].bfill()
+                else:
+                    raise Exception(f"Invalid fillna strategy: {strt_fill_na}")
         if self.list_cols_dt is not None:
             df_[self.list_cols_dt] = df_[self.list_cols_dt].fillna(self.str_dt_fillna)
         df_[list_cols] = df_[list_cols].fillna(self.str_data_fillna)
@@ -185,8 +186,9 @@ class DFStandardization(metaclass=TypeChecker):
         list_cols_numerical = [
             v
             for k, v in self.dict_dtypes.items()
-            if v in ["int64", "float64", "int32", "float32", int, float]
+            if v in ["int64", "float64", "int32", "float32", int, float, "int", "float"]
         ]
+        print(f"list_cols_numerical: {list_cols_numerical}")
         for col_ in list_cols_numerical:
             if (df_[col_].dtype == "object") and (
                 df_[col_]

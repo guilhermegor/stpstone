@@ -8,6 +8,7 @@ import re
 import subprocess
 import tempfile
 import pandas as pd
+from time import sleep
 from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
@@ -249,12 +250,9 @@ class HandleReqResponses(UtilsRequests):
                 selenium_wd
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
-            if (
-                RemoteFiles().check_separator_consistency(
+            if (RemoteFiles().check_separator_consistency(
                     req_resp.content, dict_df_read_params.get("skiprows", 0)
-                )
-                == True
-            ):
+                ) == True):
                 df_ = self._handle_csv_response(req_resp, dict_df_read_params)
             else:
                 df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
@@ -291,6 +289,14 @@ class HandleReqResponses(UtilsRequests):
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         return None
 
+    @backoff.on_exception(
+        backoff.expo,
+        (RequestException, HTTPError, ReadTimeout, ConnectTimeout, ChunkedEncodingError),
+        max_tries=20,
+        base=2,
+        factor=2,
+        max_value=1200
+    )
     def _handle_web_driver_html(
         self,
         url: str,
@@ -299,34 +305,39 @@ class HandleReqResponses(UtilsRequests):
         selenium_wd: SeleniumWD
     ) -> pd.DataFrame:
         try:
-            print(f"DICT XPATHS: {dict_xpaths}")
+            if any(StrHandler().match_string_like(value, "*delay_next_s=*") == True
+                for value in dict_xpaths.values()):
+                int_delay_next_s = (
+                    self.get_query_params(url, "delay_next_s")
+                    if self.get_query_params(url, "delay_next_s") is not None
+                    else None
+                )
             if any(StrHandler().match_string_like(value, "*{{iter}}*") == True
                 for value in dict_xpaths.values()):
                 int_iter_min = (
                     self.get_query_params(url, "iter_min")
                     if self.get_query_params(url, "iter_min") is not None
-                    else 100
+                    else 0
                 )
                 int_iter_max = (
                     self.get_query_params(url, "iter_max")
                     if self.get_query_params(url, "iter_max") is not None
                     else 100
                 )
-                list_ser = [
-                    {
-                        key: selenium_wd.find_element(req_resp,
-                        StrHandler().fill_placeholders(str_xpath, {"iter": i}))
-                    }
+                list_ser = [{
+                    key: selenium_wd.find_element(req_resp,
+                    StrHandler().fill_placeholders(str_xpath, {"iter": i})).text
                     for key, str_xpath in dict_xpaths.items()
                     for i in range(int_iter_min, int_iter_max)
-                ]
+                }]
             else:
-                list_ser = [
-                    {key: selenium_wd.find_element(req_resp, str_xpath)}
+                list_ser = [{
+                    key: selenium_wd.find_element(req_resp, str_xpath).text
                     for key, str_xpath in dict_xpaths.items()
-                ]
+                }]
         finally:
             req_resp.quit()
+            if int_delay_next_s is not None: sleep(int_delay_next_s)
         return pd.DataFrame(list_ser)
 
     def _handle_zip_response(

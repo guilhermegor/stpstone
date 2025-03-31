@@ -9,7 +9,7 @@ class ProxyScrape(ABCSession):
     def __init__(self, bl_new_proxy:bool=True, dict_proxies:Union[Dict[str, str], None]=None,
                  int_retries:int=10, int_backoff_factor:int=1, bl_alive:bool=True,
                  list_anonimity_value:List[str]=['anonymous', 'elite', 'transparent'],
-                 str_protocol:str='http', str_continent_code:Union[str, None]=None,
+                 list_protocol:str='http', str_continent_code:Union[str, None]=None,
                  str_country_code:Union[str, None]=None, bl_ssl:Union[bool, None]=None,
                  float_min_ratio_times_alive_dead:Optional[float]=0.02,
                  float_max_timeout:Optional[float]=600, bl_use_timer:bool=False,
@@ -31,7 +31,7 @@ class ProxyScrape(ABCSession):
         self.int_backoff_factor = int_backoff_factor
         self.bl_alive = bl_alive
         self.list_anonimity_value = list_anonimity_value
-        self.str_protocol = str_protocol
+        self.list_protocol = list_protocol
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
         self.bl_ssl = bl_ssl

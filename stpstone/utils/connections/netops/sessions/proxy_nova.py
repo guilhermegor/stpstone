@@ -15,7 +15,7 @@ class ProxyNova(ABCSession):
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
         list_anonimity_value: List[str] = ['anonymous', 'elite'],
-        str_protocol: str = 'http',
+        list_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
         bl_ssl: Union[bool, None] = None,
@@ -30,7 +30,7 @@ class ProxyNova(ABCSession):
         self.int_backoff_factor = int_backoff_factor
         self.bl_alive = bl_alive
         self.list_anonimity_value = list_anonimity_value
-        self.str_protocol = str_protocol
+        self.list_protocol = list_protocol
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
         self.bl_ssl = bl_ssl
@@ -38,7 +38,6 @@ class ProxyNova(ABCSession):
         self.float_max_timeout = float_max_timeout
         self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
-        self.str_continent_code = str_country_code
         self.fstr_url = "https://www.proxynova.com/proxy-server-list/country-{}/"
         self.xpath_tr = '//*[@id="tbl_proxy_list"]/tbody/tr'
         self.url = self.fstr_url.format(str_country_code.lower())
@@ -69,16 +68,18 @@ class ProxyNova(ABCSession):
                 "bl_alive": True,
                 "status": "success",
                 "alive_since": self.time_ago_to_timestamp(last_checked),
-                "anonymity": anonimity,
+                "anonymity": anonimity.lower(),
                 "average_timeout": 1.0 / self.proxy_speed_to_float(proxy_speed),
                 "first_seen": self.time_ago_to_timestamp(last_checked),
                 "ip_data": "",
                 "ip_name": "",
-                "timezone": ", ".join(WWTimezones().get_timezones_by_country(self.str_continent_code)),
-                "continent": WWGeography().get_continent_by_country_code(self.str_continent_code),
-                "continent_code": WWGeography().get_continent_code_by_country_code(self.str_continent_code),
+                "timezone": ", ".join(WWTimezones().get_timezones_by_country_code(
+                    self.str_country_code)),
+                "continent": WWGeography().get_continent_by_country_code(self.str_country_code),
+                "continent_code": WWGeography().get_continent_code_by_country_code(
+                    self.str_country_code).upper(),
                 "country": country,
-                "country_code": self.str_continent_code,
+                "country_code": self.str_country_code.upper(),
                 "city": city,
                 "district": "",
                 "region_name": "",
@@ -91,7 +92,7 @@ class ProxyNova(ABCSession):
                 "proxy": True,
                 "ip": ip,
                 "port": port,
-                "bl_ssl": False,
+                "bl_ssl": True,
                 "timeout": 1.0 / self.proxy_speed_to_float(proxy_speed),
                 "times_alive": int_times_alive,
                 "times_dead": "",

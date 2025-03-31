@@ -163,8 +163,9 @@ class SeleniumWD:
             "--disable-extensions",
             "--disable-popup-blocking",
             "--disable-notifications",
-            f"--window-size=1920,1080",
-            f"--window-position=0,0",
+            "--window-size=1920,1080",
+            "--window-position=0,0",
+            "--enable-unsafe-swiftshader",
             f"--user-agent={str_user_agent}"
         ]
         # set headless mode for operations without graphical user interface (GUI) - if true

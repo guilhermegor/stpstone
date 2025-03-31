@@ -8,7 +8,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 class WWTimezones(metaclass=TypeChecker):
 
-    def get_timezones_by_country(self, country_code: str) -> Optional[List[str]]:
+    def get_timezones_by_country_code(self, country_code: str) -> Optional[List[str]]:
         country = pycountry.countries.get(alpha_2=country_code)
         return pytz.country_timezones.get(country.alpha_2) if country else None
 
@@ -19,7 +19,7 @@ class WWTimezones(metaclass=TypeChecker):
         ]
 
     def get_current_time_in_country(self, country_code: str, int_tz: int = 0) -> Optional[str]:
-        timezones = self.get_timezones_by_country(country_code)
+        timezones = self.get_timezones_by_country_code(country_code)
         if not timezones:
             return None
         tz = pytz.timezone(timezones[int_tz])

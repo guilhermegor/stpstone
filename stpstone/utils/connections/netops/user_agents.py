@@ -1,12 +1,23 @@
+import backoff
 import requests
 import random
 from typing import List
 from lxml import html
+from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingError,
+                                 RequestException, HTTPError)
 
 
 class UserAgents:
 
     @property
+    @backoff.on_exception(
+        backoff.expo,
+        (RequestException, HTTPError, ReadTimeout, ConnectTimeout, ChunkedEncodingError),
+        max_tries=20,
+        base=2,
+        factor=2,
+        max_value=1200
+    )
     def fetch_user_agents(self) -> List[str]:
         list_ = list()
         url = "https://gist.github.com/pzb/b4b6f57144aea7827ae4"

@@ -11,13 +11,7 @@ class DocumentsNumbersBR:
     def __init__(self, list_docs:List[str]):
         self.list_docs = list_docs
 
-    def validate(self, doc='CNPJ'):
-        """
-        DOCSTRING: BOOLEAN TO VALDIATE WHETER OR NOT THE NUMBER CLASSIFIES A CORRECT ID FOR A GIVEN
-            DOCUMENT
-        INPUTS: DOC NATURE
-        OUTPUTS: BOOLEAN LIST
-        """
+    def validate(self, doc:str = 'CNPJ') -> List[bool]:
         # determine document of interest
         if doc.upper() == 'CNPJ':
             class_ = CNPJ()
@@ -39,12 +33,7 @@ class DocumentsNumbersBR:
         # return valide/invalid reponse for each given number, provided its nature
         return class_.validate_list(self.list_docs)
 
-    def mask_numbers(self, doc='CNPJ'):
-        """
-        DOCSTRING: MASK A LIST OF NUMBERS TO THE DOCUMENT FORMAT OF INTEREST
-        INPUTS: DOC NATURE
-        OUTPUTS: STRING LIST
-        """
+    def mask_numbers(self, doc:str = 'CNPJ') -> List[str]:
         # passing variables
         list_nums_to_mask = list()
         # determine document of interest
@@ -72,22 +61,11 @@ class DocumentsNumbersBR:
         return list_nums_to_mask
 
     @property
-    def unmask_docs(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
+    def unmask_docs(self) -> List[str]:
         return [d.replace('.', '').replace('/', '').replace('-', '') for d in self.list_docs]
 
     @property
-    def get_public_info_cnpj(self, url='https://receitaws.com.br/v1/cnpj/{}',
-                             method='GET'):
-        """
-        DOCSTRING: GET PUBLIC AVAILABLE BRAZILLIAN INTERNAL REVENUE SERVICE (IRS) REGARDING
-            A CNPJ (DOMESTIC DOCUMENT FOR COMPANIES)
-        INPUTS: CNPJ NUMBER
-        OUTPUTS: JSON
-        """
+    def get_public_info_cnpj(self, url: str = 'https://receitaws.com.br/v1/cnpj/{}',
+                             method: str = 'GET') -> List[dict]:
         return [request(method, url.format(cnpj_number)).json() for cnpj_number in
                 self.list_docs]
