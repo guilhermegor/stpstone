@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import Union, Dict, List, Optional
 from stpstone.utils.parsers.html import SeleniumWD
 from stpstone.utils.connections.netops.sessions.abc import ABCSession
 from stpstone.utils.geography.ww import WWTimezones, WWGeography
@@ -6,7 +7,37 @@ from stpstone.utils.geography.ww import WWTimezones, WWGeography
 
 class ProxyNova(ABCSession):
 
-    def __init__(self, str_country_code: str) -> None:
+    def __init__(
+        self,
+        bl_new_proxy: bool = True,
+        dict_proxies: Union[Dict[str, str], None] = None,
+        int_retries: int = 10,
+        int_backoff_factor: int = 1,
+        bl_alive: bool = True,
+        list_anonimity_value: List[str] = ['anonymous', 'elite'],
+        str_protocol: str = 'http',
+        str_continent_code: Union[str, None] = None,
+        str_country_code: Union[str, None] = None,
+        bl_ssl: Union[bool, None] = None,
+        float_min_ratio_times_alive_dead: Optional[float] = 0.02,
+        float_max_timeout:Optional[float] = 600,
+        bl_use_timer: bool = False,
+        list_status_forcelist: list = [429, 500, 502, 503, 504]
+    ) -> None:
+        self.bl_new_proxy = bl_new_proxy
+        self.dict_proxies = dict_proxies
+        self.int_retries = int_retries
+        self.int_backoff_factor = int_backoff_factor
+        self.bl_alive = bl_alive
+        self.list_anonimity_value = list_anonimity_value
+        self.str_protocol = str_protocol
+        self.str_continent_code = str_continent_code
+        self.str_country_code = str_country_code
+        self.bl_ssl = bl_ssl
+        self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
+        self.float_max_timeout = float_max_timeout
+        self.bl_use_timer = bl_use_timer
+        self.list_status_forcelist = list_status_forcelist
         self.str_continent_code = str_country_code
         self.fstr_url = "https://www.proxynova.com/proxy-server-list/country-{}/"
         self.xpath_tr = '//*[@id="tbl_proxy_list"]/tbody/tr'
@@ -18,7 +49,7 @@ class ProxyNova(ABCSession):
         self.driver = self.selenium_wd.get_web_driver
 
     @property
-    def _available_proxies(self) -> pd.DataFrame:
+    def _available_proxies(self) -> List[Dict[str, Union[str, float]]]:
         list_ser = list()
         el_trs = self.selenium_wd.find_elements(self.driver, self.xpath_tr)
         for el_tr in el_trs:
@@ -67,4 +98,4 @@ class ProxyNova(ABCSession):
                 "ratio_times_alive_dead": "",
                 "uptime": uptime
             })
-        return pd.DataFrame(list_ser)
+        return list_ser

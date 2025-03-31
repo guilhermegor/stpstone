@@ -21,7 +21,10 @@ class AnbimaDataDebentures(ABCRequests):
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
         list_slugs: Optional[List[str]] = None,
-        str_user_agent: Optional[str] = None
+        str_user_agent: Optional[str] = None,
+        int_wait_load: int = 10,
+        bl_headless: bool = False,
+        bl_incognito: bool = False
     ) -> None:
         super().__init__(
             dict_metadata=YAML_ANBIMA_DATA_DEBENTURES,
@@ -31,7 +34,10 @@ class AnbimaDataDebentures(ABCRequests):
             logger=logger,
             token=token,
             list_slugs=list_slugs,
-            str_user_agent=str_user_agent
+            str_user_agent=str_user_agent,
+            int_wait_load=int_wait_load,
+            bl_headless=bl_headless,
+            bl_incognito=bl_incognito
         )
         self.session = session
         self.dt_ref = dt_ref
@@ -39,6 +45,9 @@ class AnbimaDataDebentures(ABCRequests):
         self.logger = logger
         self.list_slugs = list_slugs
         self.str_user_agent = str_user_agent
+        self.int_wait_load = int_wait_load
+        self.bl_headless = bl_headless
+        self.bl_incognito = bl_incognito
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         return None

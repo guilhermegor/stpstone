@@ -41,7 +41,7 @@ class ProxyScrape(ABCSession):
         self.list_status_forcelist = list_status_forcelist
 
     @property
-    def _available_proxies(self):
+    def _available_proxies(self) -> List[Dict[str, Union[str, float]]]:
         """
         DOCSTRING:
         INPUTS:

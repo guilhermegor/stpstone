@@ -14,10 +14,7 @@ credentials:
     keys:
       token: token
   web_driver:
-    xpath_el_wait_until_loaded: //*[@id="output__container--remuneracao"]/span
     options:
-      # - --headless=new
-      - --incognito
       - --no-sandbox
       - --disable-gpu
       - --disable-setuid-sandbox
@@ -38,6 +35,8 @@ metadata:
 ### RESOURCES TO BE SCRAPED ###
 
 debentures_registries:
+  web_driver:
+    xpath_el_wait_until_loaded: //*[@id="output__container--remuneracao"]/span
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -151,6 +150,8 @@ debentures_registries:
     GARANTIA: //*[@id="output__container--garantia"]/div/span
 
 debentures_available:
+  web_driver:
+    xpath_el_wait_until_loaded: //*[@id="item-title-0"]
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -172,7 +173,7 @@ debentures_available:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: busca/debentures?size=100&page=0#iter_max=100
+  app: busca/debentures?size=100&page=0#iter_min=0&iter_max=10
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -199,5 +200,5 @@ debentures_available:
   df_read_params:
   xpaths:
     ATIVO: //a[@id="item-title-{{iter}}"]
-    URL_ATIVO: //a[@id="item-title-0"]/@href
+    URL_ATIVO: //a[@id="item-title-{{iter}}"]/@href
     PAGE: //*[@id="pagination"]/div[3]/span/form/div/input/@value

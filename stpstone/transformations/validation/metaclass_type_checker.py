@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from requests import Session
 from pydantic import validate_arguments, ConfigDict
 from typing import get_type_hints, get_origin, get_args, Type, Dict, Any, Union, BinaryIO, IO
 from io import BytesIO, RawIOBase, BufferedIOBase
@@ -11,11 +12,11 @@ class TypeChecker(type):
         for attr_name, attr_value in dict_.items():
             if (callable(attr_value)) and (not attr_name.startswith("__")):
                 bl_arbitrary_types = False
-                tuple_types = (pd.DataFrame, np.ndarray, pd.Series, list)
+                tup_types_ignore = (pd.DataFrame, np.ndarray, pd.Series, list, Session)
                 io_types = (IO, BinaryIO, RawIOBase, BufferedIOBase, BytesIO)
                 type_hints = get_type_hints(attr_value)
                 for hint in type_hints.values():
-                    if hint in tuple_types:
+                    if hint in tup_types_ignore:
                         bl_arbitrary_types = True
                         break
                     if hint in io_types:
@@ -23,10 +24,10 @@ class TypeChecker(type):
                         break
                     if get_origin(hint) is Union:
                         args = get_args(hint)
-                        if any(arg in tuple_types for arg in args):
+                        if any(arg in tup_types_ignore for arg in args):
                             bl_arbitrary_types = True
                             break
-                    if getattr(hint, "__origin__", None) in tuple_types:
+                    if getattr(hint, "__origin__", None) in tup_types_ignore:
                         bl_arbitrary_types = True
                         break
                 dict_[attr_name] = validate_arguments(

@@ -131,6 +131,7 @@ class UtilsRequests(ABC):
 
     def pdf_doc_regex(
         self,
+        url: str,
         req_resp: Response,
         bytes_pdf: BytesIO,
         dict_regex_patterns: Dict[str, Dict[str, Any]],
@@ -141,7 +142,7 @@ class UtilsRequests(ABC):
         dict_count_matches = dict()
         doc_pdf = fitz.open(
             stream=bytes_pdf,
-            filetype=DirFilesManagement().get_last_file_extension(req_resp.url),
+            filetype=DirFilesManagement().get_last_file_extension(url),
         )
         # create list of concatenated pages
         for i in range(0, len(doc_pdf), int_pgs_join):
@@ -217,20 +218,25 @@ class HandleReqResponses(UtilsRequests):
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         selenium_wd: SeleniumWD = None
     ) -> pd.DataFrame:
-        print(f"URL: {req_resp.url}")
-        str_file_extension = DirFilesManagement().get_last_file_extension(req_resp.url)
-        file_name = os.path.basename(req_resp.url) if hasattr(req_resp, "url") else ""
+        if isinstance(req_resp, WebDriver):
+            url = req_resp.current_url
+        else:
+            url = req_resp.url
+        str_file_extension = DirFilesManagement().get_last_file_extension(url)
+        file_name = os.path.basename(url) if hasattr(req_resp, "url") else ""
         if self.req_trt_injection(req_resp) is not None:
             df_ = self.req_trt_injection(req_resp)
-        elif type(req_resp) == WebDriver:
-            df_ = self._handle_web_driver_html(req_resp, dict_xpaths, selenium_wd)
+        elif isinstance(req_resp, WebDriver):
+            df_ = self._handle_web_driver_html(url, req_resp, dict_xpaths, selenium_wd)
         elif str_file_extension == "zip":
             df_ = self._handle_zip_response(
                 req_resp,
                 dict_xml_keys,
                 dict_regex_patterns,
                 dict_df_read_params,
-                list_ignored_file_extensions
+                list_ignored_file_extensions,
+                list_ser_fixed_width_layout,
+                selenium_wd
             )
         elif str_file_extension == "ex_":
             df_ = self._handle_ex_response(
@@ -240,6 +246,7 @@ class HandleReqResponses(UtilsRequests):
                 dict_df_read_params,
                 list_ignored_file_extensions,
                 list_ser_fixed_width_layout,
+                selenium_wd
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
             if (
@@ -258,7 +265,7 @@ class HandleReqResponses(UtilsRequests):
         elif str_file_extension == "json":
             df_ = self._handle_json_response(req_resp)
         elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
-            df_ = self._handle_pdf_doc_response(req_resp, dict_regex_patterns)
+            df_ = self._handle_pdf_doc_response(url, req_resp, dict_regex_patterns)
         elif str_file_extension in ["fwf", "dat"]:
             df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
         else:
@@ -286,36 +293,40 @@ class HandleReqResponses(UtilsRequests):
 
     def _handle_web_driver_html(
         self,
-        web_driver: WebDriver,
+        url: str,
+        req_resp: WebDriver,
         dict_xpaths: Dict[str, str],
         selenium_wd: SeleniumWD
     ) -> pd.DataFrame:
         try:
-            if any(StrHandler().match_string_like(value, "*{{iter}}*") == True 
+            print(f"DICT XPATHS: {dict_xpaths}")
+            if any(StrHandler().match_string_like(value, "*{{iter}}*") == True
                 for value in dict_xpaths.values()):
-                if StrHandler().match_string_like(req_resp.url, "*iter_max=*") == True:
-                    int_iter_max = (
-                        self.get_query_params(req_resp.url, "iter_max")
-                        if self.get_query_params(req_resp.url, "iter_max") is not None
-                        else 100
-                    )
-                else:
-                    int_iter_max = 100
+                int_iter_min = (
+                    self.get_query_params(url, "iter_min")
+                    if self.get_query_params(url, "iter_min") is not None
+                    else 100
+                )
+                int_iter_max = (
+                    self.get_query_params(url, "iter_max")
+                    if self.get_query_params(url, "iter_max") is not None
+                    else 100
+                )
                 list_ser = [
                     {
-                        key: selenium_wd.find_element(web_driver, 
+                        key: selenium_wd.find_element(req_resp,
                         StrHandler().fill_placeholders(str_xpath, {"iter": i}))
                     }
                     for key, str_xpath in dict_xpaths.items()
-                    for i in range(0, int_iter_max)
+                    for i in range(int_iter_min, int_iter_max)
                 ]
             else:
                 list_ser = [
-                    {key: selenium_wd.find_element(web_driver, str_xpath)}
+                    {key: selenium_wd.find_element(req_resp, str_xpath)}
                     for key, str_xpath in dict_xpaths.items()
                 ]
         finally:
-            web_driver.quit()
+            req_resp.quit()
         return pd.DataFrame(list_ser)
 
     def _handle_zip_response(
@@ -325,7 +336,8 @@ class HandleReqResponses(UtilsRequests):
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
-        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}]
+        list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
+        selenium_wd: SeleniumWD = None
     ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
         zipfile = ZipFile(BytesIO(req_resp.content))
         list_ = []
@@ -344,6 +356,7 @@ class HandleReqResponses(UtilsRequests):
                     dict_df_read_params,
                     list_ignored_file_extensions,
                     list_ser_fixed_width_layout,
+                    selenium_wd
                 )
                 if df_.empty == True:
                     continue
@@ -438,20 +451,21 @@ class HandleReqResponses(UtilsRequests):
 
     def _handle_pdf_doc_response(
         self,
+        url: str,
         req_resp: Response,
         dict_regex_patterns: Dict[str, Dict[str, str]],
-        default_int_pgs_join: int = 2,
+        default_int_pgs_join: int = 2
     ) -> pd.DataFrame:
         # reading pdf/doc
         bytes_pdf = BytesIO(req_resp.content)
         # checking wheter to read tables or use regex
-        if StrHandler().match_string_like(req_resp.url, "*feat=read_tables*") == True:
+        if StrHandler().match_string_like(url, "*feat=read_tables*") == True:
             return self.pdf_doc_tables_response(bytes_pdf)
         else:
-            if StrHandler().match_string_like(req_resp.url, "*int_pgs_join=*") == True:
+            if StrHandler().match_string_like(url, "*int_pgs_join=*") == True:
                 int_pgs_join = (
-                    self.get_query_params(req_resp.url, "int_pgs_join")
-                    if self.get_query_params(req_resp.url, "int_pgs_join") is not None
+                    self.get_query_params(url, "int_pgs_join")
+                    if self.get_query_params(url, "int_pgs_join") is not None
                     else default_int_pgs_join
                 )
             else:
@@ -468,6 +482,7 @@ class HandleReqResponses(UtilsRequests):
         dict_df_read_params: Optional[Dict[str, Any]] = None,
         list_ignored_file_extensions: Optional[List[str]] = [],
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
+        selenium_wd: SeleniumWD = None
     ) -> pd.DataFrame:
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
@@ -492,6 +507,7 @@ class HandleReqResponses(UtilsRequests):
                         dict_df_read_params,
                         list_ignored_file_extensions,
                         list_ser_fixed_width_layout,
+                        selenium_wd
                     )
                     list_ser.extend(df_.to_dict(orient="records"))
             return pd.DataFrame(list_ser)
@@ -544,7 +560,6 @@ class ABCRequests(HandleReqResponses):
         int_delay: int = 10,
         bl_headless: bool = False,
         bl_incognito: bool = False,
-        list_options_wd: Optional[List[str]] = None
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
@@ -559,7 +574,7 @@ class ABCRequests(HandleReqResponses):
         self.int_delay = int_delay
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
-        self.list_options_wd = list_options_wd
+        self.list_options_wd = self.dict_metadata["credentials"]["web_driver"]["options"]
         self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
         self.token = (
             token
@@ -727,8 +742,9 @@ class ABCRequests(HandleReqResponses):
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_fillna_strt: Optional[Dict[str, str]] = {},
+        xpath_el_wait_until_loaded: Optional[str] = None,
+        dict_xpaths: Optional[Dict[str, str]] = None
     ) -> pd.DataFrame:
-        # building url and requesting
         url = host + app if app is not None else host
         if self.logger is not None:
             CreateLog().infos(self.logger, f"Starting request to: {url}")
@@ -740,33 +756,31 @@ class ABCRequests(HandleReqResponses):
                 StrHandler().fill_placeholders(x, dict_instance_vars) for x in self.list_options_wd
             ]
             if self.session is not None:
-                list_options_wd.append(f"--proxy-server={self.session.proxies}")
-            self.selenium_wd = SeleniumWD(
+                str_proxy = self.session.proxies
+            else:
+                str_proxy = None
+            selenium_wd = SeleniumWD(
                 url, self.path_webdriver, self.int_port, self.str_user_agent, self.int_wait_load,
-                self.int_delay, self.session.proxies, self.bl_headless, self.bl_incognito,
-                self.list_options_wd
+                self.int_delay, str_proxy, self.bl_headless, self.bl_incognito,
+                list_options_wd
             )
-            if self.dict_metadata["credentials"]["web_driver"].get(
-                "xpath_el_wait_until_loaded", None) is not None:
-                self.selenium_wd.wait_until_el_loaded(
-                    self.dict_metadata["credentials"]["web_driver"].get(
-                        "xpath_el_wait_until_loaded", None)
-                )
-            req_resp = self.selenium_wd.web_driver
+            if xpath_el_wait_until_loaded is not None:
+                selenium_wd.wait_until_el_loaded(xpath_el_wait_until_loaded)
+            req_resp = selenium_wd.web_driver
         else:
             req_resp = self.generic_req(
                 req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
             )
-        # dealing with request content type
         df_ = self.handle_response(
             req_resp,
             dict_xml_keys,
             dict_regex_patterns,
             dict_df_read_params,
+            dict_xpaths,
             list_ignored_file_extensions,
             list_ser_fixed_width_layout,
+            selenium_wd
         )
-        # standardizing
         cls_df_stdz = DFStandardization(
             dict_dtypes=dict_dtypes,
             cols_from_case=cols_from_case,
@@ -926,6 +940,8 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                 self.dict_metadata[str_resource].get("xml_keys", None),
                 self.dict_metadata[str_resource].get("fillna_strt", {}),
+                self.dict_metadata[str_resource]["web_driver"].get("xpath_el_wait_until_loaded", {}),
+                self.dict_metadata[str_resource].get("xpaths", [{}]),
             )
         except tuple(list_ignorable_exceptions) as e:
             if self.logger is not None:
@@ -1042,20 +1058,15 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get(
-                                "regex_patterns", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "df_read_params", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "ignored_file_extensions", []
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "fixed_width_layout", [{}]
-                            ),
+                            self.dict_metadata[str_resource].get("regex_patterns", None),
+                            self.dict_metadata[str_resource].get("df_read_params", None),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
+                            self.dict_metadata[str_resource]["web_driver"].get(
+                                "xpath_el_wait_until_loaded", {}),
+                            self.dict_metadata[str_resource].get("xpaths", [{}]),
                         )
                         df_["SLUG_URL"] = str_slug
                         list_ser.extend(df_.to_dict(orient="records"))
@@ -1118,20 +1129,15 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get(
-                                "regex_patterns", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "df_read_params", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "ignored_file_extensions", []
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "fixed_width_layout", [{}]
-                            ),
+                            self.dict_metadata[str_resource].get("regex_patterns", None),
+                            self.dict_metadata[str_resource].get("df_read_params", None),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
+                            self.dict_metadata[str_resource]["web_driver"].get(
+                                "xpath_el_wait_until_loaded", {}),
+                            self.dict_metadata[str_resource].get("xpaths", [{}]),
                         )
                         df_["SLUG_URL"] = str_chunk_slugs
                         list_ser.extend(df_.to_dict(orient="records"))
@@ -1192,20 +1198,15 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource]["str_fmt_dt"],
                             self.dict_metadata[str_resource]["type_error_action"],
                             self.dict_metadata[str_resource]["strategy_keep_when_dupl"],
-                            self.dict_metadata[str_resource].get(
-                                "regex_patterns", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "df_read_params", None
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "ignored_file_extensions", []
-                            ),
-                            self.dict_metadata[str_resource].get(
-                                "fixed_width_layout", [{}]
-                            ),
+                            self.dict_metadata[str_resource].get("regex_patterns", None),
+                            self.dict_metadata[str_resource].get("df_read_params", None),
+                            self.dict_metadata[str_resource].get("ignored_file_extensions", []),
+                            self.dict_metadata[str_resource].get("fixed_width_layout", [{}]),
                             self.dict_metadata[str_resource].get("xml_keys", None),
                             self.dict_metadata[str_resource].get("fillna_strt", {}),
+                            self.dict_metadata[str_resource]["web_driver"].get(
+                                "xpath_el_wait_until_loaded", {}),
+                            self.dict_metadata[str_resource].get("xpaths", [{}]),
                         ).to_dict(orient="records")
                     )
                     if self.cls_db is not None:
