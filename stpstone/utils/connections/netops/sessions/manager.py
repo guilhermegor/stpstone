@@ -1,0 +1,164 @@
+from typing import Union, Dict, List, Optional
+from logging import Logger
+from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
+from stpstone.utils.connections.netops.sessions.proxy_webshare import ProxyWebShare
+from stpstone.utils.loggs.create_logs import CreateLog
+
+
+class YieldProxy:
+
+    def __init__(
+        self,
+        bl_new_proxy: bool = True,
+        dict_proxies: Union[Dict[str, str], None] = None,
+        int_retries: int = 10,
+        int_backoff_factor: int = 1,
+        bl_alive: bool = True,
+        list_anonymity_value: List[str] = ["anonymous", "elite"],
+        list_protocol: str = 'http',
+        str_continent_code: Union[str, None] = None,
+        str_country_code: Union[str, None] = None,
+        bl_ssl: Union[bool, None] = None,
+        float_min_ratio_times_alive_dead: Optional[float] = 0.02,
+        float_max_timeout: Optional[float] = 600,
+        bl_use_timer: bool = False,
+        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
+        logger: Optional[Logger] = None,
+        str_plan_id_webshare: str = "free",
+        max_iter_find_healthy_proxy: int = 10,
+    ) -> None:
+        self.bl_new_proxy = bl_new_proxy
+        self.dict_proxies = dict_proxies
+        self.int_retries = int_retries
+        self.int_backoff_factor = int_backoff_factor
+        self.bl_alive = bl_alive
+        self.list_anonymity_value = list_anonymity_value
+        self.list_protocol = list_protocol
+        self.str_continent_code = str_continent_code
+        self.str_country_code = str_country_code
+        self.bl_ssl = bl_ssl
+        self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
+        self.float_max_timeout = float_max_timeout
+        self.bl_use_timer = bl_use_timer
+        self.list_status_forcelist = list_status_forcelist
+        self.logger = logger
+        self.str_plan_id_webshare = str_plan_id_webshare
+        self.max_iter_find_healthy_proxy = max_iter_find_healthy_proxy
+        self.create_logs = CreateLog()
+
+        self.cls_proxy_nova = ProxyNova(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
+
+        self.cls_proxy_scrape_all = ProxyScrapeAll(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
+
+        self.cls_proxy_scrape_country = ProxyScrapeCountry(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
+
+        self.cls_proxy_webshare = ProxyWebShare(
+            str_plan_id=str_plan_id_webshare,
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
+
+        self.i = 0
+        self.cached_sessions = self._cache
+
+    @property
+    def _cache(self) -> List[Dict[str, str]]:
+        list_ser = list()
+        for list_ in [
+            self.cls_proxy_nova.configured_sessions,
+            self.cls_proxy_scrape_all.configured_sessions,
+            self.cls_proxy_scrape_country.configured_sessions,
+            self.cls_proxy_webshare.configured_sessions
+        ]:
+            if list_ is not None:
+                list_ser.extend(list_)
+        self.create_logs.log_message(
+            self.logger,
+            f"Number of proxies healthy: {len(list_ser)}",
+            log_level="info"
+        )
+        while (self.max_iter_find_healthy_proxy > self.i) and (len(list_ser) == 0):
+            self.create_logs.log_message(
+                self.logger,
+                f"No proxies available - retrying {self.i+1}/{self.max_iter_find_healthy_proxy}",
+                log_level="warning"
+            )
+            self.cached_sessions = self._cache
+            list_ser = self.cached_sessions
+            self.i += 1
+        if len(list_ser) == 0:
+            self.create_logs.log_message(
+                self.logger,
+                f"No proxies available after {self.max_iter_find_healthy_proxy} attempts",
+                log_level="error"
+            )
+            raise ValueError("No proxies available")
+        return list_ser
+
+    def __next__(self) -> Dict[str, str]:
+        if self.bl_new_proxy == False: return None
+        list_proxies = self.cached_sessions
+        if len(list_proxies) == 0: self.cached_sessions = self._cache
+        return list_proxies.pop(0)

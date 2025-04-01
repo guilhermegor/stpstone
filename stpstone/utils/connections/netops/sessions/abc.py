@@ -1,5 +1,4 @@
 import time
-import inspect
 from random import shuffle
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -9,7 +8,6 @@ from abc import ABC, ABCMeta, abstractmethod
 from urllib3.util import Retry
 from datetime import datetime, timedelta
 from logging import Logger
-from stpstone._config.global_slots import YAML_SESSION
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.loggs.create_logs import conditional_timeit
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -29,15 +27,15 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
-        list_anonimity_value: List[str] = ["anonymous", "elite"],
+        list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: List[str] = ["http", "https"],
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
         bl_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
-        float_max_timeout:Optional[float] = 600,
+        float_max_timeout: Optional[float] = 600,
         bl_use_timer: bool = False,
-        list_status_forcelist: list = [429, 500, 502, 503, 504],
+        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None
     ):
         self.bl_new_proxy = bl_new_proxy
@@ -45,7 +43,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
         self.bl_alive = bl_alive
-        self.list_anonimity_value = list_anonimity_value
+        self.list_anonymity_value = list_anonymity_value
         self.list_protocol = list_protocol
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
@@ -149,13 +147,23 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         @conditional_timeit(bl_use_timer=self.bl_use_timer)
         def retrieve_proxy():
             list_ser = self._filtered_proxies
-            shuffle(list_ser)
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
                 int_port = dict_proxy["port"]
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    if self._test_proxy(str_ip, int_port, bl_return_availability=True) == True:
+                    bl_test_proxy = self._test_proxy(str_ip, int_port, bl_return_availability=True)
+                    self.create_log.log_message(
+                        self.logger,
+                        f"Testing proxy {str_ip}:{int_port} - Healthy: {bl_test_proxy}",
+                        log_level="infos"
+                    )
+                    if bl_test_proxy == True:
                         list_.append({"ip": str_ip, "port": int_port})
+            self.create_log.log_message(
+                self.logger,
+                f"Number of working proxies: {len(list_)}",
+                log_level="infos"
+            )
             if len(list_) > 0:
                 return list_
             else:
@@ -180,8 +188,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             "upgrade-insecure-requests": "1",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
         }
-        req_resp = session.get(YAML_SESSION["ipinfos"]["url"], headers=dict_headers,
-                                    data=dict_payload, timeout=tup_timeout)
+        req_resp = session.get("https://lumtest.com/myip.json", headers=dict_headers,
+                                data=dict_payload, timeout=tup_timeout)
         req_resp.raise_for_status()
         if bl_return_availability == True:
             return True
@@ -192,20 +200,25 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:
         list_ser = self._available_proxies
         self.create_log.log_message(
-            f"Number of available proxies: {len(list_ser)}", log_level="infos")
+            self.logger,
+            f"Number of available proxies: {len(list_ser)}",
+            log_level="infos"
+        )
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
             ("bl_alive", self.bl_alive, "equal"),
-            ("anonymity", self.list_anonimity_value, "isin"),
+            ("anonymity", self.list_anonymity_value, "isin"),
             ("protocol", self.list_protocol, "isin"),
             ("bl_ssl", self.bl_ssl, "equal"),
-            ("ratio_times_alive_dead", self.float_min_ratio_times_alive_dead, "greater_than_or_equal_to"),
+            ("ratio_times_alive_dead", self.float_min_ratio_times_alive_dead,
+                "greater_than_or_equal_to"),
             ("timeout", self.float_max_timeout, "less_than_or_equal_to"),
             ("continent_code", self.str_continent_code, "equal"),
             ("country_code", self.str_country_code, "equal")
         ]:
             if v_filt is not None:
                 self.create_log.log_message(
+                    self.logger,
                     f"Filtering proxies with {k_filt}={v_filt} / Length: {len(list_ser)}",
                     log_level="infos"
                 )
@@ -216,6 +229,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                     str_filter_type=str_strategy
                 )
                 self.create_log.log_message(
+                    self.logger,
                     f"Filtered proxies with {k_filt}={v_filt} / Length: {len(list_ser)}",
                     log_level="infos"
                 )
@@ -254,8 +268,10 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     @property
     def configured_sessions(self):
         if self.bl_new_proxy == False: return None
+        list_ser = self.get_proxies
+        if list_ser is None: return None
         list_sessions = list()
-        for dict_proxy in self.get_proxies:
+        for dict_proxy in list_ser:
             str_ip = dict_proxy["ip"]
             int_port = dict_proxy["port"]
             dict_proxy = self._dict_proxy(str_ip, int_port)

@@ -14,32 +14,34 @@ class ProxyNova(ABCSession):
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
-        list_anonimity_value: List[str] = ["anonymous", "elite"],
+        list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
         bl_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
-        float_max_timeout:Optional[float] = 600,
+        float_max_timeout: Optional[float] = 600,
         bl_use_timer: bool = False,
-        list_status_forcelist: list = [429, 500, 502, 503, 504],
+        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None
     ) -> None:
-        self.bl_new_proxy = bl_new_proxy
-        self.dict_proxies = dict_proxies
-        self.int_retries = int_retries
-        self.int_backoff_factor = int_backoff_factor
-        self.bl_alive = bl_alive
-        self.list_anonimity_value = list_anonimity_value
-        self.list_protocol = list_protocol
-        self.str_continent_code = str_continent_code
-        self.str_country_code = str_country_code
-        self.bl_ssl = bl_ssl
-        self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
-        self.float_max_timeout = float_max_timeout
-        self.bl_use_timer = bl_use_timer
-        self.list_status_forcelist = list_status_forcelist
-        self.logger = logger
+        super().__init__(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
         self.fstr_url = "https://www.proxynova.com/proxy-server-list/country-{}/"
         self.xpath_tr = '//*[@id="tbl_proxy_list"]/tbody/tr'
         self.url = self.fstr_url.format(str_country_code.lower())
@@ -64,13 +66,13 @@ class ProxyNova(ABCSession):
             country_city = self.selenium_wd.find_element(el_tr, './td[6]').text
             country = country_city.split(" - ")[0].strip()
             city = country_city.split("- ")[1].strip()
-            anonimity = self.selenium_wd.find_element(el_tr, './td[7]').text
+            anonymity = self.selenium_wd.find_element(el_tr, './td[7]').text
             list_ser.append({
                 "protocol": "http",
                 "bl_alive": True,
                 "status": "success",
                 "alive_since": self.time_ago_to_timestamp(last_checked),
-                "anonymity": anonimity.lower(),
+                "anonymity": anonymity.lower(),
                 "average_timeout": 1.0 / self.proxy_speed_to_float(proxy_speed),
                 "first_seen": self.time_ago_to_timestamp(last_checked),
                 "ip_data": "",

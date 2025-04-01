@@ -55,8 +55,6 @@ stpstone
 │   ├── inoa.yaml
 │   ├── llms.yaml
 │   ├── microsoft_apps.yaml
-│   ├── netops
-│   │   └── session.yaml
 │   ├── usa_macro.yaml
 │   └── world_gov_bonds.yaml
 ├── analytics
@@ -219,13 +217,14 @@ stpstone
     │   │   ├── sqlite.py
     │   │   └── sqlserver.py
     │   └── netops
-    │       ├── manager.py
+    │       ├── network_info.py
     │       ├── sessions
     │       │   ├── abc.py
+    │       │   ├── manager.py
     │       │   ├── proxy_nova.py
     │       │   ├── proxy_scrape.py
     │       │   ├── proxy_webshare.py
-    │       │   └── yield_proxy.py
+    │       │   └── test_proxy.py
     │       └── user_agents.py
     ├── conversions
     │   ├── base_converter.py

@@ -10,39 +10,41 @@ class ProxyWebShare(ABCSession):
 
     def __init__(
         self,
-        str_plan_id: str,
+        str_plan_id: str = "free",
         bl_new_proxy: bool = True,
         dict_proxies: Union[Dict[str, str], None] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
-        list_anonimity_value: List[str] = ["anonymous", "elite"],
+        list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
         bl_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
-        float_max_timeout:Optional[float] = 600,
+        float_max_timeout: Optional[float] = 600,
         bl_use_timer: bool = False,
-        list_status_forcelist: list = [429, 500, 502, 503, 504],
+        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None
     ) -> None:
+        super().__init__(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
         self.str_plan_id = str_plan_id
-        self.bl_new_proxy = bl_new_proxy
-        self.dict_proxies = dict_proxies
-        self.int_retries = int_retries
-        self.int_backoff_factor = int_backoff_factor
-        self.bl_alive = bl_alive
-        self.list_anonimity_value = list_anonimity_value
-        self.list_protocol = list_protocol
-        self.str_continent_code = str_continent_code
-        self.str_country_code = str_country_code
-        self.bl_ssl = bl_ssl
-        self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
-        self.float_max_timeout = float_max_timeout
-        self.bl_use_timer = bl_use_timer
-        self.list_status_forcelist = list_status_forcelist
-        self.logger = logger
         self.fstr_url = "https://proxy.webshare.io/api/v2/proxy/list/?mode=direct&page=1&page_size=10&plan_id={}"
         self.dates_br = DatesBR()
         self.ww_timezones = WWTimezones()
@@ -77,7 +79,7 @@ class ProxyWebShare(ABCSession):
                 "bl_alive": bool(dict_["valid"]),
                 "status": "success",
                 "alive_since": self.dates_br.iso_to_unix_timestamp(dict_["last_verification"]),
-                "anonimity": "elite" if bool(dict_["high_country_confidence"]) == True \
+                "anonymity": "elite" if bool(dict_["high_country_confidence"]) == True \
                     else "anonymous",
                 "average_timeout": 1.0,
                 "first_seen": self.dates_br.iso_to_unix_timestamp(dict_["created_at"]),
@@ -101,8 +103,8 @@ class ProxyWebShare(ABCSession):
                 "organization": dict_["asn_name"],
                 "proxy": True,
                 "ip": dict_["proxy_address"],
-                "port": dict_["proxy_port"],
-                "bl_ssl": False,
+                "port": dict_["port"],
+                "bl_ssl": True,
                 "timeout": 1.0,
                 "times_alive": 1,
                 "times_dead": 0,

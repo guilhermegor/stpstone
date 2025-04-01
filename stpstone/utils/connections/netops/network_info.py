@@ -1,5 +1,3 @@
-### MANAGER OF NETWORK OPERATIONS ###
-
 import socket
 import requests
 import psutil

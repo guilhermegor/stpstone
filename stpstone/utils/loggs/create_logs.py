@@ -58,8 +58,21 @@ class CreateLog:
         Returns:
             None
         """
-        class_name = self.__class__.__name__
-        method_name = inspect.currentframe().f_back.f_code.co_name
+        frame = inspect.currentframe()
+        class_name = 'UnknownClass'
+        method_name = 'unknown_method'
+        # walk up the call stack to find the first non-CreateLog frame
+        while frame:
+            frame = frame.f_back
+            if not frame:
+                break
+            self_potential_cls = frame.f_locals.get('self')
+            if self_potential_cls is not None and not isinstance(self_potential_cls, CreateLog):
+                class_name = self_potential_cls.__class__.__name__
+                method_name = frame.f_code.co_name
+                break
+            # fallback to function name if no suitable self found
+            method_name = frame.f_code.co_name
         formatted_message = f"[{class_name}.{method_name}] {message}"
         if logger is not None:
             log_method = getattr(self, log_level, self.infos)

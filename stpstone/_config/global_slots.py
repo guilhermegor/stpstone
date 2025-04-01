@@ -82,9 +82,6 @@ YAML_B3_TRD_SEC = reading_yaml(
 # BR
 YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.yaml"))
 
-# netops
-YAML_SESSION = reading_yaml(os.path.join(root_path, "netops/session.yaml"))
-
 
 # ! deprecated
 YAML_ANBIMA = reading_yaml(os.path.join(root_path, "anbima.yaml"))
