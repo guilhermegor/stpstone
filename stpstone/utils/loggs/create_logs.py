@@ -1,36 +1,19 @@
-### CRIACAO DE LOGS ###
-
 import logging
 import os
 import time
+import inspect
 
 
 class CreateLog:
-    """
-    DOCSTRING: PREENCHIMENTO DE LOGS AO LONGO DA ROTINA
-    INPUTS: -
-    OUTPUTS: INFOS
-    """
 
     def creating_parent_folder(self, new_path):
-        """
-        DOCSTRING: CRIAÇÃO DE PASTA NA REDE PARA EMBARCAR LOGS
-        INPUTS: NEW PATH
-        OUTPUTS: INFOS
-        """
         if not os.path.exists(new_path):
             os.makedirs(new_path)
-            return 'OK'
+            return True
         else:
-            return 'NOK'
+            return False
 
     def basic_conf(self, complete_path=None, basic_level='info'):
-        """
-        DOCSTRING: INICIO ROTINA DE FORNECIMENTO DE LOGS
-        INPUTS: -
-        OUTPUTS: LOGGER
-        """
-        # defining basic level of logging
         if basic_level == 'info':
             level = logging.INFO
         elif basic_level == 'debug':
@@ -38,7 +21,6 @@ class CreateLog:
         else:
             raise Exception(
                 'Level was not properly defined in basic config of logging, please check')
-        # logging message format
         logging.basicConfig(
             level=level,
             filename=complete_path,
@@ -48,45 +30,44 @@ class CreateLog:
             ),
             datefmt='%Y-%m-%d,%H:%M:%S',
         )
-        # console stream handler
         console = logging.StreamHandler()
         console.setLevel
-        # defining logger object
         logger = logging.getLogger(__name__)
-        # return logger
         return logger
 
     def infos(self, logger, msg_str):
-        """
-        DOCSTRING: FORNECIMENTO DE INFORMAÇÕES SOBRE O ANDAMENTO DO CÓDIGO
-        INPUTS: MENSAGEM EM STRING
-        OUTPUTS: INFO
-        """
         return logger.info(msg_str)
 
     def warnings(self, logger, msg_str):
-        """
-        DOCSTRING: ALERTAS PARA PONTOS DE ATENÇÃO NO CÓDIGO
-        INPUTS: MENSAGEM EM STRING
-        OUTPUTS: WARNING
-        """
         return logger.warning(msg_str)
 
     def errors(self, logger, msg_str):
-        """
-        DOCSTRING: FALHAS POR PARTE DO USUÁRIO OU CONCEPÇÃO DO CÓDIGO
-        INPUTS: MENSAGEM EM STRING
-        OUTPUTS: ERROR
-        """
         return logger.error(msg_str, exc_info=True)
 
     def critical(self, logger, msg_str):
-        """
-        DOCSTRING: APONTAR ERROS CRÍTICOS NO CÓDIGO
-        INPUTS: MENSAGEM EM STRING
-        OUTPUTS: ERROR
-        """
         return logger.error(msg_str)
+
+    def log_message(self, logger, message: str, log_level: str = "infos") -> None:
+        """
+        Unified logging method that works with all CreateLog levels.
+
+        Args:
+            message: The log message
+            log_level: One of 'infos', 'warnings', 'errors', 'critical' (matches CreateLog methods)
+
+        Returns:
+            None
+        """
+        class_name = self.__class__.__name__
+        method_name = inspect.currentframe().f_back.f_code.co_name
+        formatted_message = f"[{class_name}.{method_name}] {message}"
+        if logger is not None:
+            log_method = getattr(self, log_level, self.infos)
+            log_method(logger, formatted_message)
+        else:
+            level = log_level.upper() if log_level != 'infos' else 'INFO'
+            timestamp = f"{time.strftime('%Y-%m-%d,%H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}"
+            print(f"{timestamp} {level} {{{class_name}}} [{method_name}] {message}")
 
 
 # decorators

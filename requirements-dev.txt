@@ -10,6 +10,8 @@ vscode:dbaeumer.vscode-eslint
 vscode:dotjoshjohnson.xml
 vscode:dzhavat.bracket-pair-toggler
 vscode:esbenp.prettier-vscode
+vscode:github.copilot
+vscode:github.copilot-chat
 vscode:grapecity.gc-excelviewer
 vscode:humao.rest-client
 vscode:janisdd.vscode-edit-csv

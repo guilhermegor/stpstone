@@ -1,4 +1,5 @@
 import time
+import inspect
 from random import shuffle
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -54,6 +55,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.bl_use_timer = bl_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.logger = logger
+        self.create_log = CreateLog()
         """
         Notes:
             Proxy levels:
@@ -61,12 +63,6 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 - Anonymous: target server does not know your IP address, but it knows that you"re using a proxy.
                 - Elite or High anonymity: target server does not know your IP address, or that the request is relayed through a proxy server.
         """
-
-    def _logger_infos(self, message: str) -> None:
-        if self.logger is not None:
-            CreateLog().infos(self.logger, message)
-        else:
-            print(f"INFO: {message}")
 
     def _validate_proxy_structure(
         self,
@@ -195,7 +191,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     @property
     def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:
         list_ser = self._available_proxies
-        self._logger_infos(f"Number of available proxies: {len(list_ser)}")
+        self.create_log.log_message(
+            f"Number of available proxies: {len(list_ser)}", log_level="infos")
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
             ("bl_alive", self.bl_alive, "equal"),
@@ -208,14 +205,20 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             ("country_code", self.str_country_code, "equal")
         ]:
             if v_filt is not None:
-                self._logger_infos(f"Filtering proxies with {k_filt}={v_filt} / Length: {len(list_ser)}")
+                self.create_log.log_message(
+                    f"Filtering proxies with {k_filt}={v_filt} / Length: {len(list_ser)}",
+                    log_level="infos"
+                )
                 list_ser = HandlingDicts().filter_list_ser(
                     list_ser,
                     k_filt,
                     v_filt,
                     str_filter_type=str_strategy
                 )
-                self._logger_infos(f"Filtered proxies with {k_filt}={v_filt} / Length: {len(list_ser)}")
+                self.create_log.log_message(
+                    f"Filtered proxies with {k_filt}={v_filt} / Length: {len(list_ser)}",
+                    log_level="infos"
+                )
         return list_ser
 
     def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:
@@ -247,3 +250,15 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             if proxy is not None else None
         )
         return self._configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
+
+    @property
+    def configured_sessions(self):
+        if self.bl_new_proxy == False: return None
+        list_sessions = list()
+        for dict_proxy in self.get_proxies:
+            str_ip = dict_proxy["ip"]
+            int_port = dict_proxy["port"]
+            dict_proxy = self._dict_proxy(str_ip, int_port)
+            session = self._configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
+            list_sessions.append(session)
+        return list_sessions

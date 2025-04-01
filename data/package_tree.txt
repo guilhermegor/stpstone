@@ -224,7 +224,8 @@ stpstone
     │       │   ├── abc.py
     │       │   ├── proxy_nova.py
     │       │   ├── proxy_scrape.py
-    │       │   └── proxy_webshare.py
+    │       │   ├── proxy_webshare.py
+    │       │   └── yield_proxy.py
     │       └── user_agents.py
     ├── conversions
     │   ├── base_converter.py
