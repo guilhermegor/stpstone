@@ -9,7 +9,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 class WWTimezones(metaclass=TypeChecker):
 
     def get_timezones_by_country_code(self, country_code: str) -> Optional[List[str]]:
-        country = pycountry.countries.get(alpha_2=country_code)
+        country = pycountry.countries.get(alpha_2=country_code.upper())
         return pytz.country_timezones.get(country.alpha_2) if country else None
 
     def get_countries_in_timezone(self, timezone_name: str) -> List[str]:
@@ -19,7 +19,7 @@ class WWTimezones(metaclass=TypeChecker):
         ]
 
     def get_current_time_in_country(self, country_code: str, int_tz: int = 0) -> Optional[str]:
-        timezones = self.get_timezones_by_country_code(country_code)
+        timezones = self.get_timezones_by_country_code(country_code.upper())
         if not timezones:
             return None
         tz = pytz.timezone(timezones[int_tz])
@@ -28,6 +28,7 @@ class WWTimezones(metaclass=TypeChecker):
     def get_country_from_timezone(self, timezone_name: str) -> List[str]:
         return self.get_countries_in_timezone(timezone_name)
 
+    @property
     def get_all_timezones_grouped(self) -> Dict[str, List[str]]:
         return pytz.country_timezones
 
@@ -36,8 +37,8 @@ class WWGeography(metaclass=TypeChecker):
 
     def get_country_details(self, country_code: str) -> Optional[Dict[str, str]]:
         country = (
-            pycountry.countries.get(alpha_2=country_code)
-            or pycountry.countries.get(alpha_3=country_code)
+            pycountry.countries.get(alpha_2=country_code.upper())
+            or pycountry.countries.get(alpha_3=country_code.upper())
         )
         if not country:
             return None
@@ -50,12 +51,12 @@ class WWGeography(metaclass=TypeChecker):
 
     def bl_valid_country_code(self, country_code: str) -> bool:
         return bool(
-            pycountry.countries.get(alpha_2=country_code) or
-            pycountry.countries.get(alpha_3=country_code)
+            pycountry.countries.get(alpha_2=country_code.upper()) or
+            pycountry.countries.get(alpha_3=country_code.upper())
         )
 
     def get_country_flag_emoji(self, country_code: str) -> Optional[str]:
-        if self.bl_valid_country_code(country_code) == False:
+        if self.bl_valid_country_code(country_code.upper()) == False:
             return None
         return "".join(chr(ord(c) + 127397) for c in country_code.upper())
 
@@ -79,6 +80,6 @@ class WWGeography(metaclass=TypeChecker):
         if not self.bl_valid_country_code(country_code):
             return None
         try:
-            return pc.country_alpha2_to_continent_code(country_code.upper())
+            return pc.country_alpha2_to_continent_code(country_code.upper()).upper()
         except (KeyError, ValueError):
             return None

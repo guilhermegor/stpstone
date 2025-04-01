@@ -426,6 +426,11 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         tz_obj = timezone.utc if str_tz == "UTC" else timezone(str_tz)
         return datetime.fromtimestamp(unix_timestamp, tz=tz_obj).date()
 
+    def iso_to_unix_timestamp(self, iso_timestamp: str) -> int:
+        dt_ = datetime.fromisoformat(iso_timestamp)
+        dt_utc = dt_.astimezone(timezone.utc)
+        return dt_utc.timestamp()
+
     def timestamp_to_date(
         self,
         timestamp: Union[str, int],

@@ -223,7 +223,8 @@ stpstone
     │       ├── sessions
     │       │   ├── abc.py
     │       │   ├── proxy_nova.py
-    │       │   └── proxy_scrape.py
+    │       │   ├── proxy_scrape.py
+    │       │   └── proxy_webshare.py
     │       └── user_agents.py
     ├── conversions
     │   ├── base_converter.py
