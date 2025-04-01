@@ -1,3 +1,4 @@
+import time
 from typing import Union, Dict, List, Optional
 from logging import Logger
 from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
@@ -27,6 +28,7 @@ class YieldProxy:
         logger: Optional[Logger] = None,
         str_plan_id_webshare: str = "free",
         max_iter_find_healthy_proxy: int = 10,
+        timeout_session: Optional[float] = 1000.0,
     ) -> None:
         self.bl_new_proxy = bl_new_proxy
         self.dict_proxies = dict_proxies
@@ -45,6 +47,7 @@ class YieldProxy:
         self.logger = logger
         self.str_plan_id_webshare = str_plan_id_webshare
         self.max_iter_find_healthy_proxy = max_iter_find_healthy_proxy
+        self.timeout_session = timeout_session
         self.create_logs = CreateLog()
 
         self.cls_proxy_nova = ProxyNova(
@@ -120,8 +123,9 @@ class YieldProxy:
             logger=logger
         )
 
-        self.i = 0
+        self._retry_count = 0
         self.cached_sessions = self._cache
+        self._last_cache_time = time.time()
 
     @property
     def _cache(self) -> List[Dict[str, str]]:
@@ -139,26 +143,45 @@ class YieldProxy:
             f"Number of proxies healthy: {len(list_ser)}",
             log_level="info"
         )
-        while (self.max_iter_find_healthy_proxy > self.i) and (len(list_ser) == 0):
+        if (len(list_ser) == 0) and (self._retry_count < self.max_iter_find_healthy_proxy):
             self.create_logs.log_message(
                 self.logger,
-                f"No proxies available - retrying {self.i+1}/{self.max_iter_find_healthy_proxy}",
+                f"*** No proxies available - retrying {self._retry_count+1}/{self.max_iter_find_healthy_proxy}",
                 log_level="warning"
             )
-            self.cached_sessions = self._cache
-            list_ser = self.cached_sessions
-            self.i += 1
-        if len(list_ser) == 0:
+            self._retry_count += 1
+        if (len(list_ser) == 0) and (self._retry_count >= self.max_iter_find_healthy_proxy):
             self.create_logs.log_message(
                 self.logger,
-                f"No proxies available after {self.max_iter_find_healthy_proxy} attempts",
+                f"*** No proxies available after {self.max_iter_find_healthy_proxy} attempts",
                 log_level="error"
             )
             raise ValueError("No proxies available")
+        if len(list_ser) > 0:
+            self._last_cache_time = time.time()
+            self._retry_count = 0
         return list_ser
 
     def __next__(self) -> Dict[str, str]:
         if self.bl_new_proxy == False: return None
-        list_proxies = self.cached_sessions
-        if len(list_proxies) == 0: self.cached_sessions = self._cache
+        list_proxies = list()
+        while (len(list_proxies) == 0) \
+            and (time.time() - self._last_cache_time < self.timeout_session):
+            list_proxies = self.cached_sessions
+            if len(list_proxies) == 0: self.cached_sessions = self._cache
+        if (len(list_proxies) == 0) \
+            and (time.time() - self._last_cache_time > self.timeout_session):
+            self.create_logs.log_message(
+                self.logger,
+                f"*** Timeout reached: {self.timeout_session} seconds / Retries: {self._retry_count}",
+                log_level="critical"
+            )
+            raise ValueError("No proxies available")
+        if len(list_proxies) == 0:
+            self.create_logs.log_message(
+                self.logger,
+                f"*** No proxies available after {self.max_iter_find_healthy_proxy} attempts",
+                log_level="critical"
+            )
+            raise ValueError("No proxies available")
         return list_proxies.pop(0)

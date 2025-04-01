@@ -83,14 +83,7 @@ class CreateLog:
             print(f"{timestamp} {level} {{{class_name}}} [{method_name}] {message}")
 
 
-# decorators
-def timeit(method):
-    """
-    REFERENCES: https://medium.com/pythonhive/python-decorator-to-measure-the-execution-time-of-methods-fa04cb6bb36d
-    DOCSTRING: TIMING DECORRATOR TO MEASURE ELAPSED TIME TO EXECUTE A FUNCTION
-    INPUTS: -
-    OUTPUTS: ELAPSED TIME PRINTED
-    """
+def timeit(method: callable) -> callable:
     def timed(*args, **kw):
         ts = time.time()
         result = method(*args, **kw)
@@ -104,13 +97,15 @@ def timeit(method):
         return result
     return timed
 
-def conditional_timeit(bl_use_timer):
+def conditional_timeit(bl_use_timer: bool) -> callable:
     """
-    DOCSTRING: APPLIES THE @TIMEIT DECORATOR CONDITIONALLY BASED ON `USE_TIMER`
-    INPUT:
-        - USE_TIMER: BOOLEAN INDICATING WHETHER TO APPLY TIMING.
-    OUTPUT:
-        - A FUNCTION WRAPPED WITH THE @TIMEIT DECORATOR IF `USE_TIMER` IS TRUE.
+    Applies the @timeit decorator conditionally based on `use_timer`
+
+    Args:
+        use_timer: boolean indicating whether to apply timing.
+
+    Returns:
+        a function wrapped with the @timeit decorator if `use_timer` is true.
     """
     def decorator(method):
         if bl_use_timer:
