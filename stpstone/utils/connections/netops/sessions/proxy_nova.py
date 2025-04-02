@@ -71,10 +71,10 @@ class ProxyNova(ABCSession):
                 "protocol": "http",
                 "bl_alive": True,
                 "status": "success",
-                "alive_since": self.time_ago_to_timestamp(last_checked),
+                "alive_since": self.time_ago_to_ts_unix(last_checked),
                 "anonymity": anonymity.lower(),
                 "average_timeout": 1.0 / self.proxy_speed_to_float(proxy_speed),
-                "first_seen": self.time_ago_to_timestamp(last_checked),
+                "first_seen": self.time_ago_to_ts_unix(last_checked),
                 "ip_data": "",
                 "ip_name": "",
                 "timezone": ", ".join(WWTimezones().get_timezones_by_country_code(

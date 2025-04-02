@@ -12,7 +12,7 @@ class ProxyLoadTester:
         self,
         bl_new_proxy: bool = True,
         dict_proxies: Union[Dict[str, str], None] = None,
-        int_retries: int = 10,
+        int_retries_new_proxies_not_mapped: int = 10,
         int_backoff_factor: int = 1,
         bl_alive: bool = True,
         list_anonymity_value: List[str] = ["anonymous", "elite"],
@@ -28,10 +28,11 @@ class ProxyLoadTester:
         str_plan_id_webshare: str = "free",
         max_iter_find_healthy_proxy: int = 30,
         timeout_session: Optional[float] = 1000.0,
+        int_wait_load: Optional[int] = 10,
     ) -> None:
         self.bl_new_proxy = bl_new_proxy
         self.dict_proxies = dict_proxies
-        self.int_retries = int_retries
+        self.int_retries_new_proxies_not_mapped = int_retries_new_proxies_not_mapped
         self.int_backoff_factor = int_backoff_factor
         self.bl_alive = bl_alive
         self.list_anonymity_value = list_anonymity_value
@@ -47,6 +48,7 @@ class ProxyLoadTester:
         self.str_plan_id_webshare = str_plan_id_webshare
         self.max_iter_find_healthy_proxy = max_iter_find_healthy_proxy
         self.timeout_session = timeout_session
+        self.int_wait_load = int_wait_load
         self.create_log = CreateLog()
         self.time_ = time.time()
         self.set_used_proxies = set()
@@ -54,7 +56,7 @@ class ProxyLoadTester:
         self.cls_yield_proxy = YieldProxy(
             bl_new_proxy=bl_new_proxy,
             dict_proxies=dict_proxies,
-            int_retries=int_retries,
+            int_retries=int_retries_new_proxies_not_mapped,
             int_backoff_factor=int_backoff_factor,
             bl_alive=bl_alive,
             list_anonymity_value=list_anonymity_value,
@@ -70,17 +72,18 @@ class ProxyLoadTester:
             str_plan_id_webshare=str_plan_id_webshare,
             max_iter_find_healthy_proxy=max_iter_find_healthy_proxy,
             timeout_session=timeout_session,
+            int_wait_load=int_wait_load,
         )
 
     def test_proxy_session(self, session: Session, test_num: int) -> bool:
         try:
             self.create_log.log_message(self.logger, f"\n--- Testing Proxy #{test_num} ---")
             self.create_log.log_message(self.logger, f"Proxy: {session.proxies}")
-            resp_req = session.get("https://jsonplaceholder.typicode.com/todos/1", timeout=10)
-            resp_req.raise_for_status()
+            req_resp = session.get("https://jsonplaceholder.typicode.com/todos/1", timeout=10)
+            req_resp.raise_for_status()
             self.create_log.log_message(self.logger, "Proxy Test Successful!")
-            self.create_log.log_message(self.logger, f"Response Status: {resp_req.status_code}")
-            self.create_log.log_message(self.logger, f"Response Data: {resp_req.json()}")
+            self.create_log.log_message(self.logger, f"Response Status: {req_resp.status_code}")
+            self.create_log.log_message(self.logger, f"Response Data: {req_resp.json()}")
             return True
         except Exception as e:
             self.create_log.log_message(self.logger, f"Proxy Test Failed: {str(e)}")
@@ -89,23 +92,24 @@ class ProxyLoadTester:
     def run_tests(self, n_trials: int = 20) -> None:
         successful_tests = 0
         for i in range(1, n_trials + 1):
+            self.create_log.log_message(self.logger, f"\n--- Testing Proxy #{i} ---")
             int_try = 0
             try:
                 session = next(self.cls_yield_proxy)
-                while (session.proxies["http"] not in self.set_used_proxies) \
-                    and (int_try < self.int_retries):
+                while (session.proxies["http"] in self.set_used_proxies) \
+                    and (int_try < self.int_retries_new_proxies_not_mapped):
                     self.create_log.log_message(
                         self.logger,
                         f"Proxy {session.proxies} is already used - attempt #{int_try + 1} "
-                        + f"/ {self.int_retries}",
+                        + f"/ {self.int_retries_new_proxies_not_mapped}",
                         "warnings"
                     )
                     session = next(self.cls_yield_proxy)
                     int_try += 1
-                if int_try >= self.int_retries:
+                if int_try >= self.int_retries_new_proxies_not_mapped:
                     self.create_log.log_message(
                         self.logger, f"\n--- Max retries reached for Proxy #{i} ---", "critical")
-                    raise Exception(f"\n--- Max retries reached for Proxy #{i} ---")
+                    break
                 self.set_used_proxies.add(session.proxies["http"])
                 if self.test_proxy_session(session, i):
                     successful_tests += 1
@@ -120,5 +124,8 @@ class ProxyLoadTester:
         self.create_log.log_message(self.logger, f"Successful tests: {successful_tests}", "infos")
         self.create_log.log_message(
             self.logger, f"Success rate: {successful_tests/n_trials*100:.1f}%", "infos")
+        self.create_log.log_message(self.logger,
+                                    f"Number of unique proxies used: {len(self.set_used_proxies)}",
+                                    "infos")
         self.create_log.log_message(self.logger, f"Elapsed time for {n_trials} trials: "
                                 + f"{time.time() - self.time_:.2f} seconds", "infos")

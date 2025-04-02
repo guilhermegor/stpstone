@@ -26,11 +26,11 @@ def test_proxy_session(session, test_num):
     try:
         print(f"\n--- Testing Proxy #{test_num} ---")
         print(f"Proxy: {session.proxies}")
-        resp_req = session.get("https://jsonplaceholder.typicode.com/todos/1", timeout=10)
-        resp_req.raise_for_status()
+        req_resp = session.get("https://jsonplaceholder.typicode.com/todos/1", timeout=10)
+        req_resp.raise_for_status()
         print("Proxy Test Successful!")
-        print(f"Response Status: {resp_req.status_code}")
-        print(f"Response Data: {resp_req.json()}")
+        print(f"Response Status: {req_resp.status_code}")
+        print(f"Response Data: {req_resp.json()}")
         return True
     except Exception as e:
         print(f"Proxy Test Failed: {str(e)}")

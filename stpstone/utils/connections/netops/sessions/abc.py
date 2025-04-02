@@ -79,7 +79,22 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             if list_missing_keys:
                 raise ValueError(f"Missing required keys in proxy data: {list_missing_keys}")
 
-    def time_ago_to_timestamp(self, time_ago_str: str) -> float:
+    def time_ago_to_ts_unix(self, time_ago_str: str) -> float:
+        """
+        Convert a time-ago string into a timestamp.
+
+        Args:
+            time_ago_str (str): A string representing a time duration in the past,
+                such as '5 minutes ago' or '2 hours ago'.
+
+        Returns:
+            float: The Unix timestamp corresponding to the time in the past
+                calculated from the current time minus the duration specified.
+
+        Raises:
+            ValueError: If the time measure in the input string is not recognized.
+
+        """
         time_ = int(time_ago_str.split()[0])
         time_measure = time_ago_str.split()[1]
         if time_measure in ["min", "mins", "minute", "minutes"]:
@@ -92,6 +107,22 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             past_time = datetime.now() - timedelta(seconds=time_)
         else:
             raise ValueError(f"Unknown time measure: {time_measure}")
+        timestamp = time.mktime(past_time.timetuple()) + past_time.microsecond / 1e6
+        return timestamp
+
+    def composed_time_ago_to_ts_unix(self, time_elapsed_str: str) -> float:
+        hours = 0
+        minutes = 0
+        if ("h." in time_elapsed_str) or ("hours " in time_elapsed_str):
+            parts = time_elapsed_str.split()
+            hours = int(parts[0].replace("h.", "").replace("hours", ""))
+            if len(parts) >= 3:
+                minutes = int(parts[1])
+        else:
+            parts = time_elapsed_str.split()
+            if parts[1].startswith(("min", "mins", "minute", "minutes")):
+                minutes = int(parts[0])
+        past_time = datetime.now() - timedelta(hours=hours, minutes=minutes)
         timestamp = time.mktime(past_time.timetuple()) + past_time.microsecond / 1e6
         return timestamp
 

@@ -28,9 +28,9 @@ class UserAgents:
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
         }
-        resp_req = requests.get(url, headers=dict_headers, timeout=10)
-        resp_req.raise_for_status()
-        tree = html.fromstring(resp_req.content)
+        req_resp = requests.get(url, headers=dict_headers, timeout=10)
+        req_resp.raise_for_status()
+        tree = html.fromstring(req_resp.content)
         while True:
             agent = tree.xpath(xpath.format(i))
             if not agent:
