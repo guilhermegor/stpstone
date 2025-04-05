@@ -43,7 +43,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class ScaffoldingReq(ABCRequests):
+class ConcreteCreatorReq(ABCRequests):
 
     def __init__(
         self,

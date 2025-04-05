@@ -38,7 +38,7 @@ from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeA
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class ScaffoldingReq(ABCRequests):
+class ConcreteCreatorReq(ABCRequests):
 
     def __init__(
         self,
