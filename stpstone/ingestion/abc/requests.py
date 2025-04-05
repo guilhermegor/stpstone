@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
 from logging import Logger
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union, Literal
 from urllib.parse import parse_qs, urlparse
 from zipfile import ZipExtFile, ZipFile
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -133,7 +133,6 @@ class UtilsRequests(ABC):
     def pdf_doc_regex(
         self,
         url: str,
-        req_resp: Response,
         bytes_pdf: BytesIO,
         dict_regex_patterns: Dict[str, Dict[str, Any]],
         int_pgs_join: int = 2,
@@ -145,19 +144,14 @@ class UtilsRequests(ABC):
             stream=bytes_pdf,
             filetype=DirFilesManagement().get_last_file_extension(url),
         )
-        # create list of concatenated pages
         for i in range(0, len(doc_pdf), int_pgs_join):
             text1 = doc_pdf[i].get_text("text") if i < len(doc_pdf) else ""
             text2 = doc_pdf[i + 1].get_text("text") if i + 1 < len(doc_pdf) else ""
             list_pages.append(text1 + "\n" + text2)
         for i, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
-            #   break if every event has at least one match
-            if (len(dict_count_matches) > 0) and (
-                len([count for count in dict_count_matches[str_event] if count > 0])
-                >= len(list(dict_regex_patterns.keys()))
-            ):
-                break
+            if (len(dict_count_matches) > 0) \
+                and (all(count > 0 for count in dict_count_matches.values())): break
             for str_event, dict_l1 in dict_regex_patterns.items():
                 for str_condition, pattern_regex in dict_l1.items():
                     if str_event not in dict_count_matches:
@@ -182,19 +176,11 @@ class UtilsRequests(ABC):
                         for i_match in range(0, len(regex_match.groups()) + 1):
                             regex_group = regex_match.group(i_match).replace("\n", " ")
                             regex_group = re.sub(r"\s+", " ", regex_group).strip()
-                            dict_[f"REGEX_GROUP_{i_match}"] = regex_group
+                            dict_[f"REGEX_GROUP_{i_match}"] = regex_group.upper()
                         list_matches.append(dict_)
-                    else:
-                        list_matches.append(
-                            {
-                                "EVENT": str_event.upper(),
-                                "CONDITION": "N/A",
-                                "PATTERN_REGEX": "zzN/A",
-                                "REGEX_GROUP_0": "N/A",
-                            }
-                        )
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
+        return df_
 
     def get_query_params(self, url: str, param: str) -> Union[int, None]:
         parsed_url = urlparse(url)
@@ -467,7 +453,6 @@ class HandleReqResponses(UtilsRequests):
         dict_regex_patterns: Dict[str, Dict[str, str]],
         default_int_pgs_join: int = 2
     ) -> pd.DataFrame:
-        # reading pdf/doc
         bytes_pdf = BytesIO(req_resp.content)
         # checking wheter to read tables or use regex
         if StrHandler().match_string_like(url, "*feat=read_tables*") == True:
@@ -482,7 +467,7 @@ class HandleReqResponses(UtilsRequests):
             else:
                 int_pgs_join = default_int_pgs_join
             return self.pdf_doc_regex(
-                req_resp, bytes_pdf, dict_regex_patterns, int_pgs_join
+                url, bytes_pdf, dict_regex_patterns, int_pgs_join
             )
 
     def _handle_ex_response(
@@ -585,8 +570,8 @@ class ABCRequests(HandleReqResponses):
         self.int_delay = int_delay
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
-        self.list_options_wd = self.dict_metadata.get("credentials", {}).get(
-            "web_driver", {}).get("options", None)
+        self.list_options_wd = None if self.dict_metadata["credentials"].get(
+            "web_driver", None) is None else self.dict_metadata["credentials"]["web_driver"]["options"]
         self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
         self.token = (
             token
@@ -597,6 +582,7 @@ class ABCRequests(HandleReqResponses):
                 else None
             )
         )
+        self.create_log = CreateLog()
 
     @property
     def access_token(self):
@@ -695,7 +681,7 @@ class ABCRequests(HandleReqResponses):
 
     def generic_req(
         self,
-        req_method: str,
+        req_method: Literal["GET", "POST"],
         url: str,
         bl_verify: bool,
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
@@ -714,14 +700,6 @@ class ABCRequests(HandleReqResponses):
         Returns:
             Tuple[Response, str]
         """
-        # checking wheter request method is valid
-        if req_method not in ["GET", "POST"]:
-            if self.logger is not None:
-                CreateLog().warnings(
-                    self.logger, f"Invalid request method: {req_method}"
-                )
-            raise Exception(f"Invalid request method: {req_method}")
-        # request content
         if self.session is not None:
             func_generic_req = self.generic_req_w_session
         else:
@@ -758,10 +736,7 @@ class ABCRequests(HandleReqResponses):
         dict_xpaths: Optional[Dict[str, str]] = None
     ) -> pd.DataFrame:
         url = host + app if app is not None else host
-        if self.logger is not None:
-            CreateLog().infos(self.logger, f"Starting request to: {url}")
-        else:
-            print(f"Starting request to: {url}")
+        self.create_log.log_message(self.logger, f"Starting request to: {url}", "info")
         if self.dict_metadata["credentials"].get("web_driver", None) is not None:
             dict_instance_vars = self.get_instance_variables
             list_options_wd = [
@@ -816,8 +791,6 @@ class ABCRequests(HandleReqResponses):
             url,
             self.dt_ref,
         )
-        if self.logger is not None:
-            CreateLog().infos(self.logger, f"Request completed successfully: {url}")
         return df_
 
     def insert_table(
@@ -884,7 +857,6 @@ class ABCRequests(HandleReqResponses):
         Returns:
             pd.DataFrame
         """
-        # setting variables
         dict_instance_vars = self.get_instance_variables
         app_ = self.dict_metadata[str_resource].get("app", None)
         app_ = StrHandler().fill_placeholders(app_, dict_instance_vars)
@@ -957,15 +929,21 @@ class ABCRequests(HandleReqResponses):
                 self.dict_metadata[str_resource].get("xpaths", [{}]),
             )
         except tuple(list_ignorable_exceptions) as e:
-            if self.logger is not None:
-                CreateLog().warnings(
-                    self.logger,
-                    f"Non-iterable method encountered ignorable error: {str(e)}. Continuing...",
-                )
-            else:
-                print(
-                    f"Non-iterable method encountered ignorable error: {str(e)}. Continuing..."
-                )
+            self.create_log.log_message(
+                self.logger,
+                "Iteration encountered an ignorable exception "
+                + f"{e.__class__.__name__}: {e}. Continuing...",
+                "warning"
+            )
+        except Exception as e:
+            self.create_log.log_message(
+                self.logger,
+                f"Iteration failed due to {e.__class__.__name__}: {e}",
+                "critical"
+            )
+            raise Exception(
+                f"Iteration failed due to {e.__class__.__name__}: {e}"
+            )
         if self.cls_db is not None:
             self.insert_table(
                 str_resource,
@@ -993,7 +971,6 @@ class ABCRequests(HandleReqResponses):
         Returns:
             Optional[pd.DataFrame]
         """
-        # setting variables
         list_ser = list()
         i = 0
         dict_instance_vars = self.get_instance_variables
@@ -1093,27 +1070,21 @@ class ABCRequests(HandleReqResponses):
                             if bl_fetch == False:
                                 list_ser = list()
                     except tuple(list_ignorable_exceptions) as e:
-                        if self.logger is not None:
-                            CreateLog().warnings(
-                                self.logger,
-                                "Iteration encountered an ignorable exception "
-                                + f"{e.__class__.__name__}: {e}. Continuing...",
-                            )
-                        else:
-                            print(
-                                "Iteration encountered an ignorable exception "
-                                + f"{e.__class__.__name__}: {e}. Continuing..."
-                            )
+                        self.create_log.log_message(
+                            self.logger,
+                            "Iteration encountered an ignorable exception "
+                            + f"{e.__class__.__name__}: {e}. Continuing...",
+                            "warning"
+                        )
                     except Exception as e:
-                        if self.logger is not None:
-                            CreateLog().critical(
-                                self.logger,
-                                f"Iteration failed due to {e.__class__.__name__}: {e}",
-                            )
-                        else:
-                            raise Exception(
-                                f"Iteration failed due to {e.__class__.__name__}: {e}"
-                            )
+                        self.create_log.log_message(
+                            self.logger,
+                            f"Iteration failed due to {e.__class__.__name__}: {e}",
+                            "critical"
+                        )
+                        raise Exception(
+                            f"Iteration failed due to {e.__class__.__name__}: {e}"
+                        )
             elif str_extract_from_braces == "chunk_slugs":
                 list_chunks_slugs = HandlingLists().chunk_list(
                     list_to_chunk=self.list_slugs,
@@ -1164,28 +1135,21 @@ class ABCRequests(HandleReqResponses):
                             if bl_fetch == False:
                                 list_ser = list()
                     except tuple(list_ignorable_exceptions) as e:
-                        if self.logger is not None:
-                            CreateLog().warnings(
-                                self.logger,
-                                "Iteration encountered an ignorable exception "
-                                + f"{e.__class__.__name__}: {e}. Continuing...",
-                            )
-                        else:
-                            print(
-                                "Iteration encountered an ignorable exception "
-                                + f"{e.__class__.__name__}: {e}. Continuing..."
-                            )
-                        continue
+                        self.create_log.log_message(
+                            self.logger,
+                            "Iteration encountered an ignorable exception "
+                            + f"{e.__class__.__name__}: {e}. Continuing...",
+                            "warning"
+                        )
                     except Exception as e:
-                        if self.logger is not None:
-                            CreateLog().critical(
-                                self.logger,
-                                f"Iteration failed due to {e.__class__.__name__}: {e}",
-                            )
-                        else:
-                            raise Exception(
-                                f"Iteration failed due to {e.__class__.__name__}: {e}"
-                            )
+                        self.create_log.log_message(
+                            self.logger,
+                            f"Iteration failed due to {e.__class__.__name__}: {e}",
+                            "critical"
+                        )
+                        raise Exception(
+                            f"Iteration failed due to {e.__class__.__name__}: {e}"
+                        )
             else:
                 raise Exception(
                     "Neither {{slug}} or {{chunk_slugs}} are found in the app "
@@ -1233,28 +1197,21 @@ class ABCRequests(HandleReqResponses):
                             list_ser = list()
                     i += 1
                 except tuple(list_ignorable_exceptions) as e:
-                    if self.logger is not None:
-                        CreateLog().warnings(
-                            self.logger,
-                            "Iteration encountered an ignorable exception "
-                            + f"{e.__class__.__name__}: {e}. Continuing...",
-                        )
-                    else:
-                        print(
-                            "Iteration encountered an ignorable exception "
-                            + f"{e.__class__.__name__}: {e}. Continuing..."
-                        )
-                    continue
+                    self.create_log.log_message(
+                        self.logger,
+                        "Iteration encountered an ignorable exception "
+                        + f"{e.__class__.__name__}: {e}. Continuing...",
+                        "warning"
+                    )
                 except Exception as e:
-                    if self.logger is not None:
-                        CreateLog().critical(
-                            self.logger,
-                            f"Iteration failed due to {e.__class__.__name__}: {e}",
-                        )
-                    else:
-                        raise Exception(
-                            f"Iteration failed due to {e.__class__.__name__}: {e}"
-                        )
+                    self.create_log.log_message(
+                        self.logger,
+                        f"Iteration failed due to {e.__class__.__name__}: {e}",
+                        "critical"
+                    )
+                    raise Exception(
+                        f"Iteration failed due to {e.__class__.__name__}: {e}"
+                    )
         if len(list_ser) > 0:
             return pd.DataFrame(list_ser)
         else:

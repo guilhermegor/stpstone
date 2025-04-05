@@ -39,6 +39,7 @@ credentials:
       timeout: (12.0, 12.0)
     keys:
       token: token
+  web_driver:
 
 metadata:
 
@@ -46,6 +47,8 @@ metadata:
 ### RESOURCES TO BE SCRAPED ###
 
 resource_example:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:

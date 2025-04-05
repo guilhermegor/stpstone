@@ -68,7 +68,7 @@ class MongoConn:
             self._collection.insert_many(data)
         except Exception as e:
             if self.logger is not None:
-                CreateLog().infos(self.logger, f'ERROR {e}, MONGODB INJECTION ABORTED')
+                CreateLog().info(self.logger, f'ERROR {e}, MONGODB INJECTION ABORTED')
 
     @property
     def close(self) -> None:

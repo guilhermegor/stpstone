@@ -53,16 +53,16 @@ class Databricks:
                 break
             except FunctionTimedOut:
                 if self.logger != None:
-                    CreateLog().warnings(self.logger, 'Connection could not be established in '
+                    CreateLog().warning(self.logger, 'Connection could not be established in '
                                          + 'the DSN {}'.format(dsn))
             except Exception as e:
                 if self.logger != None:
-                    CreateLog().warnings(self.logger, 'Connection could not be established '
+                    CreateLog().warning(self.logger, 'Connection could not be established '
                                          + 'in the DSN {}. Error: {}. '.format(dsn, e))
         # caso a conexão não tenha sido estabelecida retornar um erro
         if bl_conn == False:
             if self.logger != None:
-                CreateLog().warnings(self.logger, 'Connection to Databricks could not be established '
+                CreateLog().warning(self.logger, 'Connection to Databricks could not be established '
                                      + 'in any of the DSNs, please validate the stability of the service. List of DSNs '
                                      + 'configured on the machine: {}'.format(self.list_dsns))
                 if bl_kill_process_when_databricks_down == True:
@@ -92,7 +92,7 @@ class Databricks:
             if self.logger is None:
                 print('#{} Attempting connection with DSNs to Databricks'.format(i))
             else:
-                CreateLog().infos(self.logger,
+                CreateLog().info(self.logger,
                                   '#{} Attempting connection with DSNs to Databricks'.format(i))
             #   looping iterator to next count
             i += 1

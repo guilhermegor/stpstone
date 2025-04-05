@@ -97,7 +97,7 @@ class PostgreSQLDB:
             )
             self.conn.commit()
             if self.logger is not None:
-                CreateLog().infos(
+                CreateLog().info(
                     self.logger,
                     f'Successful commit in db {self.dict_db_config["dbname"]} '
                     + f'/ table {str_table_name}.'
@@ -106,7 +106,7 @@ class PostgreSQLDB:
             self.conn.rollback()
             self.close
             if self.logger is not None:
-                CreateLog().errors(
+                CreateLog().error(
                     self.logger,
                     'ERROR WHILE INSERTING DATA\n'
                     + f'DB_CONFIG: {self.dict_db_config}\n'

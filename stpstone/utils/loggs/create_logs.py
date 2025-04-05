@@ -2,18 +2,19 @@ import logging
 import os
 import time
 import inspect
+from typing import Literal
 
 
 class CreateLog:
 
-    def creating_parent_folder(self, new_path):
+    def creating_parent_folder(self, new_path: str):
         if not os.path.exists(new_path):
             os.makedirs(new_path)
             return True
         else:
             return False
 
-    def basic_conf(self, complete_path=None, basic_level='info'):
+    def basic_conf(self, complete_path: str, basic_level: str ="info") -> logging.Logger:
         if basic_level == 'info':
             level = logging.INFO
         elif basic_level == 'debug':
@@ -35,19 +36,20 @@ class CreateLog:
         logger = logging.getLogger(__name__)
         return logger
 
-    def infos(self, logger, msg_str):
+    def info(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
         return logger.info(msg_str)
 
-    def warnings(self, logger, msg_str):
+    def warning(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
         return logger.warning(msg_str)
 
-    def errors(self, logger, msg_str):
+    def error(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
         return logger.error(msg_str, exc_info=True)
 
-    def critical(self, logger, msg_str):
+    def critical(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
         return logger.error(msg_str)
 
-    def log_message(self, logger, message: str, log_level: str = "infos") -> None:
+    def log_message(self, logger: logging.Logger, message: str,
+                    log_level: Literal["info", "warning", "error", "critical"]) -> None:
         """
         Unified logging method that works with all CreateLog levels.
 
@@ -75,10 +77,10 @@ class CreateLog:
             method_name = frame.f_code.co_name
         formatted_message = f"[{class_name}.{method_name}] {message}"
         if logger is not None:
-            log_method = getattr(self, log_level, self.infos)
+            log_method = getattr(self, log_level, self.locals()[log_level])
             log_method(logger, formatted_message)
         else:
-            level = log_level.upper() if log_level != 'infos' else 'INFO'
+            level = log_level.upper()
             timestamp = f"{time.strftime('%Y-%m-%d,%H:%M:%S')}.{int(time.time() * 1000) % 1000:03d}"
             print(f"{timestamp} {level} {{{class_name}}} [{method_name}] {message}")
 

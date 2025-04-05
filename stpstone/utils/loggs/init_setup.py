@@ -8,15 +8,15 @@ from stpstone.utils.loggs.create_logs import CreateLog
 def iniciating_logging(logger:Logger, path_log:Optional[str]=None) -> None:
     if path_log != None:
         dispatch = CreateLog().creating_parent_folder(path_log)
-        CreateLog().infos(logger, 'Logs parent directory: {}'.format(path_log))
+        CreateLog().info(logger, 'Logs parent directory: {}'.format(path_log))
         if dispatch == True:
-            CreateLog().infos(logger, 'Logs parent directory created successfully.')
+            CreateLog().info(logger, 'Logs parent directory created successfully.')
         elif dispatch == False:
-            CreateLog().infos(
+            CreateLog().info(
                 logger, 'Logs parent directory could not be created.')
         else:
             raise Exception(
                 'Unexpected dispatch value: {}'.format(dispatch))
-    CreateLog().infos(logger, 'Rotina iniciada em {}'.format(
+    CreateLog().info(logger, 'Rotina iniciada em {}'.format(
         str(DatesBR().curr_date_time())))
-    CreateLog().infos(logger, 'Operador da rotina {}'.format(str(getuser())))
+    CreateLog().info(logger, 'Operador da rotina {}'.format(str(getuser())))

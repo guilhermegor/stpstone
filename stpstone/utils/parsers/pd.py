@@ -104,7 +104,7 @@ class DealingPd:
                     )
                     DealingExcel().close_wb(wb)
         else:
-            CreateLog().warnings(
+            CreateLog().warning(
                 logger, "File not saved to hard drive: {}".format(path_xlsx)
             )
             raise Exception("File not saved to hard drive: {}".format(path_xlsx))

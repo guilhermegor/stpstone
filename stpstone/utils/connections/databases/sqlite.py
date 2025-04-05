@@ -89,7 +89,7 @@ class SQLiteDB:
                 self.cursor.execute(str_query, tuple(record.values()))
             self.conn.commit()
             if self.logger is not None:
-                CreateLog().infos(
+                CreateLog().info(
                     self.logger,
                     f'Succesful commit in db {self.db_path} '
                     + f'/ table {str_table_name}.'
@@ -98,7 +98,7 @@ class SQLiteDB:
             self.conn.rollback()
             self.close
             if self.logger is not None:
-                CreateLog().errors(
+                CreateLog().error(
                     self.logger,
                     'ERROR WHILE INSERTING DATA\n'
                     + f'DB_PATH: {self.db_path}\n'

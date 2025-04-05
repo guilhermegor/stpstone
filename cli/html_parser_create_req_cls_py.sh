@@ -92,7 +92,7 @@ class ConcreteCreatorReq(ABCRequests):
             int_end_td = None
         else:
             if self.logger is not None:
-                CreateLog().warnings(
+                CreateLog().warning(
                     self.logger,
                     'No source found in url, for HTML webscraping, please revisit the code'
                     + f' if it is an unexpected behaviour - URL: {req_resp.url}'

@@ -115,14 +115,14 @@ class DFStandardization(metaclass=TypeChecker):
             pd.DataFrame
         """
         if self.logger is not None:
-            CreateLog().infos(
+            CreateLog().info(
                 self.logger,
                 f"List cols dataframe before filtering: {list(df_.columns)}",
             )
-            CreateLog().infos(
+            CreateLog().info(
                 self.logger, f"List cols to filter: {list(self.dict_dtypes.keys())}"
             )
-            CreateLog().infos(
+            CreateLog().info(
                 self.logger,
                 "List of columns excluded: "
                 + f"{[x for x in list(df_.columns) if x not in list(self.dict_dtypes.keys())]}",

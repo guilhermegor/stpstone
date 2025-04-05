@@ -16,7 +16,7 @@ class DataFrameValidator:
     @property
     def check_missing_values(self):
         missing_summary = self.df_.isnull().sum()
-        self.create_log.warnings(
+        self.create_log.warning(
             self.logger, "Missing Values:\n", missing_summary[missing_summary > 0]
         )
 
@@ -24,7 +24,7 @@ class DataFrameValidator:
     def check_duplicates(self):
         duplicate_count = self.df_.duplicated().sum()
         if duplicate_count:
-            self.create_log.warnings(
+            self.create_log.warning(
                 self.logger, f"Found {duplicate_count} duplicate rows."
             )
 
@@ -34,7 +34,7 @@ class DataFrameValidator:
         for col, (low, high) in dict_rng_constraints.items():
             out_of_bounds = self.df_[(self.df_[col] < low) | (self.df_[col] > high)]
             if not out_of_bounds.empty:
-                self.create_log.warnings(
+                self.create_log.warning(
                     self.logger,
                     f"{len(out_of_bounds)} values in '{col}' out of range ({low} - {high})",
                 )
@@ -42,7 +42,7 @@ class DataFrameValidator:
     def validate_dates(self, col_start: str, col_sup: str) -> None:
         list_inv_dates = self.df_[self.df_[col_start] > self.df_[col_sup]]
         if not list_inv_dates.empty:
-            self.create_log.warnings(
+            self.create_log.warning(
                 self.logger,
                 f"Found {len(list_inv_dates)} rows where {col_start} is after {col_sup}.",
             )
@@ -52,7 +52,7 @@ class DataFrameValidator:
     ):
         list_inv_values = self.df_[~self.df_[col_].isin(list_allowed_values)]
         if not list_inv_values.empty:
-            self.create_log.warnings(
+            self.create_log.warning(
                 self.logger,
                 f"Found invalid values in '{col_}':",
                 list_inv_values[col_].unique(),
