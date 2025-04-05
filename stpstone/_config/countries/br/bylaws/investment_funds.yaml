@@ -85,6 +85,7 @@ investment_funds_bylaws:
       xp_1: (?i)condom.nio:\s*([^*]+?)\s*prazo
     classe:
       xp_1: (?i)classe:\s*([^*]+?)\s*a. pol.tica
+      xp_2: (?i)classes:\s*([^*]+?)\s*t.rmino
     conversao_cota:
       xp_1: (?i)convers..\s*da\s*cota:\s*([^*]+?)\s*pagamento
     pagamento:

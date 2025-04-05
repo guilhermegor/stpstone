@@ -178,8 +178,16 @@ class UtilsRequests(ABC):
                             regex_group = re.sub(r"\s+", " ", regex_group).strip()
                             dict_[f"REGEX_GROUP_{i_match}"] = regex_group.upper()
                         list_matches.append(dict_)
+                if dict_count_matches[str_event] == 0:
+                    list_matches.append({
+                        "EVENT": str_event.upper(),
+                        "CONDITION": "zzN/A",
+                        "PATTERN_REGEX": "zzN/A",
+                    })
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
+        df_.sort_values(by=["EVENT", "CONDITION"], ascending=[True, True], inplace=True)
+        df_.drop_duplicates(subset=["EVENT"], inplace=True)
         return df_
 
     def get_query_params(self, url: str, param: str) -> Union[int, None]:
