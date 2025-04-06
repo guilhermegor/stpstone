@@ -2,7 +2,7 @@ import time
 from typing import Dict, Any, Union, List, Optional
 from requests import Session
 from logging import Logger
-from stpstone.utils.connections.netops.sessions.manager import YieldProxy
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -53,7 +53,7 @@ class ProxyLoadTester:
         self.time_ = time.time()
         self.set_used_proxies = set()
 
-        self.cls_yield_proxy = YieldProxy(
+        self.cls_yield_proxy = YieldFreeProxy(
             bl_new_proxy=bl_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries_new_proxies_not_mapped,

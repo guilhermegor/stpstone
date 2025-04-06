@@ -1,16 +1,16 @@
 import time
 from typing import Union, Dict, List, Optional
 from logging import Logger
-from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
-from stpstone.utils.connections.netops.sessions.proxy_webshare import ProxyWebShare
-from stpstone.utils.connections.netops.sessions.freeproxy_world import FreeProxyWorld
-from stpstone.utils.connections.netops.sessions.free_proxy_list_net import FreeProxyNet
-from stpstone.utils.connections.netops.sessions.spysme import SpysMeCountries
+from stpstone.utils.connections.netops.proxies._free.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.proxies._free.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
+from stpstone.utils.connections.netops.proxies._free.proxy_webshare import ProxyWebShare
+from stpstone.utils.connections.netops.proxies._free.freeproxy_world import FreeProxyWorld
+from stpstone.utils.connections.netops.proxies._free.free_proxy_list_net import FreeProxyNet
+from stpstone.utils.connections.netops.proxies._free.spysme import SpysMeCountries
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class YieldProxy:
+class YieldFreeProxy:
 
     def __init__(
         self,

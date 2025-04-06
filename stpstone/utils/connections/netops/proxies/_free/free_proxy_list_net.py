@@ -1,7 +1,7 @@
 from requests import request
 from typing import Dict, Union, List, Optional
 from logging import Logger
-from stpstone.utils.connections.netops.sessions.abc import ABCSession
+from stpstone.utils.connections.netops.proxies.abc import ABCSession
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.geography.ww import WWTimezones, WWGeography
 from stpstone.utils.parsers.html import HtmlHandler

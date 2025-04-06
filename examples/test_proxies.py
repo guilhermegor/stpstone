@@ -1,10 +1,10 @@
 import time
-from stpstone.utils.connections.netops.sessions.manager import YieldProxy
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
 
 time_ = time.time()
 
-test_proxies = YieldProxy(
+test_proxies = YieldFreeProxy(
     bl_new_proxy=True,
     str_country_code="BR",
     str_continent_code=None,
