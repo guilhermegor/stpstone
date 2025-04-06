@@ -40,8 +40,8 @@ class InvestingCom(ABCRequests):
         self.token = token,
         self.list_slugs = list_slugs
         self.ticker = str_ticker
-        self.dt_inf_unix_ts = DatesBR().datetime_to_timestamp(dt_inf)
-        self.dt_sup_unix_ts = DatesBR().datetime_to_timestamp(dt_sup)
+        self.dt_inf_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_inf)
+        self.dt_sup_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_sup)
         self.ticker_id = self.source('ticker_id', bl_fetch=True)['ticker_id'].tolist()[0]
 
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:

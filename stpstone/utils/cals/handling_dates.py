@@ -1,21 +1,15 @@
-### FUNÇÕES ÚTEIS PARA INTERACAO ENTRE DATAS ###
-
-# pypi.org libs
+import pytz
 import locale
 import time
-from datetime import date, datetime, time, timedelta, timezone
-from typing import List, Optional, Tuple, Union
-
 import businesstimedelta
 import pandas as pd
-import pytz
+from datetime import date, datetime, time, timedelta, timezone
+from typing import List, Optional, Tuple, Union
 from dateutil.relativedelta import relativedelta
 from more_itertools import unique_everseen
 from workalendar.core import SAT, SUN
-
 from stpstone.transformations.validation.metaclass_type_checker import \
     TypeChecker
-# local libs
 from stpstone.utils.cals.br_bzdays import BrazilBankCalendar
 from stpstone.utils.parsers.str import StrHandler
 
@@ -431,6 +425,30 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         dt_utc = dt_.astimezone(timezone.utc)
         return dt_utc.timestamp()
 
+    def datetime_to_unix_timestamp(self, dt_: Union[date, datetime, time]) -> int:
+        """
+        Convert a datetime/date/time object to a Unix timestamp (seconds since epoch).
+
+        Args:
+            dt_ (Union[date, datetime, time]): Date, datetime or time object to convert
+
+        Returns:
+            int: Unix timestamp (seconds since 1970-01-01 00:00:00 UTC)
+        """
+        # If input is time, combine with today's date
+        if isinstance(dt_, time):
+            dt_ = datetime.combine(date.today(), dt_)
+        # If input is date, convert to datetime at midnight
+        elif isinstance(dt_, date) and not isinstance(dt_, datetime):
+            dt_ = datetime.combine(dt_, time.min)
+
+        # If datetime is timezone-naive, assume local timezone
+        if dt_.tzinfo is None:
+            dt_ = dt_.astimezone()  # Convert to local timezone
+
+        # Convert to UTC and return timestamp
+        return int(dt_.astimezone(timezone.utc).timestamp())
+
     def timestamp_to_date(
         self,
         timestamp: Union[str, int],
@@ -453,26 +471,6 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             )
         else:
             return pd.to_datetime(timestamp_dt, unit="s", utc=True).strftime("%Y%m%d")
-
-    def datetime_to_timestamp(self, dt_: Union[date, datetime]) -> int:
-        """
-        Convert a datetime object to a timestamp (int)
-        Args:
-            dt_ (datetime or date): datetime or date object to convert
-            bl_date_to_datetime (bool): if True, convert a date object to a datetime object
-                before converting to a timestamp
-        Returns:
-            int: timestamp (seconds since the Unix epoch)
-        Raises:
-            ValueError: If the input is not a datetime or date object
-        """
-        if (isinstance(dt_, date) == True) and (isinstance(dt_, datetime) == False):
-            dt_ = datetime.combine(dt_, time.min)
-        # handle timezone-naive dates (assume utc)
-        if dt_.tzinfo is None:
-            dt_ = dt_.replace(tzinfo=timezone.utc)
-        dt_ = dt_.astimezone(timezone.utc)
-        return int(dt_.timestamp())
 
     @property
     def current_timestamp_string(self, format_output: str = "%Y%m%d_%H%M%S") -> str:
