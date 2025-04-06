@@ -149,6 +149,7 @@ class UtilsRequests(ABC):
             text2 = doc_pdf[i + 1].get_text("text") if i + 1 < len(doc_pdf) else ""
             list_pages.append(text1 + "\n" + text2)
         for i, str_page in enumerate(list_pages):
+            # print(str_page)
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
             if (len(dict_count_matches) > 0) \
                 and (all(count > 0 for count in dict_count_matches.values())): break
@@ -166,7 +167,17 @@ class UtilsRequests(ABC):
                         str_page,
                         # flags=re.DOTALL | re.MULTILINE
                     )
-                    if regex_match is not None:
+                    # print(str_event, str_condition, pattern_regex)
+                    # print((regex_match is not None) \
+                    #     and (regex_match.group(0) is not None) \
+                    #     and (len(regex_match.group(0)) > 0))
+                    # if (regex_match is not None) \
+                    #     and (regex_match.group(0) is not None):
+                    #     print(f"LEN REGEX MATCH GROUP 0: {len(regex_match.group(0))}")
+                    #     print(f"REGEX GROUP 0: {regex_match.group(0)}")
+                    if (regex_match is not None) \
+                        and (regex_match.group(0) is not None) \
+                        and (len(regex_match.group(0)) > 0):
                         dict_count_matches[str_event] += 1
                         dict_ = {
                             "EVENT": str_event.upper(),
@@ -188,6 +199,8 @@ class UtilsRequests(ABC):
         df_.drop_duplicates(inplace=True)
         df_.sort_values(by=["EVENT", "CONDITION"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
+        # print(df_)
+        # raise Exception("PDF DOC REGEX")
         return df_
 
     def get_query_params(self, url: str, param: str) -> Union[int, None]:
