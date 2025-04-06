@@ -78,7 +78,7 @@ class SpysMeCountries(ABCSession):
             str_anonymity_code = proxy.group(3) if proxy.group(3) else "N"
             str_ip = str_ip_port_porxy.split(":")[0]
             str_port = str_ip_port_porxy.split(":")[1]
-            str_anonimity = "elite" if str_anonymity_code == "H" else (
+            str_anonymity = "elite" if str_anonymity_code == "H" else (
                 "anonymous" if str_anonymity_code == "A" else "transparent"
             )
             obj_timezone = self.ww_timezones.get_timezones_by_country_code(str_country_code)
@@ -89,7 +89,7 @@ class SpysMeCountries(ABCSession):
                     "bl_alive": "true",
                     "status": "success",
                     "alive_since": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
-                    "anonymity": str_anonimity.lower(),
+                    "anonymity": str_anonymity.lower(),
                     "average_timeout": 1.0,
                     "first_seen": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
                     "ip_data": "",
