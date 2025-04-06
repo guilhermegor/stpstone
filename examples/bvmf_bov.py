@@ -4,7 +4,7 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.tradings.br.exchange.bvmf_bov import BVMFBOV
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 
 
 # session = ProxyScrapeAll(

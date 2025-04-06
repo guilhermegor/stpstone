@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from stpstone._config.global_slots import YAML_B3_FUTURES_CLOSING_ADJ
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement

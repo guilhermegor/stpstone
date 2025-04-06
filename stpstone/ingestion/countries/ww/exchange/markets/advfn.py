@@ -8,7 +8,7 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_WW_ADVFN
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.dicts import HandlingDicts
 

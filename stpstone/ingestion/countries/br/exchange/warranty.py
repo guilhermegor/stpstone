@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 
 

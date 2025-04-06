@@ -1,4 +1,4 @@
-from stpstone.utils.connections.netops.sessions.load_testing import ProxyLoadTester
+from stpstone.utils.connections.netops.proxies.load_testing import ProxyLoadTester
 
 
 cls_load_test_proxies = ProxyLoadTester(

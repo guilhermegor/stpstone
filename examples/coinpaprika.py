@@ -4,7 +4,7 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.tradings.ww.exchange.crypto.coinpaprika import CoinPaprika
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 
 
 session = ProxyScrapeAll(bl_new_proxy=True).session

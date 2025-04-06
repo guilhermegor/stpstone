@@ -1,4 +1,4 @@
-from stpstone.utils.connections.netops.sessions.test_proxy import ProxyTester
+from stpstone.utils.connections.netops.proxies.test_proxy import ProxyTester
 
 
 cls_proxy_tester = ProxyTester("200.174.198.86", 8888)

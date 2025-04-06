@@ -5,8 +5,8 @@ from keyring import get_password
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.crypto.coincap import CoinCap
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
-from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
+from stpstone.utils.connections.netops.proxies.proxy_nova import ProxyNova
 
 
 cls_session = ProxyScrapeAll(bl_new_proxy=True)

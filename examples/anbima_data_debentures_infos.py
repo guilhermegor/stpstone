@@ -1,8 +1,8 @@
 from getpass import getuser
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import AnbimaDataDebentures
-from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeCountry, ProxyScrapeAll
-from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
-from stpstone.utils.connections.netops.sessions.proxy_webshare import ProxyWebshare
+from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeCountry, ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.proxies.proxy_webshare import ProxyWebshare
 from stpstone.utils.connections.netops.user_agents import UserAgents
 from stpstone.utils.cals.handling_dates import DatesBR
 
