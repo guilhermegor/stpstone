@@ -5,6 +5,8 @@ from stpstone.utils.connections.netops.sessions.proxy_nova import ProxyNova
 from stpstone.utils.connections.netops.sessions.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
 from stpstone.utils.connections.netops.sessions.proxy_webshare import ProxyWebShare
 from stpstone.utils.connections.netops.sessions.freeproxy_world import FreeProxyWorld
+from stpstone.utils.connections.netops.sessions.free_proxy_list_net import FreeProxyNet
+from stpstone.utils.connections.netops.sessions.spysme import SpysMeCountries
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -52,6 +54,42 @@ class YieldProxy:
         self.timeout_session = timeout_session
         self.int_wait_load = int_wait_load
         self.create_logs = CreateLog()
+
+        self.cls_free_proxy_net = FreeProxyNet(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
+
+        self.cls_spysme_countries = SpysMeCountries(
+            bl_new_proxy=bl_new_proxy,
+            dict_proxies=dict_proxies,
+            int_retries=int_retries,
+            int_backoff_factor=int_backoff_factor,
+            bl_alive=bl_alive,
+            list_anonymity_value=list_anonymity_value,
+            list_protocol=list_protocol,
+            str_continent_code=str_continent_code,
+            str_country_code=str_country_code,
+            bl_ssl=bl_ssl,
+            float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
+            float_max_timeout=float_max_timeout,
+            bl_use_timer=bl_use_timer,
+            list_status_forcelist=list_status_forcelist,
+            logger=logger
+        )
 
         self.cls_proxy_nova = ProxyNova(
             bl_new_proxy=bl_new_proxy,
@@ -153,6 +191,8 @@ class YieldProxy:
     def _cache(self) -> List[Dict[str, str]]:
         list_ser = list()
         for list_ in [
+            self.cls_free_proxy_net.configured_sessions,
+            self.cls_spysme_countries.configured_sessions,
             self.cls_freeproxy_world.configured_sessions,
             self.cls_proxy_nova.configured_sessions,
             self.cls_proxy_scrape_all.configured_sessions,

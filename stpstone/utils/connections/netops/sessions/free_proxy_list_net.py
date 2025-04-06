@@ -83,14 +83,14 @@ class FreeProxyNet(ABCSession):
             str_port = self.html_parser.lxml_xpath(el_tr, './td[2]')[0].text
             str_country_code = self.html_parser.lxml_xpath(el_tr, './td[3]')[0].text
             str_country_name = self.html_parser.lxml_xpath(el_tr, './/td[@class="hm"][1]')[0].text
-            str_anonymity = self.html_parser.lxml_xpath(el_tr, './/td[@class="hm"][1]')[0].text
-            str_anonymity = "elite" if self.str_parser.match_string_like(str_anonymity, "elite%") \
+            str_anonymity = self.html_parser.lxml_xpath(el_tr, './td[5]')[0].text
+            str_anonymity = "elite" if self.str_parser.match_string_like(str_anonymity, "elite*") \
                 else (
-                    "anonymous" if self.str_parser.match_string_like(str_anonymity, "anonymous%") \
+                    "anonymous" if self.str_parser.match_string_like(str_anonymity, "anonymous*") \
                     else "transparent"
                 )
             str_protocol_code = self.html_parser.lxml_xpath(el_tr, './/td[@class="hx"]')[0].text
-            str_protocol = "https" if self.str_parser.match_string_like(str_protocol_code, "yes%") \
+            str_protocol = "https" if self.str_parser.match_string_like(str_protocol_code, "yes*") \
                 else "http"
             str_last_checked = self.html_parser.lxml_xpath(el_tr, './/td[@class="hm"][3]')[0].text
             obj_timezone = self.ww_timezones.get_timezones_by_country_code(str_country_code) if \
@@ -103,7 +103,7 @@ class FreeProxyNet(ABCSession):
                 str_country_code) if str_country_code is not None else "Unknown"
             list_ser.append({
                 "protocol": str_protocol,
-                "bl_alive": "true",
+                "bl_alive": True,
                 "status": "success",
                 "alive_since": self.time_ago_to_ts_unix(str_last_checked),
                 "anonymity": str_anonymity.lower(),
@@ -115,7 +115,7 @@ class FreeProxyNet(ABCSession):
                 "continent": str_continent,
                 "continent_code": str_continent_code,
                 "country": str_country_name,
-                "country_code": str_country_code,
+                "country_code": str_country_code if str_country_code is not None else "Unknown",
                 "city": "",
                 "district": "",
                 "region_name": "",

@@ -1,4 +1,5 @@
 import time
+import re
 from random import shuffle
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -113,16 +114,23 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     def composed_time_ago_to_ts_unix(self, time_elapsed_str: str) -> float:
         hours = 0
         minutes = 0
-        if ("h." in time_elapsed_str) or ("hours " in time_elapsed_str):
-            parts = time_elapsed_str.split()
-            hours = int(parts[0].replace("h.", "").replace("hours", ""))
-            if len(parts) >= 3:
-                minutes = int(parts[1])
+        time_elapsed_str = time_elapsed_str.strip().lower()
+        day_match = re.search(r"(\d+)\s*(d\.|days|day)", time_elapsed_str)
+        hour_match = re.search(r"(\d+)\s*(h\.|hours|hour)?", time_elapsed_str)
+        minute_match = re.search(r"(\d+)\s*(min|mins|minute|minutes)", time_elapsed_str)
+        if day_match is not None:
+            days = int(day_match.group(1))
         else:
-            parts = time_elapsed_str.split()
-            if parts[1].startswith(("min", "mins", "minute", "minutes")):
-                minutes = int(parts[0])
-        past_time = datetime.now() - timedelta(hours=hours, minutes=minutes)
+            days = 0
+        if hour_match is not None:
+            hours = int(hour_match.group(1))
+        else:
+            hours = 0
+        if minute_match is not None:
+            minutes = int(minute_match.group(1))
+        else:
+            minutes = 0
+        past_time = datetime.now() - timedelta(days=days, hours=hours, minutes=minutes)
         timestamp = time.mktime(past_time.timetuple()) + past_time.microsecond / 1e6
         return timestamp
 

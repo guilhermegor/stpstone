@@ -248,6 +248,9 @@ class SeleniumWD:
     def wait_until_el_loaded(self, str_xpath:str) -> WebDriverWait:
         return WebDriverWait(self.web_driver, self.int_delay).until(self.el_is_enabled(str_xpath))
 
+    def wait(self, seconds:int) -> None:
+        self.web_driver.implicitly_wait(seconds)
+
 
 class HtmlBuilder:
 

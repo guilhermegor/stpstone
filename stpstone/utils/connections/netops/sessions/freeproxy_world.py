@@ -1,6 +1,6 @@
-from time import sleep
 from typing import Union, Dict, List, Optional
 from logging import Logger
+from selenium.common.exceptions import TimeoutException
 from stpstone.utils.parsers.html import SeleniumWD
 from stpstone.utils.connections.netops.sessions.abc import ABCSession
 from stpstone.utils.geography.ww import WWTimezones, WWGeography
@@ -53,18 +53,24 @@ class FreeProxyWorld(ABCSession):
         list_ser = list()
         int_pg = 1
         while True:
-            print(f"Fetching page {int_pg} from {self.fstr_url.format(self.str_country_code.upper(), int_pg)}")
             cls_selenium_wd = SeleniumWD(
                 url=self.fstr_url.format(self.str_country_code.upper(), int_pg),
-                bl_headless=False,
+                bl_headless=True,
                 bl_incognito=True,
                 int_wait_load=self.int_wait_load
             )
             web_driver = cls_selenium_wd.get_web_driver
-            cls_selenium_wd.wait_until_el_loaded(self.xpath_tr)
+            try:
+                cls_selenium_wd.wait_until_el_loaded(self.xpath_tr)
+            except TimeoutException:
+                self.create_log.log_message(
+                    self.logger,
+                    f"TimeoutException - URL: {self.fstr_url.format(self.str_country_code.upper(), int_pg)}",
+                    "warning"
+                )
+                break
             el_trs = cls_selenium_wd.find_elements(web_driver, self.xpath_tr)
-            list_range = [i for i in range(2, len(el_trs), 2)]
-            list_range[-1] += 1
+            list_range = [i for i in range(2, len(el_trs) + 2, 2)]
             for i_tr in list_range:
                 ip = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
                                                   + f'[{i_tr}]/td[1]').text
@@ -81,10 +87,10 @@ class FreeProxyWorld(ABCSession):
                 type_ = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
                                                   + f'[{i_tr}]/td[6]/a').text
                 anonymity = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[7]/a').text
+                                                  + f'[{i_tr}]/td[7]/a').text.lower()
+                anonymity = "elite" if anonymity == "high" else "transparent"
                 last_checked = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
                                                   + f'[{i_tr}]/td[8]').text
-                print(f"LAST CHECKED: {last_checked}")
                 list_ser.append({
                     "protocol": type_.lower(),
                     "bl_alive": True,
@@ -122,5 +128,5 @@ class FreeProxyWorld(ABCSession):
                     "uptime": 1.0
                 })
             int_pg += 1
-            sleep(30)
+            cls_selenium_wd.wait(60)
         return list_ser

@@ -84,41 +84,44 @@ class SpysMeCountries(ABCSession):
             obj_timezone = self.ww_timezones.get_timezones_by_country_code(str_country_code)
             str_timezone = ", ".join(obj_timezone) if isinstance(obj_timezone, (list, tuple, set)) \
                 else str(obj_timezone)
+            str_continent = self.ww_geography.get_continent_by_country_code(str_country_code)
+            str_continent = str_continent if str_continent is not None else "Unknown"
+            str_continent_code = self.ww_geography.get_continent_code_by_country_code(
+                    str_country_code)
+            str_continent_code = str_continent_code if str_continent_code is not None else "Unknown"
             list_ser.append({
-                    "protocol": "https",
-                    "bl_alive": "true",
-                    "status": "success",
-                    "alive_since": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
-                    "anonymity": str_anonymity.lower(),
-                    "average_timeout": 1.0,
-                    "first_seen": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
-                    "ip_data": "",
-                    "ip_name": "",
-                    "timezone": str_timezone,
-                    "continent": self.ww_geography.get_continent_by_country_code(str_country_code),
-                    "continent_code": self.ww_geography.get_continent_code_by_country_code(
-                        str_country_code),
-                    "country": self.ww_geography.get_country_details(str_country_code)["name"] \
-                        if self.ww_geography.get_country_details(str_country_code) is not None else "",
-                    "country_code": str_country_code,
-                    "city": "",
-                    "district": "",
-                    "region_name": "",
-                    "zip": "",
-                    "bl_hosting": False,
-                    "isp": "",
-                    "latitude": 0.0,
-                    "longitude": 0.0,
-                    "organization": "",
-                    "proxy": True,
-                    "ip": str_ip,
-                    "port": str_port,
-                    "bl_ssl": True,
-                    "timeout": 1.0,
-                    "times_alive": 1,
-                    "times_dead": 0,
-                    "ratio_times_alive_dead": 1.0,
-                    "uptime": 1.0
-                }
-            )
+                "protocol": "https",
+                "bl_alive": True,
+                "status": "success",
+                "alive_since": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
+                "anonymity": str_anonymity.lower(),
+                "average_timeout": 1.0,
+                "first_seen": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
+                "ip_data": "",
+                "ip_name": "",
+                "timezone": str_timezone,
+                "continent": str_continent,
+                "continent_code": str_continent_code,
+                "country": self.ww_geography.get_country_details(str_country_code)["name"] \
+                    if self.ww_geography.get_country_details(str_country_code) is not None else "",
+                "country_code": str_country_code,
+                "city": "",
+                "district": "",
+                "region_name": "",
+                "zip": "",
+                "bl_hosting": False,
+                "isp": "",
+                "latitude": 0.0,
+                "longitude": 0.0,
+                "organization": "",
+                "proxy": True,
+                "ip": str_ip,
+                "port": str_port,
+                "bl_ssl": True,
+                "timeout": 1.0,
+                "times_alive": 1,
+                "times_dead": 0,
+                "ratio_times_alive_dead": 1.0,
+                "uptime": 1.0
+            })
         return list_ser
