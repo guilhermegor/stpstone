@@ -8,7 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 # local libs
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.cals.handling_dates import DatesBR
 
 

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from stpstone._config.global_slots import YAML_B3_FUTURES_CLOSING_ADJ
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -20,7 +20,7 @@ class FuturesClosingAdjB3(ABCRequests):
 
     def __init__(
         self,
-        session: Optional[ProxyScrapeAll] = None,
+        session: Optional[Session] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,

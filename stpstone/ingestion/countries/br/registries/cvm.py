@@ -8,14 +8,14 @@ from typing import List, Optional
 from stpstone._config.global_slots import YAML_BR_CVM_REGISTRIES
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
 class CVMRegistries(ABCRequests):
 
     def __init__(
         self,
-        session: Optional[ProxyScrapeAll] = None,
+        session: Optional[Session] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,

@@ -6,7 +6,7 @@ from typing import Optional, Dict, List, Any
 from requests import request, Response
 from requests.exceptions import ReadTimeout, ConnectTimeout, ChunkedEncodingError, ConnectionError
 from lxml import html
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.loggs.create_logs import CreateLog

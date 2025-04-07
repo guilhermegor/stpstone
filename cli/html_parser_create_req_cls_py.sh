@@ -34,7 +34,6 @@ from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_EXAMPLE
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -47,7 +46,7 @@ class ConcreteCreatorReq(ABCRequests):
 
     def __init__(
         self,
-        session: Optional[ProxyScrapeAll] = None,
+        session: Optional[Session] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,

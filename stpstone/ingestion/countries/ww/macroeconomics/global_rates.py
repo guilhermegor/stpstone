@@ -8,7 +8,7 @@ from time import sleep
 from bs4 import BeautifulSoup
 from stpstone._config.global_slots import YAML_WW_GR
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -24,7 +24,7 @@ class GlobalRates(ABCRequests):
 
     def __init__(
         self,
-        session: Optional[ProxyScrapeAll] = None,
+        session: Optional[Session] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,

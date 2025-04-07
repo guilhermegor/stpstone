@@ -6,7 +6,6 @@ from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_IRSBR
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
@@ -17,7 +16,7 @@ class IRSBR(ABCRequests):
         bl_create_session:bool=False,
         bl_new_proxy:bool=False,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        session:Optional[ProxyScrapeAll]=None,
+        session: Optional[Session] = None,
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:

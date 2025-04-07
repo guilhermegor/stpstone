@@ -6,7 +6,7 @@ from logging import Logger
 from requests import Response
 from stpstone._config.global_slots import YAML_WW_CRYPTO_COINMARKET
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
@@ -14,7 +14,7 @@ class CoinMarket(ABCRequests):
 
     def __init__(
         self,
-        session:Optional[ProxyScrapeAll]=None,
+        session: Optional[Session] = None,
         dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,

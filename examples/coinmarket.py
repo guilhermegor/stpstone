@@ -5,10 +5,10 @@ from keyring import get_password
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.tradings.ww.exchange.crypto.coinmarket import CoinMarket
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
-session = ProxyScrapeAll(bl_new_proxy=True).session
+session = YieldFreeProxy(bl_new_proxy=True).session
 df_ = CoinMarket(
     session=session,
     dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5),
