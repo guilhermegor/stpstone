@@ -92,7 +92,7 @@ class ProxyLoadTester:
     def run_tests(self, n_trials: int = 20) -> None:
         successful_tests = 0
         for i in range(1, n_trials + 1):
-            self.create_log.log_message(self.logger, f"\n--- Testing Proxy #{i} ---")
+            self.create_log.log_message(self.logger, f"\n--- Testing Proxy #{i} ---", "info")
             int_try = 0
             try:
                 session = next(self.cls_yield_proxy)
@@ -119,13 +119,13 @@ class ProxyLoadTester:
             except Exception as e:
                 self.create_log.log_message(
                     self.logger, f"\nError getting proxy #{i}: {str(e)}", "critical")
-        self.create_log.log_message(self.logger, f"\n--- Test Summary ---", "infos")
-        self.create_log.log_message(self.logger, f"Total tests attempted: {n_trials}", "infos")
-        self.create_log.log_message(self.logger, f"Successful tests: {successful_tests}", "infos")
+        self.create_log.log_message(self.logger, f"\n--- Test Summary ---", "info")
+        self.create_log.log_message(self.logger, f"Total tests attempted: {n_trials}", "info")
+        self.create_log.log_message(self.logger, f"Successful tests: {successful_tests}", "info")
         self.create_log.log_message(
-            self.logger, f"Success rate: {successful_tests/n_trials*100:.1f}%", "infos")
+            self.logger, f"Success rate: {successful_tests/n_trials*100:.1f}%", "info")
         self.create_log.log_message(self.logger,
                                     f"Number of unique proxies used: {len(self.set_used_proxies)}",
                                     "infos")
         self.create_log.log_message(self.logger, f"Elapsed time for {n_trials} trials: "
-                                + f"{time.time() - self.time_:.2f} seconds", "infos")
+                                + f"{time.time() - self.time_:.2f} seconds", "info")

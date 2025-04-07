@@ -17,12 +17,12 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union, Literal
 from urllib.parse import parse_qs, urlparse
 from zipfile import ZipExtFile, ZipFile
 from selenium.webdriver.remote.webdriver import WebDriver
-from requests import Request, Response, Session, request
+from sqlalchemy.orm import Session
+from requests import Request, Response, Session as ReqSession, request
 from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingError,
                                  RequestException, HTTPError, JSONDecodeError)
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeAll
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -564,7 +564,7 @@ class ABCRequests(HandleReqResponses):
     def __init__(
         self,
         dict_metadata: Dict[str, Any],
-        session: Optional[ProxyScrapeAll] = None,
+        session: Optional[ReqSession] = None,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,

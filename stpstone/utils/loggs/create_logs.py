@@ -2,10 +2,12 @@ import logging
 import os
 import time
 import inspect
-from typing import Literal
+from typing import Literal, Optional
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class CreateLog:
+class CreateLog(metaclass=TypeChecker):
+
 
     def creating_parent_folder(self, new_path: str):
         if not os.path.exists(new_path):
@@ -36,19 +38,19 @@ class CreateLog:
         logger = logging.getLogger(__name__)
         return logger
 
-    def info(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
+    def info(self, logger: Optional[logging.Logger], msg_str: str) -> logging.Logger:
         return logger.info(msg_str)
 
-    def warning(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
+    def warning(self, logger: Optional[logging.Logger], msg_str: str) -> logging.Logger:
         return logger.warning(msg_str)
 
-    def error(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
+    def error(self, logger: Optional[logging.Logger], msg_str: str) -> logging.Logger:
         return logger.error(msg_str, exc_info=True)
 
-    def critical(self, logger: logging.Logger, msg_str: str) -> logging.Logger:
+    def critical(self, logger: Optional[logging.Logger], msg_str: str) -> logging.Logger:
         return logger.error(msg_str)
 
-    def log_message(self, logger: logging.Logger, message: str,
+    def log_message(self, logger: Optional[logging.Logger], message: str,
                     log_level: Literal["info", "warning", "error", "critical"]) -> None:
         """
         Unified logging method that works with all CreateLog levels.
@@ -63,11 +65,21 @@ class CreateLog:
         frame = inspect.currentframe()
         class_name = 'UnknownClass'
         method_name = 'unknown_method'
+        set_skip_modules = {
+            'pydantic',
+            'typing',
+            'inspect',
+            'logging',
+            'stpstone.transformations.validation'
+        }
         # walk up the call stack to find the first non-CreateLog frame
         while frame:
             frame = frame.f_back
             if not frame:
                 break
+            module_name = frame.f_globals.get('__name__', 'UnknownModule')
+            if any(module_name.startswith(prefix) for prefix in set_skip_modules):
+                continue
             self_potential_cls = frame.f_locals.get('self')
             if self_potential_cls is not None and not isinstance(self_potential_cls, CreateLog):
                 class_name = self_potential_cls.__class__.__name__

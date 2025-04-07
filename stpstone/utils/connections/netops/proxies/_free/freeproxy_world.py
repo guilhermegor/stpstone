@@ -59,74 +59,77 @@ class FreeProxyWorld(ABCSession):
                 bl_incognito=True,
                 int_wait_load=self.int_wait_load
             )
-            web_driver = cls_selenium_wd.get_web_driver
             try:
-                cls_selenium_wd.wait_until_el_loaded(self.xpath_tr)
-            except TimeoutException:
-                self.create_log.log_message(
-                    self.logger,
-                    f"TimeoutException - URL: {self.fstr_url.format(self.str_country_code.upper(), int_pg)}",
-                    "warning"
-                )
-                break
-            el_trs = cls_selenium_wd.find_elements(web_driver, self.xpath_tr)
-            list_range = [i for i in range(2, len(el_trs) + 2, 2)]
-            for i_tr in list_range:
-                ip = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[1]').text
-                port = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[2]/a').text
-                country = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[3]//span[@class="table-country"]'
-                                                  ).text
-                city = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[4]').text
-                speed = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]//div[@class="n-bar-wrapper"]/p/a'
-                                                  ).text
-                type_ = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[6]/a').text
-                anonymity = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[7]/a').text.lower()
-                anonymity = "elite" if anonymity == "high" else "transparent"
-                last_checked = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
-                                                  + f'[{i_tr}]/td[8]').text
-                list_ser.append({
-                    "protocol": type_.lower(),
-                    "bl_alive": True,
-                    "status": "success",
-                    "alive_since": self.composed_time_ago_to_ts_unix(last_checked),
-                    "anonymity": anonymity.lower(),
-                    "average_timeout": 1.0 / self.proxy_speed_to_float(speed),
-                    "first_seen": self.composed_time_ago_to_ts_unix(last_checked),
-                    "ip_data": "",
-                    "ip_name": "",
-                    "timezone": ", ".join(WWTimezones().get_timezones_by_country_code(
-                        self.str_country_code)),
-                    "continent": WWGeography().get_continent_by_country_code(self.str_country_code),
-                    "continent_code": WWGeography().get_continent_code_by_country_code(
-                        self.str_country_code).upper(),
-                    "country": country,
-                    "country_code": self.str_country_code.upper(),
-                    "city": city,
-                    "district": "",
-                    "region_name": "",
-                    "zip": "",
-                    "bl_hosting": True,
-                    "isp": "",
-                    "latitude": 0.0,
-                    "longitude": 0.0,
-                    "organization": "",
-                    "proxy": True,
-                    "ip": ip,
-                    "port": port,
-                    "bl_ssl": True,
-                    "timeout": 1.0 / self.proxy_speed_to_float(speed),
-                    "times_alive": 1,
-                    "times_dead": "",
-                    "ratio_times_alive_dead": "",
-                    "uptime": 1.0
-                })
-            int_pg += 1
-            cls_selenium_wd.wait(60)
+                web_driver = cls_selenium_wd.get_web_driver
+                try:
+                    cls_selenium_wd.wait_until_el_loaded(self.xpath_tr)
+                except TimeoutException:
+                    self.create_log.log_message(
+                        self.logger,
+                        f"TimeoutException - URL: {self.fstr_url.format(self.str_country_code.upper(), int_pg)}",
+                        "warning"
+                    )
+                    break
+                el_trs = cls_selenium_wd.find_elements(web_driver, self.xpath_tr)
+                list_range = [i for i in range(2, len(el_trs) + 2, 2)]
+                for i_tr in list_range:
+                    ip = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[1]').text
+                    port = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[2]/a').text
+                    country = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[3]//span[@class="table-country"]'
+                                                    ).text
+                    city = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[4]').text
+                    speed = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]//div[@class="n-bar-wrapper"]/p/a'
+                                                    ).text
+                    type_ = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[6]/a').text
+                    anonymity = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[7]/a').text.lower()
+                    anonymity = "elite" if anonymity == "high" else "transparent"
+                    last_checked = cls_selenium_wd.find_element(web_driver, self.xpath_tr \
+                                                    + f'[{i_tr}]/td[8]').text
+                    list_ser.append({
+                        "protocol": type_.lower(),
+                        "bl_alive": True,
+                        "status": "success",
+                        "alive_since": self.composed_time_ago_to_ts_unix(last_checked),
+                        "anonymity": anonymity.lower(),
+                        "average_timeout": 1.0 / self.proxy_speed_to_float(speed),
+                        "first_seen": self.composed_time_ago_to_ts_unix(last_checked),
+                        "ip_data": "",
+                        "ip_name": "",
+                        "timezone": ", ".join(WWTimezones().get_timezones_by_country_code(
+                            self.str_country_code)),
+                        "continent": WWGeography().get_continent_by_country_code(self.str_country_code),
+                        "continent_code": WWGeography().get_continent_code_by_country_code(
+                            self.str_country_code).upper(),
+                        "country": country,
+                        "country_code": self.str_country_code.upper(),
+                        "city": city,
+                        "district": "",
+                        "region_name": "",
+                        "zip": "",
+                        "bl_hosting": True,
+                        "isp": "",
+                        "latitude": 0.0,
+                        "longitude": 0.0,
+                        "organization": "",
+                        "proxy": True,
+                        "ip": ip,
+                        "port": port,
+                        "bl_ssl": True,
+                        "timeout": 1.0 / self.proxy_speed_to_float(speed),
+                        "times_alive": 1,
+                        "times_dead": "",
+                        "ratio_times_alive_dead": "",
+                        "uptime": 1.0
+                    })
+                int_pg += 1
+                cls_selenium_wd.wait(60)
+            finally:
+                web_driver.quit()
         return list_ser

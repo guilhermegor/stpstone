@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from requests import Session
+from logging import Logger
 from pydantic import validate_arguments, ConfigDict
 from typing import get_type_hints, get_origin, get_args, Type, Dict, Any, Union, BinaryIO, IO
 from io import BytesIO, RawIOBase, BufferedIOBase
@@ -12,7 +13,7 @@ class TypeChecker(type):
         for attr_name, attr_value in dict_.items():
             if (callable(attr_value)) and (not attr_name.startswith("__")):
                 bl_arbitrary_types = False
-                tup_types_ignore = (pd.DataFrame, np.ndarray, pd.Series, list, Session)
+                tup_types_ignore = (pd.DataFrame, np.ndarray, pd.Series, list, Session, Logger)
                 io_types = (IO, BinaryIO, RawIOBase, BufferedIOBase, BytesIO)
                 type_hints = get_type_hints(attr_value)
                 for hint in type_hints.values():

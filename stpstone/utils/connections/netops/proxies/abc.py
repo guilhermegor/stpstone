@@ -194,14 +194,14 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                     self.create_log.log_message(
                         self.logger,
                         f"Testing proxy {str_ip}:{int_port} - Healthy: {bl_test_proxy}",
-                        log_level="infos"
+                        log_level="info"
                     )
                     if bl_test_proxy == True:
                         list_.append({"ip": str_ip, "port": int_port})
             self.create_log.log_message(
                 self.logger,
                 f"Number of working proxies: {len(list_)}",
-                log_level="infos"
+                log_level="info"
             )
             if len(list_) > 0:
                 return list_
@@ -241,7 +241,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.create_log.log_message(
             self.logger,
             f"Number of available proxies: {len(list_ser)}",
-            log_level="infos"
+            log_level="info"
         )
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
@@ -259,7 +259,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 self.create_log.log_message(
                     self.logger,
                     f"Filtering proxies with {k_filt}={v_filt} / Length: {len(list_ser)}",
-                    log_level="infos"
+                    log_level="info"
                 )
                 list_ser = HandlingDicts().filter_list_ser(
                     list_ser,
@@ -270,7 +270,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 self.create_log.log_message(
                     self.logger,
                     f"Filtered proxies with {k_filt}={v_filt} / Length: {len(list_ser)}",
-                    log_level="infos"
+                    log_level="info"
                 )
         return list_ser
 
