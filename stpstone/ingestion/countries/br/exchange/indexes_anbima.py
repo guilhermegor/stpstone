@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-from stpstone._config.global_slots import YAML_EXAMPLE
+from stpstone._config.global_slots import YAML_ANBIMA_DATA_INDEXES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
 
 
-class ConcreteCreatorReq(ABCRequests):
+class AnbimaDataIndexes(ABCRequests):
 
     def __init__(
         self,
@@ -22,7 +22,7 @@ class ConcreteCreatorReq(ABCRequests):
         list_slugs: Optional[List[str]] = None
     ) -> None:
         super().__init__(
-            dict_metadata=YAML_EXAMPLE,
+            dict_metadata=YAML_ANBIMA_DATA_INDEXES,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,

@@ -16,42 +16,42 @@ cls_ = GlobalRates(
     session=None, dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 3), cls_db=None
 )
 
-# df_ = cls_.source("euribor", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("euribor", bl_fetch=True)
 # print(f"DF EURIBOR: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("libor", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("libor", bl_fetch=True)
 # print(f"DF LIBOR: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("ester", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("ester", bl_fetch=True)
 # print(f"DF ESTER: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("sonia", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("sonia", bl_fetch=True)
 # print(f"DF SONIA: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("sofr", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("sofr", bl_fetch=True)
 # print(f"DF SOFR: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("central_banks", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("central_banks", bl_fetch=True)
 # print(f"DF CENTRAL BANKS RATES: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("usa_cpi", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("usa_cpi", bl_fetch=True)
 # print(f"DF AMERICAN CPI RATES: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("british_cpi", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("british_cpi", bl_fetch=True)
 # print(f"DF BRITISH CPI RATES: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("canadian_cpi", bl_fetch=True, bl_debug=False)
+# df_ = cls_.source("canadian_cpi", bl_fetch=True)
 # print(f"DF CANADIAN CPI RATES: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("european_cpi", bl_fetch=True, bl_debug=False)
+df_ = cls_.source("european_cpi", bl_fetch=True)
 print(f"DF EUROPEAN CPI RATES: \n{df_}")
 df_.info()

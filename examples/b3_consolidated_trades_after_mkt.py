@@ -1,6 +1,4 @@
-# pypi.org libs
 import os
-# local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt import ConsolidatedTrdsAfterMktB3
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -21,6 +19,6 @@ cls_ = ConsolidatedTrdsAfterMktB3(
     cls_db=None
 )
 
-df_ = cls_.source("consolidated_trades_information_after_mkt", bl_fetch=True, bl_debug=False)
+df_ = cls_.source("consolidated_trades_information_after_mkt", bl_fetch=True)
 print(f"DF CONSOLIDATED TRADES AFTER MARKET B3: \n{df_}")
 df_.info()

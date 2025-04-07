@@ -35,11 +35,8 @@ YAML_B3_CONSOLIDATED_TRDS_AFTER_MKT = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/consolidated_trades_after_mkt.yaml"))
 YAML_B3_FUTURES_CLOSING_ADJ = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/futures_closing_adj.yaml"))
-YAML_ANBIMA_DATA_FUNDS = reading_yaml(
-    os.path.join(root_path, "countries/br/registries/anbima_data_funds.yaml"))
-YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
-    os.path.join(root_path, "countries/br/registries/anbima_data_debentures.yaml")
-)
+YAML_ANBIMA_DATA_INDEXES = reading_yaml(
+    os.path.join(root_path, "countries/br/exchange/indexes_anbima.yaml"))
 #   US
 YAML_US_ALPHAVANTAGE = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/alphavantage.yaml"))
@@ -77,6 +74,10 @@ YAML_BR_BCB_BRAZILLIAN_BANKS_REGISTRY = reading_yaml(
     os.path.join(root_path, "countries/br/registries/brazillian_banks.yaml"))
 YAML_B3_TRD_SEC = reading_yaml(
     os.path.join(root_path, "countries/br/registries/b3_trd_sec.yaml"))
+YAML_ANBIMA_DATA_FUNDS = reading_yaml(
+    os.path.join(root_path, "countries/br/registries/anbima_data_funds.yaml"))
+YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
+    os.path.join(root_path, "countries/br/registries/anbima_data_debentures.yaml"))
 
 # taxation
 # BR

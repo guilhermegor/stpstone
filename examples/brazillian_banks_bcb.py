@@ -19,6 +19,6 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 cls_ = BrazillianBanksBCB(
     session=None
 )
-df_ = cls_.source("bcb_registry" , bl_fetch=True, bl_debug=False)
+df_ = cls_.source("bcb_registry" , bl_fetch=True)
 print(f"DF VOLUMES: \n{df_}")
 df_.info()

@@ -21,6 +21,6 @@ cls_ = B3TrdSec(
     cls_db=None
 )
 
-df_ = cls_.source("instruments_list", bl_fetch=True, bl_debug=False)
+df_ = cls_.source("instruments_list", bl_fetch=True)
 print(f"DF INSTRUMENTS LIST B3: \n{df_}")
 df_.info()

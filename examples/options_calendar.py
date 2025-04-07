@@ -19,6 +19,6 @@ cls_ = OptionsCalendarB3(
     session=None,
     cls_db=None
 )
-df_ = cls_.source('settlement_dates', bl_fetch=True, bl_debug=False)
+df_ = cls_.source('settlement_dates', bl_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()

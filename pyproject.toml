@@ -69,6 +69,7 @@ minio = "7.2.15"
 webdriver-manager = "4.0.2"
 pycountry = "24.6.1"
 pycountry-convert = "0.7.2"
+xlrd = "2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

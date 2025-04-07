@@ -21,6 +21,6 @@ cls_ = ConsolidatedTrdsB3(
     cls_db=None
 )
 
-df_ = cls_.source("consolidated_trades_information", bl_fetch=True, bl_debug=False)
+df_ = cls_.source("consolidated_trades_information", bl_fetch=True)
 print(f"DF CONSOLIDATED TRADES B3: \n{df_}")
 df_.info()

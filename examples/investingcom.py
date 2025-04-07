@@ -21,6 +21,6 @@ cls_investingcom = InvestingCom(
     dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 0),
     str_ticker='PETR4'
 )
-df_ = cls_investingcom.source('daily_ohlcv', bl_fetch=True, bl_debug=False)
+df_ = cls_investingcom.source('daily_ohlcv', bl_fetch=True)
 print(f'DF OHLCV: \n{df_}')
 print(df_.info())

@@ -22,6 +22,6 @@ cls_adfn_ww = ADVFNWW(
     str_market='BOV',
     str_ticker='PETR4'
 )
-df_ = cls_adfn_ww.source('daily_ohlcv', bl_fetch=True, bl_debug=False)
+df_ = cls_adfn_ww.source('daily_ohlcv', bl_fetch=True)
 print(f'DF OHLCV: \n{df_}')
 print(df_.info())

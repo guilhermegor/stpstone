@@ -21,17 +21,17 @@ cls_ = HistoricalSigmaB3(
 )
 
 # print('*** HISTORICAL SIGMA B3 - GROUP 1 ***')
-# df_ = cls_.source('group_1', bl_fetch=True, bl_debug=False)
+# df_ = cls_.source('group_1', bl_fetch=True)
 # print(f'DF : \n{df_}')
 # df_.info()
 
 # print('*** HISTORICAL SIGMA B3 - GROUP 2 ***')
-# df_ = cls_.source('group_2', bl_fetch=True, bl_debug=False)
+# df_ = cls_.source('group_2', bl_fetch=True)
 # print(f'DF : \n{df_}')
 # df_.info()
 
 # print('*** HISTORICAL SIGMA B3 - GROUP 3 ***')
-# df_ = cls_.source('group_3', bl_fetch=True, bl_debug=False)
+# df_ = cls_.source('group_3', bl_fetch=True)
 # print(f'DF : \n{df_}')
 # df_.info()
 

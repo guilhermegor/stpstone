@@ -16,6 +16,6 @@ cls_ = FuturesClosingAdjB3(
     session=None, dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 3), cls_db=None
 )
 
-df_ = cls_.source("futures_closing_adj", bl_fetch=True, bl_debug=False)
+df_ = cls_.source("futures_closing_adj", bl_fetch=True)
 print(f"DF FUTURES CLOSING ADJ B3: \n{df_}")
 df_.info()

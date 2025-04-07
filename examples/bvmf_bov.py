@@ -19,6 +19,6 @@ cls_ = BVMFBOV(
     session=None,
     dt_ref=DatesBR().add_months(DatesBR().curr_date, -1)
 )
-df_ = cls_.source('volumes', bl_fetch=True, bl_debug=False)
+df_ = cls_.source('volumes', bl_fetch=True)
 print(f'DF VOLUMES: \n{df_}')
 print(df_.info())

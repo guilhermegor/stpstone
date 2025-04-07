@@ -54,7 +54,7 @@ class HistoricalSigmaB3(ABCRequests):
         list_ser = list()
         for i in range(1, 4):
             list_ser.extend(
-                self.source(f'group_{i}', bl_fetch=True, bl_debug=False)\
+                self.source(f'group_{i}', bl_fetch=True)\
                     .to_dict(orient='records')
             )
         return pd.DataFrame(list_ser)

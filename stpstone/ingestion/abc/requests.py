@@ -234,6 +234,8 @@ class HandleReqResponses(UtilsRequests):
         file_name = os.path.basename(url) if hasattr(req_resp, "url") else ""
         if self.req_trt_injection(req_resp) is not None:
             df_ = self.req_trt_injection(req_resp)
+        elif str_file_extension == "xl_url":
+            df_ = self._handle_pandas_excel_url(req_resp.url, dict_df_read_params)
         elif isinstance(req_resp, WebDriver):
             df_ = self._handle_web_driver_html(url, req_resp, dict_xpaths, selenium_wd)
         elif str_file_extension == "zip":
@@ -263,7 +265,7 @@ class HandleReqResponses(UtilsRequests):
                 df_ = self._handle_csv_response(req_resp, dict_df_read_params)
             else:
                 df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
-        elif str_file_extension == "xlsx":
+        elif str_file_extension in ["xlsx", "xls"]:
             df_ = self._handle_excel_response(req_resp, dict_df_read_params)
         elif str_file_extension == "xml":
             df_ = self._handle_xml_response(req_resp, dict_xml_keys)
@@ -408,6 +410,14 @@ class HandleReqResponses(UtilsRequests):
                 dict_df_read_corrected_params = dict()
             return pd.read_csv(file, **dict_df_read_corrected_params)
 
+    def _handle_pandas_excel_url(
+        self,
+        url: Union[str],
+        dict_df_read_params: Optional[Dict[str, Any]],
+    ) -> pd.DataFrame:
+        dict_df_read_params = dict_df_read_params if dict_df_read_params is not None else {}
+        return pd.read_excel(url, **dict_df_read_params)
+
     def _handle_excel_response(
         self,
         file: Union[BytesIO, TextIOWrapper, Response],
@@ -417,6 +427,7 @@ class HandleReqResponses(UtilsRequests):
             file.seek(0)
         elif isinstance(file, Response):
             file = StringIO(file.text)
+        dict_df_read_params = dict_df_read_params if dict_df_read_params is not None else {}
         return pd.read_excel(file, **dict_df_read_params)
 
     def _handle_xml_response(
@@ -688,15 +699,19 @@ class ABCRequests(HandleReqResponses):
             #   prepare the request manually to preserve special characters
             req = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
             req_preppped = req.prepare()
-            with Session() as session:
+            with ReqSession() as session:
                 req_resp = session.send(req_preppped, verify=bl_verify)
         else:
-            if req_method == "GET":
-                req_resp = request(req_method, url, verify=bl_verify, headers=dict_headers,
-                                   params=payload, cookies=cookies)
-            elif req_method == "POST":
-                req_resp = request(req_method, url, verify=bl_verify, headers=dict_headers,
-                                   data=payload, cookies=cookies)
+            return request(
+                req_method,
+                url,
+                verify=bl_verify,
+                headers=dict_headers,
+                params=payload if req_method == "GET" else None,
+                data=payload if req_method == "POST" else None,
+                cookies=cookies,
+                timeout=tup_timeout
+            )
         req_resp.raise_for_status()
         return req_resp
 
