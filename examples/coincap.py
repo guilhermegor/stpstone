@@ -5,11 +5,10 @@ from keyring import get_password
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.crypto.coincap import CoinCap
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy, ProxyScrapeCountry
-from stpstone.utils.connections.netops.proxies.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
-cls_session = ProxyScrapeAll(bl_new_proxy=True)
+cls_session = YieldFreeProxy(bl_new_proxy=True)
 
 if cls_session.session.proxies == {}:
     raise Exception("No proxies available")

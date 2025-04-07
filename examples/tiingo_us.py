@@ -3,7 +3,7 @@ import os
 from keyring import get_password
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.us.exchange.tiingo import TiingoUS
+from stpstone.ingestion.countries.us.exchange.tiingo import TiingoUS
 from stpstone.utils.cals.handling_dates import DatesBR
 
 

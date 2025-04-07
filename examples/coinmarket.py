@@ -3,7 +3,7 @@ import os
 from keyring import get_password
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.ww.exchange.crypto.coinmarket import CoinMarket
+from stpstone.ingestion.countries.ww.exchange.crypto.coinmarket import CoinMarket
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 

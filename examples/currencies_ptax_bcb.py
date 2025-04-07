@@ -2,7 +2,7 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.macroeconomics.br.currencies.ptax_bcb import PTAXBCB
+from stpstone.ingestion.countries.br.macroeconomics.ptax_bcb import PTAXBCB
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 

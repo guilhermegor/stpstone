@@ -1,4 +1,4 @@
-from stpstone.utils.connections.netops.proxies.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.proxies._free.proxy_nova import ProxyNova
 
 
 df_ = ProxyNova("br").proxies

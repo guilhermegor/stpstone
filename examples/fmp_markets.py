@@ -3,7 +3,7 @@ import os
 from keyring import get_password
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.ww.exchange.markets.fmp import FMPWW
+from stpstone.ingestion.countries.ww.exchange.markets.fmp import FMPWW
 
 
 df_ = FMPWW(

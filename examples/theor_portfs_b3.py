@@ -2,7 +2,7 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.registries.br.exchange.indexes_theor_portf import IndexesTheorPortfB3
+from stpstone.ingestion.countries.br.exchange.indexes_theor_portf import IndexesTheorPortfB3
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 

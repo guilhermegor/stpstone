@@ -7,13 +7,13 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
-# session = YieldFreeProxy(
-#     bl_new_proxy=True,
-#     bl_use_timer=True,
-#     float_min_ratio_times_alive_dead=0.02,
-#     float_max_timeout=600
-# ).session
-# print(session.proxies)
+session = YieldFreeProxy(
+    bl_new_proxy=True,
+    bl_use_timer=True,
+    float_min_ratio_times_alive_dead=0.02,
+    float_max_timeout=600
+).session
+print(session.proxies)
 
 cls_ = ConsolidatedTrdsB3(
     session=None,

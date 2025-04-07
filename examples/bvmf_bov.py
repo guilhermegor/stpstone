@@ -2,7 +2,7 @@
 import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.br.exchange.bvmf_bov import BVMFBOV
+from stpstone.ingestion.countries.br.exchange.bvmf_bov import BVMFBOV
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 

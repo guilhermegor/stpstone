@@ -6,7 +6,6 @@ from time import sleep
 from getpass import getuser
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from urllib3.exceptions import ReadTimeoutError
-sys.path.append(r'C:\Users\guiro\GitHub\stpstone')
 from stpstone.utils.parsers.html import SeleniumWD
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -20,7 +19,7 @@ int_max_retries = 100
 list_ser = list()
 
 # getting proxy
-cls_session = ProxyScrapeAll(
+cls_session = YieldFreeProxy(
     bl_new_proxy=True,
     float_min_ratio_times_alive_dead=0.01,
     float_max_timeout=1000

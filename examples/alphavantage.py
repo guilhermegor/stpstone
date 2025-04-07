@@ -3,7 +3,7 @@ import os
 from keyring import get_password
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.tradings.us.exchange.alphavantage import AlphaVantageUS
+from stpstone.ingestion.countries.us.exchange.alphavantage import AlphaVantageUS
 from stpstone.utils.cals.handling_dates import DatesBR
 
 

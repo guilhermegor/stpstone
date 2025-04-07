@@ -1,13 +1,11 @@
 from getpass import getuser
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import AnbimaDataDebentures
-from stpstone.utils.connections.netops.proxies.proxy_scrape import ProxyScrapeCountry, ProxyScrapeAll
-from stpstone.utils.connections.netops.proxies.proxy_nova import ProxyNova
-from stpstone.utils.connections.netops.proxies.proxy_webshare import ProxyWebshare
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.connections.netops.user_agents import UserAgents
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
-cls_session = ProxyNova(
+cls_session = YieldFreeProxy(
     bl_new_proxy=True,
     str_country_code="BR",
     str_continent_code=None,
