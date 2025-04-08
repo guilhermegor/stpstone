@@ -60,6 +60,7 @@ if [[ "$outdated_branch" == "main" ]]; then
         exit 1
     fi
     echo "Running unit tests..."
+    git checkout "$updated_branch" > /dev/null 2>&1
     if ! python -m unittest discover -s tests/unit -p "*.py"; then
         echo "Error: Some unittests failed. Merge aborted."
         git checkout "$updated_branch" > /dev/null 2>&1
