@@ -7,6 +7,7 @@ vscode:christian-kohler.path-intellisense
 vscode:codeium.codeium
 vscode:darkriszty.markdown-table-prettify
 vscode:dbaeumer.vscode-eslint
+vscode:docker.docker
 vscode:dotjoshjohnson.xml
 vscode:dzhavat.bracket-pair-toggler
 vscode:esbenp.prettier-vscode
