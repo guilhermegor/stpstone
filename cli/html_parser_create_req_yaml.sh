@@ -68,6 +68,7 @@ resource_example:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True

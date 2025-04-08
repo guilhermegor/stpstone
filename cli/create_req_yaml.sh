@@ -70,6 +70,7 @@ resource_example:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
   app:
   bl_verify: False
