@@ -40,10 +40,40 @@ done
 
 # confirm before merging
 read -p "Are you sure you want to merge '$updated_branch' into '$outdated_branch'? This will overwrite any changes in '$outdated_branch'. (y/n): " confirm
-
 if [[ "$confirm" != "y" ]]; then
     echo "Merge aborted."
     exit 0
+fi
+
+# run unittests if outdated branch is main
+if [[ "$outdated_branch" == "main" ]]; then
+    echo "Running unittests before merging to main branch..."
+    if ! command -v python &> /dev/null; then
+        echo "Error: Python is not installed or not in PATH."
+        exit 1
+    fi
+    if [ ! -d "tests/unit" ]; then
+        echo "Error: tests/unit directory not found."
+        exit 1
+    fi
+    int_tests_failed=0
+    echo "Running unit tests..."
+    for test_file in tests/unit/*.py; do
+        if [[ "$(basename "$test_file")" == "__init__.py" ]]; then
+            continue
+        fi
+        echo "Running tests in $test_file..."
+        if ! python -m unittest "$test_file"; then
+            echo "ERROR: Tests failed in $test_file"
+            int_tests_failed=1
+        fi
+    done
+    if [ $int_tests_failed -ne 0 ]; then
+        echo "Error: Some unittests failed. Merge aborted."
+        exit 1
+    else
+        echo "All unittests passed successfully."
+    fi
 fi
 
 # perform the merge
