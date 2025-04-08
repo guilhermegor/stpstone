@@ -588,6 +588,7 @@ class ABCRequests(HandleReqResponses):
         int_delay: int = 10,
         bl_headless: bool = False,
         bl_incognito: bool = False,
+        bl_ts_log_str: bool = True
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
@@ -602,8 +603,10 @@ class ABCRequests(HandleReqResponses):
         self.int_delay = int_delay
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
-        self.list_options_wd = None if self.dict_metadata["credentials"].get(
-            "web_driver", None) is None else self.dict_metadata["credentials"]["web_driver"]["options"]
+        self.bl_ts_log_str = bl_ts_log_str
+        self.list_options_wd = None \
+            if self.dict_metadata["credentials"].get("web_driver", None) is None \
+            else self.dict_metadata["credentials"]["web_driver"]["options"]
         self.pattern_special_http_chars = r'["<>#%{}|\\^~\[\]` ]'
         self.token = (
             token
@@ -822,11 +825,7 @@ class ABCRequests(HandleReqResponses):
             logger=self.logger,
         )
         df_ = cls_df_stdz.pipeline(df_)
-        df_ = DBLogs().audit_log(
-            df_,
-            url,
-            self.dt_ref,
-        )
+        df_ = DBLogs().audit_log(df_, url, self.dt_ref, self.bl_ts_log_str)
         return df_
 
     def insert_table(

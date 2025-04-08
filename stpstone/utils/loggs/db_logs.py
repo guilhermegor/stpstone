@@ -14,7 +14,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 class DBLogs:
 
     def audit_log(
-        self, df_: pd.DataFrame, str_url: str, dt_db_ref: datetime
+        self, df_: pd.DataFrame, str_url: str, dt_db_ref: datetime, bl_ts_log_str: bool = True
     ) -> pd.DataFrame:
         """
         Adds audit columns to the DataFrame for logging.
@@ -29,7 +29,11 @@ class DBLogs:
         """
         df_[YAML_GEN["audit_log_cols"]["url"]] = str_url
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
-        df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = DatesBR().utc_log_ts
+        if bl_ts_log_str == True:
+            df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = DatesBR().utc_log_ts.strftime(
+                "%Y-%m-%d %H:%M:%S.%f%z")
+        else:
+            df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = DatesBR().utc_log_ts
         return df_
 
     def insert_user_info(self, df_: pd.DataFrame, user_id: str) -> pd.DataFrame:
