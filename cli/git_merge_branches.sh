@@ -59,19 +59,8 @@ if [[ "$outdated_branch" == "main" ]]; then
         git checkout "$updated_branch" > /dev/null 2>&1
         exit 1
     fi
-    int_tests_failed=0
     echo "Running unit tests..."
-    for test_file in tests/unit/*.py; do
-        if [[ "$(basename "$test_file")" == "__init__.py" ]]; then
-            continue
-        fi
-        echo "Running tests in $test_file..."
-        if ! python -m unittest "$test_file"; then
-            echo "ERROR: Tests failed in $test_file"
-            int_tests_failed=1
-        fi
-    done
-    if [ $int_tests_failed -ne 0 ]; then
+    if ! python -m unittest discover -s tests/unit -p "*.py"; then
         echo "Error: Some unittests failed. Merge aborted."
         git checkout "$updated_branch" > /dev/null 2>&1
         exit 1
