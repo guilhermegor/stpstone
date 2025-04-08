@@ -577,10 +577,10 @@ class RemoteFiles(DirFilesManagement):
         self,
         req_content: bytes,
         int_skip_rows: int = 0,
-        list_sep: Optional[List[str]] = [',', ';', '\t']
+        list_sep: Optional[List[str]] = [",", ";", "\t"]
     ) -> bool:
         result = chardet.detect(req_content)
-        encoding = result['encoding']
+        encoding = result["encoding"] if result["encoding"] is not None else "latin-1"
         decoded_content = req_content.decode(encoding)
         list_lines = decoded_content.splitlines()
         list_lines = list_lines[int_skip_rows:]

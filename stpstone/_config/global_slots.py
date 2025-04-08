@@ -36,6 +36,8 @@ YAML_B3_CONSOLIDATED_TRDS_AFTER_MKT = reading_yaml(
 YAML_B3_FUTURES_CLOSING_ADJ = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/futures_closing_adj.yaml"))
 YAML_ANBIMA_DATA_INDEXES = reading_yaml(
+    os.path.join(root_path, "countries/br/exchange/indexes_anbima_data.yaml"))
+YAML_ANBIMA_INDEXES = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/indexes_anbima.yaml"))
 #   US
 YAML_US_ALPHAVANTAGE = reading_yaml(

@@ -1,8 +1,25 @@
 ### CONFIGURATION TOOLS ###
 
 credentials:
-  host: https://s3-data-prd-use1-precos.s3.us-east-1.amazonaws.com/
+  host: https://www.anbima.com.br/
   headers:
+    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+    'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7'
+    'cache-control': 'max-age=0'
+    'if-modified-since': 'Tue, 08 Apr 2025 11:50:22 GMT'
+    'if-none-match': '"978d9687ca8db1:0"'
+    'priority': 'u=0, i'
+    'referer': 'https://www.anbima.com.br/informacoes/ima/ima.asp'
+    'sec-ch-ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"'
+    'sec-ch-ua-mobile': '?0'
+    'sec-ch-ua-platform': '"Windows"'
+    'sec-fetch-dest': 'document'
+    'sec-fetch-mode': 'navigate'
+    'sec-fetch-site': 'same-origin'
+    'sec-fetch-user': '?1'
+    'upgrade-insecure-requests': '1'
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+    'Cookie': '_hjSessionUser_3011330=eyJpZCI6IjY4MGY0MTZkLTYyZGUtNTk0Zi1iYWM1LWE4YTNiMGY3NDQyYyIsImNyZWF0ZWQiOjE3Mzc1MTMwMjA2MzcsImV4aXN0aW5nIjp0cnVlfQ==; __utmz=234609614.1737513021.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); _ga_NWVLH54NN0=GS1.3.1738599657.1.1.1738599663.54.0.0; _hjSessionUser_1295245=eyJpZCI6IjBhZTMzMDAwLTE5MzktNWUzMi1hMzQ1LTM4NDcwNTE1ZTJhZSIsImNyZWF0ZWQiOjE3MzU4MzIzMTUyNjgsImV4aXN0aW5nIjp0cnVlfQ==; lumClientId=8A2AB28B95C32FE40195CFE642B81E29; lumMonUid=SHLyvVg4_jMlAknKILXP1xw25OfbpJrp; sib_cuid=1a822bf9-8611-4661-b30d-3ccee6738b1b; lumMonUid=ze_BK5tPAH24RWsTbcmwGSC-rLrGHquB; _gcl_au=1.1.1569341387.1743931731; _clck=14k5xbs%7C2%7Cfuv%7C0%7C1828; _hjMinimizedPolls=854180; _ga_4QFQZSYDDP=GS1.3.1744016678.2.0.1744016678.0.0.0; _ga_5FNET7YTQ1=GS1.1.1744016677.2.0.1744016696.0.0.0; _ga_MG8HYG3SZ3=GS1.1.1744016677.2.0.1744016696.0.0.0; _ga_13KGREVBY7=GS1.1.1744028765.40.0.1744028765.60.0.0; ASPSESSIONIDCACDBCAQ=FDHGCDDCCFBJPBCNNBMDDFKB; lumUserName=Guest; lumIsLoggedUser=false; lumUserLocale=pt_BR; JSESSIONID=0335B7BC85B6AA9E009D16F29BC18EF1.LumisProdB; lumUserSessionId=QCzm0muvHjC_U5S80NzeKyapNG-vvBPy; _hjSession_3011330=eyJpZCI6IjFmMDA3NDE3LWMxYzYtNDgwZC1hYmI5LWE2OWMzYjgwNzAyOCIsImMiOjE3NDQxMTk0OTE2NzUsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjowLCJzcCI6MH0=; _gid=GA1.3.1374109199.1744119492; __utma=234609614.25264644.1735832317.1744021349.1744119493.7; __utmc=234609614; _ga_V5TNN4NGRT=GS1.1.1744119492.8.0.1744119492.60.0.0; _ga=GA1.3.25264644.1735832317'
   payload:
   token:
     host:
@@ -20,7 +37,7 @@ metadata:
 
 ### RESOURCES TO BE SCRAPED ###
 
-ima_geral:
+anbima_indexes_mkt_data:
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -44,52 +61,78 @@ ima_geral:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: arquivos/indices-historico/IMAGERAL-HISTORICO.xls#file_extension=.xl_url
+  #   - bl_separator_consistency_check == False, as default
+  app: informacoes/ima/arqs/ima_completo.txt#bl_separator_consistency_check=False&file_extension=.csv_url
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
   cols_to_case: upper_constant
   list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
+  str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_data_indexes_ima_geral
+  table_name: anbima_indexes_mkt_data
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
     - tmp
     - log
     - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
   dtypes:
-    INDICE: category
-    DATA_DE_REFERENCIA: date
+    DATA_REFERENCIA: date
+    INDICE: str
     NUMERO_INDICE: float
     VARIACAO_DIARIA: float
-    VARIACAO_NO_MES: float
-    VARIACAO_NO_ANO: float
-    VARIACAO_12_MESES: float
-    VARIACAO_24_MESES: float
+    VARIACAO_MENSAL: float
+    VARIACAO_ANUAL: float
+    VARIACAO_ULTIMOS_12_MESES: float
+    VARIACAO_ULTIMOS_24_MESES: float
     DURATION_DU: float
+    PESO_GERAL: float
+    CARTEIRA_A_MERCADO_RS_MIL: float
+    NUMERO_OPERACOES: int
+    QUANT_NEGOCIADA_1000_TITULOS: int
+    VALOR_NEGOCIADO_RS_MIL: float
     PMR: float
+    CONVEXIDADE: float
+    YIELD: float
+    REDEMPTION_YIELD: float
   df_read_params:
-    engine: openpyxl
-    skiprows: 0
+    sep: "@"
+    decimal: ","
+    skiprows: 3
+    nrows: 10
+    engine: python
+    na_values: "--"
+    encoding: latin-1
+    on_bad_lines: skip
     names:
+      - DATA_REFERENCIA
       - INDICE
-      - DATA_DE_REFERENCIA
       - NUMERO_INDICE
       - VARIACAO_DIARIA
-      - VARIACAO_NO_MES
-      - VARIACAO_NO_ANO
-      - VARIACAO_12_MESES
-      - VARIACAO_24_MESES
+      - VARIACAO_MENSAL
+      - VARIACAO_ANUAL
+      - VARIACAO_ULTIMOS_12_MESES
+      - VARIACAO_ULTIMOS_24_MESES
       - DURATION_DU
+      - PESO_GERAL
+      - CARTEIRA_A_MERCADO_RS_MIL
+      - NUMERO_OPERACOES
+      - QUANT_NEGOCIADA_1000_TITULOS
+      - VALOR_NEGOCIADO_RS_MIL
       - PMR
+      - CONVEXIDADE
+      - YIELD
+      - REDEMPTION_YIELD
 
-ida_geral:
+anbima_indexes_portf_composition:
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -113,175 +156,74 @@ ida_geral:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: arquivos/indices-historico/IDAGERAL-HISTORICO.xls#file_extension=.xl_url
+  app: informacoes/ima/arqs/ima_completo.txt#bl_separator_consistency_check=False&file_extension=.csv_url
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
   cols_to_case: upper_constant
   list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
+  str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_data_indexes_ida_geral
+  table_name: anbima_indexes_portf_composition
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
     - tmp
     - log
     - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
   dtypes:
-    INDICE: category
-    DATA_DE_REFERENCIA: date
-    NUMERO_INDICE: float
-    VARIACAO_DIARIA: float
-    VARIACAO_NO_MES: float
-    VARIACAO_NO_ANO: float
-    VARIACAO_12_MESES: float
-    VARIACAO_24_MESES: float
+    DATA_REFERENCIA: date
+    INDICE: str
+    TITULOS: str
+    DATA_VENCIMENTO: date
+    CODIGO_SELIC: int
+    CODIGO_ISIN: str
+    TAXA_INDICATIVA: float
+    PU: float
+    PU_JUROS: float
+    QUANTIDADE_1000_TITULOS: int
+    QUANTIDADE_TEORICA_1000_TITULOS: int
+    CARTEIRA_A_MERCADO_RS_MIL: float
+    PESO: float
+    PRAZO_DU: int
     DURATION_DU: float
+    NUMERO_OPERACOES: int
+    QTD_NEGOCIADA_1000_TITULOS: int
+    VALOR_NEGOCIADO_RS_MIL: float
+    PMR: float
+    CONVEXIDADE: float
   df_read_params:
-    engine: openpyxl
-    skiprows: 0
+    sep: "@"
+    decimal: ","
+    skiprows: 15
+    engine: python
+    na_values: "--"
+    encoding: "latin-1"
     names:
+      - DATA_REFERENCIA
       - INDICE
-      - DATA_DE_REFERENCIA
-      - NUMERO_INDICE
-      - VARIACAO_DIARIA
-      - VARIACAO_NO_MES
-      - VARIACAO_NO_ANO
-      - VARIACAO_12_MESES
-      - VARIACAO_24_MESES
+      - TITULOS
+      - DATA_VENCIMENTO
+      - CODIGO_SELIC
+      - CODIGO_ISIN
+      - TAXA_INDICATIVA
+      - PU
+      - PU_JUROS
+      - QUANTIDADE_1000_TITULOS
+      - QUANTIDADE_TEORICA_1000_TITULOS
+      - CARTEIRA_A_MERCADO_RS_MIL
+      - PESO
+      - PRAZO_DU
       - DURATION_DU
-
-ida_liq_geral:
-  web_driver:
-    xpath_el_wait_until_loaded:
-  req_method: GET
-  # if host is not defined within credentials, use the source one
-  host:
-  headers:
-  payload:
-  # list of slugs (complementary descriptive text to access a web pages)
-  slugs:
-  # use this argument only if {{chunk_slugs}} is passed to app
-  int_chunk_slugs:
-  # iteratively_get_data placeholders:
-  #   - i (int): https://example.com/{{i}}
-  #   - slug (str): https://example.com/{{slug}} - slugs in list format
-  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  # non-iteratively_get_data placeholders:
-  #   - {{replacer}}: https://example.com/{{replacer}}
-  #     note: the replacer can be any variable referenced within concrete product class
-  # expected comments to app, within url:
-  #   - feat=read_tables
-  #   - int_pgs_join={{number}}
-  #   - file_extension=.{{file_extension}}
-  #   - start with a commentary hash and separate params with &
-  app: arquivos/indices-historico/IDALIQGERAL-HISTORICO.xls#file_extension=.xl_url
-  bl_verify: False
-  timeout: (12.0, 12.0)
-  cookies:
-  cols_from_case: default
-  cols_to_case: upper_constant
-  list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
-  type_error_action: raise
-  strategy_keep_when_dupl: first
-  list_ignorable_exceptions:
-  schema: raw
-  table_name: anbima_data_indexes_ida_liq_geral
-  bl_insert_or_ignore: False
-  bl_schema: True
-  ignored_file_extensions:
-    - tmp
-    - log
-    - bak
-  dtypes:
-    INDICE: category
-    DATA_DE_REFERENCIA: date
-    NUMERO_INDICE: float
-    VARIACAO_DIARIA: float
-    VARIACAO_NO_MES: float
-    VARIACAO_NO_ANO: float
-    VARIACAO_12_MESES: float
-    VARIACAO_24_MESES: float
-    DURATION_DU: float
-  df_read_params:
-    engine: openpyxl
-    skiprows: 0
-    names:
-      - INDICE
-      - DATA_DE_REFERENCIA
-      - NUMERO_INDICE
-      - VARIACAO_DIARIA
-      - VARIACAO_NO_MES
-      - VARIACAO_NO_ANO
-      - VARIACAO_12_MESES
-      - VARIACAO_24_MESES
-      - DURATION_DU
-
-idka_pre_1a:
-  web_driver:
-    xpath_el_wait_until_loaded:
-  req_method: GET
-  # if host is not defined within credentials, use the source one
-  host:
-  headers:
-  payload:
-  # list of slugs (complementary descriptive text to access a web pages)
-  slugs:
-  # use this argument only if {{chunk_slugs}} is passed to app
-  int_chunk_slugs:
-  # iteratively_get_data placeholders:
-  #   - i (int): https://example.com/{{i}}
-  #   - slug (str): https://example.com/{{slug}} - slugs in list format
-  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  # non-iteratively_get_data placeholders:
-  #   - {{replacer}}: https://example.com/{{replacer}}
-  #     note: the replacer can be any variable referenced within concrete product class
-  # expected comments to app, within url:
-  #   - feat=read_tables
-  #   - int_pgs_join={{number}}
-  #   - file_extension=.{{file_extension}}
-  #   - start with a commentary hash and separate params with &
-  app: arquivos/indices-historico/IDKAPRE1A-HISTORICO.xls#file_extension=.xl_url
-  bl_verify: False
-  timeout: (12.0, 12.0)
-  cookies:
-  cols_from_case: default
-  cols_to_case: upper_constant
-  list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
-  type_error_action: raise
-  strategy_keep_when_dupl: first
-  list_ignorable_exceptions:
-  schema: raw
-  table_name: anbima_data_indexes_idka_pre_1a
-  bl_insert_or_ignore: False
-  bl_schema: True
-  ignored_file_extensions:
-    - tmp
-    - log
-    - bak
-  dtypes:
-    INDICE: category
-    DATA_DE_REFERENCIA: date
-    NUMERO_INDICE: float
-    VARIACAO_DIARIA: float
-    VARIACAO_NO_MES: float
-    VARIACAO_NO_ANO: float
-    VARIACAO_12_MESES: float
-  df_read_params:
-    engine: openpyxl
-    skiprows: 0
-    names:
-      - INDICE
-      - DATA_DE_REFERENCIA
-      - NUMERO_INDICE
-      - VARIACAO_DIARIA
-      - VARIACAO_NO_MES
-      - VARIACAO_NO_ANO
-      - VARIACAO_12_MESES
+      - NUMERO_OPERACOES
+      - QTD_NEGOCIADA_1000_TITULOS
+      - VALOR_NEGOCIADO_RS_MIL
+      - PMR
+      - CONVEXIDADE

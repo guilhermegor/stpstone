@@ -16,6 +16,7 @@ stpstone
 │   │   │   │   ├── futures_closing_adj.yaml
 │   │   │   │   ├── historical_sigma.yaml
 │   │   │   │   ├── indexes_anbima.yaml
+│   │   │   │   ├── indexes_anbima_data.yaml
 │   │   │   │   ├── indexes_theor_portf.yaml
 │   │   │   │   ├── options_calendar.yaml
 │   │   │   │   ├── search_by_trading_session.yaml
@@ -150,6 +151,7 @@ stpstone
 │       │   │   ├── futures_closing_adj.py
 │       │   │   ├── historical_sigma.py
 │       │   │   ├── indexes_anbima.py
+│       │   │   ├── indexes_anbima_data.py
 │       │   │   ├── indexes_theor_portf.py
 │       │   │   ├── options_calendar.py
 │       │   │   ├── search_by_trading_session.py

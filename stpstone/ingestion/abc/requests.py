@@ -149,7 +149,6 @@ class UtilsRequests(ABC):
             text2 = doc_pdf[i + 1].get_text("text") if i + 1 < len(doc_pdf) else ""
             list_pages.append(text1 + "\n" + text2)
         for i, str_page in enumerate(list_pages):
-            # print(str_page)
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
             if (len(dict_count_matches) > 0) \
                 and (all(count > 0 for count in dict_count_matches.values())): break
@@ -167,14 +166,6 @@ class UtilsRequests(ABC):
                         str_page,
                         # flags=re.DOTALL | re.MULTILINE
                     )
-                    # print(str_event, str_condition, pattern_regex)
-                    # print((regex_match is not None) \
-                    #     and (regex_match.group(0) is not None) \
-                    #     and (len(regex_match.group(0)) > 0))
-                    # if (regex_match is not None) \
-                    #     and (regex_match.group(0) is not None):
-                    #     print(f"LEN REGEX MATCH GROUP 0: {len(regex_match.group(0))}")
-                    #     print(f"REGEX GROUP 0: {regex_match.group(0)}")
                     if (regex_match is not None) \
                         and (regex_match.group(0) is not None) \
                         and (len(regex_match.group(0)) > 0):
@@ -199,21 +190,30 @@ class UtilsRequests(ABC):
         df_.drop_duplicates(inplace=True)
         df_.sort_values(by=["EVENT", "CONDITION"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
-        # print(df_)
-        # raise Exception("PDF DOC REGEX")
         return df_
 
-    def get_query_params(self, url: str, param: str) -> Union[int, None]:
+    def get_query_params(self, url: str, param: str) -> Union[int, bool, str, float, None]:
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.fragment)
-        int_pgs_join = query_params.get(param, [None])[0]
-        if int_pgs_join is not None:
-            return int(int_pgs_join)
-        else:
-            return None
+        param_value = query_params.get(param, [None])[0]
+        if param_value is not None:
+            if isinstance(param_value, bool):
+                return param_value
+            elif param_value.lower() == 'true':
+                return True
+            elif param_value.lower() == 'false':
+                return False
+            try:
+                return int(param_value)
+            except ValueError:
+                return param_value
+        return None
 
 
 class HandleReqResponses(UtilsRequests):
+
+    def __init__(self) -> None:
+        self.remote_files = RemoteFiles()
 
     def handle_response(
         self,
@@ -236,6 +236,8 @@ class HandleReqResponses(UtilsRequests):
             df_ = self.req_trt_injection(req_resp)
         elif str_file_extension == "xl_url":
             df_ = self._handle_pandas_excel_url(req_resp.url, dict_df_read_params)
+        elif str_file_extension == "csv_url":
+            df_ = self._handle_pandas_csv_url(req_resp.url, dict_df_read_params)
         elif isinstance(req_resp, WebDriver):
             df_ = self._handle_web_driver_html(url, req_resp, dict_xpaths, selenium_wd)
         elif str_file_extension == "zip":
@@ -259,12 +261,22 @@ class HandleReqResponses(UtilsRequests):
                 selenium_wd
             )
         elif str_file_extension in ["csv", "txt", "asp", "do"]:
-            if (RemoteFiles().check_separator_consistency(
-                    req_resp.content, dict_df_read_params.get("skiprows", 0)
-                ) == True):
-                df_ = self._handle_csv_response(req_resp, dict_df_read_params)
+            if StrHandler().match_string_like(url, "*bl_separator_consistency_check=*") == True:
+                bl_separator_consistency_check = (
+                    self.get_query_params(url, "bl_separator_consistency_check")
+                    if self.get_query_params(url, "bl_separator_consistency_check") is not None
+                    else True
+                )
             else:
+                bl_separator_consistency_check = True
+            if dict_df_read_params.get("encoding") is not None:
+                req_resp.encoding = dict_df_read_params.get("encoding")
+            if (bl_separator_consistency_check == True) \
+                and (self.remote_files.check_separator_consistency(
+                    req_resp.content, dict_df_read_params.get("skiprows", 0)) == False):
                 df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
+            else:
+                df_ = self._handle_csv_response(req_resp, dict_df_read_params)
         elif str_file_extension in ["xlsx", "xls"]:
             df_ = self._handle_excel_response(req_resp, dict_df_read_params)
         elif str_file_extension == "xml":
@@ -418,6 +430,14 @@ class HandleReqResponses(UtilsRequests):
         dict_df_read_params = dict_df_read_params if dict_df_read_params is not None else {}
         return pd.read_excel(url, **dict_df_read_params)
 
+    def _handle_pandas_csv_url(
+        self,
+        url: Union[str],
+        dict_df_read_params: Optional[Dict[str, Any]],
+    ) -> pd.DataFrame:
+        dict_df_read_params = dict_df_read_params if dict_df_read_params is not None else {}
+        return pd.read_csv(url, **dict_df_read_params)
+
     def _handle_excel_response(
         self,
         file: Union[BytesIO, TextIOWrapper, Response],
@@ -514,7 +534,7 @@ class HandleReqResponses(UtilsRequests):
     ) -> pd.DataFrame:
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
-            ex_file_path = RemoteFiles().get_file_from_zip(
+            ex_file_path = self.remote_files.get_file_from_zip(
                 req_resp, temp_dir_path, (".ex_")
             )
             os.chmod(ex_file_path, 0o755)
@@ -553,7 +573,7 @@ class HandleReqResponses(UtilsRequests):
             and (".zip" in req_resp.headers.get("Content-Disposition"))
         ):
             with tempfile.TemporaryDirectory() as temp_dir_path:
-                file_path = RemoteFiles().get_file_from_zip(
+                file_path = self.remote_files.get_file_from_zip(
                     req_resp, temp_dir_path, (".fwf", ".dat", ".txt", "")
                 )
                 return pd.read_fwf(
@@ -713,7 +733,7 @@ class ABCRequests(HandleReqResponses):
                 params=payload if req_method == "GET" else None,
                 data=payload if req_method == "POST" else None,
                 cookies=cookies,
-                timeout=tup_timeout
+                # timeout=tup_timeout
             )
         req_resp.raise_for_status()
         return req_resp

@@ -1,6 +1,6 @@
 from getpass import getuser
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.ingestion.countries.br.exchange.indexes_anbima import AnbimaDataIndexes
+from stpstone.ingestion.countries.br.exchange.indexes_anbima_data import AnbimaDataIndexes
 
 
 cls_ = AnbimaDataIndexes(
