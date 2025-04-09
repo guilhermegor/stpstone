@@ -11,7 +11,7 @@ from stpstone.handling_data.object import HandlingObjects
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.handling_data.numbers import NumHandler
 from stpstone.utils.parsers.json import JsonFiles
-from stpstone.handling_data.html import HtmlHandler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.db_logs import DBLogs
 

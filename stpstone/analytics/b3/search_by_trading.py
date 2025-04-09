@@ -12,7 +12,7 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.handling_data.txt import HandlingTXTFiles
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.finance.b3.up2data_web import UP2DATAB3
-from stpstone.handling_data.html import HtmlHandler
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.handling_data.xml import XMLFiles
 from stpstone.finance.derivatives.options.european import EuropeanOptions
 from stpstone.finance.b3.market_data import MDB3

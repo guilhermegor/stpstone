@@ -10,7 +10,7 @@ from time import sleep
 from lxml import html
 from typing import Tuple, Optional
 from random import shuffle
-from stpstone.handling_data.html import HtmlHandler, SeleniumWD
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.str import StrHandler

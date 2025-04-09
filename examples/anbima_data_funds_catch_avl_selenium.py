@@ -6,7 +6,7 @@ from time import sleep
 from getpass import getuser
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from urllib3.exceptions import ReadTimeoutError
-from stpstone.utils.parsers.html import SeleniumWD
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.cals.handling_dates import DatesBR
 

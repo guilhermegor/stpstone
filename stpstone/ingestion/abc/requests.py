@@ -31,7 +31,7 @@ from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.lists import HandlingLists
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.xml import XMLFiles
-from stpstone.utils.parsers.html import SeleniumWD
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

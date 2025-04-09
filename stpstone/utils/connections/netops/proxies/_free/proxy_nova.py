@@ -1,6 +1,6 @@
 from typing import Union, Dict, List, Optional
 from logging import Logger
-from stpstone.utils.parsers.html import SeleniumWD
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 from stpstone.utils.connections.netops.proxies.abc import ABCSession
 from stpstone.utils.geography.ww import WWTimezones, WWGeography
 
