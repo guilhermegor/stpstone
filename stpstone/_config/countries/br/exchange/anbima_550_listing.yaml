@@ -1,34 +1,7 @@
-#!/bin/bash
-
-# define the project root directory
-PROJECT_ROOT="$(pwd)/stpstone"
-
-# prompt for folder path within the project
-read -p "Enter the YAML folder path within the project (default: ./_config): " folder_path
-folder_path=${folder_path:-./_config}
-
-# ensure the folder path is within the project directory
-if [[ "$folder_path" != ./* ]]; then
-  echo "Error: The folder path must be within the project directory."
-  exit 1
-fi
-
-# construct the full directory path
-full_dir_path="$PROJECT_ROOT/$folder_path"
-
-# ensure the directory exists
-mkdir -p "$full_dir_path"
-
-# prompt for YAML file name
-read -p "Enter the YAML file name (without extension, default: request_config): " file_name
-file_name=${file_name:-request_config}
-
-# create yaml file
-cat <<EOF > "$full_dir_path/$file_name.yaml"
 ### CONFIGURATION TOOLS ###
 
 credentials:
-  host:
+  host: https://www.anbima.com.br/informacoes/res-550/
   headers:
   payload:
   token:
@@ -74,7 +47,7 @@ resource_example:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app:
+  app: resultados/{{dt_ref_yyyymmdd}}_550.asp
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -130,6 +103,3 @@ resource_example:
     - field: NAME_FIELD_1
       start: 6
       end: 9
-EOF
-
-echo "File succesfully created at: $full_dir_path/$file_name.yaml"

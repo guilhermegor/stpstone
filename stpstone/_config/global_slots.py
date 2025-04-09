@@ -39,6 +39,8 @@ YAML_ANBIMA_DATA_INDEXES = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/indexes_anbima_data.yaml"))
 YAML_ANBIMA_INDEXES = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/indexes_anbima.yaml"))
+YAML_ANBIMA_550_LISTING = reading_yaml(
+    os.path.join(root_path, "countries/br/exchange/anbima_550_listing.yaml"))
 #   US
 YAML_US_ALPHAVANTAGE = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/alphavantage.yaml"))
