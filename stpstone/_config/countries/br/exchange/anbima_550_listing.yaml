@@ -1,7 +1,7 @@
 ### CONFIGURATION TOOLS ###
 
 credentials:
-  host: https://www.anbima.com.br/informacoes/res-550/
+  host: https://www.anbima.com.br/
   headers:
   payload:
   token:
@@ -20,7 +20,7 @@ metadata:
 
 ### RESOURCES TO BE SCRAPED ###
 
-resource_example:
+550_listing:
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -47,19 +47,19 @@ resource_example:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: resultados/{{dt_ref_yyyymmdd}}_550.asp
+  app: informacoes/res-550/arqs/{{dt_ref_yyyymmdd}}_550.tex
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
   cols_to_case: upper_constant
   list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
+  str_fmt_dt: DD/MM/YYYY
   type_error_action: raise
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: raw_anbima_550_listing
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -67,39 +67,22 @@ resource_example:
     - log
     - bak
   fillna_strt:
-    COL_1: bfill
-    COL_2: ffill
   dtypes:
-    COL_1: date
-    COL_2: str
-    COL_3: int
-    COL_4: float
-    COL_5: category
+    TITULO: int
+    VENCIMENTO: date
+    PRECO_UNITARIO: float
+    PRECO_RETORNO: float
+    POSICAO_CUSTODIA: float
   df_read_params:
-  xml_keys:
-    tags:
-      tag_parent:
-        - col1
-        - col2
-        - col3
-        - col4
-        - col5
-    attributes:
-      attrb: Attrb
-  regex_patterns:
-    event_1:
-      condition_1: pattern_regex_1
-      condition_2: pattern_regex_2
-    event_2:
-      condition_1: pattern_regex_1
-      condition_2: pattern_regex_2
-  xpaths:
-    name_1: xpath_1
-    name_2: xpath_2
-  fixed_width_layout:
-    - field: NAME_FIELD_1
-      start: 0
-      end: 6
-    - field: NAME_FIELD_1
-      start: 6
-      end: 9
+    delim_whitespace: True
+    skiprows: 2
+    skipfooter: 4
+    engine: "python"
+    names:
+      - TITULO
+      - VENCIMENTO
+      - PRECO_UNITARIO
+      - PRECO_RETORNO
+      - POSICAO_CUSTODIA
+    thousands: "."
+    decimal: ","

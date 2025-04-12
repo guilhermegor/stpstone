@@ -212,9 +212,6 @@ class UtilsRequests(ABC):
 
 class HandleReqResponses(UtilsRequests):
 
-    def __init__(self) -> None:
-        self.remote_files = RemoteFiles()
-
     def handle_response(
         self,
         req_resp: Union[Response, WebDriver],
@@ -260,7 +257,7 @@ class HandleReqResponses(UtilsRequests):
                 list_ser_fixed_width_layout,
                 selenium_wd
             )
-        elif str_file_extension in ["csv", "txt", "asp", "do"]:
+        elif str_file_extension in ["csv", "txt", "asp", "do", "tex"]:
             if StrHandler().match_string_like(url, "*bl_separator_consistency_check=*") == True:
                 bl_separator_consistency_check = (
                     self.get_query_params(url, "bl_separator_consistency_check")
@@ -272,8 +269,11 @@ class HandleReqResponses(UtilsRequests):
             if dict_df_read_params.get("encoding") is not None:
                 req_resp.encoding = dict_df_read_params.get("encoding")
             if (bl_separator_consistency_check == True) \
-                and (self.remote_files.check_separator_consistency(
-                    req_resp.content, dict_df_read_params.get("skiprows", 0)) == False):
+                and (RemoteFiles().check_separator_consistency(
+                    req_resp.content,
+                    dict_df_read_params.get("skiprows", 0),
+                    dict_df_read_params.get("skipfooter", 0)
+                ) == False):
                 df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
             else:
                 df_ = self._handle_csv_response(req_resp, dict_df_read_params)
@@ -534,7 +534,7 @@ class HandleReqResponses(UtilsRequests):
     ) -> pd.DataFrame:
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
-            ex_file_path = self.remote_files.get_file_from_zip(
+            ex_file_path = RemoteFiles().get_file_from_zip(
                 req_resp, temp_dir_path, (".ex_")
             )
             os.chmod(ex_file_path, 0o755)
@@ -573,7 +573,7 @@ class HandleReqResponses(UtilsRequests):
             and (".zip" in req_resp.headers.get("Content-Disposition"))
         ):
             with tempfile.TemporaryDirectory() as temp_dir_path:
-                file_path = self.remote_files.get_file_from_zip(
+                file_path = RemoteFiles().get_file_from_zip(
                     req_resp, temp_dir_path, (".fwf", ".dat", ".txt", "")
                 )
                 return pd.read_fwf(
