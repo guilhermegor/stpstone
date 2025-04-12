@@ -20,11 +20,6 @@ repos:
         pass_filenames: false
   - repo: local
     hooks:
-      - id: update-readme
-        name: update readme package tree
-        entry: cmd /c "mingw32-make update_readme && rm -f .git/index.lock && git update-index --add ."
-        language: system
-        types: [file]
       - id: export-dependencies
         name: export dependencies
         entry: cmd /c "poetry export -f requirements.txt --output requirements.txt --without-hashes && (for /f %i in ('code --list-extensions') do @echo vscode:%i) > requirements-dev.txt && git add requirements.txt requirements-dev.txt"
