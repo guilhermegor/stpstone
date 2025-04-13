@@ -1,0 +1,103 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://etfdb.com/
+  headers:
+  payload:
+  token:
+    host:
+    app:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+  web_driver:
+    options:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-setuid-sandbox
+      - --disable-web-security
+      - --disable-dev-shm-usage
+      - --memory-pressure-off
+      - --ignore-certificate-errors
+      - --disable-features=site-per-process
+      - --disable-extensions
+      - --disable-popup-blocking
+      - --disable-notifications
+      - --windows-size=1920,1080
+      - --enable-unsafe-swiftshader
+      - --user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+reits:
+  web_driver:
+    xpath_el_wait_until_loaded: //*[@id="etf-holdings"]/thead/tr/th[1]/div[1]/span[1]
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+    - VNQ
+    - IYR
+    - SCHH
+    - XLRE
+    - REM
+    # - MORT
+    # - REET
+    # - SCHYF
+    # - SRVR
+    # - HOMZ
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: etf/{{slug}}/#holdings
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: us_etfdb_vettafi_reits
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    SYMBOL: str
+    HOLDING: str
+    WEIGHT: float
+  df_read_params:
+  xpaths:
+    list_tr: //table[@id="etf-holdings"]/tbody/tr[{}]
