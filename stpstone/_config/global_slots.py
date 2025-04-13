@@ -48,6 +48,8 @@ YAML_US_ALPHAVANTAGE = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/alphavantage.yaml"))
 YAML_US_TIINGO = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/tiingo.yaml"))
+YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
+    os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
 #   WW
 YAML_WW_CRYPTO_COINMARKET = reading_yaml(
     os.path.join(root_path, "countries/ww/exchange/crypto/coinmarket.yaml"))

@@ -75,14 +75,14 @@ class ConcreteCreatorReq(ABCRequests):
         int_end_td = None
         # for using this workaround, please pass a dummy variable to the url, within the YAML file,
         #   like https://example.com/app/#source=dummy_1&bl_debug=True
-        if StrHandler().match_string_like(req_resp.url, '*#source=dummy_1*') == True:
+        if StrHandler().match_string_like(req_resp.url, "*#source=dummy_1*") == True:
             list_headers = [
                 list_th[0],
                 list_th[...]
             ]
             int_init_td = 0
             int_end_td = 200
-        elif StrHandler().match_string_like(req_resp.url, '*#source=dummy_2*') == True:
+        elif StrHandler().match_string_like(req_resp.url, "*#source=dummy_2*") == True:
             list_headers = [
                 list_th[0],
                 list_th[...]
@@ -93,37 +93,37 @@ class ConcreteCreatorReq(ABCRequests):
             if self.logger is not None:
                 CreateLog().warning(
                     self.logger,
-                    'No source found in url, for HTML webscraping, please revisit the code'
-                    + f' if it is an unexpected behaviour - URL: {req_resp.url}'
+                    "No source found in url, for HTML webscraping, please revisit the code"
+                    + f" if it is an unexpected behaviour - URL: {req_resp.url}"
                 )
         return list_headers, int_init_td, int_end_td
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         bl_debug = True if StrHandler().match_string_like(
-            req_resp.url, '*bl_debug=True*') == True else False
+            req_resp.url, "*bl_debug=True*") == True else False
         root = HtmlHandler().lxml_parser(req_resp)
         # export html tree to data folder, if is user's will
         if bl_debug == True:
-            path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
-            HtmlHandler().html_tree(root, file_path=rf'{path_project}\data\test.html')
+            path_project = DirFilesManagement().find_project_root(marker="pyproject.toml")
+            HtmlHandler().html_tree(root, file_path=rf"{path_project}\data\test.html")
         list_th = [
             x.text.strip() for x in HtmlHandler().lxml_xpath(
-                root, YAML_EXAMPLE['source']['xpaths']['list_th']
+                root, YAML_EXAMPLE["source"]["xpaths"]["list_th"]
             )
         ]
         list_td = [
-            '' if x.text is None else x.text.replace('\xa0', '').strip()
+            "" if x.text is None else x.text.replace("\xa0", "").strip()
             for x in HtmlHandler().lxml_xpath(
-                root, YAML_EXAMPLE['source']['xpaths']['list_td']
+                root, YAML_EXAMPLE["source"]["xpaths"]["list_td"]
             )
         ]
         # deal with data/headers specificity for the project
         list_headers, int_init_td, int_end_td = self.td_th_parser(req_resp, list_th)
         if bl_debug == True:
             print(list_headers)
-            print(f'LEN LIST HEADERS: {len(list_headers)}')
+            print(f"LEN LIST HEADERS: {len(list_headers)}")
             print(list_td[int_init_td:int_end_td])
-            print(f'LEN LIST TD: {len(list_td[int_init_td:int_end_td])}')
+            print(f"LEN LIST TD: {len(list_td[int_init_td:int_end_td])}")
         list_ser = HandlingDicts().pair_headers_with_data(
             list_headers,
             list_td[int_init_td:int_end_td]
