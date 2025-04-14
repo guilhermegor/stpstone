@@ -22,24 +22,24 @@ build_package_test_pypi_org: clean_dist
 ### FACTORY METHODS ###
 
 concrete_creator_ingestion_request:
-	bash cli/create_req_yaml.sh
-	bash cli/create_req_cls_py.sh
+	bash cli/dp_factory_create_req_yaml.sh
+	bash cli/dp_factory_create_req_cls_py.sh
 
 concrete_creator_ingestion_request_html_parser:
-	bash cli/html_parser_create_req_yaml.sh
-	bash cli/html_parser_create_req_cls_py.sh
+	bash cli/dp_factory_html_parser_create_req_yaml.sh
+	bash cli/dp_factory_html_parser_create_req_cls_py.sh
 
 
 ### GIT ###
 
+git_gh_status:
+	bash cli/git_gh_status.sh
+
+git_protect_main: git_gh_status
+	bash cli/git_protect_main.sh
+
 git_pull_force:
 	bash cli/git_pull_force.sh
-
-git_keep_just_main_builds:
-	bash cli/git_keep_just_main.sh
-
-git_merge_branches:
-	bash cli/git_merge_branches.sh
 
 
 ### REQUIREMENTS - DEV ###
