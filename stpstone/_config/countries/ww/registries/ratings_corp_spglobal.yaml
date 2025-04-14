@@ -1,0 +1,116 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://ratings-ext-api-awse.prod.api.spglobal.com/
+  headers:
+    'accept': 'application/json, text/plain, */*'
+    'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7'
+    'access-control-allow-origin': '*'
+    'authorization': '{{bearer}}'
+    'content-type': 'application/json; charset=UTF-8'
+    'origin': 'https://disclosure.spglobal.com'
+    'priority': 'u=1, i'
+    'referer': 'https://disclosure.spglobal.com/'
+    'sec-ch-ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"'
+    'sec-ch-ua-mobile': '?0'
+    'sec-ch-ua-platform': '"Windows"'
+    'sec-fetch-dest': 'empty'
+    'sec-fetch-mode': 'cors'
+    'sec-fetch-site': 'same-site'
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+  payload:
+  token:
+    host: https://disclosure-assets-mfe.prod.cdnratings.spglobal.com/
+    app: config.json
+    headers:
+      'sec-ch-ua-platform': '"Windows"'
+      'Referer': 'https://disclosure.spglobal.com/'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
+      'Accept': 'application/json, text/plain, */*'
+      'sec-ch-ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"'
+      'sec-ch-ua-mobile': '?0'
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: apiKey
+  web_driver:
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+ratings_corp:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: POST
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+    "numberOfDays": "7"
+    "pageLength": "100"
+    "pageNumber": "{{pg_number}}"
+    "rd5Group": ""
+    "countryName": ""
+    "actionType": ""
+    "locale": "en_US"
+    "urlParam": ""
+    "jpSectorWebId": ""
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: spcom-disclosureapi/extoauthv2/getRatingActionsRequest?apikey={{token}}
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: ww_spglobal_ratings_corp
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    RATING_ACTION_DATE: str
+    ACTION_TYPE_CODE: str
+    ENTITY_ID: int
+    SOURCE_PROVIDED_NAME: str
+    ACTION_LEVEL_INDICATOR: category
+    ACTION_NAME: str
+    SECTOR_CODE: category
+    RATING_FROM: category
+    RATING_TO: category
+    RATING_TYPE: category
+    MATURITY_DATE: str
+    ID: int
+  df_read_params:

@@ -1,17 +1,10 @@
-### API TO GRANT ACCESS TO PRE TRADING LINE B3 SOLUTIONS ###
-
-# pypi.org libs
 import time
+import pandas as pd
 from pprint import pprint
 from typing import Any, Dict, List, Optional, Union
-
-import pandas as pd
 from requests import request
-
-from stpstone.transformations.validation.metaclass_type_checker import \
-    TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.handling_dates import DatesBR
-# local libs
 from stpstone.utils.parsers.json import JsonFiles
 
 

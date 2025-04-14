@@ -48,10 +48,6 @@ YAML_US_ALPHAVANTAGE = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/alphavantage.yaml"))
 YAML_US_TIINGO = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/tiingo.yaml"))
-YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
-    os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
-YAML_US_ETFDB_VETTAFI = reading_yaml(
-    os.path.join(root_path, "countries/us/registries/etfdb_vettafi.yaml"))
 #   WW
 YAML_WW_CRYPTO_COINMARKET = reading_yaml(
     os.path.join(root_path, "countries/ww/exchange/crypto/coinmarket.yaml"))
@@ -63,13 +59,14 @@ YAML_WW_FMP = reading_yaml(
     os.path.join(root_path, "countries/ww/exchange/markets/fmp.yaml"))
 YAML_WW_INVESTINGCOM = reading_yaml(
     os.path.join(root_path, "countries/ww/exchange/markets/investingcom.yaml"))
-YAML_WW_GR = reading_yaml(
-    os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
 
 # macroeconomics
 # BR
 YAML_BR_PTAX_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/ptax_bcb.yaml"))
+# WW
+YAML_WW_GR = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
 
 # otc
 # BR
@@ -88,6 +85,14 @@ YAML_ANBIMA_DATA_FUNDS = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_funds.yaml"))
 YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_debentures.yaml"))
+# US
+YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
+    os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
+YAML_US_ETFDB_VETTAFI = reading_yaml(
+    os.path.join(root_path, "countries/us/registries/etfdb_vettafi.yaml"))
+# WW
+YAML_WW_RATINGS_CORP_S_AND_P = reading_yaml(
+    os.path.join(root_path, "countries/ww/registries/ratings_corp_spglobal.yaml"))
 
 # taxation
 # BR

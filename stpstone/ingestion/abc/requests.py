@@ -654,6 +654,7 @@ class ABCRequests(HandleReqResponses):
             url_token,
             self.dict_metadata["credentials"]["token"]["get"]["bl_verify"],
             self.dict_metadata["credentials"]["token"]["get"]["timeout"],
+            self.dict_metadata["credentials"]["token"].get("headers", None),
         )
         return req_resp.json()[
             self.dict_metadata["credentials"]["token"]["keys"]["token"]
@@ -794,6 +795,7 @@ class ABCRequests(HandleReqResponses):
         xpath_el_wait_until_loaded: Optional[str] = None,
         dict_xpaths: Optional[Dict[str, str]] = None
     ) -> pd.DataFrame:
+        if payload is not None: payload = JsonFiles().dict_to_json(payload)
         url = host + app if app is not None else host
         self.create_log.log_message(self.logger, f"Starting request to: {url}", "info")
         if self.dict_metadata["credentials"].get("web_driver", None) is not None:

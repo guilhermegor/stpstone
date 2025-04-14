@@ -34,6 +34,7 @@ credentials:
   token:
     host:
     app:
+    headers:
     get:
       req_method: GET
       bl_verify: False
