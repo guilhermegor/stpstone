@@ -57,7 +57,7 @@ class CreateLog(metaclass=TypeChecker):
 
         Args:
             message: The log message
-            log_level: One of 'infos', 'warnings', 'errors', 'critical' (matches CreateLog methods)
+            log_level: One of 'info', 'warning', 'error', 'critical' (matches CreateLog methods)
 
         Returns:
             None
