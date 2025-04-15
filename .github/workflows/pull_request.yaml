@@ -1,0 +1,12 @@
+name: PR Validation to Main
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-tests:
+    name: Validate Tests Before Merge to Main
+    uses: ./.github/workflows/tests.yaml
+    secrets: inherit
