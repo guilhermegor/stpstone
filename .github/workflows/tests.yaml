@@ -37,6 +37,10 @@ jobs:
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
+          # temporary pyproject without windows platform-specific dependencies
+          cp pyproject.toml pyproject.original.toml
+          grep -v 'platform = "win32"' pyproject.original.toml > pyproject.toml
+          # install dependencies, checking for dev and docs groups if they are in the .toml file
           without_groups=()
           if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
             without_groups+=("dev")
