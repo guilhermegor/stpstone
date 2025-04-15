@@ -1,31 +1,32 @@
 ## Objective
-Describe the feature, improvement, or fix this pull request implements.
+Describe the chore or maintenance task this pull request implements (e.g., dependency update, refactoring, code cleanup, etc.).
 
 ---
 
 ## Context
-Explain the strategic or technical background that motivates this change (e.g., linked to a roadmap item, bug report, or technical debt).
+Explain the background or reasoning behind this chore (e.g., to improve code quality, ensure compatibility, reduce technical debt).
 
 ---
 
 ## Tests: [OK/NOK]
-List the tests performed to validate the implementation.
+List the tests or checks performed to validate the implementation.
 
-- `test_1`: Description of the first test
-- `test_2`: Description of the second test
+- `test_1`: Description of the test, if applicable (e.g., linting, build, or CI/CD pipeline checks)
+- `test_2`: Description of the second test or check
 
-> If tests are missing or pending, please explain why.
+> If tests are not applicable, explain why.
 
 ---
 
 ## Documentation: [OK/NOK]
-Indicate whether the related documentation has been updated.
+Indicate whether the documentation needs to be updated or has been updated as part of this chore.
 
 - [ ] Code is documented (docstrings, comments)
-- [ ] README or project documentation updated
+- [ ] README or project documentation updated (if applicable)
 - [ ] Changelog entry added (if applicable)
 
 ---
 
 ## Additional Notes
-Add any additional notes for the reviewer (e.g., potential impact, known issues, or follow-ups).
+Add any additional notes for the reviewer (e.g., follow-up actions, impact on future tasks, or known issues).
+
