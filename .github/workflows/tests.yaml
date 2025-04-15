@@ -26,6 +26,7 @@ jobs:
         with:
           virtualenvs-in-project: true
           virtualenvs-create: true
+          version: 2.1.2
 
       - name: Load Cached Virtual Environment
         id: cached-venv
@@ -41,9 +42,9 @@ jobs:
           cp pyproject.toml pyproject.original.toml
           grep -v 'platform = "win32"' pyproject.original.toml > pyproject.toml
           # regenerate lock file, if needed
-          if ! poetry lock --check; then
+          if ! poetry check --lock; then
             echo "Lock file is outdated, regenerating..."
-            poetry lock --no-update
+            poetry lock
           fi
           # install dependencies, checking for dev and docs groups if they are in the .toml file
           without_groups=()
