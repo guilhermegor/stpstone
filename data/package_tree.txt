@@ -11,6 +11,7 @@ stpstone
 │   │   │   │   └── investment_funds.yaml
 │   │   │   ├── exchange
 │   │   │   │   ├── anbima_550_listing.yaml
+│   │   │   │   ├── bmf_interest_rates.yaml
 │   │   │   │   ├── bvmf_bov.yaml
 │   │   │   │   ├── consolidated_trades.yaml
 │   │   │   │   ├── consolidated_trades_after_mkt.yaml
@@ -38,9 +39,12 @@ stpstone
 │   │   │   └── taxation
 │   │   │       └── irsbr.yaml
 │   │   ├── us
-│   │   │   └── exchange
-│   │   │       ├── alphavantage.yaml
-│   │   │       └── tiingo.yaml
+│   │   │   ├── exchange
+│   │   │   │   ├── alphavantage.yaml
+│   │   │   │   └── tiingo.yaml
+│   │   │   └── registries
+│   │   │       ├── etfdb_vettafi.yaml
+│   │   │       └── slickcharts_indexes_components.yaml
 │   │   └── ww
 │   │       ├── exchange
 │   │       │   ├── crypto
@@ -51,8 +55,10 @@ stpstone
 │   │       │       ├── advfn.yaml
 │   │       │       ├── fmp.yaml
 │   │       │       └── investingcom.yaml
-│   │       └── macroeconomics
-│   │           └── global_rates.yaml
+│   │       ├── macroeconomics
+│   │       │   └── global_rates.yaml
+│   │       └── registries
+│   │           └── ratings_corp_spglobal.yaml
 │   ├── generic.yaml
 │   ├── global_slots.py
 │   ├── inoa.yaml
@@ -147,6 +153,7 @@ stpstone
 │       │   │   └── investment_funds.py
 │       │   ├── exchange
 │       │   │   ├── anbima_550_listing.py
+│       │   │   ├── bmf_interest_rates.py
 │       │   │   ├── bvmf_bov.py
 │       │   │   ├── consolidated_trades.py
 │       │   │   ├── consolidated_trades_after_mkt.py
@@ -174,9 +181,12 @@ stpstone
 │       │   └── taxation
 │       │       └── irsbr_records.py
 │       ├── us
-│       │   └── exchange
-│       │       ├── alphavantage.py
-│       │       └── tiingo.py
+│       │   ├── exchange
+│       │   │   ├── alphavantage.py
+│       │   │   └── tiingo.py
+│       │   └── registries
+│       │       ├── etfdb_vettafi.py
+│       │       └── slickcharts_indexes_components.py
 │       └── ww
 │           ├── exchange
 │           │   ├── crypto
@@ -188,8 +198,10 @@ stpstone
 │           │       ├── fmp.py
 │           │       ├── investingcom.py
 │           │       └── yf_ws.py
-│           └── macroeconomics
-│               └── global_rates.py
+│           ├── macroeconomics
+│           │   └── global_rates.py
+│           └── registries
+│               └── ratings_corp_spglobal.py
 ├── transformations
 │   ├── cleaner
 │   │   ├── data_cleaning.py

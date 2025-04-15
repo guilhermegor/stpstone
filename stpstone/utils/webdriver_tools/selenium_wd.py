@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.remote.webelement import WebElement
-from stpstone.utils.connections.netops.user_agents import UserAgents
+from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
 
 
 class SeleniumWD:

@@ -1,7 +1,7 @@
 from getpass import getuser
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import AnbimaDataDebentures
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.utils.connections.netops.user_agents import UserAgents
+from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
