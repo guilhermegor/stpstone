@@ -37,14 +37,14 @@ ingestion_concrete_creator_html_parser:
 
 
 # git / github
-git_protect_main: git_gh_status
-	bash cli/git_protect_main.sh
-
 git_pull_force:
 	bash cli/git_pull_force.sh
 
 gh_status:
 	bash cli/gh_status.sh
+
+gh_protect_main: gh_status
+	bash cli/gh_protect_main.sh
 
 gh_actions_locally_tests:
 	bash cli/act_install.sh
