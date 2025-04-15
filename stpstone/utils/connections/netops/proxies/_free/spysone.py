@@ -162,7 +162,7 @@ class SpysOneCountry(ABCSession):
                     "timeout": 1.0 / float_latency,
                     "times_alive": 0,
                     "times_dead": 0,
-                    "ratio_times_alive_dead": 0.0,
+                    "ratio_times_alive_dead": 1.0,
                     "uptime": str_uptime
                 })
         finally:

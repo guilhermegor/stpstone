@@ -100,7 +100,7 @@ class ProxyNova(ABCSession):
                 "timeout": 1.0 / self.proxy_speed_to_float(proxy_speed),
                 "times_alive": int_times_alive,
                 "times_dead": "",
-                "ratio_times_alive_dead": "",
+                "ratio_times_alive_dead": 1.0,
                 "uptime": uptime
             })
         return list_ser

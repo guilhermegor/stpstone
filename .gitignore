@@ -11,11 +11,14 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# env
+# environments
 *.env
-
-# venv
-.venv
+*.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # logs
 logs/

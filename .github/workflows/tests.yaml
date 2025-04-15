@@ -1,0 +1,84 @@
+name: Run Tests
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ["3.12.8"]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+          version: 2.1.2
+
+      - name: Load Cached Virtual Environment
+        id: cached-venv
+        uses: actions/cache@v3
+        with:
+          path: |
+            .venv
+            poetry.lock
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install Dependencies
+        if: steps.cached-venv.outputs.cache-hit != 'true'
+        run: |
+          # temporary pyproject without windows platform-specific dependencies
+          cp pyproject.toml pyproject.original.toml
+          cat pyproject.original.toml | python -c '
+          import sys, re
+          content = sys.stdin.read()
+          content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
+          content = re.sub(r"pywin32\s*=.*\n", "", content)
+          print(content)
+          ' > pyproject.toml
+
+          # regenerate lock file, if needed
+          if ! poetry check --lock; then
+            echo "Lock file is outdated, regenerating..."
+            rm -f poetry.lock
+            poetry lock --no-cache
+          fi
+
+          # install dependencies, checking for dev and docs groups if they are in the .toml file
+          without_groups=()
+          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
+            without_groups+=("dev")
+          fi
+          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
+            without_groups+=("docs")
+          fi
+          if [ ${#without_groups[@]} -gt 0 ]; then
+            echo "Excluding groups: ${without_groups[*]}"
+            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
+          else
+            echo "No groups to exclude, installing all dependencies"
+            poetry install --no-interaction --no-root
+          fi
+
+          # restore original pyproject.toml
+          mv pyproject.original.toml pyproject.toml
+          poetry env activate
+
+      - name: Run Unit Tests
+        run: poetry run python -m unittest discover -s tests/unit -p "*.py" -v
+
+      - name: Run Integration Tests
+        run: poetry run python -m unittest discover -s tests/integration -p "*.py" -v
