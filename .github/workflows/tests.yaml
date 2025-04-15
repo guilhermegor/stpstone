@@ -43,14 +43,14 @@ jobs:
           # temporary pyproject without windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           cat pyproject.original.toml | python -c '
-              import sys, re
-              content = sys.stdin.read()
-              # remove dependencies with platform="win32" marker
-              content = re.sub(r"^.*platform\s*=\s*[\"']win32[\"'].*$", "", content, flags=re.MULTILINE)
-              # remove pywin32 completely if it exists
-              content = re.sub(r"pywin32\s*=\s*[\"'][^\"\']+'", "", content)
-              print(content)
-              ' > pyproject.toml
+          import sys, re
+          content = sys.stdin.read()
+          # remove dependencies with platform="win32" marker
+          content = re.sub(r"^.*platform\s*=\s*[\"']win32[\"'].*$", "", content, flags=re.MULTILINE)
+          # remove pywin32 completely if it exists
+          content = re.sub(r"pywin32\s*=\s*[\"'][^\"\']+'", "", content)
+          print(content)
+          ' > pyproject.toml
 
           # regenerate lock file, if needed
           if ! poetry check --lock; then
