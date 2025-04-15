@@ -51,11 +51,11 @@ jobs:
           ' > pyproject.toml
 
           # regenerate lock file, if needed
-          # if ! poetry check --lock; then
-          #   echo "Lock file is outdated, regenerating..."
-          #   poetry lock --no-cache
-          # fi
-          poetry lock --no-cache
+          if ! poetry check --lock; then
+            echo "Lock file is outdated, regenerating..."
+            rm -f poetry.lock
+            poetry lock --no-cache
+          fi
 
           # install dependencies, checking for dev and docs groups if they are in the .toml file
           without_groups=()
