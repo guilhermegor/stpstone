@@ -28,13 +28,13 @@ repos:
         pass_filenames: false
       - id: unit-tests
         name: checking unit tests
-        entry: cmd /c "python -m unittest discover -s tests/unit -p "*.py""
+        entry: cmd /c "poetry run python -m unittest discover -s tests/unit -p "*.py""
         language: system
         types: [file]
         pass_filenames: false
       - id: integration-tests
         name: checking integration tests
-        entry: cmd /c "python -m unittest discover -s tests/integration -p "*.py""
+        entry: cmd /c "poetry run python -m unittest discover -s tests/integration -p "*.py""
         language: system
         types: [file]
         pass_filenames: false
