@@ -40,6 +40,11 @@ jobs:
           # temporary pyproject without windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           grep -v 'platform = "win32"' pyproject.original.toml > pyproject.toml
+          # regenerate lock file, if needed
+          if ! poetry lock --check; then
+            echo "Lock file is outdated, regenerating..."
+            poetry lock --no-update
+          fi
           # install dependencies, checking for dev and docs groups if they are in the .toml file
           without_groups=()
           if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
