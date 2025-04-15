@@ -75,7 +75,7 @@ jobs:
 
           # restore original pyproject.toml
           mv pyproject.original.toml pyproject.toml
-          poetry shell
+          poetry env activate
 
       - name: Run Unit Tests
         run: poetry run python -m unittest discover -s tests/unit -p "*.py" -v
