@@ -54,7 +54,7 @@ cat > "$PROTECTION_RULES" <<EOF
     "require_code_owner_reviews": true,
     "required_approving_review_count": 1
   },
-  "enforce_admins": true,
+  "enforce_admins": false,
   "required_status_checks": null,
   "restrictions": null
 }
