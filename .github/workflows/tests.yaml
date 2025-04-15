@@ -32,7 +32,9 @@ jobs:
         id: cached-venv
         uses: actions/cache@v3
         with:
-          path: .venv
+          path: |
+            .venv
+            poetry.lock
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
       - name: Install Dependencies
@@ -41,11 +43,13 @@ jobs:
           # temporary pyproject without windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           grep -v 'platform = "win32"' pyproject.original.toml > pyproject.toml
+
           # regenerate lock file, if needed
           if ! poetry check --lock; then
             echo "Lock file is outdated, regenerating..."
-            poetry lock
+            poetry lock --no-update --without-hashes
           fi
+
           # install dependencies, checking for dev and docs groups if they are in the .toml file
           without_groups=()
           if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
@@ -59,8 +63,11 @@ jobs:
             poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
           else
             echo "No groups to exclude, installing all dependencies"
-            poetry install --no-interaction --no-root
+            poetry install --no-interaction --no-root --without win
           fi
+
+          # restore original pyproject.toml
+          mv pyproject.original.toml pyproject.toml
           poetry shell
 
       - name: Run Unit Tests
