@@ -37,7 +37,7 @@ jobs:
       - name: Install Dependencies (Without Dev/Docs)
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          poetry install --no-interaction --no-root --without dev docs
+          poetry install --no-interaction --no-root --without dev,docs
           poetry shell
 
       - name: Run Unit Tests
