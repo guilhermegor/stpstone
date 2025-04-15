@@ -12,7 +12,7 @@ jobs:
         python-version: ["3.12.8"]
 
     steps:
-      - name: Copy Repo
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set Up Python ${{ matrix.python-version }}
