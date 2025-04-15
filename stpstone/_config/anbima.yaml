@@ -20,55 +20,6 @@ anbima_stats:
   col_request_date: 'REQUEST_DATE'
   dt_fillna: '31/12/2000'
 
-# anbima dev endpoints
-hosts_anbima_dev_ex_fundos:
-  sandbox: 'https://api-sandbox.anbima.com.br/feed/precos-indices/v1'
-  producao: 'https://api.anbima.com.br/feed/precos-indices/v1'
-hosts_anbima_dev_fundos:
-  sandbox: 'https://api-sandbox.anbima.com.br/feed/fundos/v1'
-  producao: 'https://api.anbima.com.br/feed/fundos/v1'
-apps_anbima_dev:
-  debentures:
-    curvas-credito: '/debentures/curvas-credito'
-    mercado-secundario: '/debentures/mercado-secundario'
-    projecoes: '/debentures/projecoes'
-  indices:
-    carteira-teorica-ida: '/indices/carteira-teorica-ida'
-    carteira-teorica-ihfa: '/indices/carteira-teorica-ihfa'
-    carteira-teorica-ima: '/indices/carteira-teorica-ima'
-    resultados-ida-fechado: '/indices/resultados-ida-fechado'
-    resultados-idka: '/indices/resultados-idka'
-    resultados-ihfa-fechado: '/indices/resultados-ihfa-fechado'
-    resultados-ima: '/indices/resultados-ima'
-    resultados-intradiarios-ima: '/indices/resultados-intradiarios-ima'
-  indices+:
-    carteira-teorica-ida: '/indices-mais/carteira-teorica-ida'
-    carteira-teorica-ihfa: '/indices-mais/carteira-teorica-ihfa'
-    carteira-teorica-ima: '/indices-mais/carteira-teorica-ima'
-    pu-intradiario: '/indices-mais/pu-intradiario'
-    resultados-ida: '/indices-mais/resultados-ida'
-    resultados-idka: '/indices-mais/resultados-idka'
-    resultados-ihfa: '/indices-mais/resultados-ihfa'
-    resultados-ima: '/indices-mais/resultados-ima'
-    resultados-intradiarios-ima: '/indices-mais/resultados-intradiarios-ima'
-  titulos-publicos:
-    curva-intradiaria: '/titulos-publicos/curva-intradiaria'
-    curva-juros: '/titulos-publicos/curvas-juros'
-    difusao-taxas: '/titulos-publicos/difusao-taxas'
-    estimativa-selic: '/titulos-publicos/estimativa-selic'
-    mercado-secundario-tpf: '/titulos-publicos/mercado-secundario-TPF'
-    projecoes: '/titulos-publicos/projecoes'
-    pu-intradiario: '/titulos-publicos/pu-intradiario'
-    vna: '/titulos-publicos/vna'
-  cri-cra:
-    mercado-secundario: '/cri-cra/mercado-secundario'
-    projecoes: '/cri-cra/projecoes'
-  fundos:
-    fundos-lista: '/fundos'
-    consulta-dados: '/fundos/{}'
-    serie-historica: '/fundos/{}/serie-historica'
-    notas-explicativas: '/fundos/{}/notas-explicativas'
-
 # secondary market prices
 sec_mkt_prcs:
   br_treasuries:
@@ -81,40 +32,3 @@ sec_mkt_prcs:
     method: 'GET'
     url: https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt
     bl_verify: False
-
-# anbima data api
-anbima_data_api:
-  str_dt_data_err: '2100-01-01'
-  col_fund_code: 'codigo_fundo'
-  key_content: 'content'
-  key_name_sbclss: 'subclasses'
-  key_name_sbcls: 'subclass'
-  col_type_id: 'tipo_identificador_fundo'
-  col_fund_id: 'identificador_fundo'
-  col_comp_name: 'razao_social_fundo'
-  col_trade_name: 'nome_comercial_fundo'
-  col_fund_type: 'tipo_fundo'
-  col_class_code: 'codigo_classe'
-  col_class_id_type: 'tipo_identificador_classe'
-  col_class_id: 'identificador_classe'
-  col_comp_class: 'razao_social_classe'
-  col_trd_class: 'nome_comercial_classe'
-  col_n1_ctg: 'nome_nivel1_categoria'
-  col_subclasses: 'subclasses'
-  col_fund_closure_dt: 'data_encerramento_fundo'
-  col_closure_dt: 'data_encerramento'
-  col_eff_dt: 'data_vigencia'
-  col_incpt_dt: 'data_inicio_atividade'
-  col_update_ts: 'data_atualizacao'
-  col_sbc_incpt_dt: 'subclass_data_inicio_atividade'
-  col_sbc_closure_dt: 'subclass_data_encerramento'
-  col_sbc_eff_dt: 'subclass_data_vigencia'
-  col_sbc_update_dt: 'subclass_data_atualizacao'
-  col_num_fnd: 'NUM_FND'
-  col_num_class: 'NUM_CLASSES'
-  col_num_pg: 'NUM_PG'
-  str_dt_format: 'YYYY-MM-DD'
-  str_ts_fill_na: '2100-01-01T00:00:00.000'
-  str_dt_fill_na: '2100-01-01'
-  str_float_fill_na: 0.0
-  str_fill_na: 'N/A'
