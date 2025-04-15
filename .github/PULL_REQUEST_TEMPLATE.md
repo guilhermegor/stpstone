@@ -34,7 +34,7 @@
     - Coverage: 95% (via `pytest --cov`).  
 - **Integration Tests**:  
     - File: `tests.yaml`  
-    - Status: [OK/NOK].  
+    - Status: `OK/NOK`.  
 
 **Not Applicable**:  
 - Explain (e.g., "Documentation-only change").  
