@@ -34,10 +34,23 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
-      - name: Install Dependencies (Without Dev/Docs)
+      - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          poetry install --no-interaction --no-root --without dev,docs
+          without_groups=()
+          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
+            without_groups+=("dev")
+          fi
+          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
+            without_groups+=("docs")
+          fi
+          if [ ${#without_groups[@]} -gt 0 ]; then
+            echo "Excluding groups: ${without_groups[*]}"
+            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
+          else
+            echo "No groups to exclude, installing all dependencies"
+            poetry install --no-interaction --no-root
+          fi
           poetry shell
 
       - name: Run Unit Tests
