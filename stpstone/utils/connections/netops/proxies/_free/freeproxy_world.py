@@ -125,7 +125,7 @@ class FreeProxyWorld(ABCSession):
                         "timeout": 1.0 / self.proxy_speed_to_float(speed),
                         "times_alive": 1,
                         "times_dead": "",
-                        "ratio_times_alive_dead": "",
+                        "ratio_times_alive_dead": 1.0,
                         "uptime": 1.0
                     })
                 int_pg += 1
