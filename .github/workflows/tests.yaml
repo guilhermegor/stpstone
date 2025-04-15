@@ -33,14 +33,16 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
 
-      - name: Install Dependencies
+      - name: Install Dependencies (Without Dev/Docs)
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction --no-root --without dev docs
           poetry shell
 
       - name: Run Unit Tests
+        if: steps.cached-venv.outputs.cache-hit == 'true' || success()
         run: poetry run python -m unittest discover -s tests/unit -p "*.py" -v
 
       - name: Run Integration Tests
+        if: steps.cached-venv.outputs.cache-hit == 'true' || success()
         run: poetry run python -m unittest discover -s tests/integration -p "*.py" -v

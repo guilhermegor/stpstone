@@ -46,8 +46,10 @@ git_pull_force:
 gh_status:
 	bash cli/gh_status.sh
 
-gh_actions_locally:
+gh_actions_locally_tests:
 	bash cli/act_install.sh
+	bash cli/docker_init.sh
+	bash cli/act_tests.sh
 
 
 # requirements - dev
