@@ -47,7 +47,7 @@ jobs:
           # regenerate lock file, if needed
           if ! poetry check --lock; then
             echo "Lock file is outdated, regenerating..."
-            poetry lock --without-hashes
+            poetry lock
           fi
 
           # install dependencies, checking for dev and docs groups if they are in the .toml file
