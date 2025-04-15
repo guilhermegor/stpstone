@@ -6,14 +6,14 @@
 ---
 
 ## Changes Made
-**Added**: [ ]
+**Added**:
 - New feature: [Description].  
 - Dependency: [Package@version].  
 
-**Updated**: [ ]
+**Updated**:
 - Refactored [Component] for [Reason].  
 
-**Fixed**: [ ]
+**Fixed**:
 - Issue #[Number]: [Brief description].  
 
 ---
@@ -33,8 +33,8 @@
     - File: `test_auth.py`  
     - Coverage: 95% (via `pytest --cov`).  
 - **Integration Tests**:  
-    - CI Job: `tests.yaml`  
-    - Results: [Pipeline #123](link).  
+    - File: `tests.yaml`  
+    - Status: [OK/NOK].  
 
 **Not Applicable**:  
 - Explain (e.g., "Documentation-only change").  
