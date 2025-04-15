@@ -6,20 +6,20 @@
 ---
 
 ## Changes Made
-**Added**: [OK/NOK]
+**Added**: [ ]
 - New feature: [Description].  
 - Dependency: [Package@version].  
 
-**Updated**: [OK/NOK]
+**Updated**: [ ]
 - Refactored [Component] for [Reason].  
 
-**Fixed**: [OK/NOK]
+**Fixed**: [ ]
 - Issue #[Number]: [Brief description].  
 
 ---
 
 ## Testing
-### Manual Testing [OK/NOK]
+### Manual Testing
 - **Test Case 1**:  
     - Steps: `1. Navigate to /login → 2. Submit credentials`  
     - Expected: Redirect to dashboard.  
@@ -28,7 +28,7 @@
     - Steps: `Simulate network failure during API call`.  
     - Expected: Graceful error handling.  
 
-### Automated Testing [OK/NOK]
+### Automated Testing
 - **Unit Tests**:  
     - File: `test_auth.py`  
     - Coverage: 95% (via `pytest --cov`).  
@@ -42,7 +42,7 @@
 ---
 
 ## Documentation
-- **Code**: [OK/NOK]
+- **Code**:
     - Updated docstrings in [files].  
 - **Guides**:
     - Added [section] to README.  
