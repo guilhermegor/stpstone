@@ -5,46 +5,49 @@
 
 ---
 
-## Changes Made [OK/NOK]
-**Added**:  
-- [ ] New feature: [Description].  
-- [ ] Dependency: [Package@version].  
+## Changes Made
+**Added**: [OK/NOK]
+- New feature: [Description].  
+- Dependency: [Package@version].  
 
-**Updated**:  
-- [ ] Refactored [Component] for [Reason].  
+**Updated**: [OK/NOK]
+- Refactored [Component] for [Reason].  
 
-**Fixed**:  
-- [ ] Issue #[Number]: [Brief description].  
+**Fixed**: [OK/NOK]
+- Issue #[Number]: [Brief description].  
 
 ---
 
-## Testing [OK/NOK]
-### Manual Testing  
-- [ ] **Test Case 1**:  
-  - Steps: `1. Navigate to /login → 2. Submit credentials`  
-  - Expected: Redirect to dashboard.  
-  - Evidence: ![Screenshot](link).  
-- [ ] **Test Case 2**:  
-  - Steps: `Simulate network failure during API call`.  
-  - Expected: Graceful error handling.  
+## Testing
+### Manual Testing [OK/NOK]
+- **Test Case 1**:  
+    - Steps: `1. Navigate to /login → 2. Submit credentials`  
+    - Expected: Redirect to dashboard.  
+    - Evidence: ![Screenshot](link).  
+- **Test Case 2**:  
+    - Steps: `Simulate network failure during API call`.  
+    - Expected: Graceful error handling.  
 
 ### Automated Testing [OK/NOK]
-- [ ] **Unit Tests**:  
-  - File: `test_auth.py`  
-  - Coverage: 95% (via `pytest --cov`).  
-- [ ] **Integration Tests**:  
-  - CI Job: `tests.yaml`  
-  - Results: [Pipeline #123](link).  
+- **Unit Tests**:  
+    - File: `test_auth.py`  
+    - Coverage: 95% (via `pytest --cov`).  
+- **Integration Tests**:  
+    - CI Job: `tests.yaml`  
+    - Results: [Pipeline #123](link).  
 
 **Not Applicable**:  
 - Explain (e.g., "Documentation-only change").  
 
 ---
 
-## Documentation [OK/NOK]
-- [ ] **Code**: Updated docstrings in [files].  
-- [ ] **Guides**: Added [section] to README.  
-- [ ] **Changelog**: Entry under [Version].  
+## Documentation
+- **Code**: [OK/NOK]
+    - Updated docstrings in [files].  
+- **Guides**:
+    - Added [section] to README.  
+- **Changelog**:
+    - Entry under [Version].  
 
 ---
 
