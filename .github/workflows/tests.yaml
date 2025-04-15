@@ -47,7 +47,7 @@ jobs:
           # regenerate lock file, if needed
           if ! poetry check --lock; then
             echo "Lock file is outdated, regenerating..."
-            poetry lock --no-update --without-hashes
+            poetry lock --without-hashes
           fi
 
           # install dependencies, checking for dev and docs groups if they are in the .toml file
@@ -71,9 +71,7 @@ jobs:
           poetry shell
 
       - name: Run Unit Tests
-        if: steps.cached-venv.outputs.cache-hit == 'true' || success()
         run: poetry run python -m unittest discover -s tests/unit -p "*.py" -v
 
       - name: Run Integration Tests
-        if: steps.cached-venv.outputs.cache-hit == 'true' || success()
         run: poetry run python -m unittest discover -s tests/integration -p "*.py" -v
