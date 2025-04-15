@@ -62,7 +62,7 @@ pymupdf = "1.25.3"
 pdfplumber = "0.11.5"
 fitz = "0.0.1.dev2"
 psutil = "7.0.0"
-wmi = "1.5.1"
+wmi = {version = "1.5.1", platform = "win32"}
 chardet = "5.2.0"
 minio = "7.2.15"
 webdriver-manager = "4.0.2"
