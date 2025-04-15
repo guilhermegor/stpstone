@@ -28,7 +28,7 @@
   - Steps: `Simulate network failure during API call`.  
   - Expected: Graceful error handling.  
 
-### Automated Testing  
+### Automated Testing [OK/NOK]
 - [ ] **Unit Tests**:  
   - File: `test_auth.py`  
   - Coverage: 95% (via `pytest --cov`).  
