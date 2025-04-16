@@ -27,12 +27,12 @@ def investment_funds_bkpd() -> List[str]:
         if df_.empty == True: continue
         list_ser.extend(df_.to_dict(orient="records"))
     df_ = pd.DataFrame(list_ser)
-    return df_["SLUG_URL"].unique()
+    return df_
 
 int_chunk = 50
 list_ser = list()
 
-list_slugs_consulted = investment_funds_bkpd()
+df_slugs_consulted = investment_funds_bkpd()
 
 df_ = pd.read_excel("data/input-funds-regex-bylaws.xlsx")
 df_['URL_SLUG'] = df_['URL Regulamento'].str.replace(
@@ -41,7 +41,7 @@ df_['URL_SLUG'] = df_['URL Regulamento'].str.replace(
 )
 list_slugs = df_['URL_SLUG'].tolist()
 print(f"Slugs before filtering: {len(list_slugs)}")
-list_slugs = list(set(list_slugs) - set(list_slugs_consulted))
+list_slugs = list(set(list_slugs) - set(df_slugs_consulted["SLUGS_URL"].unique()))
 print(f"Slugs after filtering: {len(list_slugs)}")
 shuffle(list_slugs)
 list_chunks = HandlingLists().chunk_list(list_slugs, None, int_chunk)
@@ -63,6 +63,7 @@ for i, list_ in enumerate(list_chunks):
     sleep(60)
 
 df_ = pd.DataFrame(list_ser)
+df_ = pd.concat([df_slugs_consulted, df_], ignore_index=True)
 df_.to_csv("data/consolidated-investment-funds-bylaws-infos_{}_{}_{}.csv".format(
     getuser(),
     DatesBR().curr_date.strftime('%Y%m%d'),
