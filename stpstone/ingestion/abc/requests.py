@@ -144,10 +144,13 @@ class UtilsRequests(ABC):
             stream=bytes_pdf,
             filetype=DirFilesManagement().get_last_file_extension(url),
         )
-        for i in range(0, len(doc_pdf), int_pgs_join):
-            text1 = doc_pdf[i].get_text("text") if i < len(doc_pdf) else ""
-            text2 = doc_pdf[i + 1].get_text("text") if i + 1 < len(doc_pdf) else ""
-            list_pages.append(text1 + "\n" + text2)
+        str_ = ""
+        for i in range(0, len(doc_pdf)):
+            str_ = str_ + "\n" + doc_pdf[i].get_text("text")
+            if (i % int_pgs_join == 0) \
+                or (i == len(doc_pdf) - 1):
+                list_pages.append(str_)
+                str_ = ""
         for i, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
             if (len(dict_count_matches) > 0) \
