@@ -27,7 +27,7 @@ def investment_funds_bkpd() -> List[str]:
         if df_.empty == True: continue
         list_ser.extend(df_.to_dict(orient="records"))
     df_ = pd.DataFrame(list_ser)
-    return df_["URL_SLUG"].unique()
+    return df_["SLUG_URL"].unique()
 
 int_chunk = 50
 list_ser = list()
