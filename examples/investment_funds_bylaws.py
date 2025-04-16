@@ -13,7 +13,7 @@ def clean_excel_text(text):
     # remove control characters and other problematic chars
     return ''.join(char for char in text if 31 < ord(char) < 127 or char in '\t\n\r')
 
-int_chunk = 300
+int_chunk = 200
 list_ser = list()
 
 df_ = pd.read_excel("data/input-funds-regex-bylaws.xlsx")
