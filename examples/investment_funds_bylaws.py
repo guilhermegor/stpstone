@@ -29,12 +29,17 @@ def investment_funds_bkpd() -> List[str]:
     df_ = pd.DataFrame(list_ser)
     return df_
 
-int_chunk = 50
+int_chunk = 2
 list_ser = list()
 
 df_slugs_consulted = investment_funds_bkpd()
 print(f"CONSULTED SLUGS: \n{df_slugs_consulted}")
 df_slugs_consulted.info()
+df_slugs_consulted.to_excel("data/consolidated-consulted-investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
+    getuser(),
+    DatesBR().curr_date.strftime('%Y%m%d'),
+    DatesBR().curr_time.strftime('%H%M%S')
+), index=False)
 
 df_ = pd.read_excel("data/input-funds-regex-bylaws.xlsx")
 df_['URL_SLUG'] = df_['URL Regulamento'].str.replace(

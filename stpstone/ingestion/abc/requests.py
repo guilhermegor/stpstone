@@ -175,7 +175,7 @@ class UtilsRequests(ABC):
                         dict_count_matches[str_event] += 1
                         dict_ = {
                             "EVENT": str_event.upper(),
-                            "CONDITION": str_condition.upper(),
+                            "MATCH_PATTTERN": str_condition.upper(),
                             "PATTERN_REGEX": pattern_regex,
                         }
                         for i_match in range(0, len(regex_match.groups()) + 1):
@@ -186,12 +186,12 @@ class UtilsRequests(ABC):
                 if dict_count_matches[str_event] == 0:
                     list_matches.append({
                         "EVENT": str_event.upper(),
-                        "CONDITION": "zzN/A",
+                        "MATCH_PATTTERN": "zzN/A",
                         "PATTERN_REGEX": "zzN/A",
                     })
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
-        df_.sort_values(by=["EVENT", "CONDITION"], ascending=[True, True], inplace=True)
+        df_.sort_values(by=["EVENT", "MATCH_PATTTERN"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
         return df_
 

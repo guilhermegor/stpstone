@@ -520,7 +520,7 @@ investment_funds_bylaws:
     COL_2: ffill
   dtypes:
     EVENT: str
-    CONDITION: str
+    MATCH_PATTTERN: str
     PATTERN_REGEX: str
     REGEX_GROUP_0: str
     REGEX_GROUP_1: str
