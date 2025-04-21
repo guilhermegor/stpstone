@@ -5,3 +5,7 @@ cls_ = AnbimaInfos()
 df_ = cls_.source("br_treasuries", bl_fetch=True)
 print(f"DF ANBIMA SITE INFOS - BR TREASURIES: \n{df_}")
 df_.info()
+
+df_ = cls_.source("corporate_bonds", bl_fetch=True)
+print(f"DF ANBIMA SITE INFOS - CORPORATE BONDS: \n{df_}")
+df_.info()
