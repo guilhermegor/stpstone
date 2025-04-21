@@ -1,0 +1,7 @@
+from stpstone.ingestion.countries.br.exchange.anbima_site_infos import AnbimaInfos
+
+cls_ = AnbimaInfos()
+
+df_ = cls_.source("br_treasuries", bl_fetch=True)
+print(f"DF ANBIMA SITE INFOS - BR TREASURIES: \n{df_}")
+df_.info()
