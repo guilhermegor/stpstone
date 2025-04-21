@@ -144,10 +144,13 @@ class UtilsRequests(ABC):
             stream=bytes_pdf,
             filetype=DirFilesManagement().get_last_file_extension(url),
         )
-        for i in range(0, len(doc_pdf), int_pgs_join):
-            text1 = doc_pdf[i].get_text("text") if i < len(doc_pdf) else ""
-            text2 = doc_pdf[i + 1].get_text("text") if i + 1 < len(doc_pdf) else ""
-            list_pages.append(text1 + "\n" + text2)
+        str_ = ""
+        for i in range(0, len(doc_pdf)):
+            str_ = str_ + "\n" + doc_pdf[i].get_text("text")
+            if (i % int_pgs_join == 0) \
+                or (i == len(doc_pdf) - 1):
+                list_pages.append(str_)
+                str_ = ""
         for i, str_page in enumerate(list_pages):
             str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
             if (len(dict_count_matches) > 0) \
@@ -172,7 +175,7 @@ class UtilsRequests(ABC):
                         dict_count_matches[str_event] += 1
                         dict_ = {
                             "EVENT": str_event.upper(),
-                            "CONDITION": str_condition.upper(),
+                            "MATCH_PATTTERN": str_condition.upper(),
                             "PATTERN_REGEX": pattern_regex,
                         }
                         for i_match in range(0, len(regex_match.groups()) + 1):
@@ -183,12 +186,12 @@ class UtilsRequests(ABC):
                 if dict_count_matches[str_event] == 0:
                     list_matches.append({
                         "EVENT": str_event.upper(),
-                        "CONDITION": "zzN/A",
+                        "MATCH_PATTTERN": "zzN/A",
                         "PATTERN_REGEX": "zzN/A",
                     })
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
-        df_.sort_values(by=["EVENT", "CONDITION"], ascending=[True, True], inplace=True)
+        df_.sort_values(by=["EVENT", "MATCH_PATTTERN"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
         return df_
 

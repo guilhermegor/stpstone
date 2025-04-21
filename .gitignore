@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.pytest_cache
 
 # IDEs
 .idea/
@@ -32,4 +33,5 @@ build/
 # project files/folders
 data/*
 !data/.gitkeep
+!data/input-funds-regex-bylaws.xlsx
 data/anbima-avl-funds-cons.csv

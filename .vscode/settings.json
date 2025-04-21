@@ -44,6 +44,8 @@
 	"workbench.colorTheme": "Color Identifiers Dark",
 	"editor.inlineSuggest.suppressSuggestions": true,
 	"terminal.integrated.defaultProfile.windows": "Git Bash",
+	"terminal.integrated.defaultProfile.linux": "bash",
+	"terminal.integrated.defaultProfile.osx": "Git Bash",
 	"files.exclude": {
 		"**/.git": false,
 		"**/.gitkeep": true

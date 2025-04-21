@@ -1,16 +1,10 @@
-### ANBIMA DATA ###
-
-# pypi.org libs
-from typing import Any, Dict, List, Optional
-
 import pandas as pd
+from typing import Any, Dict, List, Optional
 from requests import exceptions, request
-
-from stpstone._config.global_slots import YAML_ANBIMA
+from stpstone._config.global_slots import YAML_ANBIMA_DATA_API
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.json import JsonFiles
-# local libs
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -28,6 +22,7 @@ class AnbimaDataGen:
     ):
         """
         Anbima data API
+
         Args:
             str_client_id (str): string with client id
             str_client_secret (str): string with client secret
@@ -36,6 +31,7 @@ class AnbimaDataGen:
             int_chunk (int): integer with chunk size
             str_host_prd (str): string with production host
             str_host_dev (str): string with development host
+
         Metadata: https://developers.anbima.com.br/api-portal/pt-br
         """
         self.str_client_id = str_client_id
@@ -97,7 +93,9 @@ class AnbimaDataFunds(AnbimaDataGen):
     ) -> List[Dict[str, Any]]:
         """
         Retrieve available closed and opened end funds
+
         Args: -
+
         Returns:
             Json
         """
@@ -112,8 +110,10 @@ class AnbimaDataFunds(AnbimaDataGen):
     def funds_trt(self, int_pg: int = 0) -> pd.DataFrame:
         """
         Treating available closed and opened end funds
+
         Args:
             int_pg (int): integer with page number
+
         Returns:
             pd.DataFrame
         """
@@ -129,106 +129,85 @@ class AnbimaDataFunds(AnbimaDataGen):
             except exceptions.HTTPError:
                 break
             # looping within content dictionaries
-            for dict_cnt in json_funds[YAML_ANBIMA["anbima_data_api"]["key_content"]]:
+            for dict_cnt in json_funds[YAML_ANBIMA_DATA_API["key_content"]]:
                 #   setting variables
                 dict_aux = dict()
                 int_fnd += 1
                 #   looping within keys and values from content
                 for (
-                    YAML_ANBIMA["anbima_data_api"]["key_cnt"],
+                    YAML_ANBIMA_DATA_API["key_cnt"],
                     data_cnt,
                 ) in dict_cnt.items():
                     if isinstance(data_cnt, str):
-                        dict_aux[YAML_ANBIMA["anbima_data_api"]["key_cnt"]] = (
+                        dict_aux[YAML_ANBIMA_DATA_API["key_cnt"]] = (
                             data_cnt.strip()
                         )
                     elif data_cnt is None:
-                        dict_aux[YAML_ANBIMA["anbima_data_api"]["key_cnt"]] = data_cnt
+                        dict_aux[YAML_ANBIMA_DATA_API["key_cnt"]] = data_cnt
                     elif isinstance(data_cnt, list):
                         #   looping within classes
                         for i_cls, dict_cls in enumerate(data_cnt):
                             #   looping within classes and appending to serialized list
                             for (
-                                YAML_ANBIMA["anbima_data_api"]["key_cls"],
+                                YAML_ANBIMA_DATA_API["key_cls"],
                                 data_cls,
                             ) in dict_cls.items():
                                 if (
-                                    YAML_ANBIMA["anbima_data_api"]["key_cls"]
-                                    != YAML_ANBIMA["anbima_data_api"]["key_name_sbclss"]
+                                    YAML_ANBIMA_DATA_API["key_cls"]
+                                    != YAML_ANBIMA_DATA_API["key_name_sbclss"]
                                 ) and (data_cls is not None):
                                     dict_aux[
-                                        YAML_ANBIMA["anbima_data_api"]["key_cls"]
+                                        YAML_ANBIMA_DATA_API["key_cls"]
                                     ] = data_cls.strip()
                                 elif (
-                                    YAML_ANBIMA["anbima_data_api"]["key_cls"]
-                                    != YAML_ANBIMA["anbima_data_api"]["key_name_sbclss"]
+                                    YAML_ANBIMA_DATA_API["key_cls"]
+                                    != YAML_ANBIMA_DATA_API["key_name_sbclss"]
                                 ) and (data_cls is None):
                                     dict_aux[
-                                        YAML_ANBIMA["anbima_data_api"]["key_cls"]
+                                        YAML_ANBIMA_DATA_API["key_cls"]
                                     ] = data_cls
                                 elif (
-                                    YAML_ANBIMA["anbima_data_api"]["key_cls"]
-                                    == YAML_ANBIMA["anbima_data_api"]["key_name_sbclss"]
+                                    YAML_ANBIMA_DATA_API["key_cls"]
+                                    == YAML_ANBIMA_DATA_API["key_name_sbclss"]
                                 ) and (isinstance(data_cls, list)):
-                                    #   looping within subclasses and copy auxiliary dicitionary in each iteration,
-                                    #       in order to renew the subclass info imported
+                                    #   looping within subclasses and copy auxiliary dicitionary in
+                                    #       each iteration, in order to renew the subclass
+                                    #       info imported
                                     for dict_sbcls in data_cls:
                                         dict_xpt = dict_aux.copy()
                                         for (
-                                            YAML_ANBIMA["anbima_data_api"]["key_sbcls"],
+                                            YAML_ANBIMA_DATA_API["key_sbcls"],
                                             data_sbcls,
                                         ) in dict_sbcls.items():
                                             dict_xpt = HandlingDicts().merge_n_dicts(
                                                 dict_xpt,
                                                 {
                                                     "{}_{}".format(
-                                                        YAML_ANBIMA["anbima_data_api"][
-                                                            "key_name_sbcls"
-                                                        ],
-                                                        YAML_ANBIMA["anbima_data_api"][
-                                                            "key_sbcls"
-                                                        ],
+                                                        YAML_ANBIMA_DATA_API["key_name_sbcls"],
+                                                        YAML_ANBIMA_DATA_API["key_sbcls"],
                                                     ): data_sbcls
                                                 },
                                                 {
-                                                    YAML_ANBIMA["anbima_data_api"][
-                                                        "col_num_fnd"
-                                                    ]: int_fnd
-                                                    + 1,
-                                                    YAML_ANBIMA["anbima_data_api"][
-                                                        "col_num_class"
-                                                    ]: i_cls
-                                                    + 1,
-                                                    YAML_ANBIMA["anbima_data_api"][
-                                                        "col_num_pg"
-                                                    ]: int_pg,
+                                                    YAML_ANBIMA_DATA_API["col_num_fnd"]: int_fnd + 1,
+                                                    YAML_ANBIMA_DATA_API["col_num_class"]: i_cls + 1,
+                                                    YAML_ANBIMA_DATA_API["col_num_pg"]: int_pg,
                                                 },
                                             )
                                         list_ser.append(dict_xpt)
                                 elif (
-                                    YAML_ANBIMA["anbima_data_api"]["key_cls"]
-                                    == YAML_ANBIMA["anbima_data_api"]["key_name_sbclss"]
+                                    YAML_ANBIMA_DATA_API["key_cls"]
+                                    == YAML_ANBIMA_DATA_API["key_name_sbclss"]
                                 ) and (data_cls is None):
                                     list_ser.append(
                                         HandlingDicts().merge_n_dicts(
                                             dict_aux,
                                             {
-                                                YAML_ANBIMA["anbima_data_api"][
-                                                    "key_cls"
-                                                ]: data_cls
+                                                YAML_ANBIMA_DATA_API["key_cls"]: data_cls
                                             },
                                             {
-                                                YAML_ANBIMA["anbima_data_api"][
-                                                    "col_num_fnd"
-                                                ]: int_fnd
-                                                + 1,
-                                                YAML_ANBIMA["anbima_data_api"][
-                                                    "col_num_class"
-                                                ]: i_cls
-                                                + 1,
-                                                YAML_ANBIMA["anbima_data_api"][
-                                                    "col_num_pg"
-                                                ]: int_pg,
+                                                YAML_ANBIMA_DATA_API["col_num_fnd"]: int_fnd + 1,
+                                                YAML_ANBIMA_DATA_API["col_num_class"]: i_cls + 1,
+                                                YAML_ANBIMA_DATA_API["col_num_pg"]: int_pg,
                                             },
                                         )
                                     )
@@ -237,7 +216,7 @@ class AnbimaDataFunds(AnbimaDataGen):
                                         "Error of content within class, please revise "
                                         + "pg: {} / key: {} / data: {}".format(
                                             int_pg,
-                                            YAML_ANBIMA["anbima_data_api"]["key_cls"],
+                                            YAML_ANBIMA_DATA_API["key_cls"],
                                             data_cls,
                                         )
                                     )
@@ -251,52 +230,52 @@ class AnbimaDataFunds(AnbimaDataGen):
         df_funds = pd.DataFrame(list_ser)
         # changing columns types
         for col_dt in [
-            YAML_ANBIMA["anbima_data_api"]["col_fund_closure_dt"],
-            YAML_ANBIMA["anbima_data_api"]["col_eff_dt"],
-            YAML_ANBIMA["anbima_data_api"]["col_incpt_dt"],
-            YAML_ANBIMA["anbima_data_api"]["col_closure_dt"],
-            YAML_ANBIMA["anbima_data_api"]["col_sbc_incpt_dt"],
-            YAML_ANBIMA["anbima_data_api"]["col_sbc_closure_dt"],
-            YAML_ANBIMA["anbima_data_api"]["col_sbc_eff_dt"],
+            YAML_ANBIMA_DATA_API["col_fund_closure_dt"],
+            YAML_ANBIMA_DATA_API["col_eff_dt"],
+            YAML_ANBIMA_DATA_API["col_incpt_dt"],
+            YAML_ANBIMA_DATA_API["col_closure_dt"],
+            YAML_ANBIMA_DATA_API["col_sbc_incpt_dt"],
+            YAML_ANBIMA_DATA_API["col_sbc_closure_dt"],
+            YAML_ANBIMA_DATA_API["col_sbc_eff_dt"],
         ]:
             df_funds[col_dt].fillna(
-                YAML_ANBIMA["anbima_data_api"]["str_dt_fill_na"], inplace=True
+                YAML_ANBIMA_DATA_API["str_dt_fill_na"], inplace=True
             )
             df_funds[col_dt] = [
                 DatesBR().str_date_to_datetime(
-                    d, YAML_ANBIMA["anbima_data_api"]["str_dt_format"]
+                    d, YAML_ANBIMA_DATA_API["str_dt_format"]
                 )
                 for d in df_funds[col_dt]
             ]
         for col_dt in [
-            YAML_ANBIMA["anbima_data_api"]["col_update_ts"],
-            YAML_ANBIMA["anbima_data_api"]["col_sbc_update_dt"],
+            YAML_ANBIMA_DATA_API["col_update_ts"],
+            YAML_ANBIMA_DATA_API["col_sbc_update_dt"],
         ]:
             df_funds[col_dt].fillna(
-                YAML_ANBIMA["anbima_data_api"]["str_ts_fill_na"], inplace=True
+                YAML_ANBIMA_DATA_API["str_ts_fill_na"], inplace=True
             )
             df_funds[col_dt] = [
                 DatesBR().timestamp_to_date(
-                    d, format=YAML_ANBIMA["anbima_data_api"]["str_dt_format"]
+                    d, format=YAML_ANBIMA_DATA_API["str_dt_format"]
                 )
                 for d in df_funds[col_dt]
             ]
-        df_funds.fillna(YAML_ANBIMA["anbima_data_api"]["str_fill_na"], inplace=True)
+        df_funds.fillna(YAML_ANBIMA_DATA_API["str_fill_na"], inplace=True)
         df_funds = df_funds.astype(
             {
-                YAML_ANBIMA["anbima_data_api"]["col_fund_code"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_type_id"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_fund_id"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_comp_name"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_trade_name"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_fund_type"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_class_code"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_class_id_type"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_class_id"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_comp_class"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_trd_class"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_n1_ctg"]: str,
-                YAML_ANBIMA["anbima_data_api"]["col_subclasses"]: str,
+                YAML_ANBIMA_DATA_API["col_fund_code"]: str,
+                YAML_ANBIMA_DATA_API["col_type_id"]: str,
+                YAML_ANBIMA_DATA_API["col_fund_id"]: str,
+                YAML_ANBIMA_DATA_API["col_comp_name"]: str,
+                YAML_ANBIMA_DATA_API["col_trade_name"]: str,
+                YAML_ANBIMA_DATA_API["col_fund_type"]: str,
+                YAML_ANBIMA_DATA_API["col_class_code"]: str,
+                YAML_ANBIMA_DATA_API["col_class_id_type"]: str,
+                YAML_ANBIMA_DATA_API["col_class_id"]: str,
+                YAML_ANBIMA_DATA_API["col_comp_class"]: str,
+                YAML_ANBIMA_DATA_API["col_trd_class"]: str,
+                YAML_ANBIMA_DATA_API["col_n1_ctg"]: str,
+                YAML_ANBIMA_DATA_API["col_subclasses"]: str,
             }
         )
         # removing duplicates
@@ -310,19 +289,9 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/{}/historico",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: RETRIEVE INFORMATION REGARDING A SPECIFIC FUND
-        INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
-        OUTPUTS: JSON
-        """
         return self.generic_request(str_app.format(str_code_fnd), str_method)
 
     def fund_trt(self, list_code_fnds: list):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
         # setting variables
         dict_dfs = dict()
         # looping within the funds codes
@@ -356,9 +325,9 @@ class AnbimaDataFunds(AnbimaDataGen):
                                             )
                                         ] = data_hist
                                     list_ser.append(dict_xpt_2)
-                        #   regarding classes first-order dictionary has a key called historico_classe, which is
-                        #       a list (in 2024-11-08), it is treated separately in the code, in order to create the
-                        #       serialized list
+                        #   regarding classes first-order dictionary has a key called
+                        #       historico_classe, which is a list (in 2024-11-08), it is treated
+                        #       separately in the code, in order to create the serialized list
                         if key_data != "classes":
                             list_ser.append(dict_xpt)
                     df_ = pd.DataFrame(list_ser)
@@ -369,12 +338,12 @@ class AnbimaDataFunds(AnbimaDataGen):
                             StrHandler().match_string_like(col_, "*data_*") == True
                         ) and (len(col_) == 10):
                             df_[col_].fillna(
-                                YAML_ANBIMA["anbima_data_api"]["str_dt_fill_na"],
+                                YAML_ANBIMA_DATA_API["str_dt_fill_na"],
                                 inplace=True,
                             )
                             df_[col_] = [
                                 DatesBR().str_date_to_datetime(
-                                    d, YAML_ANBIMA["anbima_data_api"]["str_dt_format"]
+                                    d, YAML_ANBIMA_DATA_API["str_dt_format"]
                                 )
                                 for d in df_[col_]
                             ]
@@ -385,13 +354,13 @@ class AnbimaDataFunds(AnbimaDataGen):
                             and (len(col_) > 10)
                         ):
                             df_[col_].fillna(
-                                YAML_ANBIMA["anbima_data_api"]["str_ts_fill_na"],
+                                YAML_ANBIMA_DATA_API["str_ts_fill_na"],
                                 inplace=True,
                             )
                             df_[col_] = [
                                 DatesBR().timestamp_to_date(
                                     d,
-                                    format=YAML_ANBIMA["anbima_data_api"][
+                                    format=YAML_ANBIMA_DATA_API[
                                         "str_dt_format"
                                     ],
                                 )
@@ -403,14 +372,14 @@ class AnbimaDataFunds(AnbimaDataGen):
                             == True
                         ):
                             df_[col_].fillna(
-                                YAML_ANBIMA["anbima_data_api"]["str_float_fill_na"],
+                                YAML_ANBIMA_DATA_API["str_float_fill_na"],
                                 inplace=True,
                             )
                             df_[col_] = [float(x) for x in df_[col_]]
                         #   string
                         else:
                             df_[col_].fillna(
-                                YAML_ANBIMA["anbima_data_api"]["str_fill_na"],
+                                YAML_ANBIMA_DATA_API["str_fill_na"],
                                 inplace=True,
                             )
                             df_[col_] = [str(x).strip() for x in df_[col_]]
@@ -418,10 +387,8 @@ class AnbimaDataFunds(AnbimaDataGen):
                     dict_dfs[str_code_fnd].append(df_)
                 else:
                     raise Exception(
-                        "Type of data within the content of the fund {} not found, please check the code. ".format(
-                            str_code_fnd
-                        )
-                        + "TYPE: {}".format(type(data_cnt))
+                        "Type of data within the content of the fund {} ".format(str_code_fnd)
+                        + "not found, please check the code. DATA_TYPE: {}".format(type(data_cnt))
                     )
         # returning list of dataframes with fund infos
         return dict_dfs
@@ -432,11 +399,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/{}/historico",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: HISTORICAL CHANGES OF REGISTRATION DATA FOR THE FUND
-        INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
-        OUTPUTS: JSON
-        """
         return self.generic_request(str_app.format(str_code_class), str_method)
 
     def segment_investor(
@@ -445,12 +407,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/segmento-investidor/{}/patrimonio-liquido",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: INVESTOR SEGMENT INFORMATION, DISPLAYING THE DISTRIBUTION OF AUM
-            BY PERCENTAGE VALUES
-        INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
-        OUTPUTS: JSON
-        """
         return self.generic_request(str_app.format(str_code_class), str_method)
 
     def time_series_fund(
@@ -461,11 +417,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/{}/serie-historica",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: TIME SERIES FOR A GIVEN FUND
-        INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
-        OUTPUTS: JSON
-        """
         dict_payload = {
             "size": self.int_chunk,
             "data-inicio": str_date_inf,
@@ -483,11 +434,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/serie-historica/lote",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: TIME SERIES OF FUNDS FOR A GIVEN DATE OF UPDATE
-        INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
-        OUTPUTS: JSON
-        """
         dict_payload = {"data-atualizacao": str_date_update, "size": self.int_chunk}
         return self.generic_request(
             str_app, str_method=str_method, dict_payload=dict_payload
@@ -499,11 +445,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/dados-cadastrais/lote",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: FUNDS REGISTRATION FOR A GIVEN DATE
-        INPTUS: DATE OF UPDATE
-        OUTPUTS: JSON
-        """
         dict_payload = {"data-atualizacao": str_date_update, "size": self.int_chunk}
         return self.generic_request(
             str_app, str_method=str_method, dict_payload=dict_payload
@@ -515,11 +456,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/instituicoes",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: INSTITUTIONS MANAGING CLOSED/OPENED-END FUNDS
-        INPTUS: -
-        OUTPUTS: JSON
-        """
         dict_payload = {"size": self.int_chunk}
         return self.generic_request(
             str_app, str_method=str_method, dict_payload=dict_payload
@@ -531,11 +467,6 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/instituicoes/{}",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: INSTITUTIONS MANAGING CLOSED/OPENED-END FUNDS
-        INPTUS: EIN (EMPLOYER IDENTIFICATION NUMBER)
-        OUTPUTS: JSON
-        """
         dict_payload = {"size": self.int_chunk}
         return self.generic_request(
             str_app.format(str_ein), str_method=str_method, dict_payload=dict_payload
@@ -547,9 +478,4 @@ class AnbimaDataFunds(AnbimaDataGen):
         str_app: str = "feed/fundos/v2/fundos/{}/notas-explicativas",
         str_method: str = "GET",
     ) -> List[Dict[str, Any]]:
-        """
-        DOCSTRING: EXPLANATORY NOTES FOR A GIVEN FUND
-        INPTUS: CODIGO_FUNDO FROM ANBIMA DATA INFOS REGARDING THE CHOSEN FUND
-        OUTPUTS: JSON
-        """
         return self.generic_request(str_app.format(str_code_class), str_method)

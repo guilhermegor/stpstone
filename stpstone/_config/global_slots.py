@@ -4,12 +4,12 @@ from stpstone.utils.parsers.yaml import reading_yaml
 
 root_path = os.path.dirname(os.path.realpath(__file__))
 
-# bylaws
+# * bylaws
 YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(
     os.path.join(root_path, "countries/br/bylaws/investment_funds.yaml")
 )
 
-# exchange
+# * exchange
 #   BR
 YAML_B3_UP2DATA_REGISTRIES = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/up2data_registries.yaml"))
@@ -60,7 +60,7 @@ YAML_WW_FMP = reading_yaml(
 YAML_WW_INVESTINGCOM = reading_yaml(
     os.path.join(root_path, "countries/ww/exchange/markets/investingcom.yaml"))
 
-# macroeconomics
+# * macroeconomics
 # BR
 YAML_BR_PTAX_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/ptax_bcb.yaml"))
@@ -68,12 +68,12 @@ YAML_BR_PTAX_BCB = reading_yaml(
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
 
-# otc
+# * otc
 # BR
 YAML_DEBENTURES = reading_yaml(
     os.path.join(root_path, "countries/br/otc/debentures.yaml"))
 
-# registries
+# * registries
 # BR
 YAML_BR_CVM_REGISTRIES = reading_yaml(
     os.path.join(root_path, "countries/br/registries/cvm.yaml"))
@@ -85,6 +85,8 @@ YAML_ANBIMA_DATA_FUNDS = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_funds.yaml"))
 YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_debentures.yaml"))
+YAML_ANBIMA_DATA_API = reading_yaml(
+    os.path.join(root_path, "countries/br/registries/anbima_data_api.yaml"))
 # US
 YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
     os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
@@ -94,13 +96,12 @@ YAML_US_ETFDB_VETTAFI = reading_yaml(
 YAML_WW_RATINGS_CORP_S_AND_P = reading_yaml(
     os.path.join(root_path, "countries/ww/registries/ratings_corp_spglobal.yaml"))
 
-# taxation
+# * taxation
 # BR
 YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.yaml"))
 
 
 # ! deprecated
-YAML_ANBIMA = reading_yaml(os.path.join(root_path, "anbima.yaml"))
 YAML_B3 = reading_yaml(os.path.join(root_path, "b3.yaml"))
 YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
 YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
