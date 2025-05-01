@@ -19,16 +19,3 @@ anbima_stats:
   col_proj: 'PROJECAO'
   col_request_date: 'REQUEST_DATE'
   dt_fillna: '31/12/2000'
-
-# secondary market prices
-sec_mkt_prcs:
-  br_treasuries:
-    url: 'https://www.anbima.com.br/informacoes/merc-sec/arqs/ms{}.txt'
-    bl_verify: False
-  corporate_bonds:
-    url: 'https://www.anbima.com.br/informacoes/merc-sec-debentures/arqs/db{}.txt'
-    bl_verify: False
-  ima:
-    method: 'GET'
-    url: https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt
-    bl_verify: False

@@ -1,0 +1,335 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://www.anbima.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    app:
+    headers:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+  web_driver:
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+br_treasuries:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: informacoes/merc-sec/arqs/ms{{dt_ref_yymmdd}}.txt#bl_separator_consistency_check=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYYMMDD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    TITULO: str
+    DATA_REFERENCIA: int
+    CODIGO_SELIC: int
+    DATA_BASE_EMISSAO: date
+    DATA_VENCIMENTO: date
+    TX_COMPRA: float
+    TX_VENDA: float
+    TX_INDICATIVAS: float
+    PU: float
+    DESVIO_PADRAO: float
+    INTERV_IND_INF_D0: float
+    INTERV_IND_SUP_D0: float
+    INTERV_IND_INF_DMA1: float
+    INTERV_IND_SUP_DMA1: float
+    CRITERIO: str
+  df_read_params:
+    skiprows: 3
+    engine: "python"
+    names:
+      - TITULO
+      - DATA_REFERENCIA
+      - CODIGO_SELIC
+      - DATA_BASE_EMISSAO
+      - DATA_VENCIMENTO
+      - TX_COMPRA
+      - TX_VENDA
+      - TX_INDICATIVAS
+      - PU
+      - DESVIO_PADRAO
+      - INTERV_IND_INF_D0
+      - INTERV_IND_SUP_D0
+      - INTERV_IND_INF_DMA1
+      - INTERV_IND_SUP_DMA1
+      - CRITERIO
+    thousands: "."
+    decimal: ","
+    sep: "@"
+
+corporate_bonds:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: informacoes/merc-sec-debentures/arqs/db{{dt_ref_yymmdd}}.txt#bl_separator_consistency_check=False
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    CODIGO: str
+    NOME_EMISSOR: str
+    DT_REPACTUACAO_VENCIMENTO: date
+    INDICE_CORRECAO: str
+    TX_COMPRA: float
+    TX_VENDA: float
+    TX_INDICATIVA: float
+    DESVIO_PADRAO: float
+    INTERVALO_INDICATIVO_MIN: float
+    INTERVALO_INDICATIVO_MAX: float
+    PU: float
+    RATIO_PU_PAR_VNE: float
+    DURATION: float
+    PCT_REUNE: float
+    REF_NTNB: str
+  df_read_params:
+    skiprows: 3
+    engine: "python"
+    names:
+      - CODIGO
+      - NOME_EMISSOR
+      - DT_REPACTUACAO_VENCIMENTO
+      - INDICE_CORRECAO
+      - TX_COMPRA
+      - TX_VENDA
+      - TX_INDICATIVA
+      - DESVIO_PADRAO
+      - INTERVALO_INDICATIVO_MIN
+      - INTERVALO_INDICATIVO_MAX
+      - PU
+      - RATIO_PU_PAR_VNE
+      - DURATION
+      - PCT_REUNE
+      - REF_NTNB
+    thousands: "."
+    decimal: ","
+    sep: "@"
+
+ima_p2_pvs:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: informacoes/ima-p2/arqs/ima_completo_p2.txt#source=ima_p2_pvs
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    DATA_REFERENCIA: date
+    INDICE: str
+    NUMERO_INDICE: int
+    VARIACAO_DIARIA_PCT: float
+    VARIACAO_MES_PCT: float
+    VARIACAO_ANUAL_PCT: float
+    VARIACAO_ULTIMOS_12_MESES: float
+    VARIACAO_ULTIMOS_24_MESES: float
+    DURATION_DU: float
+    CARTEIRA_MERCADO_MTM: float
+    NUMERO_OPERACOES: int
+    QTD_NEGOCIADA_1000_TITULOS: int
+    VALOR_NEGOCIADO_MIL_BRL: float
+    PMR: float
+  df_read_params:
+
+ima_p2_th_portf:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: informacoes/ima-p2/arqs/ima_completo_p2.txt#source=ima_p2_th_portf
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    DATA_REFERENCIA: date
+    INDICE: str
+    TITULOS: str
+    DATA_VENCIMENTO: date
+    CODIGO_SELIC: int
+    CODIGO_ISIN: str
+    TX_INDICATIVA: float
+    PU: float
+    PU_JUROS: float
+    QTD_1000_TITULOS: int
+    QTD_TEORICA_1000_TITULOS: int
+    CARTEIRA_MERCADO_MTM_BRL_1000: float
+    PESO_PCT: float
+    PRAZO_DU: int
+    DURATION_DU: float
+    NUMERO_OPERACOES: int
+    QTD_NEGOCIADA_1000_TITULOS: int
+    VALOR_NEGOCIADO_MIL_BRL: float
+    PMR: float
+  df_read_params:

@@ -40,6 +40,9 @@ ingestion_concrete_creator_html_parser:
 git_pull_force:
 	bash cli/git_pull_force.sh
 
+git_merge_branches:
+	bash cli/git_merge_branches.sh
+
 gh_status:
 	bash cli/gh_status.sh
 

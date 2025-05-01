@@ -1,7 +1,6 @@
 vscode:aaron-bond.better-comments
 vscode:alexcvzz.vscode-sqlite
 vscode:arjun.swagger-viewer
-vscode:blade.timetracker
 vscode:cateyes99.simple-case
 vscode:christian-kohler.path-intellisense
 vscode:codeium.codeium
@@ -11,6 +10,7 @@ vscode:docker.docker
 vscode:dotjoshjohnson.xml
 vscode:dzhavat.bracket-pair-toggler
 vscode:esbenp.prettier-vscode
+vscode:github.codespaces
 vscode:github.copilot
 vscode:github.copilot-chat
 vscode:grapecity.gc-excelviewer
