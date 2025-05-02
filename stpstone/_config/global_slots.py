@@ -66,6 +66,8 @@ YAML_WW_INVESTINGCOM = reading_yaml(
 # BR
 YAML_BR_PTAX_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/ptax_bcb.yaml"))
+YAML_ANBIMA_FORECASTS = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/anbima_pmi_forecasts.yaml"))
 # WW
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))

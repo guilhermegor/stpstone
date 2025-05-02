@@ -121,7 +121,7 @@ class BMFInterestRates(ABCRequests):
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
-            HtmlHandler().html_tree(root, file_path=rf'{path_project}\data\test.html')
+            HtmlHandler().html_tree(root, file_path=rf'{path_project}/data/test.html')
         for i in range(1, 5):
             list_ser = self.td_th_parser(root, i)
             list_dfs.append(pd.DataFrame(list_ser))

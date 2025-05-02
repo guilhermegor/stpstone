@@ -50,5 +50,5 @@ class IndexesTheorPortfB3(ABCRequests):
         )
         for col_ in df_.columns:
             df_[col_] = [x if x is None else x.replace('.', '') for x in df_[col_]]
-            df_[col_] = [x if x is None else x.replace(',', '.') for x in df_[col_]]
+            df_[col_] = [x if x is None else x.replace(",", ".") for x in df_[col_]]
         return df_

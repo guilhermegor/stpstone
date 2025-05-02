@@ -261,7 +261,7 @@ class TradingHoursB3(ABCRequests):
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
-            HtmlHandler().html_tree(root, file_path=rf'{path_project}\data\test.html')
+            HtmlHandler().html_tree(root, file_path=rf'{path_project}/data/test.html')
         list_th = [
             x.text.strip() for x in HtmlHandler().lxml_xpath(
                 root, YAML_B3_TRADING_HOURS_B3['stocks']['xpaths']['list_th']

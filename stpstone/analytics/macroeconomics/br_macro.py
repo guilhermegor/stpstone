@@ -29,7 +29,7 @@ class Sidra:
         # setting variables
         list_ser = list()
         # request html
-        bs_html = HtmlHandler().html_bs_parser(
+        bs_html = HtmlHandler().bs_parser(
             YAML_BR_MACRO['sidra']['st_indicators']['url'],
             bl_verify=YAML_BR_MACRO['sidra']['st_indicators']['bl_verify']
         )

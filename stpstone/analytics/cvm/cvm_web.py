@@ -453,7 +453,7 @@ class CVMWeb_WS_Funds:
             try:
                 dict_daily_infos = {
                     self.__dict__[f'key_{k}']: str(
-                        HtmlHandler().html_lxml_xpath(html_content_dt, v)[0]).replace(',', '.')
+                        HtmlHandler().html_lxml_xpath(html_content_dt, v)[0]).replace(",", ".")
                     for k, v in dict_xpaths.items()
                 }
             except IndexError:
