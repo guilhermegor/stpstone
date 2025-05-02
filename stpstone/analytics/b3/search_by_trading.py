@@ -131,11 +131,11 @@ class TradingFilesB3:
                                     and list_rows_mtm[i][5] == dict_[
                                         YAML_B3['options_traded_b3']['keys']['ticker']]:
                                     dict_[YAML_B3['options_traded_b3']['keys']['close_opt']] = \
-                                        float(list_rows_mtm[i][4].replace(',', '.'))
+                                        float(list_rows_mtm[i][4].replace(",", "."))
                                     bl_break_opt_price = True
                                     if bl_debug == True:
                                         print('OPT CLOSE: {}'.format(float(
-                                            list_rows_mtm[i][4].replace(',', '.'))))
+                                            list_rows_mtm[i][4].replace(",", "."))))
                                 #   spot close
                                 if list_rows_mtm[i][0] == YAML_B3['margens_teoricas_maximas_b3'][
                                     'key_instrumentos'] \
@@ -143,11 +143,11 @@ class TradingFilesB3:
                                     and list_rows_mtm[i][5] == dict_[YAML_B3['options_traded_b3'][
                                         'keys']['spot']]:
                                     dict_[YAML_B3['options_traded_b3']['keys']['close_spot']] = \
-                                        float(list_rows_mtm[i][4].replace(',', '.'))
+                                        float(list_rows_mtm[i][4].replace(",", "."))
                                     bl_break_spt_price = True
                                     if bl_debug == True:
                                         print('SPOT CLOSE: {}'.format(float(
-                                            list_rows_mtm[i][4].replace(',', '.'))))
+                                            list_rows_mtm[i][4].replace(",", "."))))
                     #   risk-free rate
                     dict_[YAML_B3['options_traded_b3']['keys']['risk_free']] = r
                     #   days to maturity ratio
@@ -299,7 +299,7 @@ class TradingFilesB3:
                     and (len(list_rows_mtm[i][5]) == 5 or
                          len(list_rows_mtm[i][5]) == 6):
                     den_desagios = float(
-                        list_rows_mtm[i][4].replace(',', '.'))
+                        list_rows_mtm[i][4].replace(",", "."))
                 #   numerador de preço com choque para cálculo de deságio por cenário
                 #       dias úteis considerados: 1 a 10 dias úteis
                 #       garantias exigidas calculadas de compra e venda
@@ -309,12 +309,12 @@ class TradingFilesB3:
                             dias_uteis_choque \
                                 and list_rows_mtm[i + dias_uteis_choque][2] != '':
                             list_num_desagios_compra.append(float(
-                                list_rows_mtm[i + dias_uteis_choque][2].replace(',', '.')))
+                                list_rows_mtm[i + dias_uteis_choque][2].replace(",", ".")))
                         if int(list_rows_mtm[i + dias_uteis_choque][
                             1]) == dias_uteis_choque and list_rows_mtm[
                                 i + dias_uteis_choque][3] != '':
                             list_num_desagios_venda.append(float(
-                                list_rows_mtm[i + dias_uteis_choque][3].replace(',', '.')))
+                                list_rows_mtm[i + dias_uteis_choque][3].replace(",", ".")))
                     except:
                         pass
                 # executar o loop para listas vazias

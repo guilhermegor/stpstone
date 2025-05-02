@@ -70,5 +70,5 @@ class SlickChartsIndexesComponents(ABCRequests):
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(marker="pyproject.toml")
-            HtmlHandler().html_tree(root, file_path=rf"{path_project}\data\test.html")
+            HtmlHandler().html_tree(root, file_path=rf"{path_project}/data/test.html")
         return pd.DataFrame(self.td_th_parser(root, req_resp))

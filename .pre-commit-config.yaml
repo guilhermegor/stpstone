@@ -16,8 +16,9 @@ repos:
     rev: v4.4.1
     hooks:
       - id: commitizen
-        args: [.git/COMMIT_EDITMSG]
-        pass_filenames: false
+        # args: [.git/COMMIT_EDITMSG]
+        # pass_filenames: false
+        stages: [commit-msg]
   - repo: local
     hooks:
       - id: export-dependencies

@@ -1,6 +1,7 @@
 vscode:aaron-bond.better-comments
 vscode:alexcvzz.vscode-sqlite
 vscode:arjun.swagger-viewer
+vscode:blade.timetracker
 vscode:cateyes99.simple-case
 vscode:christian-kohler.path-intellisense
 vscode:codeium.codeium
@@ -20,6 +21,7 @@ vscode:jithurjacob.nbpreviewer
 vscode:lucasmelin.airflow-snippets
 vscode:mechatroner.rainbow-csv
 vscode:mohsen1.prettify-json
+vscode:ms-azuretools.vscode-containers
 vscode:ms-azuretools.vscode-docker
 vscode:ms-kubernetes-tools.vscode-kubernetes-tools
 vscode:ms-python.debugpy

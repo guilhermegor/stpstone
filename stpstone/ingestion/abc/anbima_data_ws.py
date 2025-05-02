@@ -93,7 +93,7 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
 class AnbimaDataFetcher(AnbimaDataUtils):
 
     def __init__(self, resource: str, dict_metadata: Dict[str, Any], list_slugs: List[str],
-                 str_bucket_name: str, session: ProxyScrapeAll, client_s3: Any,
+                 str_bucket_name: str, session: YieldFreeProxy, client_s3: Any,
                  logger: Optional[Logger] = None) -> None:
         self.resource = resource
         self.dict_metadata = dict_metadata

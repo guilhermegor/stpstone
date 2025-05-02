@@ -63,7 +63,7 @@ class MDB3:
             YAML_B3['financial_indicators']['col_rate']
         ]:
             df_fin_ind[col_] = [
-                float(x.replace(',', '.')) if x != '' else 0
+                float(x.replace(",", ".")) if x != '' else 0
                 for x in df_fin_ind[col_]
             ]
         df_fin_ind[YAML_B3['financial_indicators']['col_rate']] = [

@@ -77,12 +77,12 @@ class BVMFBOV(ABCRequests):
                     float(td.get_text()
                         .strip()
                         .replace('.', '')
-                        .replace(',', '.'))
+                        .replace(",", "."))
                     if NumHandler().is_numeric(
                         StrHandler().remove_diacritics(td.get_text())
                             .strip()
                             .replace('.', '')
-                            .replace(',', '.')
+                            .replace(",", ".")
                     )
                     # data not numeric
                     else
@@ -97,7 +97,7 @@ class BVMFBOV(ABCRequests):
                             .replace(' / ', ' ')
                             .replace(' ', '_')
                             .replace('.', '')
-                            .replace(',', '.')
+                            .replace(",", ".")
                             .replace('(', '')
                             .replace(')', '')
                             .replace('/', '')

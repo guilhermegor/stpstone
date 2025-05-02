@@ -80,6 +80,7 @@ ipykernel = "^6.29.5"
 pretty-errors = "1.2.25"
 commitizen = "^4.4.1"
 python-dotenv = "1.1.0"
+poetry-plugin-export = "^1.8"
 
 [build-system]
 requires = ["poetry-core"]

@@ -32,7 +32,7 @@ ingestion_concrete_creator:
 	bash cli/cc_ingestion_py.sh
 
 ingestion_concrete_creator_html_parser:
-	bash cli/cc_ingestion_html_parser_yaml.sh
+	bash cli/cc_ingestion_yaml.sh
 	bash cli/cc_ingestion_html_parser_py.sh
 
 
