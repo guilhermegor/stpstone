@@ -10,7 +10,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.remote.webelement import WebElement
-from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
 
 
 class SeleniumWD:
@@ -56,7 +55,7 @@ class SeleniumWD:
         self.path_webdriver = path_webdriver
         self.int_port = int_port
         self.str_user_agent = str_user_agent if str_user_agent is not None \
-            else UserAgents().get_random_user_agent
+            else "Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"
         self.int_wait_load = int_wait_load
         self.int_delay = int_delay
         self.bl_headless = bl_headless

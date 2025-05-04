@@ -21,7 +21,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.finance.comdinheiro.api_request import ComDinheiro
 from stpstone.handling_data.object import HandlingObjects
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.handling_data.lists import HandlingLists
+from stpstone.handling_data.lists import ListHandler
 from stpstone.document_numbers.br import DocumentsNumbersBR
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.html import HtmlHandler

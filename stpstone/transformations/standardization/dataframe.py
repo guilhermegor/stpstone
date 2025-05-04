@@ -14,7 +14,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
 
@@ -221,7 +221,7 @@ class DFStandardization(metaclass=TypeChecker):
             c
             for c in list(df_.columns)
             if c
-            not in HandlingLists().extend_lists(
+            not in ListHandler().extend_lists(
                 list(dict_dtypes.keys()), self.list_cols_dt
             )
         ]

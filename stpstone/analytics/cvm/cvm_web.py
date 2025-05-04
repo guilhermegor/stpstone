@@ -16,7 +16,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.handling_data.lists import HandlingLists
+from stpstone.handling_data.lists import ListHandler
 from stpstone.multithreading.mp_helper import mp_worker, mp_run_parallel
 from stpstone.documents_numbers.br import DocumentsNumbersBR
 
@@ -555,7 +555,7 @@ class CVMWeb_WS_Funds:
                 int_ncpus=self.int_ncpus
             )
             #   flattening list
-            list_funds = HandlingLists().flatten_list(list_funds)
+            list_funds = ListHandler().flatten_list(list_funds)
         else:
             # randomize fund codes
             list_fnds_cds = list(dict_dts_funds.keys())

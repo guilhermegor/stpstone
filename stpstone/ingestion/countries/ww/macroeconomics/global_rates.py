@@ -17,7 +17,7 @@ from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 
 
 class GlobalRates(ABCRequests):
@@ -103,8 +103,8 @@ class GlobalRates(ABCRequests):
             "RATE_VALUE": list_td_rts_values
         }
         if str_source in ["central_banks"]:
-            list_cols = ["CENTRAL_BANK"] + HandlingLists().remove_duplicates(list_rt_dts)
-            list_data = HandlingLists().remove_consecutive_duplicates(list_rts_names)
+            list_cols = ["CENTRAL_BANK"] + ListHandler().remove_duplicates(list_rt_dts)
+            list_data = ListHandler().remove_consecutive_duplicates(list_rts_names)
             for i_rt_val, i in enumerate(range(2, len(list_data) + len(list_td_rts_values) + 1, 6)):
                 i_rt_val_ = i_rt_val * 2
                 list_data.insert(i, list_td_rts_values[i_rt_val_])

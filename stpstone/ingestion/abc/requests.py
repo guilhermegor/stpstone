@@ -28,7 +28,7 @@ from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement, RemoteFiles
 from stpstone.utils.parsers.json import JsonFiles
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.xml import XMLFiles
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
@@ -1145,8 +1145,9 @@ class ABCRequests(HandleReqResponses):
                         raise Exception(
                             f"Iteration failed due to {e.__class__.__name__}: {e}"
                         )
+                    sleep(self.int_delay)
             elif str_extract_from_braces == "chunk_slugs":
-                list_chunks_slugs = HandlingLists().chunk_list(
+                list_chunks_slugs = ListHandler().chunk_list(
                     list_to_chunk=self.list_slugs,
                     str_character_divides_clients=",",
                     int_chunk=self.dict_metadata[str_resource].get(
@@ -1210,6 +1211,7 @@ class ABCRequests(HandleReqResponses):
                         raise Exception(
                             f"Iteration failed due to {e.__class__.__name__}: {e}"
                         )
+                    sleep(self.int_delay)
             else:
                 raise Exception(
                     "Neither {{slug}} or {{chunk_slugs}} are found in the app "
@@ -1272,6 +1274,7 @@ class ABCRequests(HandleReqResponses):
                     raise Exception(
                         f"Iteration failed due to {e.__class__.__name__}: {e}"
                     )
+                sleep(self.int_delay)
         if len(list_ser) > 0:
             return pd.DataFrame(list_ser)
         else:

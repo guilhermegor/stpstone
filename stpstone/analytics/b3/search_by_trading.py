@@ -5,7 +5,7 @@ import numpy as np
 from zipfile import ZipFile
 from stpstone._config.global_slots import YAML_B3
 from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.handling_data.lists import HandlingLists
+from stpstone.handling_data.lists import ListHandler
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -282,11 +282,11 @@ class TradingFilesB3:
         # carga de ativos bovespa e bmf por tipo
         dict_ativos_bov_bmf_tipo = UP2DATAB3().security_category_name
         # selecionando apenas lista de ativos de interesse - ações, fiis, etfs, e bdrs
-        list_ativos_bov_vista = HandlingLists().extend_lists(
+        list_ativos_bov_vista = ListHandler().extend_lists(
             dict_ativos_bov_bmf_tipo[key_stocks], dict_ativos_bov_bmf_tipo[key_funds],
             dict_ativos_bov_bmf_tipo[key_etfs], dict_ativos_bov_bmf_tipo[key_bdrs])
         # removendo eventuais duplicatas
-        list_ativos_bov_vista = HandlingLists().remove_duplicates(list_ativos_bov_vista)
+        list_ativos_bov_vista = ListHandler().remove_duplicates(list_ativos_bov_vista)
         # alocando margens teóricas máximas em lista de dicionários
         for i, _ in enumerate(list_rows_mtm):
             if i < len(list_rows_mtm) - 3:

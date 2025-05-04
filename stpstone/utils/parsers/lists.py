@@ -12,7 +12,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
 
 
-class HandlingLists:
+class ListHandler:
 
     def get_first_occurrence_within_list(self, list_, obj_occurrence=None, bl_uppercase=False,
                                          bl_last_uppercase_before_capitalized=False, int_error=-1,
@@ -218,7 +218,7 @@ class HandlingLists:
             list_extended_lists = chain(list_extended_lists, list_)
         # removing duplicates
         if bl_remove_duplicates == True:
-            list_extended_lists = HandlingLists().remove_duplicates(list_extended_lists)
+            list_extended_lists = ListHandler().remove_duplicates(list_extended_lists)
         else:
             list_extended_lists = list(list_extended_lists)
         # returning final list
@@ -235,7 +235,7 @@ class HandlingLists:
         list_chunked = list()
         # remove duplicates if is user's will
         if bl_remove_duplicates == True:
-            list_to_chunk = HandlingLists().remove_duplicates(list_to_chunk)
+            list_to_chunk = ListHandler().remove_duplicates(list_to_chunk)
         # creating chunks positions
         list_position_chunks = NumHandler().multiples(int_chunk, len(list_to_chunk))
         inf_limit = list_position_chunks[0]
@@ -267,7 +267,7 @@ class HandlingLists:
             list_chunked.append(str_character_divides_clients.join(list_to_chunk[
                 inf_limit: sup_limit]))
         #   removing duplicates
-        list_chunked = HandlingLists().remove_duplicates(list_chunked)
+        list_chunked = ListHandler().remove_duplicates(list_chunked)
         #   returning final result
         return list_chunked
 

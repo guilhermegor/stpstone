@@ -9,7 +9,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 
 
 class ExchRegBR(ABCRequests):

@@ -14,7 +14,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.central.global_slots import MATURITY_WEEK_DAY_PER_CONTRACT
 from stpstone.handling_data.handling_numbers import LinearAlgebra
 from stpstone.utils.parsers.json_format import JsonFiles
-from stpstone.handling_data.handling_lists import HandlingLists
+from stpstone.handling_data.handling_lists import ListHandler
 
 
 class NotionalFromPV:
@@ -121,9 +121,9 @@ class TSIR:
         for curr_nper_wrkdays in range(list(dict_nper_rates.keys())[0],
                                        list(dict_nper_rates.keys())[-1] + 1):
             # forward rate - interpolation for two boundaries
-            nper_upper_bound = HandlingLists().get_lower_upper_bound(
+            nper_upper_bound = ListHandler().get_lower_upper_bound(
                 list(dict_nper_rates.keys()), curr_nper_wrkdays)['upper_bound']
-            nper_lower_bound = HandlingLists().get_lower_upper_bound(
+            nper_lower_bound = ListHandler().get_lower_upper_bound(
                 list(dict_nper_rates.keys()), curr_nper_wrkdays)['lower_bound']
             rate_upper_bound = dict_nper_rates[nper_upper_bound]
             rate_lower_bound = dict_nper_rates[nper_lower_bound]
@@ -186,7 +186,7 @@ class TSIR:
         for curr_nper_wrkdays in range(list(dict_nper_rates.keys())[0],
                                        list(dict_nper_rates.keys())[-1] + 1):
             # three-bounds-dictionary, nper-wise
-            dict_lower_mid_upper_bound_nper = HandlingLists().get_lower_mid_upper_bound(
+            dict_lower_mid_upper_bound_nper = ListHandler().get_lower_mid_upper_bound(
                 list(dict_nper_rates.keys()), curr_nper_wrkdays)
             if len(dict_lower_mid_upper_bound_nper.keys()) == 4:
                 # working days for each bound and boolean of wheter its the ending element of
