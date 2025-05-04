@@ -19,9 +19,11 @@ from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
+pd.set_option("display.max_rows", None)
+
 class YahiiBRMacro(ABCRequests):
 
-    MONTHS_COMBINED = [
+    LIST_MONTHS_COMBINED = [
         # english (3-letter)
         "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
@@ -35,6 +37,27 @@ class YahiiBRMacro(ABCRequests):
         "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
         "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
     ]
+
+    DICT_FW_TD_TH = {
+        "igpm": {
+            "int_start": 1,
+            "int_y": 14,
+            "int_m": 1,
+            "int_start_acc": 13
+        },
+        "igpdi": {
+            "int_start": 17,
+            "int_y": 27,
+            "int_m": 2,
+            "int_start_acc": 27
+        },
+        "cetip": {
+            "int_start": 2,
+            "int_y": 1,
+            "int_m": 9,
+            "int_start_acc": 111
+        },
+    }
 
     def __init__(
         self,
@@ -71,9 +94,11 @@ class YahiiBRMacro(ABCRequests):
         Returns:
             float: converted value
         """
-        if "%" in str_value:
-            return float(str_value.replace("(-)", "").replace("%", "").replace(",", ".")) / 100.0
-        elif str_value in ["", "A/M", " "]:
+        if str_value == "A/M":
+            return "A/M"
+        elif "%" in str_value:
+            return float(str_value.replace("(-)", "-").replace("%", "").replace(",", ".")) / 100.0
+        elif str_value in ["", " "]:
             return ""
         elif NumHandler().is_numeric(str_value) == True:
             return float(str_value)
@@ -90,50 +115,48 @@ class YahiiBRMacro(ABCRequests):
         list_td_months = list()
         list_td_years = list()
         list_td_values = list()
-        i_m = 0
         list_ser = list()
         for td in list_th_td:
-            if (td in self.MONTHS_COMBINED and "/" not in td) or "ACUMULADO" in td:
+            if (td in self.LIST_MONTHS_COMBINED and "/" not in td) or "ACUMULADO" in td:
                 list_td_months.append(td)
             elif len(td) == 4 and NumHandler().is_numeric(td) == True:
                 list_td_years.append(int(td))
             else:
                 list_td_values.append(self.td_value(td))
+        print(f"list_td_values: {list_td_values}")
+        # list_td_values.remove("A/M")
         list_td_months = ListHandler().remove_duplicates(list_td_months)
-        if source not in ["cetip", "cubsp"]:
-            list_td_values = [x for x in list_td_values if x not in ["", " "]]
-        # print(f"list_td_months: {list_td_months}")
-        # print(f"list_td_years: {list_td_years}")
-        # print(f"list_td_values: {list_td_values}")
+        print(f"list_td_months: {list_td_months}")
+        print(f"list_td_years: {list_td_years}")
+        print(f"list_td_values: {list_td_values}")
         for i_y, int_year in enumerate(list_td_years):
             if DatesBR().year_number(DatesBR().curr_date) < int_year:
                 break
-            if source in ["cetip", "cubsp"]:
-                i_m = 0
+            i_m = 0
             for str_month in list_td_months:
                 try:
-                    if source not in ["cetip", "cubsp"]:
-                        list_ser.append({
-                            "YEAR": int_year,
-                            "MONTH": str_month,
-                            "VALUE": list_td_values[i_m],
-                            "ECONOMIC_INDICATOR": source.upper()
-                        })
-                    else:
-                        list_ser.append({
-                            "YEAR": int_year,
-                            "MONTH": str_month,
-                            "VALUE": list_td_values[2 + i_y + 9 * i_m] \
-                                if "ACUMULADO" not in str_month else \
-                                list_td_values[111 + i_y],
-                            "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
-                        })
+                    list_ser.append({
+                        "YEAR": int_year,
+                        "MONTH": str_month,
+                        "VALUE": list_td_values[
+                            self.DICT_FW_TD_TH[source]["int_start"] \
+                            + self.DICT_FW_TD_TH[source]["int_y"] * i_y \
+                            + self.DICT_FW_TD_TH[source]["int_m"] * i_m
+                        ] \
+                            if "ACUMULADO" not in str_month else \
+                            list_td_values[
+                                self.DICT_FW_TD_TH[source]["int_start_acc"] \
+                                + self.DICT_FW_TD_TH[source]["int_y"] * i_y
+                            ],
+                        "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
+                    })
                     i_m += 1
                 except IndexError:
                     break
         return list_ser
         
-    def list_web_elements(self, cls_selenium_wd: SeleniumWD, driver: WebDriver, xpath_: str) -> List[Any]:
+    def list_web_elements(self, cls_selenium_wd: SeleniumWD, driver: WebDriver, xpath_: str) \
+        -> List[Any]:
         """
         Get list of web elements from xpath
 
@@ -151,7 +174,7 @@ class YahiiBRMacro(ABCRequests):
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         try:
-            source = self.get_query_params(req_resp.url, "source")
+            source = self.get_query_params(req_resp.url, "source").lower()
             cls_selenium_wd = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
             driver = cls_selenium_wd.get_web_driver
             list_th_td = self.list_web_elements(

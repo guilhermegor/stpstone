@@ -31,9 +31,10 @@ pmi_exchange_rates:
   payload:
   # list of slugs (complementary descriptive text to access a web pages)
   slugs:
-    - igpm
+    # - igpm
     - igpdi
-    - cetip
+    # - cetip
+    # - cubsp
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:
