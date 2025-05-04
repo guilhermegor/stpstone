@@ -16,6 +16,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
+from stpstone.utils.cals.handling_dates import DatesBR
 
 
 class YahiiBRMacro(ABCRequests):
@@ -99,17 +100,19 @@ class YahiiBRMacro(ABCRequests):
             else:
                 list_td_values.append(self.td_value(td))
         list_td_months = ListHandler().remove_duplicates(list_td_months)
-        if source not in ["cetip"]:
+        if source not in ["cetip", "cubsp"]:
             list_td_values = [x for x in list_td_values if x not in ["", " "]]
         # print(f"list_td_months: {list_td_months}")
         # print(f"list_td_years: {list_td_years}")
         # print(f"list_td_values: {list_td_values}")
         for i_y, int_year in enumerate(list_td_years):
-            if source in ["cetip"]:
+            if DatesBR().year_number(DatesBR().curr_date) < int_year:
+                break
+            if source in ["cetip", "cubsp"]:
                 i_m = 0
             for str_month in list_td_months:
                 try:
-                    if source not in ["cetip"]:
+                    if source not in ["cetip", "cubsp"]:
                         list_ser.append({
                             "YEAR": int_year,
                             "MONTH": str_month,
@@ -120,14 +123,14 @@ class YahiiBRMacro(ABCRequests):
                         list_ser.append({
                             "YEAR": int_year,
                             "MONTH": str_month,
-                            "VALUE": list_td_values[2 + i_y + 9 * i_m],
+                            "VALUE": list_td_values[2 + i_y + 9 * i_m] \
+                                if "ACUMULADO" not in str_month else \
+                                list_td_values[111 + i_y],
                             "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
                         })
                     i_m += 1
                 except IndexError:
                     break
-        # print(f"list_ser: {list_ser}")
-        # raise Exception("BREAKPOINT")
         return list_ser
         
     def list_web_elements(self, cls_selenium_wd: SeleniumWD, driver: WebDriver, xpath_: str) -> List[Any]:
