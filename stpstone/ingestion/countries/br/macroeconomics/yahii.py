@@ -81,7 +81,7 @@ class YahiiBRMacro(ABCRequests):
         list_td_values = list()
         list_ser = list()
         for td in list_th_td:
-            if (td in YAML_YAHII["pmi_exchange_rates"]["list_months_combined"] 
+            if (td in YAML_YAHII["pmi_rf_rates"]["list_months_combined"] 
                 and "/" not in td) or "ACUMULADO" in td:
                 list_td_months.append(td)
             elif len(td) == 4 and NumHandler().is_numeric(td) == True:
@@ -102,18 +102,18 @@ class YahiiBRMacro(ABCRequests):
                         "YEAR": int_year,
                         "MONTH": str_month,
                         "VALUE": list_td_values[
-                            YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                            YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_start"] \
-                            + YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                            + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_y"] * i_y \
-                            + YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                            + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_m"] * i_m
                         ] \
                             if "ACUMULADO" not in str_month else \
                             list_td_values[
-                                YAML_YAHII["pmi_exchange_rates"][
+                                YAML_YAHII["pmi_rf_rates"][
                                     "dict_fw_td_th"][source]["int_start_acc"] \
-                                + YAML_YAHII["pmi_exchange_rates"][
+                                + YAML_YAHII["pmi_rf_rates"][
                                     "dict_fw_td_th"][source]["int_y"] * i_y
                             ],
                         "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
@@ -146,7 +146,7 @@ class YahiiBRMacro(ABCRequests):
             cls_selenium_wd = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
             driver = cls_selenium_wd.get_web_driver
             list_th_td = self.list_web_elements(
-                cls_selenium_wd, driver, YAML_YAHII["pmi_exchange_rates"]['xpaths']['list_th_td'])
+                cls_selenium_wd, driver, YAML_YAHII["pmi_rf_rates"]['xpaths']['list_th_td'])
             list_ser = self.td_th_parser(source, list_th_td)
         finally:
             driver.quit()

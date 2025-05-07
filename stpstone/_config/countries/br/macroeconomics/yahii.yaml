@@ -21,7 +21,7 @@ metadata:
 
 ### RESOURCES TO BE SCRAPED ###
 
-pmi_exchange_rates:
+pmi_rf_rates:
   list_months_combined: [
     # english (3-letter)
     "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
@@ -47,6 +47,11 @@ pmi_exchange_rates:
       int_y: 27
       int_m: 2
       int_start_acc: 41
+    igp10:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
     cetip:
       int_start: 2
       int_y: 1
@@ -57,6 +62,16 @@ pmi_exchange_rates:
       int_y: 2
       int_m: 17
       int_start_acc: 26
+    cubspsd:
+      int_start: 12
+      int_y: 2
+      int_m: 17
+      int_start_acc: 26
+    incc:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -68,8 +83,11 @@ pmi_exchange_rates:
   slugs:
     # - igpm
     # - igpdi
+    # - igp10
     # - cetip
-    - cubsp
+    # - cubsp
+    # - cubspSD
+    - incc
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:
@@ -99,7 +117,7 @@ pmi_exchange_rates:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_yahii_pmi_exchange_rates
+  table_name: br_yahii_pmi_rf_rates
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
