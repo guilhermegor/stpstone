@@ -1,14 +1,8 @@
-### DATAFRAME STANDARDIZATION ###
-
-# pypi.org
-from logging import Logger
-from typing import Any, Dict, List, Optional
-
 import numpy as np
 import pandas as pd
+from logging import Logger
+from typing import Any, Dict, List, Optional
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-
-# local libs
 from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -18,6 +12,8 @@ from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
 
+
+pd.set_option('future.no_silent_downcasting', True)
 
 class DFStandardization(metaclass=TypeChecker):
 

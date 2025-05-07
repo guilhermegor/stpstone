@@ -38,20 +38,25 @@ pmi_exchange_rates:
   ]
   dict_fw_td_th:
     igpm:
-      int_start: 1,
-      int_y: 14,
-      int_m: 1,
+      int_start: 1
+      int_y: 14
+      int_m: 1
       int_start_acc: 13
     igpdi:
-      int_start: 17,
-      int_y: 27,
-      int_m: 2,
-      int_start_acc: 27
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
     cetip:
-      int_start: 2,
-      int_y: 1,
-      int_m: 9,
+      int_start: 2
+      int_y: 1
+      int_m: 9
       int_start_acc: 111
+    cubsp:
+      int_start: 12
+      int_y: 2
+      int_m: 17
+      int_start_acc: 26
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -62,9 +67,9 @@ pmi_exchange_rates:
   # list of slugs (complementary descriptive text to access a web pages)
   slugs:
     # - igpm
-    - igpdi
+    # - igpdi
     # - cetip
-    # - cubsp
+    - cubsp
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:

@@ -81,22 +81,20 @@ class YahiiBRMacro(ABCRequests):
         list_td_values = list()
         list_ser = list()
         for td in list_th_td:
-            if (td in self.YAML_YAHII["pmi_exchange_rates"]["list_months_combined"] 
+            if (td in YAML_YAHII["pmi_exchange_rates"]["list_months_combined"] 
                 and "/" not in td) or "ACUMULADO" in td:
                 list_td_months.append(td)
             elif len(td) == 4 and NumHandler().is_numeric(td) == True:
                 list_td_years.append(int(td))
             else:
                 list_td_values.append(self.td_value(td))
-        print(f"list_td_values: {list_td_values}")
-        # list_td_values.remove("A/M")
+        if source in ["igpm"]: list_td_values.remove("A/M")
         list_td_months = ListHandler().remove_duplicates(list_td_months)
         print(f"list_td_months: {list_td_months}")
         print(f"list_td_years: {list_td_years}")
-        print(f"list_td_values: {list_td_values}")
+        print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
         for i_y, int_year in enumerate(list_td_years):
-            if DatesBR().year_number(DatesBR().curr_date) < int_year:
-                break
+            if DatesBR().year_number(DatesBR().curr_date) < int_year: break
             i_m = 0
             for str_month in list_td_months:
                 try:
@@ -104,18 +102,18 @@ class YahiiBRMacro(ABCRequests):
                         "YEAR": int_year,
                         "MONTH": str_month,
                         "VALUE": list_td_values[
-                            self.YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                            YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
                                 "int_start"] \
-                            + self.YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                            + YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
                                 "int_y"] * i_y \
-                            + self.YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                            + YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
                                 "int_m"] * i_m
                         ] \
                             if "ACUMULADO" not in str_month else \
                             list_td_values[
-                                self.YAML_YAHII["pmi_exchange_rates"][
+                                YAML_YAHII["pmi_exchange_rates"][
                                     "dict_fw_td_th"][source]["int_start_acc"] \
-                                + self.YAML_YAHII["pmi_exchange_rates"][
+                                + YAML_YAHII["pmi_exchange_rates"][
                                     "dict_fw_td_th"][source]["int_y"] * i_y
                             ],
                         "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
