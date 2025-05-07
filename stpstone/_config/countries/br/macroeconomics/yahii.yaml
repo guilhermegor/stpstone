@@ -22,6 +22,36 @@ metadata:
 ### RESOURCES TO BE SCRAPED ###
 
 pmi_exchange_rates:
+  list_months_combined: [
+    # english (3-letter)
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+    # english (full)
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
+    # portuguese (3-letter)
+    "JAN", "FEV", "MAR", "ABR", "MAI", "JUN",
+    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ",
+    # portuguese (full)
+    "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
+    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
+  ]
+  dict_fw_td_th:
+    igpm:
+      int_start: 1,
+      int_y: 14,
+      int_m: 1,
+      int_start_acc: 13
+    igpdi:
+      int_start: 17,
+      int_y: 27,
+      int_m: 2,
+      int_start_acc: 27
+    cetip:
+      int_start: 2,
+      int_y: 1,
+      int_m: 9,
+      int_start_acc: 111
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET

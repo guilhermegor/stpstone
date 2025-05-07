@@ -23,42 +23,6 @@ pd.set_option("display.max_rows", None)
 
 class YahiiBRMacro(ABCRequests):
 
-    LIST_MONTHS_COMBINED = [
-        # english (3-letter)
-        "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
-        # english (full)
-        "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-        "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
-        # portuguese (3-letter)
-        "JAN", "FEV", "MAR", "ABR", "MAI", "JUN",
-        "JUL", "AGO", "SET", "OUT", "NOV", "DEZ",
-        # portuguese (full)
-        "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
-        "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
-    ]
-
-    DICT_FW_TD_TH = {
-        "igpm": {
-            "int_start": 1,
-            "int_y": 14,
-            "int_m": 1,
-            "int_start_acc": 13
-        },
-        "igpdi": {
-            "int_start": 17,
-            "int_y": 27,
-            "int_m": 2,
-            "int_start_acc": 27
-        },
-        "cetip": {
-            "int_start": 2,
-            "int_y": 1,
-            "int_m": 9,
-            "int_start_acc": 111
-        },
-    }
-
     def __init__(
         self,
         session: Optional[Session] = None,
@@ -117,7 +81,8 @@ class YahiiBRMacro(ABCRequests):
         list_td_values = list()
         list_ser = list()
         for td in list_th_td:
-            if (td in self.LIST_MONTHS_COMBINED and "/" not in td) or "ACUMULADO" in td:
+            if (td in self.YAML_YAHII["pmi_exchange_rates"]["list_months_combined"] 
+                and "/" not in td) or "ACUMULADO" in td:
                 list_td_months.append(td)
             elif len(td) == 4 and NumHandler().is_numeric(td) == True:
                 list_td_years.append(int(td))
@@ -139,14 +104,19 @@ class YahiiBRMacro(ABCRequests):
                         "YEAR": int_year,
                         "MONTH": str_month,
                         "VALUE": list_td_values[
-                            self.DICT_FW_TD_TH[source]["int_start"] \
-                            + self.DICT_FW_TD_TH[source]["int_y"] * i_y \
-                            + self.DICT_FW_TD_TH[source]["int_m"] * i_m
+                            self.YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                                "int_start"] \
+                            + self.YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                                "int_y"] * i_y \
+                            + self.YAML_YAHII["pmi_exchange_rates"]["dict_fw_td_th"][source][
+                                "int_m"] * i_m
                         ] \
                             if "ACUMULADO" not in str_month else \
                             list_td_values[
-                                self.DICT_FW_TD_TH[source]["int_start_acc"] \
-                                + self.DICT_FW_TD_TH[source]["int_y"] * i_y
+                                self.YAML_YAHII["pmi_exchange_rates"][
+                                    "dict_fw_td_th"][source]["int_start_acc"] \
+                                + self.YAML_YAHII["pmi_exchange_rates"][
+                                    "dict_fw_td_th"][source]["int_y"] * i_y
                             ],
                         "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
                     })
