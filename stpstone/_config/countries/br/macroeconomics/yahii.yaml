@@ -72,6 +72,18 @@ pmi_rf_rates:
       int_y: 27
       int_m: 2
       int_start_acc: 41
+    inccm:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+    iiebr:
+      int_start: 1
+      int_y: 1
+      int_m: 8
+      int_rows_tbl: 12
+      int_year_min: 2000
+      int_start_acc: 40
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -87,7 +99,10 @@ pmi_rf_rates:
     # - cetip
     # - cubsp
     # - cubspSD
-    - incc
+    # - incc
+    # - incc
+    # - inccm
+    - iiebr
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:
@@ -128,6 +143,7 @@ pmi_rf_rates:
     COL_1: bfill
     COL_2: ffill
   dtypes:
+    INDEX_TD: int
     YEAR: int
     MONTH: str
     VALUE: float

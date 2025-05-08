@@ -64,8 +64,8 @@ class YahiiBRMacro(ABCRequests):
             return float(str_value.replace("(-)", "-").replace("%", "").replace(",", ".")) / 100.0
         elif str_value in ["", " "]:
             return ""
-        elif NumHandler().is_numeric(str_value) == True:
-            return float(str_value)
+        elif NumHandler().is_numeric(str_value.replace(",", ".")) == True:
+            return float(str_value.replace(",", "."))
         else:
             self.create_log.log_message(
                 self.logger, 
@@ -95,27 +95,37 @@ class YahiiBRMacro(ABCRequests):
         print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
         for i_y, int_year in enumerate(list_td_years):
             if DatesBR().year_number(DatesBR().curr_date) < int_year: break
-            i_m = 0
+            if ("int_year_min" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
+                and ("int_year_min" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]):
+                i_m = ((int_year - YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                        "int_year_min"]) // YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_m"]) * (YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                        "int_rows_tbl"] - 1)
+                int_mult_start = (int_year - YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                        "int_year_min"]) // YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_m"] + 1
+            else:
+                i_m = 0
+                int_mult_start = 1
             for str_month in list_td_months:
-                try:
-                    list_ser.append({
-                        "YEAR": int_year,
-                        "MONTH": str_month,
-                        "VALUE": list_td_values[
-                            YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                                "int_start"] \
+                int_pos = \
+                        YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                                "int_start"] * int_mult_start \
                             + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_y"] * i_y \
                             + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                                "int_m"] * i_m
-                        ] \
-                            if "ACUMULADO" not in str_month else \
-                            list_td_values[
-                                YAML_YAHII["pmi_rf_rates"][
+                                "int_m"] * i_m if "ACUMULADO" not in str_month else \
+                        YAML_YAHII["pmi_rf_rates"][
                                     "dict_fw_td_th"][source]["int_start_acc"] \
                                 + YAML_YAHII["pmi_rf_rates"][
                                     "dict_fw_td_th"][source]["int_y"] * i_y
-                            ],
+                print(f"int_pos: {int_pos} / int_year: {int_year} / str_month: {str_month} / i_m: {i_m}")
+                try:
+                    list_ser.append({
+                        "INDEX_TD": int_pos,
+                        "YEAR": int_year,
+                        "MONTH": str_month,
+                        "VALUE": list_td_values[int_pos],
                         "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
                     })
                     i_m += 1
