@@ -119,7 +119,7 @@ class YahiiBRMacro(ABCRequests):
                                     "dict_fw_td_th"][source]["int_start_acc"] \
                                 + YAML_YAHII["pmi_rf_rates"][
                                     "dict_fw_td_th"][source]["int_y"] * i_y
-                print(f"int_pos: {int_pos} / int_year: {int_year} / str_month: {str_month} / i_m: {i_m}")
+                # print(f"int_pos: {int_pos} / int_year: {int_year} / str_month: {str_month} / i_m: {i_m}")
                 try:
                     list_ser.append({
                         "INDEX_TD": int_pos,
