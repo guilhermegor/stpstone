@@ -62,7 +62,7 @@ class YahiiBRMacro(ABCRequests):
             return "A/M"
         elif ("%" in str_value) and ("*" not in str_value):
             return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
-                         .replace(",", ".")) / 100.0
+                         .replace(",", ".").replace(" ", "")) / 100.0
         elif "(-)" in str_value:
             return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
                          .replace(",", "."))
@@ -97,12 +97,18 @@ class YahiiBRMacro(ABCRequests):
                     list_td_values.append(self.td_value(td.replace(".", ",")))
             else:
                 list_td_values.append(self.td_value(td))
-        if source in ["igpm"]: list_td_values.remove("A/M")
-        if source in ["ipcae"]:
+        if source in ["igpm"]: 
+            list_td_values.remove("A/M")
+        elif source in ["ipcae"]:
             list_td_years = list_td_years[2:]
             list_td_months = ["JAN", "FEV", "MAR", "ACUM TRIM", "ABR", "MAI", "JUN", "ACUM TRIM", 
                               "JUL", "AGO", "SET", "ACUM TRIM", "OUT", "NOV", "DEZ", "ACUM TRIM", 
                               "ACUMULADO NO ANO"]
+        elif source in ["ivar"]:
+            list_td_years = list_td_years[1:]
+            list_td_months = [x for x in list_td_months if x not in ["JAN", "FEV", "MAR", "ABR", 
+                                                                     "MAI", "JUN", "JUL", "AGO", 
+                                                                     "SET", "OUT", "NOV", "DEZ"]]
         print(f"list_td_months: {list_td_months}")
         print(f"list_td_years: {list_td_years}")
         print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")

@@ -124,6 +124,11 @@ pmi_rf_rates:
       int_y: 17
       int_m: 1
       int_start_acc: 65
+    ivar:
+      int_start: 3
+      int_y: 1
+      int_m: 9
+      int_start_acc: 111
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -150,7 +155,8 @@ pmi_rf_rates:
     # - ipc
     # - ipca
     # - ipca15
-    - ipcae
+    # - ipcae
+    - ivar
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:
