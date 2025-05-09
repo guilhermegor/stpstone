@@ -94,6 +94,36 @@ pmi_rf_rates:
       int_y: 27
       int_m: 2
       int_start_acc: 41
+    ipam:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+    ipcfipe:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+    ipc:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+    ipca:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+    ipca15:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+    ipcae:
+      int_start: 49
+      int_y: 17
+      int_m: 1
+      int_start_acc: 65
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -114,7 +144,13 @@ pmi_rf_rates:
     # - inccm
     # - iiebr
     # - inpc
-    - ipadi
+    # - ipadi
+    # - ipam
+    # - ipcfipe
+    # - ipc
+    # - ipca
+    # - ipca15
+    - ipcae
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:

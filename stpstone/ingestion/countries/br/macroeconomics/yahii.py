@@ -60,8 +60,12 @@ class YahiiBRMacro(ABCRequests):
         """
         if str_value == "A/M":
             return "A/M"
-        elif "%" in str_value:
-            return float(str_value.replace("(-)", "-").replace("%", "").replace(",", ".")) / 100.0
+        elif ("%" in str_value) and ("*" not in str_value):
+            return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
+                         .replace(",", ".")) / 100.0
+        elif "(-)" in str_value:
+            return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
+                         .replace(",", "."))
         elif str_value in ["", " "]:
             return ""
         elif NumHandler().is_numeric(str_value.replace(",", ".")) == True:
@@ -82,14 +86,23 @@ class YahiiBRMacro(ABCRequests):
         list_ser = list()
         for td in list_th_td:
             if (td in YAML_YAHII["pmi_rf_rates"]["list_months_combined"] 
-                and "/" not in td) or "ACUMULADO" in td:
+                and "/" not in td) \
+                or "ACUMULADO" in td \
+                or "ACUM" in td:
                 list_td_months.append(td)
             elif len(td) == 4 and NumHandler().is_numeric(td) == True:
-                list_td_years.append(int(td))
+                try:
+                    list_td_years.append(int(td))
+                except ValueError:
+                    list_td_values.append(self.td_value(td.replace(".", ",")))
             else:
                 list_td_values.append(self.td_value(td))
         if source in ["igpm"]: list_td_values.remove("A/M")
-        list_td_months = ListHandler().remove_duplicates(list_td_months)
+        if source in ["ipcae"]:
+            list_td_years = list_td_years[2:]
+            list_td_months = ["JAN", "FEV", "MAR", "ACUM TRIM", "ABR", "MAI", "JUN", "ACUM TRIM", 
+                              "JUL", "AGO", "SET", "ACUM TRIM", "OUT", "NOV", "DEZ", "ACUM TRIM", 
+                              "ACUMULADO NO ANO"]
         print(f"list_td_months: {list_td_months}")
         print(f"list_td_years: {list_td_years}")
         print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
