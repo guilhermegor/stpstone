@@ -61,7 +61,6 @@ class StrHandler:
         """
         try:
             start = s.index(first) + len(first)
-            print(f"STRING: {s}, START: {start}, AFTER: {s[start:]}")
             return s[start:]
         except ValueError:
             return ""
@@ -593,3 +592,7 @@ class StrHandler:
             key: value[0] if len(value) == 1 else value
             for key, value in query_params.items()
         }
+
+    def has_no_letters(self, str_: str) -> bool:
+        """Check if a string has no letters (A-Z, a-z)."""
+        return not any(char.isalpha() for char in str_)

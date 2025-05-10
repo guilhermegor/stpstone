@@ -15,7 +15,6 @@ from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.create_logs import CreateLog
 
-pd.set_option("display.max_rows", None)
 
 class YahiiOthersBR(ABCRequests):
 
@@ -43,6 +42,7 @@ class YahiiOthersBR(ABCRequests):
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
+        self.year_yy = self.dt_ref.strftime("%y")
 
     def td_th_parser(self, list_td: List[Any], list_headers: List[str], source: str) \
         -> pd.DataFrame:
@@ -103,6 +103,17 @@ class YahiiOthersBR(ABCRequests):
             )
             df_["SALARIO_INF"] = df_["SALARIO_INF"].fillna(0.0)
             df_["SALARIO_SUP"] = df_["SALARIO_SUP"].fillna(1_000_000_000)
+        elif source in ["daily_usdbrl", "daily_eurbrl"]:
+            list_td = [x.replace(",", ".") for x in list_td \
+                       if (StrHandler().match_string_like(x, "*/*/*") and len(x) == 10) \
+                        or "," in x or "." in x \
+                        or (StrHandler().match_string_like(x, "*/*") and len(x) == 9 \
+                            and StrHandler().has_no_letters(x))]
+            list_ser = HandlingDicts().pair_headers_with_data(
+                list_headers,
+                list_td
+            )
+            df_ = pd.DataFrame(list_ser)
         return df_
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
@@ -118,6 +129,8 @@ class YahiiOthersBR(ABCRequests):
             list_headers = ["DISPOSITIVO_LEGAL", "DATA", "VALOR"]
         elif source == "inss_contribution":
             list_headers = ["SALARIO_CONTRIBUICAO", "ALIQUOTA_RECOLHIMENTO_INSS"]
+        elif source in ["daily_usdbrl", "daily_eurbrl"]:
+            list_headers = ["DATA", "COMPRA", "VENDA"]
         else:
             raise ValueError(f"Source {source} not implemented.")
         return self.td_th_parser(list_td, list_headers, source)
