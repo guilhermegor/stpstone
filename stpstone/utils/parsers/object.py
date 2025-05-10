@@ -16,5 +16,5 @@ class HandlingObjects:
         if any([x is None for x in [str_left_bound, str_right_bound]]):
             return ast.literal_eval(data_object)
         else:
-            return ast.literal_eval(StrHandler().find_between(
+            return ast.literal_eval(StrHandler().get_between(
                 str(data_object), str_left_bound, str_right_bound))

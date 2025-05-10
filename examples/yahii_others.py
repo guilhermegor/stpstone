@@ -7,6 +7,10 @@ cls_ = YahiiOthersBR(
     cls_db=None
 )
 
-df_ = cls_.source("min_wage", bl_fetch=True)
-print(f"DF YAHII MIN WAGE: \n{df_}")
+# df_ = cls_.source("min_wage", bl_fetch=True)
+# print(f"DF YAHII MIN WAGE: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("inss_contribution", bl_fetch=True)
+print(f"DF YAHII INSS CONTRIBUTION: \n{df_}")
 df_.info()

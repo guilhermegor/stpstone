@@ -40,7 +40,20 @@ class StrHandler:
         )
         return multi_map.update(single_map)
 
-    def find_between(self, s, first, last):
+    def get_between(self, s, first, last):
+        """
+        DOCSTRING: FIND STRINGS BETWEEN TWO SUBSTRINGS
+        INPUTS: ORIGINAL STRING, INITAL AND FINAL DELIMITERS
+        OUTPUTS: MID STRING
+        """
+        try:
+            start = s.index(first) + len(first) + 1
+            end = s.index(last, start)
+            return s[start:end]
+        except ValueError:
+            return ""
+    
+    def get_after(self, s, first):
         """
         DOCSTRING: FIND STRINGS BETWEEN TWO SUBSTRINGS
         INPUTS: ORIGINAL STRING, INITAL AND FINAL DELIMITERS
@@ -48,8 +61,8 @@ class StrHandler:
         """
         try:
             start = s.index(first) + len(first)
-            end = s.index(last, start)
-            return s[start:end]
+            print(f"STRING: {s}, START: {start}, AFTER: {s[start:]}")
+            return s[start:]
         except ValueError:
             return ""
 

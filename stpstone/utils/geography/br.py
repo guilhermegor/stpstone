@@ -20,7 +20,7 @@ class BrazilGeo:
         url_localidades_brasil = 'https://servicodados.ibge.gov.br/api/v1/localidades/estados'
         # rest consult to ibge database
         response = request('GET', url_localidades_brasil)
-        dict_message = ast.literal_eval(StrHandler().find_between(
+        dict_message = ast.literal_eval(StrHandler().get_between(
             str(response.text.encode('utf8')), "b'", "'"))
         # latin characters to brazillian states names
         # wheter remove or not accents according to user will

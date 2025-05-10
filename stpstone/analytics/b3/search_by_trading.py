@@ -438,7 +438,7 @@ class TradingFilesB3:
         # looping within files in zip
         for file_unz in list_unzipped_files[1:]:
             #   creating columns month-file
-            str_mes_arquivo_garantias_b3_corrente = StrHandler().find_between(
+            str_mes_arquivo_garantias_b3_corrente = StrHandler().get_between(
                 str(file_unz), '_', '.xlsx').replace(' ', '').lower()
             #   looping within sheet names
             for nome_plan_ativa in [
