@@ -116,11 +116,13 @@ class YahiiBRMacro(ABCRequests):
                                                                      "SET", "OUT", "NOV", "DEZ"]]
         elif source in ["iiebr"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
-        elif source in ["poupanca", "tjlp", "tlp_fixa", "tbf"]:
+        elif source in ["poupanca", "tjlp", "tlp_fixa", "tbf", "tr", "ufesp"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
             list_td_years = ListHandler().remove_duplicates(list_td_years)
             list_td_years = [x for x in list_td_years \
-                             if x <= DatesBR().year_number(DatesBR().curr_date) + 1 and x >= 1995]
+                             if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
+                                and x >= YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                                    "int_year_min"]]
             list_td_years.sort()
         print(f"list_td_months: {list_td_months}")
         print(f"list_td_years: {list_td_years}")
@@ -151,12 +153,19 @@ class YahiiBRMacro(ABCRequests):
                 int_start_acc = 0
                 int_start_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"]
             for str_month in list_td_months:
-                int_pos = int_start_tbl \
-                    + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y \
-                    + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"] * i_m \
-                    if "ACUMULADO" not in str_month else \
-                    YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"] \
+                # position of the value in the list_td_values
+                if "ACUMULADO" not in str_month:
+                    int_pos = int_start_tbl \
+                        + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y \
+                        + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"] * i_m
+                else:
+                    int_pos = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"] \
                         + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y
+                if source in ["tr"] and int_num_tbl > 1 and "ACUM" not in str_month:
+                    int_pos -= int(int_num_tbl - 1)
+                if source in ["tr"] and int_num_tbl > 0 and "ACUM" in str_month:
+                    int_pos -= int_num_tbl
+                # populating serialized list
                 try:
                     list_ser.append({
                         "INT_START": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
