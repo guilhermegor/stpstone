@@ -6,7 +6,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 class DebenturesBR(metaclass=TypeChecker):
     """
     A comprehensive class for pricing and analyzing Brazilian debentures,
-    excluding duration-related calculations which are already implemented.
+    excluding float_duration-related calculations which are already implemented.
     """
     
     def __init__(
@@ -36,7 +36,6 @@ class DebenturesBR(metaclass=TypeChecker):
         self.float_yield = float_yield
         self.float_tax_rate = float_tax_rate
     
-    @property
     def calculate_price(self) -> float:
         """
         Calculate the theoretical float_price of the debenture considering tax on coupons.
@@ -181,19 +180,36 @@ class DebenturesBR(metaclass=TypeChecker):
                (dt_end.month - dt_start.month) * 30 + \
                (dt_d2 - dt_d1)
 
-    def dirty_price(self, float_clean_price: Optional[float] = None) -> float:
+    def dirty_price(
+        self, 
+        float_clean_price: Optional[float] = None,
+        dt_settlement: Optional[date] = None,
+        dt_last_coupon: Optional[date] = None,
+        dt_next_coupon: Optional[date] = None,
+        str_day_count_convention: str = "actual/actual"
+    ) -> float:
         """
-        Calculate dirty float_price (clean float_price + float_accrued interest).
+        Calculate dirty price (clean price + accrued interest).
         
         Args:
-            float_clean_price: Clean float_price (if None, uses calculated float_price)
+            float_clean_price: Clean price (if None, uses calculated price)
+            dt_settlement: Settlement date for accrued interest calculation
+            dt_last_coupon: Last coupon payment date
+            dt_next_coupon: Next coupon payment date
+            str_day_count_convention: Day count convention method
             
         Returns:
-            Dirty float_price
+            Dirty price including accrued interest
         """
         clean_price: float = float_clean_price if float_clean_price is not None \
             else self.calculate_price()
-        return clean_price + self.accrued_interest()
+        accrued = self.accrued_interest(
+            dt_settlement=dt_settlement,
+            dt_last_coupon=dt_last_coupon,
+            dt_next_coupon=dt_next_coupon,
+            str_day_count_convention=str_day_count_convention
+        )
+        return clean_price + accrued
     
     def holding_period_return(
         self,
@@ -215,49 +231,49 @@ class DebenturesBR(metaclass=TypeChecker):
         float_total_return: float = (float_sale_price - float_purchase_price) / float_purchase_price
         return (1 + float_total_return) ** (1 / int_holding_period) - 1
     
-    def credit_spread(self, risk_free_rate: float) -> float:
+    def credit_spread(self, float_risk_free_rate: float) -> float:
         """
         Calculate credit spread over risk-free rate.
         
         Args:
-            risk_free_rate: Risk-free rate (decimal)
+            float_risk_free_rate: Risk-free rate (decimal)
             
         Returns:
             Credit spread (decimal)
         """
-        return self.float_yield - risk_free_rate
+        return self.float_yield - float_risk_free_rate
     
-    def early_redemption_value(self, call_price: float, call_date: float) -> float:
+    def early_redemption_value(self, float_call_price: float, float_call_date: float) -> float:
         """
         Calculate the minimum between the debenture's present value to maturity and
         its present value if called at the call date, considering all cash flows.
         
         Args:
-            call_price: Price at which the debenture can be called (% of face value)
-            call_date: Time until call date in years (must be <= maturity)
+            float_call_price: Price at which the debenture can be called (% of face value)
+            float_call_date: Time until call date in years (must be <= maturity)
             
         Returns:
             float: Minimum value between holding to maturity and being called
             
         Raises:
-            ValueError: If call_date is after maturity or negative
+            ValueError: If float_call_date is after maturity or negative
         """
         float_call_value = 0.0
-        if call_date > self.int_maturity_years:
+        if float_call_date > self.int_maturity_years:
             raise ValueError("Call date cannot be after maturity")
-        if call_date <= 0:
+        if float_call_date <= 0:
             raise ValueError("Call date must be positive")
         # value if held to maturity
         float_maturity_value = self.calculate_price()
         # present value if called
-        int_call_periods = int(call_date * self.int_coupon_freq)
+        int_call_periods = int(float_call_date * self.int_coupon_freq)
         float_period_rate = self.float_yield / self.int_coupon_freq
         float_coupon_payment = (self.float_fv * self.float_coupon_r / 
                         self.int_coupon_freq) * (1 - self.float_tax_rate)
         for t in range(1, int_call_periods + 1):
             if t == int_call_periods:
-                # at call date, investor receives call price plus final coupon
-                float_cf = float_coupon_payment + call_price
+                # at call date, investor receives call float_price plus final coupon
+                float_cf = float_coupon_payment + float_call_price
             else:
                 float_cf = float_coupon_payment
             
@@ -265,106 +281,106 @@ class DebenturesBR(metaclass=TypeChecker):
         
         return min(float_maturity_value, float_call_value)
     
-    def inflation_adjusted_return(self, inflation_rate: float) -> float:
+    def inflation_adjusted_return(self, float_inflation_rate: float) -> float:
         """
         Calculate real return adjusted for inflation.
         
         Args:
-            inflation_rate: Expected inflation rate (decimal)
+            float_inflation_rate: Expected inflation rate (decimal)
             
         Returns:
             Real return (decimal)
         """
         nominal_return: float = self.float_yield
-        return (1 + nominal_return) / (1 + inflation_rate) - 1
+        return (1 + nominal_return) / (1 + float_inflation_rate) - 1
     
     def yield_to_call(
         self,
-        call_price: float,
-        call_date: float,
-        current_price: float,
-        max_iterations: int = 100,
-        precision: float = 1e-6
+        float_call_price: float,
+        float_call_date: float,
+        float_current_price: float,
+        int_max_iterations: int = 100,
+        float_precision: float = 1e-6
     ) -> float:
         """
         Calculate yield to call using Newton-Raphson method.
         
         Args:
-            call_price: Price at which debenture can be called (% of face value)
-            call_date: Time until call date in years
-            current_price: Current market price of the debenture
-            max_iterations: Maximum iterations for convergence
-            precision: Desired precision level
+            float_call_price: Price at which debenture can be called (% of face value)
+            float_call_date: Time until call date in years
+            float_current_price: Current market float_price of the debenture
+            int_max_iterations: Maximum iterations for convergence
+            float_precision: Desired float_precision level
             
         Returns:
             float: Yield to call (annualized)
             
         Raises:
-            ValueError: If call_date is invalid or calculation doesn't converge
+            ValueError: If float_call_date is invalid or calculation doesn't converge
         """
-        if call_date <= 0:
+        if float_call_date <= 0:
             raise ValueError("Call date must be positive")
-        if call_date > self.int_maturity_y:
+        if float_call_date > self.int_maturity_y:
             raise ValueError("Call date cannot be after maturity")
-        if current_price <= 0:
-            raise ValueError("Current price must be positive")
+        if float_current_price <= 0:
+            raise ValueError("Current float_price must be positive")
         float_ytc = self.float_coupon_r
-        int_periods = int(call_date * self.int_coupon_freq)
+        int_periods = int(float_call_date * self.int_coupon_freq)
         float_coupon_payment = (self.float_fv * self.float_coupon_r / 
                          self.int_coupon_freq) * (1 - self.float_tax_rate)
-        for _ in range(max_iterations):
-            # calculate price and derivative at current guess
-            price = 0.0
-            duration = 0.0
+        for _ in range(int_max_iterations):
+            # calculate float_price and derivative at current guess
+            float_price = 0.0
+            float_duration = 0.0
             for t in range(1, int_periods + 1):
                 if t == int_periods:
-                    cash_flow = float_coupon_payment + call_price
+                    float_cash_flow = float_coupon_payment + float_call_price
                 else:
-                    cash_flow = float_coupon_payment
-                discount = (1 + float_ytc/self.int_coupon_freq) ** t
-                price += cash_flow / discount
-                duration += t * cash_flow / (discount * (1 + float_ytc/self.int_coupon_freq))
+                    float_cash_flow = float_coupon_payment
+                float_discount_rate = (1 + float_ytc/self.int_coupon_freq) ** t
+                float_price += float_cash_flow / float_discount_rate
+                float_duration += t * float_cash_flow / (float_discount_rate * \
+                                                   (1 + float_ytc/self.int_coupon_freq))
             # newton-Raphson update
-            price_diff = price - current_price
-            if abs(price_diff) < precision:
+            price_diff = float_price - float_current_price
+            if abs(price_diff) < float_precision:
                 return float_ytc
-            # modified duration
-            float_mod_duration = duration / price
+            # modified float_duration
+            float_mod_duration = float_duration / float_price
             # update guess
-            float_ytc -= price_diff / (-float_mod_duration * price)
+            float_ytc -= price_diff / (-float_mod_duration * float_price)
             # ensure yield stays reasonable - prevent negative yields < -99%
             float_ytc = max(float_ytc, -0.99)
-        
-        raise ValueError(f"Yield to call calculation did not converge after {max_iterations} iterations")
+        raise ValueError("Yield to call calculation did not converge after "\
+                         + f"{int_max_iterations} iterations")
 
     def _calculate_ytc_price(
         self,
         ytc_rate: float,
-        call_price: float,
+        float_call_price: float,
         call_periods: int
     ) -> float:
         """
-        Helper method to calculate price given a yield-to-call rate.
+        Helper method to calculate float_price given a yield-to-call rate.
         
         Args:
             ytc_rate: Yield to call rate to test
-            call_price: Call price
+            float_call_price: Call float_price
             call_periods: Number of int_periods until call
             
         Returns:
-            float: Calculated price
+            float: Calculated float_price
         """
-        price = 0.0
+        float_price = 0.0
         float_coupon_payment = (self.float_fv * self.float_coupon_r / 
                          self.int_coupon_freq) * (1 - self.float_tax_rate)
         for t in range(1, call_periods + 1):
             if t == call_periods:
-                cash_flow = float_coupon_payment + call_price
+                float_cash_flow = float_coupon_payment + float_call_price
             else:
-                cash_flow = float_coupon_payment
-                
-            price += cash_flow / ((1 + ytc_rate/self.int_coupon_freq) ** t)
-        return price
+                float_cash_flow = float_coupon_payment
+            float_price += float_cash_flow / ((1 + ytc_rate/self.int_coupon_freq) ** t)
+        return float_price
     
     def tax_adjusted_yield(self, float_investor_tax_rate: float) -> float:
         """
