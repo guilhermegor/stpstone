@@ -139,6 +139,15 @@ pmi_rf_rates:
       int_step_tbl_begin: 198
       int_year_min: 1995
       int_start_acc: 40
+    tjlp:
+      int_start: 1
+      int_y: 1
+      int_m: 9
+      int_rows_tbl: 12
+      int_cols_tbl: 9
+      int_step_tbl_begin: 100
+      int_year_min: 1995
+      int_start_acc: 40
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -167,7 +176,8 @@ pmi_rf_rates:
     # - ipca15
     # - ipcae
     # - ivar
-    - poupanca
+    # - poupanca
+    - tjlp
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:

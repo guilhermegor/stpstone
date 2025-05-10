@@ -113,12 +113,11 @@ class YahiiBRMacro(ABCRequests):
                                                                      "SET", "OUT", "NOV", "DEZ"]]
         elif source in ["iiebr"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
-        elif source in ["poupanca"]:
+        elif source in ["poupanca", "tjlp"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
             list_td_years = ListHandler().remove_duplicates(list_td_years)
             list_td_years = [x for x in list_td_years \
-                             if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
-                            and x >= 1995]
+                             if x <= DatesBR().year_number(DatesBR().curr_date) + 1 and x >= 1995]
             list_td_years.sort()
         print(f"list_td_months: {list_td_months}")
         print(f"list_td_years: {list_td_years}")
