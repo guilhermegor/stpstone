@@ -82,6 +82,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 8
       int_rows_tbl: 12
+      int_cols_tbl: 8
       int_year_min: 2000
       int_start_acc: 40
     inpc:
@@ -129,6 +130,15 @@ pmi_rf_rates:
       int_y: 1
       int_m: 9
       int_start_acc: 111
+    poupanca:
+      int_start: 12
+      int_y: 2
+      int_m: 17
+      int_rows_tbl: 12
+      int_cols_tbl: 8
+      int_step_tbl_begin: 198
+      int_year_min: 1995
+      int_start_acc: 40
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -156,7 +166,8 @@ pmi_rf_rates:
     # - ipca
     # - ipca15
     # - ipcae
-    - ivar
+    # - ivar
+    - poupanca
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:
@@ -197,6 +208,18 @@ pmi_rf_rates:
     COL_1: bfill
     COL_2: ffill
   dtypes:
+    INT_START: int
+    INT_Y: int
+    INT_M: int
+    INT_ROWS_TBL: int
+    INT_COLS_TBL: int
+    INT_STEP_TBL_BEGIN: int
+    INT_YEAR_MIN: int
+    INT_START_ACC: int
+    INT_NUM_TBL: int
+    I_Y: int
+    I_M: int
+    INT_START_TBL: int
     INDEX_TD: int
     YEAR: int
     MONTH: str
