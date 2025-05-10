@@ -27,6 +27,7 @@ class YahiiRatesBRMacro(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
+        int_delay: int = 20,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
@@ -40,7 +41,8 @@ class YahiiRatesBRMacro(ABCRequests):
             cls_db=cls_db,
             logger=logger,
             token=token,
-            list_slugs=list_slugs
+            list_slugs=list_slugs, 
+            int_delay=int_delay,
         )
         self.session = session
         self.dt_ref = dt_ref
@@ -48,6 +50,7 @@ class YahiiRatesBRMacro(ABCRequests):
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
+        self.int_delay = int_delay
 
     def td_value(self, str_value: str) -> float:
         """
@@ -87,6 +90,7 @@ class YahiiRatesBRMacro(ABCRequests):
         list_td_years = list()
         list_td_values = list()
         list_ser = list()
+        # print(f"list_th_td: {list_th_td}")
         # populating list_td_months, list_td_years and list_td_values
         for td in list_th_td:
             if (td in YAML_YAHII_RATES["pmi_rf_rates"]["list_months_combined"] 
@@ -114,44 +118,47 @@ class YahiiRatesBRMacro(ABCRequests):
             list_td_months = [x for x in list_td_months if x not in ["JAN", "FEV", "MAR", "ABR", 
                                                                      "MAI", "JUN", "JUL", "AGO", 
                                                                      "SET", "OUT", "NOV", "DEZ"]]
-        elif source in ["iiebr"]:
-            list_td_months = ListHandler().remove_duplicates(list_td_months)
-        elif source in ["poupanca", "tjlp", "tlp_fixa", "tbf", "tr", "ufesp"]:
-            list_td_months = ListHandler().remove_duplicates(list_td_months)
-            list_td_years = ListHandler().remove_duplicates(list_td_years)
-            list_td_years = [x for x in list_td_years \
-                             if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
-                                and x >= YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
-                                    "int_year_min"]]
-            list_td_years.sort()
-        print(f"list_td_months: {list_td_months}")
-        print(f"list_td_years: {list_td_years}")
-        print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
+        list_td_months = ListHandler().remove_duplicates(list_td_months)
+        list_td_years = ListHandler().remove_duplicates(list_td_years)
+        list_td_years = [x for x in list_td_years \
+                            if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
+                            and x >= YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                                "int_year_min"]]
+        list_td_years.sort()
+        # print(f"list_td_months: {list_td_months}")
+        # print(f"list_td_years: {list_td_years}")
+        # print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
         # populating list_ser with year, month and values
         for i_y, int_year in enumerate(list_td_years):
             if DatesBR().year_number(DatesBR().curr_date) < int_year: break
             i_m = 0
             if ("int_year_min" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
                 and ("int_cols_tbl" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
-                and ("int_step_tbl_begin" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]):
+                and ("int_step_tbl_begin" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][
+                    source]):
                 int_num_tbl = (int_year - YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][
                     source]["int_year_min"]) // YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][
                         source]["int_cols_tbl"]
-                int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"] \
+                int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_start"] \
                     + int_num_tbl * YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                         "int_step_tbl_begin"]
-                int_cols_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_cols_tbl"]
+                int_cols_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_cols_tbl"]
                 int_step_tbl_begin = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                     "int_step_tbl_begin"]
-                int_year_min = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_year_min"]
-                int_start_acc = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"]
+                int_year_min = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_year_min"]
+                int_start_acc = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_start_acc"]
             else:
                 int_num_tbl = 0
                 int_cols_tbl = 0
                 int_step_tbl_begin = 0
                 int_year_min = 0
                 int_start_acc = 0
-                int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"]
+                int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_start"]
             for str_month in list_td_months:
                 # position of the value in the list_td_values
                 if "ACUMULADO" not in str_month:
@@ -159,7 +166,8 @@ class YahiiRatesBRMacro(ABCRequests):
                         + YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y \
                         + YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"] * i_m
                 else:
-                    int_pos = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"] \
+                    int_pos = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                        "int_start_acc"] \
                         + YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y
                 if source in ["tr"] and int_num_tbl > 1 and "ACUM" not in str_month:
                     int_pos -= int(int_num_tbl - 1)
