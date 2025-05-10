@@ -1,4 +1,5 @@
 import pandas as pd
+from math import nan
 from datetime import datetime
 from typing import Optional, List, Any, Tuple, Dict
 from sqlalchemy.orm import Session
@@ -60,6 +61,8 @@ class YahiiBRMacro(ABCRequests):
         """
         if str_value == "A/M":
             return "A/M"
+        elif str_value == "–":
+            return nan
         elif ("%" in str_value) and ("*" not in str_value):
             return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
                          .replace(",", ".").replace(" ", "")) / 100.0
@@ -113,7 +116,7 @@ class YahiiBRMacro(ABCRequests):
                                                                      "SET", "OUT", "NOV", "DEZ"]]
         elif source in ["iiebr"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
-        elif source in ["poupanca", "tjlp"]:
+        elif source in ["poupanca", "tjlp", "tlp_fixa"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
             list_td_years = ListHandler().remove_duplicates(list_td_years)
             list_td_years = [x for x in list_td_years \
@@ -126,8 +129,7 @@ class YahiiBRMacro(ABCRequests):
         for i_y, int_year in enumerate(list_td_years):
             if DatesBR().year_number(DatesBR().curr_date) < int_year: break
             i_m = 0
-            if ("int_rows_tbl" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
-                and ("int_year_min" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
+            if ("int_year_min" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
                 and ("int_cols_tbl" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
                 and ("int_step_tbl_begin" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]):
                 int_num_tbl = (int_year - YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][
@@ -136,8 +138,17 @@ class YahiiBRMacro(ABCRequests):
                 int_start_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"] \
                     + int_num_tbl * YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
                         "int_step_tbl_begin"]
+                int_cols_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_cols_tbl"]
+                int_step_tbl_begin = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_step_tbl_begin"]
+                int_year_min = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_year_min"]
+                int_start_acc = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"]
             else:
                 int_num_tbl = 0
+                int_cols_tbl = 0
+                int_step_tbl_begin = 0
+                int_year_min = 0
+                int_start_acc = 0
                 int_start_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"]
             for str_month in list_td_months:
                 int_pos = int_start_tbl \
@@ -152,16 +163,10 @@ class YahiiBRMacro(ABCRequests):
                             "int_start"],
                         "INT_Y": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"],
                         "INT_M": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"],
-                        "INT_ROWS_TBL": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                            "int_rows_tbl"],
-                        "INT_COLS_TBL": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                            "int_cols_tbl"],
-                        "INT_STEP_TBL_BEGIN": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                            "int_step_tbl_begin"],
-                        "INT_YEAR_MIN": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                            "int_year_min"],
-                        "INT_START_ACC": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
-                            "int_start_acc"],
+                        "INT_COLS_TBL": int_cols_tbl,
+                        "INT_STEP_TBL_BEGIN": int_step_tbl_begin,
+                        "INT_YEAR_MIN": int_year_min,
+                        "INT_START_ACC": int_start_acc,
                         "INT_NUM_TBL": int_num_tbl,
                         "I_Y": i_y,
                         "I_M": i_m,
