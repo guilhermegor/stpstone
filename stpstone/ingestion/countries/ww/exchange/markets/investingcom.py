@@ -16,8 +16,8 @@ class InvestingCom(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-        dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 0),
+        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 5),
+        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 0),
         str_ticker:str='PETR4',
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
@@ -33,15 +33,15 @@ class InvestingCom(ABCRequests):
             list_slugs=list_slugs
         )
         self.session = session
-        self.dt_inf = dt_inf
-        self.dt_sup = dt_sup
+        self.dt_start = dt_start
+        self.dt_end = dt_end
         self.cls_db = cls_db
         self.logger = logger
         self.token = token,
         self.list_slugs = list_slugs
         self.ticker = str_ticker
-        self.dt_inf_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_inf)
-        self.dt_sup_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_sup)
+        self.dt_inf_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_start)
+        self.dt_sup_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_end)
         self.ticker_id = self.source('ticker_id', bl_fetch=True)['ticker_id'].tolist()[0]
 
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:

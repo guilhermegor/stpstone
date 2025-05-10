@@ -815,8 +815,8 @@ class Professional(ConnectionApi):
     def professional_historic_position(
         self,
         professional_code: str,
-        dt_inf: str,
-        dt_sup: str,
+        dt_start: str,
+        dt_end: str,
         int_participant_perspective_type: int = 0,
         list_metric_type: List[int] = [
             1,
@@ -857,8 +857,8 @@ class Professional(ConnectionApi):
             "ownerBrokerCode": int(self.broker_code),
             "ownerCategoryType": int(self.category_code),
             "partPerspecType": int_participant_perspective_type,
-            "registryDateEnd": dt_sup,
-            "registryDateStart": dt_inf,
+            "registryDateEnd": dt_end,
+            "registryDateStart": dt_start,
             "traderCode": professional_code,
         }
         if bl_debug_mode == True:

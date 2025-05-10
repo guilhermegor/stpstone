@@ -129,15 +129,15 @@ class DebenturesBR(metaclass=TypeChecker):
             raise ValueError("Settlement date must be between coupon dates")
         # calculate days according to convention
         if str_day_count_convention.lower() == "actual/actual":
-            days_accrued = (dt_settlement - dt_last_coupon).days
-            days_in_period = (dt_next_coupon - dt_last_coupon).days
+            int_days_accrued = (dt_settlement - dt_last_coupon).days
+            int_days_in_period = (dt_next_coupon - dt_last_coupon).days
         elif str_day_count_convention.lower() == "30/360":
-            days_accrued = self._days_360(dt_last_coupon, dt_settlement)
-            days_in_period = self._days_360(dt_last_coupon, dt_next_coupon)
+            int_days_accrued = self._days_360(dt_last_coupon, dt_settlement)
+            int_days_in_period = self._days_360(dt_last_coupon, dt_next_coupon)
         else:
             raise ValueError(f"Unsupported day count convention: {str_day_count_convention}")
         float_coupon_payment = (self.float_fv * self.float_coupon_r) / self.int_coupon_freq
-        float_accrued = float_coupon_payment * (days_accrued / days_in_period)
+        float_accrued = float_coupon_payment * (int_days_accrued / int_days_in_period)
         # apply tax if this is a taxable coupon
         if self.float_tax_rate > 0:
             float_accrued *= (1 - self.float_tax_rate)
@@ -161,25 +161,25 @@ class DebenturesBR(metaclass=TypeChecker):
             dt_last_coupon = dt_last_coupon.replace(month=dt_last_coupon.month + int_months_between)
         dt_last_coupon = dt_last_coupon.replace(month=dt_last_coupon.month - int_months_between)
         # next coupon is int_months_between after last coupon
-        next_coupon = dt_last_coupon.replace(month=dt_last_coupon.month + int_months_between)
-        return dt_last_coupon, next_coupon
+        dt_next_coupon = dt_last_coupon.replace(month=dt_last_coupon.month + int_months_between)
+        return dt_last_coupon, dt_next_coupon
     
-    def _days_360(self, start_date: date, end_date: date) -> int:
+    def _days_360(self, dt_start: date, dt_end: date) -> int:
         """
         Calculate days between dates using 30/360 convention.
         
         Args:
-            start_date: Start date
-            end_date: End date
+            dt_start: Start date
+            dt_end: End date
             
         Returns:
             int: Days between dates under 30/360 convention
         """
-        d1 = min(start_date.day, 30)
-        d2 = min(end_date.day, 30) if d1 == 30 else end_date.day
-        return (end_date.year - start_date.year) * 360 + \
-               (end_date.month - start_date.month) * 30 + \
-               (d2 - d1)
+        dt_d1 = min(dt_start.day, 30)
+        dt_d2 = min(dt_end.day, 30) if dt_d1 == 30 else dt_end.day
+        return (dt_end.year - dt_start.year) * 360 + \
+               (dt_end.month - dt_start.month) * 30 + \
+               (dt_d2 - dt_d1)
 
     def dirty_price(self, float_clean_price: Optional[float] = None) -> float:
         """
