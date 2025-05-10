@@ -116,7 +116,7 @@ class YahiiBRMacro(ABCRequests):
                                                                      "SET", "OUT", "NOV", "DEZ"]]
         elif source in ["iiebr"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
-        elif source in ["poupanca", "tjlp", "tlp_fixa"]:
+        elif source in ["poupanca", "tjlp", "tlp_fixa", "tbf"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
             list_td_years = ListHandler().remove_duplicates(list_td_years)
             list_td_years = [x for x in list_td_years \
