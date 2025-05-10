@@ -7,7 +7,7 @@ from logging import Logger
 from requests import Response
 from time import sleep
 from selenium.webdriver.remote.webdriver import WebDriver
-from stpstone._config.global_slots import YAML_YAHII
+from stpstone._config.global_slots import YAML_YAHII_RATES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.html import HtmlHandler
@@ -22,7 +22,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 
 pd.set_option("display.max_rows", None)
 
-class YahiiBRMacro(ABCRequests):
+class YahiiRatesBRMacro(ABCRequests):
 
     def __init__(
         self,
@@ -34,7 +34,7 @@ class YahiiBRMacro(ABCRequests):
         list_slugs: Optional[List[str]] = None
     ) -> None:
         super().__init__(
-            dict_metadata=YAML_YAHII,
+            dict_metadata=YAML_YAHII_RATES,
             session=session,
             dt_ref=dt_ref,
             cls_db=cls_db,
@@ -89,7 +89,7 @@ class YahiiBRMacro(ABCRequests):
         list_ser = list()
         # populating list_td_months, list_td_years and list_td_values
         for td in list_th_td:
-            if (td in YAML_YAHII["pmi_rf_rates"]["list_months_combined"] 
+            if (td in YAML_YAHII_RATES["pmi_rf_rates"]["list_months_combined"] 
                 and "/" not in td) \
                 or "ACUMULADO" in td \
                 or "ACUM" in td:
@@ -121,7 +121,7 @@ class YahiiBRMacro(ABCRequests):
             list_td_years = ListHandler().remove_duplicates(list_td_years)
             list_td_years = [x for x in list_td_years \
                              if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
-                                and x >= YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                                and x >= YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                                     "int_year_min"]]
             list_td_years.sort()
         print(f"list_td_months: {list_td_months}")
@@ -131,36 +131,36 @@ class YahiiBRMacro(ABCRequests):
         for i_y, int_year in enumerate(list_td_years):
             if DatesBR().year_number(DatesBR().curr_date) < int_year: break
             i_m = 0
-            if ("int_year_min" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
-                and ("int_cols_tbl" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]) \
-                and ("int_step_tbl_begin" in YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]):
-                int_num_tbl = (int_year - YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][
-                    source]["int_year_min"]) // YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][
+            if ("int_year_min" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
+                and ("int_cols_tbl" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
+                and ("int_step_tbl_begin" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]):
+                int_num_tbl = (int_year - YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][
+                    source]["int_year_min"]) // YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][
                         source]["int_cols_tbl"]
-                int_start_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"] \
-                    + int_num_tbl * YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"] \
+                    + int_num_tbl * YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                         "int_step_tbl_begin"]
-                int_cols_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_cols_tbl"]
-                int_step_tbl_begin = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                int_cols_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_cols_tbl"]
+                int_step_tbl_begin = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                     "int_step_tbl_begin"]
-                int_year_min = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_year_min"]
-                int_start_acc = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"]
+                int_year_min = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_year_min"]
+                int_start_acc = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"]
             else:
                 int_num_tbl = 0
                 int_cols_tbl = 0
                 int_step_tbl_begin = 0
                 int_year_min = 0
                 int_start_acc = 0
-                int_start_tbl = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"]
+                int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start"]
             for str_month in list_td_months:
                 # position of the value in the list_td_values
                 if "ACUMULADO" not in str_month:
                     int_pos = int_start_tbl \
-                        + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y \
-                        + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"] * i_m
+                        + YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y \
+                        + YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"] * i_m
                 else:
-                    int_pos = YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"] \
-                        + YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y
+                    int_pos = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_start_acc"] \
+                        + YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"] * i_y
                 if source in ["tr"] and int_num_tbl > 1 and "ACUM" not in str_month:
                     int_pos -= int(int_num_tbl - 1)
                 if source in ["tr"] and int_num_tbl > 0 and "ACUM" in str_month:
@@ -168,10 +168,10 @@ class YahiiBRMacro(ABCRequests):
                 # populating serialized list
                 try:
                     list_ser.append({
-                        "INT_START": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source][
+                        "INT_START": YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                             "int_start"],
-                        "INT_Y": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"],
-                        "INT_M": YAML_YAHII["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"],
+                        "INT_Y": YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"],
+                        "INT_M": YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"],
                         "INT_COLS_TBL": int_cols_tbl,
                         "INT_STEP_TBL_BEGIN": int_step_tbl_begin,
                         "INT_YEAR_MIN": int_year_min,
@@ -214,7 +214,7 @@ class YahiiBRMacro(ABCRequests):
             cls_selenium_wd = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
             driver = cls_selenium_wd.get_web_driver
             list_th_td = self.list_web_elements(
-                cls_selenium_wd, driver, YAML_YAHII["pmi_rf_rates"]['xpaths']['list_th_td'])
+                cls_selenium_wd, driver, YAML_YAHII_RATES["pmi_rf_rates"]['xpaths']['list_th_td'])
             list_ser = self.td_th_parser(source, list_th_td)
         finally:
             driver.quit()
