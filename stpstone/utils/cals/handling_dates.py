@@ -83,6 +83,10 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             return date(
                 int("20" + date_str[-2:]), int(date_str[3:5]), int(date_str[0:2])
             )
+        elif format_input == "DD.MM.YY":
+            return date(
+                int("20" + date_str[-2:]), int(date_str[3:5]), int(date_str[0:2])
+            )
         else:
             raise Exception(f"Not a valid date format {format_input}")
 
