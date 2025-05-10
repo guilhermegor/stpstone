@@ -66,9 +66,9 @@ class YahiiBRMacro(ABCRequests):
         elif ("%" in str_value) and ("*" not in str_value):
             return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
                          .replace(",", ".").replace(" ", "")) / 100.0
-        elif "(-)" in str_value:
+        elif "(-)" in str_value or ("R$ " in str_value and len(str_value) <= 8):
             return float(str_value.replace("(-)", "-").replace("%", "").replace(".", "")\
-                         .replace(",", "."))
+                         .replace(",", ".").replace("R$ ", ""))
         elif str_value in ["", " "]:
             return ""
         elif NumHandler().is_numeric(str_value.replace(",", ".")) == True:

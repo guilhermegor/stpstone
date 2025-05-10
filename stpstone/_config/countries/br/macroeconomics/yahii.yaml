@@ -172,6 +172,12 @@ pmi_rf_rates:
       int_m: 1
       int_start_acc: 40
       int_year_min: 1995
+    upc:
+      int_start: 3
+      int_y: 1
+      int_m: 8
+      int_start_acc: 40
+      int_year_min: 1995
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -205,7 +211,8 @@ pmi_rf_rates:
     # - tlp_fixa
     # - tbf
     # - tr
-    - ufesp
+    # - ufesp
+    - upc
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:
