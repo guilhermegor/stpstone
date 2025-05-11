@@ -114,16 +114,17 @@ class YahiiRatesBRMacro(ABCRequests):
                               "JUL", "AGO", "SET", "ACUM TRIM", "OUT", "NOV", "DEZ", "ACUM TRIM", 
                               "ACUMULADO NO ANO"]
         elif source in ["ivar"]:
-            list_td_years = list_td_years[1:]
             list_td_months = [x for x in list_td_months if x not in ["JAN", "FEV", "MAR", "ABR", 
                                                                      "MAI", "JUN", "JUL", "AGO", 
                                                                      "SET", "OUT", "NOV", "DEZ"]]
-        list_td_months = ListHandler().remove_duplicates(list_td_months)
+        if source not in ["ipcae"]:
+            list_td_months = ListHandler().remove_duplicates(list_td_months)
         list_td_years = ListHandler().remove_duplicates(list_td_years)
         list_td_years = [x for x in list_td_years \
                             if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
                             and x >= YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_year_min"]]
+        list_td_months = [x for x in list_td_months if "ACUMULADONO" not in x]
         list_td_years.sort()
         # print(f"list_td_months: {list_td_months}")
         # print(f"list_td_years: {list_td_years}")
@@ -191,7 +192,10 @@ class YahiiRatesBRMacro(ABCRequests):
                         "INDEX_TD": int_pos,
                         "YEAR": int_year,
                         "MONTH": str_month,
-                        "VALUE": list_td_values[int_pos],
+                        "VALUE": float(list_td_values[int_pos]) / 100.0 \
+                            if (source in ["ipcae"] and "ACUMULADO NO ANO" not in str_month 
+                                and list_td_values[int_pos] != "") \
+                            else list_td_values[int_pos],
                         "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
                     })
                     i_m += 1

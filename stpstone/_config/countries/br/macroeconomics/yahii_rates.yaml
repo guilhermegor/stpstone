@@ -90,6 +90,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 8
       int_cols_tbl: 8
+      int_step_tbl_begin: 89
       int_start_acc: 40
       int_year_min: 2000
     inpc:
@@ -115,7 +116,7 @@ pmi_rf_rates:
       int_y: 27
       int_m: 2
       int_start_acc: 40
-      int_year_min: 1995
+      int_year_min: 2010
     ipc:
       int_start: 17
       int_y: 27
@@ -139,13 +140,13 @@ pmi_rf_rates:
       int_y: 17
       int_m: 1
       int_start_acc: 65
-      int_year_min: 1995
+      int_year_min: 1994
     ivar:
       int_start: 3
       int_y: 1
       int_m: 9
       int_start_acc: 111
-      int_year_min: 1995
+      int_year_min: 2019
     poupanca:
       int_start: 12
       int_y: 2
@@ -205,32 +206,31 @@ pmi_rf_rates:
   payload:
   # list of slugs (complementary descriptive text to access a web pages)
   slugs:
-    # - igpm
-    # - igpdi
-    # - igp10
+    - igpm
+    - igpdi
+    - igp10
     - cetip
-    # - cubsp
-    # - cubspSD
-    # - incc
-    # - incc
-    # - inccm
-    # - iiebr
-    # - inpc
-    # - ipadi
-    # - ipam
-    # - ipcfipe
-    # - ipc
-    # - ipca
-    # - ipca15
-    # - ipcae
-    # - ivar
-    # - poupanca
-    # - tjlp
-    # - tlp_fixa
-    # - tbf
-    # - tr
-    # - ufesp
-    # - upc
+    - cubsp
+    - cubspSD
+    - incc
+    - inccm
+    - iiebr
+    - inpc
+    - ipadi
+    - ipam
+    - ipcfipe
+    - ipc
+    - ipca
+    - ipca15
+    - ipcae
+    - ivar
+    - poupanca
+    - tjlp
+    - tlp_fixa
+    - tbf
+    - tr
+    - ufesp
+    - upc
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   # iteratively_get_data placeholders:

@@ -21,6 +21,7 @@ class YahiiOthersBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
+        int_delay: int = 20,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
@@ -34,7 +35,8 @@ class YahiiOthersBR(ABCRequests):
             cls_db=cls_db,
             logger=logger,
             token=token,
-            list_slugs=list_slugs
+            list_slugs=list_slugs, 
+            int_delay=int_delay,
         )
         self.session = session
         self.dt_ref = dt_ref
@@ -42,6 +44,7 @@ class YahiiOthersBR(ABCRequests):
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
+        self.int_delay = int_delay
         self.year_yy = self.dt_ref.strftime("%y")
 
     def td_th_parser(self, list_td: List[Any], list_headers: List[str], source: str) \
