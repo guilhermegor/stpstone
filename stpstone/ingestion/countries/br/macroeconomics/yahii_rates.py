@@ -20,8 +20,6 @@ from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
-pd.set_option("display.max_rows", None)
-
 class YahiiRatesBRMacro(ABCRequests):
 
     def __init__(
@@ -110,8 +108,8 @@ class YahiiRatesBRMacro(ABCRequests):
             list_td_values.remove("A/M")
         elif source in ["ipcae"]:
             list_td_years = list_td_years[2:]
-            list_td_months = ["JAN", "FEV", "MAR", "ACUM TRIM", "ABR", "MAI", "JUN", "ACUM TRIM", 
-                              "JUL", "AGO", "SET", "ACUM TRIM", "OUT", "NOV", "DEZ", "ACUM TRIM", 
+            list_td_months = ["JAN", "FEV", "MAR", "ACUM TRIM 1", "ABR", "MAI", "JUN", "ACUM TRIM 2", 
+                              "JUL", "AGO", "SET", "ACUM TRIM 3", "OUT", "NOV", "DEZ", "ACUM TRIM 4", 
                               "ACUMULADO NO ANO"]
         elif source in ["ivar"]:
             list_td_months = [x for x in list_td_months if x not in ["JAN", "FEV", "MAR", "ABR", 

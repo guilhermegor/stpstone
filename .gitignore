@@ -29,9 +29,3 @@ dist/
 build/
 *.egg-info/
 *.pypirc
-
-# project files/folders
-data/*
-!data/.gitkeep
-!data/input-funds-regex-bylaws.xlsx
-data/anbima-avl-funds-cons.csv
