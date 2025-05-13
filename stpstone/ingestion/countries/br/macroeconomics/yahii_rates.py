@@ -201,20 +201,20 @@ class YahiiRatesBRMacro(ABCRequests):
                     break
         return list_ser
         
-    def list_web_elements(self, cls_selenium_wd: SeleniumWD, driver: WebDriver, xpath_: str) \
+    def list_web_elements(self, cls_selenium_wd: SeleniumWD, web_driver: WebDriver, xpath_: str) \
         -> List[Any]:
         """
         Get list of web elements from xpath
 
         Args:
-            cls_selenium_wd (SeleniumWD): selenium web driver
-            driver (WebDriver): selenium web driver
+            cls_selenium_wd (SeleniumWD): selenium web web_driver
+            web_driver (WebDriver): selenium web web_driver
             xpath (str): xpath to find elements
 
         Returns:
             list: list of contents of web elements
         """
-        list_els = cls_selenium_wd.find_elements(driver, xpath_)
+        list_els = cls_selenium_wd.find_elements(web_driver, xpath_)
         list_els = [x.text for x in list_els]
         return list_els
 
@@ -222,11 +222,11 @@ class YahiiRatesBRMacro(ABCRequests):
         try:
             source = self.get_query_params(req_resp.url, "source").lower()
             cls_selenium_wd = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
-            driver = cls_selenium_wd.get_web_driver
+            web_driver = cls_selenium_wd.get_web_driver
             list_th_td = self.list_web_elements(
-                cls_selenium_wd, driver, YAML_YAHII_RATES["pmi_rf_rates"]['xpaths']['list_th_td'])
+                cls_selenium_wd, web_driver, YAML_YAHII_RATES["pmi_rf_rates"]['xpaths']['list_th_td'])
             list_ser = self.td_th_parser(source, list_th_td)
         finally:
-            driver.quit()
+            web_driver.quit()
         return pd.DataFrame(list_ser)
 

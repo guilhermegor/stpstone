@@ -378,7 +378,7 @@ class BCB:
             'access_token': 's56HuH4yFasr',
             'Cookie': 'BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000X4IrBKiAUyQvbYXXFfX0gne:1dof89mke; TS013694c2=012e4f88b3c6fee6e3a792e5d4f68cb31972d27ba778ec1e05a622b5b87ecf0bda522fe8652f85210b7cbe2b227fe76a647ca3acc6'
         }
-        req_resp = requests('GET', url, headers=dict_headers)
+        req_resp = request('GET', url, headers=dict_headers)
         req_resp.raise_for_status()
         json_bcb_expec = req_resp.json()
         # load to pandas dataframe
