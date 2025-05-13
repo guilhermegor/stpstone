@@ -7,9 +7,12 @@ from collections import OrderedDict, Counter
 from itertools import chain, tee, product
 from numbers import Number
 from typing import List, Any, Iterable, Tuple, Dict
+from logging import Logger
+from typing import List, Optional
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class ListHandler:
@@ -336,3 +339,23 @@ class ListHandler:
             if list_[i] != list_[i - 1]:
                 list_xpt.append(list_[i])
         return list_xpt
+
+    def replace_first_occurrence(self, list_: List[str], str_old_value: str, str_new_value: str, 
+                                 logger: Optional[Logger] = None) -> List[str]:
+        if str_old_value in list_:
+            index = list_.index(str_old_value)
+            list_[index] = str_new_value
+            # print(f"Value {str_old_value} replaced by {list_[index]} / Index: {index}")
+        else:
+            CreateLog().log_message(logger, f"Value {str_old_value} not found in list", "warning")
+        return list_
+
+    def replace_last_occurrence(self, list_: List[str], str_old_value: str, str_new_value: str, 
+                                 logger: Optional[Logger] = None) -> List[str]:
+        if str_old_value in list_:
+            index = list_[::-1].index(str_old_value)
+            list_[index] = str_new_value
+            # print(f"Value {str_old_value} replaced by {list_[index]} / Index: {index}")
+        else:
+            CreateLog().log_message(logger, f"Value {str_old_value} not found in list", "warning")
+        return list_
