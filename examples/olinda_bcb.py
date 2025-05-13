@@ -10,6 +10,10 @@ cls_ = OlindaBCB(
 # print(f"DF OLINDA BCB - CURRENCIES: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("closing_usdbrl_ptax_series", bl_fetch=True)
+# df_ = cls_.source("closing_usdbrl_ptax_series", bl_fetch=True)
+# print(f"DF OLINDA BCB - CLOSING USD/BRL PTAX SERIES: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("currencies_ts", bl_fetch=True)
 print(f"DF OLINDA BCB - CLOSING USD/BRL PTAX SERIES: \n{df_}")
 df_.info()
