@@ -73,6 +73,8 @@ YAML_YAHII_OHTERS = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/yahii_others.yaml"))
 YAML_SIDRA_IBGE = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/sidra_ibge.yaml"))
+YAML_SGS_BCB = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/sgs_bcb.yaml"))
 # WW
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))

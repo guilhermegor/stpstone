@@ -18,62 +18,6 @@ from stpstone.utils.loggs.db_logs import DBLogs
 
 class BCB:
 
-    @backoff.on_exception(
-        backoff.constant,
-        SyntaxError,
-        interval=10,
-        max_tries=20,
-    )
-    def sgs_bcb(self, int_sgs_tabel, data_inic, data_fim):
-        """
-        REFERENCES: https://dadosabertos.bcb.gov.br/dataset/20542-saldo-da-carteira-de-credito-com-recursos-livres---total/resource/6e2b0c97-afab-4790-b8aa-b9542923cf88
-        DOCSTRING: INFOS FROM SGS BCB REST
-        INPUTS: INPUTS, INCIAL AND END DATES ('DD/MM/YYYY' OR DATETIME FORMAT)
-        OUPUTS: SGS RESPONSE
-        """
-        # adjusting variables types
-        if isinstance(data_inic, datetime.date) == True:
-            data_inic = DatesBR().datetime_to_string(data_inic)
-        if isinstance(data_fim, datetime.date) == True:
-            data_fim = DatesBR().datetime_to_string(data_fim)
-        # url and dict_payload to communicate to rest
-        url = 'http://api.bcb.gov.br/dados/serie/bcdata.sgs.{}/dados'.format(int_sgs_tabel)
-        query_params = {
-            'formato': 'json',
-            'dataInicial': data_inic,
-            'dataFinal': data_fim
-        }
-        # retorno do dado de interesse
-        message_content = request('GET', url, params=query_params).content
-        return HandlingObjects().literal_eval_data(message_content, "b'", "'")
-
-    def igpm(self, data_inic, data_fim, tabela_sgs_bcb='189'):
-        """
-        REFERENCES: https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint
-        DOCSTRING: IGPM TIMES SERIES
-        INPUTS: INICIAL DATE, FINAL DATE, AND SGS BCB TABLE
-        OUTPUTS: LIST OF DICTS (DATE, VALUE)
-        """
-        return self.sgs_bcb(tabela_sgs_bcb, data_inic, data_fim)
-
-    def selic_daily(self, data_inic, data_fim, tabela_sgs_bcb='11'):
-        """
-        REFERENCES: https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint
-        DOCSTRING: DAILY SELIC
-        INPUTS: INICIAL DATE, FINAL DATE, AND SGS BCB TABLE
-        OUTPUTS: LIST OF DICTS (DATE, VALUE)
-        """
-        return self.sgs_bcb(tabela_sgs_bcb, data_inic, data_fim)
-
-    def selic_target(self, data_inic, data_fim, tabela_sgs_bcb='432'):
-        """
-        REFERENCES: https://www3.bcb.gov.br/sgspub/consultarvalores/telaCvsSelecionarSeries.paint
-        DOCSTRING: DAILY SELIC
-        INPUTS: INICIAL DATE, FINAL DATE, AND SGS BCB TABLE
-        OUTPUTS: LIST OF DICTS (DATE, VALUE)
-        """
-        return self.sgs_bcb(tabela_sgs_bcb, data_inic, data_fim)
-
     def usd_brl(self, data_ref, formato_data_saida='%m/%d/%Y', int_dol_usd_security_id=9800508,
                 key_dol_usd_security_id='securityIdentificationCode', key_value='value',
                 key_last_update='lastUpdate', int_precision_decimals=4,
