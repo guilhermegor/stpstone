@@ -86,26 +86,40 @@ class SidraIBGE(ABCRequests):
             i += 1
         return pd.DataFrame(list_ser)
 
-    def serialized_data(self, req_resp: Response) -> List[Dict[str, Any]]:
+    def serialized_data(self, req_resp: Response, source: str) -> List[Dict[str, Any]]:
         json_ = req_resp.json()
-        int_agg_num = int(req_resp.url.split("agregados/")[1].split("/")[0])
-        list_ser = [
-            {
-                "ID": int(dict_["id"]), 
-                "ECONOMIC_INDICATOR": "IPCA" if int_agg_num == 1737 \
-                    else "IPCA 15" if int_agg_num == 3065 \
-                    else "N/A",
-                "DT_RELEASE": dict_["literals"][0],
-                "DT_IMPLEMENTATION": dict_["modificacao"],
-            }
-            for dict_ in json_
-        ]
+        if source == "sidra_modification_dates":
+            int_agg_num = int(req_resp.url.split("agregados/")[1].split("/")[0])
+            list_ser = [
+                {
+                    "ID": int(dict_["id"]), 
+                    "NAME": "IPCA" if int_agg_num == 1737 \
+                        else "IPCA 15" if int_agg_num == 3065 \
+                        else "N/A",
+                    "DT_RELEASE": dict_["literals"][0],
+                    "DT_IMPLEMENTATION": dict_["modificacao"],
+                }
+                for dict_ in json_
+            ]
+        elif source == "sidra_variables":
+            list_ser = list()
+            for dict_ in json_:
+                for year_month, data_value in dict_["resultados"][0]["series"][0]["serie"].items():
+                    list_ser.append({
+                        "ID": dict_["id"],
+                        "NAME": dict_["variavel"],
+                        "UNITY": dict_["unidade"],
+                        "YEAR_MONTH": int(year_month),
+                        "VALUE": float(data_value)
+                    })
+        else:
+            raise Exception(f"Sidra IBGE source {source} not found")
         return pd.DataFrame(list_ser)
 
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
         source = self.get_query_params(req_resp.url, "source").lower()
-        if source in ["sidra_modification_dates"]:
-            return self.serialized_data(req_resp)
+        if source in ["sidra_modification_dates", "sidra_variables"]:
+            return self.serialized_data(req_resp, source)
         try:
             cls_selenium = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
             web_driver = cls_selenium.get_web_driver
