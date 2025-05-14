@@ -6,7 +6,7 @@ import functools
 from fractions import Fraction
 from math import gcd
 from numbers import Number
-from typing import Any
+from typing import Any, Union
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -189,3 +189,20 @@ class NumHandler:
 
     def is_number(self, value_: Any) -> bool:
         return isinstance(value_, (Number)) and not isinstance(value_, bool)
+
+    def process_numerical_value(self, str_value: Any) -> Union[float, int, str, None]:
+        try:
+            if not isinstance(str_value, str):
+                return str_value
+            elif "%" in str_value:
+                return float(str_value.replace("%", "").strip()) / 100.0
+            elif "(-)" in str_value:
+                return float(str_value.replace("(-)", "-").strip())
+            elif "+" in str_value:
+                return float(str_value.replace("+", "").strip())
+            elif "bp" in str_value or "b.p." in str_value:
+                return float(str_value.replace("bp", "").replace("b.p.", "").strip()) / 10_000.0
+            else:
+                return str_value
+        except ValueError:
+            return str_value

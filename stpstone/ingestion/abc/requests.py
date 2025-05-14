@@ -205,21 +205,15 @@ class UtilsRequests(ABC):
         Returns:
             pd.DataFrame: Pivoted DataFrame with one row per country and events as columns
         """
-        # Create a country grouping - assumes data is ordered by country blocks
         df_['country_group'] = (df_['EVENT'] == 'COUNTRY_NAME').cumsum()
-        
-        # Pivot the data
-        pivoted = df_.pivot_table(
+        df_pivoted = df_.pivot_table(
             index='country_group',
             columns='EVENT',
             values='REGEX_GROUP_1',
-            aggfunc='first'  # Take the first value if there are duplicates
+            aggfunc='first'
         ).reset_index(drop=True)
-        
-        # Clean up the column names and DataFrame
-        pivoted.columns.name = None  # Remove the 'EVENT' label from columns
-        
-        return pivoted
+        df_pivoted.columns.name = None
+        return df_pivoted
 
     def html_regex(
         self,

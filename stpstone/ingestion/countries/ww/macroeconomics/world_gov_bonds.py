@@ -5,9 +5,13 @@ from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
-from stpstone._config.global_slots import YAML_WW_WORLD_GOV_BONDS
+from stpstone._config.global_slots import YAML_WW_WORLD_GOV_BONDS, YAML_WW_RATINGS_AGENCIES
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.parsers.numbers import NumHandler
 
 
 class WorldGovBonds(ABCRequests):
@@ -36,5 +40,64 @@ class WorldGovBonds(ABCRequests):
         self.logger = logger
         self.list_slugs = list_slugs
 
+    def treat_list_td(self, list_td: List[str]) -> List[str]:
+        """
+        Processes the list of table data cells to insert "N/A" for countries without ratings.
+        
+        The rule is: After a country name, if the next item is a numeric value (like '9.88%' or '0.0988'),
+        insert "N/A" between them to represent missing rating.
+        
+        Args:
+            list_td: List of strings representing table data cells
+            
+        Returns:
+            Processed list with "N/A" inserted where needed
+        """
+        list_ratings_agencies = ListHandler().extend_lists(
+            *YAML_WW_RATINGS_AGENCIES["credit_ratings"].values())
+        list_ = []
+        i = 0
+        n = len(list_td)
+        while i < n:
+            item_curr = list_td[i]
+            item_processed = NumHandler().process_numerical_value(list_td[i])
+            list_.append(item_processed)
+            bl_country_name = (
+                isinstance(item_curr, str) and
+                not any(c.isdigit() for c in item_curr) and 
+                not item_curr.endswith('%') and 
+                item_curr != "N/A" and 
+                item_curr not in list_ratings_agencies
+            )
+            if bl_country_name:
+                if i + 1 < n:
+                    next_item = list_td[i+1]
+                    bl_next_numeric = (
+                        (isinstance(next_item, str) and next_item.endswith('%')) 
+                        or (isinstance(NumHandler().process_numerical_value(next_item), (int, float)))
+                    )
+                    if bl_next_numeric:
+                        list_.append("N/A")
+            i += 1
+        return list_
+
     def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        return None
+        source = self.get_query_params(req_resp.url, "source")
+        list_th = list(YAML_WW_WORLD_GOV_BONDS[source]["dtypes"].keys())
+        scraper = PlaywrightScraper(
+            headless=True,
+            default_timeout=100_000
+        )
+        with scraper.launch():
+            if scraper.navigate(req_resp.url):
+                list_td = scraper.get_table_data(
+                    YAML_WW_WORLD_GOV_BONDS[source]["xpaths"]["list_td"],
+                    selector_type="xpath"
+                )
+        list_td = self.treat_list_td(list_td)
+        print(f"length list td: {len(list_td)}")
+        print(f"length list th: {len(list_th)}")
+        print(f"remainder len: {len(list_td) % len(list_th)}")
+        list_td = list_td[:-1]
+        list_ser = HandlingDicts().pair_headers_with_data(list_th, list_td)
+        return pd.DataFrame(list_ser)
