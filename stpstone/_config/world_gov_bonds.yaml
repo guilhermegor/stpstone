@@ -3,7 +3,7 @@
 # 10 years rates, ratings and spreads against usd t-bonds and deutch bund
 10y_rr:
   bl_verify: False
-  url: https://www.worldgovernmentbonds.com/
+  url: https://www.WorldGovBonds.com/
   data_error: 'N/A'
   data_last_update: 'Last Update: '
   class_div_last_update: 'w3-col m5 w3-small w3-right-align'
@@ -11,7 +11,7 @@
 # inverted yeild curve economies
 inv_yc_ec:
   bl_verify: False
-  url: https://www.worldgovernmentbonds.com/inverted-yield-curves/
+  url: https://www.WorldGovBonds.com/inverted-yield-curves/
   col_rating: 'RATING'
   col_country: 'COUNTRY'
   col_lvl_inv: 'LEVEL_INVERTION'
@@ -25,7 +25,7 @@ inv_yc_ec:
 # yield spreads nations
 yield_spreads_nations:
   bl_verify: False
-  url: https://www.worldgovernmentbonds.com/spread-historical-data/
+  url: https://www.WorldGovBonds.com/spread-historical-data/
   data_last_update_like: '*Last Update:*'
   data_last_update: 'Last Update: '
   data_bp: ' bp'
@@ -34,4 +34,4 @@ yield_spreads_nations:
 # credit rating nations
 credit_rating_nations:
   bl_verify: False
-  url: https://www.worldgovernmentbonds.com/world-credit-ratings/
+  url: https://www.WorldGovBonds.com/world-credit-ratings/

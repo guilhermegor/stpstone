@@ -91,6 +91,8 @@ YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
 YAML_WW_TRADING_ECON = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/trading_econ.yaml"))
+YAML_WW_WORLD_GOV_BONDS = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/world_gov_bonds.yaml"))
 
 # * otc
 # BR
@@ -129,6 +131,5 @@ YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.y
 YAML_B3 = reading_yaml(os.path.join(root_path, "b3.yaml"))
 YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
 YAML_WGBD = reading_yaml(os.path.join(root_path, "world_gov_bonds.yaml"))
-YAML_USA_MACRO = reading_yaml(os.path.join(root_path, "usa_macro.yaml"))
 YAML_MICROSOFT_APPS = reading_yaml(os.path.join(root_path, "microsoft_apps.yaml"))
 YAML_LLMS = reading_yaml(os.path.join(root_path, "llms.yaml"))

@@ -1,6 +1,7 @@
 ### COLLECT WORLD GOVERNMENT BONDS DATA
 
 import pandas as pd
+from requests import request
 from datetime import datetime, timezone
 from stpstone._config.global_slots import YAML_WGBD
 from stpstone.utils.parsers.html import HtmlHandler
@@ -35,10 +36,8 @@ class WGBD:
         # setting variables
         list_ser = list()
         # request html
-        bs_html = HtmlHandler().bs_parser(
-            YAML_WGBD['10y_rr']['url'],
-            bl_verify=YAML_WGBD['10y_rr']['bl_verify']
-        )
+        req_resp = request("GET", YAML_WGBD['10y_rr']['url'], verify=YAML_WGBD['10y_rr']['bl_verify'])
+        bs_html = HtmlHandler().bs_parser(req_resp)
         # getting last update date
         str_last_update = StrHandler().get_string_after_substr(
             bs_html.find('article').find(

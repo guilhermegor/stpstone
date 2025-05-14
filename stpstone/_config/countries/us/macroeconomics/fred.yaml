@@ -1,4 +1,5 @@
 ### CONFIGURATION TOOLS ###
+### METADATA: https://fred.stlouisfed.org/docs/api/fred/ ###
 
 credentials:
   host: https://api.stlouisfed.org/

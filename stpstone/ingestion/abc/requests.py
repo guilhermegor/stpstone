@@ -156,16 +156,16 @@ class UtilsRequests(ABC):
             if (len(dict_count_matches) > 0) \
                 and (all(count > 0 for count in dict_count_matches.values())): break
             for str_event, dict_l1 in dict_regex_patterns.items():
-                for str_condition, pattern_regex in dict_l1.items():
+                for str_condition, regex_pattern in dict_l1.items():
                     if str_event not in dict_count_matches:
                         dict_count_matches[str_event] = 0
                     if dict_count_matches[str_event] > 0:
                         break
-                    pattern_regex = StrHandler().remove_diacritics_nfkd(
-                        pattern_regex, bl_lower_case=False
+                    regex_pattern = StrHandler().remove_diacritics_nfkd(
+                        regex_pattern, bl_lower_case=False
                     )
                     regex_match = re.search(
-                        pattern_regex,
+                        regex_pattern,
                         str_page,
                         # flags=re.DOTALL | re.MULTILINE
                     )
@@ -175,8 +175,8 @@ class UtilsRequests(ABC):
                         dict_count_matches[str_event] += 1
                         dict_ = {
                             "EVENT": str_event.upper(),
-                            "MATCH_PATTTERN": str_condition.upper(),
-                            "PATTERN_REGEX": pattern_regex,
+                            "MATCH_PATTERN": str_condition.upper(),
+                            "PATTERN_REGEX": regex_pattern,
                         }
                         for i_match in range(0, len(regex_match.groups()) + 1):
                             regex_group = regex_match.group(i_match).replace("\n", " ")
@@ -186,14 +186,82 @@ class UtilsRequests(ABC):
                 if dict_count_matches[str_event] == 0:
                     list_matches.append({
                         "EVENT": str_event.upper(),
-                        "MATCH_PATTTERN": "zzN/A",
+                        "MATCH_PATTERN": "zzN/A",
                         "PATTERN_REGEX": "zzN/A",
                     })
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
-        df_.sort_values(by=["EVENT", "MATCH_PATTTERN"], ascending=[True, True], inplace=True)
+        df_.sort_values(by=["EVENT", "MATCH_PATTERN"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
         return df_
+    
+    def pivot_event_data(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """
+        Pivots event data from long format to wide format with events as columns.
+        
+        Args:
+            df_ (pd.DataFrame): Input DataFrame containing EVENT, REGEX_GROUP_1 columns
+            
+        Returns:
+            pd.DataFrame: Pivoted DataFrame with one row per country and events as columns
+        """
+        # Create a country grouping - assumes data is ordered by country blocks
+        df_['country_group'] = (df_['EVENT'] == 'COUNTRY_NAME').cumsum()
+        
+        # Pivot the data
+        pivoted = df_.pivot_table(
+            index='country_group',
+            columns='EVENT',
+            values='REGEX_GROUP_1',
+            aggfunc='first'  # Take the first value if there are duplicates
+        ).reset_index(drop=True)
+        
+        # Clean up the column names and DataFrame
+        pivoted.columns.name = None  # Remove the 'EVENT' label from columns
+        
+        return pivoted
+
+    def html_regex(
+        self,
+        html_content: str,
+        dict_regex_patterns: Dict[str, Dict[str, Any]],
+    ):
+        dict_count_matches = dict()
+        list_matches = list()
+        with open("data/html_content.html", 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        for str_event, dict_l1 in dict_regex_patterns.items():
+            for str_condition, regex_pattern in dict_l1.items():
+                if str_event not in dict_count_matches:
+                    dict_count_matches[str_event] = 0
+                regex_pattern = StrHandler().remove_diacritics_nfkd(
+                    regex_pattern, bl_lower_case=False
+                )
+                regex_matches = list(re.finditer(regex_pattern, html_content, re.MULTILINE))
+                if regex_matches:
+                    for int_regex, match in enumerate(regex_matches):
+                        dict_ = {
+                            "INT_REGEX": int_regex,
+                            "EVENT": str_event.upper(),
+                            "MATCH_PATTERN": str_condition.upper(),
+                            "PATTERN_REGEX": regex_pattern,
+                            "REGEX_GROUP_0": match.group(0)
+                        }
+                        for i, group in enumerate(match.groups(), start=1):
+                            dict_[f"REGEX_GROUP_{i}"] = group
+                        list_matches.append(dict_)
+                        dict_count_matches[str_event] += 1
+            if dict_count_matches[str_event] == 0:
+                list_matches.append({
+                    "EVENT": str_event.upper(),
+                    "MATCH_PATTERN": "zzN/A",
+                    "PATTERN_REGEX": "zzN/A",
+                })
+        df_ = pd.DataFrame(list_matches)
+        df_.drop_duplicates(inplace=True)
+        df_.sort_values(by=["INT_REGEX", "EVENT", "MATCH_PATTERN"], 
+                        ascending=[True, True, True], inplace=True)
+        return self.pivot_event_data(df_)
 
     def get_query_params(self, url: str, param: str) -> Union[int, bool, str, float, None]:
         parsed_url = urlparse(url)
@@ -290,6 +358,8 @@ class HandleReqResponses(UtilsRequests):
             df_ = self._handle_pdf_doc_response(url, req_resp, dict_regex_patterns)
         elif str_file_extension in ["fwf", "dat"]:
             df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
+        elif str_file_extension == "html_regex":
+            df_ = self.html_regex(req_resp.text, dict_regex_patterns)
         else:
             try:
                 json_ = req_resp.json()

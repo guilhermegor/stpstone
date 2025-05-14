@@ -45,7 +45,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
 
     @property
     def get_bearer(self) -> str:
-        pattern_regex = "(?i)system_access_token=([^*]+?);"
+        regex_pattern = "(?i)system_access_token=([^*]+?);"
         url = "https://disclosure.spglobal.com/ratings/en/regulatory/ratings-actions"
         cls_selenium = SeleniumWD(url, bl_headless=True, bl_incognito=True)
         cls_selenium.wait(60)
@@ -57,7 +57,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
                 int_idx_bearer = i
                 break
         regex_match = re.search(
-            pattern_regex,
+            regex_pattern,
             list_network_traffic[int_idx_bearer]["params"]["headers"]["set-cookie"]
         )
         if (regex_match is not None) \
