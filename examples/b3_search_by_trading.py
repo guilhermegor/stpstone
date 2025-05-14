@@ -110,6 +110,10 @@ cls_ = SearchByTradingB3(
 # print(f"DF INSTRUMENT GROUP PARAMETERS B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("spot_accepted_collateral_b3", bl_fetch=True)
-print(f"DF SPOT ACCEPTED COLLATERAL B3: \n{df_}")
+# df_ = cls_.source("spot_accepted_collateral_b3", bl_fetch=True)
+# print(f"DF SPOT ACCEPTED COLLATERAL B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("risk_scenarios_curve_types", bl_fetch=True)
+print(f"DF RISK SCENARIOS CURVE TYPES B3: \n{df_}")
 df_.info()

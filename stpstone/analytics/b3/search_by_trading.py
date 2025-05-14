@@ -29,152 +29,8 @@ class TradingFilesB3:
         self.str_fillna_ts = str_fillna_ts
         self.str_fmt_dt = str_fmt_dt
 
-    def cenarios_tipo_curva(self, list_cenarios_tipo_curva=None):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # setting variables
-        list_ser_exportacao_curvas = list()
-        # validando tipo de variáveis de interesse
-        if list_cenarios_tipo_curva != None:
-            #   convertendo para lista, caso não seja
-            if type(list_cenarios_tipo_curva) != list:
-                list_cenarios_tipo_curva = [list_cenarios_tipo_curva]
-            #   alterando tipo de instâncias
-            list_cenarios_tipo_curva = [str(x)
-                                        for x in list_cenarios_tipo_curva]
-        # definindo url com cenários de risco - tipo de curva
-        url_cenarios_tipo_curva = YAML_B3['cenarios_risco_tipo_curva']['tipo_curva']['url'].format(
-            DatesBR().sub_working_days(DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_curva'][
-                'tipo_curva']['self.int_wd_bef']).strftime('%y%m%d'))
-        # baixando em memória zip com cenário de tipo curva da b3
-        list_txts_tipos_curva_cenarios = RemoteFiles().get_zip_from_web_in_memory(
-            url_cenarios_tipo_curva, bl_verify=YAML_B3['cenarios_risco_tipo_curva']['bl_verify'],
-            bl_io_interpreting=YAML_B3['cenarios_risco_tipo_curva']['bl_io_interpreting'],
-            timeout=YAML_B3['cenarios_risco_tipo_curva']['tipo_curva']['timeout'])
-        # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
-        for extracted_file_tipo_curva_cenario in list_txts_tipos_curva_cenarios:
-            #   caso a variável list_cenarios_tipo_curva seja diferente de none, o usuário tem
-            #       interesse que apenas uma parte dos cenários seja considerado, com isso, caso
-            #       o cenário corrente não esteja nessa amostra passar para o próximo
-            if (list_cenarios_tipo_curva != None) and (all([StrHandler().find_substr_str(
-                    extracted_file_tipo_curva_cenario.name, substr) == False for substr in
-                    list_cenarios_tipo_curva])):
-                continue
-            #   abrindo em memória arquivo corrente - pandas dataframe
-            reader = pd.read_csv(extracted_file_tipo_curva_cenario, sep=YAML_B3[
-                'cenarios_risco_tipo_curva']['sep_instancias'], skiprows=1, header=None,
-                names=YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'], decimal=',')
-            df_cenarios_passagem = pd.DataFrame(reader)
-            #   preenchendo com valor padrão campos com valor indisponível
-            df_cenarios_passagem.fillna(YAML_B3['cenarios_risco_tipo_curva']['fill_na_padrao'],
-                                        inplace=True)
-            #   alterando para dicionário dataframe corrente, visando consolidar em uma lista e
-            #       importar para uma dataframe para exportação
-            list_passagem = df_cenarios_passagem.to_dict(orient=YAML_B3[
-                'cenarios_risco_tipo_curva']['orient_df'])
-            list_ser_exportacao_curvas.extend(list_passagem)
-        # adicionando lista a um dataframe a ser exportado
-        df_cenarios_tipo_curva = pd.DataFrame.from_dict(
-            list_ser_exportacao_curvas)
-        # alterando tipo de variáveis de colunas de interesse
-        df_cenarios_tipo_curva = df_cenarios_tipo_curva.astype({
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][0]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][1]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][2]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][3]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][4]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][5]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][6]: int,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][7]: float,
-            YAML_B3['cenarios_risco_tipo_curva']['cols_cenarios_tipo_curvas'][8]: float,
-        })
-        # adding logging
-        df_cenarios_tipo_curva = DBLogs().audit_log(
-            df_cenarios_tipo_curva,
-            url_cenarios_tipo_curva,
-            DatesBR().utc_from_dt(DatesBR().curr_date)
-        )
-        # exportando dataframe de interesse
-        return df_cenarios_tipo_curva
-
-    def cenarios_risco_tipo_spot(self, list_cenarios_tipo_spot=None):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # setting variables
-        list_ser_exportacao_curvas = list()
-        # validando tipo de variáveis de interesse
-        if list_cenarios_tipo_spot != None:
-            #   convertendo para lista, caso não seja
-            if type(list_cenarios_tipo_spot) != list:
-                list_cenarios_tipo_spot = [list_cenarios_tipo_spot]
-            #   alterando tipo de instâncias
-            list_cenarios_tipo_spot = [str(x) for x in list_cenarios_tipo_spot]
-        # definindo url com cenários de risco - tipo de curva
-        url_cenarios_tipo_spot = YAML_B3['cenarios_risco_tipo_spot']['tipo_curva']['url'].format(
-            DatesBR().sub_working_days(DatesBR().curr_date, YAML_B3['cenarios_risco_tipo_spot'][
-                'tipo_curva']['self.int_wd_bef']).strftime('%y%m%d'))
-        # baixando em memória zip com cenário de tipo curva da b3
-        list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
-            url_cenarios_tipo_spot, bl_verify=YAML_B3['cenarios_risco_tipo_spot']['bl_verify'],
-            bl_io_interpreting=YAML_B3['cenarios_risco_tipo_spot']['bl_io_interpreting'],
-            timeout=YAML_B3['cenarios_risco_tipo_spot']['tipo_curva']['timeout'])
-        # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
-        for extracted_file_tipo_curva_cenario in list_txts_tipos_spot_cenarios:
-            #   caso a variável list_cenarios_tipo_spot seja diferente de none, o usuário tem
-            #       interesse que apenas uma parte dos cenários seja considerado, com isso, caso o
-            #       cenário corrente não esteja nessa amostra passar para o próximo
-            if (list_cenarios_tipo_spot != None) and (all([StrHandler().find_substr_str(
-                    extracted_file_tipo_curva_cenario.name, substr) == False for substr in
-                    list_cenarios_tipo_spot])):
-                continue
-            #   abrindo em memória arquivo corrente - pandas dataframe
-            reader = pd.read_csv(extracted_file_tipo_curva_cenario, sep=YAML_B3[
-                'cenarios_risco_tipo_spot']['sep_instancias'], skiprows=1, header=None,
-                names=YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'], decimal=',')
-            df_cenarios_passagem = pd.DataFrame(reader)
-            #   preenchendo com valor padrão campos com valor indisponível
-            df_cenarios_passagem.fillna(
-                YAML_B3['cenarios_risco_tipo_spot']['fill_na_padrao'], inplace=True)
-            #   alterando para dicionário dataframe corrente, visando consolidar em uma lista e
-            #       importar para uma dataframe para exportação
-            list_passagem = df_cenarios_passagem.to_dict(orient=YAML_B3[
-                'cenarios_risco_tipo_spot']['orient_df'])
-            list_ser_exportacao_curvas.extend(list_passagem)
-        # adicionando lista a um dataframe a ser exportado
-        df_cenarios_tipo_spot = pd.DataFrame.from_dict(
-            list_ser_exportacao_curvas)
-        # alterando tipo de variáveis de colunas de interesse
-        df_cenarios_tipo_spot = df_cenarios_tipo_spot.astype({
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][0]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][1]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][2]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][3]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][4]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][5]: float,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][6]: float,
-        })
-        # adicionando colunas de interesse - nome tipo do cenário
-        df_cenarios_tipo_spot[YAML_B3['cenarios_risco_tipo_spot']['col_criar_nome_tipo_cenario']] = \
-            [YAML_B3['cenarios_risco_tipo_spot']['variaveis_tipo_cenarios_curvas'][x] for x in
-                df_cenarios_tipo_spot[YAML_B3['cenarios_risco_tipo_spot'][
-                    'cols_cenarios_tipo_curvas'][3]].tolist()]
-        # adding logging
-        df_cenarios_tipo_spot = DBLogs().audit_log(
-            df_cenarios_tipo_spot,
-            url_cenarios_tipo_spot,
-            DatesBR().utc_from_dt(DatesBR().curr_date)
-        )
-        # exportando dataframe de interesse
-        return df_cenarios_tipo_spot
-
     def fprs_cenarios_curva_spot_merge(self,
-                                       list_cenarios_tipo_curva=['2962', '2906', '2945', '2924',
+                                       list_risk_scenarios_curve_type=['2962', '2906', '2945', '2924',
                                                                  '2944', '2925', '2946',
                                                                  '2901', '2902', '2934'],
                                        list_cenarios_tipo_spot=['2962', '2906', '2945', '2924',
@@ -199,25 +55,25 @@ class TradingFilesB3:
             print('*** TIPO FRPS ***')
             print(df_tipos_fprs)
         # * arquivos de pregão b3 - cenários tipo curva
-        df_cenarios_tipo_curva = self.cenarios_tipo_curva(list_cenarios_tipo_curva)
+        df_risk_scenarios_curve_type = self.risk_scenarios_curve_types(list_risk_scenarios_curve_type)
         # removendo colunas de interesse
-        df_cenarios_tipo_curva.drop([
+        df_risk_scenarios_curve_type.drop([
             YAML_B3['cenarios_risco_tipo_curva']['col_tipo'],
             YAML_B3['cenarios_risco_tipo_curva']['col_phi_2']
         ], axis=1, inplace=True)
         # limitando cenários de tipos de curvas dentro do range de interesse
-        df_cenarios_tipo_curva = df_cenarios_tipo_curva[df_cenarios_tipo_curva[YAML_B3[
+        df_risk_scenarios_curve_type = df_risk_scenarios_curve_type[df_risk_scenarios_curve_type[YAML_B3[
             'cenarios_risco_tipo_curva']['col_id_cenario']].isin(range(
                 YAML_B3['cenarios_risco_tipo_curva']['int_inf_range_cenarios'],
                 YAML_B3['cenarios_risco_tipo_curva']['int_sup_range_cenarios']))].reset_index(
                     drop=True)
         # eliminando cenários prospectivos
-        df_cenarios_tipo_curva = df_cenarios_tipo_curva[df_cenarios_tipo_curva['ID_CENARIO'].isin(
+        df_risk_scenarios_curve_type = df_risk_scenarios_curve_type[df_risk_scenarios_curve_type['ID_CENARIO'].isin(
             range(1, int_cenario_sup_avaliacao))].reset_index(drop=True)
         if bl_debug == True:
             print('*** TIPO CURVA ***')
-            print(df_cenarios_tipo_curva.info())
-            print(df_cenarios_tipo_curva)
+            print(df_risk_scenarios_curve_type.info())
+            print(df_risk_scenarios_curve_type)
         # * arquivos de pregão b3 - cenários risco tipo spot
         df_cenarios_tipo_spot = self.cenarios_risco_tipo_spot(list_cenarios_tipo_spot)
         # removendo colunas de interesse
@@ -269,13 +125,13 @@ class TradingFilesB3:
             df_tipos_fprs, how='inner', left_on='ID_FPR', right_on='ID_FPR')
         df_fpr_b3 = df_fpr_b3.reindex(columns=list_colunas_frp)
         # concat cenários tipo curva e spot
-        df_cenarios_tipo_curva = pd.concat([df_cenarios_tipo_curva, df_cenarios_tipo_spot],
+        df_risk_scenarios_curve_type = pd.concat([df_risk_scenarios_curve_type, df_cenarios_tipo_spot],
                                            ignore_index=True, sort=False)
         if bl_debug == True:
             print('*** CENÁRIOS TIPO CURVA & SPOT ***')
-            print(df_cenarios_tipo_curva)
+            print(df_risk_scenarios_curve_type)
         # inner-join fprs com cenarios spot e tipo curvas
-        df_fpr_b3 = df_fpr_b3.merge(df_cenarios_tipo_curva, how='inner', left_on='ID_FPR',
+        df_fpr_b3 = df_fpr_b3.merge(df_risk_scenarios_curve_type, how='inner', left_on='ID_FPR',
                                     right_on='ID_FPR')
         # preenchendo coluna nome fpr
         df_fpr_b3['NOME_FPR'] = [YAML_B3['fatores_primitivos_risco_b3']['dict_fprs'][x]
@@ -369,7 +225,7 @@ class TradingFilesB3:
             reader = pd.read_csv(extracted_file_tipo_curva_cenario, sep=YAML_B3[
                 'cenarios_risco_tipo_spot'][
                 'sep_instancias'], skiprows=1, header=None, names=YAML_B3[
-                    'cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'], decimal=',')
+                    'cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'], decimal=',')
             df_cenarios_passagem = pd.DataFrame(reader)
             #   preenchendo com valor padrão campos com valor indisponível
             df_cenarios_passagem.fillna(YAML_B3['cenarios_risco_tipo_spot']['fill_na_padrao'],
@@ -383,20 +239,20 @@ class TradingFilesB3:
         df_cenarios_tipo_spot = pd.DataFrame.from_dict(list_ser_exportacao_curvas)
         # alterando tipo de variáveis de colunas de interesse
         df_cenarios_tipo_spot = df_cenarios_tipo_spot.astype({
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][0]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][1]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][2]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][3]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][4]: int,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][5]: float,
-            YAML_B3['cenarios_risco_tipo_spot']['cols_cenarios_tipo_curvas'][6]: float,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][0]: int,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][1]: int,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][2]: int,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][3]: int,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][4]: int,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][5]: float,
+            YAML_B3['cenarios_risco_tipo_spot']['cols_risk_scenarios_curve_types'][6]: float,
         })
         # adicionando colunas de interesse - nome tipo do cenário
         df_cenarios_tipo_spot[YAML_B3['cenarios_risco_tipo_spot'][
             'col_criar_nome_tipo_cenario']] = \
             [YAML_B3['cenarios_risco_tipo_spot']['variaveis_tipo_cenarios_curvas'][x] for x in
                 df_cenarios_tipo_spot[YAML_B3['cenarios_risco_tipo_spot'][
-                    'cols_cenarios_tipo_curvas'][3]].tolist()]
+                    'cols_risk_scenarios_curve_types'][3]].tolist()]
         # adding logging
         df_cenarios_tipo_spot = DBLogs().audit_log(
             df_cenarios_tipo_spot,
@@ -407,7 +263,7 @@ class TradingFilesB3:
         return df_cenarios_tipo_spot
 
 
-# print(self.cenarios_tipo_curva(list_cenarios_tipo_curva=[2939, 2940, 2941]))
+# print(self.risk_scenarios_curve_types(list_risk_scenarios_curve_type=[2939, 2940, 2941]))
 # print(self.cenarios_risco_tipo_spot(list_cenarios_tipo_spot=[3012, 3134, 3135]))
 # df_fpr_b3 = self.fprs_cenarios_curva_spot_merge
 # print(df_fpr_b3)

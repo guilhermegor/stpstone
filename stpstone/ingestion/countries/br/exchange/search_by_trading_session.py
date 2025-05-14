@@ -310,7 +310,6 @@ class SearchByTradingB3(ABCRequests):
         # looping within files in zip
         for file_unz in list_unzipped_files[1:]:
             #   creating columns month-file
-            print(str(file_unz))
             str_mes_arquivo_garantias_b3_corrente = StrHandler().get_between(
                 str(file_unz), '_', '.xlsx').replace(' ', '').lower()
             #   looping within sheet names
@@ -340,10 +339,74 @@ class SearchByTradingB3(ABCRequests):
         # returning dataframe
         return df_coll_acc_spot_bov
 
+    def risk_scenarios_curve_types(self, list_risk_curve_type_scenarios=None):
+        """
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        """
+        # setting variables
+        list_ser = list()
+        list_cols_scenarios = ['TIPO', 'ID_FPR', 'ID_CENARIO', 'INT_TIPO_CENARIO',
+            'DIAS_HOLDING_PERIOD', 'DIAS_CORRIDOS_VERTICE', 'DIAS_SAQUE_VERTICE', 'VALOR_PHI_1',
+            'VALOR_PHI_2']
+        # validando tipo de variáveis de interesse
+        if list_risk_curve_type_scenarios != None:
+            #   convertendo para lista, caso não seja
+            if type(list_risk_curve_type_scenarios) != list:
+                list_risk_curve_type_scenarios = [list_risk_curve_type_scenarios]
+            #   alterando tipo de instâncias
+            list_risk_curve_type_scenarios = [str(x)
+                                        for x in list_risk_curve_type_scenarios]
+        # definindo url com cenários de risco - tipo de curva
+        url_risk_curve_type_scenarios = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoCurva{}.zip".format(
+            self.dt_ref.strftime('%y%m%d'))
+        req_resp = request("GET", url_risk_curve_type_scenarios)
+        req_resp.raise_for_status()
+        # baixando em memória zip com cenário de tipo curva da b3
+        list_txts_curve_type_scenarios = RemoteFiles().get_zip_from_web_in_memory(
+            req_resp, bl_io_interpreting=False)
+        # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
+        for extracted_file_curve_type_scenarios in list_txts_curve_type_scenarios:
+            #   caso a variável list_risk_curve_type_scenarios seja diferente de none, o usuário tem
+            #       interesse que apenas uma parte dos cenários seja considerado, com isso, caso
+            #       o cenário corrente não esteja nessa amostra passar para o próximo
+            if (list_risk_curve_type_scenarios != None) and (all([StrHandler().find_substr_str(
+                    extracted_file_curve_type_scenarios.name, substr) == False for substr in
+                    list_risk_curve_type_scenarios])):
+                continue
+            #   abrindo em memória arquivo corrente - pandas dataframe
+            reader = pd.read_csv(extracted_file_curve_type_scenarios, sep=";", skiprows=1, 
+                                 header=None, names=list_cols_scenarios, decimal=',')
+            df_cenarios_passagem = pd.DataFrame(reader)
+            #   preenchendo com valor padrão campos com valor indisponível
+            df_cenarios_passagem.fillna("-99999", inplace=True)
+            #   alterando para dicionário dataframe corrente, visando consolidar em uma lista e
+            #       importar para uma dataframe para exportação"
+            list_ser.extend(df_cenarios_passagem.to_dict(orient="records"))
+        # adicionando lista a um dataframe a ser exportado
+        df_risk_curve_type_scenarios = pd.DataFrame(list_ser)
+        # alterando tipo de variáveis de colunas de interesse
+        df_risk_curve_type_scenarios = df_risk_curve_type_scenarios.astype({
+            list_cols_scenarios[0]: int,
+            list_cols_scenarios[1]: int,
+            list_cols_scenarios[2]: int,
+            list_cols_scenarios[3]: int,
+            list_cols_scenarios[4]: int,
+            list_cols_scenarios[5]: int,
+            list_cols_scenarios[6]: int,
+            list_cols_scenarios[7]: float,
+            list_cols_scenarios[8]: float,
+        })
+        # exportando dataframe de interesse
+        return df_risk_curve_type_scenarios
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
         source = self.get_query_params(req_resp.url, "source").lower()
         if source == "mtm_b3":
             return self.mtm_compra_venda()
         elif source == "spot_accepted_collateral_b3":
             return self.collateral_accepted_spot_bov_b3()
+        elif source == "risk_scenarios_curve_types":
+            return self.risk_scenarios_curve_types()
         return None
