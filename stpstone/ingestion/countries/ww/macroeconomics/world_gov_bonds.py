@@ -95,9 +95,6 @@ class WorldGovBonds(ABCRequests):
                     selector_type="xpath"
                 )
         list_td = self.treat_list_td(list_td)
-        print(f"length list td: {len(list_td)}")
-        print(f"length list th: {len(list_th)}")
-        print(f"remainder len: {len(list_td) % len(list_th)}")
         list_td = list_td[:-1]
         list_ser = HandlingDicts().pair_headers_with_data(list_th, list_td)
         return pd.DataFrame(list_ser)
