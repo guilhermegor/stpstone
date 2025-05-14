@@ -83,6 +83,9 @@ YAML_OLINDA_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/olinda_bcb.yaml"))
 YAML_INVESTINGCOM_BR = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/investingcom_br.yaml"))
+# US
+YAML_FRED_US = reading_yaml(
+    os.path.join(root_path, "countries/us/macroeconomics/fred.yaml"))
 # WW
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
