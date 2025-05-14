@@ -86,6 +86,8 @@ YAML_INVESTINGCOM_BR = reading_yaml(
 # WW
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
+YAML_WW_TRADING_ECON = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/trading_econ.yaml"))
 
 # * otc
 # BR
