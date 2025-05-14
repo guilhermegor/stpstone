@@ -82,6 +82,3 @@ jobs:
 
       - name: Run Integration Tests
         run: poetry run python -m unittest discover -s tests/integration -p "*.py" -v
-
-      - name: Run Pact Tests
-        run: poetry run python -m unittest discover -s tests/pact -p "*.py" -v

@@ -176,7 +176,7 @@ class CVMWeb_WS_Funds:
             timeout=tup_timeout
         )
         req_resp.raise_for_status()
-        html_content = HtmlHandler().html_lxml_parser(page=req_resp.text)
+        html_content = HtmlHandler().lxml_parser(page=req_resp.text)
         return html_content
 
     @property
@@ -394,7 +394,7 @@ class CVMWeb_WS_Funds:
                 cookies=self.dict_cookie
             )
             req_resp.raise_for_status()
-            html_content = HtmlHandler().html_lxml_parser(page=req_resp.text)
+            html_content = HtmlHandler().lxml_parser(page=req_resp.text)
             # print(f'\nLIST_SER2_DAILY_INFOS: {list_ser_2}')
             dict_html_contents_dts[str_dt] = html_content
         # return html contents

@@ -47,7 +47,7 @@ class StrHandler:
         OUTPUTS: MID STRING
         """
         try:
-            start = s.index(first) + len(first) + 1
+            start = s.index(first) + len(first)
             end = s.index(last, start)
             return s[start:end]
         except ValueError:

@@ -228,33 +228,6 @@ trading_report:
   bl_io_interpreting: False
   bl_verify: False
 
-# margens teóricas b3
-margens_teoricas_maximas_b3:
-  limite_inferior_horario_atualizacao_mtm_du_atual: '{} 21:00:00'
-  url: 'https://www.b3.com.br/pesquisapregao/download?filelist=MT{}.zip'
-  bl_io_interpreting: False
-  bl_verify: False
-  key_compra: 'compra'
-  key_venda: 'venda'
-  key_margem_b3_d2: 'margem_b3_d2'
-  key_desagio_b3_d2: 'desagio_b3_d2'
-  col_incluir_ticker: 'TICKER'
-  col_incluir_desagio_b3_c: 'DESAGIO_B3_COMPRA'
-  col_incluir_desagio_b3_v: 'DESAGIO_B3_VENDA'
-  col_incluir_desagio_b3_max_c_v: 'DESAGIO_B3_MAX_C_V'
-  col_incluir_margem_b3_c: 'MARGEM_B3_COMPRA'
-  col_incluir_margem_b3_v: 'MARGEM_B3_VENDA'
-  col_incluir_margem_b3_max_c_v: 'MARGEM_B3_MAX_C_V'
-  col_incluir_margem_b3_compra_d_mais_n: 'MARGEM_B3_COMPRA_D_'
-  col_incluir_margem_b3_venda_d_mais_n: 'MARGEM_B3_VENDA_D_'
-  col_incluir_desagio_b3_compra_d_mais_n: 'DESAGIO_B3_COMPRA_D_'
-  col_incluir_desagio_b3_venda_d_mais_n: 'DESAGIO_B3_VENDA_D_'
-  col_incluir_preco_fechamento: 'PRECO_FECHAMENTO'
-  key_instrumentos: 'INSTRUMENT'
-  key_desagio_compra: 'compra'
-  key_desagio_venda: 'venda'
-  key_preco_referencia: 'preco_referencia'
-
 # ativos aceitos como garantia b3
 collateral_acc_spot_bov_b3:
   col_incluir_ticker: 'TICKER'

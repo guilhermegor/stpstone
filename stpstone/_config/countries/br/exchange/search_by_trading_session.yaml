@@ -76,11 +76,58 @@ metadata:
       ID: str
       DECODE: str
 
+# up2data b3
+up2data_b3:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  bl_verify: False
+  bl_io_interpreting: False
+  str_sep: ';'
+  str_decimal: ','
+  request_token: 'https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={}'
+  access_api: 'https://arquivos.b3.com.br/api/download/?token={}'
+  securities_by_category_name:
+    stocks: ['SHARES', 'UNITS', 'UNIT']
+    receipts: ['WARRANTS', 'WARRANT', 'RIGHTS', 'RECEIPTS']
+    forwards: ['COMMON EQUITIES FORWARD', 'FORWARD RATE AGREEMENT']
+    bdrs: ['BDR']
+    etfs: ['ETF EQUITIES', 'ETF FOREIGN INDEX', 'FIXED INCOME TRADABLE INSTRUMENTS',
+      'ETF PRIMARY MARKET', 'GROSS SETTLEMENT', 'FIXED INCOME TRADABLE INSTRUMENT T1']
+    futures: ['FUTURE', 'ROLLOVER', 'STOCK FUTURE', 'FORW/FUT GOLD']
+    options_equities: ['OPTION ON EQUITIES']
+    options_index: ['OPTION ON INDEX']
+    funds: ['FUNDS']
+    indexes: ['INDEX']
+  securities_by_market_name:
+    futures: ['FUTURE', 'SPOT']
+    options_bmf: ['OPTIONS ON FUTURE', 'OPTIONS ON SPOT']
+  daily_trades: 'https://arquivos.b3.com.br/apinegocios/tickercsv/{}/'
+  derivatives: 'https://arquivos.b3.com.br/tabelas/DerivativesOpenPosition/{}?lang=pt'
+  instruments: 'https://arquivos.b3.com.br/tabelas/InstrumentsConsolidated/{}?lang=pt'
+  key_token: token
+  url_daily_trades: https://arquivos.b3.com.br/apinegocios/tickercsv/{}/
+  bl_io_interpretin: False
+  str_input_date_format: AAAA-MM-DD
+  col_dt_ref: DataReferencia
+  col_instrument: CodigoInstrumento
+  col_stock_update: AcaoAtualizacao
+  col_pv: PrecoNegocio
+  col_qty_trd: QuantidadeNegociada
+  col_closing_time: HoraFechamento
+  col_trd_code: CodigoIdentificadorNegocio
+  col_section_type: TipoSessaoPregao
+  col_trd_dt: DataNegocio
+  col_buyer_code: CodigoParticipanteComprador
+  col_seller_code: CodigoParticipanteVendedor
+  col_create_asset: ASSET
+  value_nan: N/A
 
 ### RESOURCES TO BE SCRAPED ###
 
 # Standardized Instruments Groups
 standardized_instruments_groups:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -133,6 +180,8 @@ standardized_instruments_groups:
 
 # BVBG.087.01 IndexReport
 index_report:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -213,6 +262,8 @@ index_report:
 
 # BVBG.086.01 PriceReport
 price_report:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -303,6 +354,8 @@ price_report:
 
 # BVBG.029.02
 registration_indicator_instruments:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -390,6 +443,8 @@ registration_indicator_instruments:
 
 # BVBG.044.01
 fee_daily_unit_cost:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -454,6 +509,8 @@ fee_daily_unit_cost:
 
 # BVBG.043.01
 fee_monthly_unit_cost:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -516,6 +573,8 @@ fee_monthly_unit_cost:
 
 # Primitive Risk Factors (FPRs)
 primitive_risk_factors:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -581,6 +640,8 @@ primitive_risk_factors:
 
 # Risk Formulas
 risk_formulas:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -630,6 +691,8 @@ risk_formulas:
 
 # BVBG.024.01 Fee Variables
 variable_fees_monthly_updt:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -691,6 +754,8 @@ variable_fees_monthly_updt:
 
 # Daily Liquidity Limit
 daily_liquidity_limit:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -750,6 +815,8 @@ daily_liquidity_limit:
 
 # Daily Liquidity Limit - Other Limits
 daily_liquidity_limit_other_limits:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -805,6 +872,8 @@ daily_liquidity_limit_other_limits:
 
 # Tradable Security List
 tradable_security_list:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -921,6 +990,8 @@ tradable_security_list:
 
 # Mapping OTC Instrument Groups
 mapping_otc_instrument_groups:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -986,6 +1057,8 @@ mapping_otc_instrument_groups:
 
 # Mapping Standardized Instrument Groups
 mapping_standardized_instrument_groups:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1051,6 +1124,8 @@ mapping_standardized_instrument_groups:
 
 # Maximum Theoretical Margin for Open Positions and the Mininimum Values of Assets Pledged as Collateral
 mtm_b3:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1071,7 +1146,7 @@ mtm_b3:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip#source=mtm_b3
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1090,13 +1165,48 @@ mtm_b3:
     - log
     - bak
   dtypes:
-    INSTRUMENT_MTM: str
-    HOLDING_DAY: str
-    MTM_MAX_C_PHI1: str
-    MTM_MAX_V_PHI1: str
-    MIN_MARGIN_CREDIT_COLLATERAL_PHI1: float
-    MIN_MARGIN_CREDIT_COLLATERAL_PHI2: str
-    FILE_NAME: str
+    TICKER: str
+    PRECO_FECHAMENTO: float
+    MARGEM_B3_COMPRA_D_1: float
+    DESAGIO_B3_COMPRA_D_1: float
+    MARGEM_B3_VENDA_D_1: float
+    DESAGIO_B3_VENDA_D_1: float
+    MARGEM_B3_COMPRA_D_2: float
+    DESAGIO_B3_COMPRA_D_2: float
+    MARGEM_B3_VENDA_D_2: float
+    DESAGIO_B3_VENDA_D_2: float
+    MARGEM_B3_COMPRA_D_3: float
+    DESAGIO_B3_COMPRA_D_3: float
+    MARGEM_B3_VENDA_D_3: float
+    DESAGIO_B3_VENDA_D_3: float
+    MARGEM_B3_COMPRA_D_4: float
+    DESAGIO_B3_COMPRA_D_4: float
+    MARGEM_B3_VENDA_D_4: float
+    DESAGIO_B3_VENDA_D_4: float
+    MARGEM_B3_COMPRA_D_5: float
+    DESAGIO_B3_COMPRA_D_5: float
+    MARGEM_B3_VENDA_D_5: float
+    DESAGIO_B3_VENDA_D_5: float
+    MARGEM_B3_COMPRA_D_6: float
+    DESAGIO_B3_COMPRA_D_6: float
+    MARGEM_B3_VENDA_D_6: float
+    DESAGIO_B3_VENDA_D_6: float
+    MARGEM_B3_COMPRA_D_7: float
+    DESAGIO_B3_COMPRA_D_7: float
+    MARGEM_B3_VENDA_D_7: float
+    DESAGIO_B3_VENDA_D_7: float
+    MARGEM_B3_COMPRA_D_8: float
+    DESAGIO_B3_COMPRA_D_8: float
+    MARGEM_B3_VENDA_D_8: float
+    DESAGIO_B3_VENDA_D_8: float
+    MARGEM_B3_COMPRA_D_9: float
+    DESAGIO_B3_COMPRA_D_9: float
+    MARGEM_B3_VENDA_D_9: float
+    DESAGIO_B3_VENDA_D_9: float
+    MARGEM_B3_COMPRA_D_10: float
+    DESAGIO_B3_COMPRA_D_10: float
+    MARGEM_B3_VENDA_D_10: float
+    DESAGIO_B3_VENDA_D_10: float
   df_read_params:
     skiprows: 1
     names:
@@ -1110,6 +1220,8 @@ mtm_b3:
 
 # Equities Market - Equities Option Reference Premiums
 option_theor_premiums:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1172,6 +1284,8 @@ option_theor_premiums:
 
 # FX Market - Traded Rates, Opening Parameters and Contracted Transactions
 fx_markets_traded_rates:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1281,6 +1395,8 @@ fx_markets_traded_rates:
 
 # FX Market - Volume Settled on a Net Basis
 fx_market_volume_settled:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1346,6 +1462,8 @@ fx_market_volume_settled:
 
 # Derivatives - List of ISIN Numbers for Swaps
 list_isin_numbers_swaps:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1406,6 +1524,8 @@ list_isin_numbers_swaps:
 
 # Derivatives Market - IDxUS Dollar Swap - Mark to Market
 id_us_dollar_swap_mtm:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1510,6 +1630,8 @@ id_us_dollar_swap_mtm:
 
 # Derivatives Market - Swap Market Rates
 swap_market_rates:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1606,6 +1728,8 @@ swap_market_rates:
 
 # Securities Market - Government Securities Reference Prices
 brazillian_sovereign_bonds:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1668,6 +1792,8 @@ brazillian_sovereign_bonds:
 
 # Instrument Group Parameters
 instrument_group_parameters:
+  web_driver:
+    xpath_el_wait_until_loaded:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -1736,3 +1862,52 @@ instrument_group_parameters:
       - DATA_INICIAL_INTERVALO_VENCIMENTOS
       - DATA_FINAL_INTERVALO_VENCIMENTOS
       - INDICADOR_MODELO_GENERICO
+
+# spot accepted as collateral - b3
+spot_accepted_collateral_b3:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - start with a commentary hash and separate params with &
+  app: pt_br/produtos-e-servicos/compensacao-e-liquidacao/clearing/administracao-de-riscos/garantias/limites-de-renda-variavel/#source=spot_accepted_collateral_b3
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cols_from_case: upper_constant
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_b3_instrument_group_parameters
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  dtypes:
+    MES_ARQUIVO: category
+    TICKER: str
+    ISIN: str
+    LIMITE_QUANTIDADES: int
+  df_read_params:
