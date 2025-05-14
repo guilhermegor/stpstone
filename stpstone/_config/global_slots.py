@@ -4,6 +4,8 @@ from stpstone.utils.parsers.yaml import reading_yaml
 
 root_path = os.path.dirname(os.path.realpath(__file__))
 
+YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
+
 # * bylaws
 YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(
     os.path.join(root_path, "countries/br/bylaws/investment_funds.yaml")
@@ -79,6 +81,8 @@ YAML_B3_FINANCIAL_INDICATORS = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/b3_financial_indicators.yaml"))
 YAML_OLINDA_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/olinda_bcb.yaml"))
+YAML_INVESTINGCOM_BR = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/investingcom_br.yaml"))
 # WW
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
@@ -119,9 +123,7 @@ YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.y
 # ! deprecated
 YAML_B3 = reading_yaml(os.path.join(root_path, "b3.yaml"))
 YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
-YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
 YAML_WGBD = reading_yaml(os.path.join(root_path, "world_gov_bonds.yaml"))
 YAML_USA_MACRO = reading_yaml(os.path.join(root_path, "usa_macro.yaml"))
-YAML_BR_MACRO = reading_yaml(os.path.join(root_path, "br_macro.yaml"))
 YAML_MICROSOFT_APPS = reading_yaml(os.path.join(root_path, "microsoft_apps.yaml"))
 YAML_LLMS = reading_yaml(os.path.join(root_path, "llms.yaml"))
