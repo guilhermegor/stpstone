@@ -20,12 +20,12 @@ class TestYahiiRatesBRMacroPact(TestCase):
             self.yahii_instance = YahiiRatesBRMacro(session=None, dt_ref=dt_ref, cls_db=None)
             self.df_actual = self.yahii_instance.source("pmi_rf_rates", bl_fetch=True)
             self.df_actual.to_excel(
-                f'data/yahii-pmi-rf-rates_{DatesBR().curr_date.strftime("%Y%m%d")}_{DatesBR().curr_time.strftime("%H%M%S")}.xlsx',
+                f'tests/pact/data/yahii-pmi-rf-rates_{DatesBR().curr_date.strftime("%Y%m%d")}_{DatesBR().curr_time.strftime("%H%M%S")}.xlsx',
                 index=False
             )
         else:
             self.df_actual = pd.read_excel(DirFilesManagement().choose_last_saved_file_w_rule(
-                "data/", "yahii-pmi-rf-rates_*.xlsx"), decimal=",")
+                "tests/pact/data/", "yahii-pmi-rf-rates_*.xlsx"), decimal=",")
         self.df_actual["VALUE"] = self.df_actual["VALUE"].astype(float).round(2)
         self.df_actual_filtered = self.df_actual[
             self.df_actual["YEAR"].between(2020, 2024)
