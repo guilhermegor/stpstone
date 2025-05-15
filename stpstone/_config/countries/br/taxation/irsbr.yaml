@@ -88,7 +88,7 @@ companies:
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    EIN: str
+    CNPJ: str
     COMPANY_NAME: str
     LEGAL_FORM: str
     LEGAL_RESP_QUALIF: str
@@ -150,7 +150,7 @@ simplified_taxation_system:
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    EIN: str
+    CNPJ: str
     BL_SIMPL_TX: str
     DT_BEG_SIMPL_TX: date
     DT_END_SIMPL_TX: date

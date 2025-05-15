@@ -42,9 +42,9 @@ class SGSBCB(ABCRequests):
         self.dt_start_repr = dt_start.strftime('%d/%m/%Y')
         self.dt_end_repr = dt_end.strftime('%d/%m/%Y')
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        json_ = req_resp.json()
-        int_url_slug = int(req_resp.url.split("/bcdata.sgs.")[-1].split("/")[0])
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        json_ = resp_req.json()
+        int_url_slug = int(resp_req.url.split("/bcdata.sgs.")[-1].split("/")[0])
         df_ = pd.DataFrame(json_)
         df_.columns = [x.upper() for x in df_.columns]
         df_["NOME"] = "IGPM" if int_url_slug == 189 else \

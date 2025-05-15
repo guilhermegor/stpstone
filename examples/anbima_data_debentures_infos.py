@@ -25,7 +25,7 @@ cls_ = AnbimaDataDebentures(
     session=cls_session.session,
     list_slugs=["AEAM22", "AALM11"],
     str_user_agent=UserAgents().get_random_user_agent,
-    int_wait_load=30,
+    int_wait_load_seconds=30,
     bl_headless=False,
     bl_incognito=True
 )

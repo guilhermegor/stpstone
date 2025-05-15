@@ -21,9 +21,9 @@ def save_html(content):
 
 def scrape_proxies():
     try:
-        req_resp = requests.get(url, headers=headers, timeout=15)
-        req_resp.raise_for_status()
-        page = req_resp.content
+        resp_req = requests.get(url, headers=headers, timeout=15)
+        resp_req.raise_for_status()
+        page = resp_req.content
         save_html(page)
         html_content = html.fromstring(page)
 

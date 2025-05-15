@@ -29,7 +29,7 @@ class EtfDBVettaFi(ABCRequests):
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
         list_slugs: Optional[List[str]] = None,
-        int_wait_load: int = 10,
+        int_wait_load_seconds: int = 10,
         bl_headless: bool = False,
         bl_incognito: bool = False
     ) -> None:
@@ -41,7 +41,7 @@ class EtfDBVettaFi(ABCRequests):
             logger=logger,
             token=token,
             list_slugs=list_slugs,
-            int_wait_load=int_wait_load,
+            int_wait_load_seconds=int_wait_load_seconds,
             bl_headless=bl_headless,
             bl_incognito=bl_incognito
         )

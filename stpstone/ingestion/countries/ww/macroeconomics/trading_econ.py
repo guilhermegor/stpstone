@@ -61,10 +61,10 @@ class TradingEconWW(ABCRequests):
         list_els = [x.text for x in list_els]
         return list_els
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        source = self.get_query_params(req_resp.url, "source")
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        source = self.get_query_params(resp_req.url, "source")
         try:
-            cls_selenium = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
+            cls_selenium = SeleniumWD(resp_req.url, bl_headless=True, bl_incognito=True)
             web_driver = cls_selenium.get_web_driver
             list_th = list(YAML_WW_TRADING_ECON[source]["dtypes"].keys())
             list_td = self.list_web_elements(cls_selenium, web_driver, 

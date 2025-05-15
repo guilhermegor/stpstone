@@ -64,10 +64,10 @@ class SearchByTradingB3(ABCRequests):
                 request(method_request, url_token).text)[key_token]
         url_lotes_padrao_b3 = str(url_lotes_padrao_b3).format(token_api_b3)
         # print('URL LOTE PADRAO B3: {}'.format(url_lotes_padrao_b3))
-        req_resp = request(
+        resp_req = request(
             method_request, url_lotes_padrao_b3.format(token_api_b3))
-        req_resp.raise_for_status()
-        req_resp_text = req_resp.content.decode('iso-8859-1')
+        resp_req.raise_for_status()
+        req_resp_text = resp_req.content.decode('iso-8859-1')
         # print('RESPONSE API B3 LOTE PADRAO: {}'.format(req_resp_text[:1000]))
         # tratando dados provindos da API
         list_response_api_b3 = req_resp_text.split("\n")
@@ -141,9 +141,9 @@ class SearchByTradingB3(ABCRequests):
         url_mtm = "https://www.b3.com.br/pesquisapregao/download?filelist=MT{}.zip".format(
             self.dt_ref.strftime('%y%m%d'))
         # carga para a memória margens teóricas máximas b3
-        req_resp = request("GET", url_mtm)
+        resp_req = request("GET", url_mtm)
         zipfile = RemoteFiles().get_zip_from_web_in_memory(
-            req_resp, bl_io_interpreting=False)
+            resp_req, bl_io_interpreting=False)
         # retorno é um novo zip com um xlsx
         zipfile = ZipFile(zipfile)
         # coletando nome do arquivo txt contido dentro do zip
@@ -290,8 +290,8 @@ class SearchByTradingB3(ABCRequests):
         list_exportacao = list()
         # importing to memory html, in order to catch the url of the collateral accepted by b3,
         #   regarding spot bov
-        req_resp = request("GET", "https://www.b3.com.br/pt_br/produtos-e-servicos/compensacao-e-liquidacao/clearing/administracao-de-riscos/garantias/limites-de-renda-variavel/")
-        html_parser_acoes_units_etfs_aceitos_garantia_b3 = HtmlHandler().lxml_parser(req_resp)
+        resp_req = request("GET", "https://www.b3.com.br/pt_br/produtos-e-servicos/compensacao-e-liquidacao/clearing/administracao-de-riscos/garantias/limites-de-renda-variavel/")
+        html_parser_acoes_units_etfs_aceitos_garantia_b3 = HtmlHandler().lxml_parser(resp_req)
         url_acoes_units_etfs_aceitos_garantia_b3 = HtmlHandler().lxml_xpath(
             html_parser_acoes_units_etfs_aceitos_garantia_b3,
             '//*[@id="panel1a"]/ul/li[2]/a/@href')[0]
@@ -303,8 +303,8 @@ class SearchByTradingB3(ABCRequests):
             + "data/files" + \
             url_acoes_units_etfs_aceitos_garantia_b3
         # openning zip in memory
-        req_resp = request("GET", url_acoes_units_etfs_aceitos_garantia_b3)
-        list_unzipped_files = RemoteFiles().get_zip_from_web_in_memory(req_resp)
+        resp_req = request("GET", url_acoes_units_etfs_aceitos_garantia_b3)
+        list_unzipped_files = RemoteFiles().get_zip_from_web_in_memory(resp_req)
         if str(type(list_unzipped_files)) != "<class 'list'>":
             list_unzipped_files = [list_unzipped_files]
         # looping within files in zip
@@ -361,11 +361,11 @@ class SearchByTradingB3(ABCRequests):
         # definindo url com cenários de risco - tipo de curva
         url_risk_curve_type_scenarios = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoCurva{}.zip".format(
             self.dt_ref.strftime('%y%m%d'))
-        req_resp = request("GET", url_risk_curve_type_scenarios)
-        req_resp.raise_for_status()
+        resp_req = request("GET", url_risk_curve_type_scenarios)
+        resp_req.raise_for_status()
         # baixando em memória zip com cenário de tipo curva da b3
         list_txts_curve_type_scenarios = RemoteFiles().get_zip_from_web_in_memory(
-            req_resp, bl_io_interpreting=False)
+            resp_req, bl_io_interpreting=False)
         # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
         for extracted_file_curve_type_scenarios in list_txts_curve_type_scenarios:
             #   caso a variável list_risk_curve_type_scenarios seja diferente de none, o usuário tem
@@ -428,18 +428,18 @@ class SearchByTradingB3(ABCRequests):
             # definindo url com cenários de risco - tipo de curva
             url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
                 self.dt_ref.strftime('%y%m%d'))
-            req_resp = request("GET", url_cenarios_tipo_spot)
-            req_resp.raise_for_status()
+            resp_req = request("GET", url_cenarios_tipo_spot)
+            resp_req.raise_for_status()
             # baixando em memória zip com cenário de tipo curva da b3
             list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
-                req_resp,
+                resp_req,
                 bl_io_interpreting=False
             )
         except:
             url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
                 self.dt_ref.strftime('%y%m%d'))
-            req_resp = request("GET", url_cenarios_tipo_spot)
-            req_resp.raise_for_status()
+            resp_req = request("GET", url_cenarios_tipo_spot)
+            resp_req.raise_for_status()
             list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
                 url_cenarios_tipo_spot, bl_verify=False,
                 bl_io_interpreting=False
@@ -625,9 +625,9 @@ class SearchByTradingB3(ABCRequests):
         # retornando fpr completo
         return df_fpr_b3
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        source = self.get_query_params(req_resp.url, "source").lower() \
-            if self.get_query_params(req_resp.url, "source") is not None else None
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
+        source = self.get_query_params(resp_req.url, "source").lower() \
+            if self.get_query_params(resp_req.url, "source") is not None else None
         if source == "mtm_b3":
             return self.mtm_compra_venda()
         elif source == "spot_accepted_collateral_b3":

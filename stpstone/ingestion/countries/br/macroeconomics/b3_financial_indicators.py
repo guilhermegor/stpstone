@@ -36,9 +36,9 @@ class B3FinancialIndicators(ABCRequests):
         self.logger = logger
         self.list_slugs = list_slugs
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         list_ser = list()
-        for dict_ in req_resp.json():
+        for dict_ in resp_req.json():
             list_ser.append({
                 "SECURITY_ID": dict_["securityIdentificationCode"], 
                 "DESCRIPTION": dict_["description"],

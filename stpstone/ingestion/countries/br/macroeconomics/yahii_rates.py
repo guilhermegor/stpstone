@@ -25,7 +25,7 @@ class YahiiRatesBRMacro(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        int_delay: int = 20,
+        int_delay_seconds: int = 20,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
@@ -40,7 +40,7 @@ class YahiiRatesBRMacro(ABCRequests):
             logger=logger,
             token=token,
             list_slugs=list_slugs, 
-            int_delay=int_delay,
+            int_delay_seconds=int_delay_seconds,
         )
         self.session = session
         self.dt_ref = dt_ref
@@ -48,7 +48,7 @@ class YahiiRatesBRMacro(ABCRequests):
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
-        self.int_delay = int_delay
+        self.int_delay_seconds = int_delay_seconds
 
     def td_value(self, str_value: str) -> float:
         """
@@ -218,10 +218,10 @@ class YahiiRatesBRMacro(ABCRequests):
         list_els = [x.text for x in list_els]
         return list_els
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         try:
-            source = self.get_query_params(req_resp.url, "source").lower()
-            cls_selenium_wd = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
+            source = self.get_query_params(resp_req.url, "source").lower()
+            cls_selenium_wd = SeleniumWD(resp_req.url, bl_headless=True, bl_incognito=True)
             web_driver = cls_selenium_wd.get_web_driver
             list_th_td = self.list_web_elements(
                 cls_selenium_wd, web_driver, YAML_YAHII_RATES["pmi_rf_rates"]['xpaths']['list_th_td'])

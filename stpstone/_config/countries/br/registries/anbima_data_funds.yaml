@@ -44,7 +44,7 @@ trt_indicadores_fundos:
     status: '(?i)(?<=\\\"status\\\":\\\")\w+'
     ts_updated_at: '(?i)(?<=\\\"dataUpdatedAt\\\":)[^,]*'
     benchmarks: '(?i)(?<=},{\\\"state\\\":{\\\"data\\\":)[^*]*?}]'
-    ein_number: '(?i)(?<=\\\"identificador_fundo\\\":\\\")([^*]*?)(?=\\\")'
+    cnpj: '(?i)(?<=\\\"identificador_fundo\\\":\\\")([^*]*?)(?=\\\")'
     fund_type: '(?i)(?<=\\\"tipo_fundo\\\":\\\")[^*]*?(?=\\\")'
     fund_name: '(?i)(?<=\\\"razao_social_fundo\\\":\\\")([^*]*?)(?=\\\")'
     business_name: '(?i)(?<=\\\"nome_comercial_fundo\\\":\\\")([^*]*?)(?=\\\")'

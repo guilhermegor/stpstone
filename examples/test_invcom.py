@@ -23,15 +23,15 @@ class MDInvestingDotCom:
         OUTPUTS: STRING
         """
         # collect content from rest
-        req_resp = request(
+        resp_req = request(
             str_method,
             str_host.format(str_ticker),
             verify=bl_verify,
             headers=dict_headers
         )
-        req_resp.raise_for_status()
+        resp_req.raise_for_status()
         # turning to desired format - loading json to memopry
-        json_ = req_resp.json()
+        json_ = resp_req.json()
         # return named ticker form investing.com
         return json_[key_ticker]
 

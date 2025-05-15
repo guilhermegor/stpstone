@@ -43,12 +43,12 @@ class TradingHoursB3(ABCRequests):
         self.token = token,
         self.list_slugs = list_slugs
 
-    def td_th_parser(self, req_resp:Response, list_th:List[Any]) \
+    def td_th_parser(self, resp_req:Response, list_th:List[Any]) \
         -> Tuple[List[Any], int, Optional[int]]:
         list_headers = list_th.copy()
         int_init_td = 0
         int_end_td = None
-        if StrHandler().match_string_like(req_resp.url, '*#source=stocks*') == True:
+        if StrHandler().match_string_like(resp_req.url, '*#source=stocks*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1] + ' Início',
@@ -68,7 +68,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = 195
-        elif StrHandler().match_string_like(req_resp.url, '*#source=stock_options*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=stock_options*') == True:
             list_headers = [
                 list_th[9],
                 list_th[13] + ' Antes do Vencimento - Início',
@@ -82,7 +82,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 195
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=pmi_future*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=pmi_future*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -100,7 +100,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = 52
-        elif StrHandler().match_string_like(req_resp.url, '*#source=stock_index_futures*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=stock_index_futures*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -118,7 +118,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 52
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=interest_rates*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=interest_rates*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -136,7 +136,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = 130
-        elif StrHandler().match_string_like(req_resp.url, '*#source=usd_interest_rates*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=usd_interest_rates*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -154,7 +154,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 130
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=commodities*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=commodities*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -165,7 +165,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=crypto*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=crypto*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -181,7 +181,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=foreign_exchange_and_dollar_spot*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=foreign_exchange_and_dollar_spot*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -199,7 +199,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=otc*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=otc*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1] + ' - Início',
@@ -223,7 +223,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = None
-        elif StrHandler().match_string_like(req_resp.url, '*#source=opf_before_exc_date*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=opf_before_exc_date*') == True:
             list_headers = [
                 list_th[0],
                 list_th[1],
@@ -232,7 +232,7 @@ class TradingHoursB3(ABCRequests):
             ]
             int_init_td = 0
             int_end_td = 32
-        elif StrHandler().match_string_like(req_resp.url, '*#source=opf_after_exc_date*') == True:
+        elif StrHandler().match_string_like(resp_req.url, '*#source=opf_after_exc_date*') == True:
             list_headers = [
                 list_th[4],
                 list_th[5],
@@ -247,17 +247,17 @@ class TradingHoursB3(ABCRequests):
                 CreateLog().warning(
                     self.logger,
                     'No source found in url, for HTML webscraping, please revisit the code'
-                    + f' if it is an unexpected behaviour - URL: {req_resp.url}'
+                    + f' if it is an unexpected behaviour - URL: {resp_req.url}'
                 )
             else:
                 print('No source found in url, for HTML webscraping, please revisit the code'
-                    + f' if it is an unexpected behaviour - URL: {req_resp.url}')
+                    + f' if it is an unexpected behaviour - URL: {resp_req.url}')
         return list_headers, int_init_td, int_end_td
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         bl_debug = True if StrHandler().match_string_like(
-            req_resp.url, '*&bl_debug=True*') == True else False
-        root = HtmlHandler().lxml_parser(req_resp)
+            resp_req.url, '*&bl_debug=True*') == True else False
+        root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
@@ -277,7 +277,7 @@ class TradingHoursB3(ABCRequests):
             print(f'LIST TH RAW: {list_th}')
             print(f'LIST TD RAW: {list_td}')
         # deal with data/headers specificity for the project
-        list_headers, int_init_td, int_end_td = self.td_th_parser(req_resp, list_th)
+        list_headers, int_init_td, int_end_td = self.td_th_parser(resp_req, list_th)
         if bl_debug == True:
             print(f'LIST TH TRT: {list_headers}')
             print(f'LEN LIST HEADERS: {len(list_headers)}')

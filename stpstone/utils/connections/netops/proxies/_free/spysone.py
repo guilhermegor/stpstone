@@ -28,7 +28,7 @@ class SpysOneCountry(ABCSession):
         bl_use_timer: bool = False,
         list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None,
-        int_wait_load: int = 10,
+        int_wait_load_seconds: int = 10,
     ) -> None:
         super().__init__(
             bl_new_proxy=bl_new_proxy,
@@ -47,7 +47,7 @@ class SpysOneCountry(ABCSession):
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
-        self.int_wait_load = int_wait_load
+        self.int_wait_load_seconds = int_wait_load_seconds
         self.fstr_url = "https://spys.one/free-proxy-list/{}/"
         self.xpath_tr = '//tr[contains(@class, "spy1x")]'
         self.xpath_dd_anonimity = '//select[@name="xf1"]'
@@ -90,7 +90,7 @@ class SpysOneCountry(ABCSession):
             url=self.fstr_url.format(self.str_country_code.upper()),
             bl_headless=True,
             bl_incognito=True,
-            int_wait_load=self.int_wait_load
+            int_wait_load_seconds=self.int_wait_load_seconds
         )
         try:
             web_driver = cls_selenium_wd.get_web_driver

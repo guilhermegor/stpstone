@@ -41,6 +41,6 @@ class TiingoUS(ABCRequests):
             list_slugs=list_slugs
         )
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         sleep(10)
         return None

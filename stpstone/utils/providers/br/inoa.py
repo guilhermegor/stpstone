@@ -68,14 +68,14 @@ class AlphaTools:
                 f"USER: {self.str_user}",
                 f"PASSW:{self.str_passw}",
             )
-        req_resp = request(
+        resp_req = request(
             str_method,
             url=self.str_host + str_app,
             json=dict_params,
             auth=(self.str_user, self.str_passw),
         )
-        req_resp.raise_for_status()
-        return req_resp.json()
+        resp_req.raise_for_status()
+        return resp_req.json()
 
     @property
     def funds(self) -> pd.DataFrame:

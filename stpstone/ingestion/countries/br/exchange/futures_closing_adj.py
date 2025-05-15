@@ -45,7 +45,7 @@ class FuturesClosingAdjB3(ABCRequests):
         self.repr_dt_ref = self.dt_ref.strftime("%d/%m/%Y").replace("/", "%2F")
 
     def td_th_parser(
-        self, req_resp: Response, list_th: List[Any]
+        self, resp_req: Response, list_th: List[Any]
     ) -> Tuple[List[Any], int, Optional[int]]:
         list_headers = list_th.copy()
         int_init_td = 0
@@ -54,13 +54,13 @@ class FuturesClosingAdjB3(ABCRequests):
         #   like https://example.com/app/#source=dummy_1&bl_debug=True
         return list_headers, int_init_td, int_end_td
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         bl_debug = (
             True
-            if StrHandler().match_string_like(req_resp.url, "*bl_debug=True*") == True
+            if StrHandler().match_string_like(resp_req.url, "*bl_debug=True*") == True
             else False
         )
-        root = HtmlHandler().lxml_parser(req_resp)
+        root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(
@@ -89,7 +89,7 @@ class FuturesClosingAdjB3(ABCRequests):
             )
         ]
         # deal with data/headers specificity for the project
-        list_headers, int_init_td, int_end_td = self.td_th_parser(req_resp, list_th)
+        list_headers, int_init_td, int_end_td = self.td_th_parser(resp_req, list_th)
         if bl_debug == True:
             print(list_headers)
             print(f"LEN LIST HEADERS: {len(list_headers)}")

@@ -33,7 +33,7 @@ class YieldFreeProxy:
         str_plan_id_webshare: str = "free",
         max_iter_find_healthy_proxy: int = 10,
         timeout_session: Optional[float] = 1000.0,
-        int_wait_load: Optional[int] = 10,
+        int_wait_load_seconds: Optional[int] = 10,
     ) -> None:
         self.bl_new_proxy = bl_new_proxy
         self.dict_proxies = dict_proxies
@@ -53,7 +53,7 @@ class YieldFreeProxy:
         self.str_plan_id_webshare = str_plan_id_webshare
         self.max_iter_find_healthy_proxy = max_iter_find_healthy_proxy
         self.timeout_session = timeout_session
-        self.int_wait_load = int_wait_load
+        self.int_wait_load_seconds = int_wait_load_seconds
         self.create_logs = CreateLog()
 
         self.cls_spys_one_country = SpysOneCountry(
@@ -199,7 +199,7 @@ class YieldFreeProxy:
             bl_use_timer=bl_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger,
-            int_wait_load=int_wait_load
+            int_wait_load_seconds=int_wait_load_seconds
         )
 
         self._retry_count = 0

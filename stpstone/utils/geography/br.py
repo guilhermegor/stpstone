@@ -46,11 +46,11 @@ class BrazilGeo:
         # looping through each zip code, requesting info about adrees, and raise exception
         #   if status code is different from 2xx
         for zip_ in list_zip_codes:
-            req_resp = request(method=method, url=url.format(zip_))
+            resp_req = request(method=method, url=url.format(zip_))
             #   raises exception when not a 2xx response
-            req_resp.raise_for_status()
+            resp_req.raise_for_status()
             #   generating json
-            json_zip_codes = req_resp.json()
+            json_zip_codes = resp_req.json()
             #   organizing data to export format
             dict_zip_adresses[zip_] = [json_zip_codes[key_address_type],
                                        json_zip_codes[key_address], json_zip_codes[key_state]]

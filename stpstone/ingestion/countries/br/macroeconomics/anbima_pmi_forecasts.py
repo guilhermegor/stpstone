@@ -84,9 +84,9 @@ class AnbimaForecasts(ABCRequests):
             df_["VALOR_EFETIVO"] = df_["VALOR_EFETIVO"].astype(float) / 100.0
         return df_
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        root = HtmlHandler().bs_parser(req_resp)
-        source = self.get_query_params(req_resp.url, "source")
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        root = HtmlHandler().bs_parser(resp_req)
+        source = self.get_query_params(resp_req.url, "source")
         list_data = self.td_parser(root, source)
         return self.table_(list_data, source)
 

@@ -21,7 +21,7 @@ class YahiiOthersBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        int_delay: int = 20,
+        int_delay_seconds: int = 20,
         dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
@@ -36,7 +36,7 @@ class YahiiOthersBR(ABCRequests):
             logger=logger,
             token=token,
             list_slugs=list_slugs, 
-            int_delay=int_delay,
+            int_delay_seconds=int_delay_seconds,
         )
         self.session = session
         self.dt_ref = dt_ref
@@ -44,7 +44,7 @@ class YahiiOthersBR(ABCRequests):
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
-        self.int_delay = int_delay
+        self.int_delay_seconds = int_delay_seconds
         self.year_yy = self.dt_ref.strftime("%y")
 
     def td_th_parser(self, list_td: List[Any], list_headers: List[str], source: str) \
@@ -119,9 +119,9 @@ class YahiiOthersBR(ABCRequests):
             df_ = pd.DataFrame(list_ser)
         return df_
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        root = HtmlHandler().lxml_parser(req_resp)
-        source = self.get_query_params(req_resp.url, "source").lower()
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        root = HtmlHandler().lxml_parser(resp_req)
+        source = self.get_query_params(resp_req.url, "source").lower()
         list_td = [
             x.text.strip() for x in HtmlHandler().lxml_xpath(
                 root, YAML_YAHII_OHTERS[source]["xpaths"]["list_td"]

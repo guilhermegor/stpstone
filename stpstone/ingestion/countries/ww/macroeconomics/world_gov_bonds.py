@@ -81,16 +81,16 @@ class WorldGovBonds(ABCRequests):
             i += 1
         return list_
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        source = self.get_query_params(req_resp.url, "source")
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        source = self.get_query_params(resp_req.url, "source")
         list_th = list(YAML_WW_WORLD_GOV_BONDS[source]["dtypes"].keys())
         scraper = PlaywrightScraper(
             headless=True,
             default_timeout=100_000
         )
         with scraper.launch():
-            if scraper.navigate(req_resp.url):
-                list_td = scraper.get_table_data(
+            if scraper.navigate(resp_req.url):
+                list_td = scraper.get_list_data(
                     YAML_WW_WORLD_GOV_BONDS[source]["xpaths"]["list_td"],
                     selector_type="xpath"
                 )

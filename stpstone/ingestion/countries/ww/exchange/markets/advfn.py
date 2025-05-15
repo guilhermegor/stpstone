@@ -47,9 +47,9 @@ class ADVFNWW(ABCRequests):
         self.dt_inf_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_start)
         self.dt_sup_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_end)
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         re_pattern = r'\^([^ ]+)'
-        json_ = req_resp.json()
+        json_ = resp_req.json()
         re_match = re.search(re_pattern, json_['result']['symbol'])
         if re_match is not None:
             ticker = re_match.group(1)

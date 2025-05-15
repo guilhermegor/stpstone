@@ -72,10 +72,10 @@ class FreeProxyNet(ABCSession):
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
             'Cookie': '_ga=GA1.1.2121373567.1743934016; _ga_F5HK5559Z2=GS1.1.1743937290.2.1.1743937312.0.0.0'
         }
-        req_resp = request("GET", "https://free-proxy-list.net/", headers=headers, data=payload,
+        resp_req = request("GET", "https://free-proxy-list.net/", headers=headers, data=payload,
                            timeout=10)
-        req_resp.raise_for_status()
-        html_root = self.html_parser.lxml_parser(req_resp)
+        resp_req.raise_for_status()
+        html_root = self.html_parser.lxml_parser(resp_req)
         el_trs = self.html_parser.lxml_xpath(
             html_root, '//*[@id="list"]/div/div[2]/div/table/tbody/tr')
         for el_tr in el_trs:

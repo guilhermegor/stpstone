@@ -117,8 +117,8 @@ class GlobalRates(ABCRequests):
         list_ser = self.trt_td_th_raw(list_th_raw, list_td_raw, str_source)
         return pd.DataFrame(list_ser)
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        bs_html = HtmlHandler().bs_parser(req_resp)
-        str_source = StrHandler().get_url_query(req_resp.url, bl_include_fragment=True)["source"]
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        bs_html = HtmlHandler().bs_parser(resp_req)
+        str_source = StrHandler().get_url_query(resp_req.url, bl_include_fragment=True)["source"]
         bs_table = bs_html.find("table")
         return self.td_th_parser(bs_table, str_source)

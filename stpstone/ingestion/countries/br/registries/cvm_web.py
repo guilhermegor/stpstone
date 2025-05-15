@@ -166,7 +166,7 @@ class CVMWeb_WS_Funds:
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Windows"'
         }
-        req_resp = request(
+        resp_req = request(
             method=str_method,
             url=url,
             headers=dict_headers,
@@ -175,8 +175,8 @@ class CVMWeb_WS_Funds:
             allow_redirects=bl_allow_redirects,
             timeout=tup_timeout
         )
-        req_resp.raise_for_status()
-        html_content = HtmlHandler().lxml_parser(page=req_resp.text)
+        resp_req.raise_for_status()
+        html_content = HtmlHandler().lxml_parser(page=resp_req.text)
         return html_content
 
     @property
@@ -197,7 +197,7 @@ class CVMWeb_WS_Funds:
         bl_allow_redirects:bool=True
     ) -> pd.DataFrame:
         """
-        DOCSTRING: AVAILABLE FUND CODES AND EIN
+        DOCSTRING: AVAILABLE FUND CODES AND CNPJ
         INPUTS: -
         OUTPUTS: DATAFRAME
         """
@@ -210,7 +210,7 @@ class CVMWeb_WS_Funds:
         # print('OPTION FUND: {}'.format(HtmlHandler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
         # looping within available funds and filling serialized list
         for el_option_fund in HtmlHandler().html_lxml_xpath(html_content, str_xpath_funds):
-            #   get text and split into fund's ein and name
+            #   get text and split into fund's cnpj and name
             try:
                 str_option_fund_raw = HtmlHandler().html_lxml_xpath(el_option_fund, './text()')
                 if len(str_option_fund_raw) == 0:
@@ -238,9 +238,9 @@ class CVMWeb_WS_Funds:
                 str_fund_ein, str_fund_name =  str_option_fund_trt.split(' - ')
             except ValueError:
                 raise Exception(
-                    '** ERROR: FUND EIN AND NAME NOT FOUND \n\t'
+                    '** ERROR: FUND CNPJ AND NAME NOT FOUND \n\t'
                     + '- COMMON ERROR IS AN UNEXPECTED "-" CHARACTER, PROVIDED THE CODE'
-                    + ' EXPECTS ONLY ONE SEPARATOR FOR FUND EIN AND NAME \n\t'
+                    + ' EXPECTS ONLY ONE SEPARATOR FOR FUND CNPJ AND NAME \n\t'
                     + '- raw DROP DOWN OPTION FUND: {} \n\t'.format(str_option_fund_raw)
                     + '- REPLACED OPTION FUND: {} \n\t'.format(str_option_fund_trt)
                     + '- URL CVMWEB: {}'.format(self.str_host_ex_fund + str_app)
@@ -260,7 +260,7 @@ class CVMWeb_WS_Funds:
             self.key_fund_ein: str,
             self.key_fund_name: str
         })
-        # unmasking ein
+        # unmasking cnpj
         df_funds[self.key_fund_ein_unm] = DocumentsNumbersBR(
             df_funds[self.key_fund_ein].tolist()).unmask_docs
         # loading in db, if is user's will
@@ -386,15 +386,15 @@ class CVMWeb_WS_Funds:
             #     dict_data,
             #     bl_allow_redirects=bl_allow_redirects,
             # )
-            req_resp = request(
+            resp_req = request(
                 method=str_method_fund_report_dt,
                 url=self.str_host_post_fund + str_app.format(str_fund_code),
                 allow_redirects=False,
                 data=dict_data,
                 cookies=self.dict_cookie
             )
-            req_resp.raise_for_status()
-            html_content = HtmlHandler().lxml_parser(page=req_resp.text)
+            resp_req.raise_for_status()
+            html_content = HtmlHandler().lxml_parser(page=resp_req.text)
             # print(f'\nLIST_SER2_DAILY_INFOS: {list_ser_2}')
             dict_html_contents_dts[str_dt] = html_content
         # return html contents

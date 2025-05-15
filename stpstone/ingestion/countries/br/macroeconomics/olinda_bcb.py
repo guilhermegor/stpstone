@@ -42,5 +42,5 @@ class OlindaBCB(ABCRequests):
         self.dt_start_repr = dt_start.strftime('%m-%d-%Y')
         self.dt_end_repr = dt_end.strftime('%m-%d-%Y')
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        return pd.DataFrame(req_resp.json()["value"])
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        return pd.DataFrame(resp_req.json()["value"])

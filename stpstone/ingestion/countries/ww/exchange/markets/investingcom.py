@@ -44,5 +44,5 @@ class InvestingCom(ABCRequests):
         self.dt_sup_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_end)
         self.ticker_id = self.source('ticker_id', bl_fetch=True)['ticker_id'].tolist()[0]
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         return None

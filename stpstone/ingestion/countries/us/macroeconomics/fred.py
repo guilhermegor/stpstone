@@ -42,6 +42,6 @@ class FredUSMacro(ABCRequests):
         self.dt_end = dt_end
         self.api_key = api_key
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        json_ = req_resp.json()
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        json_ = resp_req.json()
         return pd.DataFrame(json_["seriess"])

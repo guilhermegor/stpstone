@@ -47,12 +47,12 @@ class PTAXBCB(ABCRequests):
         self.list_slugs = list_slugs if list_slugs is not None else \
             list(self.df_ids['CURRENCY_ID'].unique())
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        tup_parsed_url = urlparse(req_resp.url)
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
+        tup_parsed_url = urlparse(resp_req.url)
         if (f'{tup_parsed_url.scheme}://{tup_parsed_url.hostname}/'
              == YAML_BR_PTAX_BCB['ids']['host']) \
             and ('&' not in tup_parsed_url.query):
-            root = HtmlHandler().lxml_parser(req_resp)
+            root = HtmlHandler().lxml_parser(resp_req)
             selectors_currency = HtmlHandler().lxml_xpath(
                 root, YAML_BR_PTAX_BCB['ids']['xpaths']['currency_options']
             )

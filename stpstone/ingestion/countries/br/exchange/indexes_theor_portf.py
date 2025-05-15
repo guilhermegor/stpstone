@@ -39,8 +39,8 @@ class IndexesTheorPortfB3(ABCRequests):
         self.token = token,
         self.list_slugs = list_slugs
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        json_  = req_resp.json()
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
+        json_  = resp_req.json()
         df_ = pd.DataFrame(
             HandlingDicts().add_key_value_to_dicts(
                 json_['results'],

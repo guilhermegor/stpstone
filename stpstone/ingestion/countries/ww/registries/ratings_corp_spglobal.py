@@ -65,8 +65,8 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
             and (len(regex_match.group(0)) > 0):
             return f"Bearer {regex_match.group(1)}"
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        return pd.DataFrame(req_resp.json()["RatingAction"])
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        return pd.DataFrame(resp_req.json()["RatingAction"])
 
 
 class RatingsCorpSPGlobalProduct:

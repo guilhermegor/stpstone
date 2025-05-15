@@ -46,5 +46,5 @@ class IRSBR(ABCRequests):
             month_dt_ref = DatesBR().month_number(self.dt_ref, bl_month_mm=True)
         )
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         return None

@@ -86,10 +86,10 @@ class SidraIBGE(ABCRequests):
             i += 1
         return pd.DataFrame(list_ser)
 
-    def serialized_data(self, req_resp: Response, source: str) -> List[Dict[str, Any]]:
-        json_ = req_resp.json()
+    def serialized_data(self, resp_req: Response, source: str) -> List[Dict[str, Any]]:
+        json_ = resp_req.json()
         if source == "sidra_modification_dates":
-            int_agg_num = int(req_resp.url.split("agregados/")[1].split("/")[0])
+            int_agg_num = int(resp_req.url.split("agregados/")[1].split("/")[0])
             list_ser = [
                 {
                     "ID": int(dict_["id"]), 
@@ -116,12 +116,12 @@ class SidraIBGE(ABCRequests):
             raise Exception(f"Sidra IBGE source {source} not found")
         return pd.DataFrame(list_ser)
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        source = self.get_query_params(req_resp.url, "source").lower()
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        source = self.get_query_params(resp_req.url, "source").lower()
         if source in ["sidra_modification_dates", "sidra_variables"]:
-            return self.serialized_data(req_resp, source)
+            return self.serialized_data(resp_req, source)
         try:
-            cls_selenium = SeleniumWD(req_resp.url, bl_headless=True, bl_incognito=True)
+            cls_selenium = SeleniumWD(resp_req.url, bl_headless=True, bl_incognito=True)
             web_driver = cls_selenium.get_web_driver
             return self.td_th_parser(cls_selenium, web_driver)
         finally:

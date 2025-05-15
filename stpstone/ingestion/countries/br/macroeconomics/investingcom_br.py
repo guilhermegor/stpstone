@@ -36,8 +36,8 @@ class InvestingComBR(ABCRequests):
         self.logger = logger
         self.list_slugs = list_slugs
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        json_ = req_resp.json()["attr"]
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        json_ = resp_req.json()["attr"]
         int_convert_miliseconds_seconds = 1000
         json_ = [
             {
