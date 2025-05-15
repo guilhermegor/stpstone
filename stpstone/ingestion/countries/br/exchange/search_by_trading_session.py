@@ -380,7 +380,7 @@ class SearchByTradingB3(ABCRequests):
                                  header=None, names=list_cols_scenarios, decimal=',')
             df_cenarios_passagem = pd.DataFrame(reader)
             #   preenchendo com valor padrão campos com valor indisponível
-            df_cenarios_passagem.fillna("-99999", inplace=True)
+            df_cenarios_passagem.fillna("-1", inplace=True)
             #   alterando para dicionário dataframe corrente, visando consolidar em uma lista e
             #       importar para uma dataframe para exportação"
             list_ser.extend(df_cenarios_passagem.to_dict(orient="records"))
@@ -401,12 +401,239 @@ class SearchByTradingB3(ABCRequests):
         # exportando dataframe de interesse
         return df_risk_curve_type_scenarios
 
+    def scenarios_risk_spot(self, list_scenarios_risk_spot=None):
+        """
+        DOCSTRING:
+        INPUTS:
+        OUTPUTS:
+        """
+        # setting variables
+        list_ser_exportacao_curvas = list()
+        list_cols_scenarios = ["TIPO", "ID_FPR", "ID_CENARIO", "INT_TIPO_CENARIO",
+            "DIAS_HOLDING_PERIOD", "DIAS_CORRIDOS_VERTICE", "DIAS_SAQUE_VERTICE", "VALOR_PHI_1",
+            "VALOR_PHI_2"]
+        dict_variaveis_tipo_cenarios_curvas = {
+            1: "ENVELOPE",
+            2: "COERENTE",
+            3: "ZIG ZAG"
+        }
+        # validando tipo de variáveis de interesse
+        if list_scenarios_risk_spot != None:
+            #   convertendo para lista, caso não seja
+            if type(list_scenarios_risk_spot) != list:
+                list_scenarios_risk_spot = [list_scenarios_risk_spot]
+            #   alterando tipo de instâncias
+            list_scenarios_risk_spot = [str(x) for x in list_scenarios_risk_spot]
+        try:
+            # definindo url com cenários de risco - tipo de curva
+            url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
+                self.dt_ref.strftime('%y%m%d'))
+            req_resp = request("GET", url_cenarios_tipo_spot)
+            req_resp.raise_for_status()
+            # baixando em memória zip com cenário de tipo curva da b3
+            list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
+                req_resp,
+                bl_io_interpreting=False
+            )
+        except:
+            url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
+                self.dt_ref.strftime('%y%m%d'))
+            req_resp = request("GET", url_cenarios_tipo_spot)
+            req_resp.raise_for_status()
+            list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
+                url_cenarios_tipo_spot, bl_verify=False,
+                bl_io_interpreting=False
+            )
+        # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
+        for extracted_file_tipo_curva_cenario in list_txts_tipos_spot_cenarios:
+            #   caso a variável list_scenarios_risk_spot seja diferente de none, o usuário tem
+            #       interesse que apenas uma parte dos cenários seja considerado, com isso, caso
+            #       o cenário corrente não esteja nessa amostra passar para o próximo
+            if (list_scenarios_risk_spot != None) and (all([StrHandler().find_substr_str(
+                extracted_file_tipo_curva_cenario.name, substr) == False for substr in
+                list_scenarios_risk_spot])): continue
+            #   abrindo em memória arquivo corrente - pandas dataframe
+            reader = pd.read_csv(extracted_file_tipo_curva_cenario, sep=";", skiprows=1, 
+                                 header=None, names=list_cols_scenarios, decimal=',')
+            df_cenarios_passagem = pd.DataFrame(reader)
+            #   preenchendo com valor padrão campos com valor indisponível
+            df_cenarios_passagem.fillna("-1", inplace=True)
+            #   alterando para dicionário dataframe corrente, visando consolidar em uma lista
+            #       e importar para uma dataframe para exportação
+            list_passagem = df_cenarios_passagem.to_dict(orient="records")
+            list_ser_exportacao_curvas.extend(list_passagem)
+        # adicionando lista a um dataframe a ser exportado
+        df_cenarios_tipo_spot = pd.DataFrame.from_dict(list_ser_exportacao_curvas)
+        # alterando tipo de variáveis de colunas de interesse
+        df_cenarios_tipo_spot = df_cenarios_tipo_spot.astype({
+            list_cols_scenarios[0]: int,
+            list_cols_scenarios[1]: int,
+            list_cols_scenarios[2]: int,
+            list_cols_scenarios[3]: int,
+            list_cols_scenarios[4]: int,
+            list_cols_scenarios[5]: float,
+            list_cols_scenarios[6]: float,
+        })
+        # adicionando colunas de interesse - nome tipo do cenário
+        df_cenarios_tipo_spot["NOME_TIPO_CENARIO"] = \
+            [dict_variaveis_tipo_cenarios_curvas[x] for x in
+                df_cenarios_tipo_spot[list_cols_scenarios[3]].tolist()]
+        # exportando dataframe de interesse
+        return df_cenarios_tipo_spot
+
+    def primitive_risk_factors_merged(self, 
+                               list_risk_scenarios_curve_type=['2962', '2906', '2945', '2924',
+                                                                 '2944', '2925', '2946',
+                                                                 '2901', '2902', '2934'], 
+                                list_scenarios_risk_spot=['2962', '2906', '2945', '2924',
+                                                                '2944', '2925', '2946',
+                                                                '2901', '2902', '2934'], 
+                                int_cenario_sup_avaliacao=529, bl_debug=False):
+        """
+        DOCSTRING: UNINDO FATORES PRIMITIVOS DE RISCO, CURVAS SPOT E POR TIPO EM UM DATAFRAME COM
+            OS IDS DE CENÁRIOS DE ITNERESSE
+        INPUTS: -
+        OUTPUTS: DATAFRAME
+        """
+        dict_prfs = {
+            "ID_FPR": ['2962', '2906', '2945', '2924', '2944', '2925', '2946', '2901', '2902', '2934'],
+            "TIPO_FPR": ['Curva', 'Spot', 'Curva', 'Spot', 'Curva', 'Spot', 'Curva', 'Spot', 'Spot', 'Spot']
+        }
+        dict_fprs = {
+            2902: "ACC_IPCA",
+            2901: "ACC_IGPM",
+            2946: "C_IGP",
+            2944: "CIPCA",
+            2945: "CUPOM",
+            2906: "DOLAR",
+            2924: "IDI",
+            2925: "IGP",
+            2962: "PRE",
+            2934: "PRTIP"
+        }
+        # criando dataframe de tipos de frps de interesse
+        df_tipos_fprs = pd.DataFrame(dict_prfs)
+        # convertendo tipo de colunas de interesse
+        df_tipos_fprs = df_tipos_fprs.astype({
+            list(dict_prfs.keys())[0]: int,
+            list(dict_prfs.keys())[1]: str,
+        })
+        if bl_debug == True:
+            print('*** TIPO FRPS ***')
+            print(df_tipos_fprs)
+        # * arquivos de pregão b3 - cenários tipo curva
+        df_risk_scenarios_curve_type = self.risk_scenarios_curve_types(list_risk_scenarios_curve_type)
+        # removendo colunas de interesse
+        df_risk_scenarios_curve_type.drop(["TIPO", "VALOR_PHI_2"], axis=1, inplace=True)
+        # limitando cenários de tipos de curvas dentro do range de interesse
+        df_risk_scenarios_curve_type = df_risk_scenarios_curve_type[
+            df_risk_scenarios_curve_type["ID_CENARIO"].isin(range(1, 529))].reset_index(drop=True)
+        # eliminando cenários prospectivos
+        df_risk_scenarios_curve_type = df_risk_scenarios_curve_type[df_risk_scenarios_curve_type['ID_CENARIO'].isin(
+            range(1, int_cenario_sup_avaliacao))].reset_index(drop=True)
+        if bl_debug == True:
+            print('*** TIPO CURVA ***')
+            print(df_risk_scenarios_curve_type.info())
+            print(df_risk_scenarios_curve_type)
+        # * arquivos de pregão b3 - cenários risco tipo spot
+        df_cenarios_tipo_spot = self.scenarios_risk_spot(list_scenarios_risk_spot)
+        # removendo colunas de interesse
+        df_cenarios_tipo_spot.drop([
+            "TIPO",
+            "VALOR_PHI_2"
+        ], axis=1, inplace=True)
+        # limitando cenários de curvas spot
+        df_cenarios_tipo_spot = df_cenarios_tipo_spot[df_cenarios_tipo_spot["ID_CENARIO"].isin(
+            range(1, 529))].reset_index(drop=True)
+        # eliminando cenários prospectivos
+        df_cenarios_tipo_spot = df_cenarios_tipo_spot[df_cenarios_tipo_spot["ID_CENARIO"].isin(
+            range(1, int_cenario_sup_avaliacao))].reset_index(drop=True)
+        if bl_debug == True:
+            print('*** TIPO SPOT ***')
+            print(df_cenarios_tipo_spot.info())
+            print(df_cenarios_tipo_spot)
+        # * arquivos de pregão b3 - fatores primitivos de risco
+        df_fpr_b3 = self.source("primitive_risk_factors", bl_fetch=True)
+        # removendo colunas de interesse
+        df_fpr_b3.drop(["TIPO"], axis=1, inplace=True)
+        # limitando fprs de interesse para fins de cálculo de swaps
+        df_fpr_b3 = df_fpr_b3[df_fpr_b3["ID_FPR"].isin(list(dict_fprs.keys()))]
+        if bl_debug == True:
+            print('*** TIPO FPR ***')
+            print(df_fpr_b3.info())
+            print(df_fpr_b3)
+        # * início tratamento de dados
+        # inner-join fprs com dataframe de tipos de frps
+        list_colunas_frps = df_fpr_b3.columns
+        if bl_debug == True:
+            print("*** COLUNAS FRPS ***")
+            print(list_colunas_frps)
+        list_colunas_frp = ["ID_FPR", "ID_CENARIO", "TIPO_FPR"] + list_colunas_frps.drop([
+            "ID_FPR", "NOME_FPR"]).to_list()
+        if bl_debug == True:
+            print("*** TIPO FPR B3 ***")
+            print(df_fpr_b3)
+            print("*** TIPOS FPRS ***")
+            print(df_tipos_fprs)
+        df_fpr_b3 = df_fpr_b3.merge(
+            df_tipos_fprs, how="inner", left_on="ID_FPR", right_on="ID_FPR")
+        df_fpr_b3 = df_fpr_b3.reindex(columns=list_colunas_frp)
+        # concat cenários tipo curva e spot
+        df_risk_scenarios_curve_type = pd.concat([df_risk_scenarios_curve_type, df_cenarios_tipo_spot],
+                                           ignore_index=True, sort=False)
+        if bl_debug == True:
+            print("*** CENÁRIOS TIPO CURVA & SPOT ***")
+            print(df_risk_scenarios_curve_type)
+        # inner-join fprs com cenarios spot e tipo curvas
+        df_fpr_b3 = df_fpr_b3.merge(df_risk_scenarios_curve_type, how="inner", left_on="ID_FPR",
+                                    right_on="ID_FPR")
+        # preenchendo coluna nome fpr
+        df_fpr_b3["NOME_FPR"] = [dict_fprs[x] for x in df_fpr_b3["ID_FPR"]]
+        # alterando tipo de colunas de interesse
+        df_fpr_b3 = df_fpr_b3.astype({
+            "DIAS_CORRIDOS_VERTICE": int,
+            "DIAS_HOLDING_PERIOD": int,
+            "DIAS_SAQUE_VERTICE": int,
+        })
+        # limitando colunas de interesse
+        df_fpr_b3 = df_fpr_b3[[
+            "ID_FPR",
+            "NOME_FPR",
+            "TIPO_FPR",
+            "FORMATO_VARIACAO",
+            "ID_GRUPO_FPR",
+            "ID_CAMARA_INDICADOR",
+            "ID_INSTRUMENTO_INDICADOR",
+            # "ORIGEM_INSTURMENTO_INDICADOR",
+            "BASE",
+            "BASE_INTERPOLACAO",
+            "CRITERIO_CAPITALIZACAO",
+            "ID_CENARIO_y",
+            "INT_TIPO_CENARIO",
+            "DIAS_CORRIDOS_VERTICE",
+            "DIAS_HOLDING_PERIOD",
+            "DIAS_SAQUE_VERTICE",
+            "VALOR_PHI_1",
+        ]]
+        # alterando nome de colunas de interesse
+        df_fpr_b3.rename(columns={
+            "ID_CENARIO_y": "ID_CENARIO"
+        }, inplace=True)
+        if bl_debug == True:
+            print("*** DF FPRS CONSOLIDADO ***")
+            print(df_fpr_b3)
+        # retornando fpr completo
+        return df_fpr_b3
+
     def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        source = self.get_query_params(req_resp.url, "source").lower()
+        source = self.get_query_params(req_resp.url, "source").lower() \
+            if self.get_query_params(req_resp.url, "source") is not None else None
         if source == "mtm_b3":
             return self.mtm_compra_venda()
         elif source == "spot_accepted_collateral_b3":
             return self.collateral_accepted_spot_bov_b3()
         elif source == "risk_scenarios_curve_types":
             return self.risk_scenarios_curve_types()
+        elif source == "primitive_risk_factors_merged":
+            return self.primitive_risk_factors_merged()
         return None
