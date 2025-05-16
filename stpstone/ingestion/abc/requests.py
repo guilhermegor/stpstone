@@ -28,7 +28,7 @@ from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement, RemoteFiles
 from stpstone.utils.parsers.json import JsonFiles
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.xml import XMLFiles
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
@@ -156,16 +156,16 @@ class UtilsRequests(ABC):
             if (len(dict_count_matches) > 0) \
                 and (all(count > 0 for count in dict_count_matches.values())): break
             for str_event, dict_l1 in dict_regex_patterns.items():
-                for str_condition, pattern_regex in dict_l1.items():
+                for str_condition, regex_pattern in dict_l1.items():
                     if str_event not in dict_count_matches:
                         dict_count_matches[str_event] = 0
                     if dict_count_matches[str_event] > 0:
                         break
-                    pattern_regex = StrHandler().remove_diacritics_nfkd(
-                        pattern_regex, bl_lower_case=False
+                    regex_pattern = StrHandler().remove_diacritics_nfkd(
+                        regex_pattern, bl_lower_case=False
                     )
                     regex_match = re.search(
-                        pattern_regex,
+                        regex_pattern,
                         str_page,
                         # flags=re.DOTALL | re.MULTILINE
                     )
@@ -175,8 +175,8 @@ class UtilsRequests(ABC):
                         dict_count_matches[str_event] += 1
                         dict_ = {
                             "EVENT": str_event.upper(),
-                            "MATCH_PATTTERN": str_condition.upper(),
-                            "PATTERN_REGEX": pattern_regex,
+                            "MATCH_PATTERN": str_condition.upper(),
+                            "PATTERN_REGEX": regex_pattern,
                         }
                         for i_match in range(0, len(regex_match.groups()) + 1):
                             regex_group = regex_match.group(i_match).replace("\n", " ")
@@ -186,14 +186,76 @@ class UtilsRequests(ABC):
                 if dict_count_matches[str_event] == 0:
                     list_matches.append({
                         "EVENT": str_event.upper(),
-                        "MATCH_PATTTERN": "zzN/A",
+                        "MATCH_PATTERN": "zzN/A",
                         "PATTERN_REGEX": "zzN/A",
                     })
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
-        df_.sort_values(by=["EVENT", "MATCH_PATTTERN"], ascending=[True, True], inplace=True)
+        df_.sort_values(by=["EVENT", "MATCH_PATTERN"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
         return df_
+    
+    def pivot_event_data(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """
+        Pivots event data from long format to wide format with events as columns.
+        
+        Args:
+            df_ (pd.DataFrame): Input DataFrame containing EVENT, REGEX_GROUP_1 columns
+            
+        Returns:
+            pd.DataFrame: Pivoted DataFrame with one row per country and events as columns
+        """
+        df_['country_group'] = (df_['EVENT'] == 'COUNTRY_NAME').cumsum()
+        df_pivoted = df_.pivot_table(
+            index='country_group',
+            columns='EVENT',
+            values='REGEX_GROUP_1',
+            aggfunc='first'
+        ).reset_index(drop=True)
+        df_pivoted.columns.name = None
+        return df_pivoted
+
+    def html_regex(
+        self,
+        html_content: str,
+        dict_regex_patterns: Dict[str, Dict[str, Any]],
+    ):
+        dict_count_matches = dict()
+        list_matches = list()
+        with open("data/html_content.html", 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        for str_event, dict_l1 in dict_regex_patterns.items():
+            for str_condition, regex_pattern in dict_l1.items():
+                if str_event not in dict_count_matches:
+                    dict_count_matches[str_event] = 0
+                regex_pattern = StrHandler().remove_diacritics_nfkd(
+                    regex_pattern, bl_lower_case=False
+                )
+                regex_matches = list(re.finditer(regex_pattern, html_content, re.MULTILINE))
+                if regex_matches:
+                    for int_regex, match in enumerate(regex_matches):
+                        dict_ = {
+                            "INT_REGEX": int_regex,
+                            "EVENT": str_event.upper(),
+                            "MATCH_PATTERN": str_condition.upper(),
+                            "PATTERN_REGEX": regex_pattern,
+                            "REGEX_GROUP_0": match.group(0)
+                        }
+                        for i, group in enumerate(match.groups(), start=1):
+                            dict_[f"REGEX_GROUP_{i}"] = group
+                        list_matches.append(dict_)
+                        dict_count_matches[str_event] += 1
+            if dict_count_matches[str_event] == 0:
+                list_matches.append({
+                    "EVENT": str_event.upper(),
+                    "MATCH_PATTERN": "zzN/A",
+                    "PATTERN_REGEX": "zzN/A",
+                })
+        df_ = pd.DataFrame(list_matches)
+        df_.drop_duplicates(inplace=True)
+        df_.sort_values(by=["INT_REGEX", "EVENT", "MATCH_PATTERN"], 
+                        ascending=[True, True, True], inplace=True)
+        return self.pivot_event_data(df_)
 
     def get_query_params(self, url: str, param: str) -> Union[int, bool, str, float, None]:
         parsed_url = urlparse(url)
@@ -217,7 +279,7 @@ class HandleReqResponses(UtilsRequests):
 
     def handle_response(
         self,
-        req_resp: Union[Response, WebDriver],
+        resp_req: Union[Response, WebDriver],
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
@@ -226,23 +288,23 @@ class HandleReqResponses(UtilsRequests):
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         selenium_wd: SeleniumWD = None
     ) -> pd.DataFrame:
-        if isinstance(req_resp, WebDriver):
-            url = req_resp.current_url
+        if isinstance(resp_req, WebDriver):
+            url = resp_req.current_url
         else:
-            url = req_resp.url
+            url = resp_req.url
         str_file_extension = DirFilesManagement().get_last_file_extension(url)
-        file_name = os.path.basename(url) if hasattr(req_resp, "url") else ""
-        if self.req_trt_injection(req_resp) is not None:
-            df_ = self.req_trt_injection(req_resp)
+        file_name = os.path.basename(url) if hasattr(resp_req, "url") else ""
+        if self.req_trt_injection(resp_req) is not None:
+            df_ = self.req_trt_injection(resp_req)
         elif str_file_extension == "xl_url":
-            df_ = self._handle_pandas_excel_url(req_resp.url, dict_df_read_params)
+            df_ = self._handle_pandas_excel_url(resp_req.url, dict_df_read_params)
         elif str_file_extension == "csv_url":
-            df_ = self._handle_pandas_csv_url(req_resp.url, dict_df_read_params)
-        elif isinstance(req_resp, WebDriver):
-            df_ = self._handle_web_driver_html(url, req_resp, dict_xpaths, selenium_wd)
+            df_ = self._handle_pandas_csv_url(resp_req.url, dict_df_read_params)
+        elif isinstance(resp_req, WebDriver):
+            df_ = self._handle_web_driver_html(url, resp_req, dict_xpaths, selenium_wd)
         elif str_file_extension == "zip":
             df_ = self._handle_zip_response(
-                req_resp,
+                resp_req,
                 dict_xml_keys,
                 dict_regex_patterns,
                 dict_df_read_params,
@@ -252,7 +314,7 @@ class HandleReqResponses(UtilsRequests):
             )
         elif str_file_extension == "ex_":
             df_ = self._handle_ex_response(
-                req_resp,
+                resp_req,
                 dict_xml_keys,
                 dict_regex_patterns,
                 dict_df_read_params,
@@ -270,29 +332,31 @@ class HandleReqResponses(UtilsRequests):
             else:
                 bl_separator_consistency_check = True
             if dict_df_read_params.get("encoding") is not None:
-                req_resp.encoding = dict_df_read_params.get("encoding")
+                resp_req.encoding = dict_df_read_params.get("encoding")
             if (bl_separator_consistency_check == True) \
                 and (RemoteFiles().check_separator_consistency(
-                    req_resp.content,
+                    resp_req.content,
                     dict_df_read_params.get("skiprows", 0),
                     dict_df_read_params.get("skipfooter", 0)
                 ) == False):
-                df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
+                df_ = self._handle_fwf_response(resp_req, list_ser_fixed_width_layout)
             else:
-                df_ = self._handle_csv_response(req_resp, dict_df_read_params)
+                df_ = self._handle_csv_response(resp_req, dict_df_read_params)
         elif str_file_extension in ["xlsx", "xls"]:
-            df_ = self._handle_excel_response(req_resp, dict_df_read_params)
+            df_ = self._handle_excel_response(resp_req, dict_df_read_params)
         elif str_file_extension == "xml":
-            df_ = self._handle_xml_response(req_resp, dict_xml_keys)
+            df_ = self._handle_xml_response(resp_req, dict_xml_keys)
         elif str_file_extension == "json":
-            df_ = self._handle_json_response(req_resp)
+            df_ = self._handle_json_response(resp_req)
         elif str_file_extension in ["pdf", "docx", "doc", "docm", "dot", "dotm"]:
-            df_ = self._handle_pdf_doc_response(url, req_resp, dict_regex_patterns)
+            df_ = self._handle_pdf_doc_response(url, resp_req, dict_regex_patterns)
         elif str_file_extension in ["fwf", "dat"]:
-            df_ = self._handle_fwf_response(req_resp, list_ser_fixed_width_layout)
+            df_ = self._handle_fwf_response(resp_req, list_ser_fixed_width_layout)
+        elif str_file_extension == "html_regex":
+            df_ = self.html_regex(resp_req.text, dict_regex_patterns)
         else:
             try:
-                json_ = req_resp.json()
+                json_ = resp_req.json()
             except JSONDecodeError:
                 raise Exception(
                     "File extension not expected in the handle response method: "
@@ -310,7 +374,7 @@ class HandleReqResponses(UtilsRequests):
         return df_
 
     @abstractmethod
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None
 
     @backoff.on_exception(
@@ -324,7 +388,7 @@ class HandleReqResponses(UtilsRequests):
     def _handle_web_driver_html(
         self,
         url: str,
-        req_resp: WebDriver,
+        resp_req: WebDriver,
         dict_xpaths: Dict[str, str],
         selenium_wd: SeleniumWD
     ) -> pd.DataFrame:
@@ -349,24 +413,24 @@ class HandleReqResponses(UtilsRequests):
                     else 100
                 )
                 list_ser = [{
-                    key: selenium_wd.find_element(req_resp,
+                    key: selenium_wd.find_element(resp_req,
                     StrHandler().fill_placeholders(str_xpath, {"iter": i})).text
                     for key, str_xpath in dict_xpaths.items()
                     for i in range(int_iter_min, int_iter_max)
                 }]
             else:
                 list_ser = [{
-                    key: selenium_wd.find_element(req_resp, str_xpath).text
+                    key: selenium_wd.find_element(resp_req, str_xpath).text
                     for key, str_xpath in dict_xpaths.items()
                 }]
         finally:
-            req_resp.quit()
+            resp_req.quit()
             if int_delay_next_s is not None: sleep(int_delay_next_s)
         return pd.DataFrame(list_ser)
 
     def _handle_zip_response(
         self,
-        req_resp: Response,
+        resp_req: Response,
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
@@ -374,7 +438,7 @@ class HandleReqResponses(UtilsRequests):
         list_ser_fixed_width_layout: Optional[List[Dict[str, Any]]] = [{}],
         selenium_wd: SeleniumWD = None
     ) -> Union[pd.DataFrame, List[pd.DataFrame]]:
-        zipfile = ZipFile(BytesIO(req_resp.content))
+        zipfile = ZipFile(BytesIO(resp_req.content))
         list_ = []
         for file_name in zipfile.namelist():
             with zipfile.open(file_name) as file:
@@ -504,11 +568,11 @@ class HandleReqResponses(UtilsRequests):
     def _handle_pdf_doc_response(
         self,
         url: str,
-        req_resp: Response,
+        resp_req: Response,
         dict_regex_patterns: Dict[str, Dict[str, str]],
         default_int_pgs_join: int = 2
     ) -> pd.DataFrame:
-        bytes_pdf = BytesIO(req_resp.content)
+        bytes_pdf = BytesIO(resp_req.content)
         # checking wheter to read tables or use regex
         if StrHandler().match_string_like(url, "*feat=read_tables*") == True:
             return self.pdf_doc_tables_response(bytes_pdf)
@@ -527,7 +591,7 @@ class HandleReqResponses(UtilsRequests):
 
     def _handle_ex_response(
         self,
-        req_resp: Response,
+        resp_req: Response,
         dict_xml_keys: Optional[Dict[str, Any]] = None,
         dict_regex_patterns: Optional[Dict[str, Dict[str, str]]] = None,
         dict_df_read_params: Optional[Dict[str, Any]] = None,
@@ -538,7 +602,7 @@ class HandleReqResponses(UtilsRequests):
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
             ex_file_path = RemoteFiles().get_file_from_zip(
-                req_resp, temp_dir_path, (".ex_")
+                resp_req, temp_dir_path, (".ex_")
             )
             os.chmod(ex_file_path, 0o755)
             subprocess.run([ex_file_path], cwd=temp_dir_path, check=True)
@@ -564,30 +628,30 @@ class HandleReqResponses(UtilsRequests):
             return pd.DataFrame(list_ser)
 
     def _handle_fwf_response(
-        self, req_resp: Response, list_ser_fixed_width_layout: List[Dict[str, Any]]
+        self, resp_req: Response, list_ser_fixed_width_layout: List[Dict[str, Any]]
     ) -> pd.DataFrame:
         list_colspecs = [
             (dict_["start"], dict_["end"]) for dict_ in list_ser_fixed_width_layout
         ]
         list_colnames = [dict_["field"] for dict_ in list_ser_fixed_width_layout]
         if (
-            (req_resp.headers is not None)
-            and ("application/zip" in req_resp.headers.get("Content-Type", ""))
-            and (".zip" in req_resp.headers.get("Content-Disposition"))
+            (resp_req.headers is not None)
+            and ("application/zip" in resp_req.headers.get("Content-Type", ""))
+            and (".zip" in resp_req.headers.get("Content-Disposition"))
         ):
             with tempfile.TemporaryDirectory() as temp_dir_path:
                 file_path = RemoteFiles().get_file_from_zip(
-                    req_resp, temp_dir_path, (".fwf", ".dat", ".txt", "")
+                    resp_req, temp_dir_path, (".fwf", ".dat", ".txt", "")
                 )
                 return pd.read_fwf(
                     file_path, colspecs=list_colspecs, names=list_colnames
                 )
         else:
             try:
-                encoding = chardet.detect(req_resp.content)["encoding"]
+                encoding = chardet.detect(resp_req.content)["encoding"]
             except:
                 encoding = "latin-1"
-            decoded_content = req_resp.content.decode(encoding)
+            decoded_content = resp_req.content.decode(encoding)
             return pd.read_fwf(
                 StringIO(decoded_content), colspecs=list_colspecs, names=list_colnames
             )
@@ -607,8 +671,8 @@ class ABCRequests(HandleReqResponses):
         path_webdriver: Optional[str] = None,
         int_port: Optional[int] = None,
         str_user_agent: Optional[str] = None,
-        int_wait_load: int = 10,
-        int_delay: int = 10,
+        int_wait_load_seconds: int = 10,
+        int_delay_seconds: int = 10,
         bl_headless: bool = False,
         bl_incognito: bool = False,
         bl_ts_log_str: bool = True
@@ -622,8 +686,8 @@ class ABCRequests(HandleReqResponses):
         self.path_webdriver = path_webdriver
         self.int_port = int_port
         self.str_user_agent = str_user_agent
-        self.int_wait_load = int_wait_load
-        self.int_delay = int_delay
+        self.int_wait_load_seconds = int_wait_load_seconds
+        self.int_delay_seconds = int_delay_seconds
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
         self.bl_ts_log_str = bl_ts_log_str
@@ -652,14 +716,14 @@ class ABCRequests(HandleReqResponses):
             else self.dict_metadata["credentials"]["token"]["host"]
         )
         url_token = StrHandler().fill_placeholders(url_token, dict_instance_vars)
-        req_resp = self.generic_req(
+        resp_req = self.generic_req(
             self.dict_metadata["credentials"]["token"]["get"]["req_method"],
             url_token,
             self.dict_metadata["credentials"]["token"]["get"]["bl_verify"],
             self.dict_metadata["credentials"]["token"]["get"]["timeout"],
             self.dict_metadata["credentials"]["token"].get("headers", None),
         )
-        return req_resp.json()[
+        return resp_req.json()[
             self.dict_metadata["credentials"]["token"]["keys"]["token"]
         ]
 
@@ -687,21 +751,21 @@ class ABCRequests(HandleReqResponses):
     ) -> Response:
         if re.search(self.pattern_special_http_chars, url):
             #   prepare the request manually to preserve special characters
-            req_resp = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
-            req_preppped = self.session.prepare_request(req_resp)
+            resp_req = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
+            req_preppped = self.session.prepare_request(resp_req)
             req_preppped.url = url
-            req_resp = self.session.send(req_preppped, verify=bl_verify)
+            resp_req = self.session.send(req_preppped, verify=bl_verify)
         else:
             if req_method == "GET":
-                req_resp = self.session.get(
+                resp_req = self.session.get(
                     url, verify=bl_verify, headers=dict_headers, params=payload, cookies=cookies
                 )
             elif req_method == "POST":
-                req_resp = self.session.post(
+                resp_req = self.session.post(
                     url, verify=bl_verify, headers=dict_headers, data=payload, cookies=cookies
                 )
-        req_resp.raise_for_status()
-        return req_resp
+        resp_req.raise_for_status()
+        return resp_req
 
     # ! TODO: implement timeout
     @backoff.on_exception(
@@ -727,7 +791,7 @@ class ABCRequests(HandleReqResponses):
             req = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
             req_preppped = req.prepare()
             with ReqSession() as session:
-                req_resp = session.send(req_preppped, verify=bl_verify)
+                resp_req = session.send(req_preppped, verify=bl_verify)
         else:
             return request(
                 req_method,
@@ -739,8 +803,8 @@ class ABCRequests(HandleReqResponses):
                 cookies=cookies,
                 # timeout=tup_timeout
             )
-        req_resp.raise_for_status()
-        return req_resp
+        resp_req.raise_for_status()
+        return resp_req
 
     def generic_req(
         self,
@@ -767,10 +831,10 @@ class ABCRequests(HandleReqResponses):
             func_generic_req = self.generic_req_w_session
         else:
             func_generic_req = self.generic_req_wo_session
-        req_resp = func_generic_req(
+        resp_req = func_generic_req(
             req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
         )
-        return req_resp
+        return resp_req
 
     def trt_req(
         self,
@@ -811,20 +875,20 @@ class ABCRequests(HandleReqResponses):
             else:
                 str_proxy = None
             selenium_wd = SeleniumWD(
-                url, self.path_webdriver, self.int_port, self.str_user_agent, self.int_wait_load,
-                self.int_delay, str_proxy, self.bl_headless, self.bl_incognito,
+                url, self.path_webdriver, self.int_port, self.str_user_agent, self.int_wait_load_seconds,
+                self.int_delay_seconds, str_proxy, self.bl_headless, self.bl_incognito,
                 list_options_wd
             )
             if xpath_el_wait_until_loaded is not None:
                 selenium_wd.wait_until_el_loaded(xpath_el_wait_until_loaded)
-            req_resp = selenium_wd.web_driver
+            resp_req = selenium_wd.web_driver
         else:
             selenium_wd = None
-            req_resp = self.generic_req(
+            resp_req = self.generic_req(
                 req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
             )
         df_ = self.handle_response(
-            req_resp,
+            resp_req,
             dict_xml_keys,
             dict_regex_patterns,
             dict_df_read_params,
@@ -1145,8 +1209,9 @@ class ABCRequests(HandleReqResponses):
                         raise Exception(
                             f"Iteration failed due to {e.__class__.__name__}: {e}"
                         )
+                    sleep(self.int_delay_seconds)
             elif str_extract_from_braces == "chunk_slugs":
-                list_chunks_slugs = HandlingLists().chunk_list(
+                list_chunks_slugs = ListHandler().chunk_list(
                     list_to_chunk=self.list_slugs,
                     str_character_divides_clients=",",
                     int_chunk=self.dict_metadata[str_resource].get(
@@ -1210,6 +1275,7 @@ class ABCRequests(HandleReqResponses):
                         raise Exception(
                             f"Iteration failed due to {e.__class__.__name__}: {e}"
                         )
+                    sleep(self.int_delay_seconds)
             else:
                 raise Exception(
                     "Neither {{slug}} or {{chunk_slugs}} are found in the app "
@@ -1272,6 +1338,7 @@ class ABCRequests(HandleReqResponses):
                     raise Exception(
                         f"Iteration failed due to {e.__class__.__name__}: {e}"
                     )
+                sleep(self.int_delay_seconds)
         if len(list_ser) > 0:
             return pd.DataFrame(list_ser)
         else:

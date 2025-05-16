@@ -6,7 +6,7 @@ import plotly.graph_objs as go
 from itertools import combinations
 from datetime import datetime
 from typing import List, Tuple, Optional, Dict, Any
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.finance.b3.search_by_trading import TradingFilesB3
 
 
@@ -144,7 +144,7 @@ class MarkowitzEff:
         )
         array_min_w = array_min_w.T
         # list of uids
-        list_uids = HandlingLists().remove_duplicates(df_assets[col_id].to_list())
+        list_uids = ListHandler().remove_duplicates(df_assets[col_id].to_list())
         # return arrays of interet
         return array_returns, array_min_w, list_uids
 
@@ -206,7 +206,7 @@ class MarkowitzEff:
                 #       order to sum 1.0 or less
                 if bl_opt_possb_comb == True:
                     #   combinations where sum is less than 1.0 - flatten list
-                    list_i = HandlingLists().remove_duplicates([
+                    list_i = ListHandler().remove_duplicates([
                         idx
                         for comb in list_combs
                         for x in comb

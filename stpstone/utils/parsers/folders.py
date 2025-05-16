@@ -457,13 +457,13 @@ class RemoteFiles(DirFilesManagement):
 
     def get_file_from_zip(
         self,
-        req_resp: Response,
+        resp_req: Response,
         path_dir: Union[str, tempfile.TemporaryDirectory, Path],
         tup_endswith: Tuple[str]
     ) -> str:
         zip_file_path = os.path.join(path_dir, "archive.zip")
         with open(zip_file_path, "wb") as zip_file:
-            zip_file.write(req_resp.content)
+            zip_file.write(resp_req.content)
         self.recursive_extract_zip(zip_file_path, path_dir)
         ex_file_path = None
         for root_path, _, list_files in os.walk(path_dir):
@@ -480,10 +480,10 @@ class RemoteFiles(DirFilesManagement):
 
     def get_zip_from_web_in_memory(
         self,
-        req_resp: Response,
+        resp_req: Response,
         bl_io_interpreting: bool = False
     ) -> Union[TextIOWrapper, BufferedReader, List[BufferedReader]]:
-        zipfile = ZipFile(BytesIO(req_resp.content))
+        zipfile = ZipFile(BytesIO(resp_req.content))
         zip_names = zipfile.namelist()
         if len(zip_names) == 1:
             file_name = zip_names.pop()
@@ -559,7 +559,7 @@ class RemoteFiles(DirFilesManagement):
             "access_time": datetime.fromtimestamp(stat.st_atime),
         }
 
-    def stream_file(self, req_resp: Response, chunk_size: int = 8192) -> Iterable[bytes]:
+    def stream_file(self, resp_req: Response, chunk_size: int = 8192) -> Iterable[bytes]:
         """
         Streams a file from a remote URL in chunks.
 
@@ -570,7 +570,7 @@ class RemoteFiles(DirFilesManagement):
         Returns:
             Iterable[bytes]: An iterable yielding file chunks.
         """
-        for chunk in req_resp.iter_content(chunk_size=chunk_size):
+        for chunk in resp_req.iter_content(chunk_size=chunk_size):
             yield chunk
 
     def check_separator_consistency(

@@ -1,0 +1,292 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://www.yahii.com.br/
+  headers:
+  payload:
+  token:
+    host:
+    app:
+    headers:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+  web_driver:
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+pmi_rf_rates:
+  list_months_combined: [
+    # english (3-letter)
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+    # english (full)
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
+    # portuguese (3-letter)
+    "JAN", "FEV", "MAR", "ABR", "MAI", "JUN",
+    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ",
+    # portuguese (full)
+    "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
+    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
+  ]
+  dict_fw_td_th:
+    igpm:
+      int_start: 1
+      int_y: 14
+      int_m: 1
+      int_start_acc: 13
+      int_year_min: 1995
+    igpdi:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+      int_year_min: 1995
+    igp10:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+      int_year_min: 1995
+    cetip:
+      int_start: 2
+      int_y: 1
+      int_m: 9
+      int_start_acc: 111
+      int_year_min: 1995
+    cubsp:
+      int_start: 12
+      int_y: 2
+      int_m: 17
+      int_start_acc: 26
+      int_year_min: 1995
+    cubspsd:
+      int_start: 12
+      int_y: 2
+      int_m: 17
+      int_start_acc: 26
+      int_year_min: 1995
+    incc:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+      int_year_min: 1995
+    inccm:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+      int_year_min: 1995
+    iiebr:
+      int_start: 1
+      int_y: 1
+      int_m: 8
+      int_cols_tbl: 8
+      int_step_tbl_begin: 89
+      int_start_acc: 40
+      int_year_min: 2000
+    inpc:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+      int_year_min: 1995
+    ipadi:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+      int_year_min: 1995
+    ipam:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+      int_year_min: 1995
+    ipcfipe:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+      int_year_min: 2010
+    ipc:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+      int_year_min: 1995
+    ipca:
+      int_start: 17
+      int_y: 27
+      int_m: 2
+      int_start_acc: 41
+      int_year_min: 1995
+    ipca15:
+      int_start: 16
+      int_y: 27
+      int_m: 2
+      int_start_acc: 40
+      int_year_min: 1995
+    ipcae:
+      int_start: 49
+      int_y: 17
+      int_m: 1
+      int_start_acc: 65
+      int_year_min: 1994
+    ivar:
+      int_start: 3
+      int_y: 1
+      int_m: 9
+      int_start_acc: 111
+      int_year_min: 2019
+    poupanca:
+      int_start: 12
+      int_y: 2
+      int_m: 17
+      int_cols_tbl: 8
+      int_step_tbl_begin: 198
+      int_start_acc: 40
+      int_year_min: 1995
+    tjlp:
+      int_start: 1
+      int_y: 1
+      int_m: 9
+      int_cols_tbl: 9
+      int_step_tbl_begin: 100
+      int_start_acc: 40
+      int_year_min: 1995
+    tlp_fixa:
+      int_start: 13
+      int_y: 2
+      int_m: 19
+      int_start_acc: 111
+      int_year_min: 1995
+    tbf:
+      int_start: 1
+      int_y: 1
+      int_m: 8
+      int_cols_tbl: 8
+      int_step_tbl_begin: 89
+      int_start_acc: 40
+      int_year_min: 1995
+    tr:
+      int_start: 4
+      int_y: 2
+      int_m: 21
+      int_cols_tbl: 10
+      int_step_tbl_begin: 254
+      int_year_min: 1991
+      int_start_acc: 256
+    ufesp:
+      int_start: 1
+      int_y: 12
+      int_m: 1
+      int_start_acc: 40
+      int_year_min: 1995
+    upc:
+      int_start: 3
+      int_y: 1
+      int_m: 8
+      int_start_acc: 40
+      int_year_min: 1995
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+    - igpm
+    - igpdi
+    - igp10
+    - cetip
+    - cubsp
+    - cubspSD
+    - incc
+    - inccm
+    - iiebr
+    - inpc
+    - ipadi
+    - ipam
+    - ipcfipe
+    - ipc
+    - ipca
+    - ipca15
+    - ipcae
+    - ivar
+    - poupanca
+    - tjlp
+    - tlp_fixa
+    - tbf
+    - tr
+    - ufesp
+    - upc
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: "{{slug}}.html#source={{slug}}"
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_yahii_pmi_rf_rates
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    INT_START: int
+    INT_Y: int
+    INT_M: int
+    INT_COLS_TBL: int
+    INT_STEP_TBL_BEGIN: int
+    INT_YEAR_MIN: int
+    INT_START_ACC: int
+    INT_NUM_TBL: int
+    I_Y: int
+    I_M: int
+    INT_START_TBL: int
+    INDEX_TD: int
+    YEAR: int
+    MONTH: str
+    VALUE: float
+    ECONOMIC_INDICATOR: str
+  df_read_params:
+  xpaths:
+    list_th_td: //table[@cellspacing="3"]/tbody/tr//font

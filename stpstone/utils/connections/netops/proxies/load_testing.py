@@ -28,7 +28,7 @@ class ProxyLoadTester:
         str_plan_id_webshare: str = "free",
         max_iter_find_healthy_proxy: int = 30,
         timeout_session: Optional[float] = 1000.0,
-        int_wait_load: Optional[int] = 10,
+        int_wait_load_seconds: Optional[int] = 10,
     ) -> None:
         self.bl_new_proxy = bl_new_proxy
         self.dict_proxies = dict_proxies
@@ -48,7 +48,7 @@ class ProxyLoadTester:
         self.str_plan_id_webshare = str_plan_id_webshare
         self.max_iter_find_healthy_proxy = max_iter_find_healthy_proxy
         self.timeout_session = timeout_session
-        self.int_wait_load = int_wait_load
+        self.int_wait_load_seconds = int_wait_load_seconds
         self.create_log = CreateLog()
         self.time_ = time.time()
         self.set_used_proxies = set()
@@ -72,18 +72,18 @@ class ProxyLoadTester:
             str_plan_id_webshare=str_plan_id_webshare,
             max_iter_find_healthy_proxy=max_iter_find_healthy_proxy,
             timeout_session=timeout_session,
-            int_wait_load=int_wait_load,
+            int_wait_load_seconds=int_wait_load_seconds,
         )
 
     def test_proxy_session(self, session: Session, test_num: int) -> bool:
         try:
             self.create_log.log_message(self.logger, f"\n--- Testing Proxy #{test_num} ---")
             self.create_log.log_message(self.logger, f"Proxy: {session.proxies}")
-            req_resp = session.get("https://jsonplaceholder.typicode.com/todos/1", timeout=10)
-            req_resp.raise_for_status()
+            resp_req = session.get("https://jsonplaceholder.typicode.com/todos/1", timeout=10)
+            resp_req.raise_for_status()
             self.create_log.log_message(self.logger, "Proxy Test Successful!")
-            self.create_log.log_message(self.logger, f"Response Status: {req_resp.status_code}")
-            self.create_log.log_message(self.logger, f"Response Data: {req_resp.json()}")
+            self.create_log.log_message(self.logger, f"Response Status: {resp_req.status_code}")
+            self.create_log.log_message(self.logger, f"Response Data: {resp_req.json()}")
             return True
         except Exception as e:
             self.create_log.log_message(self.logger, f"Proxy Test Failed: {str(e)}")

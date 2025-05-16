@@ -17,8 +17,8 @@ print(session.proxies)
 
 cls_adfn_ww = ADVFNWW(
     session=None,
-    dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-    dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 0),
+    dt_start=DatesBR().sub_working_days(DatesBR().curr_date, 5),
+    dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 0),
     str_market='BOV',
     str_ticker='PETR4'
 )

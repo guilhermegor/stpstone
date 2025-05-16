@@ -38,10 +38,10 @@ class AlphaVantageUS(ABCRequests):
             list_slugs=list_slugs
         )
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         list_ = list()
         sleep(10)
-        json_ = req_resp.json()
+        json_ = resp_req.json()
         for str_day, dict_ in json_['Time Series (Daily)'].items():
             list_.append({
                 'DATE': str_day,

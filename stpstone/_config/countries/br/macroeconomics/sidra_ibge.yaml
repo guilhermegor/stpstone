@@ -1,0 +1,203 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://www.ibge.gov.br/
+  headers:
+  payload:
+  token:
+    host:
+    app:
+    headers:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+  web_driver:
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+pools_releases_dates:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: calendario-indicadores-novoportal.html#source=pools_releases_dates
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_sidra_ibge_pools_releases_dates
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    POOL_NAME: str
+    DT_POOL_RELEASE_NEW: date
+    REFERENCED_PERIOD: str
+  df_read_params:
+  xpaths:
+    iter_pool_name: //div[@class="calendario-detalhes"]/h4[{}]//p[@class="titulo pure-u-17-24"]
+    iter_pool_release_dt_new: //div[@class="calendario-detalhes"]/h4[{}]/p[@class="box-data pure-u-7-24"]
+
+sidra_modification_dates:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host: https://servicodados.ibge.gov.br/
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+    - 1737
+    - 3065
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: api/v3/agregados/{{slug}}/periodos#source=sidra_modification_dates
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_sidra_ibge_pools_releases_dates
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    ID: int
+    NAME: str
+    DT_RELEASE: str
+    DT_IMPLEMENTATION: date
+  df_read_params:
+  xpaths:
+    iter_pool_name: //div[@class="calendario-detalhes"]/h4[{}]//p[@class="titulo pure-u-17-24"]
+    iter_pool_release_dt_new: //div[@class="calendario-detalhes"]/h4[{}]/p[@class="box-data pure-u-7-24"]
+
+sidra_variables:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host: https://servicodados.ibge.gov.br/
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+    - 1737
+    - 3065
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: api/v3/agregados/{{slug}}/variaveis/all?localidades=BR#source=sidra_variables
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_sidra_ibge_pools_releases_dates
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    ID: int
+    NAME: str
+    UNITY: str
+    YEAR_MONTH: int
+    VALUE: float
+  df_read_params:
+  xpaths:
+    iter_pool_name: //div[@class="calendario-detalhes"]/h4[{}]//p[@class="titulo pure-u-17-24"]
+    iter_pool_release_dt_new: //div[@class="calendario-detalhes"]/h4[{}]/p[@class="box-data pure-u-7-24"]

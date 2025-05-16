@@ -1,23 +1,19 @@
-### DATAFRAME STANDARDIZATION ###
-
-# pypi.org
-from logging import Logger
-from typing import Any, Dict, List, Optional
-
 import numpy as np
 import pandas as pd
+from logging import Logger
+from typing import Any, Dict, List, Optional
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-
-# local libs
 from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.pipelines.generic import generic_pipeline
 
+
+pd.set_option('future.no_silent_downcasting', True)
 
 class DFStandardization(metaclass=TypeChecker):
 
@@ -221,7 +217,7 @@ class DFStandardization(metaclass=TypeChecker):
             c
             for c in list(df_.columns)
             if c
-            not in HandlingLists().extend_lists(
+            not in ListHandler().extend_lists(
                 list(dict_dtypes.keys()), self.list_cols_dt
             )
         ]

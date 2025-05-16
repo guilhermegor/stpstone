@@ -20,7 +20,7 @@ class BrazilGeo:
         url_localidades_brasil = 'https://servicodados.ibge.gov.br/api/v1/localidades/estados'
         # rest consult to ibge database
         response = request('GET', url_localidades_brasil)
-        dict_message = ast.literal_eval(StrHandler().find_between(
+        dict_message = ast.literal_eval(StrHandler().get_between(
             str(response.text.encode('utf8')), "b'", "'"))
         # latin characters to brazillian states names
         # wheter remove or not accents according to user will
@@ -46,11 +46,11 @@ class BrazilGeo:
         # looping through each zip code, requesting info about adrees, and raise exception
         #   if status code is different from 2xx
         for zip_ in list_zip_codes:
-            req_resp = request(method=method, url=url.format(zip_))
+            resp_req = request(method=method, url=url.format(zip_))
             #   raises exception when not a 2xx response
-            req_resp.raise_for_status()
+            resp_req.raise_for_status()
             #   generating json
-            json_zip_codes = req_resp.json()
+            json_zip_codes = resp_req.json()
             #   organizing data to export format
             dict_zip_adresses[zip_] = [json_zip_codes[key_address_type],
                                        json_zip_codes[key_address], json_zip_codes[key_state]]

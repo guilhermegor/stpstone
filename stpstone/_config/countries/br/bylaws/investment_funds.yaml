@@ -519,8 +519,9 @@ investment_funds_bylaws:
     COL_1: bfill
     COL_2: ffill
   dtypes:
+    INT_REGEX: int
     EVENT: str
-    MATCH_PATTTERN: str
+    MATCH_PATTERN: str
     PATTERN_REGEX: str
     REGEX_GROUP_0: str
     REGEX_GROUP_1: str

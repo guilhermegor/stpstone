@@ -26,7 +26,7 @@ class BondIssuersWB3(ABCRequests):
             logger=logger
         )
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         return None
 
     # ! TODO: downstream processing to standardize issuer name in both banks_rts_br and b3_bond_issuers_accp_warranty

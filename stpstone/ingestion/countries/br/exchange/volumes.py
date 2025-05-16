@@ -32,5 +32,5 @@ class ExchVolumesTrdBR(ABCRequests):
             logger=logger
         )
 
-    def trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         return None

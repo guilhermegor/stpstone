@@ -34,9 +34,9 @@ class CoinMarket(ABCRequests):
             token=token
         )
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         list_ser = list()
-        json_ = req_resp.json()
+        json_ = resp_req.json()
         for dict_ in json_['data']:
             list_ser.append({
                 'ID': dict_['id'],

@@ -65,7 +65,7 @@ class JsonFiles:
         INPUTS: BYTE MESSAGE
         OUTPUTS: JSON MESSAGE
         """
-        jsonify_message = ast.literal_eval(StrHandler().find_between(
+        jsonify_message = ast.literal_eval(StrHandler().get_between(
             str(byte_message), "b'", "'"))
         return JsonFiles().send_json(jsonify_message)
 

@@ -9,7 +9,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 
 
 class ExchRegBR(ABCRequests):
@@ -32,11 +32,11 @@ class ExchRegBR(ABCRequests):
             logger=logger
         )
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         # setting variables
         list_ser = list()
         # dealing with response
-        str_req_resp = req_resp.text
+        str_req_resp = resp_req.text
         # cleaning response
         list_req_resp = str_req_resp.split('\n')
         list_headers = list_req_resp[1].split(';')

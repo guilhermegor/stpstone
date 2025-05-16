@@ -55,7 +55,7 @@ class ConnectionApi(metaclass=TypeChecker):
             i <= int_max_retrieves
         ):
             try:
-                req_resp = request(
+                resp_req = request(
                     method=method,
                     url=self.hostname_api_line_b3 + app,
                     headers=dict_headers,
@@ -63,12 +63,12 @@ class ConnectionApi(metaclass=TypeChecker):
                 )
             except:
                 continue
-            int_status_code_iteration = req_resp.status_code
+            int_status_code_iteration = resp_req.status_code
             i += 1
         # raises exception when not a 2xx response
-        req_resp.raise_for_status()
+        resp_req.raise_for_status()
         # getting authheader
-        return req_resp.json()[key_header]
+        return resp_req.json()[key_header]
 
     @property
     def access_token(
@@ -121,7 +121,7 @@ class ConnectionApi(metaclass=TypeChecker):
                 i_aux <= max_retrieves
             ):
                 try:
-                    req_resp = request(
+                    resp_req = request(
                         method=method,
                         url=self.hostname_api_line_b3 + app,
                         headers=dict_headers,
@@ -130,12 +130,12 @@ class ConnectionApi(metaclass=TypeChecker):
                     )
                 except:
                     continue
-                int_status_code_iteration = req_resp.status_code
+                int_status_code_iteration = resp_req.status_code
                 i_aux += 1
             #   raises exception when not a 2xx response
-            req_resp.raise_for_status()
+            resp_req.raise_for_status()
             #   retrieving json
-            dict_token = req_resp.json()
+            dict_token = resp_req.json()
             #   refresh token
             refresh_token = dict_token[key_refresh_token]
             #   token
@@ -187,17 +187,17 @@ class ConnectionApi(metaclass=TypeChecker):
                 # print('PARAMS: {}'.format(dict_params))
                 # print('DATA: {}'.format(dict_payload))
                 try:
-                    req_resp = request(
+                    resp_req = request(
                         method=method,
                         url=self.hostname_api_line_b3 + app_line_b3,
                         headers=dict_header,
                         params=dict_params,
                         data=dict_payload,
                     )
-                    # print('ENDPOINT + API: {}'.format(req_resp.url))
-                    if req_resp.status_code == int_status_code_ok:
+                    # print('ENDPOINT + API: {}'.format(resp_req.url))
+                    if resp_req.status_code == int_status_code_ok:
                         bl_retry_request = False
-                    elif req_resp.status_code in list_int_http_error_token:
+                    elif resp_req.status_code in list_int_http_error_token:
                         #   reset token wheter http error 401 has been reached
                         dict_header = {
                             "Authorization": "Bearer {}".format(self.access_token),
@@ -219,7 +219,7 @@ class ConnectionApi(metaclass=TypeChecker):
             # reseting variables
             float_secs_sleep_iteration = float_secs_sleep
         else:
-            req_resp = request(
+            resp_req = request(
                 method=method,
                 url=self.hostname_api_line_b3 + app_line_b3,
                 headers=dict_header,
@@ -229,12 +229,12 @@ class ConnectionApi(metaclass=TypeChecker):
             if bl_debug_mode == True:
                 print("REQUEST SUCCESFULLY MADE")
         #   raises exception when not a 2xx response
-        req_resp.raise_for_status()
+        resp_req.raise_for_status()
         #   retrieving response
         try:
-            return req_resp.json()
+            return resp_req.json()
         except:
-            return req_resp.status_code
+            return resp_req.status_code
 
 
 class Operations(ConnectionApi):
@@ -815,8 +815,8 @@ class Professional(ConnectionApi):
     def professional_historic_position(
         self,
         professional_code: str,
-        dt_inf: str,
-        dt_sup: str,
+        dt_start: str,
+        dt_end: str,
         int_participant_perspective_type: int = 0,
         list_metric_type: List[int] = [
             1,
@@ -857,8 +857,8 @@ class Professional(ConnectionApi):
             "ownerBrokerCode": int(self.broker_code),
             "ownerCategoryType": int(self.category_code),
             "partPerspecType": int_participant_perspective_type,
-            "registryDateEnd": dt_sup,
-            "registryDateStart": dt_inf,
+            "registryDateEnd": dt_end,
+            "registryDateStart": dt_start,
             "traderCode": professional_code,
         }
         if bl_debug_mode == True:

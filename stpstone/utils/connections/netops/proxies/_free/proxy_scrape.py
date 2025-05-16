@@ -44,12 +44,12 @@ class ProxyScrapeAll(ABCSession):
 
     @property
     def _available_proxies(self) -> List[Dict[str, Union[str, float]]]:
-        req_resp = request(
+        resp_req = request(
             "GET",
             "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=json",
         )
-        req_resp.raise_for_status()
-        json_proxies = req_resp.json()
+        resp_req.raise_for_status()
+        json_proxies = resp_req.json()
         return [
             {
                 "protocol": str(dict_["protocol"]).lower(),
@@ -130,12 +130,12 @@ class ProxyScrapeCountry(ABCSession):
 
     @property
     def _available_proxies(self) -> List[Dict[str, Union[str, float]]]:
-        req_resp = request(
+        resp_req = request(
             "GET",
             f"https://api.proxyscrape.com/v4/free-proxy-list/get?request=get_proxies&country={self.str_country_code.lower()}&skip=0&proxy_format=protocolipport&format=json&limit=1000",
         )
-        req_resp.raise_for_status()
-        json_proxies = req_resp.json()
+        resp_req.raise_for_status()
+        json_proxies = resp_req.json()
         return [
             {
                 "protocol": str(dict_["protocol"]).lower(),

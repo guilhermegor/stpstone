@@ -5,7 +5,7 @@ from random import shuffle
 from typing import List
 from stpstone.ingestion.countries.br.bylaws.investment_funds import InvestmentFundsBylawsBR
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.parsers.lists import HandlingLists
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -51,7 +51,7 @@ print(f"Slugs before filtering: {len(list_slugs)}")
 list_slugs = list(set(list_slugs) - set(df_slugs_consulted["SLUG_URL"].unique()))
 print(f"Slugs after filtering: {len(list_slugs)}")
 shuffle(list_slugs)
-list_chunks = HandlingLists().chunk_list(list_slugs, None, int_chunk)
+list_chunks = ListHandler().chunk_list(list_slugs, None, int_chunk)
 
 for i, list_ in enumerate(list_chunks):
     print(f"{DatesBR().current_timestamp_string} - Processing chunk {i} of {len(list_chunks) - 1}")

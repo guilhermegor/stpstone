@@ -83,6 +83,7 @@ cls_ = SearchByTradingB3(
 
 # df_ = cls_.source("mtm_b3", bl_fetch=True)
 # print(f"DF MTM B3: \n{df_}")
+# print(f"TEST HAIRCUT B3: \n{df_[df_["TICKER"] == "PETR4"]}")
 # df_.info()
 
 # df_ = cls_.source("option_theor_premiums", bl_fetch=True)
@@ -105,6 +106,18 @@ cls_ = SearchByTradingB3(
 # print(f"DF SWAP MARKET RATES B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("instrument_group_parameters", bl_fetch=True)
-print(f"DF INSTRUMENT GROUP PARAMETERS B3: \n{df_}")
+# df_ = cls_.source("instrument_group_parameters", bl_fetch=True)
+# print(f"DF INSTRUMENT GROUP PARAMETERS B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("spot_accepted_collateral_b3", bl_fetch=True)
+# print(f"DF SPOT ACCEPTED COLLATERAL B3: \n{df_}")
+# df_.info()
+
+# df_ = cls_.source("risk_scenarios_curve_types", bl_fetch=True)
+# print(f"DF RISK SCENARIOS CURVE TYPES B3: \n{df_}")
+# df_.info()
+
+df_ = cls_.source("primitive_risk_factors_merged", bl_fetch=True)
+print(f"DF PRIMITIVE RISK FACTORS MERGED B3: \n{df_}")
 df_.info()

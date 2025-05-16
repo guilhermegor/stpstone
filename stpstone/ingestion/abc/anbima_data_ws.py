@@ -78,12 +78,12 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
             id_ = StrHandler().fill_zeros(str_prefix, i, int_length)
             if id_ in list_ids_ignore: continue
             url = fstr_url.format(id_)
-            req_resp = request("GET", url, headers=self.get_property("headers"),
+            resp_req = request("GET", url, headers=self.get_property("headers"),
                                cookies=self.get_property("cookies"))
             list_ser.append({
                 "COD_ANBIMA": id_,
                 "URL": url,
-                "STATUS_CODE": req_resp.status_code
+                "STATUS_CODE": resp_req.status_code
             })
         if self.cls_db is not None:
             self.insert_db(list_ser)
@@ -126,18 +126,18 @@ class AnbimaDataFetcher(AnbimaDataUtils):
             self.dict_metadata[self.resource]["app"], {"slug": slug})
         url = self.dict_metadata["credentials"]["host"] + app_
         if self.session is None:
-            req_resp = self._req_wo_session(url)
+            resp_req = self._req_wo_session(url)
         else:
-            req_resp = self.session.get(
+            resp_req = self.session.get(
                 url,
                 verify=self.get_property("verify", self.resource),
                 headers=self.get_property("headers", self.resource),
                 params=self.get_property("params", self.resource),
                 cookies=self.get_property("cookies", self.resource),
             )
-        if req_resp.status_code == 200:
+        if resp_req.status_code == 200:
             return None
-        return HtmlHandler().lxml_parser(req_resp)
+        return HtmlHandler().lxml_parser(resp_req)
 
     @property
     def filtered_slugs(self) -> List[str]:

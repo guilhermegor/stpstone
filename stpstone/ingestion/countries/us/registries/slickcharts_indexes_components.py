@@ -44,9 +44,9 @@ class SlickChartsIndexesComponents(ABCRequests):
         self.token = token
         self.list_slugs = list_slugs
 
-    def td_th_parser(self, root: HtmlElement, req_resp: Response) -> pd.DataFrame:
+    def td_th_parser(self, root: HtmlElement, resp_req: Response) -> pd.DataFrame:
         list_ser = []
-        source = self.get_query_params(req_resp.url, "source")
+        source = self.get_query_params(resp_req.url, "source")
         for i in range(1, 600):
             try:
                 el_tr = HtmlHandler().lxml_xpath(
@@ -63,12 +63,12 @@ class SlickChartsIndexesComponents(ABCRequests):
             })
         return pd.DataFrame(list_ser)
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         bl_debug = True if StrHandler().match_string_like(
-            req_resp.url, "*bl_debug=True*") == True else False
-        root = HtmlHandler().lxml_parser(req_resp)
+            resp_req.url, "*bl_debug=True*") == True else False
+        root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
         if bl_debug == True:
             path_project = DirFilesManagement().find_project_root(marker="pyproject.toml")
             HtmlHandler().html_tree(root, file_path=rf"{path_project}/data/test.html")
-        return pd.DataFrame(self.td_th_parser(root, req_resp))
+        return pd.DataFrame(self.td_th_parser(root, resp_req))

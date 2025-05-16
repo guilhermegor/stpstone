@@ -227,13 +227,13 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             "upgrade-insecure-requests": "1",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
         }
-        req_resp = session.get("https://lumtest.com/myip.json", headers=dict_headers,
+        resp_req = session.get("https://lumtest.com/myip.json", headers=dict_headers,
                                 data=dict_payload, timeout=tup_timeout)
-        req_resp.raise_for_status()
+        resp_req.raise_for_status()
         if bl_return_availability == True:
             return True
         else:
-            return req_resp.json()
+            return resp_req.json()
 
     @property
     def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:

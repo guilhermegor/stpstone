@@ -37,5 +37,5 @@ class Anbima550Listing(ABCRequests):
         self.list_slugs = list_slugs
         self.dt_ref_yyyymmdd = dt_ref.strftime('%Y%m%d')
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

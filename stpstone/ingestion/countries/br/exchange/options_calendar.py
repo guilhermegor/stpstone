@@ -40,10 +40,10 @@ class OptionsCalendarB3(ABCRequests):
         self.token = token,
         self.list_slugs = list_slugs
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         list_ser = list()
         i = 1
-        root = HtmlHandler().lxml_parser(req_resp)
+        root = HtmlHandler().lxml_parser(resp_req)
         while i <= 20:
             try:
                 list_th = [

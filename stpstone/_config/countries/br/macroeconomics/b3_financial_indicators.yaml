@@ -1,0 +1,92 @@
+### CONFIGURATION TOOLS ###
+
+credentials:
+  host: https://sistemaswebb3-derivativos.b3.com.br/
+  headers:
+    'accept': 'application/json, text/plain, */*'
+    'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7'
+    'priority': 'u=1, i'
+    'referer': 'https://sistemaswebb3-derivativos.b3.com.br/'
+    'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"'
+    'sec-ch-ua-mobile': '?0'
+    'sec-ch-ua-platform': '"Linux"'
+    'sec-fetch-dest': 'empty'
+    'sec-fetch-mode': 'cors'
+    'sec-fetch-site': 'same-origin'
+    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
+    'Cookie': 'dtCookie=v_4_srv_27_sn_D4B38F897347616B8014F4E3C8A62046_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_1_rcs-3Acss_0; TS01871345=016e3b076f2deae811a453cad4e4cc59554a8905dfca9256a0db6c8a6b84dec60cb398ce4141faf878a76acc877ab4515f3ac83241; TS0134a800=016e3b076f2deae811a453cad4e4cc59554a8905dfca9256a0db6c8a6b84dec60cb398ce4141faf878a76acc877ab4515f3ac83241; BIGipServerpool_sistemaswebb3-derivativos.b3.com.br_443_WAF=2973313034.64288.0000; __cf_bm=jYAyrwdrDZjRvxMnltuMDHVZglXiDBSRWzKzNUlG4i4-1747170407-1.0.1.1-hLUj6Sc.gksq1ZmYbSZLuCj1XB4a5xtr9Nl1owxVB3yuoWW4zXmGHyhjUoKQpLb2_CYlsgiqGb5AOWgRzt_BQkYy.PUKS81zFPFcSOcSdxw; rxVisitor=1747170456380UCMAEU71MVAC1UBD204LSDCC6C8HJV3H; cf_clearance=ljtjJVAG8Nhxm1ox_BtMND3n.P1o.Fzt0xc_nJMNgdQ-1747170458-1.2.1.1-hTheEMSgjKy5TjN8nCSqgdG6lZVJiD5Skxe1ENNS2fUXFMz8do5cldZL9nviHTOD14dRdFjJZ6rBANqONH84XmKioz1OwAFT0h8wPPxA8GyRt2IjtyzjKhPS8TqUGk4VnX9VFY_olqha23is3I1j6FtdiFJEwjEYtj2rCWAm68ANkD80QbgL2MpwQdHIuzVT_ljy.qkLC63YWzj0U1WdskX5BpVpRGW1xaqqvWHjAZwxlBLasrYLlz1F0R0IbUsjjcF3Jg5W_pKjCT3cGWa7HA63vY1Daq7ixQ8uhK72lMprC8nqG0ppJFmat7ogoqaa85.kH8emQw_9poHCKt1xgCnM6VenmXVW1pQ3FUXj6_s; _clck=1xjyenl%7C2%7Cfvv%7C0%7C1959; TS0171d45d=016e3b076f42ae63a578f3ca07984f535e7a7c9cf87635d10e81fb2d2826f81c6c8ee58d515ca1f0346df5ae3d008bef4722f19257; OptanonConsent=isGpcEnabled=0&datestamp=Tue+May+13+2025+18%3A07%3A45+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A0%2CC0001%3A1%2CC0004%3A0%2CC0002%3A0&AwaitingReconsent=false; _gid=GA1.3.1328296320.1747170466; _gat_gtag_UA_94042116_5=1; _ga_CNJN5WQC5G=GS2.1.s1747170465$o1$g0$t1747170465$j60$l0$h0; _ga=GA1.1.1816671053.1747170458; _clsk=1qorkxj%7C1747170466066%7C2%7C1%7Cs.clarity.ms%2Fcollect; dtSa=-; _ga_SS7FXRTPP3=GS2.1.s1747170458$o1$g1$t1747170471$j47$l0$h0; dtPC=27$570470876_118h1p27$570471408_820h1vKECDEGNLQCFLOFHMPNUKPLAFKUMKPHKQ-0e0; rxvt=1747172271417|1747170456384; TS01f22489=011d592ce1539216cb3ee9a275cb4a821f585845f5833b87d9e264071e06fa8701bfd0f219ad88eec3943f3c12cc61dfbd712d74cf; __cf_bm=UEvkSrWJkpWmotniQibG9oi00azTkW8a1HlqxFADoGI-1747170525-1.0.1.1-FLLKwyvHtX19nA6wWhm_nZ8zvHSW03KXZVlHEMUHgUUREDeHgGu3j6VpQTVMkAXeoigDI8nC7JNw33V47GisnninltvDu.slCHfjZhVxdnw; BIGipServerpool_sistemaswebb3-derivativos.b3.com.br_443_WAF=2973307914.64288.0000'
+  payload:
+  token:
+    host:
+    app:
+    headers:
+    get:
+      req_method: GET
+      bl_verify: False
+      timeout: (12.0, 12.0)
+    keys:
+      token: token
+  web_driver:
+
+metadata:
+
+
+### RESOURCES TO BE SCRAPED ###
+
+resource:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: financialIndicatorsProxy/FinancialIndicators/GetFinancialIndicators/eyJsYW5ndWFnZSI6InB0LWJyIn0=
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: camel
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: DD/MM/YYYY
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name:
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    SECURITY_ID: int
+    DESCRIPTION: str
+    GROUP_DESCRIPTION: str
+    VALUE: float
+    RATE: float
+    LAST_UPDATE: date
+  df_read_params:

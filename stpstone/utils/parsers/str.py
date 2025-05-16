@@ -40,7 +40,7 @@ class StrHandler:
         )
         return multi_map.update(single_map)
 
-    def find_between(self, s, first, last):
+    def get_between(self, s, first, last):
         """
         DOCSTRING: FIND STRINGS BETWEEN TWO SUBSTRINGS
         INPUTS: ORIGINAL STRING, INITAL AND FINAL DELIMITERS
@@ -50,6 +50,18 @@ class StrHandler:
             start = s.index(first) + len(first)
             end = s.index(last, start)
             return s[start:end]
+        except ValueError:
+            return ""
+    
+    def get_after(self, s, first):
+        """
+        DOCSTRING: FIND STRINGS BETWEEN TWO SUBSTRINGS
+        INPUTS: ORIGINAL STRING, INITAL AND FINAL DELIMITERS
+        OUTPUTS: MID STRING
+        """
+        try:
+            start = s.index(first) + len(first)
+            return s[start:]
         except ValueError:
             return ""
 
@@ -580,3 +592,7 @@ class StrHandler:
             key: value[0] if len(value) == 1 else value
             for key, value in query_params.items()
         }
+
+    def has_no_letters(self, str_: str) -> bool:
+        """Check if a string has no letters (A-Z, a-z)."""
+        return not any(char.isalpha() for char in str_)

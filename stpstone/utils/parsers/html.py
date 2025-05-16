@@ -6,14 +6,14 @@ from typing import Union
 
 class HtmlHandler:
 
-    def bs_parser(self, req_resp: Response, parser:str="html.parser") -> Union[BeautifulSoup, str]:
+    def bs_parser(self, resp_req: Response, parser:str="html.parser") -> Union[BeautifulSoup, str]:
         try:
-            return BeautifulSoup(req_resp.content, parser)
+            return BeautifulSoup(resp_req.content, parser)
         except HTTPError as e:
             return "HTTP Error: {}".format(e)
 
-    def lxml_parser(self, req_resp:Response) -> html.HtmlElement:
-        page = req_resp.content
+    def lxml_parser(self, resp_req:Response) -> html.HtmlElement:
+        page = resp_req.content
         return html.fromstring(page)
 
     def lxml_xpath(self, html_content, str_xpath):

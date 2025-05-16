@@ -4,6 +4,8 @@ from stpstone.utils.parsers.yaml import reading_yaml
 
 root_path = os.path.dirname(os.path.realpath(__file__))
 
+YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
+
 # * bylaws
 YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(
     os.path.join(root_path, "countries/br/bylaws/investment_funds.yaml")
@@ -68,9 +70,31 @@ YAML_BR_PTAX_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/ptax_bcb.yaml"))
 YAML_ANBIMA_FORECASTS = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/anbima_pmi_forecasts.yaml"))
+YAML_YAHII_RATES = reading_yaml(os.path.join(root_path, "countries/br/macroeconomics/yahii_rates.yaml"))
+YAML_YAHII_OHTERS = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/yahii_others.yaml"))
+YAML_SIDRA_IBGE = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/sidra_ibge.yaml"))
+YAML_SGS_BCB = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/sgs_bcb.yaml"))
+YAML_B3_FINANCIAL_INDICATORS = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/b3_financial_indicators.yaml"))
+YAML_OLINDA_BCB = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/olinda_bcb.yaml"))
+YAML_INVESTINGCOM_BR = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/investingcom_br.yaml"))
+# US
+YAML_FRED_US = reading_yaml(
+    os.path.join(root_path, "countries/us/macroeconomics/fred.yaml"))
 # WW
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
+YAML_WW_TRADING_ECON = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/trading_econ.yaml"))
+YAML_WW_WORLD_GOV_BONDS = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/world_gov_bonds.yaml"))
+YAML_WW_RATINGS_AGENCIES = reading_yaml(
+    os.path.join(root_path, "countries/ww/macroeconomics/ratings_agencies.yaml"))
 
 # * otc
 # BR
@@ -91,6 +115,8 @@ YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_debentures.yaml"))
 YAML_ANBIMA_DATA_API = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_api.yaml"))
+YAML_MAIS_RETORNO_FUNDS = reading_yaml(
+    os.path.join(root_path, "countries/br/registries/mais_retorno_funds.yaml"))
 # US
 YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
     os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
@@ -108,9 +134,5 @@ YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.y
 # ! deprecated
 YAML_B3 = reading_yaml(os.path.join(root_path, "b3.yaml"))
 YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
-YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
-YAML_WGBD = reading_yaml(os.path.join(root_path, "world_gov_bonds.yaml"))
-YAML_USA_MACRO = reading_yaml(os.path.join(root_path, "usa_macro.yaml"))
-YAML_BR_MACRO = reading_yaml(os.path.join(root_path, "br_macro.yaml"))
 YAML_MICROSOFT_APPS = reading_yaml(os.path.join(root_path, "microsoft_apps.yaml"))
 YAML_LLMS = reading_yaml(os.path.join(root_path, "llms.yaml"))

@@ -11,8 +11,8 @@ session = YieldFreeProxy(bl_new_proxy=False).session
 
 class_ptax = PTAXBCB(
     session=session,
-    dt_inf=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-    dt_sup=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+    dt_start=DatesBR().sub_working_days(DatesBR().curr_date, 5),
+    dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 1),
     cls_db=None,
     bl_debug=False
 )

@@ -83,67 +83,71 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             return date(
                 int("20" + date_str[-2:]), int(date_str[3:5]), int(date_str[0:2])
             )
+        elif format_input == "DD.MM.YY":
+            return date(
+                int("20" + date_str[-2:]), int(date_str[3:5]), int(date_str[0:2])
+            )
         else:
             raise Exception(f"Not a valid date format {format_input}")
 
-    def list_wds(self, dt_inf: datetime, dt_sup: datetime, int_wd_bef: int) -> List[int]:
+    def list_wds(self, dt_start: datetime, dt_end: datetime, int_wd_bef: int) -> List[int]:
         """
         List of working days between two dates
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
             int_wd_bef (int): number of working days before the start date
         Returns:
             List[int]
         """
         date_ref = self.sub_working_days(self.dt_(), int_wd_bef)
-        wd_inf = self.get_working_days_delta(dt_inf, date_ref)
-        wd_sup = self.get_working_days_delta(dt_sup, date_ref)
+        wd_inf = self.get_working_days_delta(dt_start, date_ref)
+        wd_sup = self.get_working_days_delta(dt_end, date_ref)
         return list(range(wd_sup, wd_inf + 1))
 
-    def list_wds(self, dt_inf: str, dt_sup: str) -> Union[List[datetime], List[str]]:
+    def list_wds(self, dt_start: str, dt_end: str) -> Union[List[datetime], List[str]]:
         """
         List of working days between two dates
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
         Returns:
             List[datetime]
         """
         list_wds = list()
-        for x in range(int((dt_sup - dt_inf).days) + 1):
+        for x in range(int((dt_end - dt_start).days) + 1):
             list_wds.append(
-                super().find_following_working_day(day=dt_inf + timedelta(days=x))
+                super().find_following_working_day(day=dt_start + timedelta(days=x))
             )
         return list(unique_everseen(list_wds))
 
-    def list_cds(self, dt_inf: datetime, dt_sup: datetime) -> List[datetime]:
+    def list_cds(self, dt_start: datetime, dt_end: datetime) -> List[datetime]:
         """
         List of calendar days between two dates
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
             format_data (str): format date
         Returns:
             List[datetime]
         """
         list_wds = list()
-        for x in range(int((dt_sup - dt_inf).days)):
-            list_wds.append(dt_inf + timedelta(days=x))
+        for x in range(int((dt_end - dt_start).days)):
+            list_wds.append(dt_start + timedelta(days=x))
         return list(unique_everseen(list_wds))
 
-    def list_years(self, dt_inf: datetime, dt_sup: datetime) -> List[int]:
+    def list_years(self, dt_start: datetime, dt_end: datetime) -> List[int]:
         """
         List of years between two dates
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
         Returns:
             List[int]
         """
         list_years = list()
-        for x in range(int((dt_sup - dt_inf).days)):
-            list_years.append((dt_inf + timedelta(days=x)).year)
+        for x in range(int((dt_end - dt_start).days)):
+            list_years.append((dt_start + timedelta(days=x)).year)
         return list(unique_everseen(list_years))
 
     @property
@@ -166,16 +170,16 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         else:
             return datetime_
 
-    def testing_dates(self, dt_inf: datetime, dt_sup: datetime) -> bool:
+    def testing_dates(self, dt_start: datetime, dt_end: datetime) -> bool:
         """
-        Test if dt_sup is greater than dt_inf
+        Test if dt_end is greater than dt_start
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
         Returns:
             Boolean
         """
-        if int((dt_sup - dt_inf).days) >= 0:
+        if int((dt_end - dt_start).days) >= 0:
             return True
         else:
             return False
@@ -211,13 +215,13 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         year = self.year_number(dt_)
         month = self.month_number(dt_)
         day = 1
-        dt_inf = self.find_working_day(self.build_date(year, month, day))
+        dt_start = self.find_working_day(self.build_date(year, month, day))
         if month < last_month_year:
-            dt_sup = self.sub_working_days(self.build_date(year, month + 1, day), 1)
+            dt_end = self.sub_working_days(self.build_date(year, month + 1, day), 1)
         else:
-            dt_sup = self.sub_working_days(self.build_date(year + 1, 1, day), 1)
+            dt_end = self.sub_working_days(self.build_date(year + 1, 1, day), 1)
         # returning dates
-        return dt_inf, dt_sup
+        return dt_start, dt_end
 
     def month_number(self, dt_: datetime, bl_month_mm: bool = False) -> Union[int, str]:
         if bl_month_mm == False:
@@ -251,8 +255,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
 
     def nth_weekday_month(
         self,
-        dt_inf: datetime,
-        dt_sup: datetime,
+        dt_start: datetime,
+        dt_end: datetime,
         int_weekday: int,
         nth_rpt: int,
         format_output: str = "DD/MM/YYYY",
@@ -261,8 +265,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         """
         Get nth weekday of month
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
             int_weekday (int): weekday number
             nth_rpt (int): nth repetition
             format_output (str): format output
@@ -270,7 +274,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         Returns:
             List[datetime]
         """
-        list_wds = self.list_wds(dt_inf, dt_sup, format_output)
+        list_wds = self.list_wds(dt_start, dt_end, format_output)
         return [
             self.add_working_days(self.sub_working_days(d, 1), 1)
             for d in list_wds
@@ -281,8 +285,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             )
         ]
 
-    def delta_calendar_days(self, dt_inf: datetime, dt_sup: datetime) -> int:
-        return (dt_sup - dt_inf).days
+    def delta_calendar_days(self, dt_start: datetime, dt_end: datetime) -> int:
+        return (dt_end - dt_start).days
 
     def add_months(self, dt_, int_months) -> datetime:
         return dt_ + relativedelta(months=int_months)
@@ -373,8 +377,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
 
     def add_holidays_not_considered_anbima(
         self,
-        dt_inf: datetime,
-        dt_sup: datetime,
+        dt_start: datetime,
+        dt_end: datetime,
         list_last_week_year_day,
         local_zone="pt-BR",
         list_holidays_not_considered: List[str] = ["25/01"],
@@ -384,8 +388,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         """
         Add holidays not considered by ANBIMA
         Args:
-            dt_inf (datetime): start date
-            dt_sup (datetime): end date
+            dt_start (datetime): start date
+            dt_end (datetime): end date
             list_last_week_year_day (List[datetime]): list of last days of years
             local_zone (str): locale zone
             list_holidays_not_considered (List[str]): list of holidays not considered
@@ -398,7 +402,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         return len(
             [
                 d
-                for d in self.list_calendar_days(dt_inf, dt_sup)
+                for d in self.list_calendar_days(dt_start, dt_end)
                 if (
                     d.strftime("%d/%m") in list_holidays_not_considered
                     and not self.week_name(d) in list_non_bzdays_week

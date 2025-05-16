@@ -18,7 +18,7 @@ cls_load_test_proxies = ProxyLoadTester(
     logger=None,
     str_plan_id_webshare="free",
     timeout_session=1000.0,
-    int_wait_load=100,
+    int_wait_load_seconds=100,
 )
 
 cls_load_test_proxies.run_tests(n_trials=20)

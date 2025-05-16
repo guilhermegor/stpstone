@@ -17,7 +17,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
 from sklearn.naive_bayes import GaussianNB
 # local libs
-from stpstone.handling_data.lists import HandlingLists
+from stpstone.handling_data.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -62,10 +62,10 @@ class Classification:
         OUTPUTS: DICTIONARY (LABLES AND ARRAY OF ONE HOT ENCODER)
         """
         # list of words to vectorizer - alphabetical order
-        list_labels = HandlingLists().extend_lists(
+        list_labels = ListHandler().extend_lists(
             *[x.split() for x in list_corpus])
         list_labels = [StrHandler().remove_sup_period_marks(x).lower()
-                       for x in HandlingLists().remove_duplicates(list_labels)]
+                       for x in ListHandler().remove_duplicates(list_labels)]
         list_labels.sort()
         # one hot vectorizer
         one_hot_vectorizer = CountVectorizer(binary=True)

@@ -55,16 +55,16 @@ class AnbimaDataGen:
             "Authorization": base64_credentials,
         }
         dict_payload = {"grant_type": "client_credentials"}
-        req_resp = request(
+        resp_req = request(
             method=str_method,
             url=str_url,
             headers=dict_headers,
             data=JsonFiles().dict_to_json(dict_payload),
         )
         if self.bl_debug == True:
-            print("TOKEN: {}".format(req_resp.json()["access_token"]))
-        req_resp.raise_for_status()
-        return req_resp.json()
+            print("TOKEN: {}".format(resp_req.json()["access_token"]))
+        resp_req.raise_for_status()
+        return resp_req.json()
 
     def generic_request(self, str_app: str, str_method: str) -> List[Dict[str, Any]]:
         str_url = self.str_host + str_app
@@ -75,9 +75,9 @@ class AnbimaDataGen:
             "client_id": self.str_client_id,
             "access_token": self.str_token,
         }
-        req_resp = request(method=str_method, url=str_url, headers=dict_headers)
-        req_resp.raise_for_status()
-        return req_resp.json()
+        resp_req = request(method=str_method, url=str_url, headers=dict_headers)
+        resp_req.raise_for_status()
+        return resp_req.json()
 
 
 class AnbimaDataFunds(AnbimaDataGen):

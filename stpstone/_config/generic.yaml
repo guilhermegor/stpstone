@@ -1,11 +1,4 @@
-### MAIN SETTINGS ###
 
-# requests
-requests:
-  successful_conn: 200
-  unsuccesful_conn: 404
-
-# audit log cols for storage banks
 audit_log_cols:
   str_fmt_dt: YYYY-MM-DD
   url: URL

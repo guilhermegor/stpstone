@@ -18,8 +18,8 @@ class PTAXBCB(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_inf:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 2),
-        dt_sup:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 2),
+        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -34,25 +34,25 @@ class PTAXBCB(ABCRequests):
             token=token
         )
         self.session = session
-        self.dt_inf = dt_inf
-        self.dt_sup = dt_sup
+        self.dt_start = dt_start
+        self.dt_end = dt_end
         self.cls_db = cls_db
         self.logger = logger
         self.token = token
         self.bl_debug = bl_debug
-        self.dt_sup_yyyymmdd = self.dt_sup.strftime('%Y%m%d')
-        self.dt_inf_ddmmyyyy = self.dt_inf.strftime('%d/%m/%Y')
-        self.dt_sup_ddmmyyyy = self.dt_sup.strftime('%d/%m/%Y')
+        self.dt_sup_yyyymmdd = self.dt_end.strftime('%Y%m%d')
+        self.dt_inf_ddmmyyyy = self.dt_start.strftime('%d/%m/%Y')
+        self.dt_sup_ddmmyyyy = self.dt_end.strftime('%d/%m/%Y')
         self.df_ids = self.source('ids', bl_fetch=True)
         self.list_slugs = list_slugs if list_slugs is not None else \
             list(self.df_ids['CURRENCY_ID'].unique())
 
-    def req_trt_injection(self, req_resp:Response) -> Optional[pd.DataFrame]:
-        tup_parsed_url = urlparse(req_resp.url)
+    def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
+        tup_parsed_url = urlparse(resp_req.url)
         if (f'{tup_parsed_url.scheme}://{tup_parsed_url.hostname}/'
              == YAML_BR_PTAX_BCB['ids']['host']) \
             and ('&' not in tup_parsed_url.query):
-            root = HtmlHandler().lxml_parser(req_resp)
+            root = HtmlHandler().lxml_parser(resp_req)
             selectors_currency = HtmlHandler().lxml_xpath(
                 root, YAML_BR_PTAX_BCB['ids']['xpaths']['currency_options']
             )

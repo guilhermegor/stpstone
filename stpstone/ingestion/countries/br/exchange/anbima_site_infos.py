@@ -39,10 +39,10 @@ class AnbimaInfos(ABCRequests):
         self.list_slugs = list_slugs
         self.dt_ref_yymmdd = dt_ref.strftime('%y%m%d')
 
-    def list_rows_injection(self, req_resp: Response) -> Union[List[Any], List[Any]]:
+    def list_rows_injection(self, resp_req: Response) -> Union[List[Any], List[Any]]:
         list_rows_1 = []
         list_rows_2 = []
-        raw_text = re.sub(r'--(?=\d)', '--@', req_resp.text)
+        raw_text = re.sub(r'--(?=\d)', '--@', resp_req.text)
         raw_text = raw_text.replace(",", ".").replace("--", "-99999").replace("\r", "")
         list_rows_raw = raw_text.split("\n")
         for i, row in enumerate(list_rows_raw):
@@ -66,11 +66,11 @@ class AnbimaInfos(ABCRequests):
                 raise ValueError(f"ROW #{i}: Unexpected row format found: {row}")
         return list_rows_1, list_rows_2
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
-        if StrHandler().match_string_like(req_resp.url, '*#source=ima_p2_pvs*'):
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
+        if StrHandler().match_string_like(resp_req.url, '*#source=ima_p2_pvs*'):
             source = "ima_p2_pvs"
             int_idx_row = 1
-        elif StrHandler().match_string_like(req_resp.url, '*#source=ima_p2_th_portf*'):
+        elif StrHandler().match_string_like(resp_req.url, '*#source=ima_p2_th_portf*'):
             source = "ima_p2_th_portf"
             int_idx_row = 2
         else:
@@ -79,7 +79,7 @@ class AnbimaInfos(ABCRequests):
         if source is None or int_idx_row is None:
             return None
         else:
-            list_rows_1, list_rows_2 = self.list_rows_injection(req_resp)
+            list_rows_1, list_rows_2 = self.list_rows_injection(resp_req)
             data_rows = locals()[f"list_rows_{int_idx_row}"]
             df_ = pd.DataFrame([row.split("@") for row in data_rows],
                             columns=list(YAML_ANBIMA_INFOS[source]["dtypes"].keys()))

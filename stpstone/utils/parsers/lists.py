@@ -7,12 +7,15 @@ from collections import OrderedDict, Counter
 from itertools import chain, tee, product
 from numbers import Number
 from typing import List, Any, Iterable, Tuple, Dict
+from logging import Logger
+from typing import List, Optional
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class HandlingLists:
+class ListHandler:
 
     def get_first_occurrence_within_list(self, list_, obj_occurrence=None, bl_uppercase=False,
                                          bl_last_uppercase_before_capitalized=False, int_error=-1,
@@ -218,7 +221,7 @@ class HandlingLists:
             list_extended_lists = chain(list_extended_lists, list_)
         # removing duplicates
         if bl_remove_duplicates == True:
-            list_extended_lists = HandlingLists().remove_duplicates(list_extended_lists)
+            list_extended_lists = ListHandler().remove_duplicates(list_extended_lists)
         else:
             list_extended_lists = list(list_extended_lists)
         # returning final list
@@ -235,7 +238,7 @@ class HandlingLists:
         list_chunked = list()
         # remove duplicates if is user's will
         if bl_remove_duplicates == True:
-            list_to_chunk = HandlingLists().remove_duplicates(list_to_chunk)
+            list_to_chunk = ListHandler().remove_duplicates(list_to_chunk)
         # creating chunks positions
         list_position_chunks = NumHandler().multiples(int_chunk, len(list_to_chunk))
         inf_limit = list_position_chunks[0]
@@ -267,7 +270,7 @@ class HandlingLists:
             list_chunked.append(str_character_divides_clients.join(list_to_chunk[
                 inf_limit: sup_limit]))
         #   removing duplicates
-        list_chunked = HandlingLists().remove_duplicates(list_chunked)
+        list_chunked = ListHandler().remove_duplicates(list_chunked)
         #   returning final result
         return list_chunked
 
@@ -336,3 +339,23 @@ class HandlingLists:
             if list_[i] != list_[i - 1]:
                 list_xpt.append(list_[i])
         return list_xpt
+
+    def replace_first_occurrence(self, list_: List[str], str_old_value: str, str_new_value: str, 
+                                 logger: Optional[Logger] = None) -> List[str]:
+        if str_old_value in list_:
+            index = list_.index(str_old_value)
+            list_[index] = str_new_value
+            # print(f"Value {str_old_value} replaced by {list_[index]} / Index: {index}")
+        else:
+            CreateLog().log_message(logger, f"Value {str_old_value} not found in list", "warning")
+        return list_
+
+    def replace_last_occurrence(self, list_: List[str], str_old_value: str, str_new_value: str, 
+                                 logger: Optional[Logger] = None) -> List[str]:
+        if str_old_value in list_:
+            index = list_[::-1].index(str_old_value)
+            list_[index] = str_new_value
+            # print(f"Value {str_old_value} replaced by {list_[index]} / Index: {index}")
+        else:
+            CreateLog().log_message(logger, f"Value {str_old_value} not found in list", "warning")
+        return list_

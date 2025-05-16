@@ -41,5 +41,5 @@ class CVMRegistries(ABCRequests):
         self.month_ref = DatesBR().add_months(self.dt_ref, -1).strftime("%Y%m")
         self.year_ref = DatesBR().year_number(self.dt_ref)
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

@@ -21,7 +21,7 @@ class AnbimaDataDebentures(ABCRequests):
         token: Optional[str] = None,
         list_slugs: Optional[List[str]] = None,
         str_user_agent: Optional[str] = None,
-        int_wait_load: int = 10,
+        int_wait_load_seconds: int = 10,
         bl_headless: bool = False,
         bl_incognito: bool = False
     ) -> None:
@@ -34,7 +34,7 @@ class AnbimaDataDebentures(ABCRequests):
             token=token,
             list_slugs=list_slugs,
             str_user_agent=str_user_agent,
-            int_wait_load=int_wait_load,
+            int_wait_load_seconds=int_wait_load_seconds,
             bl_headless=bl_headless,
             bl_incognito=bl_incognito
         )
@@ -44,9 +44,9 @@ class AnbimaDataDebentures(ABCRequests):
         self.logger = logger
         self.list_slugs = list_slugs
         self.str_user_agent = str_user_agent
-        self.int_wait_load = int_wait_load
+        self.int_wait_load_seconds = int_wait_load_seconds
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
 
-    def req_trt_injection(self, req_resp: Response) -> Optional[pd.DataFrame]:
+    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

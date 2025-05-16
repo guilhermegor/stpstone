@@ -44,7 +44,7 @@ for i in range(450, 506):
         url=url,
         path_webdriver=get_password('CHROMEDRIVER', 'PATH'),
         int_port=get_password('CHROMEDRIVER', 'PORT'),
-        int_wait_load=120,
+        int_wait_load_seconds=120,
         str_proxy=str_proxy
     )
     web_driver = cls_selenium.web_driver
@@ -77,7 +77,7 @@ for i in range(450, 506):
                     url=url,
                     path_webdriver=get_password('CHROMEDRIVER', 'PATH'),
                     int_port=get_password('CHROMEDRIVER', 'PORT'),
-                    int_wait_load=120,
+                    int_wait_load_seconds=120,
                     str_proxy=str_proxy
                 )
                 web_driver = cls_selenium.web_driver
@@ -87,7 +87,7 @@ for i in range(450, 506):
         p_ein_number = cls_selenium.find_element(a_fund_infos, xpath_ein_number)
         str_ein_number = p_ein_number.text
         list_ser.append({
-            'EIN_NUMBER': str_ein_number,
+            'CNPJ': str_ein_number,
             'URL_ANBIMA_FUND': str_anbima_fund_info
         })
         bl_retry = True
