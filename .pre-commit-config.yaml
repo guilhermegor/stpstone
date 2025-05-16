@@ -27,7 +27,7 @@ repos:
   - repo: local
     hooks:
       - id: check-unix-filenames
-        name: Check Unix/Linux filename validity
+        name: check unix/linux filename validity
         entry: bash cli/check_unix_filenames.sh
         language: system
         types: [file]
