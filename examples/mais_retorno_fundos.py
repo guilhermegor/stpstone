@@ -4,7 +4,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 
 
 cls_ = MaisRetornoFunds(list_slugs=range(1, 10), int_wait_load_seconds=60, 
-                        int_delay_seconds=30, bl_save_html=True)
+                        int_delay_seconds=30, bl_save_html=False)
 
 df_ = cls_.source("avl_funds", bl_fetch=True)
 print(f"DF MAIS RETORNO FUNDS: \n{df_}")

@@ -12,6 +12,11 @@ repos:
       - id: check-illegal-windows-names
       - id: check-merge-conflict
       - id: check-case-conflict
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.931
+    hooks:
+      - id: mypy
+        args: [--disallow-untyped-defs, --disallow-incomplete-defs, --disallow-untyped-calls]
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.4.1
     hooks:
