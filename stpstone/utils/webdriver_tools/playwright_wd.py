@@ -11,31 +11,34 @@ from stpstone.utils.loggs.create_logs import CreateLog
 class PlaywrightScraper:
     def __init__(
         self,
-        headless: bool = True,
+        bl_headless: bool = True,
         user_agent: Optional[str] = None,
         proxy: Optional[str] = None,
         viewport: Dict[str, int] = None,
-        default_timeout: int = 30000,
-        accept_cookies: bool = True, 
+        int_default_timeout: int = 30000,
+        bl_accept_cookies: bool = True, 
+        bl_incognito: bool = False,
         logger: Optional[Logger] = None
     ):
         """
         Initialize a generic Playwright scraper
         
         Args:
-            headless (bool): Run in headless mode
+            bl_headless (bool): Run in bl_headless mode
             user_agent (str): Custom user agent string
             proxy (str): Proxy server address
             viewport (dict): Browser viewport settings {"width": 1920, "height": 1080}
-            default_timeout (int): Default timeout in milliseconds
-            accept_cookies (bool): Attempt to accept cookies if popup appears
+            int_default_timeout (int): Default timeout in milliseconds
+            bl_accept_cookies (bool): Attempt to accept cookies if popup appears
+            bl_incognito (bool): Run in incognito mode
         """
-        self.headless = headless
+        self.bl_headless = bl_headless
         self.user_agent = user_agent or "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         self.proxy = proxy
         self.viewport = viewport or {"width": 1920, "height": 1080}
-        self.default_timeout = default_timeout
-        self.accept_cookies = accept_cookies
+        self.int_default_timeout = int_default_timeout
+        self.bl_accept_cookies = bl_accept_cookies
+        self.bl_incognito = bl_incognito
         self.logger = logger
         self.playwright = None
         self.browser = None
@@ -48,17 +51,25 @@ class PlaywrightScraper:
         try:
             self.playwright = sync_playwright().start()
             browser_args = {
-                "headless": self.headless,
+                "headless": self.bl_headless,
                 "proxy": {"server": self.proxy} if self.proxy else None
             }
-            
-            self.browser = self.playwright.chromium.launch(**browser_args)
-            self.context = self.browser.new_context(
-                viewport=self.viewport,
-                user_agent=self.user_agent
-            )
-            self.page = self.context.new_page()
-            self.page.set_default_timeout(self.default_timeout)
+            if self.bl_incognito:
+                self.context = self.playwright.chromium.launch_persistent_context(
+                    user_data_dir=None,
+                    **browser_args,
+                    viewport=self.viewport,
+                    user_agent=self.user_agent
+                )
+                self.page = self.context.pages[0]
+            else:
+                self.browser = self.playwright.chromium.launch(**browser_args)
+                self.context = self.browser.new_context(
+                    viewport=self.viewport,
+                    user_agent=self.user_agent
+                )
+                self.page = self.context.new_page()
+            self.page.set_default_timeout(self.int_default_timeout)
             yield self
         except Exception as e:
             CreateLog().log_message(self.logger, f"Error launching browser: {e}", "error")
@@ -78,8 +89,8 @@ class PlaywrightScraper:
     def navigate(self, url: str, timeout: Optional[int] = None):
         """Navigate to a URL"""
         try:
-            self.page.goto(url, timeout=timeout or self.default_timeout)
-            if self.accept_cookies:
+            self.page.goto(url, timeout=timeout or self.int_default_timeout)
+            if self.bl_accept_cookies:
                 self._handle_cookie_popup()
             return True
         except Exception as e:
@@ -168,7 +179,7 @@ class PlaywrightScraper:
                     self.page.wait_for_selector(
                         selector,
                         state="visible" if visible else "attached",
-                        timeout=timeout or self.default_timeout
+                        timeout=timeout or self.int_default_timeout
                     )
                 element = self.page.locator(selector).first
             elif selector_type.lower() == "css":
@@ -176,7 +187,7 @@ class PlaywrightScraper:
                     self.page.wait_for_selector(
                         selector,
                         state="visible" if visible else "attached",
-                        timeout=timeout or self.default_timeout
+                        timeout=timeout or self.int_default_timeout
                     )
                 element = self.page.locator(selector).first
             else:
@@ -234,14 +245,14 @@ class PlaywrightScraper:
                 self.page.wait_for_selector(
                     selector,
                     state="visible" if visible else "attached",
-                    timeout=timeout or self.default_timeout
+                    timeout=timeout or self.int_default_timeout
                 )
                 elements = self.page.locator(selector).all()
             elif selector_type.lower() == "css":
                 self.page.wait_for_selector(
                     selector,
                     state="visible" if visible else "attached",
-                    timeout=timeout or self.default_timeout
+                    timeout=timeout or self.int_default_timeout
                 )
                 elements = self.page.locator(selector).all()
             else:
