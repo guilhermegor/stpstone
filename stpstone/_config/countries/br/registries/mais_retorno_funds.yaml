@@ -82,9 +82,9 @@ avl_funds:
     COL_2: ffill
   dtypes:
     CNPJ: str
-    URL_FUNDO: str
-    NOME_FUNDO: str
-    CATEGORIA: str
+    URL_FUND: str
+    FUND_NAME: str
+    CATEGORY: str
   df_read_params:
   xpaths:
     p_cnpj: //ul[@style="padding:0"]/li[{}]//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"]
@@ -92,6 +92,139 @@ avl_funds:
     a_fund_name: //ul[@style="padding:0"]/li[{}]//a[@class="css-g90fw7"]
     a_category: //ul[@style="padding:0"]/li[{}]//a[@class="css-3xq1wq"]
     status_fund: //ul[@style="padding:0"]/li[{}]//span[@class="MuiChip-label MuiChip-labelMedium css-4qalxv" or @class="MuiChip-root MuiChip-outlined MuiChip-sizeMedium MuiChip-colorDefault MuiChip-outlinedDefault css-6ot3hj"]
+
+avl_instruments:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+    - 1
+    - 2
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: "{{instruments_class}}/page/{{slug}}#source=avl_instruments"
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_mais_retorno_available_instruments
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    CNPJ: str
+    INSTRUMENT_CODE: str
+    INSTRUMENT_NAME: str
+    URL_INSTRUMENT: str
+    SEGMENT: str
+    SECTOR: str
+    INSTRUMENTS_CLASS: str
+    PAGE_POSITION: int
+  df_read_params:
+  xpaths:
+    p_instrument_code: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//p[@class="MuiTypography-root MuiTypography-body1 css-12ucgyp"]
+    p_instrument_name: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//a/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"]
+    href_instrument: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//a
+    p_cnpj: (//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"])[1]
+    p_segment: (//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"])[2]
+    p_sector: (//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"])[3]
+
+avl_indexes:
+  web_driver:
+    xpath_el_wait_until_loaded:
+  req_method: GET
+  # if host is not defined within credentials, use the source one
+  host:
+  headers:
+  payload:
+  # list of slugs (complementary descriptive text to access a web pages)
+  slugs:
+    - 1
+    - 2
+  # use this argument only if {{chunk_slugs}} is passed to app
+  int_chunk_slugs:
+  # iteratively_get_data placeholders:
+  #   - i (int): https://example.com/{{i}}
+  #   - slug (str): https://example.com/{{slug}} - slugs in list format
+  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
+  # non-iteratively_get_data placeholders:
+  #   - {{replacer}}: https://example.com/{{replacer}}
+  #     note: the replacer can be any variable referenced within concrete product class
+  # expected comments to app, within url:
+  #   - feat=read_tables
+  #   - int_pgs_join={{number}}
+  #   - file_extension=.{{file_extension}}
+  #   - bl_separator_consistency_check == False, as default
+  #   - start with a commentary hash and separate params with &
+  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  app: lista-indices/page/{{slug}}#source=avl_indexes
+  bl_verify: False
+  timeout: (12.0, 12.0)
+  cookies:
+  cols_from_case: default
+  cols_to_case: upper_constant
+  list_cols_drop_dupl:
+  str_fmt_dt: YYYY-MM-DD
+  type_error_action: raise
+  strategy_keep_when_dupl: first
+  list_ignorable_exceptions:
+  schema: raw
+  table_name: br_mais_retorno_available_instruments
+  bl_insert_or_ignore: False
+  bl_schema: True
+  ignored_file_extensions:
+    - tmp
+    - log
+    - bak
+  fillna_strt:
+    COL_1: bfill
+    COL_2: ffill
+  dtypes:
+    INDEX_NAME: str
+    INDEX_CODE: str
+    URL_INDEX: str
+    STATUS: str
+    PAGE_POSITION: int
+  df_read_params:
+  xpaths:
+    p_index_name: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//p[@class="MuiTypography-root MuiTypography-body1 css-12ucgyp"]
+    p_index_code: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//a/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"]
+    href_index_url: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//a
+    p_status: //li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding MuiListItem-divider css-1toktnj"][{}]//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"]
 
 fund_properties:
   web_driver:
@@ -271,9 +404,9 @@ fund_historic_rentability:
     COL_2: ffill
   dtypes:
     CNPJ: str
-    URL_FUNDO: str
-    NOME_FUNDO: str
-    CATEGORIA: str
+    URL_FUND: str
+    FUND_NAME: str
+    CATEGORY: str
   df_read_params:
   xpaths:
     list_td_rentabilities: '//div[@class="MuiStack-root css-j7qwjs"]/span[@style="font-size: 0.7rem; color: rgb(107, 113, 137); font-weight: 400; line-height: 1.5;"]/preceding-sibling::span'
@@ -331,9 +464,9 @@ fund_stats:
     COL_2: ffill
   dtypes:
     CNPJ: str
-    URL_FUNDO: str
-    NOME_FUNDO: str
-    CATEGORIA: str
+    URL_FUND: str
+    FUND_NAME: str
+    CATEGORY: str
   df_read_params:
   xpaths:
     list_th: //th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]
@@ -391,9 +524,9 @@ fund_consistency:
     COL_2: ffill
   dtypes:
     CNPJ: str
-    URL_FUNDO: str
-    NOME_FUNDO: str
-    CATEGORIA: str
+    URL_FUND: str
+    FUND_NAME: str
+    CATEGORY: str
   df_read_params:
   xpaths:
     list_th: //th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]

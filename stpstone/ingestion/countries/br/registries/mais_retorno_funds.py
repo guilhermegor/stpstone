@@ -27,7 +27,8 @@ class MaisRetornoFunds(ABCRequests):
         int_delay_seconds: int = 30,
         bl_save_html: bool = False, 
         bl_headless: bool = False,
-        bl_incognito: bool = False
+        bl_incognito: bool = False, 
+        instruments_class: Optional[str] = None
     ) -> None:
         super().__init__(
             dict_metadata=YAML_MAIS_RETORNO_FUNDS,
@@ -50,6 +51,7 @@ class MaisRetornoFunds(ABCRequests):
         self.bl_save_html = bl_save_html
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
+        self.instruments_class = instruments_class
 
     def td_treatment_avl_funds(self, i: int, scraper: PlaywrightScraper) \
         -> Dict[str, Any]:
@@ -76,7 +78,7 @@ class MaisRetornoFunds(ABCRequests):
         )
         return {
             "CNPJ": p_cnpj.get("text", None),
-            "URL_FUNDO": "https://maisretorno.com/" + href_fund if href_fund is not None \
+            "URL_FUND": "https://maisretorno.com/" + href_fund if href_fund is not None \
                 else None,
             "FUND_NAME": a_fund_name.get("text", None),
             "CATEGORY": a_category.get("text", None),
@@ -84,6 +86,73 @@ class MaisRetornoFunds(ABCRequests):
             "PAGE_POSITION": i
         }
     
+    def td_treatment_avl_instruments(self, i: int, scraper: PlaywrightScraper) \
+        -> Dict[str, Any]:
+        p_instrument_code = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_instruments"]["xpaths"]["p_instrument_code"].format(i),
+            selector_type="xpath"
+        )
+        p_instrument_name = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_instruments"]["xpaths"]["p_instrument_name"].format(i),
+            selector_type="xpath"
+        )
+        href_instrument = scraper.get_element_attrb(
+            YAML_MAIS_RETORNO_FUNDS["avl_instruments"]["xpaths"]["href_instrument"].format(i),
+            str_attribute="href",
+            selector_type="xpath"
+        )
+        p_cnpj = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_instruments"]["xpaths"]["p_cnpj"].format(i),
+            selector_type="xpath"
+        )
+        p_segment = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_instruments"]["xpaths"]["p_segment"].format(i),
+            selector_type="xpath"
+        )
+        p_sector = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_instruments"]["xpaths"]["p_sector"].format(i),
+            selector_type="xpath"
+        )
+        return {
+            "CNPJ": p_cnpj.get("text", None),
+            "INSTRUMENT_CODE": p_instrument_code.get("text", None),
+            "INSTRUMENT_NAME": p_instrument_name.get("text", None),
+            "URL_INSTRUMENT": "https://maisretorno.com/" + href_instrument if href_instrument is not None \
+                else None,
+            "SEGMENT": p_segment.get("text", None),
+            "SECTOR": p_sector.get("text", None),
+            "INSTRUMENTS_CLASS": self.instruments_class,
+            "PAGE_POSITION": i
+        }
+    
+    def td_treatment_avl_indexes(self, i: int, scraper: PlaywrightScraper) \
+        -> Dict[str, Any]:
+        p_index_name = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_indexes"]["xpaths"]["p_index_name"].format(i),
+            selector_type="xpath"
+        )
+        p_index_code = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_indexes"]["xpaths"]["p_index_code"].format(i),
+            selector_type="xpath"
+        )
+        href_index_url = scraper.get_element_attrb(
+            YAML_MAIS_RETORNO_FUNDS["avl_indexes"]["xpaths"]["href_index_url"].format(i),
+            str_attribute="href",
+            selector_type="xpath"
+        )
+        p_status = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["avl_indexes"]["xpaths"]["p_status"].format(i),
+            selector_type="xpath"
+        )
+        return {
+            "INDEX_NAME": p_index_name.get("text", None),
+            "INDEX_CODE": p_index_code.get("text", None),
+            "URL_INDEX": "https://maisretorno.com/" + href_index_url if href_index_url is not None \
+                else None,
+            "STATUS": p_status.get("text", None),
+            "PAGE_POSITION": i
+        }
+
     def td_treatment_fund_properties(self, scraper: PlaywrightScraper) -> List[Dict[str, Any]]:
         h1_fund_nickname = scraper.get_element(
             YAML_MAIS_RETORNO_FUNDS["fund_properties"]["xpaths"]["h1_fund_nickname"],
@@ -328,6 +397,24 @@ class MaisRetornoFunds(ABCRequests):
                             timeout=self.int_wait_load_seconds * 1_000
                         ): break
                         list_ser.append(self.td_treatment_avl_funds(i, scraper))
+                        i += 1
+                elif source == "avl_instruments":
+                    while True:
+                        if not scraper.selector_exists(
+                            YAML_MAIS_RETORNO_FUNDS[source]["xpaths"]["p_instrument_code"].format(i),
+                            selector_type="xpath",
+                            timeout=self.int_wait_load_seconds * 1_000
+                        ): break
+                        list_ser.append(self.td_treatment_avl_instruments(i, scraper))
+                        i += 1
+                elif source == "avl_indexes":
+                    while True:
+                        if not scraper.selector_exists(
+                            YAML_MAIS_RETORNO_FUNDS[source]["xpaths"]["p_index_code"].format(i),
+                            selector_type="xpath",
+                            timeout=self.int_wait_load_seconds * 1_000
+                        ): break
+                        list_ser.append(self.td_treatment_avl_indexes(i, scraper))
                         i += 1
                 elif source == "fund_properties":
                     list_ser = self.td_treatment_fund_properties(scraper)
