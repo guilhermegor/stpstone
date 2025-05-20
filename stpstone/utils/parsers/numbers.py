@@ -380,35 +380,28 @@ class NumHandler(metaclass=TypeChecker):
         # handle non-string cases
         if isinstance(value_, (int, float)):
             return round(value_, int_precision) if int_precision is not None else float(value_)
-        
         original = str(value_).strip()
         s = original
-        
-        # First check if this is clearly a mixed number/text case that should remain unchanged
-        if re.search(r'[a-zA-Z].*\d|\d.*[a-zA-Z]', s) and not ('%' in s or re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE)):
+        # first check if this is clearly a mixed number/text case that should remain unchanged
+        if re.search(r'[a-zA-Z].*\d|\d.*[a-zA-Z]', s) and not (
+            '%' in s or re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE)):
             return original
-            
         # check for percentage or basis points
         bl_percentage = '%' in s
         bl_bp = re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE) is not None
-        
         # handle negative numbers (check original string)
         bl_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
-        
         # remove percentage signs, parentheses, and + signs but keep negative signs
         s = re.sub(r'[%\+\(\)]', '', s).strip()
         s = s.replace(')', '')  # remove closing parentheses if any
-        
         # remove only known suffixes (bp, b.p.) but preserve other text
         if bl_bp:
             s_clean = re.sub(r'(bp|b\.p\.?)$', '', s, flags=re.IGNORECASE).strip()
         else:
             s_clean = s
-            
         # count separators to determine format
         comma_count = s_clean.count(',')
         dot_count = s_clean.count('.')
-        
         # handle number formatting
         if comma_count == 1 and dot_count > 0:
             # if there's exactly one comma and it comes after a dot, assume European format
@@ -433,17 +426,16 @@ class NumHandler(metaclass=TypeChecker):
             # single comma - could be European decimal
             # replace comma with decimal point
             s_clean = s_clean.replace(',', '.')
-        
         # try to convert to float
         try:
             num = float(s_clean)
             if bl_negative:
-                num *= -1
+                num = -abs(num)
             # apply percentage or basis point conversion
             if bl_percentage:
                 num /= 100
             elif bl_bp:
-                num /= 10000
+                num /= 10_000
             if int_precision is not None:
                 num = round(num, int_precision)
             return num

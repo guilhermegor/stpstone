@@ -20,6 +20,11 @@ test_cases = [
     "846.874.688",      # european big number -> 846874688
     "-0,10%",           # european negative -> -0.1
     "0,10%",            # european positive -> 0.1
+    "(912.412.911,231)", # should return a negative number
+    "(81,234,567.1324432)",      # should return a negative number
+    "058,234,567.1324432",      # should return a positive number
+    "-0845547,789789",           # should return a negative number
+    "085.944,789789",            # should return a positive number
 ]
 
 print("Testing with precision=2")
