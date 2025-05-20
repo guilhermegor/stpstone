@@ -25,6 +25,8 @@ test_cases = [
     "058,234,567.1324432",      # should return a positive number
     "-0845547,789789",           # should return a negative number
     "085.944,789789",            # should return a positive number
+    "EXAMPLE (912.412.911,231)", # should remain unchanged
+    "EXAMPLE (81,234,567.1324432)", # should remain unchanged
 ]
 
 print("Testing with precision=2")

@@ -381,7 +381,7 @@ class MaisRetornoFunds(ABCRequests):
     def _convert_nums(self, list_: List[Union[str, float, int]], str_instrument: str) \
         -> List[Union[str, float, int]]:
         list_ = [NumHandler().transform_to_float(
-                dict_["text"], int_precision=2) for dict_ in list_]
+                dict_["text"], int_precision=6) for dict_ in list_]
         list_ = [nan if x == "-" else str_instrument.upper() + " " + x if type(x) == str \
                  and "p.p." in x else x for x in list_]
         return list_
