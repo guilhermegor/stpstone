@@ -381,7 +381,7 @@ class MaisRetornoFunds(ABCRequests):
     def _convert_nums(self, list_: List[Union[str, float, int]], 
                       str_instrument: Optional[str] = None) -> List[Union[str, float, int]]:
         list_ = [NumHandler().transform_to_float(
-                dict_["text"], int_precision=6) for dict_ in list_]
+                dict_, int_precision=6) for dict_ in list_]
         if str_instrument:
             list_ = [nan if x == "-" else str_instrument.upper() + " " + x if type(x) == str \
                     and "p.p." in x else x for x in list_]
@@ -439,6 +439,32 @@ class MaisRetornoFunds(ABCRequests):
         list_cols = ["INSTRUMENT", "STATISTIC"] + list_cols
         df_ = df_[list_cols]
         return df_.to_dict(orient="records")
+    
+    def td_consistency(self, scraper: PlaywrightScraper) -> List[Dict[str, Any]]:
+        span_positive_months = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["instruments_consistency"]["xpaths"]["span_positive_months"],
+            selector_type="xpath"
+        )["text"]
+        span_negative_months = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["instruments_consistency"]["xpaths"]["span_negative_months"],
+            selector_type="xpath"
+        )["text"]
+        span_greatest_return = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["instruments_consistency"]["xpaths"]["span_greatest_return"],
+            selector_type="xpath"
+        )["text"]
+        span_least_return = scraper.get_element(
+            YAML_MAIS_RETORNO_FUNDS["instruments_consistency"]["xpaths"]["span_least_return"],
+            selector_type="xpath"
+        )["text"]
+        return [{
+            "INSTRUMENT": DirFilesManagement().get_filename_parts_from_url(
+                scraper.get_current_url())[0].upper(),
+            "POSITIVE_MONTHS": NumHandler().transform_to_float(span_positive_months, int_precision=6),
+            "NEGATIVE_MONTHS": NumHandler().transform_to_float(span_negative_months, int_precision=6),
+            "GREATEST_RETURN": NumHandler().transform_to_float(span_greatest_return, int_precision=6),
+            "LEAST_RETURN": NumHandler().transform_to_float(span_least_return, int_precision=6)
+        }]
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         i = 1
@@ -491,6 +517,8 @@ class MaisRetornoFunds(ABCRequests):
                     list_ser = self.td_instruments_historical_rentability(scraper)
                 elif source == "instruments_stats":
                     list_ser = self.td_instruments_stats(scraper)
+                elif source == "instruments_consistency":
+                    list_ser = self.td_consistency(scraper)
                 else:
                     raise Exception(f"Invalid source {source}. Please choose a valid one.")
         return pd.DataFrame(list_ser)

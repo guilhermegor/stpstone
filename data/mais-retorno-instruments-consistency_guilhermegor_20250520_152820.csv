@@ -1,0 +1,10 @@
+,INSTRUMENT,POSITIVE_MONTHS,NEGATIVE_MONTHS,GREATEST_RETURN,LEAST_RETURN,URL,REF_DATE,LOG_TIMESTAMP,SLUG_URL
+0,CDI,371,0,0.0648,0.0013,https://maisretorno.com/indice/cdi#source=instruments_consistency,2025-05-19,2025-05-20 18:22:06.795399+0000,cdi
+1,DOLAR,205,165,0.6408,-0.166,https://maisretorno.com/indice/dolar#source=instruments_consistency,2025-05-19,2025-05-20 18:22:50.022901+0000,dolar
+2,BDRX,102,51,0.1632,-0.1426,https://maisretorno.com/indice/bdrx#source=instruments_consistency,2025-05-19,2025-05-20 18:23:32.070392+0000,bdrx
+3,GPTW,21,20,0.1346,-0.1516,https://maisretorno.com/indice/gptw#source=instruments_consistency,2025-05-19,2025-05-20 18:24:14.475040+0000,gptw
+4,IBBR,36,29,0.161,-0.3005,https://maisretorno.com/indice/ibbr#source=instruments_consistency,2025-05-19,2025-05-20 18:24:56.941219+0000,ibbr
+5,IBHB,126,107,0.3347,-0.3626,https://maisretorno.com/indice/ibhb#source=instruments_consistency,2025-05-19,2025-05-20 18:25:39.379974+0000,ibhb
+6,IBLV,168,101,0.1565,-0.2389,https://maisretorno.com/indice/iblv#source=instruments_consistency,2025-05-19,2025-05-20 18:26:22.270824+0000,iblv
+7,IBOV-USD,202,169,0.4394,-0.4025,https://maisretorno.com/indice/ibov-usd#source=instruments_consistency,2025-05-19,2025-05-20 18:27:06.820844+0000,ibov-usd
+8,IBOV,214,157,0.2802,-0.3955,https://maisretorno.com/indice/ibov#source=instruments_consistency,2025-05-19,2025-05-20 18:27:50.596381+0000,ibov

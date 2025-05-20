@@ -519,7 +519,7 @@ instruments_consistency:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: fundo/{{slug}}#source=instruments_consistency
+  app: "{{instruments_class}}/{{slug}}#source=instruments_consistency"
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -542,11 +542,14 @@ instruments_consistency:
     COL_1: bfill
     COL_2: ffill
   dtypes:
-    CNPJ: str
-    URL_FUND: str
-    FUND_NAME: str
-    CATEGORY: str
+    INSTRUMENT: str
+    POSITIVE_MONTHS: int
+    NEGATIVE_MONTHS: int
+    GREATEST_RETURN: float
+    LEAST_RETURN: float
   df_read_params:
   xpaths:
-    list_th: //th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]
-    list_td: //section[@id="profitability-ratio"]//td[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]/span[@data-testid="negative-number"]
+    span_positive_months: (//section[@id="consistency-table"]//span[@data-testid="negative-number"])[1]
+    span_negative_months: (//section[@id="consistency-table"]//span[@data-testid="negative-number"])[3]
+    span_greatest_return: (//section[@id="consistency-table"]//span[@data-testid="negative-number"])[5]
+    span_least_return: (//section[@id="consistency-table"]//span[@data-testid="negative-number"])[6]
