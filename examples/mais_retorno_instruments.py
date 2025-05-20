@@ -62,17 +62,25 @@ from stpstone.utils.cals.handling_dates import DatesBR
 #     df_.info()
 
 
-### --- AVAILABLE INDEXES --- ###
+### --- INSTRUMENTS HISTORIC RENTABILITY --- ###
 
-cls_ = MaisRetornoFunds(list_slugs=range(1, 4), int_wait_load_seconds=60, 
-                        int_delay_seconds=30, bl_save_html=False,
-                        bl_headless=True, bl_incognito=True)
-print(f"\n*** AVAILABLE INDEXES ***")
-df_ = cls_.source("avl_indexes", bl_fetch=True)
-print(df_)
-df_.to_csv("data/mais-retorno-available-indexes_{}_{}_{}.csv".format(
-    getuser(),
-    DatesBR().curr_date.strftime('%Y%m%d'),
-    DatesBR().curr_time.strftime('%H%M%S')
-), index=False)
-df_.info()
+
+# for list_slugs, url_slug in [
+#     (["abcp11", "afhi11", "aiec11", "ajfi11", "almi11", "alzc11", "alzm11", "brco11", "icri11"], "fii"),
+#     (["cdi", "dolar", "bdrx", "gptw", "ibbr", "ibhb", "iblv", "ibov-usd", "ibov"], "indice"),
+#     (["bidb11", "binc11", "bodb11", "cdii11", "cpti11", "divs11", "exif11", "ifra11", "ifri11"], "fi-infra"),
+# ]:
+for list_slugs, url_slug in [
+    (["bidb11", "binc11"], "fi-infra"),
+]:
+    cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bl_save_html=False,
+                            bl_headless=True, bl_incognito=True, list_slugs=list_slugs, 
+                            instruments_class=url_slug)
+    df_ = cls_.source("instruments_historical_rentability")
+    print(f"DF MAIS RETORNO - INSTRUMENTS HISTORIC RENTABILITY: \n{df_}")
+    df_.to_csv("data/mais-retorno-instruments-historic-rentability_{}_{}_{}.csv".format(
+        getuser(),
+        DatesBR().curr_date.strftime('%Y%m%d'),
+        DatesBR().curr_time.strftime('%H%M%S')
+    ), index=False)
+    df_.info()

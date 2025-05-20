@@ -1,6 +1,5 @@
 ### DIRECTORY AND FILES MANAGEMENT ###
 
-# pypi.org libs
 import os
 import re
 import shutil
@@ -19,7 +18,6 @@ from io import BytesIO, TextIOWrapper, BufferedReader
 from typing import Tuple, List, Union, Iterable, Optional
 from requests import Response
 from pathlib import Path
-# local libs
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
 

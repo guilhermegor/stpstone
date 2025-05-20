@@ -352,7 +352,7 @@ fund_properties:
     p_fund_quotation_period: //div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-4 MuiGrid-grid-lg-2 css-1e35mkm"]//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl" and contains(text(), "Prazo de cotiza")]/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"]
     p_fund_settlement_period: //div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-4 MuiGrid-grid-lg-2 css-1e35mkm"]//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl" and contains(text(), "Liqui")]/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"]
 
-fund_historic_rentability:
+instruments_historical_rentability:
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -380,7 +380,7 @@ fund_historic_rentability:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: fundo/{{slug}}#source=fund_historic_rentability
+  app: "{{instruments_class}}/{{slug}}#source=instruments_historical_rentability"
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -392,7 +392,7 @@ fund_historic_rentability:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_mais_retorno_funds_historic_rentability
+  table_name: br_mais_retorno_instruments_historic_rentability
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -403,16 +403,29 @@ fund_historic_rentability:
     COL_1: bfill
     COL_2: ffill
   dtypes:
-    CNPJ: str
-    URL_FUND: str
-    FUND_NAME: str
-    CATEGORY: str
+    YEAR: int
+    INSTRUMENT: str
+    JAN: float
+    FEB: float
+    MAR: float
+    APR: float
+    MAY: float
+    JUN: float
+    JUL: float
+    AUG: float
+    SEP: float
+    OCT: float
+    NOV: float
+    DEC: float
+    YTD: float
+    SINCE_INCEPTION: float
   df_read_params:
   xpaths:
+    list_years: //tbody[@class="css-cssveg"]/tr/th[@class="__variable_a57643 MuiBox-root css-i9lh1x"][not(*)]
     list_td_rentabilities: '//div[@class="MuiStack-root css-j7qwjs"]/span[@style="font-size: 0.7rem; color: rgb(107, 113, 137); font-weight: 400; line-height: 1.5;"]/preceding-sibling::span'
     list_td_alpha: '//div[@class="MuiStack-root css-j7qwjs"]/span[@style="font-size: 0.7rem; color: rgb(107, 113, 137); font-weight: 400; line-height: 1.5;"]'
 
-fund_stats:
+instruments_stats:
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -440,7 +453,7 @@ fund_stats:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: fundo/{{slug}}#source=fund_stats
+  app: fundo/{{slug}}#source=instruments_stats
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -452,7 +465,7 @@ fund_stats:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_mais_retorno_funds_stats
+  table_name: br_mais_retorno_instruments_stats
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -472,7 +485,7 @@ fund_stats:
     list_th: //th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]
     list_td: //section[@id="profitability-ratio"]//td[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]/span[@data-testid="negative-number"]
 
-fund_consistency:
+instruments_consistency:
   web_driver:
     xpath_el_wait_until_loaded:
   req_method: GET
@@ -500,7 +513,7 @@ fund_consistency:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: fundo/{{slug}}#source=fund_stats
+  app: fundo/{{slug}}#source=instruments_consistency
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -512,7 +525,7 @@ fund_consistency:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_mais_retorno_funds_consistency
+  table_name: br_mais_retorno_instruments_consistency
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

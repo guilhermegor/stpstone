@@ -60,7 +60,7 @@ class WorldGovBonds(ABCRequests):
         n = len(list_td)
         while i < n:
             item_curr = list_td[i]
-            item_processed = NumHandler().process_numerical_value(list_td[i])
+            item_processed = NumHandler().process_numerical_string_value(list_td[i])
             list_.append(item_processed)
             bl_country_name = (
                 isinstance(item_curr, str) and
@@ -74,7 +74,7 @@ class WorldGovBonds(ABCRequests):
                     next_item = list_td[i+1]
                     bl_next_numeric = (
                         (isinstance(next_item, str) and next_item.endswith('%')) 
-                        or (isinstance(NumHandler().process_numerical_value(next_item), (int, float)))
+                        or (isinstance(NumHandler().process_numerical_string_value(next_item), (int, float)))
                     )
                     if bl_next_numeric:
                         list_.append("N/A")

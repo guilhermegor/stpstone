@@ -97,6 +97,17 @@ class PlaywrightScraper:
             CreateLog().log_message(self.logger, f"Error navigating to {url}: {e}", "error")
             return False
 
+    def get_current_url(self) -> Optional[str]:
+        """
+        Get the current page URL
+        
+        Returns:
+            str: Current URL if page exists, None otherwise
+        """
+        if hasattr(self, 'page') and self.page:
+            return self.page.url
+        return None
+
     def _handle_cookie_popup(self, timeout: int = 3000):
         """Attempt to accept cookies if popup appears"""
         try:

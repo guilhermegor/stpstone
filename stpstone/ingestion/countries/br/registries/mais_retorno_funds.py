@@ -1,16 +1,20 @@
 import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from sqlalchemy.orm import Session
 from logging import Logger
 from requests import Response
 from time import sleep
+from math import nan
 from stpstone._config.global_slots import YAML_MAIS_RETORNO_FUNDS
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.colors import ColorIdentifier
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.numbers import NumHandler
 
 
 class MaisRetornoFunds(ABCRequests):
@@ -52,6 +56,9 @@ class MaisRetornoFunds(ABCRequests):
         self.bl_headless = bl_headless
         self.bl_incognito = bl_incognito
         self.instruments_class = instruments_class
+        self.list_months = [
+            "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+        ]
 
     def td_treatment_avl_funds(self, i: int, scraper: PlaywrightScraper) \
         -> Dict[str, Any]:
@@ -370,6 +377,47 @@ class MaisRetornoFunds(ABCRequests):
                         and p_fund_settlement_period != "-" else None
             }
         ]
+    
+    def _convert_nums(self, list_: List[Union[str, float, int]], str_instrument: str) \
+        -> List[Union[str, float, int]]:
+        list_ = [NumHandler().process_numerical_string_value(
+                dict_["text"], int_floating_points=2, 
+                str_thousands_sep_input=".", str_thousands_sep_output=",", 
+                str_decimals_sep_input=",", str_decimal_sep_output=".") for dict_ in list_]
+        list_ = [nan if x == "-" else str_instrument + " " + x if type(x) == str and "p.p." in x 
+                    else x for x in list_]
+        return list_
+
+    def td_instruments_historical_rentability(self, scraper: PlaywrightScraper) \
+        -> List[Dict[str, Any]]:
+        list_cols = ListHandler().extend_lists(["INSTRUMENT"], self.list_months, 
+                                               ["YTD", "SINCE_INCEPTION"])
+        str_instrument = DirFilesManagement().get_filename_parts_from_url(
+            scraper.get_current_url())[0]
+        list_years = scraper.get_elements(
+            YAML_MAIS_RETORNO_FUNDS["instruments_historical_rentability"]["xpaths"]["list_years"],
+            selector_type="xpath"
+        )
+        list_years = [int(dict_["text"]) for dict_ in list_years]
+        list_years = list_years * 2
+        list_years.sort(reverse=True)
+        list_td_rentabilities = scraper.get_elements(
+            YAML_MAIS_RETORNO_FUNDS["instruments_historical_rentability"]["xpaths"][
+                "list_td_rentabilities"],
+            selector_type="xpath"
+        )
+        list_td_alpha = scraper.get_elements(
+            YAML_MAIS_RETORNO_FUNDS["instruments_historical_rentability"]["xpaths"]["list_td_alpha"],
+            selector_type="xpath"
+        )
+        list_td_rentabilities = self._convert_nums(list_td_rentabilities, str_instrument)
+        list_td_alpha = self._convert_nums(list_td_alpha, str_instrument)
+        list_ = ListHandler().extend_lists(list_td_rentabilities, list_td_alpha, 
+                                           bl_remove_duplicates=False)
+        list_ser = HandlingDicts().pair_headers_with_data(list_cols, list_)
+        df_ = pd.DataFrame(list_ser)
+        df_["YEAR"] = list_years
+        return df_.to_dict(orient="records")
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         i = 1
@@ -418,6 +466,8 @@ class MaisRetornoFunds(ABCRequests):
                         i += 1
                 elif source == "fund_properties":
                     list_ser = self.td_treatment_fund_properties(scraper)
+                elif source == "instruments_historical_rentability":
+                    list_ser = self.td_instruments_historical_rentability(scraper)
                 else:
                     raise Exception(f"Invalid source {source}. Please choose a valid one.")
         return pd.DataFrame(list_ser)

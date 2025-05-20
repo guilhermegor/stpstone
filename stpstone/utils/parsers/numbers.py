@@ -1,27 +1,38 @@
 ### HANDLING NUMERICAL ISSUES ###
 
+import re
 import math
 import operator
 import functools
 from fractions import Fraction
 from math import gcd
 from numbers import Number
-from typing import Any, Union
+from typing import Any, Union, Dict, List, Optional
 from stpstone.utils.parsers.str import StrHandler
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class NumHandler:
-    """
-    REFERENCES: http://www.hoadley.net/options/develtoolsvolcalc.htm,
-        https://introcs.cs.princeton.edu/python/21function/blackscholes.py.html,
-        https://aaronschlegel.me/implied-volatility-functions-python.html#:~:text=Implied%20volatility%20σim,can%27t%20be%20directly%20observed.
-    """
+class NumHandler(metaclass=TypeChecker):
 
-    def multiples(self, m, closest_ceiling_num):
+    def multiples(self, m: int, closest_ceiling_num: int) -> List[Number]:
         """
-        DOCSTRING: LIST OF NUMERICAL MULTIPLES FROM A GIVEN NUMBER
-        INPUTS: MULTIPLE AND THE CLOSEST CEILING NUMBER (ROUNDED UP)
-        OUTPUTS: LIST
+        Generate a list of numerical multiples of a given number m, until it reaches or passes
+        a given number closest_ceiling_num. The last element of the list will be the closest
+        multiple of m to closest_ceiling_num.
+
+        For example, if m = 3 and closest_ceiling_num = 10, the output will be [0, 3, 6, 9].
+
+        Parameters
+        ----------
+        m : int
+            The number of which to generate multiples
+        closest_ceiling_num : int
+            The number after which to stop generating multiples
+
+        Returns
+        -------
+        list
+            A list of multiples of m, stopping at closest_ceiling_num
         """
         # appending multiples
         list_numerical_mulptiples = list()
@@ -34,23 +45,49 @@ class NumHandler:
         # output
         return list_numerical_mulptiples
 
-    def nearest_multiple(self, number, multiple):
+    def nearest_multiple(self, number: Number, multiple: Number) -> int:
         """
-        DOCSTRING: RETURN THE NEAREST MULTIPLE OF A GIVEN NUMBER
-        INPUTS: NUMBER AND MULTIPLE
-        OUTPUTS: INTEGER
+        Return the nearest multiple of a given number. For example, if number = 10.7 and multiple = 3,
+        the output will be 9, which is the nearest multiple of 3 to 10.7.
+        
+        Parameters
+        ----------
+        number : int or float
+            The number for which to find the nearest multiple
+        multiple : int
+            The number of which to find the nearest multiple
+        
+        Returns
+        -------
+        int
+            The nearest multiple of multiple to number
         """
         return multiple * int(number / multiple)
 
-    def round_up(self, float_number_to_round, float_base, float_ceiling):
+    def round_up(self, float_number_to_round: float, float_base: float, float_ceiling: float) \
+        -> float:
         """
-        DOCSTRING: ROUND UP A DIVISION WITH A CEILING
-        INPUTS: FLOAT NUMERATOR, FLOAT DENOMINATOR, AND FLOAT CEILING
-        OUTPUTS: FLOAT
+        Round a given number up to the nearest multiple of a given base number.
+        The new number is capped at a given ceiling.
+        
+        Parameters
+        ----------
+        float_number_to_round : float
+            The number to round up
+        float_base : float
+            The base number to round up to
+        float_ceiling : float
+            The maximum value the new number can take
+        
+        Returns
+        -------
+        float
+            The rounded up number, capped at the given ceiling
         """
         # correcting variables to float type
         float_number_to_round, float_base, float_ceiling = (float(x) for x in
-                                                            [float_number_to_round, float_base, float_ceiling])
+                                                            [float_number_to_round, float_base, 
+                                                             float_ceiling])
         # defining next multiple with a ceiling
         if float(float_base + self.truncate(float_number_to_round / float_base, 0)
                  * float_base) < float_ceiling:
@@ -59,127 +96,210 @@ class NumHandler:
         else:
             return float_ceiling
 
-    def decimal_to_fraction(self, decimal_number):
+    def decimal_to_fraction(self, decimal_number: Number) -> Fraction:
         """
-        DOCSTRING: FRACTION FROM A DECIMAL
-        INPUTS: DECIMAL NUMBER
-        OUTPUTS: FRACTION OF A NUMBER
+        Converts a decimal number to a fraction.
+
+        Parameters
+        ----------
+        decimal_number : float or str
+            The decimal number to convert. Can be a float or a string that 
+            represents a decimal number.
+
+        Returns
+        -------
+        Fraction
+            A Fraction object representing the decimal number as a fraction.
         """
         return Fraction(decimal_number)
 
-    def greatest_common_divisor(self, int1, int2):
+    def greatest_common_divisor(self, int1: int, int2: int) -> int:
         """
-        DOCSTRING: GREATEST COMMON DIVISOR BETWEEN TWO INTEGERS
-        INPUTS: INTEGER 1 AND INTEGER 2
-        OUTPUTS: GREATEST COMMON DIVISOR
+        Calculate the greatest common divisor (GCD) of two integers.
+
+        Parameters
+        ----------
+        int1 : int
+            The first integer.
+        int2 : int
+            The second integer.
+
+        Returns
+        -------
+        int
+            The greatest common divisor of int1 and int2.
         """
         return gcd(int1, int2)
 
-    def truncate(self, number, digits):
+    def truncate(self, number: Union[float, int], digits: int) -> float:
         """
-        DOCSTRING: TRUNCATE A NUMBER IN NTH-DECIMAL
-        INPUTS: NUMBER AND DIGITS
-        OUTPUTS: FLOAT
+        Truncates a given number to a given number of decimal places.
+
+        Parameters
+        ----------
+        number : float or int
+            The number to truncate.
+        digits : int
+            The number of decimal places to truncate to.
+
+        Returns
+        -------
+        float
+            The number truncated to the given number of decimal places.
         """
         stepper = 10.0 ** digits
         return math.trunc(stepper * number) / stepper
 
-    def sumproduct(self, *lists):
+    def sumproduct(self, *lists: List[List[int]]) -> int:
         """
-        REFERENCES: https://stackoverflow.com/questions/3849251/sum-of-products-for-multiple-lists-in-python
-        DOCSTRING: SUMPRODUCT, OR POSITIONAL MULTIPLIACTION OF N LISTS
-        INPUTS: *LISTS
-        OUTPUTS: FLOAT
+        Compute the sum of the products of corresponding elements of a list of lists.
+        
+        Parameters
+        ----------
+        *lists : list of lists
+            The lists of which to compute the sum of products.
+        
+        Returns
+        -------
+        int
+            The sum of the products of corresponding elements of the lists.
         """
         return sum(functools.reduce(operator.mul, data) for data in zip(*lists))
 
-    def number_sign(self, number, base_number=1):
+    def number_sign(self, number: Union[float, int], base_number: Union[float, int] = 1) -> float:
         """
-        DOCSTRING: SIGN OF A GIVEN NUMBER
-        INPUTS: NUMBER AND BASE (1 AS DEFAULT)
-        OUTPUTS: EITHER 1 OR -1
+        Determine the sign of a number.
+
+        Parameters
+        ----------
+        number : float or int
+            The number whose sign is to be determined.
+        base_number : float or int, optional
+            The base number whose sign will be returned. Default is 1.
+
+        Returns
+        -------
+        float
+            A float with the magnitude of base_number and the sign of number.
         """
         return math.copysign(base_number, number)
 
-    def multiply_n_elements(self, *args):
+    def multiply_n_elements(self, *args: int) -> int:
         """
-        DOCSTRING: MULTIPLY A GIVEN SET OF ARGUMENTS
-        INPUTS: ELEMENTS TO BE MULTIPLIED
-        OUTPUTS: A GIVEN SET OF DATA MULTIPLIED, IN THE SAME FORMAT AS THE INPUT
+        Multiply the given elements together.
+
+        Parameters
+        ----------
+        *args : int
+            A variable number of integer arguments to be multiplied.
+
+        Returns
+        -------
+        int
+            The product of the given integer arguments.
         """
         product = 1
         for a in args:
             product *= a
         return product
 
-    def sum_n_elements(self, *args):
+    def sum_n_elements(self, *args: Union[int, float]) -> Union[int, float]:
         """
-        DOCSTRING: SUM A GIVEN SET OF ARGUMENTS
-        INPUTS: ELEMENTS TO BE ADDED
-        OUTPUTS: A GIVEN SET OF DATA ADDED, IN THE SAME FORMAT AS THE INPUT
+        Calculate the sum of a variable number of arguments.
+
+        Parameters
+        ----------
+        *args : int or float
+            A variable number of numerical arguments to be summed.
+
+        Returns
+        -------
+        int or float
+            The sum of the provided arguments.
         """
         sum_ = 0
         for a in args:
             sum_ += a
         return sum_
 
-    def factorial(self, n):
+    def factorial(self, n: int) -> int:
         """
-        DOCSTRING: FACTORIAL MATHEMATICAL FUNCTION
-        INPUTS: INTEGER N
-        OUTPUTS: INTEGER
+        Calculate the factorial of a given positive integer n.
+
+        Parameters
+        ----------
+        n : int
+            A positive integer for which the factorial is to be calculated.
+
+        Returns
+        -------
+        int
+            The factorial of the input integer n.
         """
         return functools.reduce(operator.mul, range(1, n + 1))
 
-    def convert_thousands_decimals_separator(self, number_float, precision_decimals=2,
-                                             thousands_inputs='.', thousands_outputs=',',
-                                             decimals_inputs=',', decimals_outputs='.'):
-        """
-        DOCSTRING: CONVERTING THOUSANDS AND DECIMALS SEPARATORS
-        INPUTS: NUMBER FLOAT AND NUMBER FORMAT
-        OUTPUTS: NUMBER FLOAT WITH DESIRED FORMAT
-        """
-        # defining number format output string
-        number_format_output = ':{}{}{}f'.format(thousands_outputs, decimals_outputs,
-                                                 precision_decimals)
-        number_format_output = '{' + number_format_output + '}'
-        # converting to float if number is string
-        if type(number_float) == str:
-            number_int = ''.join(str(StrHandler().get_string_until_substr(
-                number_float, decimals_inputs)).split(thousands_inputs))
-            number_decimals = StrHandler().get_string_after_substr(
-                number_float, decimals_inputs)
-            number_float = float(
-                number_int + decimals_outputs + number_decimals)
-        # converting to interested format
-        return {
-            'number_float': number_float,
-            'str_number_formated': number_format_output.format(number_float)
-        }
-
     def range_floats(self, float_epsilon, float_inf, float_sup, float_pace):
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        Generate a list of float values from float_inf to float_sup, with a step size of
+        float_pace. The list is generated by multiplying each of the input parameters by
+        float_epsilon, and then dividing each element of the list by float_epsilon. This
+        allows the method to be used with any unit of measurement, such as days, hours,
+        minutes, etc.
+
+        Parameters
+        ----------
+        float_epsilon : float
+            The unit of measurement for the output list.
+        float_inf : float
+            The lower bound of the range.
+        float_sup : float
+            The upper bound of the range.
+        float_pace : float
+            The step size of the range.
+
+        Returns
+        -------
+        list
+            A list of float values from float_inf to float_sup, with a step size of
+            float_pace.
         """
         return [float(x) / float_epsilon for x in range(int(float_inf * float_epsilon),
                                                         int(float_sup * float_epsilon),
                                                         int(float_pace * float_epsilon))]
 
-    def clamp(self, n, minn, maxn):
+    def clamp(self, n: float, minn: float, maxn: float) -> float:
         """
-        DOCSTRING: CONSTRICT NUMBER WITHIN RANGE - WINSORIZE
-        INPUTS:
-        OUTPUTS:
+        Clamp a number n to the range [minn, maxn].
+        
+        Parameters
+        ----------
+        n : float
+            The number to clamp.
+        minn : float
+            The lower bound of the range.
+        maxn : float
+            The upper bound of the range.
+        
+        Returns
+        -------
+        float
+            The clamped number.
         """
         return max(min(maxn, n), minn)
 
-    def is_numeric(self, str_):
+    def is_numeric(self, str_: str) -> bool:
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS
+        Check whether a given string is a valid number.
+
+        Parameters
+        ----------
+        str_ : str
+            The string to check.
+
+        Returns
+        -------
+        bool
+            True if the string is a valid number, False otherwise.
         """
         try:
             float(str_)
@@ -188,21 +308,129 @@ class NumHandler:
             return False
 
     def is_number(self, value_: Any) -> bool:
+        """
+        Check whether a given value is a number (int, float, etc.).
+
+        Parameters
+        ----------
+        value_ : Any
+            The value to check.
+
+        Returns
+        -------
+        bool
+            True if the value is a number, False otherwise.
+        """
         return isinstance(value_, (Number)) and not isinstance(value_, bool)
 
-    def process_numerical_value(self, str_value: Any) -> Union[float, int, str, None]:
-        try:
-            if not isinstance(str_value, str):
-                return str_value
-            elif "%" in str_value:
-                return float(str_value.replace("%", "").strip()) / 100.0
-            elif "(-)" in str_value:
-                return float(str_value.replace("(-)", "-").strip())
-            elif "+" in str_value:
-                return float(str_value.replace("+", "").strip())
-            elif "bp" in str_value or "b.p." in str_value:
-                return float(str_value.replace("bp", "").replace("b.p.", "").strip()) / 10_000.0
+    def transform_to_float(
+        self,
+        value_: Union[str, int, float, bool], 
+        int_precision: Optional[int] = None
+    ) -> Union[float, str, bool]:
+        """
+        Convert a given value to a float, handling a variety of possible formats and
+        edge cases.
+
+        Parameters
+        ----------
+        value_ : Union[str, int, float, bool]
+            The value to convert.
+        int_precision : Optional[int]
+            The number of decimal places to round to. If None, the original precision is
+            preserved.
+
+        Returns
+        -------
+        Union[float, str, bool]
+            The converted float value, or the original value if conversion fails.
+
+        Notes
+        -----
+        This method is designed to handle a wide range of possible number formats, including
+        European and American number formats, percentages, basis points, and others. It also
+        handles negative numbers and edge cases like empty strings and non-numeric input.
+
+        Examples
+        --------
+        >>> transform_to_float('3,132.45%')
+        31.3245
+        >>> transform_to_float('1.234,56')
+        1234.56
+        >>> transform_to_float('1,234,567.89')
+        1234567.89
+        >>> transform_to_float('4.56 bp')
+        0.000456
+        >>> transform_to_float('(-)912.412.911,231')
+        -912412911.231
+        >>> transform_to_float(True)
+        True
+        >>> transform_to_float('Text Tried')
+        'Text Tried'
+        """
+        # return boolean values as-is
+        if isinstance(value_, bool): return value_
+        # handle non-string cases
+        if isinstance(value_, (int, float)):
+            return round(value_, int_precision) if int_precision is not None else float(value_)
+        if isinstance(value_, bool):
+            return value_
+        original = str(value_).strip()
+        s = original
+        # check for percentage or basis points
+        bl_percentage = '%' in s
+        bl_bp = re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE) is not None
+        # remove percentage signs, parentheses, and + signs
+        s = re.sub(r'[%\+\-\(\)]', '', s).strip()
+        # remove suffixes like "bp", "b.p.", etc. (but remember if it was there)
+        s_clean = re.sub(r'(bp|b\.p\.?|\s*[a-zA-Z]+.*)$', '', s, flags=re.IGNORECASE).strip()
+        # count separators to determine format
+        comma_count = s_clean.count(',')
+        dot_count = s_clean.count('.')
+        # handle number formatting - European style (3.134,4343424)
+        if comma_count == 1 and dot_count > 0:
+            # if there's exactly one comma and it comes after a dot, assume European format
+            if s_clean.find(',') > s_clean.find('.'):
+                s_clean = s_clean.replace('.', '').replace(',', '.')
             else:
-                return str_value
+                # otherwise assume American format (1,234.56)
+                s_clean = s_clean.replace(',', '')
+        elif comma_count > 1:
+            # multiple commas - assume American thousands separator (1,234,567.89)
+            s_clean = s_clean.replace(',', '')
+        elif dot_count > 1:
+            # multiple dots - could be European thousands separator (1.234.567,89)
+            parts = s_clean.split('.')
+            if all(len(p) == 3 for p in parts):
+                # all parts have length 3 → treat all as thousands separators
+                s_clean = s_clean.replace('.', '')
+            elif len(parts[-1]) != 3:
+                # last part is not 3 digits → assume malformed or no decimal → remove all dots
+                s_clean = s_clean.replace('.', '')
+            else:
+                # last part is 3 digits, and others may also be 3 → assume decimal at end
+                s_clean = s_clean.replace('.', ',')  # convert to European
+                s_clean = s_clean.replace(',', '.', 1)  # first comma becomes decimal
+                s_clean = s_clean.replace(',', '')  # remaining commas removed
+        elif comma_count == 1 and dot_count == 0:
+            # single comma - could be European decimal or American thousands
+            # if more than 3 digits before comma, assume European decimal
+            if len(s_clean.split(',')[0]) > 3:
+                s_clean = s_clean.replace(',', '.')
+        # handle negative numbers (check original string)
+        bl_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
+        # try to convert to float
+        try:
+            num = float(s_clean)
+            if bl_negative:
+                num *= -1
+            # apply percentage or basis point conversion
+            if bl_percentage:
+                num /= 100
+            elif bl_bp:
+                num /= 10000
+            if int_precision is not None:
+                num = round(num, int_precision)
+            return num
         except ValueError:
-            return str_value
+            return original
