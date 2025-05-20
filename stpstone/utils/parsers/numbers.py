@@ -371,6 +371,8 @@ class NumHandler(metaclass=TypeChecker):
         -0.001
         >>> transform_to_float('0,10%')
         0.001
+        >>> transform_to_float('9888 Example')
+        '9888 Example'
         """
         # return boolean values as-is
         if isinstance(value_, bool):
@@ -378,21 +380,35 @@ class NumHandler(metaclass=TypeChecker):
         # handle non-string cases
         if isinstance(value_, (int, float)):
             return round(value_, int_precision) if int_precision is not None else float(value_)
+        
         original = str(value_).strip()
         s = original
+        
+        # First check if this is clearly a mixed number/text case that should remain unchanged
+        if re.search(r'[a-zA-Z].*\d|\d.*[a-zA-Z]', s) and not ('%' in s or re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE)):
+            return original
+            
         # check for percentage or basis points
         bl_percentage = '%' in s
         bl_bp = re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE) is not None
+        
         # handle negative numbers (check original string)
         bl_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
+        
         # remove percentage signs, parentheses, and + signs but keep negative signs
         s = re.sub(r'[%\+\(\)]', '', s).strip()
         s = s.replace(')', '')  # remove closing parentheses if any
-        # remove suffixes like "bp", "b.p.", etc. (but remember if it was there)
-        s_clean = re.sub(r'(bp|b\.p\.?|\s*[a-zA-Z]+.*)$', '', s, flags=re.IGNORECASE).strip()
+        
+        # remove only known suffixes (bp, b.p.) but preserve other text
+        if bl_bp:
+            s_clean = re.sub(r'(bp|b\.p\.?)$', '', s, flags=re.IGNORECASE).strip()
+        else:
+            s_clean = s
+            
         # count separators to determine format
         comma_count = s_clean.count(',')
         dot_count = s_clean.count('.')
+        
         # handle number formatting
         if comma_count == 1 and dot_count > 0:
             # if there's exactly one comma and it comes after a dot, assume European format
@@ -417,6 +433,7 @@ class NumHandler(metaclass=TypeChecker):
             # single comma - could be European decimal
             # replace comma with decimal point
             s_clean = s_clean.replace(',', '.')
+        
         # try to convert to float
         try:
             num = float(s_clean)

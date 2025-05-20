@@ -382,8 +382,8 @@ class MaisRetornoFunds(ABCRequests):
         -> List[Union[str, float, int]]:
         list_ = [NumHandler().transform_to_float(
                 dict_["text"], int_precision=2) for dict_ in list_]
-        list_ = [nan if x == "-" else str_instrument + " " + x if type(x) == str and "p.p." in x 
-                    else x for x in list_]
+        list_ = [nan if x == "-" else str_instrument.upper() + " " + x if type(x) == str \
+                 and "p.p." in x else x for x in list_]
         return list_
 
     def td_instruments_historical_rentability(self, scraper: PlaywrightScraper) \
