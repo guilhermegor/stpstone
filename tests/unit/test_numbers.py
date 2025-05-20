@@ -47,5 +47,6 @@ class TestNumHandler(TestCase):
                 result = self.num_converter(input_val, int_precision=6)
                 self.assertEqual(result, expected_6)
 
+
 if __name__ == '__main__':
     main()

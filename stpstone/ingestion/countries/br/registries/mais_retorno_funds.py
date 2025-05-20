@@ -398,7 +398,6 @@ class MaisRetornoFunds(ABCRequests):
         )
         list_years = [int(dict_["text"]) for dict_ in list_years]
         list_years = list_years * 2
-        list_years.sort(reverse=True)
         list_td_rentabilities = scraper.get_elements(
             YAML_MAIS_RETORNO_FUNDS["instruments_historical_rentability"]["xpaths"][
                 "list_td_rentabilities"],
