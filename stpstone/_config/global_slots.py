@@ -118,7 +118,7 @@ YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
 YAML_ANBIMA_DATA_API = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_api.yaml"))
 YAML_MAIS_RETORNO_FUNDS = reading_yaml(
-    os.path.join(root_path, "countries/br/registries/mais_retorno_funds.yaml"))
+    os.path.join(root_path, "countries/br/registries/mais_retorno_instruments.yaml"))
 # US
 YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
     os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
