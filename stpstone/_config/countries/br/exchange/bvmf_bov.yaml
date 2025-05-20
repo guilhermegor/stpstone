@@ -48,7 +48,7 @@ volumes:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_volumes
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

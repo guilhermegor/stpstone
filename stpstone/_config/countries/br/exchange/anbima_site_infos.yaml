@@ -60,7 +60,7 @@ br_treasuries:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_anbima_br_treasuries
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -148,7 +148,7 @@ corporate_bonds:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_anbima_corporate_bonds
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -236,7 +236,7 @@ ima_p2_pvs:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_anbima_ima_p2_pvs
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -302,7 +302,7 @@ ima_p2_th_portf:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_anbima_ima_2_th_portf
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

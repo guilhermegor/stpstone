@@ -42,7 +42,7 @@ ibov:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_ibov_theor_portf
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -80,7 +80,7 @@ ibrx100:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_ibrx100_theor_portf
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -118,7 +118,7 @@ ibrx50:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_ibrx50_theor_portf
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -156,7 +156,7 @@ ibra:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_ibra_theor_portf
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

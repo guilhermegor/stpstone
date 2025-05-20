@@ -49,7 +49,7 @@ daily_ohlcv:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: ww_advfn_daily_ohlcv
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

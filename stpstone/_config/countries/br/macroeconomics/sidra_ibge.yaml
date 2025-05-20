@@ -120,7 +120,7 @@ sidra_modification_dates:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_sidra_ibge_pools_releases_dates
+  table_name: br_sidra_ibge_modification_dates
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -181,7 +181,7 @@ sidra_variables:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_sidra_ibge_pools_releases_dates
+  table_name: br_sidra_ibge_variables
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

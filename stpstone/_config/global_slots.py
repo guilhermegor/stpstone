@@ -92,7 +92,7 @@ YAML_FRED_US = reading_yaml(
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
 YAML_WW_TRADING_ECON = reading_yaml(
-    os.path.join(root_path, "countries/ww/macroeconomics/trading_econ.yaml"))
+    os.path.join(root_path, "countries/ww/macroeconomics/trading_economics.yaml"))
 YAML_WW_WORLD_GOV_BONDS = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/world_gov_bonds.yaml"))
 YAML_WW_RATINGS_AGENCIES = reading_yaml(

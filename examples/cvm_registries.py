@@ -61,7 +61,7 @@ cls_ = CVMRegistries(session=None, cls_db=None)
 # print(f"\n*** DF FUNDS MONTHLY PROFILE - CVM: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("funds_abs", bl_fetch=True)
+# df_ = cls_.source("monthly_infos_fidcs", bl_fetch=True)
 # print(f"\n*** DF FUNDS ABS - CVM: \n{df_}")
 # df_.info()
 

@@ -59,7 +59,7 @@ metadata:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: raw_anbima_550_listing
+  table_name: br_anbima_550_listing
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

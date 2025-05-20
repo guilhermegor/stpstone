@@ -65,7 +65,7 @@ resource:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: us_fred
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

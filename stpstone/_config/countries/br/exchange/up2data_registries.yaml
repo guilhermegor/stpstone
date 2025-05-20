@@ -18,7 +18,7 @@ logs:
 
 ### RESOURCES TO BE SCRAPED ###
 
-instruments_register:
+instruments_registration:
   app: api/download/?token={{token}}
   req_method: GET
   bl_verify: False
@@ -26,7 +26,7 @@ instruments_register:
   timeout: (12.0, 12.0)
   str_fmt_dt: 'YYYY-MM-DD'
   schema: raw
-  table_name: b3_instruments_registration
+  table_name: br_b3_instruments_registration
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

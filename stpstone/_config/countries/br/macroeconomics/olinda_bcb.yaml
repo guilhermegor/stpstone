@@ -181,7 +181,7 @@ currencies_ts:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_olinda_bcb_closing_usdbrl_ptax_series
+  table_name: br_olinda_bcb_currencies_ts
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -236,7 +236,7 @@ annual_mkt_expectations:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_olinda_bcb_closing_usdbrl_ptax_series
+  table_name: br_olinda_bcb_annual_mkt_expectations
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

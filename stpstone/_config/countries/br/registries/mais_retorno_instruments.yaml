@@ -203,7 +203,7 @@ avl_indexes:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_mais_retorno_available_instruments
+  table_name: br_mais_retorno_available_indexes
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

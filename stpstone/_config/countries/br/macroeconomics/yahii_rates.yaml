@@ -260,7 +260,7 @@ pmi_rf_rates:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_yahii_pmi_rf_rates
+  table_name: br_yahii_pmis_rf_rates
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
