@@ -453,7 +453,7 @@ instruments_stats:
   #   - start with a commentary hash and separate params with &
   # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
   #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: fundo/{{slug}}#source=instruments_stats
+  app: "{{instruments_class}}/{{slug}}#source=instruments_stats"
   bl_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -476,13 +476,19 @@ instruments_stats:
     COL_1: bfill
     COL_2: ffill
   dtypes:
-    CNPJ: str
-    URL_FUND: str
-    FUND_NAME: str
-    CATEGORY: str
+    INSTRUMENT: str
+    STATISTIC: str
+    YTD: float
+    MTD: float
+    LTM: float
+    L_24M: float
+    L_36M: float
+    L_48M: float
+    L_60M: float
+    SINCE_INCEPTION: float
   df_read_params:
   xpaths:
-    list_th: //th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]
+    list_stas: //th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]
     list_td: //section[@id="profitability-ratio"]//td[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]/span[@data-testid="negative-number"]
 
 instruments_consistency:

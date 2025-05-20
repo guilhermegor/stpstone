@@ -378,12 +378,15 @@ class MaisRetornoFunds(ABCRequests):
             }
         ]
     
-    def _convert_nums(self, list_: List[Union[str, float, int]], str_instrument: str) \
-        -> List[Union[str, float, int]]:
+    def _convert_nums(self, list_: List[Union[str, float, int]], 
+                      str_instrument: Optional[str] = None) -> List[Union[str, float, int]]:
         list_ = [NumHandler().transform_to_float(
                 dict_["text"], int_precision=6) for dict_ in list_]
-        list_ = [nan if x == "-" else str_instrument.upper() + " " + x if type(x) == str \
-                 and "p.p." in x else x for x in list_]
+        if str_instrument:
+            list_ = [nan if x == "-" else str_instrument.upper() + " " + x if type(x) == str \
+                    and "p.p." in x else x for x in list_]
+        else:
+            list_ = [nan if x == "-" else x for x in list_]
         return list_
 
     def td_instruments_historical_rentability(self, scraper: PlaywrightScraper) \
@@ -414,6 +417,27 @@ class MaisRetornoFunds(ABCRequests):
         list_ser = HandlingDicts().pair_headers_with_data(list_cols, list_)
         df_ = pd.DataFrame(list_ser)
         df_["YEAR"] = list_years
+        return df_.to_dict(orient="records")
+    
+    def td_instruments_stats(self, scraper: PlaywrightScraper) -> List[Dict[str, Any]]:
+        list_cols = ["YTD", "MTD", "LTM", "L_24M", "L_36M", "L_48M", "L_60M", "SINCE_INCEPTION"]
+        list_stas = scraper.get_elements(
+            YAML_MAIS_RETORNO_FUNDS["instruments_stats"]["xpaths"]["list_stas"],
+            selector_type="xpath"
+        )
+        list_td = scraper.get_elements(
+            YAML_MAIS_RETORNO_FUNDS["instruments_stats"]["xpaths"]["list_td"],
+            selector_type="xpath"
+        )
+        list_td = self._convert_nums(list_td, "")
+        list_ser = HandlingDicts().pair_headers_with_data(list_cols, list_td)
+        df_ = pd.DataFrame(list_ser)
+        df_["STATISTIC"] = [dict_["text"] for dict_ in list_stas]
+        df_["INSTRUMENT"] = DirFilesManagement().get_filename_parts_from_url(
+            scraper.get_current_url())[0].upper()
+        list_ser = df_.to_dict(orient="records")
+        list_cols = ["INSTRUMENT", "STATISTIC"] + list_cols
+        df_ = df_[list_cols]
         return df_.to_dict(orient="records")
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
@@ -465,6 +489,8 @@ class MaisRetornoFunds(ABCRequests):
                     list_ser = self.td_treatment_fund_properties(scraper)
                 elif source == "instruments_historical_rentability":
                     list_ser = self.td_instruments_historical_rentability(scraper)
+                elif source == "instruments_stats":
+                    list_ser = self.td_instruments_stats(scraper)
                 else:
                     raise Exception(f"Invalid source {source}. Please choose a valid one.")
         return pd.DataFrame(list_ser)
