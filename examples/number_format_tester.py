@@ -16,6 +16,8 @@ test_cases = [
     True,                  # Should remain True
     "55,987,544",     # European big number -> 55987544
     "846.874.688",      # European big number -> 846874688
+    "-0,10%",           # European negative -> -0.1
+    "0,10%",            # European positive -> 0.1
 ]
 
 print("Testing with precision=2")

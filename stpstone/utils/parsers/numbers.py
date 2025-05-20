@@ -367,27 +367,33 @@ class NumHandler(metaclass=TypeChecker):
         True
         >>> transform_to_float('Text Tried')
         'Text Tried'
+        >>> transform_to_float('-0,10%')
+        -0.001
+        >>> transform_to_float('0,10%')
+        0.001
         """
         # return boolean values as-is
-        if isinstance(value_, bool): return value_
+        if isinstance(value_, bool):
+            return value_
         # handle non-string cases
         if isinstance(value_, (int, float)):
             return round(value_, int_precision) if int_precision is not None else float(value_)
-        if isinstance(value_, bool):
-            return value_
         original = str(value_).strip()
         s = original
         # check for percentage or basis points
         bl_percentage = '%' in s
         bl_bp = re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE) is not None
-        # remove percentage signs, parentheses, and + signs
-        s = re.sub(r'[%\+\-\(\)]', '', s).strip()
+        # handle negative numbers (check original string)
+        bl_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
+        # remove percentage signs, parentheses, and + signs but keep negative signs
+        s = re.sub(r'[%\+\(\)]', '', s).strip()
+        s = s.replace(')', '')  # remove closing parentheses if any
         # remove suffixes like "bp", "b.p.", etc. (but remember if it was there)
         s_clean = re.sub(r'(bp|b\.p\.?|\s*[a-zA-Z]+.*)$', '', s, flags=re.IGNORECASE).strip()
         # count separators to determine format
         comma_count = s_clean.count(',')
         dot_count = s_clean.count('.')
-        # handle number formatting - European style (3.134,4343424)
+        # handle number formatting
         if comma_count == 1 and dot_count > 0:
             # if there's exactly one comma and it comes after a dot, assume European format
             if s_clean.find(',') > s_clean.find('.'):
@@ -401,24 +407,16 @@ class NumHandler(metaclass=TypeChecker):
         elif dot_count > 1:
             # multiple dots - could be European thousands separator (1.234.567,89)
             parts = s_clean.split('.')
-            if all(len(p) == 3 for p in parts):
-                # all parts have length 3 → treat all as thousands separators
-                s_clean = s_clean.replace('.', '')
-            elif len(parts[-1]) != 3:
-                # last part is not 3 digits → assume malformed or no decimal → remove all dots
+            if all(len(p) == 3 for p in parts[:-1]):
+                # all parts except last have length 3 → thousands separators
                 s_clean = s_clean.replace('.', '')
             else:
-                # last part is 3 digits, and others may also be 3 → assume decimal at end
-                s_clean = s_clean.replace('.', ',')  # convert to European
-                s_clean = s_clean.replace(',', '.', 1)  # first comma becomes decimal
-                s_clean = s_clean.replace(',', '')  # remaining commas removed
+                # might be decimal points, but unclear - try removing all dots
+                s_clean = s_clean.replace('.', '')
         elif comma_count == 1 and dot_count == 0:
-            # single comma - could be European decimal or American thousands
-            # if more than 3 digits before comma, assume European decimal
-            if len(s_clean.split(',')[0]) > 3:
-                s_clean = s_clean.replace(',', '.')
-        # handle negative numbers (check original string)
-        bl_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
+            # single comma - could be European decimal
+            # replace comma with decimal point
+            s_clean = s_clean.replace(',', '.')
         # try to convert to float
         try:
             num = float(s_clean)

@@ -380,10 +380,8 @@ class MaisRetornoFunds(ABCRequests):
     
     def _convert_nums(self, list_: List[Union[str, float, int]], str_instrument: str) \
         -> List[Union[str, float, int]]:
-        list_ = [NumHandler().process_numerical_string_value(
-                dict_["text"], int_floating_points=2, 
-                str_thousands_sep_input=".", str_thousands_sep_output=",", 
-                str_decimals_sep_input=",", str_decimal_sep_output=".") for dict_ in list_]
+        list_ = [NumHandler().transform_to_float(
+                dict_["text"], int_precision=2) for dict_ in list_]
         list_ = [nan if x == "-" else str_instrument + " " + x if type(x) == str and "p.p." in x 
                     else x for x in list_]
         return list_
