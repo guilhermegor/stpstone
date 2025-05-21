@@ -131,8 +131,3 @@ YAML_WW_RATINGS_CORP_S_AND_P = reading_yaml(
 # * taxation
 # BR
 YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.yaml"))
-
-
-# ! deprecated
-YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
-YAML_MICROSOFT_APPS = reading_yaml(os.path.join(root_path, "microsoft_apps.yaml"))
