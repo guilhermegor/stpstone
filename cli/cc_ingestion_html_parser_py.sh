@@ -35,11 +35,7 @@ from time import sleep
 from stpstone._config.global_slots import YAML_EXAMPLE
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
 class ConcreteCreatorReq(ABCRequests):
@@ -51,7 +47,12 @@ class ConcreteCreatorReq(ABCRequests):
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None
+        list_slugs: Optional[List[str]] = None, 
+        int_wait_load_seconds: int = 60, 
+        int_delay_seconds: int = 30,
+        bl_save_html: bool = False, 
+        bl_headless: bool = False,
+        bl_incognito: bool = False, 
     ) -> None:
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
@@ -60,74 +61,56 @@ class ConcreteCreatorReq(ABCRequests):
             cls_db=cls_db,
             logger=logger,
             token=token,
-            list_slugs=list_slugs
+            list_slugs=list_slugs,
+            int_wait_load_seconds=int_wait_load_seconds, 
+            int_delay_seconds=int_delay_seconds,
         )
         self.session = session
         self.dt_ref = dt_ref
         self.cls_db = cls_db
         self.logger = logger
-        self.token = token
         self.list_slugs = list_slugs
+        self.int_wait_load_seconds = int_wait_load_seconds
+        self.int_delay_seconds = int_delay_seconds
+        self.bl_save_html = bl_save_html
+        self.bl_headless = bl_headless
+        self.bl_incognito = bl_incognito
 
-    def td_th_parser(self, resp_req: Response, list_th: List[Any]) -> Tuple[List[Any], int, Optional[int]]:
-        list_headers = list_th.copy()
-        int_init_td = 0
-        int_end_td = None
-        # for using this workaround, please pass a dummy variable to the url, within the YAML file,
-        #   like https://example.com/app/#source=dummy_1&bl_debug=True
-        if StrHandler().match_string_like(resp_req.url, "*#source=dummy_1*") == True:
-            list_headers = [
-                list_th[0],
-                list_th[...]
-            ]
-            int_init_td = 0
-            int_end_td = 200
-        elif StrHandler().match_string_like(resp_req.url, "*#source=dummy_2*") == True:
-            list_headers = [
-                list_th[0],
-                list_th[...]
-            ]
-            int_init_td = 200
-            int_end_td = None
-        else:
-            if self.logger is not None:
-                CreateLog().warning(
-                    self.logger,
-                    "No source found in url, for HTML webscraping, please revisit the code"
-                    + f" if it is an unexpected behaviour - URL: {resp_req.url}"
-                )
-        return list_headers, int_init_td, int_end_td
+    def td_iterative(self, i: int, scraper: PlaywrightScraper) -> Dict[str, Any]:
+        pass
+
+    def td_generic(self, scraper: PlaywrightScraper) -> List[Dict[str, Any]]:
+        pass
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        bl_debug = True if StrHandler().match_string_like(
-            resp_req.url, "*bl_debug=True*") == True else False
-        root = HtmlHandler().lxml_parser(resp_req)
-        # export html tree to data folder, if is user's will
-        if bl_debug == True:
-            path_project = DirFilesManagement().find_project_root(marker="pyproject.toml")
-            HtmlHandler().html_tree(root, file_path=rf"{path_project}/data/test.html")
-        list_th = [
-            x.text.strip() for x in HtmlHandler().lxml_xpath(
-                root, YAML_EXAMPLE["source"]["xpaths"]["list_th"]
-            )
-        ]
-        list_td = [
-            "" if x.text is None else x.text.replace("\xa0", "").strip()
-            for x in HtmlHandler().lxml_xpath(
-                root, YAML_EXAMPLE["source"]["xpaths"]["list_td"]
-            )
-        ]
-        # deal with data/headers specificity for the project
-        list_headers, int_init_td, int_end_td = self.td_th_parser(resp_req, list_th)
-        if bl_debug == True:
-            print(list_headers)
-            print(f"LEN LIST HEADERS: {len(list_headers)}")
-            print(list_td[int_init_td:int_end_td])
-            print(f"LEN LIST TD: {len(list_td[int_init_td:int_end_td])}")
-        list_ser = HandlingDicts().pair_headers_with_data(
-            list_headers,
-            list_td[int_init_td:int_end_td]
+        i = 1
+        list_ser = list()
+        source = self.get_query_params(resp_req.url, "source")
+        scraper = PlaywrightScraper(
+            bl_headless=self.bl_headless,
+            int_default_timeout=self.int_wait_load_seconds * 1_000, 
+            bl_incognito=self.bl_incognito
         )
+        with scraper.launch():
+            if scraper.navigate(resp_req.url):
+                if self.bl_save_html:
+                    scraper.export_html(
+                        scraper.page.content(), 
+                        folder_path="data", 
+                        filename="html-mais-retorno-avl-funds", 
+                        bl_include_timestamp=True
+                    )
+                if source == "iterative":
+                    while True:
+                        if not scraper.selector_exists(
+                            YAML_EXAMPLE[source]["xpaths"]["p_example"].format(i),
+                            selector_type="xpath",
+                            timeout=self.int_wait_load_seconds * 1_000
+                        ): break
+                        list_ser.append(self.td_iterative(i, scraper))
+                        i += 1
+                elif source == "generic":
+                    list_ser = td_generic(scraper)
         return pd.DataFrame(list_ser)
 
 EOF
