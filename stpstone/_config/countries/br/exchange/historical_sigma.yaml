@@ -51,7 +51,7 @@ group_1:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_historical_sigma
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -106,7 +106,7 @@ group_2:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_historical_sigma
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -155,7 +155,7 @@ group_3:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_historical_sigma
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

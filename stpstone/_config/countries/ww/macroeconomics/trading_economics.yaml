@@ -67,7 +67,7 @@ non_farm_payroll_forecasts:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_trading_econ_non_farm_payroll_forecasts
+  table_name: us_trading_economics_non_farm_payroll_forecasts
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -129,7 +129,7 @@ non_farm_payroll_components:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_trading_econ_non_farm_payroll_components
+  table_name: us_trading_economics_non_farm_payroll_components
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -188,7 +188,7 @@ non_farm_payroll_related:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_trading_econ_non_farm_payroll_related
+  table_name: us_trading_economics_non_farm_payroll_related
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -247,7 +247,7 @@ non_farm_payroll_stats:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_trading_econ_non_farm_payroll_stats
+  table_name: us_trading_economics_non_farm_payroll_stats
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -310,7 +310,7 @@ wages_usa:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_trading_econ_wages_usa
+  table_name: us_trading_economics_wages
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

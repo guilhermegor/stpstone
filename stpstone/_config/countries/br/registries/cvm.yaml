@@ -500,7 +500,7 @@ funds_registries:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_cvm_crowdfunding
+  table_name: br_cvm_funds_registries
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -573,7 +573,7 @@ funds_daily_infos:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_cvm_crowdfunding
+  table_name: br_cvm_funds_daily_infos
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -616,7 +616,7 @@ funds_fact_sheet:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_cvm_crowdfunding
+  table_name: br_cvm_funds_fact_sheet
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -748,7 +748,7 @@ funds_monthly_profile:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_cvm_crowdfunding
+  table_name: br_cvm_funds_monthly_profile
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -864,7 +864,7 @@ funds_monthly_profile:
     encoding: latin-1
     on_bad_lines: skip
 
-funds_abs:
+monthly_infos_fidcs:
   req_method: GET
   # if host is not defined within credentials, use the source one
   host:
@@ -896,7 +896,7 @@ funds_abs:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_cvm_crowdfunding
+  table_name: br_cvm_monthly_infos_fidcs
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

@@ -43,7 +43,7 @@ mtm:
   type_error_action: raise
   strategy_keep_when_dupl: first
   schema: raw
-  table_name: debentures_com_br_mtm
+  table_name: br_debenturescom_mtm
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -80,7 +80,7 @@ infos:
   type_error_action: raise
   strategy_keep_when_dupl: first
   schema: raw
-  table_name: debentures_com_br_infos
+  table_name: br_debenturescom_infos
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -193,7 +193,7 @@ otc_pvs:
   type_error_action: raise
   strategy_keep_when_dupl: first
   schema: raw
-  table_name: debentures_com_br_otc_pvs
+  table_name: br_debenturescom_otc_pvs
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -232,7 +232,7 @@ primary_offers:
   type_error_action: raise
   strategy_keep_when_dupl: first
   schema: raw
-  table_name: debentures_com_br_primary_offers
+  table_name: br_debenturescom_primary_offers
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -268,7 +268,7 @@ secondary_otc_volume:
   type_error_action: raise
   strategy_keep_when_dupl: first
   schema: raw
-  table_name: debentures_com_br_primary_offers
+  table_name: dbr_debenturescom_secondary_otc_volume
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

@@ -59,7 +59,7 @@ sp500:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: us_slickcharts_sp500
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -117,7 +117,7 @@ nasdaq100:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: us_slickcharts_nasdaq100
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -175,7 +175,7 @@ dowjones:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: us_slickcharts_dowjones
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

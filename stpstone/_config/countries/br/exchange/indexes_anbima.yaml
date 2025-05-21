@@ -74,7 +74,7 @@ anbima_indexes_mkt_data:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_indexes_mkt_data
+  table_name: br_anbima_indexes_mkt_data
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -169,7 +169,7 @@ anbima_indexes_portf_composition:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_indexes_portf_composition
+  table_name: br_anbima_indexes_portf_composition
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

@@ -9,9 +9,10 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.pd import DealingPd
+from stpstone.utils.connections.databases.abc import DatabaseConnection
 
 
-class SQLiteDB:
+class SQLiteDB(DatabaseConnection):
 
     def __init__(self, db_path:str, logger:Optional[Logger]=None) -> None:
         """

@@ -60,7 +60,7 @@ class WorldGovBonds(ABCRequests):
         n = len(list_td)
         while i < n:
             item_curr = list_td[i]
-            item_processed = NumHandler().process_numerical_value(list_td[i])
+            item_processed = NumHandler().transform_to_float(list_td[i], int_precision=6)
             list_.append(item_processed)
             bl_country_name = (
                 isinstance(item_curr, str) and
@@ -74,7 +74,8 @@ class WorldGovBonds(ABCRequests):
                     next_item = list_td[i+1]
                     bl_next_numeric = (
                         (isinstance(next_item, str) and next_item.endswith('%')) 
-                        or (isinstance(NumHandler().process_numerical_value(next_item), (int, float)))
+                        or (isinstance(NumHandler().transform_to_float(next_item, int_precision=6), 
+                                       (int, float)))
                     )
                     if bl_next_numeric:
                         list_.append("N/A")
@@ -85,8 +86,8 @@ class WorldGovBonds(ABCRequests):
         source = self.get_query_params(resp_req.url, "source")
         list_th = list(YAML_WW_WORLD_GOV_BONDS[source]["dtypes"].keys())
         scraper = PlaywrightScraper(
-            headless=True,
-            default_timeout=100_000
+            bl_headless=True,
+            int_default_timeout=100_000
         )
         with scraper.launch():
             if scraper.navigate(resp_req.url):
@@ -95,6 +96,6 @@ class WorldGovBonds(ABCRequests):
                     selector_type="xpath"
                 )
         list_td = self.treat_list_td(list_td)
-        list_td = list_td[:-1]
+        if source == "sovereign_cds": list_td = list_td[:-1]
         list_ser = HandlingDicts().pair_headers_with_data(list_th, list_td)
         return pd.DataFrame(list_ser)

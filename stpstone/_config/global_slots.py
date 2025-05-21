@@ -4,6 +4,8 @@ from stpstone.utils.parsers.yaml import reading_yaml
 
 root_path = os.path.dirname(os.path.realpath(__file__))
 
+
+# * generic
 YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
 
 # * bylaws
@@ -90,7 +92,7 @@ YAML_FRED_US = reading_yaml(
 YAML_WW_GR = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/global_rates.yaml"))
 YAML_WW_TRADING_ECON = reading_yaml(
-    os.path.join(root_path, "countries/ww/macroeconomics/trading_econ.yaml"))
+    os.path.join(root_path, "countries/ww/macroeconomics/trading_economics.yaml"))
 YAML_WW_WORLD_GOV_BONDS = reading_yaml(
     os.path.join(root_path, "countries/ww/macroeconomics/world_gov_bonds.yaml"))
 YAML_WW_RATINGS_AGENCIES = reading_yaml(
@@ -116,7 +118,7 @@ YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
 YAML_ANBIMA_DATA_API = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_api.yaml"))
 YAML_MAIS_RETORNO_FUNDS = reading_yaml(
-    os.path.join(root_path, "countries/br/registries/mais_retorno_funds.yaml"))
+    os.path.join(root_path, "countries/br/registries/mais_retorno_instruments.yaml"))
 # US
 YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
     os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
@@ -129,10 +131,3 @@ YAML_WW_RATINGS_CORP_S_AND_P = reading_yaml(
 # * taxation
 # BR
 YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.yaml"))
-
-
-# ! deprecated
-YAML_B3 = reading_yaml(os.path.join(root_path, "b3.yaml"))
-YAML_BR_TRS = reading_yaml(os.path.join(root_path, "br_treasury.yaml"))
-YAML_MICROSOFT_APPS = reading_yaml(os.path.join(root_path, "microsoft_apps.yaml"))
-YAML_LLMS = reading_yaml(os.path.join(root_path, "llms.yaml"))

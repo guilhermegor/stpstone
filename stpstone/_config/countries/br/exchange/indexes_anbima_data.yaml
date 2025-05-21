@@ -56,7 +56,7 @@ ima_geral:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_data_indexes_ima_geral
+  table_name: br_anbima_data_indexes_ima_geral
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -125,7 +125,7 @@ ida_geral:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_data_indexes_ida_geral
+  table_name: br_anbima_data_indexes_ida_geral
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -192,7 +192,7 @@ ida_liq_geral:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_data_indexes_ida_liq_geral
+  table_name: br_anbima_data_indexes_ida_liq_geral
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -259,7 +259,7 @@ idka_pre_1a:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: anbima_data_indexes_idka_pre_1a
+  table_name: br_anbima_data_indexes_idka_pre_1a
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

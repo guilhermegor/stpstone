@@ -175,7 +175,7 @@ daily_usdbrl:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_yahii_usdbrl
+  table_name: br_yahii_daily_usdbrl
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -232,7 +232,7 @@ daily_eurbrl:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: br_yahii_eurbrl
+  table_name: br_yahii_daily_eurbrl
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

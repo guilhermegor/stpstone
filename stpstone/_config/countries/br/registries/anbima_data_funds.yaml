@@ -53,7 +53,7 @@ trt_indicadores_fundos:
     date_inception_class: '(?i)(?<=\\\",\\\"data_inicio_atividade_classe\\\":\\\")[^*]*?(?=\\\",)'
     date_inception_subclass: '(?i)(?<=\\\",\\\"data_inicio_atividade_subclasse\\\":\\\")[^*]*?(?=\\\",)'
     date_closure: '(?i)(?<=\\\"data_encerramento\\\":\\\")([^*]*?)(?=\\\")'
-    fund_status: '(?i)(?<=\\\"status_fundo\\\":\\\")([^*]*?)(?=\\\")'
+    fund_status: '(?i)(?<=\\\"status_fund\\\":\\\")([^*]*?)(?=\\\")'
     date_last_update: '(?i)(?<=\\\"data_atualizacao_mais_recente\\\":\\\")([^*]*?)(?=\\\")'
     num_classes: '(?i)(?<=\\\"quantidade_classes\\\":)[^*]*?(?=})'
     bylaws: '(?i)(?<=\\\"documentos\\\":)[^*]*?]}'

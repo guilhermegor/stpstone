@@ -1,4 +1,4 @@
-from stpstone.ingestion.countries.ww.macroeconomics.trading_econ import TradingEconWW
+from stpstone.ingestion.countries.ww.macroeconomics.trading_economics import TradingEconWW
 
 
 cls_ = TradingEconWW()

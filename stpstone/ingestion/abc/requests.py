@@ -1183,6 +1183,7 @@ class ABCRequests(HandleReqResponses):
                             self.dict_metadata[str_resource].get("xpaths", [{}]),
                         )
                         df_["SLUG_URL"] = str_slug
+                        if df_.empty == True: break
                         list_ser.extend(df_.to_dict(orient="records"))
                         if self.cls_db is not None:
                             self.insert_table(

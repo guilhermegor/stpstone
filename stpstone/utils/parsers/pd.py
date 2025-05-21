@@ -20,6 +20,14 @@ if os.name == "nt":
 
 class DealingPd:
 
+    def __init__(self):
+        self.dict_sensitivity_labels_office = {
+            "public": "e6a9157b-bcf3-4eac-b03e-7cf007ba9fdf",
+            "internal": "d5bef5af-bbc1-4d24-bb43-47a55a90f763",
+            "confidential": "f33522dc-133a-44f0-ba7f-cdd6f493ffbd",
+            "restricted": "69878aea-41a3-47a7-b03f-1211df6e7785"
+        }
+
     def append_df_to_Excel(
         self,
         filename: str,
@@ -60,7 +68,7 @@ class DealingPd:
         if (bl_set_sensitivity_label == True) and (os.name == "nt"):
             DealingExcel().xlsx_sensitivity_label(
                 filename,
-                YAML_MICROSOFT_APPS["sensitivity_labels_office"],
+                self.dict_sensitivity_labels_office,
                 label_sensitivity.capitalize(),
             )
 

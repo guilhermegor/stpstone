@@ -375,7 +375,7 @@ central_banks:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_globalrates_sofr
+  table_name: ww_globalrates_central_banks
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -440,7 +440,7 @@ usa_cpi:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_globalrates_sofr
+  table_name: ww_globalrates_usa_cpi
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -502,7 +502,7 @@ british_cpi:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_globalrates_sofr
+  table_name: ww_globalrates_british_cpi
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -564,7 +564,7 @@ canadian_cpi:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_globalrates_sofr
+  table_name: ww_globalrates_canadian_cpi
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:
@@ -626,7 +626,7 @@ european_cpi:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name: ww_globalrates_sofr
+  table_name: ww_globalrates_european_cpi
   bl_insert_or_ignore: False
   bl_schema: True
   ignored_file_extensions:

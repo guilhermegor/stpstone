@@ -42,7 +42,7 @@ stocks:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_stocks
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -91,7 +91,7 @@ stock_options:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_stock_options
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -134,7 +134,7 @@ pmi_future:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_pmi_future
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -181,7 +181,7 @@ stock_index_futures:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_stock_index_futures
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -228,7 +228,7 @@ interest_rates:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_interest_rates
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -275,7 +275,7 @@ usd_interest_rates:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_usd_interest_rates
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -322,7 +322,7 @@ commodities:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_commodities
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -362,7 +362,7 @@ crypto:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_crypto
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -407,7 +407,7 @@ foreign_exchange_and_dollar_spot:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_foreign_exchange_and_dollar_spot
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -454,7 +454,7 @@ otc:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_otc
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -507,7 +507,7 @@ opf_before_exc:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_opf_before_exc
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -545,7 +545,7 @@ opf_after_exc:
   strategy_keep_when_dupl: first
   list_ignorable_exceptions:
   schema: raw
-  table_name:
+  table_name: br_b3_trading_hours_opf_after_exc
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:

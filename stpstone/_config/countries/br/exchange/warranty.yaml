@@ -34,7 +34,7 @@ banks_rts_br:
   bl_io_interpreting: False
   str_fmt_dt: 'YYYY-MM-DD'
   schema: raw
-  table_name: banks_rts_br
+  table_name: br_rts_banks_br
   bl_insert_or_ignore: False
   bl_schema: True
   list_cols_dt:
@@ -55,7 +55,7 @@ b3_bond_issuers_accp_warranty:
   bl_verify: False
   str_fmt_dt: 'YYYY-MM-DD'
   schema: raw
-  table_name: b3_bond_issuers_accp_warranty
+  table_name: br_b3_bond_issuers_accp_warranty
   bl_insert_or_ignore: False
   bl_schema: True
   list_cols_dt:
