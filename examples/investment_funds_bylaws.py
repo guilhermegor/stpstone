@@ -29,26 +29,28 @@ def investment_funds_bkpd() -> List[str]:
     df_ = pd.DataFrame(list_ser)
     return df_
 
-int_chunk = 2
+int_chunk = 50
 list_ser = list()
 
 df_slugs_consulted = investment_funds_bkpd()
 print(f"CONSULTED SLUGS: \n{df_slugs_consulted}")
 df_slugs_consulted.info()
-df_slugs_consulted.to_excel("data/consolidated-consulted-investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
-    getuser(),
-    DatesBR().curr_date.strftime('%Y%m%d'),
-    DatesBR().curr_time.strftime('%H%M%S')
-), index=False)
+if df_slugs_consulted.empty == False: df_slugs_consulted.to_excel(
+    "data/consolidated-consulted-investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
+        getuser(),
+        DatesBR().curr_date.strftime('%Y%m%d'),
+        DatesBR().curr_time.strftime('%H%M%S')
+    ), index=False)
 
 df_ = pd.read_excel("data/input-funds-regex-bylaws.xlsx")
-df_['URL_SLUG'] = df_['URL Regulamento'].str.replace(
+df_['SLUG_URL'] = df_['URL Regulamento'].str.replace(
     'https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/',
     ''
 )
-list_slugs = df_['URL_SLUG'].tolist()
+list_slugs = df_['SLUG_URL'].tolist()
 print(f"Slugs before filtering: {len(list_slugs)}")
-list_slugs = list(set(list_slugs) - set(df_slugs_consulted["SLUG_URL"].unique()))
+if df_slugs_consulted.empty == False:
+    list_slugs = list(set(list_slugs) - set(df_slugs_consulted["SLUG_URL"].unique()))
 print(f"Slugs after filtering: {len(list_slugs)}")
 shuffle(list_slugs)
 list_chunks = ListHandler().chunk_list(list_slugs, None, int_chunk)
@@ -57,6 +59,7 @@ for i, list_ in enumerate(list_chunks):
     print(f"{DatesBR().current_timestamp_string} - Processing chunk {i} of {len(list_chunks) - 1}")
     cls_ = InvestmentFundsBylawsBR(list_slugs=list_)
     df_ = cls_.source("investment_funds_bylaws", bl_fetch=True)
+    print(f"DF TEMPORARY: \n{df_}")
     # clean all string columns
     for col in df_.select_dtypes(include=['object']):
         df_[col] = df_[col].apply(clean_excel_text)
