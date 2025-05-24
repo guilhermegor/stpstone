@@ -1,6 +1,7 @@
 ![alt text](img/logo_stpstone.png)
 
 * Stylized name, shortened spelling of stepping stone;
+* ETL, analytics & utils library for finacial market usage;
 * A Python framework for ingesting and interpreting structured and unstructured financial data, designed to optimize quantitative methods in financial markets.
 
 ## Key Features
@@ -35,7 +36,7 @@ These instructions will get you a copy of the project running on your local mach
     mingw32-make --version
     ```
 * MacOS: https://wahyu-ehs.medium.com/makefile-on-mac-os-2ef0e67b0a15
-* Linux: https://stackoverflow.com/questions/3915067/what-are-makefiles-make-install-etc
+* Linux - Ubuntu OS: built in
 
 #### PyPi.org
 
@@ -94,36 +95,14 @@ poetry run <module.py>
 
 ## Running the Tests
 
-* EDA - Exploratory Data Analysis:
 ```(bash)
 
 (bash)
 
-cd "complete/path/to/project"
-poetry run python stpstone.tests.eda.py
+poetry run python -m unittest discover -s tests/unit -p "*.py" -v
+poetry run python -m unittest discover -s tests/integration -p "*.py" -v
 
 ```
-
-* European / American Options:
-```(bash)
-
-(bash)
-
-cd "complete/path/to/project"
-poetry run python tests.european-american-options.py
-
-```
-
-* Markowitz Portfolios:
-```(bash)
-
-(bash)
-
-cd "complete/path/to/project"
-poetry run python tests.markowitz-portfolios.py
-
-```
-
 
 ## Authors
 
@@ -132,6 +111,8 @@ poetry run python tests.markowitz-portfolios.py
 * [LinkedIn](https://www.linkedin.com/in/guilhermegor/)
 
 ## License
+
+* [MIT](https://mit-license.org/)
 
 
 ## Acknowledgments

@@ -73,7 +73,6 @@ bcrypt = "4.3.0"
 playwright = "1.52.0"
 openai = "1.79.0"
 
-
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"
 build = "^1.2.2.post1"
@@ -83,6 +82,7 @@ pretty-errors = "1.2.25"
 commitizen = "^4.4.1"
 python-dotenv = "1.1.0"
 poetry-plugin-export = "^1.8"
+setuptools = "80.8.0"
 
 [build-system]
 requires = ["poetry-core"]
