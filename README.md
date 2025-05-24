@@ -1,4 +1,4 @@
-# stpstone <img src="img/logo_stpstone.png" align="right" width="200" alt="stpstone"/>
+# stpstone <img src="img/logo_stpstone.png" align="right" width="200" style="border-radius: 15px;" alt="stpstone">
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
