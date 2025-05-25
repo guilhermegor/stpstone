@@ -18,7 +18,6 @@ class Stack:
         self._items[self._size] = item
         self._size += 1
 
-    @property
     def pop(self) -> Any:
         if self.is_empty:
             raise IndexError("Pop from an empty stack")

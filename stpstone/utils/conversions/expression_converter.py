@@ -34,16 +34,16 @@ class ExpressionConverter(metaclass=TypeChecker):
             elif token == "(":
                 cls_stack.push(token)
             elif token == ")":
-                top_token = cls_stack.pop
+                top_token = cls_stack.pop()
                 while top_token != "(":
                     self.postfix_list.append(top_token)
-                    top_token = cls_stack.pop
+                    top_token = cls_stack.pop()
             else:
                 while (not cls_stack.is_empty) and (self.prec[cls_stack.peek] >= self.prec[token]):
-                    self.postfix_list.append(cls_stack.pop)
+                    self.postfix_list.append(cls_stack.pop())
                 cls_stack.push(token)
         while not cls_stack.is_empty:
-            self.postfix_list.append(cls_stack.pop)
+            self.postfix_list.append(cls_stack.pop())
         return " ".join(self.postfix_list)
 
     @property
@@ -54,11 +54,11 @@ class ExpressionConverter(metaclass=TypeChecker):
             if token in self.str_operands:
                 cls_stack.push(token)
             else:
-                right = cls_stack.pop
-                left = cls_stack.pop
+                right = cls_stack.pop()
+                left = cls_stack.pop()
                 expr = f"{token} {left} {right}"
                 cls_stack.push(expr)
-        return cls_stack.pop
+        return cls_stack.pop()
 
     @property
     def _postfix_to_infix(self) -> str:
@@ -67,11 +67,11 @@ class ExpressionConverter(metaclass=TypeChecker):
             if token in self.str_operands:
                 cls_stack.push(token)
             else:
-                right = cls_stack.pop
-                left = cls_stack.pop
+                right = cls_stack.pop()
+                left = cls_stack.pop()
                 expr = f"({left} {token} {right})"
                 cls_stack.push(expr)
-        return cls_stack.pop
+        return cls_stack.pop()
 
     @property
     def _postfix_to_prefix(self) -> str:
@@ -80,11 +80,11 @@ class ExpressionConverter(metaclass=TypeChecker):
             if token in self.str_operands:
                 cls_stack.push(token)
             else:
-                right = cls_stack.pop
-                left = cls_stack.pop
+                right = cls_stack.pop()
+                left = cls_stack.pop()
                 expr = f"{token} {left} {right}"
                 cls_stack.push(expr)
-        return cls_stack.pop
+        return cls_stack.pop()
 
     @property
     def _prefix_to_infix(self) -> str:
@@ -93,11 +93,11 @@ class ExpressionConverter(metaclass=TypeChecker):
             if token in self.str_operands:
                 cls_stack.push(token)
             else:
-                left = cls_stack.pop
-                right = cls_stack.pop
+                left = cls_stack.pop()
+                right = cls_stack.pop()
                 expr = f"({left} {token} {right})"
                 cls_stack.push(expr)
-        return cls_stack.pop
+        return cls_stack.pop()
 
     @property
     def _prefix_to_postfix(self) -> str:
@@ -106,11 +106,11 @@ class ExpressionConverter(metaclass=TypeChecker):
             if token in self.str_operands:
                 cls_stack.push(token)
             else:
-                left = cls_stack.pop
-                right = cls_stack.pop
+                left = cls_stack.pop()
+                right = cls_stack.pop()
                 expr = f"{left} {right} {token}"
                 cls_stack.push(expr)
-        return cls_stack.pop
+        return cls_stack.pop()
 
     @property
     def convert(self) -> str:

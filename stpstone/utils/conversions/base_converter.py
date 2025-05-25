@@ -54,5 +54,5 @@ class BaseConverter(metaclass=TypeChecker):
             num //= self.int_to_base
         new_string = ""
         while not rem_stack.is_empty:
-            new_string += self.digits[rem_stack.pop]
+            new_string += self.digits[rem_stack.pop()]
         return new_string

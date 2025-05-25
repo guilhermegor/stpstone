@@ -32,9 +32,9 @@ else:
 "
 
 # Run the tests
-if [ -f "test_package_locally.py" ]; then
-    python test_package_locally.py
+if [ -f "run_dist.py" ]; then
+    python run_dist.py
 else
-    echo "Error: test_package_locally.py not found in current directory"
+    echo "Error: run_dist.py not found in current directory"
     exit 1
 fi
