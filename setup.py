@@ -34,7 +34,7 @@ setup(
     author_email="github.bucked794@silomails.com",
     license="MIT",
     classifiers=list_classifiers,
-    keywords="stpstone, python, financial, data, utils, analytics, ingestion",
+    keywords="stpstone, python, financial, data, utils, analytics, ingestion, b3, cvm, exchange, derivatives, quantitative, risk, portfolio, fixed income, options, futures, market data, macroeconomic, scraping, statistics, time series, cryptocurrency, brazilian markets, pricing models, financial mathematics",
     install_requires=[
         'poetry==2.1.2 ; python_full_version >= "3.12.8" and python_version < "3.14"',
     ],
