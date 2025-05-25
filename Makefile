@@ -7,6 +7,9 @@ package_tree:
 			bl_add_linebreak_markdown=False); \
 		cls_tree.export_tree(os.path.join(root_path, 'data', 'package_tree.txt'))"
 
+clean_previous_builds:
+	rm -rf dist/ build/ *.egg-info/
+
 install_dist_locally:
 	python setup.py sdist
 	pip install .
@@ -15,11 +18,10 @@ test_dist:
 	bash cli/test_dist.sh
 	twine check dist/*
 
-upload_test_pypi: test_dist
+upload_test_pypi: clean_previous_builds
+	yes | bash cli/test_dist.sh
+	twine check dist/*
 	bash cli/upload_test_pypi.sh
-
-clean_previous_builds:
-	rm -rf dist/ build/ *.egg-info/
 
 
 # ingestion concrete creator - factory design pattern
