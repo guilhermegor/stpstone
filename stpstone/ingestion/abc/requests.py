@@ -247,6 +247,7 @@ class UtilsRequests(ABC):
                         dict_count_matches[str_event] += 1
             if dict_count_matches[str_event] == 0:
                 list_matches.append({
+                    "INT_REGEX": -1,
                     "EVENT": str_event.upper(),
                     "MATCH_PATTERN": "zzN/A",
                     "PATTERN_REGEX": "zzN/A",

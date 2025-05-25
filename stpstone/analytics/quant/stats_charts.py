@@ -8,7 +8,7 @@ from matplotlib.colors import ListedColormap
 from sklearn.metrics import precision_recall_curve, roc_curve, mean_squared_error
 from sklearn.model_selection import train_test_split
 from stpstone.quantitative_methods.regression import LogLinearRegressions
-from stpstone.quantitative_methods.prob_distributions import NormalDistribution
+from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.fit_assessment import FitPerformance
 
 

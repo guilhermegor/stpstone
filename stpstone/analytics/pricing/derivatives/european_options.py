@@ -4,8 +4,8 @@ import numpy as np
 from math import pi
 from scipy.optimize import fsolve, minimize
 from functools import lru_cache
-from stpstone.quantitative_methods.prob_distributions import NormalDistribution
-from stpstone.quantitative_methods.regression import NonLinearEquations
+from stpstone.analytics.quant.prob_distributions import NormalDistribution
+from stpstone.analytics.quant.regression import  NonLinearEquations
 
 
 class InitialSettings:

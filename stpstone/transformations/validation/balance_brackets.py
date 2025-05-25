@@ -11,6 +11,6 @@ class BalanceBrackets:
             if char in open_brackets:
                 cls_stack.push(char)
             elif char in bracket_map:
-                if cls_stack.is_empty or cls_stack.pop != bracket_map[char]:
+                if cls_stack.is_empty or cls_stack.pop() != bracket_map[char]:
                     return False
         return cls_stack.is_empty
