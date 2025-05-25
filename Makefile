@@ -13,6 +13,7 @@ install_dist_locally:
 
 test_dist:
 	bash cli/test_dist.sh
+	twine check dist/*
 
 
 # ingestion concrete creator - factory design pattern
