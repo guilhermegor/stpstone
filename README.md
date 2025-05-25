@@ -110,7 +110,7 @@
 #### **Data Validation**
 - [Type Enforcement](stpstone/transformations/validation/metaclass_type_checker.py)
 - [Brazilian Docs Validation](stpstone/transformations/validation/br_docs.py)
-- [DataFrame Contracts](stpstone/transformations/validation/dataframe.py)
+- [DataFrame Validation](stpstone/transformations/validation/dataframe.py)
 - [Bracket Balance Checker](stpstone/transformations/validation/balance_brackets.py)
 
 ----
@@ -418,7 +418,7 @@ This project is licensed under the MIT License - see LICENSE for details.
 
 * Inspired by open-source financial libraries and tools
 
-* Documentation template: [PurpleBooth/README-Template.md](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
+* This documentation follows a structure inspired by [PurpleBooth's README-Template.md](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).  
 
 * Special thanks to Python community
 
