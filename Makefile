@@ -34,7 +34,7 @@ ingestion_concrete_creator_html_parser:
 	bash cli/cc_ingestion_html_parser_py.sh
 
 
-# git / github
+# git
 git_pull_force:
 	bash cli/git_pull_force.sh
 
@@ -47,6 +47,11 @@ git_create_branch_from_main:
 git_delete_dev_branches:
 	bash cli/git_delete_dev_branches.sh
 
+
+# github
+create_ssh_key:
+	bash cli/create_ssh_key.sh
+
 gh_status:
 	bash cli/gh_status.sh
 
@@ -58,6 +63,10 @@ gh_actions_local_tests:
 	bash cli/docker_init.sh
 	bash cli/act_tests.sh
 
+gh_set_pypi_secret:
+	bash cli/gh_set_pypi_secret.sh
+	@echo -e "\033[0;34m[i]\033[0m Checking GitHub secrets..."
+	@gh secret list
 
 # requirements - dev
 vscode_install_extensions:
