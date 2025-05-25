@@ -8,7 +8,7 @@ stats.chisqprob = lambda chisq, df: stats.chi2.sf(chisq, df)
 from sklearn.linear_model import LinearRegression
 from statsmodels.stats.stattools import durbin_watson
 from stpstone.quantitative_methods.statistical_description import StatiscalDescription
-from stpstone.quantitative_methods.prob_distributions import NormalDistribution
+from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
 
 

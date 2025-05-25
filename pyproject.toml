@@ -72,6 +72,7 @@ xlrd = "2.0.1"
 bcrypt = "4.3.0"
 playwright = "1.52.0"
 openai = "1.79.0"
+mystic = "0.4.4"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"
