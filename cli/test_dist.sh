@@ -1,5 +1,5 @@
 #!/bin/bash
-# Color definitions
+# color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -8,7 +8,7 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m' # no color
 
-# Print colored status messages
+# print colored status messages
 print_status() {
     local status="$1"
     local message="$2"
@@ -37,19 +37,19 @@ print_status() {
     esac
 }
 
-# Get the repository/package name from current directory
+# get the repository/package name from current directory
 get_package_name() {
     local repo_name=$(basename "$(pwd)")
-    local package_name="${repo_name//-/_}" # Convert dashes to underscores
+    local package_name="${repo_name//-/_}" # convert dashes to underscores
     print_status "config" "Detected package name: ${MAGENTA}${package_name}${NC}"
     echo "$package_name"
 }
 
-# Check if package is installed and install if needed
+# check if package is installed and install if needed
 check_and_install() {
     local package_name=$1
     
-    # Create a temporary Python script to avoid string interpolation issues
+    # create a temporary python script to avoid string interpolation issues
     cat << 'EOF' > /tmp/check_install.py
 import importlib.util
 import sys
@@ -84,7 +84,7 @@ EOF
     rm -f /tmp/check_install.py
 }
 
-# Run twine check on distribution files
+# run twine check on distribution files
 run_twine_check() {
     print_status "info" "Running twine check on distribution files..."
     if twine check dist/*; then
@@ -95,13 +95,13 @@ run_twine_check() {
     fi
 }
 
-# Run automated unit and integration tests
+# run automated unit and integration tests
 run_automated_tests() {
     local test_failed=0
     
     print_status "info" "Running automated tests..."
     
-    # Run unit tests
+    # run unit tests
     if [ -d "tests/unit" ]; then
         print_status "info" "Running unit tests..."
         if python -m unittest discover -s tests/unit -p "*.py" -v; then
@@ -114,7 +114,7 @@ run_automated_tests() {
         print_status "warning" "Unit tests directory not found (tests/unit)"
     fi
     
-    # Run integration tests
+    # run integration tests
     if [ -d "tests/integration" ]; then
         print_status "info" "Running integration tests..."
         if python -m unittest discover -s tests/integration -p "*.py" -v; then
@@ -130,7 +130,7 @@ run_automated_tests() {
     return $test_failed
 }
 
-# Run the package tests
+# run the package tests
 run_package_tests() {
     print_status "info" "Running package tests..."
     if [ -f "run_dist.py" ]; then
@@ -146,27 +146,27 @@ run_package_tests() {
     fi
 }
 
-# Main execution flow
+# main execution flow
 main() {
-    # Get package name (capture only the package name, not the colored output)
+    # get package name (capture only the package name, not the colored output)
     package_name=$(basename "$(pwd)")
-    package_name="${package_name//-/_}" # Convert dashes to underscores
+    package_name="${package_name//-/_}" # convert dashes to underscores
     print_status "config" "Detected package name: ${MAGENTA}${package_name}${NC}"
     
-    # Check and install package
+    # check and install package
     check_and_install "$package_name"
     
-    # Run automated tests
+    # run automated tests
     if ! run_automated_tests; then
         exit 1
     fi
     
-    # Run twine check
+    # run twine check
     if ! run_twine_check; then
         exit 1
     fi
     
-    # Run package tests
+    # run package tests
     if ! run_package_tests; then
         exit 1
     fi
@@ -175,5 +175,5 @@ main() {
     print_status "debug" "Package ${MAGENTA}${package_name}${NC} is ready for distribution"
 }
 
-# Execute main function
+# execute main function
 main "$@"

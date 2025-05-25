@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+# available classifiers: https://pypi.org/classifiers/
 list_classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -12,13 +14,11 @@ list_classifiers = [
     "Intended Audience :: Financial and Insurance Industry",
     "Intended Audience :: Science/Research",
     "Topic :: Office/Business :: Financial",
-    "Topic :: Office/Business :: Financial :: Investment",
-    "Topic :: Office/Business :: Financial :: Investment :: Brokers",
-    "Topic :: Office/Business :: Financial :: Investment :: Mutual Funds",
-    "Topic :: Office/Business :: Financial :: Investment :: Securities",
-    "Topic :: Office/Business :: Financial :: Investment :: Securities :: Mutual Funds",
-    "Topic :: Office/Business :: Financial :: Investment :: Securities :: Mutual Funds :: Brazil",
-    "Topic :: Office/Business :: Financial :: Investment :: Securities :: Mutual Funds :: Brazil :: CVM",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+    "Topic :: Office/Business :: Office Suites",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: Other/Nonlisted Topic",
+    "Topic :: Scientific/Engineering :: Mathematics",
 ]
 
 setup(

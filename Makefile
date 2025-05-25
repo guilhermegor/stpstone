@@ -15,6 +15,12 @@ test_dist:
 	bash cli/test_dist.sh
 	twine check dist/*
 
+upload_test_pypi: test_dist
+	bash cli/upload_test_pypi.sh
+
+clean_previous_builds:
+	rm -rf dist/ build/ *.egg-info/
+
 
 # ingestion concrete creator - factory design pattern
 ingestion_concrete_creator:
