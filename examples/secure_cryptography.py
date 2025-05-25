@@ -1,5 +1,5 @@
 import os
-from stpstone.utils.security.secure_crypto import SecureCrypto
+from stpstone.utils.security.secure_cryptography import SecureCrypto
 
 # Create an instance of the crypto helper
 crypto = SecureCrypto()
