@@ -17,7 +17,7 @@ from sklearn.metrics import confusion_matrix, classification_report, accuracy_sc
 from sklearn.metrics import class_likelihood_ratios
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
-from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
+from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 
 class LinearRegressions:

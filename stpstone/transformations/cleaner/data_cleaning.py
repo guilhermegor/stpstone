@@ -10,7 +10,7 @@ from sklearn.impute import SimpleImputer, KNNImputer
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, LabelEncoder
 from sklearn.compose import ColumnTransformer
-from stpstone.quantitative_methods.eda import ExploratoryDataAnalysis
+from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 
 class DataCleaning:
