@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 list_classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,5 +24,23 @@ list_classifiers = [
 setup(
     name="stpstone",
     version="2.0.0",
-    
+    description="Solid financial ETL, analytics and utils with support to global markets.",
+    package_dir={"": "stpstone"},
+    packages=find_packages(where="stpstone"),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/guilhermegor/stpstone",
+    author="guilhermegor",
+    author_email="github.bucked794@silomails.com",
+    license="MIT",
+    classifiers=list_classifiers,
+    keywords="stpstone, python, financial, data, utils, analytics, ingestion",
+    install_requires=[
+        'poetry==2.1.2 ; python_full_version >= "3.12.8" and python_version < "3.14"',
+    ],
+    python_requires=">=3.12.8",
+    project_urls={
+        "Bug Reports": "https://github.com/guilhermegor/stpstone/issues",
+        "Source": "https://github.com/guilhermegor/stpstone",
+    },
 )
