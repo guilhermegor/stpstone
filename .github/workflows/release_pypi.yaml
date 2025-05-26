@@ -1,5 +1,3 @@
-# inspired by: https://github.com/ArjanCodes/bragir/blob/af6b9af21974ef7756c9e735e709a3c014b2b0cb/.github/workflows/release.yaml
-
 name: release
 
 on:
@@ -79,7 +77,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12.8"]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -89,75 +86,27 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
-          virtualenvs-create: true
-          version: 2.1.2
-
-      - name: Load Cached Virtual Environment
-        id: cached-venv
-        uses: actions/cache@v3
-        with:
-          path: |
-            .venv
-            poetry.lock
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
-
-      - name: Install Dependencies
-        if: steps.cached-venv.outputs.cache-hit != 'true'
+      - name: Clean Build Artifacts
         run: |
-          # temporary pyproject without windows platform-specific dependencies
-          cp pyproject.toml pyproject.original.toml
-          cat pyproject.original.toml | python -c '
-          import sys, re
-          content = sys.stdin.read()
-          content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
-          content = re.sub(r"pywin32\s*=.*\n", "", content)
-          print(content)
-          ' > pyproject.toml
+          rm -rf dist/ build/ *.egg-info/
 
-          # regenerate lock file, if needed
-          if ! poetry check --lock; then
-            echo "Lock file is outdated, regenerating..."
-            rm -f poetry.lock
-            poetry lock --no-cache
-          fi
-
-          # install dependencies, checking for dev and docs groups if they are in the .toml file
-          without_groups=()
-          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
-            without_groups+=("dev")
-          fi
-          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
-            without_groups+=("docs")
-          fi
-          if [ ${#without_groups[@]} -gt 0 ]; then
-            echo "Excluding groups: ${without_groups[*]}"
-            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
+      - name: Build package
+        run: |
+          if [ ! -d "dist" ] || [ ! -d "dist/${{ env.PACKAGE_NAME }}-${{ needs.details.outputs.new_version }}" ]; then
+            echo "Building package for version ${{ needs.details.outputs.new_version }}"
+            python setup.py sdist bdist_wheel
           else
-            echo "No groups to exclude, installing all dependencies"
-            poetry install --no-interaction --no-root
+            echo "Package version already built, skipping build step"
           fi
-
-          # restore original pyproject.toml
-          mv pyproject.original.toml pyproject.toml
-          poetry env activate
-
-      - name: Build Source and Wheel Distributions
-        run: |
-          poetry build
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
   pypi_publish:
-    name: Upload Release to PyPI
-    needs: [setup_and_build, details]
+    needs: setup_and_build
     runs-on: ubuntu-24.04
     environment:
       name: release
@@ -171,7 +120,13 @@ jobs:
           path: dist/
 
       - name: Publish to PyPI
-        run: pypa/gh-action-pypi-publish@release/v1
+        run: |
+          dist_files=$(find dist -type f -name "*.tar.gz" -o -name "*.whl")
+          python -m twine upload \
+            --verbose \
+            --username "__token__" \
+            --password "${{ secrets.PYPI_TOKEN }}" \
+            $dist_files
 
   github_release:
     name: Create GitHub Release
@@ -185,7 +140,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # fetch full history to avoid issues with tags and branches
+          fetch-depth: 0
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
@@ -194,7 +149,11 @@ jobs:
           path: dist/
 
       - name: Create GitHub Release
-        id: create_release
-        run: gh release create ${{ env.TAG_NAME }} dist/* --title ${{ env.TAG_NAME }} --generate-notes
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          files: |
+            dist/*
+          generate_release_notes: true
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
