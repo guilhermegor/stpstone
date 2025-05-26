@@ -5676,7 +5676,7 @@ version = "80.8.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "setuptools-80.8.0-py3-none-any.whl", hash = "sha256:95a60484590d24103af13b686121328cc2736bee85de8936383111e421b9edc0"},
     {file = "setuptools-80.8.0.tar.gz", hash = "sha256:49f7af965996f26d43c8ae34539c8d99c5042fbff34302ea151eaa9c207cd257"},
@@ -6829,4 +6829,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.8,<3.14"
-content-hash = "e245b464b12877faa3aef5369a1a988c4a1e7c081fc7af86c4883e27b152f029"
+content-hash = "ae76295a41b898c02330c41e38e4eeadbd855b64481a9c3bcf77ed9f9aae1997"
