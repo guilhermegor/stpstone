@@ -61,11 +61,6 @@ gh_status:
 gh_protect_main: gh_status
 	bash cli/gh_protect_main.sh
 
-gh_actions_local_tests:
-	bash cli/act_install.sh
-	bash cli/docker_init.sh
-	bash cli/act_tests.sh
-
 gh_set_pypi_secret:
 	bash cli/gh_set_pypi_secret.sh
 	@echo -e "\033[0;34m[i]\033[0m Checking GitHub secrets..."
