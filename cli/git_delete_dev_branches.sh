@@ -48,15 +48,27 @@ check_git_status() {
         return 1
     fi
     
-    # check if release branch is ahead of main
-    current_branch=$(git rev-parse --abbrev-ref HEAD)
-    if [[ "$current_branch" == release/* ]]; then
-        git fetch origin main &> /dev/null
-        local commits_ahead=$(git rev-list --count main..$current_branch)
+    # check if any branch is ahead of main
+    git fetch origin main &> /dev/null
+    local problematic_branches=()
+    
+    # get all local branches except main and release/*
+    local branches_to_check=$(git branch | grep -v "main" | grep -v "release/" | sed 's/^* //' | sed 's/^ *//')
+    
+    for branch in $branches_to_check; do
+        local commits_ahead=$(git rev-list --count main..$branch 2>/dev/null)
         if [ "$commits_ahead" -gt 0 ]; then
-            print_status "error" "The current release branch is ${commits_ahead} commit(s) ahead of main. Please merge or rebase."
-            return 1
+            problematic_branches+=("$branch (${commits_ahead} commit(s) ahead)")
         fi
+    done
+    
+    if [ ${#problematic_branches[@]} -gt 0 ]; then
+        print_status "error" "The following branches are ahead of main:"
+        for branch_info in "${problematic_branches[@]}"; do
+            print_status "error" "  - $branch_info"
+        done
+        print_status "error" "Please merge or rebase these branches before deletion."
+        return 1
     fi
     
     print_status "success" "Git status check passed."
