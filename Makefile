@@ -51,7 +51,7 @@ git_delete_dev_branches:
 	bash cli/git_delete_dev_branches.sh
 
 git_update_branch_with_main:
-	bash cli/git_update_branch_with_main.sh
+	bash cli/git_update_branch_with_main.sh -b $(BRANCH) $(if $(FORCE),--force)
 
 
 # github

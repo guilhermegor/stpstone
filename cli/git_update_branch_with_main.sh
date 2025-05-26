@@ -140,10 +140,14 @@ main() {
         esac
     done
 
-    # validate branch name
+    # default to current branch if none specified
     if [ -z "$branch_name" ]; then
-        print_status "error" "No branch specified. Usage: $0 -b <branch_name> [-f|--force]"
-        exit 1
+        branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+        if [ -z "$branch_name" ]; then
+            print_status "error" "Could not determine current Git branch"
+            exit 1
+        fi
+        print_status "info" "No branch specified. Using current branch: ${CYAN}${branch_name}${NC}"
     fi
 
     # execute alignment
