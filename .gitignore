@@ -1,9 +1,25 @@
-# python
+# byte-compiled / cache
 __pycache__/
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
 *.pytest_cache
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# test coverage reports
+htmlcov/
+.coverage
+.cache
+
+# jupyter notebook checkpoints
+.ipynb_checkpoints/
 
 # IDEs
 .idea/
@@ -12,7 +28,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# environments
+# virutal environments
 *.env
 *.venv
 env/
