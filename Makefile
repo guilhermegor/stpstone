@@ -44,6 +44,9 @@ git_merge_branches:
 git_create_branch_from_main:
 	bash cli/git_create_branch_from_main.sh
 
+git_delete_current_branch:
+	bash cli/git_delete_current_branch.sh
+
 git_delete_dev_branches:
 	bash cli/git_delete_dev_branches.sh
 
