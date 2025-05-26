@@ -125,7 +125,7 @@ create_version_tag() {
     # Create tag
     print_status "info" "Creating tag $tag_name for release $version"
     git tag -a "$tag_name" -m "Version $version"
-    git push origin "$tag_name"
+    git push origin "$tag_name" --tags
     
     if [ $? -eq 0 ]; then
         print_status "success" "Successfully created and pushed tag $tag_name"
