@@ -3,6 +3,7 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 ![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
+![CI - Test](https://github.com/pandas-dev/pandas/actions/workflows/unit-tests.yml/badge.svg)
 ![Linting](https://img.shields.io/badge/linting-flake8%20+%20isort-blue)
 ![Security](https://img.shields.io/badge/security-bandit-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
