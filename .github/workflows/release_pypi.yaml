@@ -122,21 +122,8 @@ jobs:
             poetry lock --no-cache
           fi
 
-          # install dependencies, checking for dev and docs groups if they are in the .toml file
-          without_groups=()
-          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
-            without_groups+=("dev")
-          fi
-          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
-            without_groups+=("docs")
-          fi
-          if [ ${#without_groups[@]} -gt 0 ]; then
-            echo "Excluding groups: ${without_groups[*]}"
-            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
-          else
-            echo "No groups to exclude, installing all dependencies"
-            poetry install --no-interaction --no-root
-          fi
+          # install all dependencies including dev and docs
+          poetry install --no-interaction --no-root
 
           # restore original pyproject.toml
           mv pyproject.original.toml pyproject.toml
@@ -209,21 +196,8 @@ jobs:
             poetry lock --no-cache
           fi
 
-          # install dependencies, checking for dev and docs groups if they are in the .toml file
-          without_groups=()
-          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
-            without_groups+=("dev")
-          fi
-          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
-            without_groups+=("docs")
-          fi
-          if [ ${#without_groups[@]} -gt 0 ]; then
-            echo "Excluding groups: ${without_groups[*]}"
-            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
-          else
-            echo "No groups to exclude, installing all dependencies"
-            poetry install --no-interaction --no-root
-          fi
+          # install all dependencies including dev and docs
+          poetry install --no-interaction --no-root
 
           # restore original pyproject.toml
           mv pyproject.original.toml pyproject.toml
