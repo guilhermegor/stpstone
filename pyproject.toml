@@ -74,11 +74,11 @@ playwright = "1.52.0"
 openai = "1.79.0"
 mystic = "0.4.4"
 setuptools = "80.8.0"
+twine = "^6.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"
 build = "^1.2.2.post1"
-twine = "^6.1.0"
 ipykernel = "^6.29.5"
 pretty-errors = "1.2.25"
 commitizen = "^4.4.1"

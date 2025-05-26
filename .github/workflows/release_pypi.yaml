@@ -86,15 +86,67 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Clean Build Artifacts
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-in-project: true
+          virtualenvs-create: true
+          version: 2.1.2
+
+      - name: Load Cached Virtual Environment
+        id: cached-venv
+        uses: actions/cache@v3
+        with:
+          path: |
+            .venv
+            poetry.lock
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install Dependencies
+        if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          rm -rf dist/ build/ *.egg-info/
+          # temporary pyproject without windows platform-specific dependencies
+          cp pyproject.toml pyproject.original.toml
+          cat pyproject.original.toml | python -c '
+          import sys, re
+          content = sys.stdin.read()
+          content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
+          content = re.sub(r"pywin32\s*=.*\n", "", content)
+          print(content)
+          ' > pyproject.toml
+
+          # regenerate lock file, if needed
+          if ! poetry check --lock; then
+            echo "Lock file is outdated, regenerating..."
+            rm -f poetry.lock
+            poetry lock --no-cache
+          fi
+
+          # install dependencies, checking for dev and docs groups if they are in the .toml file
+          without_groups=()
+          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
+            without_groups+=("dev")
+          fi
+          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
+            without_groups+=("docs")
+          fi
+          if [ ${#without_groups[@]} -gt 0 ]; then
+            echo "Excluding groups: ${without_groups[*]}"
+            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
+          else
+            echo "No groups to exclude, installing all dependencies"
+            poetry install --no-interaction --no-root
+          fi
+
+          # restore original pyproject.toml
+          mv pyproject.original.toml pyproject.toml
+          poetry env activate
 
       - name: Build package
         run: |
           if [ ! -d "dist" ] || [ ! -d "dist/${{ env.PACKAGE_NAME }}-${{ needs.details.outputs.new_version }}" ]; then
             echo "Building package for version ${{ needs.details.outputs.new_version }}"
-            python setup.py sdist bdist_wheel
+            poetry run python setup.py sdist bdist_wheel
           else
             echo "Package version already built, skipping build step"
           fi
@@ -122,7 +174,7 @@ jobs:
       - name: Publish to PyPI
         run: |
           dist_files=$(find dist -type f -name "*.tar.gz" -o -name "*.whl")
-          python -m twine upload \
+          poetry run python -m twine upload \
             --verbose \
             --username "__token__" \
             --password "${{ secrets.PYPI_TOKEN }}" \
