@@ -50,6 +50,9 @@ git_delete_current_branch:
 git_delete_dev_branches:
 	bash cli/git_delete_dev_branches.sh
 
+git_update_branch_with_main:
+	bash cli/git_update_branch_with_main.sh
+
 
 # github
 create_ssh_key:
