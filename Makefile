@@ -29,8 +29,9 @@ upload_test_pypi: clean_builds
 
 check_test_pypi:
 	bash cli/docker_init.sh
-	docker build -f containers/test_pypi -t stpstone-test .
+	docker build -f containers/check_test_pypi -t stpstone-test .
 	docker run -it --rm stpstone-test
+
 
 # ingestion concrete creator - factory design pattern
 ingestion_concrete_creator:
@@ -76,6 +77,7 @@ gh_set_pypi_secret:
 	bash cli/gh_set_pypi_secret.sh
 	@echo -e "\033[0;34m[i]\033[0m Checking GitHub secrets..."
 	@gh secret list
+
 
 # requirements - dev
 vscode_install_extensions:

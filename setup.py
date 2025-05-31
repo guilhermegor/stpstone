@@ -23,7 +23,7 @@ list_classifiers = [
 
 setup(
     name="stpstone",
-    version='2.0.5',
+    version='2.0.6',
     description="Solid financial ETL, analytics and utils with support to global markets.",
     packages=find_namespace_packages(include=['stpstone*']),
     long_description=long_description,

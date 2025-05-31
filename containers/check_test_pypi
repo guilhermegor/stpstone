@@ -1,0 +1,22 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY pyproject.toml setup.py pkg_version.py run_dist.py check_import.py ./
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc python3-dev jq && \
+    pip install --no-cache-dir toml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN PKG_INFO=$(python pkg_version.py) && \
+    PACKAGE_NAME=$(echo "$PKG_INFO" | jq -r '.name') && \
+    PACKAGE_VERSION=$(echo "$PKG_INFO" | jq -r '.version') && \
+    pip install --no-cache-dir \
+    --index-url https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple \
+    "${PACKAGE_NAME}==${PACKAGE_VERSION}"
+
+CMD PKG_INFO=$(python pkg_version.py) && \
+    python check_import.py "$PKG_INFO" && \
+    python run_dist.py
