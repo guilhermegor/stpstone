@@ -1,0 +1,24 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY pyproject.toml setup.py pkg_version.py ./
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc python3-dev && \
+    pip install --no-cache-dir toml && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN PACKAGE_VERSION=$(python pkg_version.py) && \
+    pip install --no-cache-dir \
+    --index-url https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple \
+    "stpstone==$PACKAGE_VERSION"
+
+RUN python -c "from stpstone.utils.parsers.folders import FoldersTree; print('\n[Import Test] Package import successful')" && \
+    python -c "print('\n[Version Check]'); from importlib.metadata import version; print(f'Installed version: {version(\"stpstone\")}')"
+
+COPY run_dist.py .
+
+CMD python -c "from stpstone.utils.parsers.folders import FoldersTree; print('\n[Pre-Run Import Check] Package import successful')" && \
+    python run_dist.py

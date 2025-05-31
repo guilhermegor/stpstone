@@ -7,7 +7,10 @@ package_tree:
 			bl_add_linebreak_markdown=False); \
 		cls_tree.export_tree(os.path.join(root_path, 'data', 'package_tree.txt'))"
 
-clean_previous_builds:
+bump_version:
+	bash cli/bump_version.sh
+
+clean_builds:
 	rm -rf dist/ build/ *.egg-info/
 
 install_dist_locally:
@@ -19,11 +22,15 @@ test_dist:
 	bash cli/test_dist.sh
 	twine check dist/*
 
-upload_test_pypi: clean_previous_builds
+upload_test_pypi: clean_builds
 	yes | bash cli/test_dist.sh
 	twine check dist/*
 	bash cli/upload_test_pypi.sh
 
+check_test_pypi:
+	bash cli/docker_init.sh
+	docker build -f containers/test_pypi -t stpstone-test .
+	docker run -it --rm stpstone-test
 
 # ingestion concrete creator - factory design pattern
 ingestion_concrete_creator:

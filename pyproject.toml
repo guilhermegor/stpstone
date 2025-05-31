@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.1"
+version = "2.0.5"
 description = ""
 authors = ["Guilherme Rodrigues <55053188+guilhermegor@users.noreply.github.com>"]
 readme = "README.md"
@@ -73,6 +73,7 @@ bcrypt = "4.3.0"
 playwright = "1.52.0"
 openai = "1.79.0"
 mystic = "0.4.4"
+toml = "0.10.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"

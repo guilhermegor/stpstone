@@ -23,9 +23,9 @@ list_classifiers = [
 
 setup(
     name="stpstone",
-    version="2.0.1",
+    version='2.0.5',
     description="Solid financial ETL, analytics and utils with support to global markets.",
-    packages=find_namespace_packages(["stpstone*"]),
+    packages=find_namespace_packages(include=['stpstone*']),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/guilhermegor/stpstone",
