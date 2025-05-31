@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -23,9 +23,9 @@ list_classifiers = [
 
 setup(
     name="stpstone",
-    version="2.0.0",
+    version="2.0.1",
     description="Solid financial ETL, analytics and utils with support to global markets.",
-    packages=find_packages(),
+    packages=find_namespace_packages(["stpstone*"]),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/guilhermegor/stpstone",

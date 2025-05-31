@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.0"
+version = "2.0.1"
 description = ""
 authors = ["Guilherme Rodrigues <55053188+guilhermegor@users.noreply.github.com>"]
 readme = "README.md"

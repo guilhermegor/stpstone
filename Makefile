@@ -13,6 +13,7 @@ clean_previous_builds:
 install_dist_locally:
 	python setup.py sdist
 	pip install .
+	python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
 
 test_dist:
 	bash cli/test_dist.sh
