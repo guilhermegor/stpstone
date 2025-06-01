@@ -14,8 +14,8 @@ clean_builds:
 	rm -rf dist/ build/ *.egg-info/
 
 install_dist_locally:
-	python setup.py sdist
-	pip install .
+	poetry build
+	poetry install
 	python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
 
 test_dist:

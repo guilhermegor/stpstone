@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY pyproject.toml setup.py pkg_version.py run_dist.py check_import.py ./
+COPY pyproject.toml pkg_version.py run_dist.py check_import.py ./
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc python3-dev jq && \

@@ -1,14 +1,13 @@
 #!/bin/bash
-# color definitions
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
-NC='\033[0m' # no color
+NC='\033[0m'
 
-# print colored status messages
 print_status() {
     local status="$1"
     local message="$2"
@@ -37,7 +36,6 @@ print_status() {
     esac
 }
 
-# get the repository/package name from current directory
 get_package_name() {
     local repo_name=$(basename "$(pwd)")
     local package_name="${repo_name//-/_}" # convert dashes to underscores
@@ -45,7 +43,6 @@ get_package_name() {
     echo "$package_name"
 }
 
-# check if package is installed and install if needed
 check_and_install() {
     local package_name=$1
     
@@ -84,7 +81,6 @@ EOF
     rm -f /tmp/check_install.py
 }
 
-# run twine check on distribution files
 run_twine_check() {
     print_status "info" "Running twine check on distribution files..."
     if twine check dist/*; then
@@ -95,13 +91,11 @@ run_twine_check() {
     fi
 }
 
-# run automated unit and integration tests
 run_automated_tests() {
     local test_failed=0
     
     print_status "info" "Running automated tests..."
     
-    # run unit tests
     if [ -d "tests/unit" ]; then
         print_status "info" "Running unit tests..."
         if python -m unittest discover -s tests/unit -p "*.py" -v; then
@@ -114,7 +108,6 @@ run_automated_tests() {
         print_status "warning" "Unit tests directory not found (tests/unit)"
     fi
     
-    # run integration tests
     if [ -d "tests/integration" ]; then
         print_status "info" "Running integration tests..."
         if python -m unittest discover -s tests/integration -p "*.py" -v; then
@@ -130,7 +123,6 @@ run_automated_tests() {
     return $test_failed
 }
 
-# run the package tests
 run_package_tests() {
     print_status "info" "Running package tests..."
     if [ -f "run_dist.py" ]; then
@@ -146,27 +138,21 @@ run_package_tests() {
     fi
 }
 
-# main execution flow
 main() {
-    # get package name (capture only the package name, not the colored output)
     package_name=$(basename "$(pwd)")
     package_name="${package_name//-/_}" # convert dashes to underscores
     print_status "config" "Detected package name: ${MAGENTA}${package_name}${NC}"
     
-    # check and install package
     check_and_install "$package_name"
     
-    # run automated tests
     if ! run_automated_tests; then
         exit 1
     fi
     
-    # run twine check
     if ! run_twine_check; then
         exit 1
     fi
-    
-    # run package tests
+
     if ! run_package_tests; then
         exit 1
     fi
@@ -175,5 +161,4 @@ main() {
     print_status "debug" "Package ${MAGENTA}${package_name}${NC} is ready for distribution"
 }
 
-# execute main function
 main "$@"
