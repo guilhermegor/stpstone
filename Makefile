@@ -32,6 +32,11 @@ check_test_pypi:
 	docker build -f containers/check_test_pypi -t stpstone-test .
 	docker run -it --rm stpstone-test
 
+check_pypi:
+	bash cli/docker_init.sh
+	docker build -f containers/check_pypi -t stpstone .
+	docker run -it --rm stpstone
+
 
 # ingestion concrete creator - factory design pattern
 ingestion_concrete_creator:

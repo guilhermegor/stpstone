@@ -1,8 +1,11 @@
 from setuptools import setup, find_namespace_packages
 
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
+
+with open("requirements-venv.txt") as f:
+    install_requires = f.read().splitlines()
 
 # available classifiers: https://pypi.org/classifiers/
 list_classifiers = [
@@ -34,9 +37,7 @@ setup(
     license="MIT",
     classifiers=list_classifiers,
     keywords="stpstone, python, financial, data, utils, analytics, ingestion, b3, cvm, exchange, derivatives, quantitative, risk, portfolio, fixed income, options, futures, market data, macroeconomic, scraping, statistics, time series, cryptocurrency, brazilian markets, pricing models, financial mathematics",
-    install_requires=[
-        'poetry==2.1.2 ; python_full_version >= "3.12.8" and python_version < "3.14"',
-    ],
+    install_requires=install_requires,
     python_requires=">=3.12.8",
     project_urls={
         "Bug Reports": "https://github.com/guilhermegor/stpstone/issues",
