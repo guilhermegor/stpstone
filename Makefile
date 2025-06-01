@@ -25,7 +25,7 @@ test_dist:
 upload_test_pypi: clean_builds
 	yes | bash cli/test_dist.sh
 	twine check dist/*
-	bash cli/upload_test_pypi.sh
+	bash cli/test_pypi_publish.sh
 
 check_test_pypi:
 	bash cli/docker_init.sh

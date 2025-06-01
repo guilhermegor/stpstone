@@ -129,11 +129,11 @@ jobs:
           mv pyproject.original.toml pyproject.toml
           poetry env activate
 
-      - name: Build package
+      - name: Build Package
         run: |
           if [ ! -d "dist" ] || [ ! -d "dist/${{ env.PACKAGE_NAME }}-${{ needs.details.outputs.new_version }}" ]; then
             echo "Building package for version ${{ needs.details.outputs.new_version }}"
-            poetry run python setup.py sdist bdist_wheel
+            poetry build
           else
             echo "Package version already built, skipping build step"
           fi
@@ -211,12 +211,19 @@ jobs:
 
       - name: Publish to PyPI
         run: |
-          dist_files=$(find dist -type f -name "*.tar.gz" -o -name "*.whl")
-          poetry run python -m twine upload \
-            --verbose \
-            --username "__token__" \
-            --password "${{ secrets.PYPI_TOKEN }}" \
-            $dist_files
+          poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
+          
+          poetry publish --build
+          
+          # fallback to twine
+          if [ $? -ne 0 ]; then
+            echo "Poetry publish failed, falling back to twine"
+            poetry run twine upload \
+              --verbose \
+              --username "__token__" \
+              --password "${{ secrets.PYPI_TOKEN }}" \
+              dist/*
+          fi
 
   github_release:
     name: Create GitHub Release
