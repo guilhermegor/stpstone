@@ -1,10 +1,59 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.6"
-description = ""
-authors = ["Guilherme Rodrigues <55053188+guilhermegor@users.noreply.github.com>"]
+version = "2.0.7"
+description = "Solid financial ETL, analytics and utils with support to global markets."
+authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
 license = "MIT"
+homepage = "https://github.com/guilhermegor/stpstone"
+repository = "https://github.com/guilhermegor/stpstone"
+keywords = [
+    "stpstone",
+    "python",
+    "financial",
+    "data",
+    "utils",
+    "analytics",
+    "ingestion",
+    "b3",
+    "cvm",
+    "exchange",
+    "derivatives",
+    "quantitative",
+    "risk",
+    "portfolio",
+    "fixed income",
+    "options",
+    "futures",
+    "market data",
+    "macroeconomic",
+    "scraping",
+    "statistics",
+    "time series",
+    "cryptocurrency",
+    "brazilian markets",
+    "pricing models",
+    "financial mathematics"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+    "Topic :: Office/Business :: Office Suites",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: Other/Nonlisted Topic",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[tool.poetry.urls]
+"Bug Reports" = "https://github.com/guilhermegor/stpstone/issues"
+"Source" = "https://github.com/guilhermegor/stpstone"
 
 [tool.poetry.dependencies]
 python = ">=3.12.8,<3.14"

@@ -14,8 +14,8 @@ clean_builds:
 	rm -rf dist/ build/ *.egg-info/
 
 install_dist_locally:
-	python setup.py sdist
-	pip install .
+	poetry build
+	poetry install
 	python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
 
 test_dist:
@@ -25,12 +25,17 @@ test_dist:
 upload_test_pypi: clean_builds
 	yes | bash cli/test_dist.sh
 	twine check dist/*
-	bash cli/upload_test_pypi.sh
+	bash cli/test_pypi_publish.sh
 
 check_test_pypi:
 	bash cli/docker_init.sh
 	docker build -f containers/check_test_pypi -t stpstone-test .
 	docker run -it --rm stpstone-test
+
+check_pypi:
+	bash cli/docker_init.sh
+	docker build -f containers/check_pypi -t stpstone .
+	docker run -it --rm stpstone
 
 
 # ingestion concrete creator - factory design pattern
@@ -80,5 +85,5 @@ gh_set_pypi_secret:
 
 
 # requirements - dev
-vscode_install_extensions:
+vscode_setup:
 	bash cli/install_vscode_extensions.sh

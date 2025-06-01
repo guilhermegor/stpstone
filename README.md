@@ -298,8 +298,10 @@
 ### Prerequisites:
 
 - **Python** ^3.12
-- **Pyenv**
-- **Make** (optional, below are some benefits of usage)
+
+### Optional:
+- **Pyenv**: [Installation Guide](https://github.com/pyenv/pyenv)
+- **Makefile** (below are some benefits of usage)
 
     | Category	| Example Targets | Benefit |
     | --------- | --------------- | ------- |
@@ -307,18 +309,24 @@
     | Git Workflows	| `git_pull_force`, `gh_protect_main` | Enforces branch policies |
     | CI/CD	| `gh_actions_local_tests`	| Local pipeline validation |
     | Code Generation | `ingestion_concrete_creator` | Factory pattern automation |
-    | Dev Environment | `vscode_install_extensions` | Consistent IDE setup |
+    | Dev Environment | `vscode_setup` | Consistent IDE setup |
+- Makefile Installation Options for Windows:
+  - 1: [MinGW](https://sourceforge.net/projects/mingw/files/MinGW/Extension/make/mingw32-make-3.80-3/)
+  - 2: [Chocolatey](https://chocolatey.org/install): Windows Package Manager
+  - 2.1.: [Chocolatey Make](https://community.chocolatey.org/packages/make)
+- Makefile Installation for MacOS:
+  - 1: [Homebrew](https://brew.sh/): MacOS Package Manager
+  - 1.1: [Homebrew Make](https://formulae.brew.sh/formula/make)
+- Makefile Installation for Ubuntu: Preinstalled, no action needed
 
 ### Installation Guide:
 
 -  **Option 1: Pip Install (Recommended)**
-📌 Available on PyPI
+[📌 Available on PyPI](https://pypi.org/project/stpstone/)
 
     <pre style="font-size: 12px;"><code>
     #!/bin/bash
     pip install stpstone
-    poetry install --no-root
-    poetry shell
     </code></pre>
 
 - **Option 2: Build from Source**
