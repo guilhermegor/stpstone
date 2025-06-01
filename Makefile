@@ -33,9 +33,16 @@ check_test_pypi:
 	docker run -it --rm stpstone-test
 
 check_pypi:
-	bash cli/docker_init.sh
-	docker build -f containers/check_pypi -t stpstone .
-	docker run -it --rm stpstone
+	@bash cli/docker_init.sh
+	@read -p "Enter stpstone version to test (leave empty for latest): " version; \
+	if [ -z "$$version" ]; then \
+		echo "Testing latest version"; \
+		docker build -f containers/check_pypi -t stpstone .; \
+	else \
+		echo "Testing version $$version"; \
+		docker build -f containers/check_pypi --build-arg STPSTONE_VERSION=$$version -t stpstone .; \
+	fi
+	@docker run -it --rm stpstone
 
 
 # ingestion concrete creator - factory design pattern
