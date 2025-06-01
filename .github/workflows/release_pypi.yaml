@@ -213,7 +213,7 @@ jobs:
         run: |
           poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
           
-          poetry publish --build
+          yes | poetry publish --build
           
           # fallback to twine
           if [ $? -ne 0 ]; then

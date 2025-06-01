@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# color definitions
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
-NC='\033[0m' # no color
+NC='\033[0m'
 
-# print colored status messages
 print_status() {
     local status="$1"
     local message="$2"
@@ -40,10 +39,25 @@ print_status() {
 
 validate_branch() {
     local branch=$1
-    if [[ "$branch" == "main" ]]; then
-        print_status "error" "Cannot delete the main branch - this is a protected branch"
+    if [[ "$branch" == "main" || "$branch" == "master" ]]; then
+        print_status "error" "Cannot delete the $branch branch - this is a protected branch"
         exit 1
     fi
+}
+
+get_user_input() {
+    local prompt="$1"
+    local default="$2"
+    local input
+    
+    if [ -n "$default" ]; then
+        read -p "$prompt [$default]: " input
+        input=${input:-$default}
+    else
+        read -p "$prompt: " input
+    fi
+    
+    echo "$input"
 }
 
 switch_to_main() {
@@ -127,8 +141,7 @@ verify_deletion() {
         print_status "success" "Tag $tag successfully removed"
     fi
     
-    # Check branch (skip check if branch is main)
-    if [[ "$branch" != "main" ]]; then
+    if [[ "$branch" != "main" && "$branch" != "master" ]]; then
         if git branch -a | grep -q "$branch"; then
             print_status "error" "Branch $branch still exists!"
         else
@@ -138,22 +151,36 @@ verify_deletion() {
 }
 
 main() {
-    local tag="v2.0.0"
-    local branch="release/2.0.0"
+    local branch=$(get_user_input "Enter the branch name to delete" "")
+    local tag=$(get_user_input "Enter the tag to delete (include 'v' prefix if needed)" "")
+    
+    if [[ -z "$branch" && -z "$tag" ]]; then
+        print_status "error" "No branch or tag specified for deletion"
+        exit 1
+    fi
     
     if ! switch_to_main; then
         print_status "error" "Aborting script due to failure to switch to main"
         exit 1
     fi
     
-    delete_local_tag "$tag"
-    delete_remote_tag "$tag"
-    delete_local_branch "$branch"
-    delete_remote_branch "$branch"
-    clean_references
-    verify_deletion "$tag" "$branch"
+    if [[ -n "$tag" ]]; then
+        delete_local_tag "$tag"
+        delete_remote_tag "$tag"
+    fi
     
-    print_status "success" "Cleanup completed for tag $tag and branch $branch"
+    if [[ -n "$branch" ]]; then
+        delete_local_branch "$branch"
+        delete_remote_branch "$branch"
+    fi
+    
+    clean_references
+    
+    if [[ -n "$tag" || -n "$branch" ]]; then
+        verify_deletion "$tag" "$branch"
+    fi
+    
+    print_status "success" "Cleanup completed"
 }
 
 main "$@"
