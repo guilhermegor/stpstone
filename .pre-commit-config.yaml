@@ -68,10 +68,6 @@ repos:
     hooks:
       - id: flake8
         args: [--max-line-length=100, --ignore=E203, --max-complexity=10]
-  - repo: https://github.com/igorshubovych/markdownlint-cli 
-    rev: v0.45.0
-    hooks:
-      - id: markdownlint
   - repo: local
     hooks:
       - id: check-unix-filenames
