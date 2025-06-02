@@ -93,4 +93,4 @@ gh_set_pypi_secret:
 
 # requirements - dev
 vscode_setup:
-	bash cli/install_vscode_extensions.sh
+	bash cli/vscode_setup.sh
