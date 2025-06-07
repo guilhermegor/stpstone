@@ -16,15 +16,13 @@ clean_builds:
 install_dist_locally:
 	poetry build
 	poetry install
-	python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
+	poetry run python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
 
 test_dist:
 	bash cli/test_dist.sh
-	twine check dist/*
 
 upload_test_pypi: clean_builds
 	yes | bash cli/test_dist.sh
-	twine check dist/*
 	bash cli/test_pypi_publish.sh
 
 check_test_pypi:

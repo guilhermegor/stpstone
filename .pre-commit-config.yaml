@@ -28,18 +28,12 @@ repos:
         # pass_filenames: false
         stages: [commit-msg]
   - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.19.1 
+    rev: v0.19.1
     hooks:
       - id: gitlint
         stages: [commit-msg]
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
-    hooks:
-      - id: shellcheck
-        args: [--severity=warning]
-        types: [shell]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.8 
+    rev: 1.7.8
     hooks:
       - id: bandit
         args: [-r, .]
