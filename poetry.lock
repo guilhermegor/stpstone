@@ -3926,24 +3926,24 @@ wcwidth = "*"
 
 [[package]]
 name = "prov"
-version = "2.0.0"
+version = "2.0.2"
 description = "A library for W3C Provenance Data Model supporting PROV-JSON, PROV-XML and PROV-O (RDF)"
 optional = false
-python-versions = ">=3.6, <4"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "prov-2.0.0-py3-none-any.whl", hash = "sha256:aaccc7c6ad6ec662fd1561c872991f13cd7df368d6dcab9cbac19fccc491d970"},
-    {file = "prov-2.0.0.tar.gz", hash = "sha256:b6438f2195ecb9f6e8279b58971e02bc51814599b5d5383366eef91d867422ee"},
+    {file = "prov-2.0.2-py3-none-any.whl", hash = "sha256:d23290f4c8750e03567093f068c7cd3593546ee9d477382dbca6f87c75836f85"},
+    {file = "prov-2.0.2.tar.gz", hash = "sha256:ed7d866fb622fbb17f5311d849d0fe102d8b30001218aa916087f0fd034ea844"},
 ]
 
 [package.dependencies]
-lxml = ">=3.3.5"
 networkx = ">=2.0"
+pydot = ">=1.2.0"
 python-dateutil = ">=2.2"
-rdflib = ">=4.2.1"
 
 [package.extras]
-dot = ["pydot (>=1.2.0)"]
+rdf = ["rdflib (>=4.2.1,<7)"]
+xml = ["lxml (>=3.3.5)"]
 
 [[package]]
 name = "psutil"
