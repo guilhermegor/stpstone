@@ -15,7 +15,7 @@
 		"source.organizeFroms": "never"
 	},
 	"editor.quickSuggestions": null,
-	"editor.rulers": [102],
+	"editor.rulers": [79],
 	"workbench.colorCustomizations": {
 		"editorRuler.foreground": "#D3D3D3"
 	},
