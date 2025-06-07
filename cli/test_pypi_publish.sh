@@ -38,11 +38,11 @@ print_status() {
 
 load_env() {
     local env_file=".env"
-    
+
     if [[ -f "$env_file" ]]; then
         print_status "info" "Loading environment variables from $env_file"
         # export variables while preserving existing ones
-        export $(grep -v '^#' "$env_file" | xargs)
+        export $(grep -v '^#' "$env_file" | xargs -0)
     else
         print_status "error" "Environment file $env_file not found"
         exit 1
@@ -52,13 +52,13 @@ load_env() {
 upload_to_testpypi() {
     print_status "info" "Building package with Poetry..."
     poetry build
-    
+
     local dist_files="dist/*"
     if ! ls $dist_files >/dev/null 2>&1; then
         print_status "error" "No distribution files found in dist/"
         exit 1
     fi
-    
+
     if [[ -z "$TEST_PYPI_TOKEN" ]]; then
         print_status "error" "TEST_PYPI_TOKEN is not set"
         print_status "info" "You can set it via:"
@@ -67,25 +67,25 @@ upload_to_testpypi() {
         print_status "info" "3. Poetry config (poetry config pypi-token.testpypi your_token)"
         exit 1
     fi
-    
+
     print_status "config" "Uploading to TestPyPI using Poetry"
     print_status "debug" "Using token: ${TEST_PYPI_TOKEN:0:4}..."
-    
+
     print_status "info" "Method 1: Using poetry publish (recommended)"
     poetry config pypi-token.testpypi "$TEST_PYPI_TOKEN"
-    poetry publish -r testpypi --build
-    
+    yes | poetry publish -r testpypi --build
+
     if [[ $? -eq 0 ]]; then
         print_status "success" "Upload to TestPyPI completed successfully"
     else
         print_status "warning" "Poetry publish failed, trying twine as fallback..."
-        
+
         # fallback to twine
         poetry run twine upload -r testpypi "$dist_files" \
             --verbose \
             --username "__token__" \
             --password "$TEST_PYPI_TOKEN"
-        
+
         if [[ $? -eq 0 ]]; then
             print_status "success" "Twine upload to TestPyPI completed successfully"
         else

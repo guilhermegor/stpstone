@@ -16,15 +16,13 @@ clean_builds:
 install_dist_locally:
 	poetry build
 	poetry install
-	python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
+	poetry run python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
 
 test_dist:
 	bash cli/test_dist.sh
-	twine check dist/*
 
 upload_test_pypi: clean_builds
 	yes | bash cli/test_dist.sh
-	twine check dist/*
 	bash cli/test_pypi_publish.sh
 
 check_test_pypi:
@@ -56,6 +54,10 @@ ingestion_concrete_creator_html_parser:
 
 
 # git
+precommit_update:
+	poetry run pre-commit install
+	poetry run pre-commit install --hook-type commit-msg
+
 git_pull_force:
 	bash cli/git_pull_force.sh
 
@@ -93,4 +95,4 @@ gh_set_pypi_secret:
 
 # requirements - dev
 vscode_setup:
-	bash cli/install_vscode_extensions.sh
+	bash cli/vscode_setup.sh

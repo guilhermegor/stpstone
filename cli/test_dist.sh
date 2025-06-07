@@ -37,7 +37,8 @@ print_status() {
 }
 
 get_package_name() {
-    local repo_name=$(basename "$(pwd)")
+    local repo_name
+    repo_name=$(basename "$(pwd)")
     local package_name="${repo_name//-/_}" # convert dashes to underscores
     print_status "config" "Detected package name: ${MAGENTA}${package_name}${NC}"
     echo "$package_name"
@@ -45,7 +46,7 @@ get_package_name() {
 
 check_and_install() {
     local package_name=$1
-    
+
     # create a temporary python script to avoid string interpolation issues
     cat << 'EOF' > /tmp/check_install.py
 import importlib.util
@@ -72,18 +73,18 @@ def check_and_install_package(package_name):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python check_install.py <package_name>")
+        print("Usage: poetry run python check_install.py <package_name>")
         sys.exit(1)
     check_and_install_package(sys.argv[1])
 EOF
-    
+
     python3 /tmp/check_install.py "$package_name"
     rm -f /tmp/check_install.py
 }
 
 run_twine_check() {
     print_status "info" "Running twine check on distribution files..."
-    if twine check dist/*; then
+    if poetry run twine check dist/*; then
         print_status "success" "Twine validation passed"
     else
         print_status "error" "Twine check failed"
@@ -93,12 +94,12 @@ run_twine_check() {
 
 run_automated_tests() {
     local test_failed=0
-    
+
     print_status "info" "Running automated tests..."
-    
+
     if [ -d "tests/unit" ]; then
         print_status "info" "Running unit tests..."
-        if python -m unittest discover -s tests/unit -p "*.py" -v; then
+        if poetry run python -m unittest discover -s tests/unit -p "*.py" -v; then
             print_status "success" "Unit tests passed"
         else
             print_status "error" "Unit tests failed"
@@ -107,10 +108,10 @@ run_automated_tests() {
     else
         print_status "warning" "Unit tests directory not found (tests/unit)"
     fi
-    
+
     if [ -d "tests/integration" ]; then
         print_status "info" "Running integration tests..."
-        if python -m unittest discover -s tests/integration -p "*.py" -v; then
+        if poetry run python -m unittest discover -s tests/integration -p "*.py" -v; then
             print_status "success" "Integration tests passed"
         else
             print_status "error" "Integration tests failed"
@@ -119,14 +120,14 @@ run_automated_tests() {
     else
         print_status "warning" "Integration tests directory not found (tests/integration)"
     fi
-    
+
     return $test_failed
 }
 
 run_package_tests() {
     print_status "info" "Running package tests..."
     if [ -f "run_dist.py" ]; then
-        if python run_dist.py; then
+        if poetry run python run_dist.py; then
             print_status "success" "All tests passed"
         else
             print_status "error" "Some tests failed"
@@ -142,13 +143,13 @@ main() {
     package_name=$(basename "$(pwd)")
     package_name="${package_name//-/_}" # convert dashes to underscores
     print_status "config" "Detected package name: ${MAGENTA}${package_name}${NC}"
-    
+
     check_and_install "$package_name"
-    
+
     if ! run_automated_tests; then
         exit 1
     fi
-    
+
     if ! run_twine_check; then
         exit 1
     fi
@@ -156,7 +157,7 @@ main() {
     if ! run_package_tests; then
         exit 1
     fi
-    
+
     print_status "success" "All checks and tests completed successfully"
     print_status "debug" "Package ${MAGENTA}${package_name}${NC} is ready for distribution"
 }

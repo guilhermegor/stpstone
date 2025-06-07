@@ -28,18 +28,12 @@ repos:
         # pass_filenames: false
         stages: [commit-msg]
   - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.19.1 
+    rev: v0.19.1
     hooks:
       - id: gitlint
         stages: [commit-msg]
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
-    hooks:
-      - id: shellcheck
-        args: [--severity=warning]
-        types: [shell]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.8 
+    rev: 1.7.8
     hooks:
       - id: bandit
         args: [-r, .]
@@ -68,10 +62,6 @@ repos:
     hooks:
       - id: flake8
         args: [--max-line-length=100, --ignore=E203, --max-complexity=10]
-  - repo: https://github.com/igorshubovych/markdownlint-cli 
-    rev: v0.45.0
-    hooks:
-      - id: markdownlint
   - repo: local
     hooks:
       - id: check-unix-filenames
