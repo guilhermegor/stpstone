@@ -13,12 +13,12 @@ env:
   OWNER: "guilhermegor"
 
 jobs:
-  automated-tests:
+  automated_tests:
     uses: ./.github/workflows/tests.yaml
 
   details:
     runs-on: ubuntu-24.04
-    needs: automated-tests
+    needs: automated_tests
     outputs:
       new_version: ${{ steps.release.outputs.new_version }}
       suffix: ${{ steps.release.outputs.suffix }}
@@ -212,9 +212,9 @@ jobs:
       - name: Publish to PyPI
         run: |
           poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
-          
+
           yes | poetry publish --build
-          
+
           # fallback to twine
           if [ $? -ne 0 ]; then
             echo "Poetry publish failed, falling back to twine"

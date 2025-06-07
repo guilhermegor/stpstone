@@ -12,7 +12,6 @@ repos:
       - id: check-xml
       - id: check-yaml
       - id: check-toml
-      - id: pretty-format-json
       - id: debug-statements
       - id: detect-private-key
       - id: check-added-large-files
