@@ -23,6 +23,7 @@ vscode:mohsen1.prettify-json
 vscode:ms-azuretools.vscode-containers
 vscode:ms-azuretools.vscode-docker
 vscode:ms-kubernetes-tools.vscode-kubernetes-tools
+vscode:ms-python.autopep8
 vscode:ms-python.debugpy
 vscode:ms-python.isort
 vscode:ms-python.python

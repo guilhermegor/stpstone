@@ -23,29 +23,29 @@ metadata:
         DESCRIPTION: OTHERS
   id_headquarters_branch:
     schema: raw
-    table_name: br_irs_id_headquarters_branch
+    table_name: br_irs_metadata_id_headquarters_branch
     data:
-      - CODE: 1
+      - CODE: '1'
         DESCRIPTION: HEADQUARTERS
-      - CODE: 2
+      - CODE: '2'
         DESCRIPTION: BRANCH
   registration_status:
     schema: raw
-    table_name: br_irs_registration_status
+    table_name: br_irs_metadata_registration_status
     data:
-      - CODE: 1
+      - CODE: '1'
         DESCRIPTION: 'NULL'
-      - CODE: 2
+      - CODE: '2'
         DESCRIPTION: ACTIVE
-      - CODE: 3
+      - CODE: '3'
         DESCRIPTION: SUSPENDED
-      - CODE: 4
+      - CODE: '4'
         DESCRIPTION: UNFIT
-      - CODE: 8
+      - CODE: '8'
         DESCRIPTION: RETIRED
   simplified_tx_system:
     schema: raw
-    table_name: br_irs_simplified_tx_system
+    table_name: br_irs_metadata_simplified_tx_system
     data:
       - CODE: S
         DESCRIPTION: 'YES'
@@ -55,7 +55,7 @@ metadata:
         DESCRIPTION: 'OTHERS'
   mei:
     schema: raw
-    table_name: br_irs_mei
+    table_name: br_irs_metadata_mei
     data:
       - CODE: S
         DESCRIPTION: 'YES'
@@ -65,7 +65,7 @@ metadata:
         DESCRIPTION: 'OTHERS'
   type_person:
     schema: raw
-    table_name: br_irs_type_person
+    table_name: br_irs_metadata_person_type
     data:
       - CODE: 1
         DESCRIPTION: LEGAL ENTITY
@@ -82,18 +82,18 @@ companies:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_companies
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    CNPJ: str
+    EIN_COMPANY: str
     COMPANY_NAME: str
     LEGAL_FORM: str
     LEGAL_RESP_QUALIF: str
     COMPANY_SHARE_CAPITAL: float
-    COMPANY_SIZE: int
+    CODE_COMPANY_SIZE: str
     #   filled for governmental slugs with legal code 1xxx, and empty otherwise
     RESP_FEDERAL_ENTITY: str
 
@@ -102,7 +102,7 @@ businesses:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_businesses
   bl_insert_or_ignore: False
@@ -111,30 +111,30 @@ businesses:
     EIN_BASIC: str
     EIN_ORDER: str
     EIN_VD: str
-    ID_HEADQUARTERS_BRANCH: int
+    ID_HEADQUARTERS_BRANCH: str
     COMPANY_NAME: str
     ID_REGISTRATION_STATUS: str
     DT_REGISTRATION_STATUS: date
-    ID_REASON_REGISTRATION_STATUS: int
+    ID_REASON_REGISTRATION_STATUS: str
     CITY_FOREIGN_COUNTRY: str
     COUNTRY: str
     DT_INCEPTION: date
-    CNAE_MAIN: str
-    CNAE_SECOND: str
+    NCEA_MAIN: str
+    NCEA_SECONDARY: str
     TYPE_PUBLIC_PLACE: str
     DESC_PUBLIC_PLACE: str
-    NUMBER: str
+    NUMBER_PUBLIC_PLACE: str
     ADDRESS_COMPLEMENT: str
     NEIGHBORHOOD: str
     ZIP_CODE: str
     STATE: str
     CITY: str
-    AREA_CODE_1: int
-    TELEPHONE_1: int
-    AREA_CODE_2: int
-    TELEPHONE_2: int
-    AREA_CODE_FAX: int
-    FAX: int
+    AREA_CODE_1: str
+    TELEPHONE_1: str
+    AREA_CODE_2: str
+    TELEPHONE_2: str
+    AREA_CODE_FAX: str
+    FAX: str
     ELECTRONIC_MAILING: str
     SPECIAL_SIT: str
     DT_SPECIAL_SIT: date
@@ -144,17 +144,17 @@ simplified_taxation_system:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_simp_tax_sys
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    CNPJ: str
-    BL_SIMPL_TX: str
+    EIN_BASIC: str
+    CODE_SIMPL_TX: str
     DT_BEG_SIMPL_TX: date
     DT_END_SIMPL_TX: date
-    BL_MEI_TX: str
+    CODE_MEI_TX: str
     DT_BEG_MEI_TX: date
     DT_END_MEI_TX: date
 
@@ -163,22 +163,22 @@ shareholders:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_shareholders
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
-    EIN_COMPANY: str
-    ID_TYPE_PERSON: int
+    EIN_BASIC: str
+    ID_PERSON_TYPE: str
     NAME: str
     DOC_SHAREHOLDER: str
     SHAREHOLDER_EDUCATION: str
     DT_BEG_SHAREHOLDER: date
     COUNTRY: str
-    LEGAL_REPRESENTATIVE: str
-    REPRESENTATIVE_NAME: str
-    REPRESENTATIVE_EDUCATION: str
+    DOC_LEGAL_REPRESENTATIVE: str
+    NAME_LEGAL_REPRESENTATIVE: str
+    CODE_EDUCATION_LEGAL_REPRESENTATIVE: str
     AGE_RANGE: str
 
 countries:
@@ -186,7 +186,7 @@ countries:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_countries
   bl_insert_or_ignore: False
@@ -200,7 +200,7 @@ cities:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_cities
   bl_insert_or_ignore: False
@@ -214,7 +214,7 @@ shareholders_education:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_shareholders_education
   bl_insert_or_ignore: False
@@ -242,9 +242,9 @@ ncea:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
-  table_name: br_irs_rfb_cnaes
+  table_name: br_irs_ncea
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
@@ -256,11 +256,11 @@ registration_status:
   req_method: GET
   bl_verify: False
   bl_io_interpreting: True
-  str_fmt_dt: 'YYYY-MM-DD'
+  str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_registration_status
   bl_insert_or_ignore: False
   bl_schema: True
   dtypes:
     CODE: str
-    REASON_REG_STATUS: str
+    DESCRIPTION: str
