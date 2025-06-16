@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.12"
+version = "2.0.13"
 description = "Solid financial ETL, analytics and utils with support to global markets."
 authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
@@ -56,7 +56,7 @@ classifiers = [
 "Source" = "https://github.com/guilhermegor/stpstone"
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.14"
+python = ">=3.10,<3.14"
 pyyaml = "6.0.2"
 pyodbc = "5.2.0"
 workalendar = "17.0.0"
