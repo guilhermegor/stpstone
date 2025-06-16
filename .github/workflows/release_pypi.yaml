@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: ["3.12.8"]
+        python-version: ["3.9.22", "3.10.17", "3.11.12", "3.12.8"]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
