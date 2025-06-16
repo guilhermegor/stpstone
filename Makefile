@@ -21,7 +21,7 @@ install_dist_locally:
 test_dist:
 	bash cli/test_dist.sh
 
-upload_test_pypi: clean_builds
+publish_test_pypi: clean_builds
 	yes | bash cli/test_dist.sh
 	bash cli/test_pypi_publish.sh
 
