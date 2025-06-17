@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.15"
+version = "2.0.16"
 description = "Solid financial ETL, analytics and utils with support to global markets."
 authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
@@ -81,7 +81,6 @@ wget = "3.2"
 requests = "2.32.3"
 py7zr = "0.22.0"
 validate-docbr = "1.10.0"
-asyncio = "3.4.3"
 investpy = "1.0.8"
 yfinance = "0.2.52"
 nelson-siegel-svensson = "0.5.0"
