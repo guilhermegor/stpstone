@@ -1,21 +1,30 @@
-import psycopg2
-import subprocess
-import os
-import pandas as pd
-from psycopg2.extensions import connection as Connection, cursor as Cursor
-from psycopg2.extras import execute_values
 from logging import Logger
-from typing import List, Dict, Any, Optional
+import os
+import subprocess
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
+from psycopg import connect, Connection, Cursor
+from psycopg.rows import dict_row
+from psycopg.sql import Composed, Identifier, SQL
+
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.parsers.json import JsonFiles
-from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.connections.databases.abc import DatabaseConnection
+from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.json import JsonFiles
 
 
 class PostgreSQLDB(DatabaseConnection):
-
-    def __init__(self, dbname:str, user:str, password:str, host:str, port:int,
-                 str_schema:str="public", logger:Optional[Logger]=None) -> None:
+    def __init__(
+        self,
+        dbname: str,
+        user: str,
+        password: str,
+        host: str,
+        port: int,
+        str_schema: str = "public",
+        logger: Optional[Logger] = None,
+    ) -> None:
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -28,56 +37,82 @@ class PostgreSQLDB(DatabaseConnection):
             "user": self.user,
             "password": self.password,
             "host": self.host,
-            "port": self.port
+            "port": self.port,
         }
-        self.conn: Connection = psycopg2.connect(**self.dict_db_config)
+        self.conn: Connection = connect(**self.dict_db_config, row_factory=dict_row)
         self.cursor: Cursor = self.conn.cursor()
-        self.execute(f"SET search_path TO '{self.str_schema}';")
+        self.execute(SQL("SET search_path TO {}").format(Identifier(self.str_schema)))
 
-    def execute(self, str_query:str) -> None:
+    def execute(self, str_query: str | Composed) -> None:
         self.cursor.execute(str_query)
 
-    def read(self, str_query:str, dict_type_cols:Optional[Dict[str, Any]]=None,
-              list_cols_dt:Optional[List[str]]=None, str_fmt_dt:Optional[str]=None) -> pd.DataFrame:
+    def read(
+        self,
+        str_query: str,
+        dict_type_cols: Optional[Dict[str, Any]] = None,
+        list_cols_dt: Optional[List[str]] = None,
+        str_fmt_dt: Optional[str] = None,
+    ) -> pd.DataFrame:
         # retrieving dataframe
-        df_ = pd.read_sql_query(str_query, self.conn)
+        self.cursor.execute(str_query)
+        data = self.cursor.fetchall()
+        df_ = pd.DataFrame(data)
+
         # changing data types
         if all([x is not None for x in [dict_type_cols, list_cols_dt, str_fmt_dt]]):
             df_ = df_.astype(dict_type_cols)
             for col_ in list_cols_dt:
-                df_[col_] = [DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]]
-        # return dataframe
+                df_[col_] = [
+                    DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]
+                ]
         return df_
 
-    def insert(self, json_data:List[Dict[str, Any]], str_table_name:str,
-        bl_insert_or_ignore:bool=False) -> None:
+    def insert(
+        self,
+        json_data: List[Dict[str, Any]],
+        str_table_name: str,
+        bl_insert_or_ignore: bool = False,
+    ) -> None:
         # validate json, in order to have the same keys
         json_data = JsonFiles().normalize_json_keys(json_data)
-        # sql insert statement
-        list_columns = ", ".join(json_data[0].keys())
-        list_placeholders = ", ".join(["%s" for _ in json_data[0]])
-        if bl_insert_or_ignore == True:
-            str_query = f"INSERT INTO {str_table_name} ({list_columns}) VALUES " \
-                + f"({list_placeholders}) ON CONFLICT DO NOTHING"
+
+        if not json_data:
+            return
+
+        columns = json_data[0].keys()
+        placeholders = SQL(",").join([SQL("%s") for _ in columns])
+        table = Identifier(str_table_name)
+        cols = SQL(",").join(map(Identifier, columns))
+
+        if bl_insert_or_ignore:
+            query = SQL("""
+                INSERT INTO {table} ({cols})
+                VALUES ({placeholders})
+                ON CONFLICT DO NOTHING
+            """).format(table=table, cols=cols, placeholders=placeholders)
         else:
-            str_query = f"INSERT INTO {str_table_name} ({list_columns}) VALUES " \
-                + f"({list_placeholders})"
+            query = SQL("""
+                INSERT INTO {table} ({cols})
+                VALUES ({placeholders})
+            """).format(table=table, cols=cols, placeholders=placeholders)
+
         try:
-            execute_values(
-                self.cursor,
-                str_query,
-                [tuple(record.values()) for record in json_data]
-            )
+            # Convert each record to a tuple in the same order as columns
+            records = [tuple(record[col] for col in columns) for record in json_data]
+
+            # Execute with all records at once
+            self.cursor.executemany(query, records)
             self.conn.commit()
+
             if self.logger is not None:
                 CreateLog().info(
                     self.logger,
-                    f"Successful commit in db {self.dict_db_config["dbname"]} "
-                    + f"/ table {str_table_name}."
+                    f"Successful commit in db {self.dict_db_config['dbname']} "
+                    + f"/ table {str_table_name}.",
                 )
         except Exception as e:
             self.conn.rollback()
-            self.close
+            self.close()
             if self.logger is not None:
                 CreateLog().error(
                     self.logger,
@@ -85,7 +120,7 @@ class PostgreSQLDB(DatabaseConnection):
                     + f"DB_CONFIG: {self.dict_db_config}\n"
                     + f"TABLE_NAME: {str_table_name}\n"
                     + f"JSON_DATA: {json_data}\n"
-                    + f"ERROR_MESSAGE: {e}"
+                    + f"ERROR_MESSAGE: {e}",
                 )
             raise Exception(
                 "ERROR WHILE INSERTING DATA\n"
@@ -98,24 +133,27 @@ class PostgreSQLDB(DatabaseConnection):
     def close(self) -> None:
         self.conn.close()
 
-    def backup(self, str_backup_dir:str, str_bkp_name:str=None) -> str:
+    def backup(self, str_backup_dir: str, str_bkp_name: str = None) -> str:
         try:
-            # ensure the backup directory exists
             os.makedirs(str_backup_dir, exist_ok=True)
-            # generate the backup file name
             backup_file = os.path.join(str_backup_dir, str_bkp_name)
             env = os.environ.copy()
             env["PGPASSWORD"] = self.password
-            # run the pg_dump command
+
             command = [
                 "pg_dump",
-                "-h", self.host,
-                "-p", str(self.port),
-                "-U", self.user,
-                "-F", "c",  # custom format
-                "-b",       # include large objects
-                "-f", backup_file,  # output file
-                self.dbname
+                "-h",
+                self.host,
+                "-p",
+                str(self.port),
+                "-U",
+                self.user,
+                "-F",
+                "c",
+                "-b",
+                "-f",
+                backup_file,
+                self.dbname,
             ]
             subprocess.run(command, check=True, env=env)
             return f"Backup successful! File saved at: {backup_file}"
