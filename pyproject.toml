@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.17"
+version = "2.0.19"
 description = "Solid financial ETL, analytics and utils with support to global markets."
 authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
