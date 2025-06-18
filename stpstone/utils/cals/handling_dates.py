@@ -1,21 +1,21 @@
-import pytz
+from datetime import date, datetime, time, timedelta, timezone
 import locale
 import time
-import businesstimedelta
-import pandas as pd
-from datetime import date, datetime, time, timedelta, timezone
 from typing import List, Optional, Tuple, Union
+from zoneinfo import ZoneInfo
+
+import businesstimedelta
 from dateutil.relativedelta import relativedelta
 from more_itertools import unique_everseen
+import pandas as pd
 from workalendar.core import SAT, SUN
-from stpstone.transformations.validation.metaclass_type_checker import \
-    TypeChecker
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.br_bzdays import BrazilBankCalendar
 from stpstone.utils.parsers.str import StrHandler
 
 
 class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
-
     def build_date(self, year: int, month: int, day: int) -> date:
         return date(year=year, month=month, day=day)
 
@@ -51,7 +51,9 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
     def check_is_date(self, dt_: datetime) -> bool:
         return isinstance(dt_, date)
 
-    def str_date_to_datetime(self, date_str: str, format_input: str = "DD/MM/YYYY") -> datetime:
+    def str_date_to_datetime(
+        self, date_str: str, format_input: str = "DD/MM/YYYY"
+    ) -> datetime:
         """
         String date to datetime
         Args:
@@ -90,7 +92,9 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         else:
             raise Exception(f"Not a valid date format {format_input}")
 
-    def list_wds(self, dt_start: datetime, dt_end: datetime, int_wd_bef: int) -> List[int]:
+    def list_wds(
+        self, dt_start: datetime, dt_end: datetime, int_wd_bef: int
+    ) -> List[int]:
         """
         List of working days between two dates
         Args:
@@ -415,13 +419,13 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
     def unix_timestamp_to_datetime(
         self, unix_timestamp: Union[float, int], str_tz: str = "UTC"
     ) -> datetime:
-        tz_obj = timezone.utc if str_tz == "UTC" else timezone(str_tz)
+        tz_obj = ZoneInfo("UTC") if str_tz == "UTC" else ZoneInfo(str_tz)
         return datetime.fromtimestamp(unix_timestamp, tz=tz_obj)
 
     def unix_timestamp_to_date(
         self, unix_timestamp: Union[float, int], str_tz: str = "UTC"
     ) -> datetime:
-        tz_obj = timezone.utc if str_tz == "UTC" else timezone(str_tz)
+        tz_obj = ZoneInfo("UTC") if str_tz == "UTC" else ZoneInfo(str_tz)
         return datetime.fromtimestamp(unix_timestamp, tz=tz_obj).date()
 
     def iso_to_unix_timestamp(self, iso_timestamp: str) -> int:
@@ -471,7 +475,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
     ) -> Union[datetime, str]:
         if bl_return_from_utc == True:
             return pd.to_datetime(timestamp_dt, unit="s", utc=True).tz_convert(
-                "America/Sao_Paulo"
+                ZoneInfo("America/Sao_Paulo")
             )
         else:
             return pd.to_datetime(timestamp_dt, unit="s", utc=True).strftime("%Y%m%d")
@@ -486,7 +490,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
 
     def utc_from_dt(self, dt_):
         dt_ = datetime.combine(dt_, datetime.min.time())
-        return pytz.utc.localize(dt_)
+        return dt_.replace(tzinfo=ZoneInfo("UTC"))
 
     def month_year_string(
         self,

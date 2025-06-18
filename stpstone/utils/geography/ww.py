@@ -1,28 +1,39 @@
-import pycountry
-import pytz
-import pycountry_convert as pc
 from datetime import datetime
-from typing import List, Optional, Dict, Literal
+from typing import Dict, List, Literal, Optional
+from zoneinfo import ZoneInfo
+
+from countryinfo import CountryInfo
+import pycountry
+import pycountry_convert as pc
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class WWTimezones(metaclass=TypeChecker):
-
     def get_timezones_by_country_code(self, country_code: str) -> Optional[List[str]]:
-        country = pycountry.countries.get(alpha_2=country_code.upper())
-        return pytz.country_timezones.get(country.alpha_2) if country else None
+        try:
+            country = CountryInfo(country_code.upper())
+            return country.timezones()
+        except KeyError:
+            return None
 
     def get_countries_in_timezone(self, timezone_name: str) -> List[str]:
-        return [
-            code for code, tz_list in pytz.country_timezones.items()
-            if timezone_name in tz_list
-        ]
+        countries = []
+        for country in pycountry.countries:
+            try:
+                if timezone_name in CountryInfo(country.alpha_2).timezones():
+                    countries.append(country.alpha_2)
+            except Exception:
+                continue
+        return countries
 
-    def get_current_time_in_country(self, country_code: str, int_tz: int = 0) -> Optional[str]:
+    def get_current_time_in_country(
+        self, country_code: str, int_tz: int = 0
+    ) -> Optional[str]:
         timezones = self.get_timezones_by_country_code(country_code.upper())
         if not timezones:
             return None
-        tz = pytz.timezone(timezones[int_tz])
+        tz = ZoneInfo(timezones[int_tz])
         return datetime.now(tz).isoformat(sep=" ")
 
     def get_country_from_timezone(self, timezone_name: str) -> List[str]:
@@ -30,16 +41,20 @@ class WWTimezones(metaclass=TypeChecker):
 
     @property
     def get_all_timezones_grouped(self) -> Dict[str, List[str]]:
-        return pytz.country_timezones
+        mapping = {}
+        for country in pycountry.countries:
+            try:
+                mapping[country.alpha_2] = CountryInfo(country.alpha_2).timezones()
+            except Exception:
+                continue
+        return mapping
 
 
 class WWGeography(metaclass=TypeChecker):
-
     def get_country_details(self, country_code: str) -> Optional[Dict[str, str]]:
-        country = (
-            pycountry.countries.get(alpha_2=country_code.upper())
-            or pycountry.countries.get(alpha_3=country_code.upper())
-        )
+        country = pycountry.countries.get(
+            alpha_2=country_code.upper()
+        ) or pycountry.countries.get(alpha_3=country_code.upper())
         if not country:
             return None
         return {
@@ -51,12 +66,12 @@ class WWGeography(metaclass=TypeChecker):
 
     def bl_valid_country_code(self, country_code: str) -> bool:
         return bool(
-            pycountry.countries.get(alpha_2=country_code.upper()) or
-            pycountry.countries.get(alpha_3=country_code.upper())
+            pycountry.countries.get(alpha_2=country_code.upper())
+            or pycountry.countries.get(alpha_3=country_code.upper())
         )
 
     def get_country_flag_emoji(self, country_code: str) -> Optional[str]:
-        if self.bl_valid_country_code(country_code.upper()) == False:
+        if not self.bl_valid_country_code(country_code.upper()):
             return None
         return "".join(chr(ord(c) + 127397) for c in country_code.upper())
 
@@ -67,7 +82,7 @@ class WWGeography(metaclass=TypeChecker):
         return None
 
     def get_continent_by_country_code(self, country_code: str) -> Optional[str]:
-        if self.bl_valid_country_code(country_code) == False:
+        if not self.bl_valid_country_code(country_code):
             return None
         try:
             continent_code = pc.country_alpha2_to_continent_code(country_code.upper())
@@ -75,8 +90,9 @@ class WWGeography(metaclass=TypeChecker):
         except (KeyError, ValueError):
             return None
 
-    def get_continent_code_by_country_code(self, country_code: str) \
-        -> Literal["AF", "AS", "EU", "NA", "SA", "OC", "AN"]:
+    def get_continent_code_by_country_code(
+        self, country_code: str
+    ) -> Literal["AF", "AS", "EU", "NA", "SA", "OC", "AN"]:
         if not self.bl_valid_country_code(country_code):
             return None
         try:
