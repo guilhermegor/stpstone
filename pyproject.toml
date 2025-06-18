@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.17"
+version = "2.0.19"
 description = "Solid financial ETL, analytics and utils with support to global markets."
 authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
@@ -64,7 +64,6 @@ python-dateutil = "2.9.0.post0"
 more-itertools = "10.6.0"
 businesstimedelta = "1.0.1"
 pandas = "2.2.3"
-pathlib = "1.0.1"
 backoff = "2.2.1"
 numpy = [
     { version = ">=2.0.0", python = ">=3.10" },

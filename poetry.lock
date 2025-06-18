@@ -3603,14 +3603,14 @@ plotting = ["matplotlib (>=0.91)"]
 
 [[package]]
 name = "narwhals"
-version = "1.43.0"
+version = "1.42.1"
 description = "Extremely lightweight compatibility layer between dataframe libraries"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "narwhals-1.43.0-py3-none-any.whl", hash = "sha256:7accb0eae172f5697ada3635f46221dfcc98e9419f694df628c0745526d5c514"},
-    {file = "narwhals-1.43.0.tar.gz", hash = "sha256:5a28119401fccb4d344704f806438a983bb0a5b3f4a638760d25b1d521a18a79"},
+    {file = "narwhals-1.42.1-py3-none-any.whl", hash = "sha256:7a270d44b94ccdb277a799ae890c42e8504c537c1849f195eb14717c6184977a"},
+    {file = "narwhals-1.42.1.tar.gz", hash = "sha256:50a5635b11aeda98cf9c37e839fd34b0a24159f59a4dfae930290ad698320494"},
 ]
 
 [package.extras]
@@ -3619,7 +3619,7 @@ dask = ["dask[dataframe] (>=2024.8)"]
 duckdb = ["duckdb (>=1.0)"]
 ibis = ["ibis-framework (>=6.0.0)", "packaging", "pyarrow-hotfix", "rich"]
 modin = ["modin"]
-pandas = ["pandas (>=1.1.3)"]
+pandas = ["pandas (>=0.25.3)"]
 polars = ["polars (>=0.20.3)"]
 pyarrow = ["pyarrow (>=11.0.0)"]
 pyspark = ["pyspark (>=3.5.0)"]
@@ -7714,4 +7714,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.14"
-content-hash = "88001224093460c443148f4f0ebd993085eca60a682143e3efc66479e794c50d"
+content-hash = "d656cdf557f7d2ec2d01ff350dbf728431ca649984a339e9d9c9bbb98bae037c"

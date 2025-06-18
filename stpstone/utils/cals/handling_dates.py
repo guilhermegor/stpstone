@@ -1,4 +1,5 @@
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from datetime import time as datetime_time
 import locale
 import time
 from typing import List, Optional, Tuple, Union
@@ -433,7 +434,9 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         dt_utc = dt_.astimezone(timezone.utc)
         return dt_utc.timestamp()
 
-    def datetime_to_unix_timestamp(self, dt_: Union[date, datetime, time]) -> int:
+    def datetime_to_unix_timestamp(
+        self, dt_: Union[date, datetime, datetime_time]
+    ) -> int:
         """
         Convert a datetime/date/time object to a Unix timestamp (seconds since epoch).
 
@@ -444,11 +447,11 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             int: Unix timestamp (seconds since 1970-01-01 00:00:00 UTC)
         """
         # If input is time, combine with today's date
-        if isinstance(dt_, time):
+        if isinstance(dt_, datetime_time):
             dt_ = datetime.combine(date.today(), dt_)
         # If input is date, convert to datetime at midnight
         elif isinstance(dt_, date) and not isinstance(dt_, datetime):
-            dt_ = datetime.combine(dt_, time.min)
+            dt_ = datetime.combine(dt_, datetime_time.min)
 
         # If datetime is timezone-naive, assume local timezone
         if dt_.tzinfo is None:
