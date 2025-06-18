@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.16"
+version = "2.0.17"
 description = "Solid financial ETL, analytics and utils with support to global markets."
 authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
@@ -60,7 +60,6 @@ python = ">=3.9,<3.14"
 pyyaml = "6.0.2"
 pyodbc = "5.2.0"
 workalendar = "17.0.0"
-pytz = "2025.1"
 python-dateutil = "2.9.0.post0"
 more-itertools = "10.6.0"
 businesstimedelta = "1.0.1"
@@ -127,6 +126,7 @@ bcrypt = "4.3.0"
 playwright = "1.52.0"
 openai = "1.79.0"
 mystic = "0.4.4"
+countryinfo = "0.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.1.0"
