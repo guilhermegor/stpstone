@@ -96,3 +96,6 @@ gh_set_pypi_secret:
 # requirements - dev
 vscode_setup:
 	bash cli/vscode_setup.sh
+
+export_deps:
+	bash cli/export_deps.sh
