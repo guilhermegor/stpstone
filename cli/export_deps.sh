@@ -19,9 +19,9 @@ fi
 
 # export main dependencies
 echo "Exporting production dependencies to $REQUIREMENTS_FILE..."
-if ! poetry export -f requirements.txt --output "$REQUIREMENTS_FILE" --without-hashes; then
+if ! poetry export --without dev --format requirements.txt --output "$REQUIREMENTS_FILE" --without-hashes; then
     echo "Warning: Failed to export with poetry, falling back to pip freeze" >&2
-    pip freeze > "$REQUIREMENTS_FILE"
+    poetry run python -m pip freeze > "$REQUIREMENTS_FILE"
 fi
 
 # export development dependencies (vscode extensions)
