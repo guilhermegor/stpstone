@@ -9,12 +9,12 @@ from psycopg.rows import dict_row
 from psycopg.sql import Composed, Identifier, SQL
 
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.databases.abc import DatabaseConnection
+from stpstone.utils.connections.databases.abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
 
 
-class PostgreSQLDB(DatabaseConnection):
+class PostgreSQLDB(ABCDatabase):
     def __init__(
         self,
         dbname: str,
@@ -133,7 +133,7 @@ class PostgreSQLDB(DatabaseConnection):
     def close(self) -> None:
         self.conn.close()
 
-    def backup(self, str_backup_dir: str, str_bkp_name: str = None) -> str:
+    def backup(self, str_backup_dir: str, str_bkp_name: Optional[str] = None) -> str:
         try:
             os.makedirs(str_backup_dir, exist_ok=True)
             backup_file = os.path.join(str_backup_dir, str_bkp_name)
