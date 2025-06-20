@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from psycopg import connect, Connection, Cursor
 from psycopg.rows import dict_row
-from psycopg.sql import Composed, Identifier, SQL
+from psycopg.sql import Identifier, SQL
 
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.abc import ABCDatabase
@@ -43,7 +43,7 @@ class PostgreSQLDB(ABCDatabase):
         self.cursor: Cursor = self.conn.cursor()
         self.execute(SQL("SET search_path TO {}").format(Identifier(self.str_schema)))
 
-    def execute(self, str_query: str | Composed) -> None:
+    def execute(self, str_query: str) -> None:
         self.cursor.execute(str_query)
 
     def read(
