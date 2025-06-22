@@ -1,9 +1,18 @@
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Dict, List, Any, Optional, Protocol, runtime_checkable
-import pandas as pd
 from logging import Logger
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+
+import pandas as pd
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
+
+
+@runtime_checkable
+class SQLComposable(Protocol):
+    """Protocol for database-agnostic SQL composable objects"""
+
+    def __str__(self) -> str: ...
 
 
 @runtime_checkable
@@ -84,7 +93,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         self.logger = logger
 
     @abstractmethod
-    def execute(self, str_query: str) -> None:
+    def execute(self, str_query: str | SQLComposable) -> None:
         """
         Execute a SQL query without returning results.
 

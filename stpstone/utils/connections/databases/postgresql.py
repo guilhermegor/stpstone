@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from psycopg import connect, Connection, Cursor
 from psycopg.rows import dict_row
-from psycopg.sql import Identifier, SQL
+from psycopg.sql import Composable, Identifier, SQL
 
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.abc import ABCDatabase
@@ -39,11 +39,15 @@ class PostgreSQLDB(ABCDatabase):
             "host": self.host,
             "port": self.port,
         }
-        self.conn: Connection = connect(**self.dict_db_config, row_factory=dict_row)
-        self.cursor: Cursor = self.conn.cursor()
+        try:
+            self.conn: Connection = connect(**self.dict_db_config, row_factory=dict_row)
+            self.cursor: Cursor = self.conn.cursor()
+            self.execute("SELECT 1")
+        except Exception as e:
+            CreateLog().error(self.logger, f"Error connecting to database: {str(e)}")
         self.execute(SQL("SET search_path TO {}").format(Identifier(self.str_schema)))
 
-    def execute(self, str_query: str) -> None:
+    def execute(self, str_query: str | Composable) -> None:
         self.cursor.execute(str_query)
 
     def read(
