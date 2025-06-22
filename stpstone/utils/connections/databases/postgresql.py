@@ -48,6 +48,8 @@ class PostgreSQLDB(ABCDatabase):
         self.execute(SQL("SET search_path TO {}").format(Identifier(self.str_schema)))
 
     def execute(self, str_query: str | Composable) -> None:
+        if not isinstance(str_query, (str, Composable)):
+            raise TypeError("Query must be string or Composable")
         self.cursor.execute(str_query)
 
     def read(

@@ -1,8 +1,9 @@
 from abc import ABC, ABCMeta, abstractmethod
 from logging import Logger
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, List, Optional, Union, Protocol, runtime_checkable
 
 import pandas as pd
+from pydantic_core import core_schema
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -10,16 +11,27 @@ from stpstone.utils.loggs.create_logs import CreateLog
 
 @runtime_checkable
 class SQLComposable(Protocol):
-    """Protocol for database-agnostic SQL composable objects"""
+    """Database-agnostic protocol for SQL composable objects"""
 
     def __str__(self) -> str: ...
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls,
+        _source_type: Any,
+        _handler: Any,
+    ) -> core_schema.CoreSchema:
+        """Tell Pydantic how to handle this protocol"""
+        return core_schema.union_schema(
+            [core_schema.str_schema(), core_schema.is_instance_schema(cls)]
+        )
 
 
 @runtime_checkable
 class DbCursor(Protocol):
     """Protocol defining a generic database cursor interface."""
 
-    def execute(self, query: str, params: Any = None) -> Any: ...
+    def execute(self, query: Union[str, SQLComposable], params: Any = None) -> Any: ...
     def fetchone(self) -> Any: ...
     def fetchall(self) -> List[Any]: ...
     def close(self) -> None: ...
@@ -93,7 +105,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         self.logger = logger
 
     @abstractmethod
-    def execute(self, str_query: str | SQLComposable) -> None:
+    def execute(self, str_query: Union[str, SQLComposable]) -> None:
         """
         Execute a SQL query without returning results.
 
