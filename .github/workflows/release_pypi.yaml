@@ -144,6 +144,7 @@ jobs:
 
       - name: Build Package
         run: |
+          poetry version ${{ needs.details.outputs.new_version }}
           if [ ! -d "dist" ] || [ ! -d "dist/${{ env.PACKAGE_NAME }}-${{ needs.details.outputs.new_version }}" ]; then
             echo "Building package for version ${{ needs.details.outputs.new_version }}"
             poetry build

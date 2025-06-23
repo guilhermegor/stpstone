@@ -17,6 +17,7 @@ install_dist_locally:
 	poetry build
 	poetry install
 	poetry run python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
+	poetry run python -c "import stpstone; print(stpstone.__version__)"
 
 test_dist:
 	bash cli/test_dist.sh

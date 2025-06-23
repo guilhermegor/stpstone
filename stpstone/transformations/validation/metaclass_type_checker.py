@@ -68,9 +68,14 @@ class TypeChecker(type):
                     BufferedIOBase,
                     BytesIO,
                     SQLComposable,
+                    Composable,
                 )
                 # use get_type_hints with include_extras=True for Python 3.9+ compatibility
-                type_hints = get_type_hints(attr_value, include_extras=True)
+                try:
+                    type_hints = get_type_hints(attr_value, include_extras=True)
+                except (NameError, AttributeError):
+                    type_hints = {}
+                    bl_arbitrary_types = True
                 for hint in type_hints.values():
                     origin = get_origin(hint)
                     # check for direct matches
