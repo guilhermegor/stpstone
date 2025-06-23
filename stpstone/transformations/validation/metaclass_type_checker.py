@@ -5,6 +5,7 @@ from logging import Logger
 from numbers import Number
 from pydantic import validate_arguments, ConfigDict
 from pydantic_core import core_schema
+from psycopg.sql import Composable
 from typing import (
     get_type_hints,
     get_origin,
@@ -35,7 +36,11 @@ class SQLComposable(Protocol):
     ) -> core_schema.CoreSchema:
         """Tell Pydantic how to handle this protocol"""
         return core_schema.union_schema(
-            [core_schema.str_schema(), core_schema.is_instance_schema(cls)]
+            [
+                core_schema.str_schema(),
+                core_schema.is_instance_schema(cls),
+                core_schema.is_instance_schema(Composable),
+            ]
         )
 
 
