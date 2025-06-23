@@ -1,6 +1,7 @@
-from logging import Logger
 import os
+import sys
 import subprocess
+from logging import Logger
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
@@ -43,9 +44,16 @@ class PostgreSQLDB(ABCDatabase):
             self.conn: Connection = connect(**self.dict_db_config, row_factory=dict_row)
             self.cursor: Cursor = self.conn.cursor()
             self.execute("SELECT 1")
+            self.execute(
+                SQL("SET search_path TO {}").format(Identifier(self.str_schema))
+            )
         except Exception as e:
-            CreateLog().error(self.logger, f"Error connecting to database: {str(e)}")
-        self.execute(SQL("SET search_path TO {}").format(Identifier(self.str_schema)))
+            error_msg = f"Error connecting to database: {str(e)}"
+            if self.logger is not None:
+                CreateLog().error(self.logger, error_msg)
+            else:
+                print(f"DATABASE CONNECTION ERROR: {error_msg}", file=sys.stderr)
+            raise ConnectionError(error_msg) from e
 
     def execute(self, str_query: str | Composable) -> None:
         if not isinstance(str_query, (str, Composable)):
