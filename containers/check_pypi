@@ -1,6 +1,5 @@
 FROM python:3.12-slim
 
-# Allow the user to specify which version to install
 ARG STPSTONE_VERSION=latest
 
 WORKDIR /app
@@ -11,7 +10,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Install the specified version (or latest if not specified)
 RUN if [ "$STPSTONE_VERSION" = "latest" ]; then \
     pip install --no-cache-dir stpstone; \
     else \

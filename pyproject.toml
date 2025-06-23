@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stpstone"
-version = "2.0.25"
+version = "2.0.26"
 description = "Solid financial ETL, analytics and utils with support to global markets."
 authors = ["guilhermegor <github.bucked794@silomails.com>"]
 readme = "README.md"
@@ -71,6 +71,7 @@ numpy = [
 ]
 seaborn = ">=0.13.2"
 statsmodels = ">=0.14.4"
+scipy = ">=1.11.0,!=1.16.0"
 scikit-learn = ">=1.4.0"
 boto = ">=2.49.0"
 keyring = ">=25.6.0"
