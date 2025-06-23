@@ -31,7 +31,7 @@ class SQLComposable(Protocol):
     @classmethod
     def __get_pydantic_core_schema__(
         cls,
-        _source_type: Any,
+        source_type: Any,
         _handler: Any,
     ) -> core_schema.CoreSchema:
         """Tell Pydantic how to handle this protocol"""
@@ -44,70 +44,98 @@ class SQLComposable(Protocol):
         )
 
 
+def check_for_special_types(hint: Any, tup_special_types: tuple) -> bool:
+    """
+    Recursively check if a type hint contains any special types that require arbitrary_types_allowed
+
+    Args:
+        hint: The type hint to check
+        tup_special_types: Tuple of special types that require arbitrary_types_allowed
+
+    Returns:
+        True if the hint contains any special types, False otherwise
+    """
+    # Direct type check
+    if hint in tup_special_types:
+        return True
+
+    # Check if it's a class and subclass of special types
+    if isinstance(hint, type):
+        for special_type in tup_special_types:
+            try:
+                if issubclass(hint, special_type):
+                    return True
+            except TypeError:
+                # issubclass can raise TypeError for some types
+                continue
+
+    # Handle Union types
+    origin = get_origin(hint)
+    if origin is Union:
+        args = typing_get_args(hint)
+        for arg in args:
+            if check_for_special_types(arg, tup_special_types):
+                return True
+
+    # Handle other generic types (List, Dict, etc.)
+    if origin is not None:
+        args = typing_get_args(hint)
+        for arg in args:
+            if check_for_special_types(arg, tup_special_types):
+                return True
+
+    return False
+
+
 class TypeChecker(type):
     def __new__(
         cls: Type["TypeChecker"], name: str, bases: tuple, dict_: Dict[str, Any]
     ) -> "TypeChecker":
+        tup_types_ignore = (
+            pd.DataFrame,
+            pd.Series,
+            np.ndarray,
+            list,
+            Session,
+            Logger,
+            Number,
+        )
+
+        tup_special_types = (
+            *tup_types_ignore,
+            IO,
+            BinaryIO,
+            RawIOBase,
+            BufferedIOBase,
+            BytesIO,
+            SQLComposable,
+            Composable,  # This is the key addition
+        )
+
         for attr_name, attr_value in dict_.items():
             if callable(attr_value) and not attr_name.startswith("__"):
                 bl_arbitrary_types = False
-                tup_types_ignore = (
-                    pd.DataFrame,
-                    np.ndarray,
-                    pd.Series,
-                    list,
-                    Session,
-                    Logger,
-                    Number,
-                )
-                tup_special_types = (
-                    *tup_types_ignore,
-                    IO,
-                    BinaryIO,
-                    RawIOBase,
-                    BufferedIOBase,
-                    BytesIO,
-                    SQLComposable,
-                    Composable,
-                )
-                # use get_type_hints with include_extras=True for Python 3.9+ compatibility
+
+                # Get type hints with error handling
                 try:
                     type_hints = get_type_hints(attr_value, include_extras=True)
-                except (NameError, AttributeError):
-                    type_hints = {}
+                except (NameError, AttributeError, TypeError):
+                    # If we can't get type hints, assume we need arbitrary types
                     bl_arbitrary_types = True
+                    type_hints = {}
+
+                # Check each type hint for special types
                 for hint in type_hints.values():
-                    origin = get_origin(hint)
-                    # check for direct matches
-                    if any(
-                        hint is typ
-                        or (isinstance(hint, type) and issubclass(hint, typ))
-                        for typ in tup_special_types
-                    ):
+                    if check_for_special_types(hint, tup_special_types):
                         bl_arbitrary_types = True
                         break
-                    # handle Union types (Python 3.9+ compatible)
-                    if origin is Union or (
-                        hasattr(hint, "__origin__") and hint.__origin__ is Union
-                    ):
-                        args = typing_get_args(hint)
-                        if any(
-                            arg in tup_special_types
-                            or (isinstance(arg, type) and issubclass(arg, Protocol))
-                            for arg in args
-                        ):
-                            bl_arbitrary_types = True
-                            break
-                    # handle protocols
-                    if isinstance(hint, type) and issubclass(hint, Protocol):
-                        bl_arbitrary_types = True
-                        break
+
+                # Apply validation with appropriate config
                 dict_[attr_name] = validate_arguments(
                     attr_value,
                     config=ConfigDict(
                         arbitrary_types_allowed=bl_arbitrary_types,
-                        # for Python 3.9+ compatibility with protocols
-                        arbitrary_types_allowed_for_protocols=True,
                     ),
                 )
+
         return super().__new__(cls, name, bases, dict_)
