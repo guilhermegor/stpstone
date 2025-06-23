@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 from logging import Logger
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from psycopg import connect, Connection, Cursor
@@ -55,7 +55,7 @@ class PostgreSQLDB(ABCDatabase):
                 print(f"DATABASE CONNECTION ERROR: {error_msg}", file=sys.stderr)
             raise ConnectionError(error_msg) from e
 
-    def execute(self, str_query: str | Composable) -> None:
+    def execute(self, str_query: Union[str, Composable]) -> None:
         if not isinstance(str_query, (str, Composable)):
             raise TypeError("Query must be string or Composable")
         self.cursor.execute(str_query)
