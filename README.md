@@ -409,7 +409,7 @@ stpstone/
 ├── 📖 README.md             # Project overview
 ├── 📦 requirements.txt      # Production dependencies
 ├── 🔧 requirements-dev.txt  # Development dependencies
-└── 💻 requirements-venv.txt # Virtual environment setup
+└── 💻 requirements-prd.txt # Virtual environment setup
 </code></pre>
 
 ## 👨‍💻 Authors

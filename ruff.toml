@@ -1,0 +1,95 @@
+line-length = 99
+indent-width = 4
+target-version = "py312"
+exclude = [
+    # version control systems
+    ".bzr",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".svn",
+
+    # python-specific
+    "__pycache__",
+    "__pypackages__",
+    ".eggs",
+    "*.egg",
+    "*.egg-info",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+
+    # environment and cache
+    ".direnv",
+    ".env",
+    ".mypy_cache",
+    ".nox",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "venv",
+    "site-packages",
+
+    # build and distribution
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+
+    # ide and editor
+    ".ipynb_checkpoints",
+    ".vscode",
+
+    # other
+    ".pants.d",
+    ".pyenv",
+    "node_modules",
+    "*.log",
+]
+
+[format]
+quote-style = "double"
+indent-style = "tab"
+docstring-code-format = false
+docstring-code-line-length = 79  # original python standard - readability in terminal (help)
+
+[lint]
+select = [
+    "UP",  # pyupgrade - flags the use of deprecated Python features
+    "E",   # pycodestyle - checks for PEP 8 compliance
+    "F",   # flake8 - checks for various code quality issues
+    "ANN", # annotations - checks for type annotations
+    "B",   # flake8-bugbear - checks for common bugs and design problems
+    "SIM", # flake8-simplify - checks for code simplification opportunities
+    "I",   # isort - checks for import sorting
+    "AIR", # airflow - checks for Airflow-specific issues
+    "ERA", # eradicate - removes commented-out code
+    "S",   # flake8-bandit - checks for security issues
+    "PD",  # pandas-vet - checks for common pandas issues
+    "D",   # pydocstring - this enables all docstring checks
+]
+ignore = [
+    "D206",  # docstring should be indented with spaces, not tabs
+]
+fixable = ["I"]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"  # allow dummy variables to start
+                                                              #     with an underscore and be
+                                                              #     followed by alphanumeric
+
+[lint.isort]
+force-single-line = false
+combine-as-imports = true
+split-on-trailing-comma = true
+force-sort-within-sections = true
+lines-after-imports = 2
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.flake8-annotations]
+suppress-none-returning = false  # do not suppress warnings for functions that return None
+suppress-dummy-args = false  # require annotations for dummy arguments
+ignore-fully-untyped = false  # flag functions that are completely untyped
+allow-star-arg-any = false  # do not allow `*args` and `**kwargs` to be untyped

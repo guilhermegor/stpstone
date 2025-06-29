@@ -1,53 +1,114 @@
 {
-    "python.formatting.autopep8Args": ["--ignore", "E402"],
-	"yaml.format.singleQuote": true,
-	"workbench.iconTheme": "material-icon-theme",
-	"prettier.useTabs": true,
-	"prettier.singleQuote": true,
-	"prettier.requirePragma": true,
-	"prettier.insertPragma": true,
-	"[yaml]": {
-		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	},
-	"editor.formatOnSave": true,
-	"editor.codeActionsOnSave": {
-		"source.organizeImports": "never",
-		"source.organizeFroms": "never"
-	},
-	"editor.quickSuggestions": null,
-	"editor.rulers": [79],
-	"workbench.colorCustomizations": {
-		"editorRuler.foreground": "#D3D3D3"
-	},
-	"jupyter.useNotebookEditor": true,
-	"workbench.editorAssociations": {
-		"*.ipynb": "jupyter-notebook"
-	},
-	"jupyter.askForKernelRestart": false,
-	"notebook.cellToolbarLocation": {
-		"default": "right",
-		"jupyter-notebook": "left"
-	},
-	"security.workspace.trust.untrustedFiles": "open",
-	"files.associations": {
-		"*.ipynb": "jupyter"
-	},
-	"editor.minimap.enabled": false,
-	"editor.bracketPairColorization.enabled": true,
-	"[python]": {
-		"editor.formatOnType": true
-	},
-	"bracket-pair-colorizer-2.depreciation-notice": false,
-	"jupyter.interactiveWindow.textEditor.executeSelection": true,
-	"git.enableSmartCommit": true,
-	"git.confirmSync": false,
-	"workbench.colorTheme": "Color Identifiers Dark",
-	"editor.inlineSuggest.suppressSuggestions": true,
-	"terminal.integrated.defaultProfile.windows": "Git Bash",
-	"terminal.integrated.defaultProfile.linux": "bash",
-	"terminal.integrated.defaultProfile.osx": "Git Bash",
-	"files.exclude": {
-		"**/.git": false,
-		"**/.gitkeep": true
-	}
+  // =============================================
+  // GENERAL EDITOR SETTINGS
+  // =============================================
+  "editor.formatOnSave": true,
+  "editor.minimap.enabled": false,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never",
+    "source.organizeFroms": "never"
+  },
+  "editor.inlineSuggest.suppressSuggestions": true,
+
+  // =============================================
+  // LANGUAGE-SPECIFIC SETTINGS
+  // =============================================
+  "[python]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.rulers": [99],
+    "editor.codeActionsOnSave": {
+			"source.organizeImports.ruff": "explicit"
+		},
+    "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#D3D3D3"
+    },
+  },
+
+  "[sql]": {
+    "editor.rulers": [99],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#D3D3D3"
+    }
+  },
+
+  "[yaml]": {
+    "editor.rulers": [99],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#D3D3D3"
+    }
+  },
+  "yaml.format.singleQuote": true,
+
+  "[toml]": {
+    "editor.rulers": [99],
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#D3D3D3"
+    }
+  },
+
+
+	// =============================================
+	// RUFF SPECIFIC SETTINGS
+	// =============================================
+	"ruff.lint.select": ["I"],
+	"ruff.organizeImports": true,
+
+  // =============================================
+  // FORMATTER CONFIGURATIONS
+  // =============================================
+  "prettier.useTabs": true,
+  "prettier.singleQuote": true,
+  "prettier.requirePragma": true,
+  "prettier.insertPragma": true,
+
+  // =============================================
+  // WORKBENCH APPEARANCE
+  // =============================================
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.colorCustomizations": {
+    "editorRuler.foreground": "#D3D3D3"
+  },
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+
+  // =============================================
+  // JUPYTER NOTEBOOK SETTINGS
+  // =============================================
+  "jupyter.useNotebookEditor": true,
+  "jupyter.askForKernelRestart": false,
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+
+  // =============================================
+  // FILE HANDLING
+  // =============================================
+  "files.associations": {
+    "*.ipynb": "jupyter"
+  },
+  "files.exclude": {
+    "**/.git": false,
+    "**/.gitkeep": true
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+
+  // =============================================
+  // GIT SETTINGS
+  // =============================================
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+
+  // =============================================
+  // TERMINAL SETTINGS
+  // =============================================
+  "terminal.integrated.defaultProfile.windows": "Git Bash"
 }

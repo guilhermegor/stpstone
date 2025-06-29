@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # configuration
-REQUIREMENTS_FILE="requirements-venv.txt"
+REQUIREMENTS_FILE="requirements-prd.txt"
 REQUIREMENTS_DEV_FILE="requirements-dev.txt"
 VSCODE_PREFIX="vscode:"
 
