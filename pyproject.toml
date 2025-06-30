@@ -136,6 +136,7 @@ python-dotenv = ">=1.1.0"
 poetry-plugin-export = ">=1.8"
 setuptools = ">=80.8.0"
 twine = ">=6.1.0"
+ruff = "^0.12.1"
 
 [build-system]
 requires = ["poetry-core>=1.7.0"]

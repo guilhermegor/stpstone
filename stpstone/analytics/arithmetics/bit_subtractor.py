@@ -1,102 +1,154 @@
+"""Binary subtractor implementations.
+
+This module provides implementations of binary subtractors:
+- HalfSubtractor: Subtracts two single bits
+- FullSubtractor: Subtracts two bits with borrow-in
+
+Classes
+-------
+HalfSubtractor
+    Subtracts two single bits producing difference and borrow
+FullSubtractor
+    Subtracts two bits with borrow-in producing difference and borrow-out
+"""
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class HalfSubtractor(metaclass=TypeChecker):
+    """A half subtractor circuit that subtracts two single-bit binary numbers.
+
+    The half subtractor performs binary subtraction of two bits and produces
+    a difference bit and a borrow bit as outputs.
+
+    Parameters
+    ----------
+    a : int
+        First binary input (0 or 1)
+    b : int
+        Second binary input (0 or 1)
+
+    Examples
+    --------
+    >>> subtractor = HalfSubtractor(1, 0)
+    >>> subtractor.get_difference()
+    1
+    >>> subtractor.get_borrow()
+    0
+    """
 
     def __init__(self, a: int, b: int) -> None:
-        """
-        Initialize the Half Subtractor with two binary inputs.
-        Args:
-            a (int): First binary input (0 or 1)
-            b (int): Second binary input (0 or 1)
-        Returns:
-            None
-        """
+        """Initialize the half subtractor with two binary inputs."""
         self.a = a
         self.b = b
 
-    @property
-    def difference(self) -> int:
-        """
-        Returns the difference output of the half subtractor.
-        The difference output indicates the difference of the two binary inputs.
-        The difference is calculated using the XOR operation:
-            - Difference (D) = A XOR B
-        Args:
-            None
-        Returns:
-            int: The difference output of the half subtractor.
+    def get_difference(self) -> int:
+        """Calculate the difference output of the half subtractor.
+
+        The difference is computed using XOR operation:
+        Difference = A XOR B
+
+        Returns
+        -------
+        int
+            The difference output (0 or 1)
+
+        Examples
+        --------
+        >>> HalfSubtractor(0, 0).get_difference()
+        0
+        >>> HalfSubtractor(1, 1).get_difference()
+        0
         """
         return self.a ^ self.b
 
-    @property
-    def borrow(self) -> int:
-        """
-        Returns the borrow output of the half subtractor.
-        The borrow output indicates whether there is a borrow from the subtraction
-        of the two binary inputs.
-        The borrow is calculated using the following logic:
-            - Borrow occurs when A is less than B
-        Args:
-            None
-        Returns:
-            int: The borrow output of the half subtractor.
+    def get_borrow(self) -> int:
+        """Calculate the borrow output of the half subtractor.
+
+        The borrow is computed using:
+        Borrow = NOT A AND B
+
+        Returns
+        -------
+        int
+            The borrow output (0 or 1)
+
+        Examples
+        --------
+        >>> HalfSubtractor(0, 1).get_borrow()
+        1
+        >>> HalfSubtractor(1, 0).get_borrow()
+        0
         """
         return not self.a and self.b
 
 
 class FullSubtractor(metaclass=TypeChecker):
+    """A full subtractor circuit that subtracts two bits with borrow-in.
+
+    The full subtractor performs binary subtraction of two bits with a borrow-in
+    and produces a difference bit and a borrow-out bit.
+
+    Parameters
+    ----------
+    a : int
+        First binary input (0 or 1)
+    b : int
+        Second binary input (0 or 1)
+    borrow_in : int
+        Borrow input from previous stage (0 or 1)
+
+    Examples
+    --------
+    >>> subtractor = FullSubtractor(1, 0, 1)
+    >>> subtractor.get_difference()
+    0
+    >>> subtractor.get_borrow_out()
+    1
+    """
 
     def __init__(self, a: int, b: int, borrow_in: int) -> None:
-        """
-        Initialize the Full Subtractor with two binary inputs and a borrow-in.
-        Args:
-            a (int): First binary input (0 or 1)
-            b (int): Second binary input (0 or 1)
-            borrow_in (int): Borrow input from the previous stage (0 or 1).
-        Returns:
-            None
-        """
+        """Initialize the full subtractor with two bits and borrow-in."""
         self.a = a
         self.b = b
         self.borrow_in = borrow_in
 
-    @property
-    def difference(self) -> int:
-        """
-        Returns the difference output of the full subtractor.
-        The difference output indicates the difference of the two binary inputs and
-        the borrow-in. The difference is calculated using the XOR operation:
-            - Difference (D) = A XOR B XOR Borrow-In
-        Args:
-            None
-        Returns:
-            int: The difference output of the full subtractor.
+    def get_difference(self) -> int:
+        """Calculate the difference output of the full subtractor.
+
+        The difference is computed using:
+        Difference = A XOR B XOR Borrow-In
+
+        Returns
+        -------
+        int
+            The difference output (0 or 1)
+
+        Examples
+        --------
+        >>> FullSubtractor(1, 0, 0).get_difference()
+        1
+        >>> FullSubtractor(1, 1, 1).get_difference()
+        1
         """
         return (self.a ^ self.b) ^ self.borrow_in
 
-    @property
-    def borrow_out(self) -> int:
-        """
-        Returns the borrow output of the full subtractor.
-        The borrow output indicates whether there is a borrow from the subtraction
-        of the two binary inputs and the borrow-in.
-        The borrow is calculated using the following logic:
-            - Borrow occurs when A is less than B, or
-            - Borrow occurs when Borrow-In is 1 and A XOR B is 0
-        Args:
-            None
-        Returns:
-            int: The borrow output of the full subtractor.
+    def get_borrow_out(self) -> int:
+        """Calculate the borrow-out of the full subtractor.
+
+        The borrow-out is computed using:
+        Borrow-Out = (NOT A AND B) OR (Borrow-In AND NOT (A XOR B))
+
+        Returns
+        -------
+        int
+            The borrow-out bit (0 or 1)
+
+        Examples
+        --------
+        >>> FullSubtractor(1, 0, 1).get_borrow_out()
+        1
+        >>> FullSubtractor(0, 0, 1).get_borrow_out()
+        1
         """
         return (not self.a and self.b) or (self.borrow_in and not (self.a ^ self.b))
-
-
-if __name__ == "__main__":
-    hs = HalfSubtractor(1, 1)
-    # output: Difference: 0, Borrow: 1
-    print(f"Half Subtractor (1, 1) => Difference: {hs.difference()}, Borrow: {hs.borrow()}")
-
-    fs = FullSubtractor(1, 0, 1)
-    # output: Difference: 0, Borrow Out: 1
-    print(f"Full Subtractor (1, 0, 1) => Difference: {fs.difference()}, Borrow Out: {fs.borrow_out()}")

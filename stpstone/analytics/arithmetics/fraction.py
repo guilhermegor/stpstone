@@ -1,13 +1,72 @@
-# pypi.org libs
+"""Fraction arithmetic implementation.
+
+This module provides a Fraction class that implements exact arithmetic with fractions.
+The class supports all basic arithmetic operations (+, -, *, /) and comparisons,
+while maintaining fractions in their simplest form.
+
+Classes
+-------
+Fraction
+    A class representing fractions with numerator and denominator.
+"""
+
 import math
 
-# local libs
-from stpstone.transformations.validation.metaclass_type_checker import \
-    TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class Fraction(metaclass=TypeChecker):
+    """A class representing fractions with exact arithmetic.
+
+    This class implements fractions with numerator and denominator, maintaining
+    them in reduced form (simplest terms). All arithmetic operations return
+    new Fraction instances in reduced form.
+
+    Parameters
+    ----------
+    numerator : int
+        The numerator of the fraction
+    denominator : int
+        The denominator of the fraction (must not be zero)
+
+    Raises
+    ------
+    ValueError
+        If denominator is zero
+
+    Examples
+    --------
+    >>> f1 = Fraction(1, 2)
+    >>> f2 = Fraction(3, 4)
+    >>> f1 + f2
+    Fraction(5, 4)
+    """
+
     def __init__(self, numerator: int, denominator: int) -> None:
+        """Initialize a Fraction with numerator and denominator.
+
+        The fraction is automatically reduced to its simplest form and
+        normalized to have a positive denominator.
+
+        Parameters
+        ----------
+        numerator : int
+            The numerator of the fraction
+        denominator : int
+            The denominator of the fraction (must not be zero)
+
+        Raises
+        ------
+        ValueError
+            If denominator is zero
+
+        Examples
+        --------
+        >>> Fraction(2, 4)  # automatically reduced to 1/2
+        Fraction(1, 2)
+        >>> Fraction(3, -4)  # normalized to -3/4
+        Fraction(-3, 4)
+        """
         if denominator == 0:
             raise ValueError("Denominator cannot be zero.")
         gcd = math.gcd(numerator, denominator)
@@ -18,12 +77,53 @@ class Fraction(metaclass=TypeChecker):
             self.denominator = -self.denominator
 
     def get_num(self) -> int:
+        """Get the numerator of the fraction.
+
+        Returns
+        -------
+        int
+            The numerator of the fraction
+
+        Examples
+        --------
+        >>> Fraction(3, 4).get_num()
+        3
+        """
         return self.numerator
 
     def get_den(self) -> int:
+        """Get the denominator of the fraction.
+
+        Returns
+        -------
+        int
+            The denominator of the fraction
+
+        Examples
+        --------
+        >>> Fraction(3, 4).get_den()
+        4
+        """
         return self.denominator
 
     def __add__(self, fraction_new_instance: "Fraction") -> "Fraction":
+        """Add two fractions and return the result as a new Fraction.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to add to this fraction
+
+        Returns
+        -------
+        Fraction
+            The sum of the two fractions in reduced form
+
+        Examples
+        --------
+        >>> Fraction(1, 2) + Fraction(1, 3)
+        Fraction(5, 6)
+        """
         new_numerator = (
             self.numerator * fraction_new_instance.denominator
             + fraction_new_instance.numerator * self.denominator
@@ -32,12 +132,22 @@ class Fraction(metaclass=TypeChecker):
         return Fraction(new_numerator, new_denominator)
 
     def __radd__(self, fraction_new_instance: int) -> "Fraction":
-        """
-        Implements addition of a Fraction with an int.
-        Args:
-            fraction_new_instance (int): The int to add to the Fraction.
-        Returns:
-            Fraction: The sum of the two fractions.
+        """Add an integer to this fraction (right addition).
+
+        Parameters
+        ----------
+        fraction_new_instance : int
+            The integer to add to this fraction
+
+        Returns
+        -------
+        Fraction
+            The sum as a new Fraction
+
+        Examples
+        --------
+        >>> 5 + Fraction(1, 2)
+        Fraction(11, 2)
         """
         if isinstance(fraction_new_instance, int):
             return Fraction(
@@ -47,12 +157,24 @@ class Fraction(metaclass=TypeChecker):
         return NotImplemented
 
     def __iadd__(self, fraction_new_instance: "Fraction") -> "Fraction":
-        """
-        Implements in-place addition of another Fraction to this Fraction.
-        Args:
-            fraction_new_instance (Fraction): The Fraction instance to add.
-        Returns:
-            Fraction: The result of the addition, reduced to its simplest form.
+        """Add another fraction to this fraction in-place.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to add to this fraction
+
+        Returns
+        -------
+        Fraction
+            This fraction after addition (in reduced form)
+
+        Examples
+        --------
+        >>> f = Fraction(1, 2)
+        >>> f += Fraction(1, 3)
+        >>> f
+        Fraction(5, 6)
         """
         if isinstance(fraction_new_instance, Fraction):
             self.numerator = (
@@ -67,6 +189,23 @@ class Fraction(metaclass=TypeChecker):
         return NotImplemented
 
     def __sub__(self, fraction_new_instance: "Fraction") -> "Fraction":
+        """Subtract another fraction from this fraction.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to subtract from this fraction
+
+        Returns
+        -------
+        Fraction
+            The difference as a new Fraction
+
+        Examples
+        --------
+        >>> Fraction(1, 2) - Fraction(1, 3)
+        Fraction(1, 6)
+        """
         new_numerator = (
             self.numerator * fraction_new_instance.denominator
             - fraction_new_instance.numerator * self.denominator
@@ -75,20 +214,49 @@ class Fraction(metaclass=TypeChecker):
         return Fraction(new_numerator, new_denominator)
 
     def __mul__(self, fraction_new_instance: "Fraction") -> "Fraction":
+        """Multiply this fraction by another fraction.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to multiply by
+
+        Returns
+        -------
+        Fraction
+            The product as a new Fraction
+
+        Examples
+        --------
+        >>> Fraction(1, 2) * Fraction(2, 3)
+        Fraction(1, 3)
+        """
         new_numerator = self.numerator * fraction_new_instance.numerator
         new_denominator = self.denominator * fraction_new_instance.denominator
         return Fraction(new_numerator, new_denominator)
 
     def __truediv__(self, fraction_new_instance: "Fraction") -> "Fraction":
-        """
-        Implements true division of two Fraction instances.
-        Args:
-            fraction_new_instance (Fraction): The Fraction to divide by.
-        Returns:
-            Fraction: The result of the division as a new Fraction instance.
-        Raises:
-            ValueError: If the numerator of the fraction_new_instance is zero,
-                        indicating division by zero is not allowed.
+        """Divide this fraction by another fraction.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to divide by (must not be zero)
+
+        Returns
+        -------
+        Fraction
+            The quotient as a new Fraction
+
+        Raises
+        ------
+        ValueError
+            If attempting to divide by zero
+
+        Examples
+        --------
+        >>> Fraction(1, 2) / Fraction(2, 3)
+        Fraction(3, 4)
         """
         if fraction_new_instance.numerator == 0:
             raise ValueError("Cannot divide by zero.")
@@ -97,88 +265,166 @@ class Fraction(metaclass=TypeChecker):
         return Fraction(new_numerator, new_denominator)
 
     def __gt__(self, fraction_new_instance: "Fraction") -> bool:
+        """Check if this fraction is greater than another.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to compare with
+
+        Returns
+        -------
+        bool
+            True if this fraction is greater, False otherwise
+
+        Examples
+        --------
+        >>> Fraction(1, 2) > Fraction(1, 3)
+        True
+        """
         return (
             self.numerator * fraction_new_instance.denominator
             > fraction_new_instance.numerator * self.denominator
         )
 
     def __ge__(self, fraction_new_instance: "Fraction") -> bool:
+        """Check if this fraction is greater than or equal to another.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to compare with
+
+        Returns
+        -------
+        bool
+            True if this fraction is greater or equal, False otherwise
+
+        Examples
+        --------
+        >>> Fraction(1, 2) >= Fraction(1, 2)
+        True
+        """
         return (
             self.numerator * fraction_new_instance.denominator
             >= fraction_new_instance.numerator * self.denominator
         )
 
     def __lt__(self, fraction_new_instance: "Fraction") -> bool:
+        """Check if this fraction is less than another.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to compare with
+
+        Returns
+        -------
+        bool
+            True if this fraction is less, False otherwise
+
+        Examples
+        --------
+        >>> Fraction(1, 3) < Fraction(1, 2)
+        True
+        """
         return (
             self.numerator * fraction_new_instance.denominator
             < fraction_new_instance.numerator * self.denominator
         )
 
     def __le__(self, fraction_new_instance: "Fraction") -> bool:
+        """Check if this fraction is less than or equal to another.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to compare with
+
+        Returns
+        -------
+        bool
+            True if this fraction is less or equal, False otherwise
+
+        Examples
+        --------
+        >>> Fraction(1, 2) <= Fraction(1, 2)
+        True
+        """
         return (
             self.numerator * fraction_new_instance.denominator
             <= fraction_new_instance.numerator * self.denominator
         )
 
     def __ne__(self, fraction_new_instance: "Fraction") -> bool:
-        """
-        Returns True if the two fractions are not equal, False otherwise.
-        Args:
-            fraction_new_instance (Fraction): The Fraction instance to compare with.
-        Returns:
-            bool: True if the two fractions are not equal, False otherwise.
+        """Check if this fraction is not equal to another.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to compare with
+
+        Returns
+        -------
+        bool
+            True if fractions are not equal, False otherwise
+
+        Examples
+        --------
+        >>> Fraction(1, 2) != Fraction(1, 3)
+        True
         """
         return not (self == fraction_new_instance)
 
     def __eq__(self, fraction_new_instance: "Fraction") -> bool:
+        """Check if this fraction is equal to another.
+
+        Parameters
+        ----------
+        fraction_new_instance : Fraction
+            The fraction to compare with
+
+        Returns
+        -------
+        bool
+            True if fractions are equal, False otherwise
+
+        Examples
+        --------
+        >>> Fraction(1, 2) == Fraction(2, 4)
+        True
+        """
         return (
             self.numerator * fraction_new_instance.denominator
             == fraction_new_instance.numerator * self.denominator
         )
 
     def __repr__(self) -> str:
-        """
-        Returns an unambiguous string representation of the Fraction instance that is
-        useful for debugging.
-        Args:
-            None
-        Returns:
-            str: A string representation of the Fraction instance.
+        """Return an unambiguous string representation of the fraction.
+
+        Returns
+        -------
+        str
+            String representation suitable for eval()
+
+        Examples
+        --------
+        >>> repr(Fraction(1, 2))
+        'Fraction(1, 2)'
         """
         return f"Fraction({self.numerator}, {self.denominator})"
 
     def __str__(self) -> str:
-        """
-        Returns a user-friendly string representation of the fraction.
-        Args:
-            None
-        Returns:
-            str: A string representation of the fraction.
+        """Return a user-friendly string representation of the fraction.
+
+        Returns
+        -------
+        str
+            String in 'numerator/denominator' format
+
+        Examples
+        --------
+        >>> str(Fraction(1, 2))
+        '1/2'
         """
         return f"{self.numerator}/{self.denominator}"
-
-
-# example usage of the Fraction class
-if __name__ == "__main__":
-    fraction1 = Fraction(1, 2)  # represents 1/2
-    fraction2 = Fraction(3, 4)  # represents 3/4
-
-    print(f"Fraction 1: {fraction1}")  # output: 1/2
-    print(f"Fraction 2: {fraction2}")  # output: 3/4
-
-    # arithmetic operations
-    print(f"Addition: {fraction1 + fraction2}")  # output: 5/4
-    print(f"Subtraction: {fraction1 - fraction2}")  # output: -1/4
-    print(f"Multiplication: {fraction1 * fraction2}")  # output: 3/8
-    print(f"Division: {fraction1 / fraction2}")  # output: 2/3
-
-    # in-place addition
-    fraction1 += fraction2
-    print(f"In-place Addition: {fraction1}")  # output: 5/4
-
-    # right Addition
-    print(f"Right Addition with int: {5 + fraction1}")  # output: 25/4
-
-    # relational operations
-    print(f"Is Fraction 1 > Fraction 2? {fraction1 > fraction2}")  # output: True
-    print(f"Is Fraction 1 < Fraction 2? {fraction1 < fraction2}")  # output: False

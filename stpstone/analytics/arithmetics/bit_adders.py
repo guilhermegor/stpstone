@@ -1,164 +1,216 @@
+"""Binary adder implementations.
+
+This module provides implementations of various binary adders:
+- HalfAdder: Adds two single bits
+- FullAdder: Adds two bits with carry-in
+- EightBitFullAdder: Adds two 8-bit numbers using full adders
+
+Classes
+-------
+HalfAdder
+    Adds two single bits producing sum and carry
+FullAdder
+    Adds two bits with carry-in producing sum and carry-out
+EightBitFullAdder
+    Adds two 8-bit numbers using cascaded full adders
+"""
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class HalfAdder(metaclass=TypeChecker):
+    """A half adder circuit that adds two single-bit binary numbers.
+
+    The half adder performs binary addition of two bits and produces
+    a sum bit and a carry bit as outputs.
+
+    Parameters
+    ----------
+    a : int
+        First binary input (0 or 1)
+    b : int
+        Second binary input (0 or 1)
+
+    Examples
+    --------
+    >>> adder = HalfAdder(0, 1)
+    >>> adder.get_sum()
+    1
+    >>> adder.get_carry()
+    0
+    """
 
     def __init__(self, a: int, b: int) -> None:
-        """
-        Initialize the Half Adder with two binary inputs.
-        Args:
-            a (int): First binary input (0 or 1)
-            b (int): Second binary input (0 or 1)
-        Returns:
-            None
-        """
+        """Initialize the half adder with two binary inputs."""
         self.a = a
         self.b = b
 
-    @property
-    def sum(self) -> int:
-        """
-        Returns the sum output of the half adder.
+    def get_sum(self) -> int:
+        """Calculate the sum output of the half adder.
 
-        The half adder computes the sum of two binary digits (bits) and produces
-        two outputs: the sum and the carry. The sum is calculated using the XOR
-        operation:
-            - Sum (S) = A XOR B
-        Args:
-            None
-        Returns:
-            int: The sum of the two binary inputs.
+        The sum is computed using XOR operation:
+        Sum = A XOR B
+
+        Returns
+        -------
+        int
+            The sum output (0 or 1)
+
+        Examples
+        --------
+        >>> HalfAdder(0, 0).get_sum()
+        0
+        >>> HalfAdder(1, 1).get_sum()
+        0
         """
         return self.a ^ self.b
 
-    @property
-    def carry(self) -> int:
-        """
-        Returns the carry output of the half adder.
+    def get_carry(self) -> int:
+        """Calculate the carry output of the half adder.
 
-        The carry output indicates whether there is an overflow from the addition
-        of the two bits. The carry is calculated using the AND operation:
-            - Carry (C) = A AND B
-        Args:
-            None
-        Returns:
-            int: The carry output of the half adder.
+        The carry is computed using AND operation:
+        Carry = A AND B
+
+        Returns
+        -------
+        int
+            The carry output (0 or 1)
+
+        Examples
+        --------
+        >>> HalfAdder(0, 1).get_carry()
+        0
+        >>> HalfAdder(1, 1).get_carry()
+        1
         """
         return self.a & self.b
 
 
 class FullAdder(metaclass=TypeChecker):
+    """A full adder circuit that adds two bits with carry-in.
+
+    The full adder performs binary addition of two bits with a carry-in
+    and produces a sum bit and a carry-out bit.
+
+    Parameters
+    ----------
+    a : int
+        First binary input (0 or 1)
+    b : int
+        Second binary input (0 or 1)
+    carry_in : int
+        Carry input from previous stage (0 or 1)
+
+    Examples
+    --------
+    >>> adder = FullAdder(1, 1, 0)
+    >>> adder.get_sum()
+    0
+    >>> adder.get_carry_out()
+    1
+    """
 
     def __init__(self, a: int, b: int, carry_in: int) -> None:
-        """
-        Initialize the Full Adder with two binary inputs and a carry-in.
-        Args:
-            a (int): First binary input (0 or 1)
-            b (int): Second binary input (0 or 1)
-            carry_in (int): Carry input from the previous stage (0 or 1).
-        Returns:
-            None
-        """
+        """Initialize the full adder with two bits and carry-in."""
         self.a = a
         self.b = b
         self.carry_in = carry_in
 
-    @property
-    def sum(self) -> int:
-        """
-        Returns the sum output of the full adder.
+    def get_sum(self) -> int:
+        """Calculate the sum output of the full adder.
 
-        The full adder computes the sum of two binary digits (bits) and a carry-in
-        bit, producing a sum and a carry-out. The sum is calculated using the XOR
-        operation:
-            - Sum (S) = A XOR B XOR Carry-In
-        Args:
-            None
-        Returns:
-            int: The sum of the two binary inputs and the carry-in
+        The sum is computed using:
+        Sum = A XOR B XOR Carry-In
+
+        Returns
+        -------
+        int
+            The sum output (0 or 1)
+
+        Examples
+        --------
+        >>> FullAdder(1, 0, 1).get_sum()
+        0
+        >>> FullAdder(1, 1, 1).get_sum()
+        1
         """
         return (self.a ^ self.b) ^ self.carry_in
 
-    @property
-    def carry_out(self) -> int:
-        """
-        Returns the carry output of the full adder.
+    def get_carry_out(self) -> int:
+        """Calculate the carry-out of the full adder.
 
-        The carry output indicates whether there is an overflow from the addition
-        of the two bits and the carry-in. The carry-out is calculated using the
-        OR operation on the AND results:
-            - Carry-Out (Cout) = (A AND B) OR (Carry-In AND (A XOR B))
-        Args:
-            None
-        Returns:
-            int: The carry output of the full adder
+        The carry-out is computed using:
+        Carry-Out = (A AND B) OR (Carry-In AND (A XOR B))
+
+        Returns
+        -------
+        int
+            The carry-out bit (0 or 1)
+
+        Examples
+        --------
+        >>> FullAdder(1, 0, 1).get_carry_out()
+        1
+        >>> FullAdder(0, 0, 1).get_carry_out()
+        0
         """
         return (self.a & self.b) | (self.carry_in & (self.a ^ self.b))
 
 
 class EightBitFullAdder(metaclass=TypeChecker):
+    """An 8-bit adder implemented using full adders.
+
+    This class adds two 8-bit numbers by cascading eight full adders,
+    with the carry-out of each adder feeding into the next.
+
+    Parameters
+    ----------
+    a : int
+        First 8-bit number (0-255)
+    b : int
+        Second 8-bit number (0-255)
+
+    Examples
+    --------
+    >>> adder = EightBitFullAdder(0b11001100, 0b00110011)
+    >>> sum_result, carry = adder.add()
+    >>> bin(sum_result)
+    '0b11111111'
+    """
 
     def __init__(self, a: int, b: int) -> None:
-        """
-        Initialize the Eight-Bit Full Adder with two 8-bit binary numbers.
-        Args:
-            a (int): First 8-bit binary number
-            b (int): Second 8-bit binary number
-        Returns:
-            None
-        """
+        """Initialize the 8-bit adder with two 8-bit numbers."""
         self.a = a
         self.b = b
 
-    @property
-    def add(self) -> tuple:
-        """
-        Adds two 8-bit numbers and returns the sum and carry out.
+    def add(self) -> tuple[int, int]:
+        """Add two 8-bit numbers and return the sum and final carry-out.
 
-        This method iterates through each bit of the two 8-bit numbers, using
-        a full adder to compute the sum and carry for each bit position. The
-        final result is an 8-bit sum and a carry-out bit.
-        Args:
-            None
-        Returns:
-            tuple: A tuple containing the sum as an integer and the carry-out bit.
+        The addition is performed by:
+        1. Processing each bit from LSB to MSB
+        2. Using a full adder for each bit position
+        3. Propagating the carry between stages
+
+        Returns
+        -------
+        tuple[int, int]
+            A tuple containing:
+            - sum_result: The 8-bit sum (0-255)
+            - carry: The final carry-out bit (0 or 1)
+
+        Examples
+        --------
+        >>> EightBitFullAdder(10, 20).add()
+        (30, 0)
+        >>> EightBitFullAdder(255, 1).add()
+        (0, 1)
         """
         carry = 0
         sum_result = 0
         for i in range(8):
-            # extract the i-th bit from a and b
             bit_a = (self.a >> i) & 1
             bit_b = (self.b >> i) & 1
-            # create a full adder for the current bit
             full_adder = FullAdder(bit_a, bit_b, carry)
-            sum_result |= (full_adder.sum << i)  # set the i-th bit of the sum
-            carry = full_adder.carry_out  # update carry for the next bit
+            sum_result |= (full_adder.get_sum() << i)
+            carry = full_adder.get_carry_out()
         return sum_result, carry
-
-
-# example usage of the Half Adder, Full Adder, and Eight-Bit Full Adder
-if __name__ == "__main__":
-    # test half adder
-    ha1 = HalfAdder(0, 0)
-    print(f"Half Adder (0, 0) => Sum: {ha1.sum}, Carry: {ha1.carry}")  # output: Sum: 0, Carry: 0
-
-    ha2 = HalfAdder(0, 1)
-    print(f"Half Adder (0, 1) => Sum: {ha2.sum}, Carry: {ha2.carry}")  # output: Sum: 1, Carry: 0
-
-    ha3 = HalfAdder(1, 0)
-    print(f"Half Adder (1, 0) => Sum: {ha3.sum}, Carry: {ha3.carry}")  # output: Sum: 1, Carry: 0
-
-    ha4 = HalfAdder(1, 1)
-    print(f"Half Adder (1, 1) => Sum: {ha4.sum}, Carry: {ha4.carry}")  # output: Sum: 0, Carry: 1
-
-    # test full adder
-    fa1 = FullAdder(1, 1, 0)
-    print(f"Full Adder (1, 1, 0) => Sum: {fa1.sum}, Carry Out: {fa1.carry_out}")  # output: Sum: 0, Carry Out: 1
-
-    fa2 = FullAdder(1, 0, 1)
-    print(f"Full Adder (1, 0, 1) => Sum: {fa2.sum}, Carry Out: {fa2.carry_out}")  # output: Sum: 0, Carry Out: 1
-
-    # test eight bit full adder
-    eight_bit_adder = EightBitFullAdder(0b11001100, 0b10101010)
-    result, carry = eight_bit_adder.add()
-    print(f"8-bit Full Adder Result: {bin(result)}, Carry Out: {carry}")  # output: Result in binary, Carry Out: 0 or 1

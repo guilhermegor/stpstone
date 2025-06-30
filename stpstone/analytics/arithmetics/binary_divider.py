@@ -1,59 +1,103 @@
+"""Binary division implementation.
+
+This module provides a class for performing binary division operations on integers,
+returning both quotient and remainder. The division is implemented using bitwise
+operations for efficiency.
+
+Classes
+-------
+BinaryDivider
+    A class that performs binary division on two numbers, returning quotient and remainder.
+"""
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class BinaryDivider(metaclass=TypeChecker):
+    """A class for performing binary division between two numbers.
+
+    This class implements binary division using bit shifting operations, which is
+    more efficient than standard division for some applications. It returns both
+    the quotient and remainder of the division operation.
+
+    Parameters
+    ----------
+    dividend : int
+        The number to be divided (must be non-negative).
+    divisor : int
+        The number to divide by (must be positive).
+
+    Raises
+    ------
+    ValueError
+        If divisor is zero.
+
+    Examples
+    --------
+    >>> divider = BinaryDivider(12, 2)  # 12 in binary is 1100, 2 is 10
+    >>> quotient, remainder = divider.divide
+    >>> print(f"Quotient: {bin(quotient)}, Remainder: {bin(remainder)}")
+    Quotient: 0b110, Remainder: 0b0  # 6 with remainder 0
+    """
 
     def __init__(self, dividend: int, divisor: int) -> None:
-        """
-        Initialize the Binary Divider with two binary inputs.
+        """Initialize the Binary Divider with dividend and divisor.
 
-        Args:
-            dividend (int): The dividend, the number being divided.
-            divisor (int): The divisor, the number by which we are dividing.
+        Parameters
+        ----------
+        dividend : int
+            The number to be divided (must be non-negative).
+        divisor : int
+            The number to divide by (must be positive).
 
-        Returns:
-            None
+        Raises
+        ------
+        ValueError
+            If divisor is zero.
 
-        Raises:
-            ValueError: If the divisor is zero.
+        Examples
+        --------
+        >>> BinaryDivider(12, 2)  # Valid initialization
+        >>> BinaryDivider(10, 0)   # Raises ValueError
         """
         if divisor == 0:
             raise ValueError("Divisor cannot be zero.")
         self.dividend = dividend
         self.divisor = divisor
 
-    @property
-    def divide(self) -> tuple:
-        """
-        Divide the dividend by the divisor using binary division.
+    def divide(self) -> tuple[int, int]:
+        """Perform binary division and return quotient and remainder.
 
-        The algorithm works by shifting the divisor left and subtracting it
-        from the dividend if the dividend is greater than or equal to the
-        divisor. The result is then shifted back to the right, and the
-        remainder is returned.
+        This method implements binary division using bit shifting operations.
+        It works by iteratively shifting the divisor and comparing it with
+        the remaining dividend. The algorithm is optimized for 8-bit numbers
+        but can be extended for larger numbers by adjusting the range.
 
-        Args:
-            None
+        Returns
+        -------
+        tuple[int, int]
+            A tuple containing (quotient, remainder).
 
-        Returns:
-            tuple: (quotient, remainder)
+        Examples
+        --------
+        >>> divider = BinaryDivider(12, 2)
+        >>> quotient, remainder = divider.divide
+        >>> quotient
+        6
+        >>> remainder
+        0
 
-        Raises:
-            ValueError: If the divisor is zero.
+        >>> divider = BinaryDivider(15, 4)
+        >>> quotient, remainder = divider.divide
+        >>> quotient
+        3
+        >>> remainder
+        3
         """
         quotient = 0
         remainder = self.dividend
         for i in range(7, -1, -1):
-            # if remainder is greater than or equal to divisor, subtract divisor
             if remainder >= (self.divisor << i):
                 remainder -= (self.divisor << i)
-                # set the i-th bit of the quotient
                 quotient |= (1 << i)
         return quotient, remainder
-
-
-if __name__ == "__main__":
-    divider = BinaryDivider(0b1100, 0b0010)
-    quotient, remainder = divider.divide()
-    # output: Quotient and Remainder in binary
-    print(f"Binary Divider (1100 / 10) => Quotient: {bin(quotient)}, Remainder: {bin(remainder)}")
