@@ -5,13 +5,13 @@
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
 [![Linting](https://img.shields.io/badge/linting-ruff-blue)](https://github.com/astral-sh/ruff)
 [![Formatting: isort](https://img.shields.io/badge/formatting-isort-%231674b1)](https://pycqa.github.io/isort/)
-![Test Coverage](https://github.com/guilhermegor/stpstone/raw/coverage-badge/coverage.svg)
+![Test Coverage](./coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/stpstone)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
 
-**stpstone** (short for *stepping stone*) is a Python framework designed for ingesting, processing, and analyzing structured and unstructured financial data. It provides tools for ETL (Extract, Transform, Load), quantitative analysis, and derivatives pricing, optimized for financial market applications.
+**stpstone** (short for *stepping stone*) is a Python package designed for ingesting, processing, and analyzing structured and unstructured financial data. It provides tools for ETL (Extract, Transform, Load), quantitative analysis, and derivatives pricing, optimized for financial market applications.
 
 ## ✨ Key Features
 
