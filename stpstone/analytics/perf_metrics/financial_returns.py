@@ -13,8 +13,6 @@ from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-type ReturnType = Literal["ln_return", "stnd_return"]
-
 class FinancialReturns(metaclass=TypeChecker):
     """A class for calculating various stock return metrics and performance measures.
 
@@ -75,7 +73,7 @@ class FinancialReturns(metaclass=TypeChecker):
     def calc_returns_from_prices(
         self,
         list_prices: list[float],
-        type_return: ReturnType="ln_return"
+        type_return: Literal["ln_return", "stnd_return"]="ln_return"
     ) -> list[float]:
         """Calculate a series of returns from a list of prices.
 
@@ -223,7 +221,7 @@ class FinancialReturns(metaclass=TypeChecker):
         short_price: float,
         leverage: float,
         operational_costs: float = 0,
-        type_return: ReturnType = "ln_return"
+        type_return: Literal["ln_return", "stnd_return"] = "ln_return"
     ) -> dict[str, float]:
         """Calculate performance metrics for a trading strategy.
 

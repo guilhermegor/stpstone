@@ -4,7 +4,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue.svg)
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
 [![Linting](https://img.shields.io/badge/linting-ruff-blue)](https://github.com/astral-sh/ruff)
-[![Code Style: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=grey)](https://pycqa.github.io/isort/)
+[![Formatting: isort](https://img.shields.io/badge/formatting-isort-%231674b1)](https://pycqa.github.io/isort/)
 ![Test Coverage](https://github.com/guilhermegor/stpstone/raw/coverage-badge/coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)
