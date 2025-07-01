@@ -1,10 +1,10 @@
 # stpstone <img src="img/logo_stpstone.png" align="right" width="200" style="border-radius: 15px;" alt="stpstone">
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue.svg)
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
-![Linting](https://img.shields.io/badge/linting-flake8%20+%20isort-blue)
-![Security](https://img.shields.io/badge/security-bandit-blue.svg)
+[![Linting](https://img.shields.io/badge/linting-ruff-blue)](https://github.com/astral-sh/ruff)
+[![Code Style: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=grey)](https://pycqa.github.io/isort/)
 ![Test Coverage](https://github.com/guilhermegor/stpstone/raw/coverage-badge/coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)

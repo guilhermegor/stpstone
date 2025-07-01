@@ -71,7 +71,7 @@ jobs:
             poetry run coverage run --source=stpstone -m unittest discover tests/unit/
             poetry run coverage-badge -o coverage.svg -f
       - name: Upload badge
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-badge
           path: coverage.svg
