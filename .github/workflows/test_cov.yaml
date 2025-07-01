@@ -66,13 +66,13 @@ jobs:
           mv pyproject.original.toml pyproject.toml
           poetry env activate
 
-      - name: Run tests with coverage
+      - name: Run Tests With Coverage
         run: |
             poetry run coverage run --source=stpstone -m unittest discover tests/unit/
             poetry run coverage-badge -o coverage.svg -f
-      - name: Upload badge
+    
+      - name: Upload Badge
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-badge
-          path: coverage.svg
-          overwrite: true
+            name: coverage-badge-${{ matrix.python-version }}
+            path: coverage.svg
