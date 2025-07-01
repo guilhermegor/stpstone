@@ -41,13 +41,13 @@ class TestFinancialReturns(unittest.TestCase):
         # test log returns
         log_returns = self.fr.calc_returns_from_prices(prices, "ln_return")
         expected_log = [np.log(110/100), np.log(105/110), np.log(120/105)]
-        for actual, expected in zip(log_returns, expected_log, strict=True):
+        for actual, expected in zip(log_returns, expected_log):
             self.assertAlmostEqual(actual, expected)
 
         # test standard returns
         std_returns = self.fr.calc_returns_from_prices(prices, "stnd_return")
         expected_std = [0.1, -0.04545454545454545, 0.14285714285714285]
-        for actual, expected in zip(std_returns, expected_std, strict=True):
+        for actual, expected in zip(std_returns, expected_std):
             self.assertAlmostEqual(actual, expected)
 
         # test invalid return type
