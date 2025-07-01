@@ -105,3 +105,10 @@ repos:
         types: [python]
         pass_filenames: false
         verbose: true
+      
+      - id: coverage-badge
+        name: coverage badge
+        entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage-badge -o coverage.svg -f"
+        language: system
+        types: [python]
+        pass_filenames: false
