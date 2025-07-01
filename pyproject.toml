@@ -138,6 +138,7 @@ setuptools = ">=80.8.0"
 twine = ">=6.1.0"
 ruff = "^0.12.1"
 coverage = ">=7.3.0"
+coverage-badge = ">=1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.7.0"]
