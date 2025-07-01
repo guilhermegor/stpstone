@@ -14,7 +14,7 @@ from fnmatch import fnmatch
 import json
 import re
 from string import ascii_lowercase, ascii_uppercase, digits
-from typing import Union
+from typing import Optional, Union
 from unicodedata import combining, normalize
 from urllib.parse import parse_qs, urlparse
 import uuid
@@ -448,7 +448,7 @@ class StrHandler(metaclass=TypeChecker):
         self,
         letters_in_alphabet: int = 21,
         first_letter_alphabet: str = "f",
-        list_not_in_range: list | None = None,
+        list_not_in_range: Optional[list] = None,
     ) -> dict:
         """Create mapping from letters to numbers.
 
