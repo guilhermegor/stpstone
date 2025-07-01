@@ -5,7 +5,7 @@
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
 [![Linting](https://img.shields.io/badge/linting-ruff-blue)](https://github.com/astral-sh/ruff)
 [![Formatting: isort](https://img.shields.io/badge/formatting-isort-%231674b1)](https://pycqa.github.io/isort/)
-![Test Coverage](./coverage-badge-3.9.22.svg)
+![Test Coverage](./coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/stpstone)
