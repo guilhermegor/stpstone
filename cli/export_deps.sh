@@ -3,7 +3,7 @@ set -eo pipefail
 
 # configuration
 REQUIREMENTS_FILE="requirements-prd.txt"
-REQUIREMENTS_DEV_FILE="requirements-dev.txt"
+REQUIREMENTS_DEV_FILE=".vscode/extensions.txt"
 VSCODE_PREFIX="vscode:"
 
 # function to handle errors

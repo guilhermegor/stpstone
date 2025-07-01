@@ -1,6 +1,8 @@
+from unittest import TestCase, main
+
 import numpy as np
 import pandas as pd
-from unittest import TestCase, main
+
 from stpstone.utils.parsers.arrays import Arrays
 
 

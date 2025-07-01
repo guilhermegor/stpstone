@@ -86,9 +86,9 @@ stpstone
 │   │   ├── fraction.py
 │   │   └── logic_gate.py
 │   ├── perf_metrics
-│   │   ├── data_deltas.py
 │   │   ├── earnings_quality.py
 │   │   ├── financial_math.py
+│   │   ├── financial_returns.py
 │   │   └── roe_decomposition.py
 │   ├── portfolio_alloc
 │   │   └── eff.py
@@ -316,7 +316,7 @@ stpstone
     │   └── ww
     │       └── reuters.py
     ├── security
-    │   └── secure_crypto.py
+    │   └── secure_cryptography.py
     ├── system
     │   └── drives.py
     ├── trading_platforms

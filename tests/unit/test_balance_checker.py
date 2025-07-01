@@ -1,4 +1,5 @@
 from unittest import TestCase, main
+
 from stpstone.transformations.validation.balance_brackets import BalanceBrackets
 
 

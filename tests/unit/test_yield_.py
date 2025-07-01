@@ -1,4 +1,5 @@
 from unittest import TestCase, main
+
 from stpstone.analytics.risk.yield_ import BondDuration
 
 
@@ -16,13 +17,16 @@ class TestBondDuration(TestCase):
         self.assertAlmostEqual(self.cls_bond_duration.macaulay, 3.5339529365236304, places=2)
 
     def test_modified_duration(self):
-        self.assertAlmostEqual(self.cls_bond_duration.modified(0.05, 1), 3.365669463355838, places=2)
+        self.assertAlmostEqual(self.cls_bond_duration.modified(0.05, 1), 3.365669463355838, 
+                               places=2)
 
     def test_dollar_duration(self):
-        self.assertAlmostEqual(self.cls_bond_duration.dollar(0.05, 1), -4004.3738180384144, places=2)
+        self.assertAlmostEqual(self.cls_bond_duration.dollar(0.05, 1), -4004.3738180384144, 
+                               places=2)
 
     def test_effective_duration(self):
-        self.assertAlmostEqual(self.cls_bond_duration.effective(0.01), -3.3279316177786717, places=2)
+        self.assertAlmostEqual(self.cls_bond_duration.effective(0.01), -3.3279316177786717, 
+                               places=2)
 
     def test_convexity(self):
         self.assertAlmostEqual(self.cls_bond_duration.convexity(0.01), -39805.485, places=3)

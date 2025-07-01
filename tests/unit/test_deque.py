@@ -1,9 +1,10 @@
-from stpstone.dsa.queues.simple_deque import Deque
 from unittest import TestCase, main
+
+from stpstone.dsa.queues.simple_deque import Deque
 
 
 class TestDeque(TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         self.deque = Deque()
 
     def test_is_empty_initially(self):

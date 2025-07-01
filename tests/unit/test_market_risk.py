@@ -1,7 +1,15 @@
-import numpy as np
 from unittest import TestCase, main
-from stpstone.analytics.risk.market import MarkowitzPortf, PortfVar, RiskStats, QuoteVar, VaR, \
-    RiskMeasures
+
+import numpy as np
+
+from stpstone.analytics.risk.market import (
+    MarkowitzPortf,
+    PortfVar,
+    QuoteVar,
+    RiskMeasures,
+    RiskStats,
+    VaR,
+)
 
 
 array_r = np.array([

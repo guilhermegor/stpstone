@@ -71,25 +71,37 @@ repos:
         name: check unix/linux filename validity
         entry: bash cli/check_unix_filenames.sh
         language: system
-        types: [file]
+        types:
+          - file
 
       - id: export-dependencies
         name: export dependencies
         entry: bash cli/export_deps.sh
         language: system
-        types: [file]
+        types:
+          - file
         pass_filenames: false
 
       - id: unit-tests
         name: checking unit tests
         entry: poetry run python -m unittest discover -s tests/unit -p "*.py"
         language: system
-        types: [file]
+        types:
+          - file
         pass_filenames: false
 
       - id: integration-tests
         name: checking integration tests
         entry: poetry run python -m unittest discover -s tests/integration -p "*.py"
         language: system
-        types: [file]
+        types:
+          - file
         pass_filenames: false
+
+      - id: coverage-check
+        name: test coverage check
+        entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ -v && poetry run coverage report --fail-under=80 -m"
+        language: system
+        types: [python]
+        pass_filenames: false
+        verbose: true

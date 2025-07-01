@@ -9,6 +9,7 @@ vscode:dzhavat.bracket-pair-toggler
 vscode:esbenp.prettier-vscode
 vscode:github.copilot
 vscode:github.copilot-chat
+vscode:github.vscode-github-actions
 vscode:mechatroner.rainbow-csv
 vscode:ms-azuretools.vscode-containers
 vscode:ms-azuretools.vscode-docker

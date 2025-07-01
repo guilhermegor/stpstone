@@ -1,4 +1,5 @@
 from unittest import TestCase, main
+
 from stpstone.utils.conversions.base_converter import BaseConverter
 
 

@@ -1,5 +1,7 @@
-import numpy as np
 from unittest import TestCase, main
+
+import numpy as np
+
 from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 
 
@@ -32,7 +34,8 @@ class TestFinancialMath(TestCase):
         self.assertAlmostEqual(self.cls_fm.irr([-1000, 200, 300, 500, 200]), 0.07409, places=4)
 
     def test_npv(self):
-        self.assertAlmostEqual(self.cls_fm.npv(0.05, [-1000, 200, 300, 500, 200]), 59.044, places=2)
+        self.assertAlmostEqual(self.cls_fm.npv(0.05, [-1000, 200, 300, 500, 200]), 59.044, 
+                               places=2)
 
     def test_pmt(self):
         self.assertAlmostEqual(self.cls_fm.pmt(0.05, 10, -613.91), 79.504, places=3)
@@ -45,14 +48,16 @@ class TestFinancialMath(TestCase):
         list_cfs = [100, 200, 300]
         float_ytm = 0.05
         list_exp_pvs = [-95.24, -181.41, -259.15]
-        _, array_discounted_cfs = self.cls_fm.pv_cfs(list_cfs, float_ytm, str_capitalization="compound")
+        _, array_discounted_cfs = self.cls_fm.pv_cfs(list_cfs, float_ytm, 
+                                                     str_capitalization="compound")
         np.testing.assert_array_almost_equal(array_discounted_cfs, list_exp_pvs, decimal=2)
 
     def test_pv_cfs_simple(self):
         list_cfs = [100, 200, 300]
         float_ytm = 0.05
         list_exp_pvs = [95.24, 181.82, 260.87]
-        _, array_discounted_cfs = self.cls_fm.pv_cfs(list_cfs, float_ytm, str_capitalization="simple")
+        _, array_discounted_cfs = self.cls_fm.pv_cfs(list_cfs, float_ytm, 
+                                                     str_capitalization="simple")
         np.testing.assert_array_almost_equal(array_discounted_cfs, list_exp_pvs, decimal=2)
 
 if __name__ == "__main__":

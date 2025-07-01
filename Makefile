@@ -1,6 +1,66 @@
-# package
+# software development
+unit_tests:
+	poetry run python -m unittest discover -s tests/unit -p "*.py" -v
+
+integration_tests:
+	poetry run python -m unittest discover -s tests/integration -p "*.py" -v
+
+test_cov:
+	poetry run coverage run --source=stpstone -m unittest discover tests/unit/ -v
+	poetry run coverage report -m
+
+
+# git
+precommit_update:
+	poetry run pre-commit install
+	poetry run pre-commit install --hook-type commit-msg
+
+git_pull_force:
+	bash cli/git_pull_force.sh
+
+git_merge_branches:
+	bash cli/git_merge_branches.sh
+
+git_create_branch_from_main:
+	bash cli/git_create_branch_from_main.sh
+
+git_delete_branch_tag:
+	bash cli/git_delete_branch_tag.sh
+
+git_delete_dev_branches:
+	bash cli/git_delete_dev_branches.sh
+
+git_update_branch_with_main:
+	bash cli/git_update_branch_with_main.sh -b $(BRANCH) $(if $(FORCE),--force)
+
+
+# github
+create_ssh_key:
+	bash cli/create_ssh_key.sh
+
+gh_status:
+	bash cli/gh_status.sh
+
+gh_protect_main: gh_status
+	bash cli/gh_protect_main.sh
+
+gh_set_pypi_secret:
+	bash cli/gh_set_pypi_secret.sh
+	@echo -e "\033[0;34m[i]\033[0m Checking GitHub secrets..."
+	@gh secret list
+
+
+# requirements - dev
+vscode_setup:
+	bash cli/vscode_setup.sh
+
+export_deps:
+	bash cli/export_deps.sh
+
+
+# package shipping
 package_tree:
-	python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
+	poetry run python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
 		root_path = os.getcwd(); \
 		cls_tree = FoldersTree(os.path.join(root_path, 'stpstone'), \
 			bl_ignore_dot_folders=True, list_ignored_folders=['__pycache__'], \
@@ -52,51 +112,3 @@ ingestion_concrete_creator:
 ingestion_concrete_creator_html_parser:
 	bash cli/cc_ingestion_yaml.sh
 	bash cli/cc_ingestion_html_parser_py.sh
-
-
-# git
-precommit_update:
-	poetry run pre-commit install
-	poetry run pre-commit install --hook-type commit-msg
-
-git_pull_force:
-	bash cli/git_pull_force.sh
-
-git_merge_branches:
-	bash cli/git_merge_branches.sh
-
-git_create_branch_from_main:
-	bash cli/git_create_branch_from_main.sh
-
-git_delete_branch_tag:
-	bash cli/git_delete_branch_tag.sh
-
-git_delete_dev_branches:
-	bash cli/git_delete_dev_branches.sh
-
-git_update_branch_with_main:
-	bash cli/git_update_branch_with_main.sh -b $(BRANCH) $(if $(FORCE),--force)
-
-
-# github
-create_ssh_key:
-	bash cli/create_ssh_key.sh
-
-gh_status:
-	bash cli/gh_status.sh
-
-gh_protect_main: gh_status
-	bash cli/gh_protect_main.sh
-
-gh_set_pypi_secret:
-	bash cli/gh_set_pypi_secret.sh
-	@echo -e "\033[0;34m[i]\033[0m Checking GitHub secrets..."
-	@gh secret list
-
-
-# requirements - dev
-vscode_setup:
-	bash cli/vscode_setup.sh
-
-export_deps:
-	bash cli/export_deps.sh

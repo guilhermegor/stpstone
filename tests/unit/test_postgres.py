@@ -1,11 +1,13 @@
 import unittest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, Mock, patch
+
 import pandas as pd
 
 from stpstone.utils.connections.databases.postgresql import PostgreSQLDB
 
 
 class TestPostgreSQLDB(unittest.TestCase):
+
     def setUp(self):
         self.mock_conn = MagicMock()
         self.mock_cursor = MagicMock()
@@ -18,8 +20,8 @@ class TestPostgreSQLDB(unittest.TestCase):
 
         self.db = PostgreSQLDB(
             dbname="testdb",
-            user="user",
-            password="pass",
+            user="testuser",
+            password="testpass", # noqa: S106 - possible hardcoded password
             host="localhost",
             port=5432,
         )
@@ -36,13 +38,13 @@ class TestPostgreSQLDB(unittest.TestCase):
             {"id": 1, "name": "Alice"},
             {"id": 2, "name": "Bob"},
         ]
-        df = self.db.read("SELECT * FROM users")
+        df_ = self.db.read("SELECT * FROM users")
         self.mock_cursor.execute.assert_called_with("SELECT * FROM users")
-        self.assertIsInstance(df, pd.DataFrame)
-        self.assertListEqual(df["name"].tolist(), ["Alice", "Bob"])
+        self.assertIsInstance(df_, pd.DataFrame)
+        self.assertListEqual(df_["name"].tolist(), ["Alice", "Bob"])
 
     @patch("stpstone.utils.connections.databases.postgresql.JsonFiles")
-    def test_insert_success(self, mock_jsonfiles):
+    def test_insert_success(self, mock_jsonfiles: Mock):
         json_data = [{"id": 1, "name": "Test"}]
         mock_jsonfiles.return_value.normalize_json_keys.return_value = json_data
 
@@ -51,7 +53,7 @@ class TestPostgreSQLDB(unittest.TestCase):
         self.mock_conn.commit.assert_called()
 
     @patch("stpstone.utils.connections.databases.postgresql.JsonFiles")
-    def test_insert_failure_rolls_back(self, mock_jsonfiles):
+    def test_insert_failure_rolls_back(self, mock_jsonfiles: Mock):
         json_data = [{"id": 1, "name": "Test"}]
         mock_jsonfiles.return_value.normalize_json_keys.return_value = json_data
 
@@ -66,14 +68,14 @@ class TestPostgreSQLDB(unittest.TestCase):
 
     @patch("os.makedirs")
     @patch("subprocess.run")
-    def test_backup_success(self, mock_run, mock_makedirs):
-        result = self.db.backup("/tmp/backup", "dump.bak")
+    def test_backup_success(self, mock_run: Mock, mock_makedirs: Mock):
+        result = self.db.backup("/tmp/backup", "dump.bak") # noqa: S108 - hardcoded temp file path
         self.assertIn("Backup successful", result)
         mock_run.assert_called()
 
     @patch("subprocess.run", side_effect=Exception("Failed"))
-    def test_backup_failure(self, mock_run):
-        result = self.db.backup("/tmp/backup", "dump.bak")
+    def test_backup_failure(self, mock_run: Mock):
+        result = self.db.backup("/tmp/backup", "dump.bak") # noqa: S108 - hardcoded temp file path
         self.assertIn("An error occurred", result)
 
     def test_close_connection(self):

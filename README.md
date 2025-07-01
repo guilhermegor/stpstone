@@ -5,6 +5,7 @@
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
 ![Linting](https://img.shields.io/badge/linting-flake8%20+%20isort-blue)
 ![Security](https://img.shields.io/badge/security-bandit-blue.svg)
+![Test Coverage](https://github.com/guilhermegor/stpstone/raw/coverage-badge/coverage.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/stpstone)
@@ -408,7 +409,7 @@ stpstone/
 ├── ⚙️ pyproject.toml        # Project metadata and dependencies
 ├── 📖 README.md             # Project overview
 ├── 📦 requirements.txt      # Production dependencies
-├── 🔧 requirements-dev.txt  # Development dependencies
+├── 🔧 extensions.txt  # Development dependencies
 └── 💻 requirements-prd.txt # Virtual environment setup
 </code></pre>
 

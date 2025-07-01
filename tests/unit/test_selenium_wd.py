@@ -1,5 +1,6 @@
 from unittest import TestCase, main
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 

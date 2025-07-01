@@ -1,4 +1,5 @@
 from unittest import TestCase, main
+
 from stpstone.dsa.queues.simple_queue import Queue
 
 
