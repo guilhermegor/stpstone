@@ -75,3 +75,4 @@ jobs:
         with:
           name: coverage-badge
           path: coverage.svg
+          overwrite: true
