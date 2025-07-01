@@ -18,15 +18,21 @@ class BinaryMultiplier(metaclass=TypeChecker):
 
     This class implements binary multiplication using bit shifting and addition,
     which is more efficient than standard multiplication for some applications.
-    The algorithm works by examining each bit of the multiplier and adding shifted
-    versions of the multiplicand accordingly.
+    Currently limited to 8-bit unsigned integers (0-255).
 
     Parameters
     ----------
     a : int
-        The multiplicand (first binary number to multiply).
+        The multiplicand (must be 0-255)
     b : int
-        The multiplier (second binary number to multiply).
+        The multiplier (must be 0-255)
+
+    Raises
+    ------
+    ValueError
+        If inputs are negative or exceed 8-bit range
+    TypeError
+        If inputs are not integers
 
     Examples
     --------
@@ -37,52 +43,32 @@ class BinaryMultiplier(metaclass=TypeChecker):
     """
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize the Binary Multiplier with two binary numbers.
-
-        Parameters
-        ----------
-        a : int
-            The multiplicand (first binary number to multiply).
-        b : int
-            The multiplier (second binary number to multiply).
-
-        Examples
-        --------
-        >>> BinaryMultiplier(0b1100, 0b1010)  # 12 × 10
-        """
+        """Initialize the Binary Multiplier with two 8-bit numbers."""
+        if not isinstance(a, int) or not isinstance(b, int):
+            raise TypeError("Both inputs must be integers")
+        if a < 0 or b < 0:
+            raise ValueError("Inputs must be non-negative")
+        if a > 255 or b > 255:
+            raise ValueError("Inputs must be 8-bit numbers (0-255)")
         self.a = a
         self.b = b
 
     def multiply(self) -> int:
-        """Multiply two binary numbers using bit shifting.
-
-        This method implements binary multiplication by:
-        1. Iterating through each bit of the multiplier (b)
-        2. When a set bit is found, shifting the multiplicand (a) left by the bit position
-        3. Accumulating the shifted values to form the final product
-
-        The current implementation supports 8-bit numbers but can be extended.
+        """Multiply two 8-bit numbers using bit shifting.
 
         Returns
         -------
         int
-            The product of the two binary numbers.
+            The product of the two numbers (may exceed 8 bits)
 
         Examples
         --------
-        >>> multiplier = BinaryMultiplier(0b1100, 0b1010)  # 12 × 10
-        >>> product = multiplier.multiply()
-        >>> product
-        120
-        >>> bin(product)
-        '0b1111000'
-
-        >>> multiplier = BinaryMultiplier(0b1111, 0b0001)  # 15 × 1
+        >>> multiplier = BinaryMultiplier(12, 10)
         >>> multiplier.multiply()
-        15
+        120
         """
         result = 0
-        for i in range(8):
+        for i in range(8):  # Fixed 8-bit implementation
             if (self.b >> i) & 1:
                 result += (self.a << i)
         return result

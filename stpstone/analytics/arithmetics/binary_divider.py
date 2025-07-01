@@ -23,21 +23,16 @@ class BinaryDivider(metaclass=TypeChecker):
     Parameters
     ----------
     dividend : int
-        The number to be divided (must be non-negative).
+        The number to be divided (must be non-negative)
     divisor : int
-        The number to divide by (must be positive).
+        The number to divide by (must be positive)
 
     Raises
     ------
     ValueError
-        If divisor is zero.
-
-    Examples
-    --------
-    >>> divider = BinaryDivider(12, 2)  # 12 in binary is 1100, 2 is 10
-    >>> quotient, remainder = divider.divide
-    >>> print(f"Quotient: {bin(quotient)}, Remainder: {bin(remainder)}")
-    Quotient: 0b110, Remainder: 0b0  # 6 with remainder 0
+        If dividend is negative or divisor is not positive
+    TypeError
+        If inputs are not integers
     """
 
     def __init__(self, dividend: int, divisor: int) -> None:
@@ -46,58 +41,55 @@ class BinaryDivider(metaclass=TypeChecker):
         Parameters
         ----------
         dividend : int
-            The number to be divided (must be non-negative).
+            The number to be divided (must be non-negative)
         divisor : int
-            The number to divide by (must be positive).
+            The number to divide by (must be positive)
 
         Raises
         ------
         ValueError
-            If divisor is zero.
-
-        Examples
-        --------
-        >>> BinaryDivider(12, 2)  # Valid initialization
-        >>> BinaryDivider(10, 0)   # Raises ValueError
+            If dividend is negative or divisor is not positive
+        TypeError
+            If inputs are not integers
         """
-        if divisor == 0:
-            raise ValueError("Divisor cannot be zero.")
+        if not isinstance(dividend, int) or not isinstance(divisor, int):
+            raise TypeError("Both dividend and divisor must be integers")
+        if dividend < 0:
+            raise ValueError("Dividend must be non-negative")
+        if divisor <= 0:
+            raise ValueError("Divisor must be positive")
+            
         self.dividend = dividend
         self.divisor = divisor
 
     def divide(self) -> tuple[int, int]:
         """Perform binary division and return quotient and remainder.
 
-        This method implements binary division using bit shifting operations.
-        It works by iteratively shifting the divisor and comparing it with
-        the remaining dividend. The algorithm is optimized for 8-bit numbers
-        but can be extended for larger numbers by adjusting the range.
-
         Returns
         -------
         tuple[int, int]
-            A tuple containing (quotient, remainder).
+            A tuple containing (quotient, remainder)
 
-        Examples
-        --------
-        >>> divider = BinaryDivider(12, 2)
-        >>> quotient, remainder = divider.divide
-        >>> quotient
-        6
-        >>> remainder
-        0
-
-        >>> divider = BinaryDivider(15, 4)
-        >>> quotient, remainder = divider.divide
-        >>> quotient
-        3
-        >>> remainder
-        3
+        Raises
+        ------
+        ValueError
+            If divisor is zero
         """
+        if self.divisor == 0:
+            raise ValueError("Divisor cannot be zero")
+
         quotient = 0
         remainder = self.dividend
-        for i in range(7, -1, -1):
-            if remainder >= (self.divisor << i):
-                remainder -= (self.divisor << i)
-                quotient |= (1 << i)
+        
+        # Find the highest power of 2 where divisor * 2^i <= dividend
+        i = 0
+        while (self.divisor << (i+1)) <= self.dividend:
+            i += 1
+            
+        # Perform binary division
+        for power in range(i, -1, -1):
+            if remainder >= (self.divisor << power):
+                remainder -= (self.divisor << power)
+                quotient |= (1 << power)
+                
         return quotient, remainder
