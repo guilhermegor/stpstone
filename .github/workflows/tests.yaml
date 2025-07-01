@@ -6,6 +6,12 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+a[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+b[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
 
 jobs:
   test:
@@ -85,3 +91,13 @@ jobs:
 
       - name: Run Integration Tests
         run: poetry run python -m unittest discover -s tests/integration -p "*.py" -v
+
+  tests_passed:
+    if: ${{ github.ref_type == 'tag' }}
+    needs: test
+    runs-on: ubuntu-24.04
+    outputs:
+      ready_for_release: ${{ needs.test.result == 'success' }}
+    steps:
+      - name: Set Output
+        run: echo "ready_for_release=true" >> $GITHUB_OUTPUT

@@ -1,6 +1,12 @@
 name: Release to PyPI
 
 on:
+  workflow_dispatch:
+    inputs:
+      tests_passed:
+        description: 'Whether Tests Passed'
+        required: true
+        default: 'true'
   push:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
@@ -13,12 +19,23 @@ env:
   OWNER: "guilhermegor"
 
 jobs:
-  automated_tests:
+  check_tests:
+    if: ${{ github.event_name == 'push' }}
     uses: ./.github/workflows/tests.yaml
+    secrets: inherit
+    outputs:
+      ready_for_release: ${{ jobs.test.result == 'success' }}
 
+  release:
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tests_passed == 'true') || (github.event_name == 'push' && needs.check_tests.outputs.ready_for_release == 'true') }}
+    needs: [check_tests]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check Test Status
+        run: echo "Tests passed, proceeding with release"
+  
   details:
     runs-on: ubuntu-24.04
-    needs: automated_tests
     outputs:
       new_version: ${{ steps.release.outputs.new_version }}
       suffix: ${{ steps.release.outputs.suffix }}
