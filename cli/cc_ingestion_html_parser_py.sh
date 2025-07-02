@@ -43,16 +43,16 @@ class ConcreteCreatorReq(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None, 
-        int_wait_load_seconds: int = 60, 
+        list_slugs: Optional[List[str]] = None,
+        int_wait_load_seconds: int = 60,
         int_delay_seconds: int = 30,
-        bl_save_html: bool = False, 
+        bl_save_html: bool = False,
         bl_headless: bool = False,
-        bl_incognito: bool = False, 
+        bl_incognito: bool = False,
     ) -> None:
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
@@ -62,7 +62,7 @@ class ConcreteCreatorReq(ABCRequests):
             logger=logger,
             token=token,
             list_slugs=list_slugs,
-            int_wait_load_seconds=int_wait_load_seconds, 
+            int_wait_load_seconds=int_wait_load_seconds,
             int_delay_seconds=int_delay_seconds,
         )
         self.session = session
@@ -88,16 +88,16 @@ class ConcreteCreatorReq(ABCRequests):
         source = self.get_query_params(resp_req.url, "source")
         scraper = PlaywrightScraper(
             bl_headless=self.bl_headless,
-            int_default_timeout=self.int_wait_load_seconds * 1_000, 
+            int_default_timeout=self.int_wait_load_seconds * 1_000,
             bl_incognito=self.bl_incognito
         )
         with scraper.launch():
             if scraper.navigate(resp_req.url):
                 if self.bl_save_html:
                     scraper.export_html(
-                        scraper.page.content(), 
-                        folder_path="data", 
-                        filename="html-mais-retorno-avl-funds", 
+                        scraper.page.content(),
+                        folder_path="data",
+                        filename="html-mais-retorno-avl-funds",
                         bl_include_timestamp=True
                     )
                 if source == "iterative":

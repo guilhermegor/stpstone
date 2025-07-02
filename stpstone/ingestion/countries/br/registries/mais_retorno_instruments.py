@@ -1,20 +1,22 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Dict, Any, Union
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
-from time import sleep
 from math import nan
+from time import sleep
+from typing import Any, Dict, List, Optional, Union
+
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_MAIS_RETORNO_FUNDS
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.colors import ColorIdentifier
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
 class MaisRetornoFunds(ABCRequests):
@@ -22,16 +24,16 @@ class MaisRetornoFunds(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None, 
-        int_wait_load_seconds: int = 60, 
+        list_slugs: Optional[List[str]] = None,
+        int_wait_load_seconds: int = 60,
         int_delay_seconds: int = 30,
-        bl_save_html: bool = False, 
+        bl_save_html: bool = False,
         bl_headless: bool = False,
-        bl_incognito: bool = False, 
+        bl_incognito: bool = False,
         instruments_class: Optional[str] = None
     ) -> None:
         super().__init__(
@@ -42,7 +44,7 @@ class MaisRetornoFunds(ABCRequests):
             logger=logger,
             token=token,
             list_slugs=list_slugs,
-            int_wait_load_seconds=int_wait_load_seconds, 
+            int_wait_load_seconds=int_wait_load_seconds,
             int_delay_seconds=int_delay_seconds,
         )
         self.session = session
@@ -92,7 +94,7 @@ class MaisRetornoFunds(ABCRequests):
             "STATUS_FUND": status_fund.get("text", None),
             "PAGE_POSITION": i
         }
-    
+
     def td_treatment_avl_instruments(self, i: int, scraper: PlaywrightScraper) \
         -> Dict[str, Any]:
         p_instrument_code = scraper.get_element(
@@ -131,7 +133,7 @@ class MaisRetornoFunds(ABCRequests):
             "INSTRUMENTS_CLASS": self.instruments_class,
             "PAGE_POSITION": i
         }
-    
+
     def td_treatment_avl_indexes(self, i: int, scraper: PlaywrightScraper) \
         -> Dict[str, Any]:
         p_index_name = scraper.get_element(
@@ -305,58 +307,58 @@ class MaisRetornoFunds(ABCRequests):
         return [
             {
                 "NICKNAME": h1_fund_nickname.get("text", None),
-                "FUND_NAME": p_fund_full_name.get("text", None), 
+                "FUND_NAME": p_fund_full_name.get("text", None),
                 "STATUS": span_status.get("text", None),
                 "BL_POOL_OPEN": ColorIdentifier(hex_pool_open).bl_green() \
-                    if hex_pool_open is not None else False, 
+                    if hex_pool_open is not None else False,
                 "BL_QUALIFIED_INVESTOR": ColorIdentifier(hex_qualified_investor).bl_green() \
-                    if hex_qualified_investor is not None else False, 
+                    if hex_qualified_investor is not None else False,
                 "BL_EXCLUSIVE_FUND": ColorIdentifier(hex_exclusive_fund).bl_green() \
-                    if hex_exclusive_fund is not None else False, 
+                    if hex_exclusive_fund is not None else False,
                 "BL_LONG_TERM_TAXATION": ColorIdentifier(hex_long_term_taxation).bl_green() \
-                    if hex_long_term_taxation is not None else False, 
+                    if hex_long_term_taxation is not None else False,
                 "BL_PENSION_FUND": ColorIdentifier(hex_pension_fund).bl_green() \
                     if hex_pension_fund is not None else False,
-                "CNPJ": p_cnpj_fund.get("text", None), 
-                "BENCHMARK": p_benchmark.get("text", None), 
+                "CNPJ": p_cnpj_fund.get("text", None),
+                "BENCHMARK": p_benchmark.get("text", None),
                 "FUND_INITIAL_DATE": DatesBR().str_date_to_datetime(
-                    p_fund_initial_date.get("text", None), "DD/MM/YYYY"), 
-                "FUND_TYPE": p_fund_type.get("text", None), 
-                "ADMINISTRATOR": a_fund_administrator.get("text", None), 
-                "CLASS": a_fund_class.get("text", None), 
-                "SUBCLASS": a_fund_subclass.get("text", None), 
+                    p_fund_initial_date.get("text", None), "DD/MM/YYYY"),
+                "FUND_TYPE": p_fund_type.get("text", None),
+                "ADMINISTRATOR": a_fund_administrator.get("text", None),
+                "CLASS": a_fund_class.get("text", None),
+                "SUBCLASS": a_fund_subclass.get("text", None),
                 "MANAGER": a_fund_manager.get("text", None) if a_fund_manager is not None \
-                    else None, 
+                    else None,
                 "RENTABILITY_LTM": float(p_rentability_ltm.get("text", None).replace(
                     "%", "").replace(",", ".")) / 100.0 \
                     if p_rentability_ltm is not None and \
                         p_rentability_ltm.get("text", None) is not None and \
                         p_rentability_ltm.get("text", None) != "-" else None,
-                "AUM": p_aum.get("text", None), 
-                "AVERAGE_AUM_LTM": p_average_aum_ltm.get("text", None), 
+                "AUM": p_aum.get("text", None),
+                "AVERAGE_AUM_LTM": p_average_aum_ltm.get("text", None),
                 "VOLATILITY_LTM": float(p_volatility_ltm.get("text", None).replace(
                     "%", "").replace(",", ".")) / 100.0 \
                     if p_volatility_ltm.get("text", None) is not None and \
-                        p_volatility_ltm.get("text", None) != "-" else None, 
+                        p_volatility_ltm.get("text", None) != "-" else None,
                 "SHARPE_LTM": float(p_sharpe_ltm.get("text", None).replace(",", ".")) \
                     if p_sharpe_ltm.get("text", None) is not None and \
                         p_sharpe_ltm.get("text", None) != "-" else None,
-                "QTY_UNITHOLDERS": p_qty_unitholders.get("text", None), 
-                "MANAGER_FULL_NAME": h3_manager_full_name.get("text", None), 
-                "MANAGER_DIRECTOR": p_fund_manager_director.get("text", None), 
-                "MANAGER_EMAIL": p_fund_manager_email.get("text", None), 
-                "MANAGER_SITE": p_fund_manager_site.get("text", None), 
+                "QTY_UNITHOLDERS": p_qty_unitholders.get("text", None),
+                "MANAGER_FULL_NAME": h3_manager_full_name.get("text", None),
+                "MANAGER_DIRECTOR": p_fund_manager_director.get("text", None),
+                "MANAGER_EMAIL": p_fund_manager_email.get("text", None),
+                "MANAGER_SITE": p_fund_manager_site.get("text", None),
                 "MANAGER_TELEPHONE": p_fund_manager_telephone.get("text", None),
                 "MINIMUM_INVESTMENT_AMOUNT": float(p_minimum_investment_amount.get(
                     "text", None).replace(".", "").replace("R$ ", "")) \
                     if p_minimum_investment_amount.get("text", None) is not None \
                     and p_minimum_investment_amount.get("text", None) != "-" \
-                    and len(p_minimum_investment_amount.get("text", None)) > 1 else None, 
+                    and len(p_minimum_investment_amount.get("text", None)) > 1 else None,
                 "MINIMUM_BALANCE_REQUIRED": float(p_minimum_balance_required.get(
                     "text", None).replace(".", "").replace("R$ ", "")) \
                     if p_minimum_balance_required.get("text", None) is not None \
                     and p_minimum_balance_required.get("text", None) != "-" \
-                    and len(p_minimum_balance_required.get("text", None)) > 1 else None, 
+                    and len(p_minimum_balance_required.get("text", None)) > 1 else None,
                 "ADMINISTRATION_FEE": float(p_administration_fee.get("text", None).replace(
                     "%", "").replace(",", ".")) / 100.0 \
                     if p_administration_fee.get("text", None) is not None \
@@ -371,14 +373,14 @@ class MaisRetornoFunds(ABCRequests):
                         and p_performance_fee.get("text", None) != "-" else None,
                 "FUND_QUOTATION_PERIOD": p_fund_quotation_period.get("text", None) \
                     if p_fund_quotation_period is not None \
-                        and p_fund_quotation_period != "-" else None, 
+                        and p_fund_quotation_period != "-" else None,
                 "FUND_SETTLEMENT_PERIOD": p_fund_settlement_period.get("text", None) \
                     if p_fund_settlement_period is not None \
                         and p_fund_settlement_period != "-" else None
             }
         ]
-    
-    def _convert_nums(self, list_: List[Union[str, float, int]], 
+
+    def _convert_nums(self, list_: List[Union[str, float, int]],
                       str_instrument: Optional[str] = None) -> List[Union[str, float, int]]:
         list_ = [NumHandler().transform_to_float(
                 dict_, int_precision=6) for dict_ in list_]
@@ -391,7 +393,7 @@ class MaisRetornoFunds(ABCRequests):
 
     def td_instruments_historical_rentability(self, scraper: PlaywrightScraper) \
         -> List[Dict[str, Any]]:
-        list_cols = ListHandler().extend_lists(["INSTRUMENT"], self.list_months, 
+        list_cols = ListHandler().extend_lists(["INSTRUMENT"], self.list_months,
                                                ["YTD", "SINCE_INCEPTION"])
         str_instrument = DirFilesManagement().get_filename_parts_from_url(
             scraper.get_current_url())[0]
@@ -412,13 +414,13 @@ class MaisRetornoFunds(ABCRequests):
         )
         list_td_rentabilities = self._convert_nums(list_td_rentabilities, str_instrument)
         list_td_alpha = self._convert_nums(list_td_alpha, str_instrument)
-        list_ = ListHandler().extend_lists(list_td_rentabilities, list_td_alpha, 
+        list_ = ListHandler().extend_lists(list_td_rentabilities, list_td_alpha,
                                            bl_remove_duplicates=False)
         list_ser = HandlingDicts().pair_headers_with_data(list_cols, list_)
         df_ = pd.DataFrame(list_ser)
         df_["YEAR"] = list_years
         return df_.to_dict(orient="records")
-    
+
     def td_instruments_stats(self, scraper: PlaywrightScraper) -> List[Dict[str, Any]]:
         list_cols = ["YTD", "MTD", "LTM", "L_24M", "L_36M", "L_48M", "L_60M", "SINCE_INCEPTION"]
         list_stas = scraper.get_elements(
@@ -439,7 +441,7 @@ class MaisRetornoFunds(ABCRequests):
         list_cols = ["INSTRUMENT", "STATISTIC"] + list_cols
         df_ = df_[list_cols]
         return df_.to_dict(orient="records")
-    
+
     def td_consistency(self, scraper: PlaywrightScraper) -> List[Dict[str, Any]]:
         span_positive_months = scraper.get_element(
             YAML_MAIS_RETORNO_FUNDS["instruments_consistency"]["xpaths"]["span_positive_months"],
@@ -472,16 +474,16 @@ class MaisRetornoFunds(ABCRequests):
         source = self.get_query_params(resp_req.url, "source")
         scraper = PlaywrightScraper(
             bl_headless=self.bl_headless,
-            int_default_timeout=self.int_wait_load_seconds * 1_000, 
+            int_default_timeout=self.int_wait_load_seconds * 1_000,
             bl_incognito=self.bl_incognito
         )
         with scraper.launch():
             if scraper.navigate(resp_req.url):
                 if self.bl_save_html:
                     scraper.export_html(
-                        scraper.page.content(), 
-                        folder_path="data", 
-                        filename="html-mais-retorno-avl-funds", 
+                        scraper.page.content(),
+                        folder_path="data",
+                        filename="html-mais-retorno-avl-funds",
                         bl_include_timestamp=True
                     )
                 if source == "avl_funds":

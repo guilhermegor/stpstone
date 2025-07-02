@@ -1,10 +1,12 @@
-import re
-from requests import request
-from typing import Dict, Union, List, Optional
 from logging import Logger
-from stpstone.utils.connections.netops.proxies.abc import ABCSession
+import re
+from typing import Dict, List, Optional, Union
+
+from requests import request
+
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.geography.ww import WWTimezones, WWGeography
+from stpstone.utils.connections.netops.proxies.abc import ABCSession
+from stpstone.utils.geography.ww import WWGeography, WWTimezones
 
 
 class SpysMeCountries(ABCSession):
@@ -93,10 +95,10 @@ class SpysMeCountries(ABCSession):
                 "protocol": "https",
                 "bl_alive": True,
                 "status": "success",
-                "alive_since": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
+                "alive_since": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time()),
                 "anonymity": str_anonymity.lower(),
                 "average_timeout": 1.0,
-                "first_seen": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time),
+                "first_seen": self.dates_br.datetime_to_unix_timestamp(self.dates_br.curr_time()),
                 "ip_data": "",
                 "ip_name": "",
                 "timezone": str_timezone,

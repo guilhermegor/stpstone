@@ -1,6 +1,9 @@
 # pypi.org libs
 import os
+
 from keyring import get_password
+
+
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.crypto.coincap import CoinCap
@@ -16,7 +19,7 @@ print(f"Proxies available: {cls_session.session.proxies}")
 
 df_ = CoinCap(
     session=cls_session.session,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5),
+    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
     cls_db=None,
     token=get_password('COIN_CAP', 'API_KEY')
 ).source('ohlcv_latest', bl_fetch=True)

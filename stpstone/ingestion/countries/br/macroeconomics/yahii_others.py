@@ -1,19 +1,21 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Any, Dict
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
 from time import sleep
+from typing import Any, Dict, List, Optional
+
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_YAHII_OHTERS
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.numbers import NumHandler
-from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.html import HtmlHandler
+from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class YahiiOthersBR(ABCRequests):
@@ -22,7 +24,7 @@ class YahiiOthersBR(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -35,7 +37,7 @@ class YahiiOthersBR(ABCRequests):
             cls_db=cls_db,
             logger=logger,
             token=token,
-            list_slugs=list_slugs, 
+            list_slugs=list_slugs,
             int_delay_seconds=int_delay_seconds,
         )
         self.session = session
@@ -97,11 +99,11 @@ class YahiiOthersBR(ABCRequests):
                 for x in df_["SALARIO_CONTRIBUICAO"]
             ]
             df_["SALARIO_INF"] = pd.to_numeric(
-                df_["SALARIO_INF"].str.replace(".", "").str.replace(",", "."), 
+                df_["SALARIO_INF"].str.replace(".", "").str.replace(",", "."),
                 errors="coerce"
             )
             df_["SALARIO_SUP"] = pd.to_numeric(
-                df_["SALARIO_SUP"].str.replace(".", "").str.replace(",", "."), 
+                df_["SALARIO_SUP"].str.replace(".", "").str.replace(",", "."),
                 errors="coerce"
             )
             df_["SALARIO_INF"] = df_["SALARIO_INF"].fillna(0.0)

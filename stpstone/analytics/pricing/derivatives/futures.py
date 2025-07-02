@@ -1,20 +1,22 @@
 
 ### PRICING FUTURE CONTRACTS
 
+from datetime import date, datetime
 import math
-import numpy as np
 from operator import itemgetter
-from datetime import datetime, date
-from scipy.interpolate import CubicSpline
-from nelson_siegel_svensson.calibrate import calibrate_ns_ols, calibrate_nss_ols
+
 from nelson_siegel_svensson import NelsonSiegelCurve, NelsonSiegelSvenssonCurve
+from nelson_siegel_svensson.calibrate import calibrate_ns_ols, calibrate_nss_ols
+import numpy as np
+from scipy.interpolate import CubicSpline
+
+from stpstone.central.global_slots import MATURITY_WEEK_DAY_PER_CONTRACT
 from stpstone.finance.performance_apprraisal.financial_math import FinancialMath
+from stpstone.handling_data.handling_lists import ListHandler
+from stpstone.handling_data.handling_numbers import LinearAlgebra
 from stpstone.handling_data.handlingstr import StrHandler
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.central.global_slots import MATURITY_WEEK_DAY_PER_CONTRACT
-from stpstone.handling_data.handling_numbers import LinearAlgebra
 from stpstone.utils.parsers.json_format import JsonFiles
-from stpstone.handling_data.handling_lists import ListHandler
 
 
 class NotionalFromPV:
@@ -53,7 +55,7 @@ class NotionalFromPV:
         # working days from the last release until the reference date
         int_wddt = DatesBR().get_working_days_delta(
             dt_pmi_last,
-            DatesBR().sub_working_days(DatesBR().curr_date, wd_bef_ref)
+            DatesBR().sub_working_days(DatesBR().curr_date(), wd_bef_ref)
         )
         # prt - pmi pro-rata tempore
         float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
@@ -76,7 +78,7 @@ class NotionalFromRt:
         if DatesBR().check_date_datetime_format(dt_xpt) == False:
             dt_xpt = DatesBR().str_date_to_datetime(dt_xpt, str_format_dt_input)
         # reference date
-        dt_ref = DatesBR().sub_working_days(DatesBR().curr_date, int_wd_bef)
+        dt_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
         # number of days to settlement of contract
         int_wddt = DatesBR().get_working_days_delta(dt_ref, dt_xpt)
         # real rate
@@ -99,7 +101,7 @@ class RtFromPV:
         if DatesBR().check_date_datetime_format(dt_xpt) == False:
             dt_xpt = DatesBR().str_date_to_datetime(dt_xpt, str_format_dt_input)
         # reference date
-        dt_ref = DatesBR().sub_working_days(DatesBR().curr_date, int_wd_bef)
+        dt_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
         # number of days to settlement of contract
         int_cddt = DatesBR().delta_calendar_days(dt_ref, dt_xpt)
         # returning rate

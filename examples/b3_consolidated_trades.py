@@ -1,5 +1,7 @@
 # pypi.org libs
 import os
+
+
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.br.exchange.consolidated_trades import ConsolidatedTrdsB3
@@ -17,7 +19,7 @@ print(session.proxies)
 
 cls_ = ConsolidatedTrdsB3(
     session=None,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
     cls_db=None
 )
 

@@ -1,20 +1,22 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Any, Dict, Tuple
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
-from time import sleep
-from bs4 import BeautifulSoup
 from math import nan
+from time import sleep
+from typing import Any, Dict, List, Optional, Tuple
+
+from bs4 import BeautifulSoup
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_ANBIMA_FORECASTS
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.html import HtmlHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class AnbimaForecasts(ABCRequests):
@@ -22,7 +24,7 @@ class AnbimaForecasts(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -89,4 +91,3 @@ class AnbimaForecasts(ABCRequests):
         source = self.get_query_params(resp_req.url, "source")
         list_data = self.td_parser(root, source)
         return self.table_(list_data, source)
-

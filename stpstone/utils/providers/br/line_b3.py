@@ -1,8 +1,10 @@
-import time
-import pandas as pd
 from pprint import pprint
+import time
 from typing import Any, Dict, List, Optional, Union
+
+import pandas as pd
 from requests import request
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.json import JsonFiles
@@ -1044,10 +1046,10 @@ class SystemEventManagement(ConnectionApi):
             "startTime": str_start_time,
             "endTime": str_sup_time,
             "startDate": DatesBR()
-            .sub_working_days(DatesBR().curr_date(), int_working_days_before)
+            .sub_working_days(DatesBR().curr_date()(), int_working_days_before)
             .strftime("%d/%m/%Y"),
             "endDate": DatesBR()
-            .add_working_days(DatesBR().curr_date(), int_working_days_after)
+            .add_working_days(DatesBR().curr_date()(), int_working_days_after)
             .strftime("%d/%m/%Y"),
         }
         # return json

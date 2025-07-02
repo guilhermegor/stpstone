@@ -1,19 +1,21 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Any, Tuple
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
 from time import sleep
+from typing import Any, List, Optional, Tuple
+
+import pandas as pd
+from requests import Response
 from selenium.webdriver.remote.webdriver import WebDriver
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_WW_TRADING_ECON
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.html import HtmlHandler
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
@@ -22,7 +24,7 @@ class TradingEconWW(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -67,7 +69,7 @@ class TradingEconWW(ABCRequests):
             cls_selenium = SeleniumWD(resp_req.url, bl_headless=True, bl_incognito=True)
             web_driver = cls_selenium.get_web_driver
             list_th = list(YAML_WW_TRADING_ECON[source]["dtypes"].keys())
-            list_td = self.list_web_elements(cls_selenium, web_driver, 
+            list_td = self.list_web_elements(cls_selenium, web_driver,
                                              YAML_WW_TRADING_ECON[source]["xpaths"]["list_td"])
         finally:
             web_driver.quit()

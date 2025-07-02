@@ -1,26 +1,34 @@
-import backoff
-import chardet
-import fitz
-import pdfplumber
-import urllib3
-import os
-import re
-import subprocess
-import tempfile
-import pandas as pd
-from time import sleep
 from abc import ABC, abstractmethod
 from datetime import datetime
 from io import BytesIO, StringIO, TextIOWrapper
 from logging import Logger
-from typing import Any, Dict, List, Optional, Tuple, Type, Union, Literal
+import os
+import re
+import subprocess
+import tempfile
+from time import sleep
+from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union
 from urllib.parse import parse_qs, urlparse
 from zipfile import ZipExtFile, ZipFile
+
+import backoff
+import chardet
+import fitz
+import pandas as pd
+import pdfplumber
+from requests import Request, Response, Session as ReqSession, request
+from requests.exceptions import (
+    ChunkedEncodingError,
+    ConnectTimeout,
+    HTTPError,
+    JSONDecodeError,
+    ReadTimeout,
+    RequestException,
+)
 from selenium.webdriver.remote.webdriver import WebDriver
 from sqlalchemy.orm import Session
-from requests import Request, Response, Session as ReqSession, request
-from requests.exceptions import (ReadTimeout, ConnectTimeout, ChunkedEncodingError,
-                                 RequestException, HTTPError, JSONDecodeError)
+import urllib3
+
 from stpstone.transformations.standardization.dataframe import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -194,14 +202,14 @@ class UtilsRequests(ABC):
         df_.sort_values(by=["EVENT", "MATCH_PATTERN"], ascending=[True, True], inplace=True)
         df_.drop_duplicates(subset=["EVENT"], inplace=True)
         return df_
-    
+
     def pivot_event_data(self, df_: pd.DataFrame) -> pd.DataFrame:
         """
         Pivots event data from long format to wide format with events as columns.
-        
+
         Args:
             df_ (pd.DataFrame): Input DataFrame containing EVENT, REGEX_GROUP_1 columns
-            
+
         Returns:
             pd.DataFrame: Pivoted DataFrame with one row per country and events as columns
         """
@@ -254,7 +262,7 @@ class UtilsRequests(ABC):
                 })
         df_ = pd.DataFrame(list_matches)
         df_.drop_duplicates(inplace=True)
-        df_.sort_values(by=["INT_REGEX", "EVENT", "MATCH_PATTERN"], 
+        df_.sort_values(by=["INT_REGEX", "EVENT", "MATCH_PATTERN"],
                         ascending=[True, True, True], inplace=True)
         return self.pivot_event_data(df_)
 
@@ -664,7 +672,7 @@ class ABCRequests(HandleReqResponses):
         self,
         dict_metadata: Dict[str, Any],
         session: Optional[ReqSession] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

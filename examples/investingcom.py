@@ -1,5 +1,7 @@
 # pypi.org libs
 import os
+
+
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.markets.investingcom import InvestingCom
@@ -17,8 +19,8 @@ print(session.proxies)
 
 cls_investingcom = InvestingCom(
     session=session,
-    dt_start=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-    dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 0),
+    dt_start=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
+    dt_end=DatesBR().sub_working_days(DatesBR().curr_date(), 0),
     str_ticker='PETR4'
 )
 df_ = cls_investingcom.source('daily_ohlcv', bl_fetch=True)

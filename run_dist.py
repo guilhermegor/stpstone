@@ -3,17 +3,17 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.conversions.base_converter import BaseConverter
 from stpstone.utils.conversions.expression_converter import ExpressionConverter
 from stpstone.utils.geography.br import BrazilGeo
-from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.parsers.numbers import NumHandler
 
 
 print("*** Dates BR Tester ***")
-print(f"Current Date: {DatesBR().curr_date}")
-print(f"3 working days before current date: {DatesBR().sub_working_days(DatesBR().curr_date, 3)}")
-print(f"3 working days after current date: {DatesBR().add_working_days(DatesBR().curr_date, 3)}")
+print(f"Current Date: {DatesBR().curr_date()}")
+print(f"3 working days before current date: {DatesBR().sub_working_days(DatesBR().curr_date(), 3)}")
+print(f"3 working days after current date: {DatesBR().add_working_days(DatesBR().curr_date(), 3)}")
 
 print("\n*** Unix Timestamp Tester ***")
-print(f"Current Unix Timestamp: {DatesBR().datetime_to_unix_timestamp(DatesBR().curr_date)}")
+print(f"Current Unix Timestamp: {DatesBR().datetime_to_unix_timestamp(DatesBR().curr_date())}")
 
 print("\n*** European Options Tester ***")
 print(f"Black Scholes Call Option: {EuropeanOptions().general_opt_price(103.0, 100.0, 0.025, 0.25, 0.2, 0.0, 0.0, 'call')}")

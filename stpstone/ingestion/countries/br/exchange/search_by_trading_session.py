@@ -1,19 +1,21 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Dict, Any
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response, request
 from time import sleep
+from typing import Any, Dict, List, Optional
 from zipfile import ZipFile
+
+import pandas as pd
+from requests import Response, request
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_B3_SEARCH_BY_TRADING_SESSION
+from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.folders import RemoteFiles
-from stpstone.utils.parsers.object import HandlingObjects
 from stpstone.utils.parsers.html import HtmlHandler
+from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.parsers.object import HandlingObjects
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -22,7 +24,7 @@ class SearchByTradingB3(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -48,8 +50,8 @@ class SearchByTradingB3(ABCRequests):
         self.dt_inf_month_yymmdd = self.dt_inf_month.strftime("%y%m%d")
 
     def instruments_register_raw(
-        self, 
-        method_request: str = "GET", 
+        self,
+        method_request: str = "GET",
         key_token: str = "token"
     ) -> pd.DataFrame:
         """
@@ -59,7 +61,7 @@ class SearchByTradingB3(ABCRequests):
         """
         # api consulta lotes padrão xp
         url_token = "https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={}".format(
-            DatesBR().curr_date)
+            DatesBR().curr_date())
         url_lotes_padrao_b3 = "https://arquivos.b3.com.br/api/download/?token={}"
         # coletando token para consulta da API da B3
         token_api_b3 = \
@@ -92,12 +94,12 @@ class SearchByTradingB3(ABCRequests):
         return df_instruments_register_b3_raw
 
     def security_category_name(
-        self, 
-        dict_export: Dict[Any] = dict(), 
-        key_ticker: str = "TckrSymb", 
-        col_security_category_name: str = "SctyCtgyNm", 
-        col_market_name: str = "MktNm", 
-        list_markets_classified: List[str] = list(), 
+        self,
+        dict_export: Dict[Any] = dict(),
+        key_ticker: str = "TckrSymb",
+        col_security_category_name: str = "SctyCtgyNm",
+        col_market_name: str = "MktNm",
+        list_markets_classified: List[str] = list(),
         bl_return_markets_not_classified: bool = False
     ) -> Dict[str, List[str]]:
         """
@@ -171,11 +173,11 @@ class SearchByTradingB3(ABCRequests):
         return list_rows_mtm
 
     def mtm_compra_venda(
-        self, 
-        den_desagios: Optional[float] = None, 
-        key_stocks: str = "stocks", 
-        key_funds:str = "funds", 
-        key_etfs: str = "etfs", 
+        self,
+        den_desagios: Optional[float] = None,
+        key_stocks: str = "stocks",
+        key_funds:str = "funds",
+        key_etfs: str = "etfs",
         key_bdrs: str = "bdrs"
     ) -> pd.DataFrame:
         """
@@ -292,12 +294,12 @@ class SearchByTradingB3(ABCRequests):
         return df_mtm_b3
 
     def collateral_accepted_spot_bov_b3(
-        self, 
-        dict_repalce_str_erros: Dict[str] = {"ETF": ""}, 
-        col_ticker: str = "TICKER", 
-        col_isin: str = "ISIN", 
-        col_limite_qtds: str = "LIMITE_QUANTIDADES", 
-        col_mes_arquivo: str = "MES_ARQUIVO", 
+        self,
+        dict_repalce_str_erros: Dict[str] = {"ETF": ""},
+        col_ticker: str = "TICKER",
+        col_isin: str = "ISIN",
+        col_limite_qtds: str = "LIMITE_QUANTIDADES",
+        col_mes_arquivo: str = "MES_ARQUIVO",
         key_limite_qtds: str = "Limite (quantidade)"
     ) -> pd.DataFrame:
         """
@@ -334,7 +336,7 @@ class SearchByTradingB3(ABCRequests):
             #   looping within sheet names
             for nome_plan_ativa in [
                 "Ações, BDRs, ETFs e Units",
-                "ADR", 
+                "ADR",
                 "DEB"
             ]:
                 #   openning dataframe in memory
@@ -359,7 +361,7 @@ class SearchByTradingB3(ABCRequests):
         return df_coll_acc_spot_bov
 
     def risk_scenarios_curve_types(
-        self, 
+        self,
         list_risk_curve_type_scenarios: Optional[List[str]] = None
     ) -> pd.DataFrame:
         """
@@ -398,7 +400,7 @@ class SearchByTradingB3(ABCRequests):
                     list_risk_curve_type_scenarios])):
                 continue
             #   abrindo em memória arquivo corrente - pandas dataframe
-            reader = pd.read_csv(extracted_file_curve_type_scenarios, sep=";", skiprows=1, 
+            reader = pd.read_csv(extracted_file_curve_type_scenarios, sep=";", skiprows=1,
                                  header=None, names=list_cols_scenarios, decimal=",")
             df_cenarios_passagem = pd.DataFrame(reader)
             #   preenchendo com valor padrão campos com valor indisponível
@@ -424,7 +426,7 @@ class SearchByTradingB3(ABCRequests):
         return df_risk_curve_type_scenarios
 
     def scenarios_risk_spot(
-        self, 
+        self,
         list_scenarios_risk_spot: Optional[List[str]] = None
     ) -> pd.DataFrame:
         """
@@ -478,7 +480,7 @@ class SearchByTradingB3(ABCRequests):
                 extracted_file_tipo_curva_cenario.name, substr) == False for substr in
                 list_scenarios_risk_spot])): continue
             #   abrindo em memória arquivo corrente - pandas dataframe
-            reader = pd.read_csv(extracted_file_tipo_curva_cenario, sep=";", skiprows=1, 
+            reader = pd.read_csv(extracted_file_tipo_curva_cenario, sep=";", skiprows=1,
                                  header=None, names=list_cols_scenarios, decimal=",")
             df_cenarios_passagem = pd.DataFrame(reader)
             #   preenchendo com valor padrão campos com valor indisponível
@@ -507,12 +509,12 @@ class SearchByTradingB3(ABCRequests):
         return df_cenarios_tipo_spot
 
     def primitive_risk_factors_merged(
-        self, 
+        self,
         list_risk_scenarios_curve_type: List[str] = \
-            ["2962", "2906", "2945", "2924", "2944", "2925", "2946", "2901", "2902", "2934"], 
+            ["2962", "2906", "2945", "2924", "2944", "2925", "2946", "2901", "2902", "2934"],
         list_scenarios_risk_spot: List[str] = \
-            ["2962", "2906", "2945", "2924", "2944", "2925", "2946", "2901", "2902", "2934"], 
-        int_cenario_sup_avaliacao: int = 529, 
+            ["2962", "2906", "2945", "2924", "2944", "2925", "2946", "2901", "2902", "2934"],
+        int_cenario_sup_avaliacao: int = 529,
         bl_debug: bool = False
     ) -> pd.DataFrame:
         """

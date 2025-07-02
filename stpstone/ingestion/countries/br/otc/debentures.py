@@ -1,13 +1,15 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional
-from sqlalchemy.orm import Session
 from logging import Logger
+from typing import Optional
+
+import pandas as pd
 from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_DEBENTURES
+from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.ingestion.abc.requests import ABCRequests
 
 
 class DebenturesComBR(ABCRequests):
@@ -21,8 +23,8 @@ class DebenturesComBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 10),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 10),
+        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:

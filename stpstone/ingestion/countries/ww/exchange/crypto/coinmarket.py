@@ -1,13 +1,15 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional
-from sqlalchemy.orm import Session
 from logging import Logger
+from typing import Optional
+
+import pandas as pd
 from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_WW_CRYPTO_COINMARKET
+from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.ingestion.abc.requests import ABCRequests
 
 
 class CoinMarket(ABCRequests):
@@ -15,7 +17,7 @@ class CoinMarket(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None

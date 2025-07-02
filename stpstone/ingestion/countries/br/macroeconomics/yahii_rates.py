@@ -1,23 +1,24 @@
-import pandas as pd
-from math import nan
 from datetime import datetime
-from typing import Optional, List, Any, Tuple, Dict
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
+from math import nan
 from time import sleep
+from typing import Any, Dict, List, Optional, Tuple
+
+import pandas as pd
+from requests import Response
 from selenium.webdriver.remote.webdriver import WebDriver
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_YAHII_RATES
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.parsers.numbers import NumHandler
-from stpstone.utils.parsers.lists import ListHandler
-from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.html import HtmlHandler
+from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
 class YahiiRatesBRMacro(ABCRequests):
@@ -26,7 +27,7 @@ class YahiiRatesBRMacro(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -39,7 +40,7 @@ class YahiiRatesBRMacro(ABCRequests):
             cls_db=cls_db,
             logger=logger,
             token=token,
-            list_slugs=list_slugs, 
+            list_slugs=list_slugs,
             int_delay_seconds=int_delay_seconds,
         )
         self.session = session
@@ -76,9 +77,9 @@ class YahiiRatesBRMacro(ABCRequests):
             return float(str_value.replace(",", "."))
         else:
             self.create_log.log_message(
-                self.logger, 
+                self.logger,
                 f"{str_value} of type {type(str_value)}, which cannot be handled by the method, "
-                + f"please check", 
+                + f"please check",
                 "warning"
             )
             return ""
@@ -91,7 +92,7 @@ class YahiiRatesBRMacro(ABCRequests):
         # print(f"list_th_td: {list_th_td}")
         # populating list_td_months, list_td_years and list_td_values
         for td in list_th_td:
-            if (td in YAML_YAHII_RATES["pmi_rf_rates"]["list_months_combined"] 
+            if (td in YAML_YAHII_RATES["pmi_rf_rates"]["list_months_combined"]
                 and "/" not in td) \
                 or "ACUMULADO" in td \
                 or "ACUM" in td:
@@ -104,22 +105,22 @@ class YahiiRatesBRMacro(ABCRequests):
             else:
                 list_td_values.append(self.td_value(td))
         # cleaning list_td_months and list_td_years, regarding the source
-        if source in ["igpm"]: 
+        if source in ["igpm"]:
             list_td_values.remove("A/M")
         elif source in ["ipcae"]:
             list_td_years = list_td_years[2:]
-            list_td_months = ["JAN", "FEV", "MAR", "ACUM TRIM 1", "ABR", "MAI", "JUN", "ACUM TRIM 2", 
-                              "JUL", "AGO", "SET", "ACUM TRIM 3", "OUT", "NOV", "DEZ", "ACUM TRIM 4", 
+            list_td_months = ["JAN", "FEV", "MAR", "ACUM TRIM 1", "ABR", "MAI", "JUN", "ACUM TRIM 2",
+                              "JUL", "AGO", "SET", "ACUM TRIM 3", "OUT", "NOV", "DEZ", "ACUM TRIM 4",
                               "ACUMULADO NO ANO"]
         elif source in ["ivar"]:
-            list_td_months = [x for x in list_td_months if x not in ["JAN", "FEV", "MAR", "ABR", 
-                                                                     "MAI", "JUN", "JUL", "AGO", 
+            list_td_months = [x for x in list_td_months if x not in ["JAN", "FEV", "MAR", "ABR",
+                                                                     "MAI", "JUN", "JUL", "AGO",
                                                                      "SET", "OUT", "NOV", "DEZ"]]
         if source not in ["ipcae"]:
             list_td_months = ListHandler().remove_duplicates(list_td_months)
         list_td_years = ListHandler().remove_duplicates(list_td_years)
         list_td_years = [x for x in list_td_years \
-                            if x <= DatesBR().year_number(DatesBR().curr_date) + 1 \
+                            if x <= DatesBR().year_number(DatesBR().curr_date()) + 1 \
                             and x >= YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_year_min"]]
         list_td_months = [x for x in list_td_months if "ACUMULADONO" not in x]
@@ -129,7 +130,7 @@ class YahiiRatesBRMacro(ABCRequests):
         # print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
         # populating list_ser with year, month and values
         for i_y, int_year in enumerate(list_td_years):
-            if DatesBR().year_number(DatesBR().curr_date) < int_year: break
+            if DatesBR().year_number(DatesBR().curr_date()) < int_year: break
             i_m = 0
             if ("int_year_min" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
                 and ("int_cols_tbl" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
@@ -191,7 +192,7 @@ class YahiiRatesBRMacro(ABCRequests):
                         "YEAR": int_year,
                         "MONTH": str_month,
                         "VALUE": float(list_td_values[int_pos]) / 100.0 \
-                            if (source in ["ipcae"] and "ACUMULADO NO ANO" not in str_month 
+                            if (source in ["ipcae"] and "ACUMULADO NO ANO" not in str_month
                                 and list_td_values[int_pos] != "") \
                             else list_td_values[int_pos],
                         "ECONOMIC_INDICATOR": "CDI" if source == "cetip" else source.upper()
@@ -200,7 +201,7 @@ class YahiiRatesBRMacro(ABCRequests):
                 except IndexError:
                     break
         return list_ser
-        
+
     def list_web_elements(self, cls_selenium_wd: SeleniumWD, web_driver: WebDriver, xpath_: str) \
         -> List[Any]:
         """
@@ -229,4 +230,3 @@ class YahiiRatesBRMacro(ABCRequests):
         finally:
             web_driver.quit()
         return pd.DataFrame(list_ser)
-

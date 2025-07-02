@@ -1,13 +1,14 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
-from requests import Session as RequestsSession
+from typing import List, Optional
+
+import pandas as pd
+from requests import Response, Session as RequestsSession
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_DEBENTURES
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.utils.cals.handling_dates import DatesBR
 
 
 class AnbimaDataDebentures(ABCRequests):
@@ -15,7 +16,7 @@ class AnbimaDataDebentures(ABCRequests):
     def __init__(
         self,
         session: Optional[RequestsSession] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

@@ -1,10 +1,12 @@
-import pandas as pd
 from datetime import datetime
 from logging import Logger
 from time import sleep
 from typing import Any, List, Optional, Tuple
+
+import pandas as pd
 from requests import Response
 from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_B3_FUTURES_CLOSING_ADJ
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -21,7 +23,7 @@ class FuturesClosingAdjB3(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

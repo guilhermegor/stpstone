@@ -1,12 +1,14 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List
-from sqlalchemy.orm import Session
 from logging import Logger
+from typing import List, Optional
+
+import pandas as pd
 from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_IRSBR
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.utils.cals.handling_dates import DatesBR
 
 
 class IRSBR(ABCRequests):
@@ -14,7 +16,7 @@ class IRSBR(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

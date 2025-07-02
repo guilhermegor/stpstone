@@ -1,5 +1,7 @@
 # pypi.org libs
 import os
+
+
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.br.macroeconomics.ptax_bcb import PTAXBCB
@@ -11,8 +13,8 @@ session = YieldFreeProxy(bl_new_proxy=False).session
 
 class_ptax = PTAXBCB(
     session=session,
-    dt_start=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-    dt_end=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+    dt_start=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
+    dt_end=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
     cls_db=None,
     bl_debug=False
 )

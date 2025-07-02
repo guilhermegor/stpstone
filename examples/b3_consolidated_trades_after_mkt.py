@@ -1,6 +1,10 @@
 import os
+
+
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt import ConsolidatedTrdsAfterMktB3
+from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt import (
+    ConsolidatedTrdsAfterMktB3,
+)
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
@@ -15,7 +19,7 @@ print(session.proxies)
 
 cls_ = ConsolidatedTrdsAfterMktB3(
     session=None,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
     cls_db=None
 )
 

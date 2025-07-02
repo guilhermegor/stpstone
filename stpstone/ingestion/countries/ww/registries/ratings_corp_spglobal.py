@@ -1,16 +1,18 @@
-import re
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
+import re
 from time import sleep
+from typing import List, Optional
+
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_WW_RATINGS_CORP_S_AND_P
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
 class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
@@ -19,7 +21,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
         self,
         bearer: str,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -74,7 +76,7 @@ class RatingsCorpSPGlobalProduct:
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

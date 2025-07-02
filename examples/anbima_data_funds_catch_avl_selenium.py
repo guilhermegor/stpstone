@@ -1,14 +1,16 @@
-import sys
-import pandas as pd
-from keyring import get_password
-from random import choice, randint
-from time import sleep
 from getpass import getuser
+from random import choice, randint
+import sys
+from time import sleep
+
+from keyring import get_password
+import pandas as pd
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from urllib3.exceptions import ReadTimeoutError
-from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+
 from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
 # setting variables
@@ -38,7 +40,7 @@ else:
 # looping within anbima data pages
 for i in range(450, 506):
     url = url_anbima_data_funds.format(i)
-    print('{} - #{}/{} PG ANBIMA DATA FUNDS: {}'.format(DatesBR().current_timestamp_string, i, 505, url))
+    print('{} - #{}/{} PG ANBIMA DATA FUNDS: {}'.format(DatesBR().current_timestamp_string(), i, 505, url))
     print('PROXY: {}'.format(str_proxy))
     cls_selenium = SeleniumWD(
         url=url,
@@ -96,8 +98,8 @@ for i in range(450, 506):
         "data/anbima-avl-funds-pg-{}_{}_{}_{}.csv".format(
             i,
             getuser(),
-            DatesBR().curr_date.strftime('%Y%m%d'),
-            DatesBR().curr_time.strftime('%H%M%S')
+            DatesBR().curr_date().strftime('%Y%m%d'),
+            DatesBR().curr_time().strftime('%H%M%S')
         ),
         index=False
     )

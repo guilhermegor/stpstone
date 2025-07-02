@@ -1,13 +1,15 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
 from time import sleep
+from typing import List, Optional
+
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_B3_FINANCIAL_INDICATORS
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.utils.cals.handling_dates import DatesBR
 
 
 class B3FinancialIndicators(ABCRequests):
@@ -15,7 +17,7 @@ class B3FinancialIndicators(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -40,9 +42,9 @@ class B3FinancialIndicators(ABCRequests):
         list_ser = list()
         for dict_ in resp_req.json():
             list_ser.append({
-                "SECURITY_ID": dict_["securityIdentificationCode"], 
+                "SECURITY_ID": dict_["securityIdentificationCode"],
                 "DESCRIPTION": dict_["description"],
-                "GROUP_DESCRIPTION": dict_["groupDescription"], 
+                "GROUP_DESCRIPTION": dict_["groupDescription"],
                 "VALUE": float(dict_["value"].replace(",", ".")) if dict_["value"] is not None \
                     and len(dict_["value"]) > 0 else 0.0,
                 "RATE": float(dict_["rate"].replace(",", ".")) if dict_["rate"] is not None \

@@ -100,7 +100,7 @@ repos:
 
       - id: coverage-check
         name: test coverage check
-        entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ -v && poetry run coverage report --fail-under=80 -m"
+        entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage report --fail-under=80 -m"
         language: system
         types: [python]
         pass_filenames: false

@@ -2,6 +2,8 @@
 
 from datetime import date, datetime
 import sys
+
+
 sys.path.append(r'C:\Users\Guilherme\OneDrive\Dev\Python\Packages')
 from stpstone.finance.performance_apprraisal.financial_math import FinancialMath
 from stpstone.utils.cals.handling_dates import DatesBR
@@ -48,7 +50,7 @@ class PrecificacaoTD:
             'retorno_bruto_ntnf': sum(list_fluxos_caixa)
         }
 
-    def pr1(self, data_negociacao=DatesBR().add_working_days(DatesBR().curr_date(),
+    def pr1(self, data_negociacao=DatesBR().add_working_days(DatesBR().curr_date()(),
                                                              1).strftime('%d/%m/%Y'),
             dia_atualizacao_vna=15):
         """
@@ -97,7 +99,7 @@ class PrecificacaoTD:
         return vna_ultimo_disponivel_ntnb * (1 + ipca_projetado_adu) ** pr1
 
     def ntn_b_principal(self, ytm, du, vna_ultimo_disponivel_ntnb, ipca_projetado_aa,
-                        data_negociacao=DatesBR().add_working_days(DatesBR().curr_date(),
+                        data_negociacao=DatesBR().add_working_days(DatesBR().curr_date()(),
                                                                    1).strftime('%d/%m/%Y'),
                         dia_atualizacao_vna=15,
                         nper_dias_uteis_aa=252, nper_dias_corridos_am=30,
@@ -123,7 +125,7 @@ class PrecificacaoTD:
         return vna_projetado_ntnb * cotacao
 
     def ntn_b(self, ytm, lista_dus_fluxos_caixa, vna_ultimo_disponivel_ntnb, ipca_projetado_aa,
-              data_negociacao=DatesBR().add_working_days(DatesBR().curr_date(),
+              data_negociacao=DatesBR().add_working_days(DatesBR().curr_date()(),
                                                          1).strftime('%d/%m/%Y'),
               dia_atualizacao_vna=15,
               nper_dias_uteis_aa=252, nper_dias_corridos_am=30,
@@ -199,7 +201,7 @@ class PrecificacaoTD:
         """
         pass
 
-    def dus_vencimento(self, data_vencimento, data_referencia=DatesBR().curr_date()):
+    def dus_vencimento(self, data_vencimento, data_referencia=DatesBR().curr_date()()):
         """
         DOCSTRING:
         INPUTS:
@@ -341,7 +343,7 @@ class PrecificacaoTD:
 # # output
 # 1940.139464570165
 
-# print(type(DatesBR().add_working_days(DatesBR().curr_date(),
+# print(type(DatesBR().add_working_days(DatesBR().curr_date()(),
 #                                       1).strftime('%d/%m/%Y')))
 
 # print(PrecificacaoTD().ntn_b(
@@ -355,10 +357,10 @@ class PrecificacaoTD:
 # print(PrecificacaoTD().lft(0, 6543.016794, 0.1175))
 # # output
 # 6545.90191489939
-# print(type(DatesBR().curr_date()))
+# print(type(DatesBR().curr_date()()))
 
 # print(PrecificacaoTD().dus_pagamento_cupons(
-#     DatesBR().curr_date(), 'ntn-f', '01/01/2031'))
+#     DatesBR().curr_date()(), 'ntn-f', '01/01/2031'))
 # # output
 # {datetime.date(2021, 1, 4): 3649, datetime.date(2021, 7, 1): 3471, datetime.date(2022, 1, 3): 3285, datetime.date(2022, 7, 1): 3106, datetime.date(2023, 1, 2): 2921, datetime.date(2023, 7, 3): 2739, datetime.date(2024, 1, 2): 2556, datetime.date(2024, 7, 1): 2375, datetime.date(2025, 1, 2): 2190, datetime.date(2025, 7, 1): 2010, datetime.date(2026, 1, 2): 1825, datetime.date(2026, 7, 1): 1645, datetime.date(2027, 1, 4): 1458, datetime.date(2027, 7, 1): 1280, datetime.date(2028, 1, 3): 1094, datetime.date(2028, 7, 3): 912, datetime.date(2029, 1, 2): 729, datetime.date(2029, 7, 2): 548, datetime.date(2030, 1, 2): 364, datetime.date(2030, 7, 1): 184}
 

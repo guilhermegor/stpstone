@@ -1,13 +1,15 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional
-from sqlalchemy.orm import Session, Dict
 from logging import Logger
+from typing import Optional
+
+import pandas as pd
 from requests import Response
+from sqlalchemy.orm import Dict, Session
+
 from stpstone._config.global_slots import YAML_B3_UP2DATA_VOLUMES_TRD
+from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.ingestion.abc.requests import ABCRequests
 
 
 class ExchVolumesTrdBR(ABCRequests):
@@ -15,7 +17,7 @@ class ExchVolumesTrdBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         dict_headers:Optional[Dict[str, str]]=None,
         dict_payload:Optional[Dict[str, str]]=None,
         cls_db:Optional[Session]=None,

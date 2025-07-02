@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
@@ -7,11 +8,11 @@ dt_ = datetime(2024, 11, 25, 12, 58, 5, tzinfo=timezone.utc)
 timestamp_ = DatesBR().datetime_to_unix_timestamp(dt_)
 print(dt_, timestamp_)
 
-dt_ = DatesBR().sub_working_days(DatesBR().curr_date, 5)
+dt_ = DatesBR().sub_working_days(DatesBR().curr_date(), 5)
 timestamp_ = DatesBR().datetime_to_unix_timestamp(dt_)
 print(dt_, timestamp_)
 
-dt_ = DatesBR().sub_working_days(DatesBR().curr_date, 0)
+dt_ = DatesBR().sub_working_days(DatesBR().curr_date(), 0)
 timestamp_ = DatesBR().datetime_to_unix_timestamp(dt_)
 print(dt_, timestamp_)
 

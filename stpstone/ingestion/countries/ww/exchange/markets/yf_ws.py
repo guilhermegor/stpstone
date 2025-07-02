@@ -2,14 +2,16 @@
 
 
 # pypi.org libs
+from datetime import datetime
+from typing import List, Optional
+
 import pandas as pd
 from yfinance import download
-from typing import List, Optional
-from datetime import datetime
+
 # local libs
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
 class YFinanceWS(metaclass=TypeChecker):
@@ -17,8 +19,8 @@ class YFinanceWS(metaclass=TypeChecker):
     def __init__(
         self,
         list_tickers:List[str],
-        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 52).strftime('%Y-%m-%d'),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date, 1).strftime('%Y-%m-%d'),
+        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 52).strftime('%Y-%m-%d'),
+        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1).strftime('%Y-%m-%d'),
         session:Optional[ProxyScrapeAll]=None
     ) -> None:
         self.list_tickers = list_tickers

@@ -1,8 +1,9 @@
 from getpass import getuser
+
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import AnbimaDataDebentures
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
-from stpstone.utils.cals.handling_dates import DatesBR
 
 
 cls_session = YieldFreeProxy(
@@ -35,8 +36,8 @@ cls_ = AnbimaDataDebentures(
 # df_.info()
 # df_.to_csv("data/anbima-debentures-avl_{}_{}_{}.csv".format(
 #     getuser(),
-#     DatesBR().curr_date.strftime('%Y%m%d'),
-#     DatesBR().curr_time.strftime('%H%M%S')
+#     DatesBR().curr_date().strftime('%Y%m%d'),
+#     DatesBR().curr_time().strftime('%H%M%S')
 # ), index=False)
 
 df_ = cls_.source("debentures_registries", bl_fetch=True)
@@ -44,6 +45,6 @@ print(f"DF DEBENTURES REGISTRIES: \n{df_}")
 df_.info()
 df_.to_csv("data/anbima-debentures-registries_{}_{}_{}.csv".format(
     getuser(),
-    DatesBR().curr_date.strftime('%Y%m%d'),
-    DatesBR().curr_time.strftime('%H%M%S')
+    DatesBR().curr_date().strftime('%Y%m%d'),
+    DatesBR().curr_time().strftime('%H%M%S')
 ), index=False)

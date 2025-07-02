@@ -1,17 +1,19 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
 from time import sleep
-from stpstone._config.global_slots import YAML_WW_WORLD_GOV_BONDS, YAML_WW_RATINGS_AGENCIES
-from stpstone.utils.cals.handling_dates import DatesBR
+from typing import List, Optional
+
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
+from stpstone._config.global_slots import YAML_WW_RATINGS_AGENCIES, YAML_WW_WORLD_GOV_BONDS
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
 class WorldGovBonds(ABCRequests):
@@ -19,7 +21,7 @@ class WorldGovBonds(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -43,13 +45,13 @@ class WorldGovBonds(ABCRequests):
     def treat_list_td(self, list_td: List[str]) -> List[str]:
         """
         Processes the list of table data cells to insert "N/A" for countries without ratings.
-        
+
         The rule is: After a country name, if the next item is a numeric value (like '9.88%' or '0.0988'),
         insert "N/A" between them to represent missing rating.
-        
+
         Args:
             list_td: List of strings representing table data cells
-            
+
         Returns:
             Processed list with "N/A" inserted where needed
         """
@@ -64,17 +66,17 @@ class WorldGovBonds(ABCRequests):
             list_.append(item_processed)
             bl_country_name = (
                 isinstance(item_curr, str) and
-                not any(c.isdigit() for c in item_curr) and 
-                not item_curr.endswith('%') and 
-                item_curr != "N/A" and 
+                not any(c.isdigit() for c in item_curr) and
+                not item_curr.endswith('%') and
+                item_curr != "N/A" and
                 item_curr not in list_ratings_agencies
             )
             if bl_country_name:
                 if i + 1 < n:
                     next_item = list_td[i+1]
                     bl_next_numeric = (
-                        (isinstance(next_item, str) and next_item.endswith('%')) 
-                        or (isinstance(NumHandler().transform_to_float(next_item, int_precision=6), 
+                        (isinstance(next_item, str) and next_item.endswith('%'))
+                        or (isinstance(NumHandler().transform_to_float(next_item, int_precision=6),
                                        (int, float)))
                     )
                     if bl_next_numeric:

@@ -1,19 +1,21 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Any, Dict
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
 from time import sleep
+from typing import Any, Dict, List, Optional
+
 from lxml import html
+import pandas as pd
+from requests import Response
 from selenium.webdriver.remote.webdriver import WebDriver
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_SIDRA_IBGE
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
@@ -22,7 +24,7 @@ class SidraIBGE(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -66,15 +68,15 @@ class SidraIBGE(ABCRequests):
         list_ser = list()
         while True:
             list_pool_name = self.list_web_elements(
-                cls_selenium_wd, 
-                web_driver, 
+                cls_selenium_wd,
+                web_driver,
                 YAML_SIDRA_IBGE["pools_releases_dates"]["xpaths"]["iter_pool_name"].format(i)
             )
             if list_pool_name == None or list_pool_name == [] or len(list_pool_name) == 0:
                 break
             list_pool_release_dt_new = self.list_web_elements(
-                cls_selenium_wd, 
-                web_driver, 
+                cls_selenium_wd,
+                web_driver,
                 YAML_SIDRA_IBGE["pools_releases_dates"]["xpaths"][
                     "iter_pool_release_dt_new"].format(i)
             )
@@ -92,7 +94,7 @@ class SidraIBGE(ABCRequests):
             int_agg_num = int(resp_req.url.split("agregados/")[1].split("/")[0])
             list_ser = [
                 {
-                    "ID": int(dict_["id"]), 
+                    "ID": int(dict_["id"]),
                     "NAME": "IPCA" if int_agg_num == 1737 \
                         else "IPCA 15" if int_agg_num == 3065 \
                         else "N/A",

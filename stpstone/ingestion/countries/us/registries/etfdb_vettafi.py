@@ -1,22 +1,23 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Any, Tuple
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
 from time import sleep
+from typing import Any, List, Optional, Tuple
+
 from lxml.html import HtmlElement
-from selenium.webdriver.remote.webdriver import WebDriver
+import pandas as pd
+from requests import Response
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.remote.webdriver import WebDriver
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_US_ETFDB_VETTAFI
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.str import StrHandler
 
 
 class EtfDBVettaFi(ABCRequests):
@@ -24,7 +25,7 @@ class EtfDBVettaFi(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

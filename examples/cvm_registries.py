@@ -1,12 +1,15 @@
 # pypi.org libs
 import os
 import sys
+
+
 # local libs
 sys.path.append(os.path.abspath(os.path.join(os.path.realpath(__file__), "..", "..")))
 from stpstone.ingestion.countries.br.registries.cvm import CVMRegistries
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.parsers.folders import DirFilesManagement
+
 
 session = YieldFreeProxy(bl_new_proxy=False).session
 
@@ -37,7 +40,7 @@ cls_ = CVMRegistries(session=None, cls_db=None)
 # df_.info()
 # df_.to_excel(
 #     rf'{DirFilesManagement().find_project_root()}\data\cvm-securities-consultants_'
-#     + rf'{DatesBR().curr_date.strftime('%Y%m%d')}_{DatesBR().curr_time.strftime('%H%M%S')}.xlsx',
+#     + rf'{DatesBR().curr_date().strftime('%Y%m%d')}_{DatesBR().curr_time().strftime('%H%M%S')}.xlsx',
 #     index=False
 # )
 

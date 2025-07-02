@@ -1,20 +1,22 @@
-import pandas as pd
 from datetime import datetime
-from typing import Optional, List, Any, Tuple, Dict, Union
-from lxml.html import HtmlElement
-from sqlalchemy.orm import Session
 from logging import Logger
-from requests import Response
-from time import sleep
 from numbers import Number
+from time import sleep
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from lxml.html import HtmlElement
+import pandas as pd
+from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_US_SLICKCHARTS_INDEXES_COMPONENTS
-from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.folders import DirFilesManagement
+from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class SlickChartsIndexesComponents(ABCRequests):
@@ -22,7 +24,7 @@ class SlickChartsIndexesComponents(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
+        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
