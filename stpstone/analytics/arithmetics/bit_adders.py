@@ -1,6 +1,6 @@
-"""Binary adder implementations.
+"""Bit adder implementations.
 
-This module provides implementations of various binary adders:
+This module provides implementations of various bit adders:
 - HalfAdder: Adds two single bits
 - FullAdder: Adds two bits with carry-in
 - EightBitFullAdder: Adds two 8-bit numbers using full adders
@@ -19,17 +19,17 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 
 class HalfAdder(metaclass=TypeChecker):
-    """A half adder circuit that adds two single-bit binary numbers.
+    """A half adder circuit that adds two single-bit bit numbers.
 
-    The half adder performs binary addition of two bits and produces
+    The half adder performs bit addition of two bits and produces
     a sum bit and a carry bit as outputs.
 
     Parameters
     ----------
     a : int
-        First binary input (0 or 1)
+        First bit input (0 or 1)
     b : int
-        Second binary input (0 or 1)
+        Second bit input (0 or 1)
 
     Examples
     --------
@@ -41,7 +41,11 @@ class HalfAdder(metaclass=TypeChecker):
     """
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize the half adder with two binary inputs."""
+        """Initialize the half adder with two bit inputs."""
+        if not isinstance(a, int) or not isinstance(b, int):
+            raise TypeError("Inputs must be integers")
+        if a not in (0, 1) or b not in (0, 1):
+            raise ValueError("Inputs must be 0 or 1")
         self.a = a
         self.b = b
 
@@ -89,15 +93,15 @@ class HalfAdder(metaclass=TypeChecker):
 class FullAdder(metaclass=TypeChecker):
     """A full adder circuit that adds two bits with carry-in.
 
-    The full adder performs binary addition of two bits with a carry-in
+    The full adder performs bit addition of two bits with a carry-in
     and produces a sum bit and a carry-out bit.
 
     Parameters
     ----------
     a : int
-        First binary input (0 or 1)
+        First bit input (0 or 1)
     b : int
-        Second binary input (0 or 1)
+        Second bit input (0 or 1)
     carry_in : int
         Carry input from previous stage (0 or 1)
 
@@ -112,6 +116,10 @@ class FullAdder(metaclass=TypeChecker):
 
     def __init__(self, a: int, b: int, carry_in: int) -> None:
         """Initialize the full adder with two bits and carry-in."""
+        if not isinstance(a, int) or not isinstance(b, int) or not isinstance(carry_in, int):
+            raise TypeError("All inputs must be integers")
+        if a not in (0, 1) or b not in (0, 1) or carry_in not in (0, 1):
+            raise ValueError("All inputs must be 0 or 1")
         self.a = a
         self.b = b
         self.carry_in = carry_in
@@ -180,6 +188,10 @@ class EightBitFullAdder(metaclass=TypeChecker):
 
     def __init__(self, a: int, b: int) -> None:
         """Initialize the 8-bit adder with two 8-bit numbers."""
+        if not isinstance(a, int) or not isinstance(b, int):
+            raise TypeError("Inputs must be integers")
+        if a < 0 or a > 255 or b < 0 or b > 255:
+            raise ValueError("Inputs must be 8-bit numbers (0-255)")
         self.a = a
         self.b = b
 

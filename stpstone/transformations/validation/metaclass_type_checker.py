@@ -1,24 +1,25 @@
-import pandas as pd
-import numpy as np
-from requests import Session
+from io import BufferedIOBase, BytesIO, RawIOBase
 from logging import Logger
 from numbers import Number
-from pydantic import validate_arguments, ConfigDict
-from pydantic_core import core_schema
-from psycopg.sql import Composable
 from typing import (
-    get_type_hints,
-    get_origin,
-    runtime_checkable,
-    Type,
-    Dict,
-    Any,
-    Union,
-    BinaryIO,
     IO,
+    Any,
+    BinaryIO,
+    Dict,
     Protocol,
+    Type,
+    Union,
+    get_origin,
+    get_type_hints,
+    runtime_checkable,
 )
-from io import BytesIO, RawIOBase, BufferedIOBase
+
+import numpy as np
+import pandas as pd
+from psycopg.sql import Composable
+from pydantic import ConfigDict, validate_arguments, validator
+from pydantic_core import core_schema
+from requests import Session
 from typing_extensions import get_args as typing_get_args
 
 
@@ -34,7 +35,7 @@ class SQLComposable(Protocol):
         source_type: Any,
         _handler: Any,
     ) -> core_schema.CoreSchema:
-        """Tell Pydantic how to handle this protocol"""
+        """Pydantic of SQL composable objects"""
         return core_schema.union_schema(
             [
                 core_schema.str_schema(),
@@ -55,21 +56,18 @@ def check_for_special_types(hint: Any, tup_special_types: tuple) -> bool:
     Returns:
         True if the hint contains any special types, False otherwise
     """
-    # Direct type check
     if hint in tup_special_types:
         return True
-
-    # Check if it's a class and subclass of special types
+    
     if isinstance(hint, type):
         for special_type in tup_special_types:
             try:
                 if issubclass(hint, special_type):
                     return True
             except TypeError:
-                # issubclass can raise TypeError for some types
                 continue
 
-    # Handle Union types
+    # handle Union types
     origin = get_origin(hint)
     if origin is Union:
         args = typing_get_args(hint)
@@ -77,7 +75,7 @@ def check_for_special_types(hint: Any, tup_special_types: tuple) -> bool:
             if check_for_special_types(arg, tup_special_types):
                 return True
 
-    # Handle other generic types (List, Dict, etc.)
+    # handle other generic types (List, Dict, etc.)
     if origin is not None:
         args = typing_get_args(hint)
         for arg in args:
@@ -85,6 +83,14 @@ def check_for_special_types(hint: Any, tup_special_types: tuple) -> bool:
                 return True
 
     return False
+
+def create_validator(field_name: str, expected_type: Any) -> classmethod:
+    """Create a Pydantic validator for a specific field and type."""
+    def validate_field(cls, value: Any) -> Any:
+        if not isinstance(value, expected_type):
+            raise TypeError(f"{field_name} must be of type {expected_type.__name__}")
+        return value
+    return validator(field_name, allow_reuse=True)(validate_field)
 
 
 class TypeChecker(type):
@@ -109,33 +115,48 @@ class TypeChecker(type):
             BufferedIOBase,
             BytesIO,
             SQLComposable,
-            Composable,  # This is the key addition
+            Composable,
         )
 
+        # Process all methods in the class
         for attr_name, attr_value in dict_.items():
             if callable(attr_value) and not attr_name.startswith("__"):
                 bl_arbitrary_types = False
+                type_hints = get_type_hints(attr_value, include_extras=True)
 
-                # Get type hints with error handling
-                try:
-                    type_hints = get_type_hints(attr_value, include_extras=True)
-                except (NameError, AttributeError, TypeError):
-                    # If we can't get type hints, assume we need arbitrary types
-                    bl_arbitrary_types = True
-                    type_hints = {}
-
-                # Check each type hint for special types
+                # Check for special types
                 for hint in type_hints.values():
                     if check_for_special_types(hint, tup_special_types):
                         bl_arbitrary_types = True
                         break
 
-                # Apply validation with appropriate config
+                # Apply validation
                 dict_[attr_name] = validate_arguments(
                     attr_value,
-                    config=ConfigDict(
-                        arbitrary_types_allowed=bl_arbitrary_types,
-                    ),
+                    config=ConfigDict(arbitrary_types_allowed=bl_arbitrary_types),
                 )
+        
+        # process __init__ separately to add field validators
+        if "__init__" in dict_:
+            init_method = dict_["__init__"]
+            type_hints = get_type_hints(init_method, include_extras=True)
+            
+            for param, hint in type_hints.items():
+                if param == "return":
+                    continue
+                    
+                # handle simple types (int, str, etc.)
+                if isinstance(hint, type):
+                    validator_method = create_validator(param, hint)
+                    dict_[f"validate_{param}"] = validator_method
+                
+                # handle union types (including optional)
+                elif get_origin(hint) is Union:
+                    args = typing_get_args(hint)
+                    # filter out NoneType for optional
+                    type_args = [arg for arg in args if arg is not type(None)]
+                    if len(type_args) == 1:
+                        validator_method = create_validator(param, type_args[0])
+                        dict_[f"validate_{param}"] = validator_method
 
         return super().__new__(cls, name, bases, dict_)
