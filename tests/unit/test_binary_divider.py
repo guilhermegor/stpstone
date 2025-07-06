@@ -1,6 +1,6 @@
 import unittest
 
-from stpstone.analytics.arithmetics.binary_divider import BinaryDivider
+from stpstone.analytics.arithmetic.binary_divider import BinaryDivider
 
 
 class TestBinaryDivider(unittest.TestCase):

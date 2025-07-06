@@ -3,7 +3,7 @@
 This demonstrates how to compare two binary numbers using the BinaryComparator class.
 """
 
-from stpstone.analytics.arithmetics.binary_comparator import BinaryComparator
+from stpstone.analytics.arithmetic.binary_comparator import BinaryComparator
 
 
 comparator = BinaryComparator(0b1100, 0b1010)

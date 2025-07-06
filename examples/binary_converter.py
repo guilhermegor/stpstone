@@ -7,7 +7,7 @@ This demonstrates various number system conversions:
 - Hexadecimal to Decimal
 """
 
-from stpstone.analytics.arithmetics.binary_converter import BinaryConverter
+from stpstone.analytics.arithmetic.binary_converter import BinaryConverter
 
 
 converter = BinaryConverter()

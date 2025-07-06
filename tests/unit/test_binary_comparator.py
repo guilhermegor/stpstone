@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from stpstone.analytics.arithmetics.binary_comparator import BinaryComparator
+from stpstone.analytics.arithmetic.binary_comparator import BinaryComparator
 
 
 class TestBinaryComparator(unittest.TestCase):

@@ -1,99 +1,41 @@
-"""Binary subtraction implementation.
-
-This module provides a class for performing binary subtraction operations on binary strings
-using full subtractor logic. The implementation handles borrow propagation between bits.
-
-Classes
--------
-BinarySubtractor
-    A class that performs binary subtraction on two binary strings.
-"""
-
-from stpstone.analytics.arithmetics.bit_subtractor import FullSubtractor
+"""Binary subtractor implementation."""
+from stpstone.analytics.arithmetic.bit_subtractor import FullSubtractor
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class BinarySubtractor(metaclass=TypeChecker):
-    """A class for performing binary subtraction between two binary numbers.
-
-    This class implements binary subtraction using full subtractor components to handle
-    borrow propagation between bits. The numbers are processed as strings of binary digits
-    (0s and 1s) of equal length, with the shorter number being zero-padded.
-
-    Parameters
-    ----------
-    minuend : str
-        The binary number being subtracted from (must contain only 0s and 1s).
-    subtrahend : str
-        The binary number to subtract (must contain only 0s and 1s).
-
-    Attributes
-    ----------
-    minuend : str
-        Zero-padded minuend string.
-    subtrahend : str
-        Zero-padded subtrahend string.
-    result : str
-        Stores the result of the subtraction operation.
-
-    Examples
-    --------
-    >>> subtractor = BinarySubtractor("1011", "0101")  # 11 - 5
-    >>> result = subtractor.subtract()
-    >>> result
-    '0110'  # 6 in decimal
-    """
+    """A class for performing binary subtraction between two binary numbers."""
 
     def __init__(self, minuend: str, subtrahend: str) -> None:
-        """Initialize the BinarySubtractor with two binary numbers.
-
-        Parameters
-        ----------
-        minuend : str
-            The binary number being subtracted from (must contain only 0s and 1s).
-        subtrahend : str
-            The binary number to subtract (must contain only 0s and 1s).
-
-        Notes
-        -----
-        The input strings are automatically zero-padded to equal length.
-        """
-        self.minuend = minuend.zfill(max(len(minuend), len(subtrahend)))
-        self.subtrahend = subtrahend.zfill(max(len(minuend), len(subtrahend)))
+        """Initialize the BinarySubtractor with two binary numbers."""
+        self._validate_inputs(minuend, subtrahend)
+        max_length = max(len(minuend), len(subtrahend))
+        self.minuend = minuend.zfill(max_length)
+        self.subtrahend = subtrahend.zfill(max_length)
         self.result = ""
 
+    def _validate_inputs(self, minuend: str, subtrahend: str) -> None:
+        """Validate that inputs are non-empty binary strings."""
+        if not isinstance(minuend, str) or not isinstance(subtrahend, str):
+            raise TypeError("Inputs must be strings")
+        if not minuend or not subtrahend:
+            raise ValueError("Input strings cannot be empty")
+        if not all(c in '01' for c in minuend):
+            raise ValueError("Minuend must be a binary string")
+        if not all(c in '01' for c in subtrahend):
+            raise ValueError("Subtrahend must be a binary string")
+
     def subtract(self) -> str:
-        """Perform binary subtraction using full subtractor logic.
-
-        This method implements binary subtraction by:
-        1. Processing bits from least significant to most significant
-        2. Using FullSubtractor components for each bit position
-        3. Propagating borrow between bit positions
-        4. Returning the result as a binary string
-
-        Returns
-        -------
-        str
-            The binary subtraction result as a string (may contain leading zeros).
-
-        Examples
-        --------
-        >>> subtractor = BinarySubtractor("1101", "0110")  # 13 - 6
-        >>> subtractor.subtract()
-        '0111'  # 7 in decimal
-
-        >>> subtractor = BinarySubtractor("1000", "0001")  # 8 - 1
-        >>> subtractor.subtract()
-        '0111'  # 7 in decimal
-        """
+        """Perform binary subtraction using full subtractor logic."""
         result = []
         borrow = 0
+        
         for i in range(len(self.minuend) - 1, -1, -1):
             a = int(self.minuend[i])
             b = int(self.subtrahend[i])
             fs = FullSubtractor(a, b, borrow)
-            result.append(str(fs.difference))
-            borrow = fs.borrow_out
+            result.append(str(fs.get_difference()))
+            borrow = fs.get_borrow_out()
 
-        self.result = "".join(result[::-1])
+        self.result = "".join(reversed(result))
         return self.result

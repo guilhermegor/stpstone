@@ -4,7 +4,7 @@ Demonstrates binary subtraction operation between two binary numbers represented
 Shows the result of subtracting a subtrahend from a minuend in binary format.
 """
 
-from stpstone.analytics.arithmetics.binary_subtractor import BinarySubtractor
+from stpstone.analytics.arithmetic.binary_subtractor import BinarySubtractor
 
 
 minuend = "1011"  # 11 in decimal

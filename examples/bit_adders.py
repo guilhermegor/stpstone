@@ -8,7 +8,7 @@ Demonstrates various digital adder circuits:
 Shows the sum and carry outputs for each adder type.
 """
 
-from stpstone.analytics.arithmetics.bit_adders import EightBitFullAdder, FullAdder, HalfAdder
+from stpstone.analytics.arithmetic.bit_adders import EightBitFullAdder, FullAdder, HalfAdder
 
 
 ha1 = HalfAdder(0, 0)

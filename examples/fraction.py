@@ -9,7 +9,7 @@ Demonstrates fraction creation and various arithmetic operations including:
 Shows proper fraction handling with automatic simplification.
 """
 
-from stpstone.analytics.arithmetics.fraction import Fraction
+from stpstone.analytics.arithmetic.fraction import Fraction
 
 
 fraction1 = Fraction(1, 2)  # represents 1/2

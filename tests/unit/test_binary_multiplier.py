@@ -1,6 +1,6 @@
 import unittest
 
-from stpstone.analytics.arithmetics.binary_multiplier import BinaryMultiplier
+from stpstone.analytics.arithmetic.binary_multiplier import BinaryMultiplier
 
 
 class TestBinaryMultiplier(unittest.TestCase):

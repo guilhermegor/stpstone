@@ -3,7 +3,7 @@
 Demonstrates binary multiplication operation between two binary numbers.
 """
 
-from stpstone.analytics.arithmetics.binary_multiplier import BinaryMultiplier
+from stpstone.analytics.arithmetic.binary_multiplier import BinaryMultiplier
 
 
 multiplier = BinaryMultiplier(0b1100, 0b1010)

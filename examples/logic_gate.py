@@ -8,7 +8,7 @@ Demonstrates basic logic gates and their truth table outputs:
 Shows both boolean output and string representation for each gate.
 """
 
-from stpstone.analytics.arithmetics.logic_gate import NANDGate, NORGate, XORGate
+from stpstone.analytics.arithmetic.logic_gate import NANDGate, NORGate, XORGate
 
 
 # NAND Gate examples

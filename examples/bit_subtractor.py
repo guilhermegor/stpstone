@@ -7,7 +7,7 @@ Demonstrates digital subtractor circuits including:
 Shows the difference and borrow outputs for each operation.
 """
 
-from stpstone.analytics.arithmetics.bit_subtractor import FullSubtractor, HalfSubtractor
+from stpstone.analytics.arithmetic.bit_subtractor import FullSubtractor, HalfSubtractor
 
 
 hs = HalfSubtractor(1, 1)

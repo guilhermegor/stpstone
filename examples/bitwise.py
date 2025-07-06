@@ -9,7 +9,7 @@ Demonstrates fundamental bitwise operations:
 Shows example outputs for each operation on sample inputs.
 """
 
-from stpstone.analytics.arithmetics.bitwise import Utilities
+from stpstone.analytics.arithmetic.bitwise import Utilities
 
 
 utils = Utilities()
