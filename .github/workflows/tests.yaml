@@ -87,10 +87,10 @@ jobs:
           poetry env activate
 
       - name: Run Unit Tests
-        run: poetry run python -m unittest discover -s tests/unit -p "*.py" -v
+        run: poetry run pytest tests/unit/ -v
 
       - name: Run Integration Tests
-        run: poetry run python -m unittest discover -s tests/integration -p "*.py" -v
+        run: poetry run pytest tests/integration/ -v
 
   tests_passed:
     if: ${{ github.ref_type == 'tag' }}

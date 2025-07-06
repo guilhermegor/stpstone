@@ -1,12 +1,12 @@
-# software development
+# test-driven development
 unit_tests:
-	poetry run python -m unittest discover -s tests/unit -p "*.py" -v
+	poetry run pytest tests/unit/ -v
 
 integration_tests:
-	poetry run python -m unittest discover -s tests/integration -p "*.py" -v
+	poetry run pytest tests/integration/ -v
 
 test_cov:
-	poetry run coverage run --source=stpstone -m unittest discover tests/unit/ -v
+	poetry run pytest --cov=stpstone tests/unit/ -v
 	poetry run coverage report -m
 
 
