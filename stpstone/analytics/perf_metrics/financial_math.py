@@ -1,15 +1,69 @@
+"""Financial mathematics calculations including time value of money and cash flow analysis."""
+
 import numpy as np
 import numpy_financial as npf
-from typing import List, Tuple
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class FinancialMath(metaclass=TypeChecker):
+    """A collection of financial mathematics calculations.
+    
+    This class provides methods for common financial calculations including:
+    - Compound and simple interest rates
+    - Present and future value calculations
+    - Internal rate of return (IRR)
+    - Net present value (NPV)
+    - Payment calculations
+    - Cash flow analysis
+    
+    All methods are type-checked at runtime using the TypeChecker metaclass.
+    """
 
     def compound_r(self, float_ytm: float, int_nper: int, int_compound_n: int) -> float:
+        """Calculate compound interest rate.
+        
+        Parameters
+        ----------
+        float_ytm : float
+            Yield to maturity (annual interest rate)
+        int_nper : int
+            Number of periods
+        int_compound_n : int
+            Number of compounding periods per year
+            
+        Returns
+        -------
+        float
+            Compound interest rate
+        """
+        if np.isnan(float_ytm):
+            raise ValueError("Yield cannot be NaN")
+        if np.isinf(float_ytm):
+            raise ValueError("Yield cannot be infinite")
         return float((1.0 + float_ytm) ** (float(int_nper) / float(int_compound_n))) - 1.0
 
     def simple_r(self, float_ytm: float, int_nper: int, int_compound_n: int) -> float:
+        """Calculate simple interest rate.
+        
+        Parameters
+        ----------
+        float_ytm : float
+            Yield to maturity (annual interest rate)
+        int_nper : int
+            Number of periods
+        int_compound_n : int
+            Number of compounding periods per year
+            
+        Returns
+        -------
+        float
+            Simple interest rate
+        """
+        if np.isnan(float_ytm):
+            raise ValueError("Yield cannot be NaN")
+        if np.isinf(float_ytm):
+            raise ValueError("Yield cannot be infinite")
         return float_ytm * float(int_nper) / float(int_compound_n)
 
     def pv(
@@ -21,6 +75,35 @@ class FinancialMath(metaclass=TypeChecker):
         str_capitalization: str = "compound",
         str_when: str = "end"
     ) -> float:
+        """Calculate present value of a future cash flow.
+        
+        Parameters
+        ----------
+        float_ytm : float
+            Yield to maturity (annual interest rate)
+        int_nper : int
+            Number of periods
+        float_fv : float
+            Future value
+        float_pmt : float, optional
+            Periodic payment, by default 0
+        str_capitalization : str, optional
+            Type of capitalization ('compound' or 'simple'), by default "compound"
+        str_when : str, optional
+            When payments are due ('begin' or 'end'), by default "end"
+            
+        Returns
+        -------
+        float
+            Present value
+            
+        Raises
+        ------
+        ValueError
+            If str_capitalization is not 'compound' or 'simple'
+        """
+        if float_ytm == 0:
+            return -float_fv - float_pmt * int_nper
         if str_capitalization == "compound":
             return npf.pv(float_ytm, int_nper, float_pmt, float_fv, str_when)
         elif str_capitalization == "simple":
@@ -37,6 +120,33 @@ class FinancialMath(metaclass=TypeChecker):
         str_capitalization: str = "compound",
         str_when: str = "end"
     ) -> float:
+        """Calculate future value of a present cash flow.
+        
+        Parameters
+        ----------
+        float_ytm : float
+            Yield to maturity (annual interest rate)
+        int_nper : int
+            Number of periods
+        float_pv : float
+            Present value
+        float_pmt : float, optional
+            Periodic payment, by default 0
+        str_capitalization : str, optional
+            Type of capitalization ('compound' or 'simple'), by default "compound"
+        str_when : str, optional
+            When payments are due ('begin' or 'end'), by default "end"
+            
+        Returns
+        -------
+        float
+            Future value
+            
+        Raises
+        ------
+        ValueError
+            If str_capitalization is not 'compound' or 'simple'
+        """
         if str_capitalization == "compound":
             return npf.fv(float_ytm, int_nper, float_pmt, float_pv, str_when)
         elif str_capitalization == "simple":
@@ -44,49 +154,51 @@ class FinancialMath(metaclass=TypeChecker):
         else:
             raise ValueError("str_capitalization must be 'compound' or 'simple'")
 
-    def irr(self, list_cfs: List[float]) -> float:
-        """
-        Internal Rate of Return: interest rate at which the net present value of a list of
-        cash flows is zero. The IRR is often used to evaluate the performance of an investment or
-        project.
-
-        Ags:
-            list_cfs: List[float]
-                A list of cash flows. The list must have at least one positive and one negative value.
-
-        Returns:
-            The internal rate of return of the cash flows.
-
-        Raises:
-            ValueError
-                - If the list of cash flows does not have at least one positive and one negative
-                value.
+    def irr(self, list_cfs: list[float]) -> float:
+        """Calculate internal rate of return (IRR) for a series of cash flows.
+        
+        The IRR is the discount rate that makes the net present value of all cash flows equal 
+        to zero.
+        
+        Parameters
+        ----------
+        list_cfs : list[float]
+            List of cash flows where the first element is the initial investment
+            (negative value) and subsequent elements are the periodic cash flows
+            
+        Returns
+        -------
+        float
+            Internal rate of return
+            
+        Raises
+        ------
+        ValueError
+            If cash flows don't contain at least one positive and one negative value
         """
         if (not any(float_cf < 0 for float_cf in list_cfs)) \
             or (not any(float_cf > 0 for float_cf in list_cfs)):
             raise ValueError(
-                "List of cash flows must have at least one positive and one negative value.")
+                "Cash flows must have at least one positive and one negative value")
         return npf.irr(list_cfs)
 
-    def npv(self, float_ytm: float, list_cfs: List[float]) -> float:
+    def npv(self, float_ytm: float, list_cfs: list[float]) -> float:
+        """Calculate net present value (NPV) of a series of cash flows.
+        
+        Parameters
+        ----------
+        float_ytm : float
+            Discount rate
+        list_cfs : list[float]
+            List of cash flows where the first element is the initial investment
+            
+        Returns
+        -------
+        float
+            Net present value
         """
-        Net Present Value: the difference between the present value of the cash inflows and the
-        present value of the cash outflows. The NPV is often used to evaluate the performance of an
-        investment or project.
-
-        Args:
-            float_ytm: float
-                The discount rate to be used when calculating the net present value.
-            list_cfs: List[float]
-                A list of cash flows. The list must have at least one positive and one negative value.
-
-        Returns:
-            The net present value of the cash flows.
-
-        Raises:
-            ValueError
-                - If the list of cash flows does not have at least one positive and one negative value.
-        """
+        if not list_cfs:
+            raise ValueError("Cash flows list cannot be empty")
         return npf.npv(float_ytm, list_cfs)
 
     def pmt(
@@ -97,40 +209,60 @@ class FinancialMath(metaclass=TypeChecker):
         float_fv: float = 0,
         str_when: str = "end"
     ) -> float:
+        """Calculate periodic payment for a loan or annuity.
+        
+        Parameters
+        ----------
+        float_ytm : float
+            Interest rate per period
+        int_nper : int
+            Total number of payments
+        float_pv : float
+            Present value (principal)
+        float_fv : float, optional
+            Future value (remaining balance), by default 0
+        str_when : str, optional
+            When payments are due ('begin' or 'end'), by default "end"
+            
+        Returns
+        -------
+        float
+            Periodic payment amount
         """
-        Calculate the fixed monthly payment based on a constant interest rate and a constant
-        payment schedule.
-
-        Args:
-            float_ytm: float
-                The interest rate per period.
-            int_nper: int
-                The total number of periods (months) over which the loan is outstanding.
-            float_pv: float
-                The present value of the loan/annuity. The present value is the lump-sum amount that
-                a series of future payments is worth right now.
-            float_fv: float, optional
-                The future value of the loan/annuity. The future value is the amount of money the
-                series of payments will be worth after the last payment is made. If not given, the
-                future value is set to 0.
-            str_when: str, optional
-                When payments are due (either 'begin' or 'end'). If not given, 'end' is used.
-
-        Returns:
-            The fixed monthly payment.
-        """
+        if int_nper <= 0:
+            raise ValueError("Number of periods must be positive")
         return npf.pmt(float_ytm, int_nper, float_pv, float_fv, str_when)
 
     def pv_cfs(
         self,
-        list_cfs: List[float],
+        list_cfs: list[float],
         float_ytm: float,
         str_capitalization: str = "compound",
         str_when: str = "end"
-    ) -> Tuple[np.ndarray, np.ndarray]:
-        array_nper = np.arange(1, len(list_cfs) + 1)
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Calculate present values for a series of cash flows.
+        
+        Parameters
+        ----------
+        list_cfs : list[float]
+            List of cash flows
+        float_ytm : float
+            Discount rate
+        str_capitalization : str, optional
+            Type of capitalization ('compound' or 'simple'), by default "compound"
+        str_when : str, optional
+            When payments are due ('begin' or 'end'), by default "end"
+            
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray]
+            Tuple containing:
+            - Array of period numbers
+            - Array of discounted cash flows
+        """
+        array_nper = np.arange(1, len(list_cfs) + 1).astype(int)
         array_discounted_cfs = np.array([
-            self.pv(float_ytm, int_t, float_cf, 0, str_capitalization, str_when)
+            self.pv(float_ytm, int(int_t), float_cf, 0.0, str_capitalization, str_when)
             for int_t, float_cf in tuple(zip(array_nper, list_cfs))
         ])
         return array_nper, array_discounted_cfs

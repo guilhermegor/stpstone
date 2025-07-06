@@ -69,21 +69,21 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
         raise TypeError(f"{param_name} must be one of types: {', '.join(type_names)}, "
                         + f"got {type(value).__name__}")
     
-    # Handle generic types like List, dict, etc.
+    # handle generic types like List, dict, etc.
     elif origin is not None:
         if not isinstance(value, origin):
             raise TypeError(f"{param_name} must be of type {expected_type}, "
                             + f"got {type(value).__name__}")
         return
     
-    # Handle regular types
+    # handle regular types
     elif isinstance(expected_type, type):
         if not isinstance(value, expected_type):
             raise TypeError(f"{param_name} must be of type {expected_type.__name__}, "
                             + f"got {type(value).__name__}")
         return
     
-    # Handle special cases or protocols
+    # handle special cases or protocols
     else:
         # For protocols and other complex types, try isinstance
         try:

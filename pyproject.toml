@@ -139,6 +139,7 @@ twine = ">=6.1.0"
 ruff = "^0.12.1"
 coverage = ">=7.3.0"
 coverage-badge = ">=1.0.0"
+pytest = ">=7.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.7.0"]

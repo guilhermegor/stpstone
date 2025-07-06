@@ -8,7 +8,7 @@ class TestEarningsManipulation(unittest.TestCase):
     def setUp(self):
         self.analyzer = EarningsManipulation()
 
-    # Test normal operations
+    # test normal operations
     def test_normal_case(self):
         """Test with typical financial values."""
         ratios = self.analyzer.inputs_beneish_model(
@@ -36,7 +36,7 @@ class TestEarningsManipulation(unittest.TestCase):
             float_tl_tm1=380000.0,
         )
 
-        # Verify all ratios are calculated
+        # verify all ratios are calculated
         self.assertEqual(len(ratios), 8)
         self.assertAlmostEqual(ratios["float_dsr"], 1.0, places=2)
         self.assertAlmostEqual(ratios["float_gmi"], 1.04, places=2)
@@ -47,11 +47,10 @@ class TestEarningsManipulation(unittest.TestCase):
         self.assertAlmostEqual(ratios["float_tata"], 0.01, places=2)
         self.assertAlmostEqual(ratios["float_lvgi"], 1.0, places=2)
 
-        # Test M-Score calculation
+        # test m-score calculation
         m_score = self.analyzer.beneish_model(**ratios)
         self.assertAlmostEqual(m_score, -2.34, places=2)
 
-    # Test edge cases
     def test_zero_sales(self):
         """Test handling of zero sales edge case."""
         with self.assertRaises(ZeroDivisionError):
@@ -107,15 +106,13 @@ class TestEarningsManipulation(unittest.TestCase):
             float_tl_tm1=380000.0,
         )
         
-        # Just verify the calculation completes without errors
         self.assertEqual(len(ratios), 8)
 
-    # Test type validation
     def test_type_validation(self):
         """Test type validation of input parameters."""
         with self.assertRaises(TypeError):
             self.analyzer.inputs_beneish_model(
-                float_ar_t="50000",  # String instead of float
+                float_ar_t="50000",
                 float_sales_t=1000000.0,
                 float_ar_tm1=45000.0,
                 float_sales_tm1=900000.0,
@@ -139,7 +136,6 @@ class TestEarningsManipulation(unittest.TestCase):
                 float_tl_tm1=380000.0,
             )
 
-    # Test extreme values
     def test_extreme_values(self):
         """Test with extremely large/small values."""
         ratios = self.analyzer.inputs_beneish_model(
@@ -167,15 +163,12 @@ class TestEarningsManipulation(unittest.TestCase):
             float_tl_tm1=1e14,
         )
         
-        # Verify no math errors and reasonable ratios
         for val in ratios.values():
             self.assertFalse(math.isnan(val))
             self.assertFalse(math.isinf(val))
 
-    # Test M-Score interpretation
     def test_m_score_interpretation(self):
         """Test M-Score interpretation thresholds."""
-        # Below threshold (no manipulation)
         low_score = self.analyzer.beneish_model(
             float_dsr=1.0,
             float_gmi=1.0,
@@ -188,20 +181,19 @@ class TestEarningsManipulation(unittest.TestCase):
         )
         self.assertLess(low_score, -1.78)
         
-        # Above threshold (potential manipulation)
+        # above threshold (potential manipulation)
         high_score = self.analyzer.beneish_model(
             float_dsr=1.5,
             float_gmi=1.5,
             float_aqi=1.5,
             float_sgi=1.5,
             float_depi=1.5,
-            float_sgai=0.5,  # SGAI is inverted in interpretation
+            float_sgai=0.5,
             float_tata=0.1,
             float_lvgi=1.5,
         )
         self.assertGreater(high_score, -1.78)
 
-    # Test NaN/infinity handling
     def test_nan_handling(self):
         """Test that NaN inputs raise appropriate exceptions."""
         with self.assertRaises(ValueError):
