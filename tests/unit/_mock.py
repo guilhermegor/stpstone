@@ -6,6 +6,7 @@ import pytest
 
 class APIClient(Protocol):
     """Protocol defining the API client interface."""
+    
     def get_value(self) -> int: 
         """Get a value from the API.
 
