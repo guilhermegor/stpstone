@@ -96,8 +96,8 @@ allow-star-arg-any = false  # do not allow `*args` and `**kwargs` to be untyped
 
 [lint.per-file-ignores]
 "tests/**/*.py" = [
-    # Docstring rules
-    "D1",  # All pydocstyle rules (D100-D107)
-    "S101",  # Use of assert
-    "ANN201",  # Missing type annotation for self in method
+    # docstring rules
+    "D1",  # all pydocstyle rules (D100-D107)
+    "S101",  # use of assert
+    "ANN201",  # missing type annotation for self in method
 ]

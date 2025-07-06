@@ -1,6 +1,14 @@
 import unittest
+from unittest.mock import patch
 
-from stpstone.analytics.arithmetics.bit_adders import EightBitFullAdder, FullAdder, HalfAdder
+from stpstone.analytics.arithmetics.bit_adders import (
+    ConfigurableHalfAdder,
+    EightBitFullAdder,
+    FlexibleAdder,
+    FullAdder,
+    HalfAdder,
+)
+from stpstone.transformations.validation.metaclass_type_checker import ConfigurableTypeChecker
 
 
 class TestHalfAdder(unittest.TestCase):
@@ -196,6 +204,166 @@ class TestEightBitFullAdder(unittest.TestCase):
         self.assertEqual(adder.add(), (30, 0))
         adder = EightBitFullAdder(255, 1)
         self.assertEqual(adder.add(), (0, 1))
+
+
+class TestConfigurableHalfAdder(unittest.TestCase):
+    """Test cases for ConfigurableHalfAdder class with advanced type checking."""
+
+    def test_normal_operations(self):
+        """Test normal operations of ConfigurableHalfAdder."""
+        # test all possible input combinations
+        adder = ConfigurableHalfAdder(0, 0)
+        self.assertEqual(adder.get_sum(), 0)
+        self.assertEqual(adder.get_carry(), 0)
+
+        adder = ConfigurableHalfAdder(0, 1)
+        self.assertEqual(adder.get_sum(), 1)
+        self.assertEqual(adder.get_carry(), 0)
+
+        adder = ConfigurableHalfAdder(1, 0)
+        self.assertEqual(adder.get_sum(), 1)
+        self.assertEqual(adder.get_carry(), 0)
+
+        adder = ConfigurableHalfAdder(1, 1)
+        self.assertEqual(adder.get_sum(), 0)
+        self.assertEqual(adder.get_carry(), 1)
+
+    def test_strict_type_checking(self):
+        """Test strict type checking in ConfigurableHalfAdder."""
+        # test invalid types - should raise TypeError due to strict mode
+        with self.assertRaises(TypeError):
+            ConfigurableHalfAdder("0", 1)
+        with self.assertRaises(TypeError):
+            ConfigurableHalfAdder(0, "1")
+        with self.assertRaises(TypeError):
+            ConfigurableHalfAdder(0.5, 1)
+        with self.assertRaises(TypeError):
+            ConfigurableHalfAdder(0, 1.0)
+
+    def test_return_type_checking(self):
+        """Test return type checking in ConfigurableHalfAdder."""
+        # since return type checking is enabled, test that it works
+        adder = ConfigurableHalfAdder(1, 0)
+        # these should work as they return correct types
+        self.assertEqual(adder.get_sum(), 1)
+        self.assertEqual(adder.get_carry(), 0)
+
+    def test_excluded_method_type_checking(self):
+        """Test that excluded methods don't have type checking."""
+        adder = ConfigurableHalfAdder(1, 0)
+        # _private_method is excluded from type checking
+        # so it should work even with wrong types
+        result = adder._private_method("not_an_int")
+        self.assertEqual(result, "not_an_int")
+
+    def test_value_validation(self):
+        """Test value validation in ConfigurableHalfAdder."""
+        # test invalid values (non-binary)
+        with self.assertRaises(ValueError):
+            ConfigurableHalfAdder(2, 1)
+        with self.assertRaises(ValueError):
+            ConfigurableHalfAdder(0, -1)
+        with self.assertRaises(ValueError):
+            ConfigurableHalfAdder(3, 4)
+
+    def test_configuration_behavior(self):
+        """Test that the configuration is properly applied."""
+        # test that the configuration dictionary is correctly set
+        adder = ConfigurableHalfAdder(1, 1)
+        self.assertTrue(hasattr(adder.__class__, '_type_check_config'))
+        config = adder.__class__._type_check_config
+        self.assertTrue(config['strict'])
+        self.assertTrue(config['check_returns'])
+        self.assertIn('_private_method', config['exclude'])
+
+
+class TestFlexibleAdder(unittest.TestCase):
+    """Test cases for FlexibleAdder class with configurable type checking."""
+
+    def test_normal_operations(self):
+        """Test normal operations of FlexibleAdder."""
+        adder = FlexibleAdder(0, 1)
+        self.assertEqual(adder.a, 0)
+        self.assertEqual(adder.b, 1)
+
+        # test add_numbers method
+        result = adder.add_numbers(5, 10)
+        self.assertEqual(result, 15)
+
+    def test_excluded_method_no_type_checking(self):
+        """Test that excluded methods don't have type checking."""
+        adder = FlexibleAdder(1, 0)
+        # debug_method is excluded from type checking
+        # should work with any type without warnings
+        with patch('builtins.print') as mock_print:
+            adder.debug_method("test data")
+            # check that the method was called normally
+            mock_print.assert_called_with("Debug: test data")
+
+    def test_private_method_not_checked(self):
+        """Test that private methods are not checked by default."""
+        adder = FlexibleAdder(1, 0)
+        # _private_helper should not be type checked
+        result = adder._private_helper("hello")
+        self.assertEqual(result, "HELLO")
+
+    def test_constructor_type_checking(self):
+        """Test constructor type checking in FlexibleAdder."""
+        # constructor should warn but not raise exception due to non-strict mode
+        with patch('builtins.print') as mock_print:
+            adder = FlexibleAdder("0", 1)
+            # should print warning for constructor type mismatch
+            mock_print.assert_called()
+            warning_message = mock_print.call_args[0][0]
+            self.assertIn("Warning in __init__", warning_message)
+            # object should still be created
+            self.assertEqual(adder.a, "0")
+            self.assertEqual(adder.b, 1)
+
+    def test_value_validation(self):
+        """Test value validation in FlexibleAdder."""
+        # test invalid values (non-binary)
+        with self.assertRaises(ValueError):
+            FlexibleAdder(2, 1)
+        with self.assertRaises(ValueError):
+            FlexibleAdder(0, -1)
+        with self.assertRaises(ValueError):
+            FlexibleAdder(3, 4)
+
+    def test_mixed_valid_invalid_params(self):
+        """Test behavior with mixed valid and invalid parameters."""
+        adder = FlexibleAdder(1, 0)
+        
+        with patch('builtins.print') as mock_print:
+            # one valid, one invalid parameter
+            # this will attempt int + str which will fail
+            with self.assertRaises(TypeError):  # The actual operation fails
+                adder.add_numbers(5, "10")
+            
+            # should print one warning before the operation fails
+            mock_print.assert_called()
+            warning = mock_print.call_args[0][0]
+            self.assertIn("Warning in add_numbers", warning)
+            self.assertIn("y must be of type int", warning)
+
+    def test_enable_disable_functionality(self):
+        """Test that type checking can be disabled."""
+        # create a class with type checking disabled
+        class DisabledAdder(metaclass=ConfigurableTypeChecker):
+            __type_check_config__ = {'enabled': False}
+            
+            def __init__(self, a: int, b: int) -> None:
+                self.a = a
+                self.b = b
+                
+            def add_numbers(self, x: int, y: int) -> int:
+                return str(x) + str(y)  # Convert to string to avoid type issues
+        
+        # should work without any type checking
+        adder = DisabledAdder("not_int", 1.5)
+        result = adder.add_numbers("5", [10])
+        # this would normally cause issues but should work when disabled
+        self.assertEqual(result, "5[10]")  # string concatenation
 
 
 if __name__ == '__main__':

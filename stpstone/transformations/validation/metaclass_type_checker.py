@@ -1,3 +1,7 @@
+"""Metaclass for automatic type checking of methods in a class."""
+
+from functools import wraps
+import inspect
 from io import BufferedIOBase, BytesIO, RawIOBase
 from logging import Logger
 from numbers import Number
@@ -5,10 +9,10 @@ from typing import (
     IO,
     Any,
     BinaryIO,
-    Dict,
+    Callable,
     Protocol,
-    Type,
     Union,
+    get_args,
     get_origin,
     get_type_hints,
     runtime_checkable,
@@ -17,25 +21,24 @@ from typing import (
 import numpy as np
 import pandas as pd
 from psycopg.sql import Composable
-from pydantic import ConfigDict, validate_arguments, validator
 from pydantic_core import core_schema
-from requests import Session
-from typing_extensions import get_args as typing_get_args
 
 
 @runtime_checkable
 class SQLComposable(Protocol):
-    """Database-agnostic protocol for SQL composable objects"""
+    """Database-agnostic protocol for SQL composable objects."""
 
-    def __str__(self) -> str: ...
+    def __str__(self) -> str: 
+        """Return a string representation of the SQL composable object."""
+        ...
 
     @classmethod
     def __get_pydantic_core_schema__(
         cls,
-        source_type: Any,
-        _handler: Any,
+        source_type: type[Any],
+        _handler: Callable[[Any], core_schema.CoreSchema],
     ) -> core_schema.CoreSchema:
-        """Pydantic of SQL composable objects"""
+        """Pydantic of SQL composable objects."""
         return core_schema.union_schema(
             [
                 core_schema.str_schema(),
@@ -45,69 +48,101 @@ class SQLComposable(Protocol):
         )
 
 
-def check_for_special_types(hint: Any, tup_special_types: tuple) -> bool:
-    """
-    Recursively check if a type hint contains any special types that require arbitrary_types_allowed
-
-    Args:
-        hint: The type hint to check
-        tup_special_types: Tuple of special types that require arbitrary_types_allowed
-
-    Returns:
-        True if the hint contains any special types, False otherwise
-    """
-    if hint in tup_special_types:
-        return True
+def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -> None:
+    """Validate that a value matches the expected type."""
+    origin = get_origin(expected_type)
     
-    if isinstance(hint, type):
-        for special_type in tup_special_types:
+    # handle Union types (including Optional)
+    if origin is Union:
+        args = get_args(expected_type)
+        # Check if any of the union types match
+        for arg in args:
+            if arg is type(None) and value is None:
+                return
             try:
-                if issubclass(hint, special_type):
-                    return True
+                validate_type(value, arg, param_name)
+                return
             except TypeError:
                 continue
-
-    # handle Union types
-    origin = get_origin(hint)
-    if origin is Union:
-        args = typing_get_args(hint)
-        for arg in args:
-            if check_for_special_types(arg, tup_special_types):
-                return True
-
-    # handle other generic types (List, Dict, etc.)
-    if origin is not None:
-        args = typing_get_args(hint)
-        for arg in args:
-            if check_for_special_types(arg, tup_special_types):
-                return True
-
-    return False
-
-def create_validator(field_name: str, expected_type: Any) -> classmethod:
-    """Create a Pydantic validator for a specific field and type."""
-    def validate_field(cls, value: Any) -> Any:
+        # If none matched, raise error
+        type_names = [getattr(arg, '__name__', str(arg)) for arg in args]
+        raise TypeError(f"{param_name} must be one of types: {', '.join(type_names)}, "
+                        + f"got {type(value).__name__}")
+    
+    # Handle generic types like List, dict, etc.
+    elif origin is not None:
+        if not isinstance(value, origin):
+            raise TypeError(f"{param_name} must be of type {expected_type}, "
+                            + f"got {type(value).__name__}")
+        return
+    
+    # Handle regular types
+    elif isinstance(expected_type, type):
         if not isinstance(value, expected_type):
-            raise TypeError(f"{field_name} must be of type {expected_type.__name__}")
-        return value
-    return validator(field_name, allow_reuse=True)(validate_field)
+            raise TypeError(f"{param_name} must be of type {expected_type.__name__}, "
+                            + f"got {type(value).__name__}")
+        return
+    
+    # Handle special cases or protocols
+    else:
+        # For protocols and other complex types, try isinstance
+        try:
+            if not isinstance(value, expected_type):
+                raise TypeError(f"{param_name} must be of type {expected_type}, "
+                                + f"got {type(value).__name__}")
+        except TypeError:
+            # If isinstance fails, skip validation for complex types
+            pass
+
+
+def create_type_checked_method(original_method: Callable[..., Any]) -> Callable[..., Any]:
+    """Create a type-checked wrapper for a method."""
+    @wraps(original_method)
+    def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+        # Get type hints for the method
+        try:
+            type_hints = get_type_hints(original_method)
+        except (NameError, AttributeError):
+            # If we can't get type hints, just call the original method
+            return original_method(*args, **kwargs)
+        
+        # Get parameter names
+        sig = inspect.signature(original_method)
+        param_names = list(sig.parameters.keys())
+        
+        # Validate positional arguments
+        for _, (arg, param_name) in enumerate(zip(args, param_names)):
+            if param_name in type_hints and param_name != 'self':
+                validate_type(arg, type_hints[param_name], param_name)
+        
+        # Validate keyword arguments
+        for param_name, value in kwargs.items():
+            if param_name in type_hints:
+                validate_type(value, type_hints[param_name], param_name)
+        
+        return original_method(*args, **kwargs)
+    
+    return wrapper
 
 
 class TypeChecker(type):
+    """Metaclass that automatically adds runtime type checking to methods."""
+    
     def __new__(
-        cls: Type["TypeChecker"], name: str, bases: tuple, dict_: Dict[str, Any]
+        cls: type["TypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
     ) -> "TypeChecker":
+        """Create a new class with type-checked methods."""
+        # Types that should be ignored for type checking
         tup_types_ignore = (
             pd.DataFrame,
             pd.Series,
             np.ndarray,
             list,
-            Session,
             Logger,
             Number,
         )
 
-        tup_special_types = (
+        tup_special_types = ( # noqa: F841 - local variable is assigned but not used
             *tup_types_ignore,
             IO,
             BinaryIO,
@@ -121,42 +156,197 @@ class TypeChecker(type):
         # Process all methods in the class
         for attr_name, attr_value in dict_.items():
             if callable(attr_value) and not attr_name.startswith("__"):
-                bl_arbitrary_types = False
-                type_hints = get_type_hints(attr_value, include_extras=True)
-
-                # Check for special types
-                for hint in type_hints.values():
-                    if check_for_special_types(hint, tup_special_types):
-                        bl_arbitrary_types = True
-                        break
-
-                # Apply validation
-                dict_[attr_name] = validate_arguments(
-                    attr_value,
-                    config=ConfigDict(arbitrary_types_allowed=bl_arbitrary_types),
-                )
+                # Add type checking wrapper
+                dict_[attr_name] = create_type_checked_method(attr_value)
         
-        # process __init__ separately to add field validators
+        # Special handling for __init__ method
         if "__init__" in dict_:
-            init_method = dict_["__init__"]
-            type_hints = get_type_hints(init_method, include_extras=True)
-            
-            for param, hint in type_hints.items():
-                if param == "return":
-                    continue
-                    
-                # handle simple types (int, str, etc.)
-                if isinstance(hint, type):
-                    validator_method = create_validator(param, hint)
-                    dict_[f"validate_{param}"] = validator_method
+            original_init = dict_["__init__"]
+            dict_["__init__"] = create_type_checked_method(original_init)
+
+        return super().__new__(cls, name, bases, dict_)
+
+
+# Enhanced version with additional features
+class AdvancedTypeChecker(type):
+    """Advanced metaclass with more features for type checking."""
+    
+    def __new__(
+        cls: type["AdvancedTypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
+    ) -> "AdvancedTypeChecker":
+        """Create a new class with advanced type-checked methods."""
+        # Store type checking configuration
+        type_check_config = dict_.get('_type_check_config', {})
+        strict_mode = type_check_config.get('strict', True)
+        check_return_types = type_check_config.get('check_returns', False)
+        excluded_methods = type_check_config.get('exclude', set())
+        
+        def create_advanced_type_checked_method(
+            original_method: Callable[..., Any],
+            method_name: str
+        ) -> Callable[..., Any]:
+            """Create an advanced type-checked wrapper for a method."""
+            @wraps(original_method)
+            def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+                if method_name in excluded_methods:
+                    return original_method(*args, **kwargs)
                 
-                # handle union types (including optional)
-                elif get_origin(hint) is Union:
-                    args = typing_get_args(hint)
-                    # filter out NoneType for optional
-                    type_args = [arg for arg in args if arg is not type(None)]
-                    if len(type_args) == 1:
-                        validator_method = create_validator(param, type_args[0])
-                        dict_[f"validate_{param}"] = validator_method
+                # Get type hints for the method
+                try:
+                    type_hints = get_type_hints(original_method)
+                except (NameError, AttributeError) as err:
+                    if strict_mode:
+                        msg = f"Could not get type hints for {method_name}"
+                        raise RuntimeError(msg) from err
+                    return original_method(*args, **kwargs)
+                
+                # Get parameter names
+                sig = inspect.signature(original_method)
+                param_names = list(sig.parameters.keys())
+                
+                # Validate positional arguments
+                for _, (arg, param_name) in enumerate(zip(args, param_names)):
+                    if param_name in type_hints and param_name != 'self':
+                        try:
+                            validate_type(arg, type_hints[param_name], param_name)
+                        except TypeError as e:
+                            if strict_mode:
+                                msg = f"In method {method_name}: {e}"
+                                raise TypeError(msg) from e
+                            # In non-strict mode, just issue a warning
+                            print(f"Warning in {method_name}: {e}")
+                
+                # Validate keyword arguments
+                for param_name, value in kwargs.items():
+                    if param_name in type_hints:
+                        try:
+                            validate_type(value, type_hints[param_name], param_name)
+                        except TypeError as e:
+                            if strict_mode:
+                                msg = f"In method {method_name}: {e}"
+                                raise TypeError(msg) from e
+                            print(f"Warning in {method_name}: {e}")
+                
+                # Call the original method
+                result = original_method(*args, **kwargs)
+                
+                # Validate return type if requested
+                if check_return_types and 'return' in type_hints:
+                    try:
+                        validate_type(result, type_hints['return'], 'return value')
+                    except TypeError as e:
+                        if strict_mode:
+                            msg = f"In method {method_name} return: {e}"
+                            raise TypeError(msg) from e
+                        print(f"Warning in {method_name} return: {e}")
+                
+                return result
+            
+            return wrapper
+
+        # Process all methods in the class
+        for attr_name, attr_value in dict_.items():
+            if callable(attr_value) and not attr_name.startswith("__"):
+                dict_[attr_name] = create_advanced_type_checked_method(attr_value, attr_name)
+        
+        # Special handling for __init__ method
+        if "__init__" in dict_:
+            original_init = dict_["__init__"]
+            dict_["__init__"] = create_advanced_type_checked_method(original_init, "__init__")
+
+        return super().__new__(cls, name, bases, dict_)
+
+
+# Decorator version for individual methods
+def type_check(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Add type checking to individual methods."""
+    return create_type_checked_method(func)
+
+
+# Example usage with configuration
+class ConfigurableTypeChecker(type):
+    """Metaclass that respects configuration for type checking behavior."""
+    
+    def __new__(
+        cls: type["ConfigurableTypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
+    ) -> "ConfigurableTypeChecker":
+        """Create a new class with configurable type checking."""
+        # Configuration options
+        config = dict_.get('__type_check_config__', {})
+        enabled = config.get('enabled', True)
+        strict = config.get('strict', True)
+        exclude_methods = config.get('exclude_methods', set())
+        include_private = config.get('include_private', False)
+        
+        if not enabled:
+            return super().__new__(cls, name, bases, dict_)
+        
+        def should_check_method(method_name: str) -> bool:
+            if method_name in exclude_methods:
+                return False
+            return include_private or not method_name.startswith('_')
+        
+        def create_configurable_type_checked_method(
+            original_method: Callable[..., Any],
+            method_name: str
+        ) -> Callable[..., Any]:
+            """Create a configurable type-checked wrapper for a method."""
+            @wraps(original_method)
+            def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+                if not should_check_method(method_name):
+                    return original_method(*args, **kwargs)
+                
+                # Get type hints for the method
+                try:
+                    type_hints = get_type_hints(original_method)
+                except (NameError, AttributeError) as err:
+                    if strict:
+                        msg = f"Could not get type hints for {method_name}"
+                        raise RuntimeError(msg) from err
+                    return original_method(*args, **kwargs)
+                
+                # Get parameter names
+                sig = inspect.signature(original_method)
+                param_names = list(sig.parameters.keys())
+                
+                # Validate positional arguments
+                for _, (arg, param_name) in enumerate(zip(args, param_names)):
+                    if param_name in type_hints and param_name != 'self':
+                        try:
+                            validate_type(arg, type_hints[param_name], param_name)
+                        except TypeError as e:
+                            if strict:
+                                msg = f"In method {method_name}: {e}"
+                                raise TypeError(msg) from e
+                            # In non-strict mode, just issue a warning
+                            print(f"Warning in {method_name}: {e}")
+                
+                # Validate keyword arguments
+                for param_name, value in kwargs.items():
+                    if param_name in type_hints:
+                        try:
+                            validate_type(value, type_hints[param_name], param_name)
+                        except TypeError as e:
+                            if strict:
+                                msg = f"In method {method_name}: {e}"
+                                raise TypeError(msg) from e
+                            print(f"Warning in {method_name}: {e}")
+                
+                # Call the original method
+                result = original_method(*args, **kwargs)
+                
+                return result
+            
+            return wrapper
+        
+        # Process methods
+        for attr_name, attr_value in dict_.items():
+            if callable(attr_value) and should_check_method(attr_name):
+                dict_[attr_name] = create_configurable_type_checked_method(attr_value, attr_name)
+        
+        # Special handling for __init__ method if it should be checked
+        if "__init__" in dict_ and should_check_method("__init__"):
+            original_init = dict_["__init__"]
+            dict_["__init__"] = create_configurable_type_checked_method(original_init, "__init__")
 
         return super().__new__(cls, name, bases, dict_)
