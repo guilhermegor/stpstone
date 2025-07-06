@@ -1,10 +1,20 @@
 from typing import Protocol
-import unittest
 from unittest.mock import MagicMock
+
+import pytest
 
 
 class APIClient(Protocol):
-    def get_value(self) -> int: ...
+    """Protocol defining the API client interface."""
+    def get_value(self) -> int: 
+        """Get a value from the API.
+
+        Returns
+        -------
+        int
+            The retrieved value
+        """
+
 
 class Calculator:
     """Simple calculator class for demonstration purposes."""
@@ -31,7 +41,7 @@ class Calculator:
 
         Parameters
         ----------
-        api_client : Any
+        api_client : APIClient
             Client object with get_value() method
 
         Returns
@@ -42,22 +52,41 @@ class Calculator:
         return api_client.get_value() + 10
 
 
-class TestCalculator(unittest.TestCase):
-    
-    def setUp(self) -> None:
-        self.calc = Calculator()
+class TestCalculator:
+    """Test suite for Calculator class."""
 
-    def test_add(self) -> None:
-        result = self.calc.add(2, 3)
-        self.assertEqual(result, 5)
+    @pytest.fixture
+    def calculator(self) -> Calculator:
+        """Fixture providing Calculator instance for tests.
+        
+        Returns
+        -------
+        Calculator
+            Fresh Calculator instance
+        """
+        return Calculator()
 
-    def test_fetch_remote_value(self) -> None:
+    def test_add(self, calculator: Calculator) -> None:
+        """Test addition functionality.
+        
+        Parameters
+        ----------
+        calculator : Calculator
+            Calculator instance from fixture
+        """
+        result = calculator.add(2, 3)
+        assert result == 5
+
+    def test_fetch_remote_value(self, calculator: Calculator) -> None:
+        """Test remote value fetching.
+        
+        Parameters
+        ----------
+        calculator : Calculator
+            Calculator instance from fixture
+        """
         mock_api_client = MagicMock()
         mock_api_client.get_value.return_value = 5
-        result = self.calc.fetch_remote_value(mock_api_client)
+        result = calculator.fetch_remote_value(mock_api_client)
         mock_api_client.get_value.assert_called_once()
-        self.assertEqual(result, 15)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert result == 15
