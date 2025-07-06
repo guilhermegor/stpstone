@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from stpstone.analytics.arithmetics.bit_adders import (
+from stpstone.analytics.arithmetic.bit_adders import (
     ConfigurableHalfAdder,
     EightBitFullAdder,
     FlexibleAdder,

@@ -173,13 +173,13 @@
 - [Yield Risk](stpstone/analytics/risk/yield_.py)
 
 #### **Computer Arithmetic**
-- [Binary Operations](stpstone/analytics/arithmetics/)
-  - [Binary Comparator](stpstone/analytics/arithmetics/binary_comparator.py)
-  - [Binary Converter](stpstone/analytics/arithmetics/binary_converter.py)
-  - [Binary Arithmetic](stpstone/analytics/arithmetics/binary_divider.py)
-  - [Bit Operations](stpstone/analytics/arithmetics/bitwise.py)
-  - [Logic Gates](stpstone/analytics/arithmetics/logic_gate.py)
-  - [Fraction Operations](stpstone/analytics/arithmetics/fraction.py)
+- [Binary Operations](stpstone/analytics/arithmetic/)
+  - [Binary Comparator](stpstone/analytics/arithmetic/binary_comparator.py)
+  - [Binary Converter](stpstone/analytics/arithmetic/binary_converter.py)
+  - [Binary Arithmetic](stpstone/analytics/arithmetic/binary_divider.py)
+  - [Bit Operations](stpstone/analytics/arithmetic/bitwise.py)
+  - [Logic Gates](stpstone/analytics/arithmetic/logic_gate.py)
+  - [Fraction Operations](stpstone/analytics/arithmetic/fraction.py)
 
 ----
 ### ⚙️ Utilities

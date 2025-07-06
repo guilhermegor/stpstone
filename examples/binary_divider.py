@@ -3,7 +3,7 @@
 Demonstrates binary division operation showing quotient and remainder.
 """
 
-from stpstone.analytics.arithmetics.binary_divider import BinaryDivider
+from stpstone.analytics.arithmetic.binary_divider import BinaryDivider
 
 
 divider = BinaryDivider(0b1100, 0b0010)

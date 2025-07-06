@@ -1,6 +1,6 @@
 import unittest
 
-from stpstone.analytics.arithmetics.bit_subtractor import FullSubtractor, HalfSubtractor
+from stpstone.analytics.arithmetic.bit_subtractor import FullSubtractor, HalfSubtractor
 
 
 class TestHalfSubtractor(unittest.TestCase):
@@ -66,7 +66,7 @@ class TestFullSubtractor(unittest.TestCase):
         self.assertEqual(FullSubtractor(0, 1, 0).get_borrow_out(), 1)
 
         self.assertEqual(FullSubtractor(1, 0, 1).get_difference(), 0)
-        self.assertEqual(FullSubtractor(1, 0, 1).get_borrow_out(), 1)
+        self.assertEqual(FullSubtractor(1, 0, 1).get_borrow_out(), 0)
 
         self.assertEqual(FullSubtractor(1, 1, 1).get_difference(), 1)
         self.assertEqual(FullSubtractor(1, 1, 1).get_borrow_out(), 1)
@@ -102,9 +102,9 @@ class TestFullSubtractor(unittest.TestCase):
         """Test the examples provided in docstrings."""
         subtractor = FullSubtractor(1, 0, 1)
         self.assertEqual(subtractor.get_difference(), 0)
-        self.assertEqual(subtractor.get_borrow_out(), 1)
+        self.assertEqual(subtractor.get_borrow_out(), 0)
 
-        self.assertEqual(FullSubtractor(1, 0, 1).get_borrow_out(), 1)
+        self.assertEqual(FullSubtractor(1, 0, 1).get_borrow_out(), 0)
         self.assertEqual(FullSubtractor(0, 0, 1).get_borrow_out(), 1)
 
 

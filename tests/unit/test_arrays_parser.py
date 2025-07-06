@@ -60,7 +60,7 @@ class TestArrays(TestCase):
         np.testing.assert_array_equal(result, self.np_array)
 
     def test_to_array_with_unsupported_type(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             self.arrays.to_array({"a": 1, "b": 2})
 
 if __name__ == "__main__":

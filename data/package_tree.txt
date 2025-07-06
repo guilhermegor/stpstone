@@ -74,7 +74,7 @@ stpstone
 │   ├── generic.yaml
 │   └── global_slots.py
 ├── analytics
-│   ├── arithmetics
+│   ├── arithmetic
 │   │   ├── binary_comparator.py
 │   │   ├── binary_converter.py
 │   │   ├── binary_divider.py

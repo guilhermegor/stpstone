@@ -5,14 +5,14 @@ on integers. The operations include AND, OR, XOR, and NOT.
 
 Classes
 -------
-Utilities
+Bitwise
     A utility class providing bitwise operation methods.
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class Utilities(metaclass=TypeChecker):
+class Bitwise(metaclass=TypeChecker):
     """A utility class providing basic bitwise operations.
 
     This class implements fundamental bitwise operations that are commonly used in
@@ -21,7 +21,7 @@ class Utilities(metaclass=TypeChecker):
 
     Examples
     --------
-    >>> utils = Utilities()
+    >>> utils = Bitwise()
     >>> utils.bitwise_and(3, 5)
     1
     >>> utils.bitwise_or(3, 5)
@@ -48,9 +48,9 @@ class Utilities(metaclass=TypeChecker):
 
         Examples
         --------
-        >>> Utilities().bitwise_and(0b1100, 0b1010)
+        >>> Bitwise().bitwise_and(0b1100, 0b1010)
         0b1000  # 8 in decimal
-        >>> Utilities().bitwise_and(3, 5)
+        >>> Bitwise().bitwise_and(3, 5)
         1
         """
         return a & b
@@ -75,9 +75,9 @@ class Utilities(metaclass=TypeChecker):
 
         Examples
         --------
-        >>> Utilities().bitwise_or(0b1100, 0b1010)
+        >>> Bitwise().bitwise_or(0b1100, 0b1010)
         0b1110  # 14 in decimal
-        >>> Utilities().bitwise_or(3, 5)
+        >>> Bitwise().bitwise_or(3, 5)
         7
         """
         return a | b
@@ -102,9 +102,9 @@ class Utilities(metaclass=TypeChecker):
 
         Examples
         --------
-        >>> Utilities().bitwise_xor(0b1100, 0b1010)
+        >>> Bitwise().bitwise_xor(0b1100, 0b1010)
         0b0110  # 6 in decimal
-        >>> Utilities().bitwise_xor(3, 5)
+        >>> Bitwise().bitwise_xor(3, 5)
         6
         """
         return a ^ b
@@ -128,9 +128,9 @@ class Utilities(metaclass=TypeChecker):
 
         Examples
         --------
-        >>> Utilities().bitwise_not(0b1010)
+        >>> Bitwise().bitwise_not(0b1010)
         -0b1011  # -11 in decimal (depends on bit length)
-        >>> Utilities().bitwise_not(3)
+        >>> Bitwise().bitwise_not(3)
         -4
         """
         return ~a
