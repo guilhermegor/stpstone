@@ -125,10 +125,12 @@ class EarningsManipulation(metaclass=TypeChecker):
     def _validate_inputs(self, params: dict) -> None:
         """Validate all input parameters for the Beneish model.
         
-        Args:
+        Parametes
+        ----------
             params: Dictionary of parameter names and values from locals()
             
-        Raises:
+        Raises
+        ------
             ValueError: If any parameter contains NaN or infinity
             TypeError: If any parameter has wrong type
         """
