@@ -116,7 +116,7 @@ def test_normal_case(
     """Test with typical financial values."""
     ratios = earnings_analyzer.inputs_beneish_model(**normal_financial_values)
 
-    # Verify all ratios are calculated
+    # verify all ratios are calculated
     assert len(ratios) == 8
     assert ratios["float_dsr"] == pytest.approx(1.0, abs=0.01)
     assert ratios["float_gmi"] == pytest.approx(1.04, abs=0.01)
@@ -127,7 +127,7 @@ def test_normal_case(
     assert ratios["float_tata"] == pytest.approx(0.01, abs=0.01)
     assert ratios["float_lvgi"] == pytest.approx(1.0, abs=0.01)
 
-    # Test m-score calculation
+    # test m-score calculation
     m_score = earnings_analyzer.beneish_model(**ratios)
     assert m_score == pytest.approx(-2.34, abs=0.01)
 
@@ -176,7 +176,7 @@ def test_extreme_values(
 
 def test_m_score_interpretation(earnings_analyzer: EarningsManipulation) -> None:
     """Test M-Score interpretation thresholds."""
-    # Below threshold (no manipulation expected)
+    # below threshold (no manipulation expected)
     low_score = earnings_analyzer.beneish_model(
         float_dsr=1.0,
         float_gmi=1.0,
@@ -189,7 +189,7 @@ def test_m_score_interpretation(earnings_analyzer: EarningsManipulation) -> None
     )
     assert low_score < -1.78
     
-    # Above threshold (potential manipulation)
+    # above threshold (potential manipulation)
     high_score = earnings_analyzer.beneish_model(
         float_dsr=1.5,
         float_gmi=1.5,
