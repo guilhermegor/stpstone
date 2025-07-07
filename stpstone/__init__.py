@@ -1,3 +1,4 @@
+"""stpstone package - Solid financial ETL, analytics and utils with support to global markets."""
 from importlib.metadata import PackageNotFoundError, version
 
 

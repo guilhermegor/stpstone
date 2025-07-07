@@ -1,112 +1,126 @@
-import unittest
+"""Unit tests for stpstone arithmetic subtractors.
+
+Tests the HalfSubtractor and FullSubtractor classes functionality.
+"""
+
+from typing import Any
+
+import pytest
 
 from stpstone.analytics.arithmetic.bit_subtractor import FullSubtractor, HalfSubtractor
 
 
-class TestHalfSubtractor(unittest.TestCase):
-    """Test cases for HalfSubtractor class."""
+# --------------------------
+# Fixtures
+# --------------------------
+@pytest.fixture(params=[(0, 0, 0, 0), (0, 1, 1, 1), (1, 0, 1, 0), (1, 1, 0, 0)])
+def half_subtractor_cases(request: pytest.FixtureRequest) -> tuple[int, int, int, int]:
+    """Fixture providing all possible input combinations for HalfSubtractor."""
+    return request.param
 
-    def test_normal_operations(self):
-        """Test normal operations of HalfSubtractor."""
-        # test all possible input combinations
-        self.assertEqual(HalfSubtractor(0, 0).get_difference(), 0)
-        self.assertEqual(HalfSubtractor(0, 0).get_borrow(), 0)
-
-        self.assertEqual(HalfSubtractor(0, 1).get_difference(), 1)
-        self.assertEqual(HalfSubtractor(0, 1).get_borrow(), 1)
-
-        self.assertEqual(HalfSubtractor(1, 0).get_difference(), 1)
-        self.assertEqual(HalfSubtractor(1, 0).get_borrow(), 0)
-
-        self.assertEqual(HalfSubtractor(1, 1).get_difference(), 0)
-        self.assertEqual(HalfSubtractor(1, 1).get_borrow(), 0)
-
-    def test_type_validation(self):
-        """Test type validation in HalfSubtractor."""
-        # test invalid types
-        with self.assertRaises(TypeError):
-            HalfSubtractor("0", 1)
-        with self.assertRaises(TypeError):
-            HalfSubtractor(0, "1")
-        with self.assertRaises(TypeError):
-            HalfSubtractor(0.5, 1)
-        with self.assertRaises(TypeError):
-            HalfSubtractor(0, 1.0)
-
-    def test_value_validation(self):
-        """Test value validation in HalfSubtractor."""
-        # test invalid values (non-binary)
-        with self.assertRaises(ValueError):
-            HalfSubtractor(2, 1)
-        with self.assertRaises(ValueError):
-            HalfSubtractor(0, -1)
-        with self.assertRaises(ValueError):
-            HalfSubtractor(3, 4)
-
-    def test_docstring_examples(self):
-        """Test the examples provided in docstrings."""
-        subtractor = HalfSubtractor(1, 0)
-        self.assertEqual(subtractor.get_difference(), 1)
-        self.assertEqual(subtractor.get_borrow(), 0)
-
-        self.assertEqual(HalfSubtractor(0, 1).get_borrow(), 1)
-        self.assertEqual(HalfSubtractor(1, 0).get_borrow(), 0)
+@pytest.fixture(params=[
+    (0, 0, 0, 0, 0),
+    (0, 1, 0, 1, 1),
+    (1, 0, 1, 0, 0),
+    (1, 1, 1, 1, 1),
+    (0, 0, 1, 1, 1),
+    (0, 1, 1, 0, 1),
+    (1, 0, 0, 1, 0),
+    (1, 1, 0, 0, 0)
+])
+def full_subtractor_cases(request: pytest.FixtureRequest) -> tuple[int, int, int, int, int]:
+    """Fixture providing various input combinations for FullSubtractor."""
+    return request.param
 
 
-class TestFullSubtractor(unittest.TestCase):
-    """Test cases for FullSubtractor class."""
+# --------------------------
+# Tests for HalfSubtractor
+# --------------------------
+def test_half_subtractor_normal_operations(half_subtractor_cases: tuple[int, int, int, int]) \
+    -> None:
+    """Test normal operations of HalfSubtractor."""
+    a, b, expected_diff, expected_borrow = half_subtractor_cases
+    subtractor = HalfSubtractor(a, b)
+    assert subtractor.get_difference() == expected_diff
+    assert subtractor.get_borrow() == expected_borrow
 
-    def test_normal_operations(self):
-        """Test normal operations of FullSubtractor."""
-        # test various combinations
-        self.assertEqual(FullSubtractor(0, 0, 0).get_difference(), 0)
-        self.assertEqual(FullSubtractor(0, 0, 0).get_borrow_out(), 0)
+@pytest.mark.parametrize("a,b", [
+    ("0", 1),
+    (0, "1"),
+    (0.5, 1),
+    (0, 1.0)
+])
+def test_half_subtractor_type_validation(a: type[Any], b: type[Any]) -> None:
+    """Test type validation in HalfSubtractor."""
+    with pytest.raises(TypeError):
+        HalfSubtractor(a, b)
 
-        self.assertEqual(FullSubtractor(0, 1, 0).get_difference(), 1)
-        self.assertEqual(FullSubtractor(0, 1, 0).get_borrow_out(), 1)
+@pytest.mark.parametrize("a,b", [
+    (2, 1),
+    (0, -1),
+    (3, 4)
+])
+def test_half_subtractor_value_validation(a: int, b: int) -> None:
+    """Test value validation in HalfSubtractor."""
+    with pytest.raises(ValueError):
+        HalfSubtractor(a, b)
 
-        self.assertEqual(FullSubtractor(1, 0, 1).get_difference(), 0)
-        self.assertEqual(FullSubtractor(1, 0, 1).get_borrow_out(), 0)
+def test_half_subtractor_docstring_examples() -> None:
+    """Test the examples provided in docstrings."""
+    subtractor = HalfSubtractor(1, 0)
+    assert subtractor.get_difference() == 1
+    assert subtractor.get_borrow() == 0
 
-        self.assertEqual(FullSubtractor(1, 1, 1).get_difference(), 1)
-        self.assertEqual(FullSubtractor(1, 1, 1).get_borrow_out(), 1)
-
-    def test_borrow_propagation(self):
-        """Test borrow propagation in FullSubtractor."""
-        # test cases where borrow is generated
-        self.assertEqual(FullSubtractor(0, 1, 0).get_borrow_out(), 1)
-        self.assertEqual(FullSubtractor(0, 0, 1).get_borrow_out(), 1)
-        self.assertEqual(FullSubtractor(1, 1, 1).get_borrow_out(), 1)
-
-    def test_type_validation(self):
-        """Test type validation in FullSubtractor."""
-        # test invalid types
-        with self.assertRaises(TypeError):
-            FullSubtractor("0", 1, 0)
-        with self.assertRaises(TypeError):
-            FullSubtractor(0, [1], 0)
-        with self.assertRaises(TypeError):
-            FullSubtractor(0, 1, 0.5)
-
-    def test_value_validation(self):
-        """Test value validation in FullSubtractor."""
-        # test invalid values (non-binary)
-        with self.assertRaises(ValueError):
-            FullSubtractor(2, 1, 0)
-        with self.assertRaises(ValueError):
-            FullSubtractor(0, -1, 0)
-        with self.assertRaises(ValueError):
-            FullSubtractor(0, 1, 2)
-
-    def test_docstring_examples(self):
-        """Test the examples provided in docstrings."""
-        subtractor = FullSubtractor(1, 0, 1)
-        self.assertEqual(subtractor.get_difference(), 0)
-        self.assertEqual(subtractor.get_borrow_out(), 0)
-
-        self.assertEqual(FullSubtractor(1, 0, 1).get_borrow_out(), 0)
-        self.assertEqual(FullSubtractor(0, 0, 1).get_borrow_out(), 1)
+    assert HalfSubtractor(0, 1).get_borrow() == 1
+    assert HalfSubtractor(1, 0).get_borrow() == 0
 
 
-if __name__ == '__main__':
-    unittest.main()
+# --------------------------
+# Tests for FullSubtractor
+# --------------------------
+def test_full_subtractor_normal_operations(
+    full_subtractor_cases: tuple[int, int, int, int, int]
+) -> None:
+    """Test normal operations of FullSubtractor."""
+    a, b, borrow_in, expected_diff, expected_borrow = full_subtractor_cases
+    subtractor = FullSubtractor(a, b, borrow_in)
+    assert subtractor.get_difference() == expected_diff
+    assert subtractor.get_borrow_out() == expected_borrow
+
+@pytest.mark.parametrize("a,b,borrow_in", [
+    (0, 1, 0),
+    (0, 0, 1),
+    (1, 1, 1)
+])
+def test_full_subtractor_borrow_propagation(a: int, b: int, borrow_in: int) -> None:
+    """Test borrow propagation in FullSubtractor."""
+    assert FullSubtractor(a, b, borrow_in).get_borrow_out() == 1
+
+@pytest.mark.parametrize("a,b,borrow_in", [
+    ("0", 1, 0),
+    (0, [1], 0),
+    (0, 1, 0.5)
+])
+def test_full_subtractor_type_validation(a: type[Any], b: type[Any], borrow_in: type[Any]) -> None:
+    """Test type validation in FullSubtractor."""
+    with pytest.raises(TypeError):
+        FullSubtractor(a, b, borrow_in)
+
+@pytest.mark.parametrize("a,b,borrow_in", [
+    (2, 1, 0),
+    (0, -1, 0),
+    (0, 1, 2)
+])
+def test_full_subtractor_value_validation(a: int, b: int, borrow_in: int) -> None:
+    """Test value validation in FullSubtractor."""
+    with pytest.raises(ValueError):
+        FullSubtractor(a, b, borrow_in)
+
+def test_full_subtractor_docstring_examples() -> None:
+    """Test the examples provided in docstrings."""
+    subtractor = FullSubtractor(1, 0, 1)
+    assert subtractor.get_difference() == 0
+    assert subtractor.get_borrow_out() == 0
+
+    assert FullSubtractor(1, 0, 1).get_borrow_out() == 0
+    assert FullSubtractor(0, 0, 1).get_borrow_out() == 1

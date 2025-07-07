@@ -1,95 +1,120 @@
-import unittest
+"""Unit tests for BinaryDivider class.
+
+Tests binary division functionality with various input scenarios.
+"""
+
+import pytest
 
 from stpstone.analytics.arithmetic.binary_divider import BinaryDivider
 
 
-class TestBinaryDivider(unittest.TestCase):
-    """Test cases for BinaryDivider class."""
+# --------------------------
+# Fixtures
+# --------------------------
+@pytest.fixture
+def positive_divider() -> BinaryDivider:
+    """Fixture for positive number division."""
+    return BinaryDivider(12, 2)
 
-    def test_divide_positive_numbers(self):
-        """Test division of positive numbers."""
-        # test exact division
-        divider = BinaryDivider(12, 2)
-        quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 6)
-        self.assertEqual(remainder, 0)
 
-        # test division with remainder
-        divider = BinaryDivider(15, 4)
-        quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 3)
-        self.assertEqual(remainder, 3)
+@pytest.fixture
+def remainder_divider() -> BinaryDivider:
+    """Fixture for division with remainder."""
+    return BinaryDivider(15, 4)
 
-    def test_divide_large_numbers(self):
+
+# --------------------------
+# Tests
+# --------------------------
+class TestPositiveDivision:
+    """Tests for division of positive numbers."""
+
+    def test_exact_division(self, positive_divider: BinaryDivider) -> None:
+        """Test exact division (no remainder)."""
+        quotient, remainder = positive_divider.divide()
+        assert quotient == 6
+        assert remainder == 0
+
+    def test_division_with_remainder(self, remainder_divider: BinaryDivider) -> None:
+        """Test division with remainder."""
+        quotient, remainder = remainder_divider.divide()
+        assert quotient == 3
+        assert remainder == 3
+
+    def test_large_numbers(self) -> None:
         """Test division with larger numbers."""
-        # test with 8-bit boundary
+        # 8-bit boundary
         divider = BinaryDivider(255, 16)
         quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 15)
-        self.assertEqual(remainder, 15)
+        assert quotient == 15
+        assert remainder == 15
 
-        # test with numbers beyond 8-bit
+        # Beyond 8-bit
         divider = BinaryDivider(1024, 256)
         quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 4)
-        self.assertEqual(remainder, 0)
+        assert quotient == 4
+        assert remainder == 0
 
-    def test_divide_by_one(self):
+    def test_divide_by_one(self) -> None:
         """Test division by one."""
         divider = BinaryDivider(42, 1)
         quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 42)
-        self.assertEqual(remainder, 0)
+        assert quotient == 42
+        assert remainder == 0
 
-    def test_divide_zero_dividend(self):
+    def test_zero_dividend(self) -> None:
         """Test division with zero dividend."""
         divider = BinaryDivider(0, 5)
         quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 0)
-        self.assertEqual(remainder, 0)
+        assert quotient == 0
+        assert remainder == 0
 
-    def test_divide_same_numbers(self):
+    def test_equal_numbers(self) -> None:
         """Test division when dividend equals divisor."""
         divider = BinaryDivider(7, 7)
         quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 1)
-        self.assertEqual(remainder, 0)
+        assert quotient == 1
+        assert remainder == 0
 
-    def test_divide_dividend_smaller_than_divisor(self):
+    def test_dividend_smaller_than_divisor(self) -> None:
         """Test when dividend is smaller than divisor."""
         divider = BinaryDivider(3, 5)
         quotient, remainder = divider.divide()
-        self.assertEqual(quotient, 0)
-        self.assertEqual(remainder, 3)
+        assert quotient == 0
+        assert remainder == 3
 
-    def test_divide_negative_dividend(self):
+
+class TestErrorCases:
+    """Tests for error conditions and input validation."""
+
+    def test_negative_dividend(self) -> None:
         """Test initialization with negative dividend."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             BinaryDivider(-10, 5)
 
-    def test_divide_negative_divisor(self):
+    def test_negative_divisor(self) -> None:
         """Test initialization with negative divisor."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             BinaryDivider(10, -5)
 
-    def test_divide_by_zero(self):
+    def test_divide_by_zero(self) -> None:
         """Test division by zero."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             BinaryDivider(10, 0)
 
-    def test_type_checking(self):
+    def test_type_checking(self) -> None:
         """Test type checking of inputs."""
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             BinaryDivider("10", 5)
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             BinaryDivider(10, "5")
 
-    def test_property_access(self):
+
+class TestProperties:
+    """Tests for property access."""
+
+    def test_property_access(self) -> None:
         """Test property access after division."""
         divider = BinaryDivider(10, 3)
-        self.assertEqual(divider.dividend, 10)
-        self.assertEqual(divider.divisor, 3)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        assert divider.dividend == 10
+        assert divider.divisor == 3

@@ -1,5 +1,9 @@
-import unittest
+"""Unit tests for bit adder classes in stpstone.analytics.arithmetic.bit_adders module."""
+
+from typing import Any
 from unittest.mock import patch
+
+import pytest
 
 from stpstone.analytics.arithmetic.bit_adders import (
     ConfigurableHalfAdder,
@@ -11,360 +15,334 @@ from stpstone.analytics.arithmetic.bit_adders import (
 from stpstone.transformations.validation.metaclass_type_checker import ConfigurableTypeChecker
 
 
-class TestHalfAdder(unittest.TestCase):
+class TestHalfAdder:
     """Test cases for HalfAdder class."""
 
-    def test_normal_operations(self):
+    @pytest.mark.parametrize(
+        "a, b, expected_sum, expected_carry",
+        [
+            (0, 0, 0, 0),
+            (0, 1, 1, 0),
+            (1, 0, 1, 0),
+            (1, 1, 0, 1),
+        ],
+    )
+    def test_normal_operations(
+        self, a: int, b: int, expected_sum: int, expected_carry: int
+    ) -> None:
         """Test normal operations of HalfAdder."""
-        # test all possible input combinations
-        self.assertEqual(HalfAdder(0, 0).get_sum(), 0)
-        self.assertEqual(HalfAdder(0, 0).get_carry(), 0)
+        adder: HalfAdder = HalfAdder(a, b)
+        assert adder.get_sum() == expected_sum
+        assert adder.get_carry() == expected_carry
 
-        self.assertEqual(HalfAdder(0, 1).get_sum(), 1)
-        self.assertEqual(HalfAdder(0, 1).get_carry(), 0)
-
-        self.assertEqual(HalfAdder(1, 0).get_sum(), 1)
-        self.assertEqual(HalfAdder(1, 0).get_carry(), 0)
-
-        self.assertEqual(HalfAdder(1, 1).get_sum(), 0)
-        self.assertEqual(HalfAdder(1, 1).get_carry(), 1)
-
-    def test_type_validation(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            ("0", 1),
+            (0, "1"),
+            (0.5, 1),
+            (0, 1.0),
+        ],
+    )
+    def test_type_validation(self, a: type[Any], b: type[Any]) -> None:
         """Test type validation in HalfAdder."""
-        # test invalid types
-        with self.assertRaises(TypeError):
-            HalfAdder("0", 1)
-        with self.assertRaises(TypeError):
-            HalfAdder(0, "1")
-        with self.assertRaises(TypeError):
-            HalfAdder(0.5, 1)
-        with self.assertRaises(TypeError):
-            HalfAdder(0, 1.0)
+        with pytest.raises(TypeError):
+            HalfAdder(a, b)
 
-    def test_value_validation(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            (2, 1),
+            (0, -1),
+            (3, 4),
+        ],
+    )
+    def test_value_validation(self, a: int, b: int) -> None:
         """Test value validation in HalfAdder."""
-        # test invalid values (non-binary)
-        with self.assertRaises(ValueError):
-            HalfAdder(2, 1)
-        with self.assertRaises(ValueError):
-            HalfAdder(0, -1)
-        with self.assertRaises(ValueError):
-            HalfAdder(3, 4)
+        with pytest.raises(ValueError):
+            HalfAdder(a, b)
 
 
-class TestFullAdder(unittest.TestCase):
+class TestFullAdder:
     """Test cases for FullAdder class."""
 
-    def test_normal_operations(self):
+    @pytest.mark.parametrize(
+        "a, b, carry_in, expected_sum, expected_carry_out",
+        [
+            (0, 0, 0, 0, 0),
+            (0, 1, 0, 1, 0),
+            (1, 0, 1, 0, 1),
+            (1, 1, 1, 1, 1),
+        ],
+    )
+    def test_normal_operations(
+        self,
+        a: int,
+        b: int,
+        carry_in: int,
+        expected_sum: int,
+        expected_carry_out: int,
+    ) -> None:
         """Test normal operations of FullAdder."""
-        # test various combinations
-        self.assertEqual(FullAdder(0, 0, 0).get_sum(), 0)
-        self.assertEqual(FullAdder(0, 0, 0).get_carry_out(), 0)
+        adder: FullAdder = FullAdder(a, b, carry_in)
+        assert adder.get_sum() == expected_sum
+        assert adder.get_carry_out() == expected_carry_out
 
-        self.assertEqual(FullAdder(0, 1, 0).get_sum(), 1)
-        self.assertEqual(FullAdder(0, 1, 0).get_carry_out(), 0)
-
-        self.assertEqual(FullAdder(1, 0, 1).get_sum(), 0)
-        self.assertEqual(FullAdder(1, 0, 1).get_carry_out(), 1)
-
-        self.assertEqual(FullAdder(1, 1, 1).get_sum(), 1)
-        self.assertEqual(FullAdder(1, 1, 1).get_carry_out(), 1)
-
-    def test_carry_propagation(self):
+    @pytest.mark.parametrize(
+        "a, b, carry_in",
+        [
+            (1, 1, 0),
+            (1, 0, 1),
+            (0, 1, 1),
+        ],
+    )
+    def test_carry_propagation(self, a: int, b: int, carry_in: int) -> None:
         """Test carry propagation in FullAdder."""
-        # test cases where carry is generated
-        self.assertEqual(FullAdder(1, 1, 0).get_carry_out(), 1)
-        self.assertEqual(FullAdder(1, 0, 1).get_carry_out(), 1)
-        self.assertEqual(FullAdder(0, 1, 1).get_carry_out(), 1)
+        adder: FullAdder = FullAdder(a, b, carry_in)
+        assert adder.get_carry_out() == 1
 
-    def test_type_validation(self):
+    @pytest.mark.parametrize(
+        "a, b, carry_in",
+        [
+            ("0", 1, 0),
+            (0, [1], 0),
+            (0, 1, 0.5),
+        ],
+    )
+    def test_type_validation(self, a: type[Any], b: type[Any], carry_in: type[Any]) -> None:
         """Test type validation in FullAdder."""
-        # test invalid types
-        with self.assertRaises(TypeError):
-            FullAdder("0", 1, 0)
-        with self.assertRaises(TypeError):
-            FullAdder(0, [1], 0)
-        with self.assertRaises(TypeError):
-            FullAdder(0, 1, 0.5)
+        with pytest.raises(TypeError):
+            FullAdder(a, b, carry_in)
 
-    def test_value_validation(self):
+    @pytest.mark.parametrize(
+        "a, b, carry_in",
+        [
+            (2, 1, 0),
+            (0, -1, 0),
+            (0, 1, 2),
+        ],
+    )
+    def test_value_validation(self, a: int, b: int, carry_in: int) -> None:
         """Test value validation in FullAdder."""
-        # test invalid values (non-binary)
-        with self.assertRaises(ValueError):
-            FullAdder(2, 1, 0)
-        with self.assertRaises(ValueError):
-            FullAdder(0, -1, 0)
-        with self.assertRaises(ValueError):
-            FullAdder(0, 1, 2)
+        with pytest.raises(ValueError):
+            FullAdder(a, b, carry_in)
 
 
-class TestEightBitFullAdder(unittest.TestCase):
+class TestEightBitFullAdder:
     """Test cases for EightBitFullAdder class."""
 
-    def test_normal_operations(self):
-        """Test normal operations of EightBitFullAdder."""
-        # test basic additions
-        adder = EightBitFullAdder(0, 0)
+    @pytest.mark.parametrize(
+        "a, b, expected_sum, expected_carry",
+        [
+            (0, 0, 0, 0),
+            (10, 20, 30, 0),
+            (255, 0, 255, 0),
+            (255, 1, 0, 1),
+            (128, 128, 0, 1),
+            (255, 255, 254, 1),
+            (123, 45, 168, 0),
+            (0b11001100, 0b00110011, 0b11111111, 0),
+            (0b11111111, 0b00000001, 0b00000000, 1),
+        ],
+    )
+    def test_operations(
+        self, a: int, b: int, expected_sum: int, expected_carry: int
+    ) -> None:
+        """Test various operations of EightBitFullAdder."""
+        adder: EightBitFullAdder = EightBitFullAdder(a, b)
         sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 0)
-        self.assertEqual(carry, 0)
+        assert sum_result == expected_sum
+        assert carry == expected_carry
 
-        adder = EightBitFullAdder(10, 20)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 30)
-        self.assertEqual(carry, 0)
-
-        adder = EightBitFullAdder(255, 0)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 255)
-        self.assertEqual(carry, 0)
-
-    def test_carry_operations(self):
-        """Test carry operations in EightBitFullAdder."""
-        # test cases where carry is generated
-        adder = EightBitFullAdder(255, 1)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 0)
-        self.assertEqual(carry, 1)
-
-        adder = EightBitFullAdder(128, 128)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 0)
-        self.assertEqual(carry, 1)
-
-    def test_edge_cases(self):
-        """Test edge cases of EightBitFullAdder."""
-        # test maximum values
-        adder = EightBitFullAdder(255, 255)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 254)
-        self.assertEqual(carry, 1)
-
-        # test minimum values
-        adder = EightBitFullAdder(0, 0)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 0)
-        self.assertEqual(carry, 0)
-
-        # test random values
-        adder = EightBitFullAdder(123, 45)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 168)
-        self.assertEqual(carry, 0)
-
-    def test_type_validation(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            ("255", 0),
+            (0, [1]),
+            (0.5, 1),
+        ],
+    )
+    def test_type_validation(self, a: type[Any], b: type[Any]) -> None:
         """Test type validation in EightBitFullAdder."""
-        # test invalid types
-        with self.assertRaises(TypeError):
-            EightBitFullAdder("255", 0)
-        with self.assertRaises(TypeError):
-            EightBitFullAdder(0, [1])
-        with self.assertRaises(TypeError):
-            EightBitFullAdder(0.5, 1)
+        with pytest.raises(TypeError):
+            EightBitFullAdder(a, b)
 
-    def test_value_validation(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            (-1, 0),
+            (256, 0),
+            (0, -100),
+            (1000, 1000),
+        ],
+    )
+    def test_value_validation(self, a: int, b: int) -> None:
         """Test value validation in EightBitFullAdder."""
-        # test invalid values (out of 8-bit range)
-        with self.assertRaises(ValueError):
-            EightBitFullAdder(-1, 0)
-        with self.assertRaises(ValueError):
-            EightBitFullAdder(256, 0)
-        with self.assertRaises(ValueError):
-            EightBitFullAdder(0, -100)
-        with self.assertRaises(ValueError):
-            EightBitFullAdder(1000, 1000)
+        with pytest.raises(ValueError):
+            EightBitFullAdder(a, b)
 
-    def test_binary_operations(self):
-        """Test binary operations in EightBitFullAdder."""
-        # test binary inputs
-        adder = EightBitFullAdder(0b11001100, 0b00110011)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 0b11111111)
-        self.assertEqual(carry, 0)
-
-        adder = EightBitFullAdder(0b11111111, 0b00000001)
-        sum_result, carry = adder.add()
-        self.assertEqual(sum_result, 0b00000000)
-        self.assertEqual(carry, 1)
-
-    def test_docstring_examples(self):
+    def test_docstring_examples(self) -> None:
         """Test the examples provided in docstrings."""
-        # halfAdder examples
-        adder = HalfAdder(0, 1)
-        self.assertEqual(adder.get_sum(), 1)
-        self.assertEqual(adder.get_carry(), 0)
+        # HalfAdder examples
+        adder: HalfAdder = HalfAdder(0, 1)
+        assert adder.get_sum() == 1
+        assert adder.get_carry() == 0
 
-        # fullAdder examples
-        adder = FullAdder(1, 1, 0)
-        self.assertEqual(adder.get_sum(), 0)
-        self.assertEqual(adder.get_carry_out(), 1)
+        # FullAdder examples
+        adder: FullAdder = FullAdder(1, 1, 0)
+        assert adder.get_sum() == 0
+        assert adder.get_carry_out() == 1
 
-        # eightBitFullAdder examples
-        adder = EightBitFullAdder(10, 20)
-        self.assertEqual(adder.add(), (30, 0))
+        # EightBitFullAdder examples
+        adder: EightBitFullAdder = EightBitFullAdder(10, 20)
+        assert adder.add() == (30, 0)
         adder = EightBitFullAdder(255, 1)
-        self.assertEqual(adder.add(), (0, 1))
+        assert adder.add() == (0, 1)
 
 
-class TestConfigurableHalfAdder(unittest.TestCase):
+class TestConfigurableHalfAdder:
     """Test cases for ConfigurableHalfAdder class with advanced type checking."""
 
-    def test_normal_operations(self):
+    @pytest.mark.parametrize(
+        "a, b, expected_sum, expected_carry",
+        [
+            (0, 0, 0, 0),
+            (0, 1, 1, 0),
+            (1, 0, 1, 0),
+            (1, 1, 0, 1),
+        ],
+    )
+    def test_normal_operations(
+        self, a: int, b: int, expected_sum: int, expected_carry: int
+    ) -> None:
         """Test normal operations of ConfigurableHalfAdder."""
-        # test all possible input combinations
-        adder = ConfigurableHalfAdder(0, 0)
-        self.assertEqual(adder.get_sum(), 0)
-        self.assertEqual(adder.get_carry(), 0)
+        adder: ConfigurableHalfAdder = ConfigurableHalfAdder(a, b)
+        assert adder.get_sum() == expected_sum
+        assert adder.get_carry() == expected_carry
 
-        adder = ConfigurableHalfAdder(0, 1)
-        self.assertEqual(adder.get_sum(), 1)
-        self.assertEqual(adder.get_carry(), 0)
-
-        adder = ConfigurableHalfAdder(1, 0)
-        self.assertEqual(adder.get_sum(), 1)
-        self.assertEqual(adder.get_carry(), 0)
-
-        adder = ConfigurableHalfAdder(1, 1)
-        self.assertEqual(adder.get_sum(), 0)
-        self.assertEqual(adder.get_carry(), 1)
-
-    def test_strict_type_checking(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            ("0", 1),
+            (0, "1"),
+            (0.5, 1),
+            (0, 1.0),
+        ],
+    )
+    def test_strict_type_checking(self, a: type[Any], b: type[Any]) -> None:
         """Test strict type checking in ConfigurableHalfAdder."""
-        # test invalid types - should raise TypeError due to strict mode
-        with self.assertRaises(TypeError):
-            ConfigurableHalfAdder("0", 1)
-        with self.assertRaises(TypeError):
-            ConfigurableHalfAdder(0, "1")
-        with self.assertRaises(TypeError):
-            ConfigurableHalfAdder(0.5, 1)
-        with self.assertRaises(TypeError):
-            ConfigurableHalfAdder(0, 1.0)
+        with pytest.raises(TypeError):
+            ConfigurableHalfAdder(a, b)
 
-    def test_return_type_checking(self):
+    def test_return_type_checking(self) -> None:
         """Test return type checking in ConfigurableHalfAdder."""
-        # since return type checking is enabled, test that it works
-        adder = ConfigurableHalfAdder(1, 0)
-        # these should work as they return correct types
-        self.assertEqual(adder.get_sum(), 1)
-        self.assertEqual(adder.get_carry(), 0)
+        adder: ConfigurableHalfAdder = ConfigurableHalfAdder(1, 0)
+        assert adder.get_sum() == 1
+        assert adder.get_carry() == 0
 
-    def test_excluded_method_type_checking(self):
+    def test_excluded_method_type_checking(self) -> None:
         """Test that excluded methods don't have type checking."""
-        adder = ConfigurableHalfAdder(1, 0)
-        # _private_method is excluded from type checking
-        # so it should work even with wrong types
-        result = adder._private_method("not_an_int")
-        self.assertEqual(result, "not_an_int")
+        adder: ConfigurableHalfAdder = ConfigurableHalfAdder(1, 0)
+        result: str = adder._private_method("not_an_int")
+        assert result == "not_an_int"
 
-    def test_value_validation(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            (2, 1),
+            (0, -1),
+            (3, 4),
+        ],
+    )
+    def test_value_validation(self, a: int, b: int) -> None:
         """Test value validation in ConfigurableHalfAdder."""
-        # test invalid values (non-binary)
-        with self.assertRaises(ValueError):
-            ConfigurableHalfAdder(2, 1)
-        with self.assertRaises(ValueError):
-            ConfigurableHalfAdder(0, -1)
-        with self.assertRaises(ValueError):
-            ConfigurableHalfAdder(3, 4)
+        with pytest.raises(ValueError):
+            ConfigurableHalfAdder(a, b)
 
-    def test_configuration_behavior(self):
+    def test_configuration_behavior(self) -> None:
         """Test that the configuration is properly applied."""
-        # test that the configuration dictionary is correctly set
-        adder = ConfigurableHalfAdder(1, 1)
-        self.assertTrue(hasattr(adder.__class__, '_type_check_config'))
-        config = adder.__class__._type_check_config
-        self.assertTrue(config['strict'])
-        self.assertTrue(config['check_returns'])
-        self.assertIn('_private_method', config['exclude'])
+        adder: ConfigurableHalfAdder = ConfigurableHalfAdder(1, 1)
+        assert hasattr(adder.__class__, "_type_check_config")
+        config: dict = adder.__class__._type_check_config
+        assert config["strict"]
+        assert config["check_returns"]
+        assert "_private_method" in config["exclude"]
 
 
-class TestFlexibleAdder(unittest.TestCase):
+class TestFlexibleAdder:
     """Test cases for FlexibleAdder class with configurable type checking."""
 
-    def test_normal_operations(self):
+    def test_normal_operations(self) -> None:
         """Test normal operations of FlexibleAdder."""
-        adder = FlexibleAdder(0, 1)
-        self.assertEqual(adder.a, 0)
-        self.assertEqual(adder.b, 1)
+        adder: FlexibleAdder = FlexibleAdder(0, 1)
+        assert adder.a == 0
+        assert adder.b == 1
 
-        # test add_numbers method
-        result = adder.add_numbers(5, 10)
-        self.assertEqual(result, 15)
+        result: int = adder.add_numbers(5, 10)
+        assert result == 15
 
-    def test_excluded_method_no_type_checking(self):
+    def test_excluded_method_no_type_checking(self) -> None:
         """Test that excluded methods don't have type checking."""
-        adder = FlexibleAdder(1, 0)
-        # debug_method is excluded from type checking
-        # should work with any type without warnings
-        with patch('builtins.print') as mock_print:
+        adder: FlexibleAdder = FlexibleAdder(1, 0)
+        with patch("builtins.print") as mock_print:
             adder.debug_method("test data")
-            # check that the method was called normally
             mock_print.assert_called_with("Debug: test data")
 
-    def test_private_method_not_checked(self):
+    def test_private_method_not_checked(self) -> None:
         """Test that private methods are not checked by default."""
-        adder = FlexibleAdder(1, 0)
-        # _private_helper should not be type checked
-        result = adder._private_helper("hello")
-        self.assertEqual(result, "HELLO")
+        adder: FlexibleAdder = FlexibleAdder(1, 0)
+        result: str = adder._private_helper("hello")
+        assert result == "HELLO"
 
-    def test_constructor_type_checking(self):
+    def test_constructor_type_checking(self) -> None:
         """Test constructor type checking in FlexibleAdder."""
-        # constructor should warn but not raise exception due to non-strict mode
-        with patch('builtins.print') as mock_print:
-            adder = FlexibleAdder("0", 1)
-            # should print warning for constructor type mismatch
+        with patch("builtins.print") as mock_print:
+            adder: FlexibleAdder = FlexibleAdder("0", 1)
             mock_print.assert_called()
-            warning_message = mock_print.call_args[0][0]
-            self.assertIn("Warning in __init__", warning_message)
-            # object should still be created
-            self.assertEqual(adder.a, "0")
-            self.assertEqual(adder.b, 1)
+            warning_message: str = mock_print.call_args[0][0]
+            assert "Warning in __init__" in warning_message
+            assert adder.a == "0"
+            assert adder.b == 1
 
-    def test_value_validation(self):
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            (2, 1),
+            (0, -1),
+            (3, 4),
+        ],
+    )
+    def test_value_validation(self, a: int, b: int) -> None:
         """Test value validation in FlexibleAdder."""
-        # test invalid values (non-binary)
-        with self.assertRaises(ValueError):
-            FlexibleAdder(2, 1)
-        with self.assertRaises(ValueError):
-            FlexibleAdder(0, -1)
-        with self.assertRaises(ValueError):
-            FlexibleAdder(3, 4)
+        with pytest.raises(ValueError):
+            FlexibleAdder(a, b)
 
-    def test_mixed_valid_invalid_params(self):
+    def test_mixed_valid_invalid_params(self) -> None:
         """Test behavior with mixed valid and invalid parameters."""
-        adder = FlexibleAdder(1, 0)
-        
-        with patch('builtins.print') as mock_print:
-            # one valid, one invalid parameter
-            # this will attempt int + str which will fail
-            with self.assertRaises(TypeError):  # The actual operation fails
-                adder.add_numbers(5, "10")
-            
-            # should print one warning before the operation fails
-            mock_print.assert_called()
-            warning = mock_print.call_args[0][0]
-            self.assertIn("Warning in add_numbers", warning)
-            self.assertIn("y must be of type int", warning)
+        adder: FlexibleAdder = FlexibleAdder(1, 0)
 
-    def test_enable_disable_functionality(self):
+        with patch("builtins.print") as mock_print:
+            with pytest.raises(TypeError):
+                adder.add_numbers(5, "10")
+
+            mock_print.assert_called()
+            warning: str = mock_print.call_args[0][0]
+            assert "Warning in add_numbers" in warning
+            assert "y must be of type int" in warning
+
+    def test_enable_disable_functionality(self) -> None:
         """Test that type checking can be disabled."""
-        # create a class with type checking disabled
+
         class DisabledAdder(metaclass=ConfigurableTypeChecker):
-            __type_check_config__ = {'enabled': False}
-            
+            __type_check_config__ = {"enabled": False}
+
             def __init__(self, a: int, b: int) -> None:
                 self.a = a
                 self.b = b
-                
+
             def add_numbers(self, x: int, y: int) -> int:
-                return str(x) + str(y)  # Convert to string to avoid type issues
-        
-        # should work without any type checking
-        adder = DisabledAdder("not_int", 1.5)
-        result = adder.add_numbers("5", [10])
-        # this would normally cause issues but should work when disabled
-        self.assertEqual(result, "5[10]")  # string concatenation
+                return str(x) + str(y)
 
-
-if __name__ == '__main__':
-    unittest.main()
+        adder: DisabledAdder = DisabledAdder("not_int", 1.5)
+        result: str = adder.add_numbers("5", [10])
+        assert result == "5[10]"
