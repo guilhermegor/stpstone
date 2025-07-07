@@ -9,7 +9,7 @@ test_cov:
 	poetry run pytest --cov=stpstone tests/unit/ -v
 	poetry run coverage report -m
 
-test_feature:
+test_feat:
 	bash cli/test_feature.sh $(MODULE)
 
 
