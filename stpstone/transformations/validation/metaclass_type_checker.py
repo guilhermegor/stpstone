@@ -10,6 +10,7 @@ from typing import (
     Any,
     BinaryIO,
     Callable,
+    Literal,
     Protocol,
     Union,
     get_args,
@@ -52,6 +53,16 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
     """Validate that a value matches the expected type."""
     origin = get_origin(expected_type)
     
+    # handle Literal types
+    if origin is Literal:
+        args = get_args(expected_type)
+        if value not in args:
+            allowed_values = ", ".join(repr(arg) for arg in args)
+            raise TypeError(
+                f"{param_name} must be one of: {allowed_values}, got {repr(value)}"
+            )
+        return
+
     # handle Union types (including Optional)
     if origin is Union:
         args = get_args(expected_type)

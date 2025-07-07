@@ -22,32 +22,32 @@ class MarkowitzEff(metaclass=TypeChecker):
     """
 
     def __init__(
-            self, 
-            df_mktdata: pd.DataFrame, 
-            int_n_portfolios: int, 
-            float_prtf_notional: float,
-            float_rf: float, 
-            col_ticker: str = 'ticker', 
-            col_close: str = 'close', 
-            col_dt: datetime = 'dt_date',
-            col_returns: str = 'daily_return', 
-            col_last_close: str = 'last_close', 
-            col_min_w: str = 'min_w',
-            col_max_date: str = 'max_date', 
-            bl_constraints: bool = True, 
-            bl_opt_possb_comb: bool = False,
-            bl_progress_printing_opt: bool = False, 
-            nth_try: int = 100, 
-            n_attempts_opt_prf: int = 10000,
-            int_wdy:int=252, int_round_close: int = 2, 
-            path_fig: Optional[str] = None,
-            bl_debug_mode: bool = True, 
-            bl_show_plot: bool = True, 
-            bl_non_zero_w_eff: bool = False,
-            title_text: str = 'Markowitz Risk x Return Portfolios',
-            yaxis_title: str = 'Return (%)', 
-            xaxis_title: str = 'Risk (%)'
-        ) -> None:
+        self, 
+        df_mktdata: pd.DataFrame, 
+        int_n_portfolios: int, 
+        float_prtf_notional: float,
+        float_rf: float, 
+        col_ticker: str = 'ticker', 
+        col_close: str = 'close', 
+        col_dt: datetime = 'dt_date',
+        col_returns: str = 'daily_return', 
+        col_last_close: str = 'last_close', 
+        col_min_w: str = 'min_w',
+        col_max_date: str = 'max_date', 
+        bl_constraints: bool = True, 
+        bl_opt_possb_comb: bool = False,
+        bl_progress_printing_opt: bool = False, 
+        nth_try: int = 100, 
+        n_attempts_opt_prf: int = 10000,
+        int_wdy:int=252, int_round_close: int = 2, 
+        path_fig: Optional[str] = None,
+        bl_debug_mode: bool = True, 
+        bl_show_plot: bool = True, 
+        bl_non_zero_w_eff: bool = False,
+        title_text: str = 'Markowitz Risk x Return Portfolios',
+        yaxis_title: str = 'Return (%)', 
+        xaxis_title: str = 'Risk (%)'
+    ) -> None:
         """Initialize the MarkowitzEff class with market data and portfolio parameters.
 
         Parameters
@@ -186,13 +186,13 @@ class MarkowitzEff(metaclass=TypeChecker):
         return np.sqrt(np.dot(array_weights.T, np.dot(array_cov, array_weights)))
 
     def returns_min_w_uids(
-            self, 
-            df_assets: pd.DataFrame, 
-            col_dt: str, 
-            col_id: str, 
-            col_returns: str, 
-            col_min_w: str
-        ) -> tuple[np.ndarray, np.ndarray, list[str]]:
+        self, 
+        df_assets: pd.DataFrame, 
+        col_dt: str, 
+        col_id: str, 
+        col_returns: str, 
+        col_min_w: str
+    ) -> tuple[np.ndarray, np.ndarray, list[str]]:
         """Minimum weights per uids."""
         # filter where returns are not nulls
         df_assets = df_assets[~df_assets[col_returns].isna()]
@@ -218,18 +218,18 @@ class MarkowitzEff(metaclass=TypeChecker):
         return array_returns, array_min_w, list_uids
 
     def random_weights(
-            self, 
-            int_n_assets: int, 
-            bl_constraints: bool = False, 
-            bl_opt_possb_comb: bool = False, 
-            array_min_w: np.array = None, 
-            nth_try: int = 100, 
-            int_idx_val: int = 2, 
-            bl_valid_weights: bool = False, 
-            i_attempts: int = 0, 
-            float_atol_sum: float = 1e-4, 
-            float_atol_w: float = 10000.0
-        ) -> np.array:
+        self, 
+        int_n_assets: int, 
+        bl_constraints: bool = False, 
+        bl_opt_possb_comb: bool = False, 
+        array_min_w: np.array = None, 
+        nth_try: int = 100, 
+        int_idx_val: int = 2, 
+        bl_valid_weights: bool = False, 
+        i_attempts: int = 0, 
+        float_atol_sum: float = 1e-4, 
+        float_atol_w: float = 10000.0
+    ) -> np.array:
         """Generate random weights for a portfolio."""
         # adjusting number of assets within the portfolio
         int_idx_val = min(len(array_min_w), int_idx_val)
@@ -348,15 +348,15 @@ class MarkowitzEff(metaclass=TypeChecker):
             return k / sum(k)
 
     def random_portfolio(
-            self, 
-            array_returns: np.ndarray, 
-            float_rf: float, 
-            bl_constraints: bool = False, 
-            bl_opt_possb_comb: bool = False, 
-            array_min_w: Optional[np.ndarray] = None,
-            nth_try: int = 100, 
-            int_wdy: int = 252
-        ) -> tuple[np.ndarray, np.ndarray, np.ndarray, str]:
+        self, 
+        array_returns: np.ndarray, 
+        float_rf: float, 
+        bl_constraints: bool = False, 
+        bl_opt_possb_comb: bool = False, 
+        array_min_w: Optional[np.ndarray] = None,
+        nth_try: int = 100, 
+        int_wdy: int = 252
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, str]:
         """Generate a random portfolio with specified parameters."""
         # adjusting variables' types
         array_r = np.asmatrix(array_returns)
@@ -378,19 +378,19 @@ class MarkowitzEff(metaclass=TypeChecker):
         return array_mus, array_sigmas, array_sharpes, array_weights
 
     def random_portfolios(
-            self, 
-            df_assets: pd.DataFrame, 
-            int_n_portfolios: int, 
-            col_id: str, 
-            col_dt: str, 
-            col_returns: str,
-            col_min_w: str = 'min_w', 
-            float_rf: float = 0.0, 
-            bl_constraints: bool = False, 
-            bl_opt_possb_comb: bool = False, 
-            nth_try: int = 100, 
-            int_wdy: int = 252
-        ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[str]]:
+        self, 
+        df_assets: pd.DataFrame, 
+        int_n_portfolios: int, 
+        col_id: str, 
+        col_dt: str, 
+        col_returns: str,
+        col_min_w: str = 'min_w', 
+        float_rf: float = 0.0, 
+        bl_constraints: bool = False, 
+        bl_opt_possb_comb: bool = False, 
+        nth_try: int = 100, 
+        int_wdy: int = 252
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[str]]:
         """Generate random portfolios based on market data."""
         # arrays of retunrs and minimum weights per asset
         array_returns, array_min_w, list_uuids = \
@@ -422,12 +422,12 @@ class MarkowitzEff(metaclass=TypeChecker):
         return array_mus, array_sigmas, array_sharpes, array_weights, array_returns, list_uuids
 
     def optimal_portfolios(
-            self, 
-            array_returns: np.ndarray, 
-            n_attempts: int = 1000, 
-            bl_progress_printing_opt: bool = False, 
-            int_wdy: int = 252
-        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        self, 
+        array_returns: np.ndarray, 
+        n_attempts: int = 1000, 
+        bl_progress_printing_opt: bool = False, 
+        int_wdy: int = 252
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Calculate optimal portfolios using quadratic programming."""
         # turn on/off progress printing
         opt.solvers.options['show_progress'] = bl_progress_printing_opt
@@ -464,20 +464,20 @@ class MarkowitzEff(metaclass=TypeChecker):
         return np.asarray(wt), array_returns, array_sigmas
 
     def eff_frontier(
-            self, 
-            array_eff_risks:np.array, 
-            array_eff_returns:np.array, 
-            array_weights:np.array, 
-            array_mus:np.array, 
-            array_sigmas:np.array, 
-            float_rf:float, 
-            col_sigma:str='sigma', 
-            col_mu:str='float_mu', 
-            col_w:str='weights', 
-            col_sharpe:str='sharpe', 
-            float_atol:float=1e-2, 
-            int_pace_atol:int=5
-        ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        self, 
+        array_eff_risks:np.array, 
+        array_eff_returns:np.array, 
+        array_weights:np.array, 
+        array_mus:np.array, 
+        array_sigmas:np.array, 
+        float_rf:float, 
+        col_sigma:str='sigma', 
+        col_mu:str='float_mu', 
+        col_w:str='weights', 
+        col_sharpe:str='sharpe', 
+        float_atol:float=1e-2, 
+        int_pace_atol:int=5
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Generate the efficient frontier."""
         # setting variables
         array_eff_weights = list()
