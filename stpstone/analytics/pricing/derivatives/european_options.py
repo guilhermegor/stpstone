@@ -1,78 +1,160 @@
-# OPTION PRCING FORMULAS, FOR EUROPEAN TYPE
+"""European options pricing models."""
+
+from functools import lru_cache
+from math import pi
+from typing import Literal, Optional
 
 import numpy as np
-from math import pi
 from scipy.optimize import fsolve, minimize
-from functools import lru_cache
+
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
-from stpstone.analytics.quant.regression import  NonLinearEquations
+from stpstone.analytics.quant.regression import NonLinearEquations
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class InitialSettings:
+class InitialSettings(metaclass=TypeChecker):
+    """Initial settings for European options pricing models.
+
+    Parameters
+    ----------
+    s : float
+        spot price
+    k : float
+        strike price
+    r : float
+        risk free rate
+    t : float
+        time to maturity
+    sigma : float
+        volatility
+    q : float
+        dividend yield
+    b : float
+        risk free rate
+    opt_type : str
+        option type ('call' or 'put')
+    """
 
     def set_parameters(self, *params, opt_type='call'):
+        """Set parameters.
+        
+        Parameters
+        ----------
+        params : list
+            list of parameters
+        opt_type : str
+            option type ('call' or 'put')
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # check wheter is a call or put option, in case the type is neither of the former raise
-        #   error
         if opt_type not in ['call', 'put']:
-            raise Exception('Option ought be a call or a put')
-        # initial parameters
-        list_params = [param[0] if isinstance(param, list) == True else param for
+            raise Exception('Option ought be a call or a put')        
+        list_params = [param[0] if isinstance(param, list) else param for
                        param in params]
-        # return parameters
         return [float(param) for param in list_params if isinstance(param, str) == False]
 
 
 class BlackScholesMerton(InitialSettings):
-    """
-    REFERENCES: https://brilliant.org/wiki/black-scholes-merton/
+    """Black Scholes Merton Model.
+    
+    References
+    ----------
+    https://brilliant.org/wiki/black-scholes-merton/
     """
 
-    def d1(self, s, k, b, t, sigma, q):
+    def d1(self, s: float, k: float, b: float, t: float, sigma: float, q: float) -> float:
+        """d1 is the probability for the option to be in the money (d1 > 0).
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        b : float
+            cost of carry
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        
+        Returns
+        -------
+        float
+            d1 probability
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: D1 OF UNDERLYING OPTION
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), B (COST OF CARRY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET) AND Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, b, t, sigma, q = self.set_parameters(s, k, b, t, sigma, q)
-        # return d1 probability
         return (np.log(s / k) + (b + sigma ** 2 / 2) * t) / (sigma * np.sqrt(t))
 
-    def d2(self, s, k, b, t, sigma, q):
+    def d2(self, s: float, k: float, b: float, t: float, sigma: float, q: float) -> float:
+        """d2 is the probability for the option to be in the money (d2 > 0).
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        b : float
+            cost of carry
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        
+        Returns
+        -------
+        float
+            d2 probability
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: D2 OF UNDERLYING OPTION (MONEYNESS)
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), B (COST OF CARRY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET) AND Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, b, t, sigma, q = self.set_parameters(s, k, b, t, sigma, q)
-        # return d2 probability
         return self.d1(s, k, b, t, sigma, q) - sigma * np.sqrt(t)
 
-    def general_opt_price(self, s, k, r, t, sigma, q, b, opt_type):
+    def general_opt_price(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """General option price function for European options.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+            option price
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: CALL/PUT PRICE OF AN UNDERLYING ASSET
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE),
-            T (TIME TO MATURITY), SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD),
-            B (COST OF CARRY - R FOR STOCK OPTION, R - Q FOR STOCK
-            OPTION WITH CONTINUOUS DIVIDEND YIELD, 0 FOR FUTURES, 0 AND R 0 FOR MARGINED FUTURES
-            OPTIONS, AND R - RF FOR CURRENCY OPTION MODEL) AND OPTION STYLE (CALL/PUT)
-        OUTPUTS: CALL PRICE
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return option price
         if opt_type == 'call':
             return s * np.exp((b - r) * t) * \
                 NormalDistribution().cdf(self.d1(s, k, b, t, sigma, q)) \
@@ -85,27 +167,56 @@ class BlackScholesMerton(InitialSettings):
 
 
 class Greeks(BlackScholesMerton):
-    """
-    REFERENCES: https://www.macroption.com/option-greeks-excel/, https://en.wikipedia.org/wiki/Greeks_(finance)
-    INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE),
-        SIGMA (VOLATILITY OF UNDERLYING ASSET) AND Q (DIVIDEND YIELD)
+    """Greeks for European Options using the Black-Scholes-Merton model.
+
+    References
+    ----------
+    https://www.macroption.com/option-greeks-excel/, https://en.wikipedia.org/wiki/Greeks_(finance)
     """
 
-    def delta(self, s, k, r, t, sigma, q, b, opt_type):
+    def delta(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Delta is the rate of change of the theoretical option value with respect to changes.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+            delta
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF THE THEORETICAL OPTION VALUE WITH RESPECT TO CHANGES IN THE
-            UNDERLYING ASSET'S PRICE - FIRST DERIVATIVE OF THE OPTION VALUE WITH RESPECT TO THE
-            UNDERLYING INSTRUMENT'S PRICE S
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY)
-            AND OPTION STYLE (CALL/PUT)
-        OUTPUTS:
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return np.exp((b - r) * t) * NormalDistribution().cdf(self.d1(
                 s, k, b, t, sigma, q))
@@ -113,34 +224,70 @@ class Greeks(BlackScholesMerton):
             return np.exp((b - r) * t) * (NormalDistribution().cdf(
                 self.d1(s, k, b, t, sigma, q)) - 1)
 
-    def future_delta_from_spot_delta(self, delta, b, t):
-        """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: IN SOME MARKETS IT IS OPTIONAL TO HEDGE WITH THE STOCK ITSELF OR, ALTERNATIVELY,
-            HEDGE WITH THE STOCK FUTURES - IN THE CASE WHERE ONE HEDGE WITH A FORWARD CONTRACT WITH
-            THE SAME EXPIRATION AS THE OPTION THE FORMULA ALSO HOLDS TRUE - THIS IS PARTICULARLY
-            USEFUL IN THE FX MARKET, WHERE TYPICALLY CAN BE CHOOSEN BETWEEN HEDGING WITH THE
-            CURRENCY SPOT OR ALTERNATIVELY A FORWARD WITH EXPIRATION MATCHING THE OPTION EXPIRATION
-        INPUTS:
-        OUTPUTS:
+    def future_delta_from_spot_delta(self, delta: float, b: float, t: float) -> float:
+        """Future delta from spot delta.
+
+        Parameters
+        ----------
+        delta : float
+            delta
+        b : float
+            risk free rate
+        t : float
+            time to maturity
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
         return delta * np.exp(-b * t)
 
-    def strike_from_delta(self, s, r, t, sigma, q, b, delta, opt_type):
+    def strike_from_delta(
+        self, 
+        s: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        delta: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Strike from delta.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+        delta : float
+            delta
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF THE THEORETICAL OPTION VALUE WITH RESPECT TO CHANGES IN THE
-            UNDERLYING ASSET'S PRICE - FIRST DERIVATIVE OF THE OPTION VALUE WITH RESPECT TO THE
-            UNDERLYING INSTRUMENT'S PRICE S
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-            AND OPTION STYLE (CALL/PUT)
-        OUTPUTS:
-        """
-        # initial parameters
         s, r, t, sigma, q, b = self.set_parameters(
             s, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return s * np.exp(-NormalDistribution().inv_cdf(delta * np.exp((r - b) * t))
                               * sigma * t ** 0.5 + (b + sigma ** 2 / 2.0) * t)
@@ -148,62 +295,145 @@ class Greeks(BlackScholesMerton):
             return s * np.exp(NormalDistribution().inv_cdf(delta * np.exp((r - b) * t))
                               * sigma * t ** 0.5 + (b + sigma ** 2 / 2.0) * t)
 
-    def gamma(self, s, k, r, t, sigma, q, b):
+    def gamma(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Gamma. 
+        
+        Rate of change of delta with respect to changes in the underlying asset's price.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+            gamma
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: DELTA SENSITIVITY TO SMALL CHANGES IN THE UNDERLYING PRICE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return NormalDistribution().pdf(self.d1(s, k, b, t, sigma, q)) * np.exp((b - r) * t) \
             / (s * sigma * t ** 0.5)
 
-    def saddle_gamma(self, k, r, sigma, q, b):
+    def saddle_gamma(self, k: float, r: float, sigma: float, q: float, b: float) -> float:
+        """Saddle point for gamma, where gamma is zero.
+
+        Parameters
+        ----------
+        k : float
+            strike price
+        r : float
+            risk free rate
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: CRITICAL POINT OF GAMMA - LOWER BOUNDARY
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         k, r, sigma, q, b = self.set_parameters(k, r, sigma, q, b)
-        # return greek
         return np.sqrt((np.exp(1) / pi) * ((2 * b - r) / sigma ** 2 + 1)) / k
 
-    def gamma_p(self, s, k, r, t, sigma, q, b):
+    def gamma_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Gamma percentage.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: PERCENTAGE CHAGENS IN DELTA FOR PERCENTAGE CHANGES IN THE UNDERLYING (GAMMA
-            PERCENT)
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return NormalDistribution().pdf(self.d1(s, k, b, t, sigma, q)) * np.exp((b - r) * t) \
             / (100.0 * sigma * t ** 0.5)
 
-    def theta(self, s, k, r, t, sigma, q, b, opt_type):
+    def theta(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Theta is the rate of change of the theoretical option value with respect to time.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+            theta
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        DOCSTRING: SENSITIVITY  MEASUREMENT OF TIME  BEFORE EXPIRATION DATE (IT WILL LOSE VALUE
-            PRICED INTO THE EXTRINSIC VALUE OVER TIME) - GAUGE HOW MUCH VALUE AN OPTION LOSES ON
-            A DAILY BASIS
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), OPTION CALL OR PUT AND T
-            (NUMBER OF DAY PER YEAR, GENERALLY 365 OR 252)
-        OUTPUTS:
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return -(s * np.exp((b - r) * t) * NormalDistribution().pdf(self.d1(
                 s, k, b, t, sigma, q)) * sigma) / (2.0 * t ** 0.5) - (b - r) * s * np.exp(
@@ -219,69 +449,142 @@ class Greeks(BlackScholesMerton):
                 np.exp(-r * t) * \
                 NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
 
-    def vega(self, s, k, r, t, sigma, q, b):
+    def vega(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Vega. 
+        
+        Rate of change of the theoretical option value with respect to changes in volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: SENSITIVITY MEASUREMENT OF VOLATILITY OVER TIME
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: VEGA
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return s * np.exp((b - r) * t) * NormalDistribution().pdf(self.d1(
             s, k, b, t, sigma, q)) * np.sqrt(t)
 
-    def vega_local_maximum(self, k, t, sigma, b):
+    def vega_local_maximum(self, k: float, t: float, sigma: float, b: float) -> float:
+        """Vega local maximum.
+
+        Parameters
+        ----------
+        k : float
+            strike price
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: LOCAL MAXIMUM OF VEGA
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: VEGA
-        """
-        # initial parameters
         k, t, sigma, b = self.set_parameters(k, t, sigma, b)
-        # return greek
         return k * np.exp(-b + sigma ** 2 / 2.0) * t
 
-    def strike_maximizes_vega(self, s, t, sigma, b):
+    def strike_maximizes_vega(self, s: float, t: float, sigma: float, b: float) -> float:
+        """Strike that maximizes vega.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: STRIKE THAT MAXIMIZES VEGA, GIVEN THE ASSET PRICE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: VEGA
-        """
-        # initial parameters
         s, t, sigma, b = self.set_parameters(s, t, sigma, b)
-        # return greek
         return s * np.exp(b + sigma ** 2 / 2.0) * t
 
-    def time_to_maturity_maximum_vega(self, s, k, r, sigma, b):
+    def time_to_maturity_maximum_vega(self, s: float, k: float, r: float, sigma: float, b: float) \
+        -> float:
+        """Time to maturity that maximizes vega.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        sigma : float
+            volatility
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: TIME TO MATURITY WHEN VEGA IS THE GREATEST
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: VEGA
-        """
-        # initial parameters
         s, k, r, sigma, b = self.set_parameters(s, k, r, sigma, b)
-        # return greek
         return 2 * (1.0 + (1.0 + (8.0 * r / sigma ** 2 + 1.0) * np.log(s / k) ** 2) ** 0.5) \
             / (8.0 * r + sigma ** 2)
 
-    def vega_global_maximum(self, k, r, sigma, b):
+    def vega_global_maximum(self, k: float, r: float, sigma: float, b: float) -> dict[str, float]:
+        """Vega global maximum.
+        
+        Parameters
+        ----------
+        k : float
+            strike price
+        r : float
+            risk free rate
+        sigma : float
+            volatility
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: TIME TO MATURITY WHEN VEGA IS THE GREATEST
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: VEGA
-        """
-        # initial parameters
         k, r, sigma, b = self.set_parameters(k, r, sigma, b)
         # global maximum time for vega
         t = 1 / (2.0 * r)
@@ -289,151 +592,418 @@ class Greeks(BlackScholesMerton):
         s = k * np.exp((-b + sigma ** 2 / 2.0) * t)
         # vega at t
         vega = k / (2.0 * (r * np.exp(1) * pi) ** 0.5)
-        # return greek
         return {
             't_max_global_vega': t,
             's_max_global_vega': s,
             'vega_max_global': vega
         }
 
-    def vega_gamma_relationship(self, s, k, r, t, sigma, q, b):
+    def vega_gamma_relationship(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Vega gamma relationship.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RELATIONSHIP BETWEEN VEGA AND GAMMA - RETURNS VEGA
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return self.gamma(s, k, r, t, sigma, q, b) * sigma * s ** 2 * t
 
-    def vega_delta_relationship(self, s, k, r, t, sigma, q, b, opt_type):
-        """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RELATIONSHIP BETWEEN VEGA AND GAMMA - RETURNS VEGA
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
+    def vega_delta_relationship(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Vega delta relationship.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug"""
         s, k, r, t, sigma, q, b, opt_type = self.set_parameters(s, k, r, t, sigma, q, b,
                                                                  opt_type)
-        # return greek
         return np.exp((b - r) * t) * NormalDistribution().pdf(NormalDistribution().inv_cdf(
             np.exp((r - b) * t) * np.abs(self.delta(s, k, r, t, sigma, q, b, opt_type)))) \
             / (s * sigma * t ** 0.5)
 
-    def vega_p(self, s, k, r, t, sigma, q, b):
+    def vega_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Vega percentual change.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float    
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            risk free rate
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VEGA PERCENTUAL CHANGE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B(COST OF CARRY) AND
-            OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return sigma / 10.0 * s * np.exp((b - r) * t) * NormalDistribution().pdf(
             self.d1(s, k, b, t, sigma, q)) * t ** 0.5
 
-    def vega_elasticity(self, s, k, r, t, sigma, q, b, opt_type):
+    def vega_elasticity(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Vega elasticity is the ratio of vega to the option price, multiplied by the volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VEGA PERCENTUAL CHANGE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B(COST OF CARRY) AND
-            OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b, opt_type = self.set_parameters(s, k, r, t, sigma, q, b,
                                                                  opt_type)
-        # return greek
         return self.vega(s, k, r, t, sigma, q, b) * sigma \
             / self.general_opt_price(s, k, r, t, sigma, q, b, opt_type)
 
-    def rho(self, s, k, r, t, sigma, q, b, opt_type):
-        """
-        DOCSTRING: OPTION'S SENSITIVITY TO SMALL CHANGES IN THE RISK-FREE INTEREST RATE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), OPTION CALL OR PUT AND T
-            (NUMBER OF DAY PER YEAR, GENERALLY 365 OR 252)
-        OUTPUTS:
-        """
-        # initial parameters
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s, k, r, t, sigma, q, b, opt_type)
-        # return greek
-        if opt_type == 'call':
-            return t * k * np.exp(- r * t) * NormalDistribution().cdf(self.d2(s, k, b, t, sigma, q))
-        elif opt_type == 'put':
-            return -t * k * np.exp(- r * t) * NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
+    def rho(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Rho. 
+        
+        Rate of change of the theoretical option value with respect to changes in the risk free 
+        rate.
 
-    def lambda_greek(self, s, k, r, t, sigma, q, b, opt_type):
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        DOCSTRING:
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) OPTION CALL OR PUT
-        OUTPUTS: LAMBDA
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
+        if opt_type == 'call':
+            return t * k * np.exp(- r * t) * NormalDistribution().cdf(
+                self.d2(s, k, b, t, sigma, q))
+        elif opt_type == 'put':
+            return -t * k * np.exp(- r * t) * NormalDistribution().cdf(
+                -self.d2(s, k, b, t, sigma, q))
+
+    def lambda_greek(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Lambda.
+        
+        Rate of change of the theoretical option value with respect to changes in the dividend 
+        yield.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
+        """
+        s, k, r, t, sigma, q, b = self.set_parameters(
+            s, k, r, t, sigma, q, b, opt_type)
         return self.delta(s, k, r, t, sigma, q, opt_type) * s / \
             self.general_opt_price(s, k, r, t, sigma, q, b, opt_type)
 
-    def vanna(self, s, k, r, t, sigma, q, b, opt_type):
+    def vanna(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Vanna. 
+        
+        Rate of change of delta with respect to changes in the implied volatility (sigma), or 
+        the sensitivity of vega to changes in the underlying price (s).
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
+
+        Notes
+        -----
+        Essentially, it tells how much the option's sensitivity to price changes (delta) will be 
+        affected by changes in the market's expectation of price fluctuations (implied volatility).
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF VEGA ACCORDING TO SPOT, OR DELTA TO VOLATILITY (SIGMA)
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY)
-            AND OPTION STYLE (CALL/PUT)
-        OUTPUTS:
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         return -np.exp((b - r) * t) * self.d2(s, k, b, t, sigma, q) * NormalDistribution().pdf(
             self.d1(s, k, b, t, sigma, q)) / sigma
 
-    def vanna_vol(self, s, k, r, t, sigma, q, b, opt_type):
+    def vanna_vol(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Vanna Vol.
+         
+        Rate of change of the theoretical option value with respect to changes in the volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF VANNA ACCORDING TO VOLATILITY (SIGMA) (SECOND-ORDER PARTIAL
-            DERIVATIVE OF DELTA WITH RESPECT TO VOLATILITY)
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY)
-            AND OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         return self.vanna(s, k, r, t, sigma, q, b, opt_type) * (1.0 / sigma) \
             * (self.d1(s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)
                 - self.d1(s, k, b, t, sigma, q) / self.d2(s, k, b, t, sigma, q) - 1.0)
 
-    def charm(self, s, k, r, t, sigma, q, b, opt_type):
+    def charm(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Charm is the rate of change of delta with respect to time.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type ('call' or 'put')
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF DELTA TO TIME, ALSO KNOWN AS CHARM OR DELTA BLEED
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD) B (COST OF CARRY)
-            AND OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return -np.exp((b - r) * t) * (NormalDistribution().pdf(
                 self.d1(s, k, b, t, sigma, q)) * (b / (sigma * t ** 0.5) - self.d2(
@@ -445,346 +1015,875 @@ class Greeks(BlackScholesMerton):
                     s, k, b, t, sigma, q) / (2.0 * t)) - (b - r) * NormalDistribution().cdf(
                         -self.d1(s, k, b, t, sigma, q)))
 
-    def zomma(self, s, k, r, t, sigma, q, b):
+    def zomma(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Zomma.
+        
+        Rate of change of the theoretical option value with respect to changes in the cost 
+        of carry.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF GAMMA TO IMPLIED VOLATILITY, ALSO KNOWN AS ZOMMA
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.gamma(s, k, r, t, sigma, q, b) * (self.d1(s, k, b, t, sigma, q) * self.d2(
             s, k, b, t, sigma, q) - 1) / sigma
 
-    def zomma_p(self, s, k, r, t, sigma, q, b):
+    def zomma_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Zomma percentage. 
+        
+        Rate of change of the theoretical option value with respect to changes in the cost of 
+        carry, expressed as a percentage.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: SPEED PERCENTAGE
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.zomma(s, k, r, t, sigma, q, b) * s / 100
 
-    def speed(self, s, k, r, t, sigma, q, b):
+    def speed(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Speed. 
+        
+        Rate of change of gamma with respect to changes in the underlying asset's price.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF GAMMA TO SPOT PRICE, ALSO KNOWN AS SPEED
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return -self.gamma(s, k, r, t, sigma, q, b) * (1.0 + self.d1(s, k, b, t, sigma, q)
                                                        / (sigma * t ** 0.5)) / s
 
-    def speed_p(self, s, k, r, t, sigma, q, b):
+    def speed_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Speed percentage 
+        
+        Rate of change of gamma with respect to changes in the underlying asset's price, 
+        expressed as a percentage.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: SPEED PERCENTAGE
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.speed(s, k, r, t, sigma, q, b) * s / 100
 
-    def color(self, s, k, r, t, sigma, q, b):
+    def color(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Color is the rate of change of gamma with respect to changes in the cost of carry.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF GAMMA TO TIME, ALSO KNOWN AS COLOR
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return -self.gamma(s, k, r, t, sigma, q, b) * (r - b + b * self.d1(
             s, k, b, t, sigma, q) / (sigma * t ** 0.5) + (1.0 - self.d1(
                 s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
 
-    def color_p(self, s, k, r, t, sigma, q, b):
+    def color_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """"Color percentage.
+         
+        Rate of change of gamma with respect to changes in the cost of carry, expressed as a 
+        percentage.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF GAMMA TO TIME, ALSO KNOWN AS COLOR
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return -self.gamma_p(s, k, r, t, sigma, q, b) \
             * (r - b + b * self.d1(s, k, b, t, sigma, q)
                / (sigma * t ** 0.5) + (1.0 - self.d1(s, k, b, t, sigma, q)
                                        * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
 
-    def vomma(self, s, k, r, t, sigma, q, b):
+    def vomma(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Vomma is the rate of change of vega with respect to changes in volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VEGA PERCENTUAL CONVEXITY, OR THE SENSITIVITY OF CHANGES IN IMPLIED VOLATILITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.vega(s, k, r, t, sigma, q, b) * self.d1(s, k, b, t, sigma, q) \
             * self.d2(s, k, b, t, sigma, q) / sigma
 
-    def vomma_p(self, s, k, r, t, sigma, q, b):
+    def vomma_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Vomma percentage. 
+        
+        Rate of change of vega with respect to changes in volatility, expressed as a percentage.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VEGA CONVEXITY, OR THE SENSITIVITY OF CHANGES IN IMPLIED VOLATILITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.vega_p(s, k, r, t, sigma, q, b) * self.d1(s, k, b, t, sigma, q) \
             * self.d2(s, k, b, t, sigma, q) / sigma
 
-    def vomma_positive_outside_interval(self, s_k, r, t, sigma, q, b, bl_spot=True):
+    def vomma_positive_outside_interval(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        bl_spot: bool = True
+    ) -> dict[str, float]:
+        """Vomma positive outside interval.
+
+        Parameters
+        ----------
+        s_k : float
+            spot or strike value
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        bl_spot : bool, optional
+            spot or strike value, by default True
+
+        Returns
+        -------
+        dict
+            lower boundary and upper boundary
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: INTERVAL BEYOND WHICH VOMMA BEGINS TO REGISTER POSITIVE VALUES -->
-            INTERVAL TO SPOT OR STRIKE VALUES
-        INPUTS: S (SPOT PRICE) OR K (STRIKE) (S_K), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            GAMMA (OR GAMMA_P)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
         # sign of cost of carry, according to s_k being a spot or strike value
-        if bl_spot == True:
+        if bl_spot:
             sign_ = 1
+            s_k = s
         else:
             sign_ = -1
+            s_k = k
         # return vomma 0 boundaries
         return {
             'lower_boundary': s_k * np.exp((sign_ * b - sigma ** 2 / 2.0) * t),
             'upper_boundary': s_k * np.exp((sign_ * b + sigma ** 2 / 2.0) * t)
         }
 
-    def ultima(self, s, k, r, t, sigma, q, b):
+    def ultima(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
+        -> float:
+        """Ultima is the rate of change of vomma with respect to changes in volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VOMMA'S SENSITIVITY TO A CHANGE IN VOLATITLITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.vomma(s, k, r, t, sigma, q, b) / sigma \
             * (self.d1(s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)
                - self.d1(s, k, b, t, sigma, q) / self.d2(s, k, b, t, sigma, q)
                 - self.d2(s, k, b, t, sigma, q) / self.d1(s, k, b, t, sigma, q) - 1.0)
 
-    def d_vega_d_time(self, s, k, r, t, sigma, q, b):
+    def d_vega_d_time(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Delta vega with respect to time.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VEGA'S SENSITIVITY TO A CHANGE IN TIME
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.vega(s, k, r, t, sigma, q, b) * (r - b + b * self.d1(
             s, k, b, t, sigma, q) / (sigma * t ** 0.5) - (1.0 + self.d1(
                 s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
 
-    def variance_vega(self, s, k, r, t, sigma, q, b):
+    def variance_vega(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Variance vega. 
+        
+        Rate of change of the theoretical option value with respect to changes in the variance 
+        of the underlying asset.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: BSM'S FORMULA SENSITIVITY TO A SMALL CHANGE IN THE VARIANCE OF THE UNDERLYING
-            ASSET'S INSTANTENEOUS RATE OF RETURN
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return self.vega(s, k, r, t, sigma, q, b) / (2 * sigma)
 
-    def variance_vanna(self, s, k, r, t, sigma, q, b):
+    def variance_vanna(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Variance vann. 
+        
+        Rate of change of the theoretical option value with respect to changes in the variance 
+        of the underlying asset.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: CHANGE IN DELTA FOR A CHANGE IN THE VARIANCE
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return - s * np.exp((b - r) * t) * self.pdf(self.d1(s, k, b, t, sigma, q)) * self.d2(
             s, k, b, t, sigma, q) / (2.0 * sigma)
 
-    def variance_vomma(self, s, k, r, t, sigma, q, b):
+    def variance_vomma(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Variance vomma. 
+        
+        Rate of change of vega with respect to changes in the implied volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VARIANCE VEGA'S SENSITIVITY TO A SMALL CHANGE IN THE VARIANCE
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return s * np.exp((b - r) * t) * t ** 0.5 / (4.0 * sigma ** 3) * self.pdf(self.d1(
             s, k, b, t, sigma, q)) * (self.d1(s, k, b, t, sigma, q) * self.d2(
                 s, k, b, t, sigma, q) - 1.0)
 
-    def variance_ultima(self, s, k, r, t, sigma, q, b):
+    def variance_ultima(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Variance ultima. 
+        
+        Rate of change of vomma with respect to changes in the implied volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: VARIANCE ULTIMA IS THE THIRD DERIVATIVE OF BSM'S MODEL WITH RESPECT TO VARIANCE
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return s * np.exp((b - r) * t) * t ** 0.5 / (8 * sigma ** 5) * self.pdf(self.d1(
             s, k, b, t, sigma, q)) * ((self.d1(s, k, b, t, sigma, q) * self.d2(
                 s, k, b, t, sigma, q) - 1.0) * (self.d1(s, k, b, t, sigma, q) * self.d2(
                     s, k, b, t, sigma, q) - 3.0) - (self.d1(s, k, b, t, sigma, q) ** 2 + self.d2(
                         s, k, b, t, sigma, q) ** 2))
 
-    def dbsm_dohm(self, s, k, r, t, sigma, q, b):
+    def dbsm_dohm(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Rate of change of BSM's model regarding OHM (standard deviation - time).
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RATE OF CHANGE OF BSM'S MODEL REGARDING OHM (STANDARD DEVIATION - TIME)
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return s * NormalDistribution().pdf((np.log(s / k) + t * sigma ** 2 / 2.0)
                                             / (sigma * t ** 0.5))
 
-    def driftless_theta(self, s, k, r, t, sigma, q, b):
+    def driftless_theta(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Driftless theta. 
+        
+        Expected change in the option price over time, assuming no drift in the underlying 
+        asset's price.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: TIME DECAY WITHOUT TAKING INTO ACCOUNT THE DRIFT OF THE UNDERLYING OR DISCOUNTING
-            - THE DRIFTLESS THETA THEREBY ISOLATES THE EFFECT TIME DECAY HAS ON UNCERTAINTY,
-            ASSUMING CONSTANT VOLATILITY - UNCERTAINTY AFFECTS THE OPTION THROUGH BOTH TIME AND
-            VOLATILITY, SINCE THE LATTER IS A MEASURE OF UNCERTAINTY DURING AN INFINITESIMAL TIME
-            PERIOD
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b)
-        # return greek
         return -s * NormalDistribution().pdf(self.d1(s, k, b, t, sigma, q)) * sigma / (
             2.0 * t ** 0.5)
 
-    def theta_vega_relationship(self, s, k, r, t, sigma, q, b):
+    def theta_vega_relationship(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Theta-vega relationship. 
+        
+        Relationship between theta and vega, which indicates how much the option's price will 
+        change with respect to changes in implied volatility.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RELATIONSHIP BETWEEN THETA AND VEGA - RETURNS THETA
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return -self.gamma(s, k, r, t, sigma, q, b) * sigma / (2.0 * t)
 
-    def bleed_offset_volatility(self, s, k, r, t, sigma, q, b):
+    def bleed_offset_volatility(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Bleed offset volatility. 
+        
+        This is the amount of volatility that must increase to offset the theta-bleed/time decay.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
+        
+        Notes
+        -----
+        In the case of positive theta, one can actually have negative offset volatility.
+        Deep in-the-money (DITM) European options can have positive theta, and in this case 
+        the offset volatility will be negative.
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: IT MEASURES HOW MUCH THE VOLATILITY MUST INCREASE TO OFFSET THE THETA-BLEED/TIME
-            DECAY - IN THE CASE OF POSITIVE THETA, ONE CAN ACTUALLY HAVE NEGATIVA OFFSET VOLATILITY
-            - DITM EUROPEAN OPTIONS CAN HAVE POSITIVE THETA, AND IN THIS CASE THE OFFSET VOLATILITY
-            WILL BE NEGATIVE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return self.theta(s, k, r, t, sigma, q, b) / self.vega(s, k, r, t, sigma, q, b)
 
-    def theta_gamma_relationship_driftless(self, s, k, r, t, sigma, q, b):
+    def theta_gamma_relationship_driftless(
+        self, s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float
+    ) -> float:
+        """Theta-gamma relationship. 
+        
+        Relationship between theta and gamma, which indicates how much the option's price will 
+        change with respect to changes in implied volatility.
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RELATIONSHIP BETWEEN DRIFTLESS GAMMA AND THETA - RETURNS DRIFTLESS THETA
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(s, k, r, t, sigma, q, b)
-        # return greek
         return -2.0 * self.driftless_theta(s, k, r, t, sigma, q, b) / (
             s ** 2 * sigma ** 2)
 
-    def phi(self, s, k, r, t, sigma, q, b, opt_type):
+    def phi(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Phi. 
+        
+        The sensitivity of the option price to a change in the dividend yield (or foreign interest 
+        rate in the case of a currency option).
+
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: OPTION SENSITIVITY TO A CHANGE IN THE DIVIDEND YIELD (PHI, ALSO KNOWN AS RHO-2),
-            OR THE FOREIGN INTEREST RATE IN THE CASE OF A CURRENCY OPTION
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return -t * s * np.exp((b - r) * t) * NormalDistribution().cdf(self.d1(
                 s, k, b, t, sigma, q))
@@ -792,18 +1891,50 @@ class Greeks(BlackScholesMerton):
             return t * s * np.exp((b - r) * t) * NormalDistribution().cdf(-self.d1(
                 s, k, b, t, sigma, q))
 
-    def carry_rho(self, s, k, r, t, sigma, q, b, opt_type):
+    def carry_rho(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Carry rho. 
+        
+        The sensitivity of the option price to a change in the cost-of-carry rate.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: OPTION'S SENSITIVITY TO A SMALL CHANGE IN THE COST-OF-CARRY RATE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return t * s * np.exp((b - r) * t) * NormalDistribution().cdf(self.d1(
                 s, k, b, t, sigma, q))
@@ -811,36 +1942,98 @@ class Greeks(BlackScholesMerton):
             return -t * s * np.exp((b - r) * t) * NormalDistribution().cdf(-self.d1(
                 s, k, b, t, sigma, q))
 
-    def risk_neutral_prob_itm(self, s, k, r, t, sigma, q, b, opt_type):
+    def risk_neutral_prob_itm(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Risk-neutral probability for ending up ITM at maturity.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: RISK-NEUTRAL PROBABILITY FOR ENDING UP ITM AT MATURITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return NormalDistribution().cdf(self.d2(s, k, b, t, sigma, q))
         elif opt_type == 'put':
             return NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
 
-    def strike_given_risk_neutral_prob(self, s, k, r, t, sigma, q, b, p, opt_type):
+    def strike_given_risk_neutral_prob(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        p: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Strike price given a risk-neutral probability.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        p : float
+            risk-neutral probability
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING:
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD), B (COST OF CARRY),
-            P (RISK-NEUTRAL PROBABILITY) AND opt_type (OPTION STYLE)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b, p = self.set_parameters(
             s, k, r, t, sigma, q, b, p, opt_type)
-        # return greek
         if opt_type == 'call':
             return s * np.exp(-NormalDistribution().inv_cdf(p) * sigma * t ** 0.5
                               + (b - sigma ** 2 / 2.0) * t)
@@ -848,18 +2041,48 @@ class Greeks(BlackScholesMerton):
             return s * np.exp(NormalDistribution().inv_cdf(p) * sigma * t ** 0.5
                               + (b - sigma ** 2 / 2.0) * t)
 
-    def d_zeta_d_vol(self, s, k, r, t, sigma, q, b, opt_type):
+    def d_zeta_d_vol(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Zeta's sensitivity to a small change in the implied volatility.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: ZETA'S SENSITIVITY TO A SMALL CHANGE IN THE IMPLIED VOLATILITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return -NormalDistribution().pdf(self.d2(s, k, b, t, sigma, q)) * self.d1(
                 s, k, b, t, sigma, q) / sigma
@@ -867,18 +2090,48 @@ class Greeks(BlackScholesMerton):
             return NormalDistribution().pdf(self.d2(s, k, b, t, sigma, q)) * self.d1(
                 s, k, b, t, sigma, q) / sigma
 
-    def d_zeta_d_time(self, s, k, r, t, sigma, q, b, opt_type):
+    def d_zeta_d_time(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Zeta's sensitivity to a small change in time.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: THE ITM RISK-NEUTRAL PROBABILITY'S SENSITIVITY TO MOVING CLOSER TO MATURITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         if opt_type == 'call':
             return self.pdf(self.d2(s, k, b, t, sigma, q)) * (b / (sigma * t ** 0.5) - self.d1(
                 s, k, b, t, sigma, q) / (2.0 * t))
@@ -886,30 +2139,93 @@ class Greeks(BlackScholesMerton):
             return -self.pdf(self.d2(s, k, b, t, sigma, q)) * (b / (sigma * t ** 0.5) - self.d1(
                 s, k, b, t, sigma, q) / (2.0 * t))
 
-    def risk_neutral_probability_density(self, s, k, r, t, sigma, q, b, opt_type):
+    def risk_neutral_probability_density(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Risk-neutral probability density function for the option price.
+        
+        Second order BSM's formula regarding strike.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: SECOND ORDER BSM'S FORMULA REGARDING STRIKE
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # return greek
         return NormalDistribution().pdf(self.d2(s, k, b, t, sigma, q)) * np.exp(-r * t) / (
             k * sigma * t ** 0.5)
 
-    def probability_ever_getting_itm(self, s, k, r, t, sigma, q, b, opt_type):
+    def probability_ever_getting_itm(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Probability of ever getting ITM at maturity.
+        
+        Parameters
+        ----------
+        s : float
+            spot price
+        k : float
+            strike price
+        r : float
+            risk free rate
+        t : float
+            time to maturity
+        sigma : float
+            volatility
+        q : float
+            dividend yield
+        b : float
+            cost of carry
+        opt_type : str
+            option type (call or put)
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG
-        DOCSTRING: THE ITM RISK-NEUTRAL PROBABILITY'S SENSITIVITY TO MOVING CLOSER TO MATURITY
-        INPUTS: S (SPOT PRICE), K (STRIKE), R (INTEREST RATE), T (TIME TO MATURITY),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), Q (DIVIDEND YIELD)
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
         # defining greek parameters
@@ -926,38 +2242,87 @@ class Greeks(BlackScholesMerton):
                 + (k / s) ** (mu - lambda_) * NormalDistribution().cdf(
                 z - 2 * lambda_ * sigma * t ** 0.5)
 
-    def net_weighted_vega_exposure(self, psi_r, *dicts_opts):
+    def net_weighted_vega_exposure(self, psi_r: float, *dicts_opts: list[dict[str, float]]) \
+        -> float:
+        """Net weighted vega exposure. 
+        
+        The sum of the vega exposures of all options, weighted by their respective volatilities 
+        and correlations with the reference volatility.
+        
+        Parameters
+        ----------
+        psi_r : float
+            volatility of reference volatility
+        dicts_opts : tuple of dicts
+            dictionaries containing the following keys:
+            - 'q_vega': number of contracts with vega
+            - 'vega_t': vega at time t
+            - 'psi_t': volatility of volatility for the given set of options with same underlying
+              and maturity
+            - 'corr_t': correlation between the volatility with time to maturity t and the 
+            reference volatility
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        REFERENCES: THE COMPLETE GUIDE TO OPTION PRICING FORMULAS - ESPEN GAARDER HAUG - PG 119
-        DOCSTRING: NET WEIGHTED VEGA EXPOSURE
-        INPUTS: PSI_R (VOLATILITY OF REFERENCE VOLATILITY), DICTIONARIES (KEYS -
-            NUMBER OF CONTRACTS WITH VEGA I, T (q_vega), VEGA I, T (vega_t), PSI T (VOLATILITY OF
-            VOLATILITY FOR THE GIVEN SET OF OPTIONS WITH SAME UNDERLYING AND MATURITY) (psi_t),
-            CORRELATION BETWEEN THE VOLATILITY WITH TIME TO MATURITY T AND THE REFERENCE VOLATILITY
-            (corr_t))
-        OUTPUTS: FLOAT (VEGA)
-        """
-        # initial parameters
         psi_r = self.set_parameters(psi_r)
-        # return greek
         return [float(dict_['q_vega']) * float(dict_['vega_t']) * float(dict_['psi_t'])
                 * float(dict_['corr_t']) / float(psi_r) for dict_ in dicts_opts].sum()
 
 
 class IterativeMethods(Greeks):
+    """Iterative methods for European options."""
 
-    def binomial_pricing_model(self, s, k, r, t, n, u, d, opt_type, h_upper=None, h_lower=None):
+    def binomial_pricing_model(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        n: int, 
+        u: float, 
+        d: float, 
+        opt_type: Literal["call", "put"], 
+        h_upper: Optional[float] = None, 
+        h_lower: Optional[float] = None
+    ) -> float:
+        """Binomial pricing model for European options.
+
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.  
+        n : int
+            Number of time steps.
+        u : float
+            Up-factor in binomial models.
+        d : float
+            Down-factor in binomial models.
+        opt_style : str
+            Option style, either 'call' or 'put'.
+        h_upper : float, optional
+        h_lower : float, optional
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        https://www.youtube.com/watch?v=a3906k9C0fM,
+        https://www.youtube.com/watch?v=WxrRi9lNnqY
         """
-        REFERENCES:
-            https://www.youtube.com/watch?v=a3906k9C0fM,
-            https://www.youtube.com/watch?v=WxrRi9lNnqY,
-        DOCSTRING: BINOMIAL ASSET PRICING MODEL - UPPER/LOWER BARRIERS FEATURES IMPLEMENTED
-        INPUTS: S0 (INITIAL STOCK PRICING MODEL), K (STRIKE PRICE), T (TIME TO MATURITY IN YEARS),
-            R (ANNUAL RISK-FREE RATE), N (NODES), U (UP-FACTOR IN BINOMIAL MODELS), D (DOWN-FACTOR
-            - TO ENSURE RECOMBINING TREE USE 1/U), OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT FROM ARRAY_CP[0] (CALL-PUT PRICING FOR EACH NODE)
-        """
-        # initial parameters
         s, k, r, t, n, u, d = self.set_parameters(
             s, k, r, t, n, u, d, opt_type)
         # precomute constants
@@ -984,17 +2349,48 @@ class IterativeMethods(Greeks):
         # returning the no-arbitrage price at node 0
         return array_cp[0]
 
-    def crr_method(self, s, k, r, t, n, sigma, opt_type):
+    def crr_method(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        n: int, 
+        sigma: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Cox, Ross and Rubinstein (CRR) method for European options.
+        
+        The CRR method is a binomial tree model that uses the Cox-Ross-Rubinstein parameters
+        for the up and down factors, which are derived from the volatility of the underlying asset.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        n : int
+            Number of time steps.
+        sigma : float
+            Volatility of the underlying asset.
+        opt_style : str
+            Option style, either 'call' or 'put'.
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        https://www.youtube.com/watch?v=nWslah9tHLk,
+        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
+        parameters/
         """
-        REFERENCES:
-            https://www.youtube.com/watch?v=nWslah9tHLk,
-            https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
-        DOCSTRING: COX, ROSS AND RUBINSTEIN (CRR) METHOD
-        INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
         # precomute constants
@@ -1024,17 +2420,48 @@ class IterativeMethods(Greeks):
         # returning the no-arbitrage price at node 0
         return array_cp[0]
 
-    def jr_method(self, s, k, r, t, n, sigma, opt_type):
+    def jr_method(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        n: int, 
+        sigma: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Jarrow and Rudd (JR) method for European options.
+        
+        The JR method is a binomial tree model that uses the Jarrow-Rudd parameters
+        for the up and down factors, which are derived from the volatility of the underlying asset.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        n : int
+            Number of time steps.
+        sigma : float
+            Volatility of the underlying asset.
+        opt_style : str
+            Option style, either 'call' or 'put'.
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        https://www.youtube.com/watch?v=nWslah9tHLk,
+        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
+        parameters/
         """
-        REFERENCES:
-            https://www.youtube.com/watch?v=nWslah9tHLk,
-            https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
-        DOCSTRING: JARROW AND RUDD (JR) METHOD
-        INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
         # precomute constants
@@ -1065,17 +2492,48 @@ class IterativeMethods(Greeks):
         # returning the no-arbitrage price at node 0
         return array_cp[0]
 
-    def eqp_method(self, s, k, r, t, n, sigma, opt_type):
+    def eqp_method(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        n: int, 
+        sigma: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Equal probabilities (EQP) method for European options.
+        
+        The EQP method is a binomial tree model that uses equal probabilities for the up and down
+        factors, which are derived from the volatility of the underlying asset.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        n : int
+            Number of time steps.
+        sigma : float
+            Volatility of the underlying asset.
+        opt_style : str
+            Option style, either 'call' or 'put'.
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        https://www.youtube.com/watch?v=nWslah9tHLk,
+        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
+        parameters/
         """
-        REFERENCES:
-            https://www.youtube.com/watch?v=nWslah9tHLk,
-            https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
-        DOCSTRING: EQUAL PROBABILITIES (EQP) METHOD
-        INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
         # precomute constants
@@ -1109,17 +2567,48 @@ class IterativeMethods(Greeks):
         # returning the no-arbitrage price at node 0
         return array_cp[0]
 
-    def trg_method(self, s, k, r, t, n, sigma, opt_type):
+    def trg_method(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        n: int, 
+        sigma: float, 
+        opt_type: Literal["call", "put"]
+    ) -> float:
+        """Trigeorgis (TRG) method for European options.
+        
+        The TRG method is a binomial tree model that uses the Trigeorgis parameters
+        for the up and down factors, which are derived from the volatility of the underlying asset.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        n : int
+            Number of time steps.
+        sigma : float
+            Volatility of the underlying asset.
+        opt_style : str
+            Option style, either 'call' or 'put'.
+
+        Returns
+        -------
+        float
+        
+        References
+        ----------
+        https://www.youtube.com/watch?v=nWslah9tHLk,
+        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
+        parameters/
         """
-        REFERENCES:
-            https://www.youtube.com/watch?v=nWslah9tHLk,
-            https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-parameters/
-        DOCSTRING: TRIGEORGIS (TRG) METHOD
-        INPUTS: SPOT (S), STRIKE (K), RISK-FREE RATE (R), T (TIME TO MATURITY IN YEARS), N (NODES),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION STYLE (CALL/PUT)
-        OUTPUTS: FLOAT
-        """
-        # initial parameters
         s, k, r, t, n, sigma = self.set_parameters(
             s, k, r, t, n, sigma, opt_type)
         # precomute constants
@@ -1153,20 +2642,90 @@ class IterativeMethods(Greeks):
 
 
 class EuropeanOptions(IterativeMethods):
+    """European options pricing and volatility estimation.
+    
+    This class provides methods for pricing European options, including the Black-Scholes model,
+    the Trigeorgis method, and the binomial tree model. It also includes methods for estimating
+    the implied volatility of European options using various methods, such as the Newton-Raphson
+    method, the bisection method, and the fsolve method.
+    """
 
     @lru_cache()
-    def implied_volatility(self, s, k, r, t, sigma, q, b, cp0, opt_type,
-                           method='fsolve',
-                           tolerance=1E-3, epsilon=1, max_iter=1000, orig_vol=0.5,
-                           list_bounds=[(0, 2)]):
+    def implied_volatility(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        q: float, 
+        b: float, 
+        cp0: float, 
+        opt_type: Literal["call", "put"], 
+        method: Literal["newton_raphson", "bisection", "fsolve", "scipy_optimize_minimize", 
+                        "differential_evolution"] = "fsolve", 
+        tolerance: float = 1E-3, 
+        epsilon: float = 1, 
+        max_iter: int = 1000, 
+        orig_vol: float = 0.5, 
+        list_bounds: list[tuple[float, float]] = [(0, 2)]
+    ) -> tuple[float, bool]:
+        """Calculates the implied volatility of a European option using various methods.
+        
+        Parameters
+        ----------
+        s : float
+            Spot price of the underlying asset.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        sigma : float
+            Volatility of the underlying asset.
+        q : float
+            Dividend yield.
+        b : float
+            Cost of carry.
+        cp0 : float
+            Current price of the option.
+        opt_type : str
+            Option type, either 'call' or 'put'.
+        method : str, optional
+            Method to use for calculating the implied volatility, by default 'fsolve'.
+            - 'newton_raphson': Newton-Raphson method.
+            - 'bisection': Bisection method.
+            - 'fsolve': fsolve method.
+            - 'scipy_optimize_minimize': scipy.optimize.minimize method.
+            - 'differential_evolution': differential_evolution method.
+        tolerance : float, optional
+            Tolerance for the error, by default 1E-3.
+        epsilon : float, optional
+            Initial guess for the implied volatility, by default 1.
+        max_iter : int, optional
+            Maximum number of iterations, by default 1000.
+        orig_vol : float, optional
+            Original volatility, by default 0.5.
+        list_bounds : list[tuple[float, float]], optional
+            List of bounds for the implied volatility, by default [(0, 2)].
+            
+        Returns
+        -------
+        tuple[float, bool]
+            Implied volatility and a boolean indicating if the maximum number of iterations was 
+            hit.
+        
+        Raises
+        ------
+        Exception
+            If the method to return the root of the non-linear equation is not recognized.
+        
+        References
+        ----------
+        https://www.youtube.com/watch?v=Jpy3iCsijIU,
+        https://www.option-price.com/documentation.php#impliedvolatility
         """
-        REFERENCES: https://www.youtube.com/watch?v=Jpy3iCsijIU,
-            https://www.option-price.com/documentation.php#impliedvolatility
-        DOCSTRING: CALCULATING THE IMPLIED VOLATILITY FOR A GIVEN
-        INPUTS: OPTION CALL OR PUT, TOLERANCE, EPSILON, MAX ITERATIONS, ORIGINAL VOL
-        OUTPUTS: IMPLIED VOLATILITY AND MAX ITERATION HITTED BOOLEAN, ALL ENCAPSULED IN A TUPLE
-        """
-        # initial parameters
         s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
             s, k, r, t, sigma, q, b, cp0, opt_type)
         count = 0
@@ -1182,19 +2741,16 @@ class EuropeanOptions(IterativeMethods):
                 if count >= max_iter:
                     flag_max_iter_hitten = True
                     break
-                # calculating the difference betwwen call prize, by the implied vol and call price
+                # calculating the difference between call prize, by the implied vol and call price
                 dif_calc_market = self.general_opt_price(s, k, r, t, imp_vol, q, b, opt_type) \
                     - cp0
                 # newthon-hampson-model to check whether the zero of the function has been spoted
                 #   working with a tolerance to assume the zero of the function has been found
-                # if self.vega(s, k, r, t, imp_vol, q, b) != 0:
                 try:
                     imp_vol = -dif_calc_market / \
                         self.vega(s, k, r, t, imp_vol, q, b) + imp_vol
                 except RuntimeWarning:
                     return imp_vol, flag_max_iter_hitten
-                # else:
-                #     raise Exception("Vega musn't be zero")
                 epsilon = abs((imp_vol - orig_vol) / imp_vol)
             # returning implied volatility and maximum iterations hitten
             return imp_vol, flag_max_iter_hitten
@@ -1207,62 +2763,96 @@ class EuropeanOptions(IterativeMethods):
                     float_high = float(float_high + float_low) / 2.0
                 else:
                     float_low = float(float_high + float_low) / 2.0
-            return (float_high + float_low) / 2
+            return (float_high + float_low) / 2, False
         elif method == 'fsolve':
-            # defining a non-linear function as the difference of the theoratical price (Black
-            #   & Scholes) and the fair price
-            def func_non_linear(sigma): return np.power(
+            def func_non_linear(sigma: float) -> float: return np.power(
                 self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
-            # print(func_non_linear(orig_vol))
-            # returning the least sigma for the cost function
-            return fsolve(func_non_linear, orig_vol)
+            return fsolve(func_non_linear, orig_vol), False
         elif method == 'scipy_optimize_minimize':
-            # defining a non-linear function as the difference of the theoratical price (Black
-            #   & Scholes) and the fair price
-            def func_non_linear(sigma): return np.power(
+            def func_non_linear(sigma: float) -> float: return np.power(
                 self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
-            # print(func_non_linear(orig_vol))
-            # returning the least sigma for the cost function
-            return minimize(func_non_linear, orig_vol, method='CG')
+            return minimize(func_non_linear, orig_vol, method='CG'), False
         elif method == 'differential_evolution':
-            # defining a non-linear function as the difference of the theoratical price (Black
-            #   & Scholes) and the fair price
-            def func_non_linear(sigma): return np.power(
+            def func_non_linear(sigma: float) -> float: return np.power(
                 self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
-            # print(func_non_linear(orig_vol))
-            # returning the least sigma for the cost function
-            return NonLinearEquations().differential_evolution(func_non_linear, list_bounds)
+            return NonLinearEquations().differential_evolution(func_non_linear, list_bounds), False
         else:
             raise Exception('Method to return the root of the non-linear equation is not '
                             + 'recognized, please revisit the parameter')
 
-    def moneyness(self, s, k, r, t, sigma, q):
+    def moneyness(self, s: float, k: float, r: float, t: float, sigma: float, q: float) -> float:
+        """Moneyness of the option, measures how far the option is from being at-the-money.
+        
+        Parameters
+        ----------
+        s : float
+            Spot price of the underlying asset.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        sigma : float
+            Volatility of the underlying asset.
+        q : float
+            Dividend yield of the underlying asset.
+
+        Returns
+        -------
+        float
+            Moneyness of the option.
+            
+        References
+        ----------
+        Mercado de Opções, Conceitos e Estratégias / Author: Luiz Maurício da Silva /
+            Pgs. 74, 75, 76, 77, 78
         """
-        REFERENCES: MERCADO DE OPÇÕES, CONCEITOS E ESTRATÉGIAS / AUTOR: LUIZ MAURÍCIO DA SILVA /
-            PGS. 74, 75, 76, 77, 78
-        DOCSTRING: MEASURES WHETER THE OPTION WILL BE EXERCISED OR NOT TRANSLATED IN A PERCENTUAL
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE) AND
-            SIGMA (VOLATILITY OF UNDERLYING ASSET)
-        OUTPUTS: PERCENTAGE
-        """
-        # initial parameters
         s, k, r, t, sigma, q = self.set_parameters(s, k, r, t, sigma, q)
-        # returning moneyness
         return (self.d1(s, k, r, t, sigma, q)
                 + self.d2(s, k, r, t, sigma, q)) / 2
 
-    def iaotm(self, s, k, r, t, sigma, opt_type, pct_moneyness_atm=0.05):
+    def iaotm(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float, 
+        opt_type: float, 
+        pct_moneyness_atm: float = 0.05
+    ) -> str:
+        """Determine whether the option is ITM, ATM, or OTM based on moneyness.
+        
+        Parameters
+        ----------
+        s : float
+            Spot price of the underlying asset.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        sigma : float
+            Volatility of the underlying asset.
+        opt_type : float
+            Option type, either 'call' or 'put'.
+        pct_moneyness_atm : float, optional
+            Percentage of the moneyness that is considered ATM, by default 0.05.
+
+        Returns
+        -------
+        str
+            ITM/ATM/OTM
+            
+        Raises
+        ------
+        Exception
+            If the inputs do not return appropriate values.
         """
-        DOCSTRING: ITM / ATM / OTM - OPTIONS PREDICT OF EXERCISING
-        INPUTS: S (SPOT PRICE), K (STRIKE), T (TIME TO MATURITY), R (INTEREST RATE),
-            SIGMA (VOLATILITY OF UNDERLYING ASSET), OPTION TYPE AND PERCENTAGE OF ATM
-            (STANDARD VALUE OF 5%)
-        OUTPUTS: ITM/ATM/OTM
-        """
-        # initial parameters
-        s, k, r, t, sigma, q = self.set_parameters(
-            s, k, r, t, sigma, q, opt_type)
-        # determining iaotm
+        s, k, r, t, sigma = self.set_parameters(
+            s, k, r, t, sigma, opt_type)
         if abs(self.moneyness(s, k, r, t, sigma)) < pct_moneyness_atm:
             return 'ATM'
         elif (self.moneyness(s, k, r, t, sigma) < pct_moneyness_atm and
@@ -1276,133 +2866,3 @@ class EuropeanOptions(IterativeMethods):
         else:
             raise Exception(
                 'Please revisit your inputs, request did not return appropriate values')
-
-
-# print(BlackScholesMerton(50, 45, 0.02, 80 / 365, 0.3).call_price())
-# # output: 6.021277654922962
-# print(BlackScholesMerton(100, 105, 0.01, 30 / 365, 0.38).call_price())
-# print(BlackScholesMerton(100, 105, 0.01, 30 / 365, 0.15).call_price())
-
-# # option parameters
-# s = 100.0
-# k = 105.0
-# t = 30.0 / 365.0
-# r = 0.01
-# q = 0
-# sigma = 0
-# c0 = 2.30
-# opt_type = 'call'
-
-# # result
-# print(EuropeanOptions().implied_volatility(opt_type))
-# # output: (0.3688563249135555, True)
-
-# # result
-# print(EuropeanOptions(100.0, 105.0, 0.01, 30.0 / 365.0,
-#                      0, 0, 2.30, 365).implied_volatility('call'))
-# # output: (0.3688563249135555, True)
-
-# print(EuropeanOptions().implied_volatility(194.11, 210.0, 0.01, 38 / 365,
-#                                           0, 0, 1.50, 'call'))
-# # output: (0.25273873689374843, True)
-
-# print(EuropeanOptions().call_price(50, 45, 0.02, 80 / 365, 0.3))
-# # output: 6.021277654922962
-
-# print(EuropeanOptions().delta_call(100, 105, 0.01, 30 / 365, 0.31, 0))
-# # output: 0.3101960860984582
-
-# print(EuropeanOptions().delta_put(100, 105, 0.01, 30 / 365, 0.31, 0))
-# # output: -0.6898039139015417
-
-# print(EuropeanOptions().gamma(100, 105, 0.01, 30 / 365, 0.31, 0))
-# # output: 0.03970674807221808
-
-# print(EuropeanOptions().theta_call(819.42, 1020, 0.01, 42 / 365, 0.6966, 0))
-# # output: -0.6700017174199313
-
-# print(EuropeanOptions().theta_put(819.42, 1020, 0.01, 42 / 365, 0.6966, 0))
-# # output: -0.6420886495736411
-
-# print(EuropeanOptions().delta_call(100, 105, 0.01, 30 / 365, 0.31, 0))
-# # output: 0.3101960860984582
-
-# print(EuropeanOptions().delta_put(100, 105, 0.01, 30 / 365, 0.31, 0))
-# # output: -0.6898039139015417
-
-# print(EuropeanOptions().gamma(100, 105, 0.01, 30 / 365, 0.31, 0))
-# # output: 0.03970674807221808
-
-# print(EuropeanOptions().implied_volatility(
-#     100.0, 105.0, 0.01, 30.0 / 365.0, 0, 2.30, 'call'))
-# # output: (0.3688563249135555, True)
-
-# print(EuropeanOptions().basic_opt_price(50, 45, 0.02, 80 / 365, 0.3, 0, 'call'))
-# # output: 6.021277654922962
-
-# print(EuropeanOptions().basic_opt_price(50, 45, 0.02, 80 / 365, 0.3, 0, 'put'))
-# # output: 0.8244491011813224
-
-# print(EuropeanOptions().implied_volatility(194.11, 210.0, 0.01, 38 / 365,
-#                                           0, 1.50, 'call'))
-# # output: (0.25273873689374843, True)
-
-# print(EuropeanOptions().implied_volatility(100.0, 95.0, 0.01, 30 / 365,
-#                                           0, 2.30, 'put'))
-# # output: (0.3931007096283138, True)
-
-# print(EuropeanOptions().implied_volatility(100.0, 95.0, 0.01, 30 / 365,
-#                                           0, 2.30, 'put'))
-
-# print(EuropeanOptions().implied_volatility(
-#     14.50, 15, 0.0225, 10 / 365, 0.0861, 0.25, 'call'))
-# # output:(0.47974617961730276, True)
-
-# print(EuropeanOptions().implied_volatility(
-#     17.65, 15, 0.0225, 467 / 252, 0, 7.61, 'call'))
-# # output:(0.6983823635729837, True)
-
-
-# print(EuropeanOptions().implied_volatility(
-#     11.33, 14.50, 0.0225, 3 / 365, 0.09076773878571428, 0.01, 'call',
-#     orig_vol=0.812424814792))
-
-
-# def newton_vol_call_div(s, k, t, c, r, q, sigma):
-
-#     fx = s * np.exp(-q * t) * si.norm.cdf(EuropeanOptions().d1(s, k, r, t, sigma), 0.0, 1.0) - \
-#         k * np.exp(-r * t) * si.norm.cdf(EuropeanOptions().d2(s,
-#                                                              k, r, t, sigma), 0.0, 1.0) - c
-
-#     vega = (1 / np.sqrt(2 * np.pi)) * s * np.exp(-q * t) * np.sqrt(t) * \
-#         np.exp(
-#             (-si.norm.cdf(EuropeanOptions().d1(s, k, r, t, sigma), 0.0, 1.0) ** 2) * 0.5)
-
-#     tolerance = 0.000001
-#     x0 = sigma
-#     xnew = x0
-#     xold = x0 - 1
-
-#     while abs(xnew - xold) > tolerance:
-
-#         xold = xnew
-#         xnew = (xnew - fx - c) / vega
-
-#         return abs(xnew)
-
-
-# print(newton_vol_call_div(11.33, 14.50, 3 / 365,
-#                           0.08, 0.0225, 0.09076773878571428, 0.812424814792))
-
-# max(0.041276451234, '[]')
-
-# print(EuropeanOptions().delta(5127.7930, 5300.0, 0.02, 60 / 365, 0.3, 0, 'call'))
-
-# s = 24.87
-# k = 40.25
-# r = 0.0775
-# t = 0.05555555555555555
-# sigma = 1.9251923611193833
-
-# print(EuropeanOptions().d1(s, k, r, t, sigma))
-# # output: -0.8246155162915018

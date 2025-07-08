@@ -141,6 +141,7 @@ coverage = ">=7.3.0"
 coverage-badge = ">=1.0.0"
 pytest = ">=7.4.0"
 toml = { version = ">=0.10.2", python = "<=3.10" }
+codespell = ">=2.2.5"
 
 [build-system]
 requires = ["poetry-core>=1.7.0"]

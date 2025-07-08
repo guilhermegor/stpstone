@@ -57,6 +57,14 @@ repos:
         name: ruff check
         args:
           - --config=ruff.toml
+  
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        name: codespell check
+        args:
+          - --config=.codespellrc
 
   - repo: https://github.com/hadolint/hadolint
     rev: v2.12.0

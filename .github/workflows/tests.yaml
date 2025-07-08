@@ -15,7 +15,7 @@ on:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Automated Tests
     runs-on: ubuntu-24.04
     strategy:
       matrix:
@@ -66,31 +66,36 @@ jobs:
             poetry lock --no-cache
           fi
 
-          # install dependencies, checking for dev and docs groups if they are in the .toml file
-          without_groups=()
-          if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
-            without_groups+=("dev")
-          fi
-          if grep -q '\[tool.poetry.group.docs\]' pyproject.toml; then
-            without_groups+=("docs")
-          fi
-          if [ ${#without_groups[@]} -gt 0 ]; then
-            echo "Excluding groups: ${without_groups[*]}"
-            poetry install --no-interaction --no-root --without $(IFS=,; echo "${without_groups[*]}")
-          else
-            echo "No groups to exclude, installing all dependencies"
-            poetry install --no-interaction --no-root
-          fi
+          echo "No groups to exclude, installing all dependencies"
+          poetry install --no-interaction --no-root
 
           # restore original pyproject.toml
           mv pyproject.original.toml pyproject.toml
           poetry env activate
 
-      - name: Run Unit Tests
-        run: poetry run pytest tests/unit/ -v
+      - name: Run Spell Check (codespell)
+        run: |
+          poetry run codespell .
+          # exit with error if typos found (quiet-level=3 makes it silent)
+          if [ $? -ne 0 ]; then
+            echo "Typos found! Run 'codespell .' locally to see them."
+            exit 1
+          fi
 
       - name: Run Integration Tests
         run: poetry run pytest tests/integration/ -v
+    
+      - name: Run Unit Tests With Coverage
+        run: |
+            poetry run pytest --cov=stpstone tests/unit/ -v
+            poetry run coverage-badge -o coverage.svg -f
+      
+      - name: Upload Badge
+        uses: actions/upload-artifact@v4
+        with:
+            name: coverage-badge-${{ matrix.python-version }}
+            path: coverage.svg
+
 
   tests_passed:
     if: ${{ github.ref_type == 'tag' }}

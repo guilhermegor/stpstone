@@ -1,0 +1,4 @@
+[codespell]
+skip = *.po,*.csv,*.json,*.xml,*.txt
+count =
+quiet-level = 3

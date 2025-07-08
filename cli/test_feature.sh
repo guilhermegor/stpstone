@@ -42,6 +42,18 @@ find_test_path() {
     echo "$test_path"
 }
 
+run_codespell() {
+    local path="$1"
+    local type="$2"
+    print_status "info" "Running codespell on ${type}: ${path}"
+    if ! poetry run codespell "$path"; then
+        print_status "error" "codespell found spelling issues in ${type}"
+        print_status "warning" "To interactively fix, run: poetry run codespell -w ${path}"
+        return 1
+    fi
+    print_status "success" "codespell passed for ${type}"
+}
+
 run_ruff() {
     local path="$1"
     local type="$2"
@@ -77,6 +89,8 @@ main() {
     local test_path
     test_path=$(find_test_path "$module") || exit 1
 
+    run_codespell "$module_path" "module" || return 1
+    run_codespell "$test_path" "tests" || return 1
     run_ruff "$module_path" "module" || return 1
     run_ruff "$test_path" "tests" || return 1
     run_pytest "$test_path" || return 1
