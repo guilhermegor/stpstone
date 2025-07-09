@@ -233,7 +233,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         """Generate random weights for a portfolio."""
         # adjusting number of assets within the portfolio
         int_idx_val = min(len(array_min_w), int_idx_val)
-        # check wheter the constraints are enabled
+        # check whether the constraints are enabled
         if bl_constraints:
             #   sanity check for constraints
             if array_min_w is None:
@@ -261,7 +261,7 @@ class MarkowitzEff(metaclass=TypeChecker):
             while not bl_valid_weights:
                 #   increment the try counter
                 i_attempts += 1
-                #   reseting variables
+                #   resetting variables
                 array_w = np.zeros(int_n_assets)
                 #   check if it's the nth try or all the combinations are greater than one
                 if (i_attempts >= nth_try)\
@@ -319,7 +319,7 @@ class MarkowitzEff(metaclass=TypeChecker):
                     #   check if the sum of weights is equal to 1.0 or greater
                     if sum(array_w) >= 1.0:
                         break
-                #   normalize only if the total weight is non-zero, if multiplier is unabled
+                #   normalize only if the total weight is non-zero, if multiplier is disabled
                 if not bl_opt_possb_comb \
                     or np.count_nonzero(array_w) == 1:
                     total_weight = np.sum(array_w)
@@ -361,7 +361,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         # adjusting variables' types
         array_r = np.asmatrix(array_returns)
         float_rf = float(float_rf)
-        # random wieghts for the current portfolio
+        # random weights for the current portfolio
         array_weights = self.random_weights(array_r.shape[0], bl_constraints, bl_opt_possb_comb,
                                             array_min_w, nth_try)
         # mean returns for assets
@@ -392,7 +392,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         int_wdy: int = 252
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, list[str]]:
         """Generate random portfolios based on market data."""
-        # arrays of retunrs and minimum weights per asset
+        # arrays of returns and minimum weights per asset
         array_returns, array_min_w, list_uuids = \
             self.returns_min_w_uids(
                 df_assets,
@@ -544,7 +544,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         ], dtype=object)
         # prepare the subtitle with the list of securities
         subtitle_text = 'list of securities: ' + ', '.join(self.list_securities)
-        # ploting data
+        # plotting data
         data = [
             go.Scatter(
                 x=self.array_sigmas.flatten(),

@@ -1,4 +1,4 @@
-"""Test the Markowitz Effcient Frontier class."""
+"""Test the Markowitz Efficient Frontier class."""
 import numpy as np
 import pandas as pd
 import pytest
