@@ -1,8 +1,7 @@
 """European options pricing models."""
 
-from functools import lru_cache
 from math import pi
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 import numpy as np
 from scipy.optimize import fsolve, minimize
@@ -35,21 +34,48 @@ class InitialSettings(metaclass=TypeChecker):
         option type ('call' or 'put')
     """
 
-    def set_parameters(self, *params, opt_type='call'):
-        """Set parameters.
+    def set_parameters(
+        self, 
+        *params: Union[float, str, list, tuple], 
+        opt_type: Literal["call", "put"] = "call"
+    ) -> list:
+        """Set parameters and validate option type.
         
         Parameters
         ----------
-        params : list
-            list of parameters
-        opt_type : str
-            option type ('call' or 'put')
+        *params : Union[float, str, list, tuple]
+            Variable-length list of expected numerical parameters
+        opt_type : Literal["call", "put"], optional
+            Option type, either 'call' or 'put' (default: 'call')
+
+        Returns
+        -------
+        list[float]
+            List of converted numerical parameters (excluding opt_type)
+
+        Raises
+        ------
+        ValueError
+            If opt_type is not 'call' or 'put'
+        TypeError
+            If any parameter cannot be converted to float
         """
-        if opt_type not in ['call', 'put']:
-            raise Exception('Option ought be a call or a put')        
-        list_params = [param[0] if isinstance(param, list) else param for
-                       param in params]
-        return [float(param) for param in list_params if isinstance(param, str) == False]
+        # validate opt_type first
+        if opt_type not in ["call", "put"]:
+            raise ValueError("Option type must be either 'call' or 'put'")
+
+        # process numerical parameters
+        processed_params = []
+        for param in params:
+            if isinstance(param, (list, tuple)):
+                param = param[0] if len(param) > 0 else 0.0
+            if isinstance(param, str):
+                continue
+            try:
+                processed_params.append(float(param))
+            except (TypeError, ValueError) as e:
+                raise TypeError(f"Parameter must be numeric, got {param}") from e
+        return processed_params
 
 
 class BlackScholesMerton(InitialSettings):
@@ -162,8 +188,8 @@ class BlackScholesMerton(InitialSettings):
                 ).d2(s, k, b, t, sigma, q))
         elif opt_type == 'put':
             return k * np.exp(-r * t) * NormalDistribution().cdf(
-                -self.d2(s, k, b, t, sigma, q)) - s * np.exp((b - r) * t) * NormalDistribution().cdf(
-                -self.d1(s, k, b, t, sigma, q))
+                -self.d2(s, k, b, t, sigma, q)) - s * np.exp((b - r) * t) \
+                    * NormalDistribution().cdf(-self.d1(s, k, b, t, sigma, q))
 
 
 class Greeks(BlackScholesMerton):
@@ -297,7 +323,7 @@ class Greeks(BlackScholesMerton):
 
     def gamma(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """Gamma. 
+        """Gamma.
         
         Rate of change of delta with respect to changes in the underlying asset's price.
 
@@ -451,7 +477,7 @@ class Greeks(BlackScholesMerton):
 
     def vega(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """Vega. 
+        """Vega.
         
         Rate of change of the theoretical option value with respect to changes in volatility.
 
@@ -676,7 +702,8 @@ class Greeks(BlackScholesMerton):
 
         References
         ----------
-        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug"""
+        The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
+        """
         s, k, r, t, sigma, q, b, opt_type = self.set_parameters(s, k, r, t, sigma, q, b,
                                                                  opt_type)
         return np.exp((b - r) * t) * NormalDistribution().pdf(NormalDistribution().inv_cdf(
@@ -772,7 +799,7 @@ class Greeks(BlackScholesMerton):
         b: float, 
         opt_type: Literal["call", "put"]
     ) -> float:
-        """Rho. 
+        """Rho.
         
         Rate of change of the theoretical option value with respect to changes in the risk free 
         rate.
@@ -872,7 +899,7 @@ class Greeks(BlackScholesMerton):
         b: float, 
         opt_type: Literal["call", "put"]
     ) -> float:
-        """Vanna. 
+        """Vanna.
         
         Rate of change of delta with respect to changes in the implied volatility (sigma), or 
         the sensitivity of vega to changes in the underlying price (s).
@@ -1054,7 +1081,7 @@ class Greeks(BlackScholesMerton):
 
     def zomma_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """Zomma percentage. 
+        """Zomma percentage.
         
         Rate of change of the theoretical option value with respect to changes in the cost of 
         carry, expressed as a percentage.
@@ -1090,7 +1117,7 @@ class Greeks(BlackScholesMerton):
 
     def speed(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """Speed. 
+        """Speed.
         
         Rate of change of gamma with respect to changes in the underlying asset's price.
 
@@ -1126,7 +1153,7 @@ class Greeks(BlackScholesMerton):
 
     def speed_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """Speed percentage 
+        """Speed percentage.
         
         Rate of change of gamma with respect to changes in the underlying asset's price, 
         expressed as a percentage.
@@ -1270,7 +1297,7 @@ class Greeks(BlackScholesMerton):
 
     def vomma_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """Vomma percentage. 
+        """Vomma percentage.
         
         Rate of change of vega with respect to changes in volatility, expressed as a percentage.
 
@@ -1447,7 +1474,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Variance vega. 
+        """Variance vega.
         
         Rate of change of the theoretical option value with respect to changes in the variance 
         of the underlying asset.
@@ -1491,7 +1518,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Variance vann. 
+        """Variance vanna.
         
         Rate of change of the theoretical option value with respect to changes in the variance 
         of the underlying asset.
@@ -1536,7 +1563,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Variance vomma. 
+        """Variance vomma.
         
         Rate of change of vega with respect to changes in the implied volatility.
 
@@ -1581,7 +1608,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Variance ultima. 
+        """Variance ultima.
         
         Rate of change of vomma with respect to changes in the implied volatility.
 
@@ -1670,7 +1697,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Driftless theta. 
+        """Driftless theta.
         
         Expected change in the option price over time, assuming no drift in the underlying 
         asset's price.
@@ -1715,7 +1742,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Theta-vega relationship. 
+        """Theta-vega relationship.
         
         Relationship between theta and vega, which indicates how much the option's price will 
         change with respect to changes in implied volatility.
@@ -1758,7 +1785,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Bleed offset volatility. 
+        """Bleed offset volatility.
         
         This is the amount of volatility that must increase to offset the theta-bleed/time decay.
         
@@ -1805,7 +1832,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float
     ) -> float:
-        """Theta-gamma relationship. 
+        """Theta-gamma relationship.
         
         Relationship between theta and gamma, which indicates how much the option's price will 
         change with respect to changes in implied volatility.
@@ -1850,7 +1877,7 @@ class Greeks(BlackScholesMerton):
         b: float, 
         opt_type: Literal["call", "put"]
     ) -> float:
-        """Phi. 
+        """Phi.
         
         The sensitivity of the option price to a change in the dividend yield (or foreign interest 
         rate in the case of a currency option).
@@ -1902,7 +1929,7 @@ class Greeks(BlackScholesMerton):
         b: float, 
         opt_type: Literal["call", "put"]
     ) -> float:
-        """Carry rho. 
+        """Carry rho.
         
         The sensitivity of the option price to a change in the cost-of-carry rate.
         
@@ -2228,11 +2255,9 @@ class Greeks(BlackScholesMerton):
         """
         s, k, r, t, sigma, q, b = self.set_parameters(
             s, k, r, t, sigma, q, b, opt_type)
-        # defining greek parameters
         mu = (b - sigma ** 2 / 2.0) / sigma ** 2
         lambda_ = (mu ** 2 + 2 * r / sigma ** 2) ** 0.5
         z = np.log(k / s) / (sigma * t ** 0.5) + lambda_ * sigma * t ** 0.5
-        # return greek
         if opt_type == 'call':
             return (k / s) ** (mu + lambda_) * NormalDistribution().cdf(-z) \
                 + (k / s) ** (mu - lambda_) * NormalDistribution().cdf(
@@ -2244,7 +2269,7 @@ class Greeks(BlackScholesMerton):
 
     def net_weighted_vega_exposure(self, psi_r: float, *dicts_opts: list[dict[str, float]]) \
         -> float:
-        """Net weighted vega exposure. 
+        """Net weighted vega exposure.
         
         The sum of the vega exposures of all options, weighted by their respective volatilities 
         and correlations with the reference volatility.
@@ -2338,9 +2363,9 @@ class IterativeMethods(Greeks):
         else:
             array_cp = np.maximum(k - array_s_nodes, np.zeros(int(n) + 1))
         # check s payoff, according to barriers, if values are different from none
-        if h_upper != None:
+        if h_upper is not None:
             array_cp[array_s_nodes >= h_upper] = 0
-        if h_lower != None:
+        if h_lower is not None:
             array_cp[array_s_nodes <= h_lower] = 0
         # step backwards recursion through tree
         for i in np.arange(int(n), 0, -1):
@@ -2406,7 +2431,7 @@ class IterativeMethods(Greeks):
             array_s_nodes[j] = array_s_nodes[j - 1] * u / d
         # initialise option values at maturity
         array_cp = np.zeros(int(n) + 1)
-        for j in range(0, int(n) + 1):
+        for _ in range(0, int(n) + 1):
             #   evaluating maximum value between fair and intrinsic value
             if opt_type == 'call':
                 array_cp = np.maximum(array_cp, array_s_nodes - k)
@@ -2478,7 +2503,7 @@ class IterativeMethods(Greeks):
             array_s_nodes[j] = array_s_nodes[j - 1] * u / d
         # initialise option values at maturity
         array_cp = np.zeros(int(n) + 1)
-        for j in range(0, int(n) + 1):
+        for _ in range(0, int(n) + 1):
             #   evaluating maximum value between fair and intrinsic value
             if opt_type == 'call':
                 array_cp = np.maximum(array_cp, array_s_nodes - k)
@@ -2553,7 +2578,7 @@ class IterativeMethods(Greeks):
             array_s_nodes[j] = array_s_nodes[j - 1] * np.exp(dxu - dxd)
         # initialise option values at maturity
         array_cp = np.zeros(int(n) + 1)
-        for j in range(0, int(n) + 1):
+        for _ in range(0, int(n) + 1):
             #   evaluating maximum value between fair and intrinsic value
             if opt_type == 'call':
                 array_cp = np.maximum(array_cp, array_s_nodes - k)
@@ -2626,7 +2651,7 @@ class IterativeMethods(Greeks):
             array_s_nodes[j] = array_s_nodes[j - 1] * np.exp(dxu - dxd)
         # initialise option values at maturity
         array_cp = np.zeros(int(n) + 1)
-        for j in range(0, int(n) + 1):
+        for _ in range(0, int(n) + 1):
             #   evaluating maximum value between fair and intrinsic value
             if opt_type == 'call':
                 array_cp = np.maximum(array_cp, array_s_nodes - k)
@@ -2650,7 +2675,6 @@ class EuropeanOptions(IterativeMethods):
     method, the bisection method, and the fsolve method.
     """
 
-    @lru_cache()
     def implied_volatility(
         self, 
         s: float, 
@@ -2668,9 +2692,9 @@ class EuropeanOptions(IterativeMethods):
         epsilon: float = 1, 
         max_iter: int = 1000, 
         orig_vol: float = 0.5, 
-        list_bounds: list[tuple[float, float]] = [(0, 2)]
+        list_bounds: Optional[list[tuple[float, float]]] = None
     ) -> tuple[float, bool]:
-        """Calculates the implied volatility of a European option using various methods.
+        """Calculate the implied volatility of a European option using various methods.
         
         Parameters
         ----------
@@ -2718,7 +2742,7 @@ class EuropeanOptions(IterativeMethods):
         
         Raises
         ------
-        Exception
+        ValueError
             If the method to return the root of the non-linear equation is not recognized.
         
         References
@@ -2728,6 +2752,8 @@ class EuropeanOptions(IterativeMethods):
         """
         s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
             s, k, r, t, sigma, q, b, cp0, opt_type)
+        if list_bounds is None:
+            list_bounds = [(0, 2)]
         count = 0
         if method == 'newton_raphson':
             # iterating until the error is meaningless
@@ -2777,7 +2803,7 @@ class EuropeanOptions(IterativeMethods):
                 self.general_opt_price(s, k, r, t, sigma, q, b, opt_type) - cp0, 2)
             return NonLinearEquations().differential_evolution(func_non_linear, list_bounds), False
         else:
-            raise Exception('Method to return the root of the non-linear equation is not '
+            raise ValueError('Method to return the root of the non-linear equation is not '
                             + 'recognized, please revisit the parameter')
 
     def moneyness(self, s: float, k: float, r: float, t: float, sigma: float, q: float) -> float:
@@ -2848,7 +2874,7 @@ class EuropeanOptions(IterativeMethods):
             
         Raises
         ------
-        Exception
+        ValueError
             If the inputs do not return appropriate values.
         """
         s, k, r, t, sigma = self.set_parameters(
@@ -2864,5 +2890,5 @@ class EuropeanOptions(IterativeMethods):
                                        pct_moneyness_atm and opt_type == 'put'):
             return 'ITM'
         else:
-            raise Exception(
+            raise ValueError(
                 'Please revisit your inputs, request did not return appropriate values')

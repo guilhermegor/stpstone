@@ -158,21 +158,21 @@ class FinancialReturns(metaclass=TypeChecker):
         # creating column with first occurrence of a ticker
         df_[col_first_occurrence_ticker] = np.where(
             df_[col_dt_date] == np.min(df_[col_dt_date]),
-            'OK', 'NOK'
+            "OK", "NOK"
         )
         # creating column with lag prices
-        df_[col_lag_close] = df_[col_prices].shift(periods=-1)
+        df_[col_lag_close] = df_[col_prices].shift(periods=1)
         # calculating returns
-        if type_return == 'ln_return':
+        if type_return == "ln_return":
             df_[col_stock_returns] = df_.apply(
                 lambda row: np.log(row[col_prices] / row[col_lag_close])
-                if row[col_first_occurrence_ticker] == 'NOK' else 0,
+                if row[col_first_occurrence_ticker] == "NOK" else 0,
                 axis=1
             )
         else:
             df_[col_stock_returns] = df_.apply(
                 lambda row: row[col_prices] / row[col_lag_close] - 1.0
-                if row[col_first_occurrence_ticker] == 'NOK' else 0,
+                if row[col_first_occurrence_ticker] == "NOK" else 0,
                 axis=1
             )
         return df_
@@ -257,19 +257,19 @@ class FinancialReturns(metaclass=TypeChecker):
         >>> dd.pricing_strategy(100, 110, 2)
         {'mtm': 20.0, 'pct_retun': 0.09531017980432493, 'notional': 110.0}
         """
-        if type_return == 'ln_return':
+        if type_return == "ln_return":
             return {
-                'mtm': (float(short_price) - float(long_price)) * float(leverage) \
+                "mtm": (float(short_price) - float(long_price)) * float(leverage) \
                     - float(operational_costs),
-                'pct_return': self.continuous_return(float(short_price), float(long_price)),
-                'notional': float(short_price)
+                "pct_return": self.continuous_return(float(short_price), float(long_price)),
+                "notional": float(short_price)
             }
-        elif type_return == 'stnd_return':
+        elif type_return == "stnd_return":
             return {
-                'mtm': (float(short_price) - float(long_price)) * float(leverage) \
+                "mtm": (float(short_price) - float(long_price)) * float(leverage) \
                     - float(operational_costs),
-                'pct_return': float(long_price) / float(short_price) - 1,
-                'notional': float(short_price)
+                "pct_return": float(long_price) / float(short_price) - 1,
+                "notional": float(short_price)
             }
         else:
             raise ValueError(

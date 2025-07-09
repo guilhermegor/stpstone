@@ -125,7 +125,7 @@ class EarningsManipulation(metaclass=TypeChecker):
     def _validate_inputs(self, params: dict) -> None:
         """Validate all input parameters for the Beneish model.
         
-        Parametes
+        Parameters
         ----------
             params: Dictionary of parameter names and values from locals()
             
