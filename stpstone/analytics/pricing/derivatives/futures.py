@@ -1,22 +1,16 @@
 
-### PRICING FUTURE CONTRACTS
+"""Pricing Futures Contracts."""
 
-from datetime import date, datetime
 import math
-from operator import itemgetter
 
-from nelson_siegel_svensson import NelsonSiegelCurve, NelsonSiegelSvenssonCurve
-from nelson_siegel_svensson.calibrate import calibrate_ns_ols, calibrate_nss_ols
+from nelson_siegel_svensson.calibrate import calibrate_ns_ols
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from stpstone.central.global_slots import MATURITY_WEEK_DAY_PER_CONTRACT
-from stpstone.finance.performance_apprraisal.financial_math import FinancialMath
-from stpstone.handling_data.handling_lists import ListHandler
-from stpstone.handling_data.handling_numbers import LinearAlgebra
-from stpstone.handling_data.handlingstr import StrHandler
+from stpstone.analytics.perf_metrics.financial_math import FinancialMath
+from stpstone.analytics.quant.linear_algebra import LinearAlgebra
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.parsers.json_format import JsonFiles
+from stpstone.utils.parsers.lists import ListHandler
 
 
 class NotionalFromPV:
@@ -249,7 +243,7 @@ class TSIR:
             FOR TAU AND NUMBER OF SAMPLES WITHIN THE RANGE
         OUTPUTS: DICTIONARY WITH RATE (Y), PERIOD (T)
         """
-        y, status = calibrate_ns_ols(
+        y, _ = calibrate_ns_ols(
             np.array(list(dict_nper_rates.keys())),
             np.array(list(dict_nper_rates.values())), tau_first_assumption)
         if number_samples is None:

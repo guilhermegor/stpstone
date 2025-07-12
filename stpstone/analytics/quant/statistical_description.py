@@ -2,7 +2,7 @@
 
 import numpy as np
 from scipy import stats
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 
 class StatiscalDescription:
@@ -62,7 +62,7 @@ class StatiscalDescription:
         """
         REFERENCES: https://stackoverflow.com/questions/48105922/numpy-covariance-between-each-column-of-a-matrix-and-a-array
         DOCSTRING: COVARIANCE OF ARRAY
-        INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
+        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: COVARIANCE - FLOAT
         """
         return np.dot(np.array(array_data_2).T - np.array(
@@ -72,7 +72,7 @@ class StatiscalDescription:
     def correlation(self, array_data_1, array_data_2):
         """
         REFERENCES: https://stackoverflow.com/questions/48105922/numpy-covariance-between-each-column-of-a-matrix-and-a-array
-        DOCSTRING: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
+        DOCSTRING: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS:
         """
         return self.covariance(array_data_1, array_data_2) / \

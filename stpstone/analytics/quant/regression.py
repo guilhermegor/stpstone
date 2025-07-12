@@ -1,22 +1,36 @@
 ### STATISTIC FUNCTIONS FOR SUPERVISED REGRESSION MACHINE LEARNING MODELS ###
 
-import numpy as np
-import statsmodels.api as sm
-import statsmodels.stats.api as sms
-from statsmodels.compat import lzip
-from mystic.solvers import diffev2
 from mystic.monitors import VerboseMonitor
-from scipy.optimize import differential_evolution, curve_fit
-from sklearn.linear_model import SGDRegressor, Ridge, Lasso, ElasticNet, LinearRegression, \
-    LogisticRegression
-from sklearn.preprocessing import PolynomialFeatures
+from mystic.solvers import diffev2
+import numpy as np
+from scipy.optimize import curve_fit, differential_evolution
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import (
+    ElasticNet,
+    Lasso,
+    LinearRegression,
+    LogisticRegression,
+    Ridge,
+    SGDRegressor,
+)
+from sklearn.metrics import (
+    accuracy_score,
+    class_likelihood_ratios,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    r2_score,
+    recall_score,
+)
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, \
-    precision_score, recall_score, f1_score, r2_score
-from sklearn.metrics import class_likelihood_ratios
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+import statsmodels.api as sm
+from statsmodels.compat import lzip
+import statsmodels.stats.api as sms
+
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 
@@ -103,7 +117,7 @@ class LinearRegressions:
     def linear_regression(self, array_x, array_y):
         """
         DOCSTRING: BEST FITTING LINE FOR A SAMPLE OF DATA IN X ARRAY, COMAPARED TO AN Y ARRAY
-        INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
+        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH
             INCLINATION)
         """
@@ -136,7 +150,7 @@ class LinearRegressions:
     def k_neighbors_regression(self, array_x, array_y):
         """
         DOCSTRING: BEST FITTING LINE FOR A SAMPLE OF DATA IN X ARRAY, COMAPARED TO AN Y ARRAY
-        INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
+        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH
             INCLINATION)
         """
@@ -261,7 +275,7 @@ class NonLinearRegressions:
     def decision_tree_regression(self, array_x, array_y, seed=None):
         """
         DOCSTRING: DECISION TREE REGRESSION
-        INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
+        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE AND PREDICT
         """
         model = DecisionTreeRegressor(random_state=seed).fit(
@@ -279,7 +293,7 @@ class NonLinearRegressions:
         DOCSTRING: RANDOM FOREST REGRESSION, FITTING SEVERAL DECISION TREES AND AVERAGING THE
             PREDICTIONS --> BUILIDING A MODEL ONT TOP OF MANY OTHER MODELS IS CALLED ENSEMBLE
             LEARNING
-        INPUTS: TWO ARRAIES '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
+        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
         OUTPUTS: DICT WIHT SCORE AND PREDICT
         """
         model = RandomForestRegressor(random_state=seed, n_estimators=n_estimators).fit(

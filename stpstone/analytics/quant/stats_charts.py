@@ -1,15 +1,16 @@
 ### CHARTS FOR PROBABILITY AND STATISTICAL PROBLEMS ###
 
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
-from matplotlib.colors import ListedColormap
-from sklearn.metrics import precision_recall_curve, roc_curve, mean_squared_error
+from sklearn.metrics import mean_squared_error, precision_recall_curve, roc_curve
 from sklearn.model_selection import train_test_split
-from stpstone.quantitative_methods.regression import LogLinearRegressions
+import statsmodels.api as sm
+
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.quantitative_methods.fit_assessment import FitPerformance
+from stpstone.quantitative_methods.regression import LogLinearRegressions
 
 
 class ProbStatsCharts:
@@ -19,7 +20,7 @@ class ProbStatsCharts:
         """
         DOCSTRING: CONFUSION MATRIX WITH PREDICTIONS (Y-AXIS) AND ACTUAL TARGETS (X-DATA) OF
             THE DATA TESTED
-        INPUTS: X AND Y ARRAIES OF REAL NUMBERS, AS WELL AS C POSITIVE FLOATING-POINT NUMBER
+        INPUTS: X AND Y ARRAYS OF REAL NUMBERS, AS WELL AS C POSITIVE FLOATING-POINT NUMBER
             THAT DEFINES THE RELATIVE STRENGTH OF REGULARIZATION; SMALLER VALUES INDICATE STRONGER
             REGULARIZATION, FITTING-WISE ITS POORLY FITTED
         OUTPUTS: -

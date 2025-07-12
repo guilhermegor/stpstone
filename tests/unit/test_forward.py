@@ -152,13 +152,13 @@ class TestForwardBR:
         valid_inputs: dict[str, type[Any]]
     ) -> None:
         """Test with invalid argument types."""
-        # Test string instead of float
+        # test string instead of float
         inputs = valid_inputs.copy()
         inputs['spot'] = "100"
         with pytest.raises(TypeError):
             forward_br.forward_contract_pricing(**inputs)
 
-        # Test float instead of int
+        # test float instead of int
         inputs = valid_inputs.copy()
         inputs['number_contracts'] = 10.5
         with pytest.raises(TypeError):
