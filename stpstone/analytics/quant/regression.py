@@ -121,7 +121,7 @@ class LinearRegressions:
         OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH
             INCLINATION)
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # fitting the model
         model = LinearRegression().fit(np.array(array_x),
@@ -175,7 +175,7 @@ class LinearRegressions:
             (FALSE AS DEFAULT)
         OUTPUTS: DICTIONARY WITH MODEL FITTED, INTERCEPT AND COEFICIENTS
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defininig polynomial model
         poly_features = PolynomialFeatures(
@@ -352,7 +352,7 @@ class LogLinearRegressions:
             REGARDING TRUE NEGATIVE (C0,0), FALSE NEGATIVE (C1,0), FALSE POSITIVES (C0,1)
             AND TRUE POSITIVES (C1,1))
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # fitting the model
         model = LogisticRegression(C=c_positive_floating_point_number,

@@ -1,12 +1,13 @@
 ### DIMENSIONALITY REDUCTION OF IVS
 
 # pypi.org libs
+from mlxtend.feature_selection import ExhaustiveFeatureSelector, SequentialFeatureSelector
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestClassifier
-from mlxtend.feature_selection import SequentialFeatureSelector, ExhaustiveFeatureSelector
 from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression
+
 # local libs
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
@@ -23,7 +24,7 @@ class DimensionalityReduction:
         INPUTS:
         OUTPUTS:
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defining the estimator
         if str_estimator == 'linear_regression':
@@ -63,7 +64,7 @@ class DimensionalityReduction:
         INPUTS:
         OUTPUTS:
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defining the estimator
         if str_estimator == 'linear_regression':
@@ -102,7 +103,7 @@ class DimensionalityReduction:
         INPUTS:
         OUTPUTS:
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # maximum features
         if max_features is None:

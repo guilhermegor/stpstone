@@ -117,7 +117,7 @@ class SearchByTradingB3(ABCRequests):
                 ("securities_by_market_name", col_market_name)]:
             for market, list_source_names in YAML_B3_SEARCH_BY_TRADING_SESSION["up2data_b3"][
                 security_division].items():
-                #   validating wheter the market is already in the exporting dictionary and extending
+                #   validating whether the market is already in the exporting dictionary and extending
                 #       or creating a new list
                 if market not in dict_export:
                     dict_export[market] = ListHandler().remove_duplicates(

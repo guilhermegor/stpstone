@@ -1,10 +1,12 @@
 ### MODULE TO DEAL WITH PDF, FROM EXTRACTION TO HANDLING DATA ###
 
-import tabula
-import textwrap
-from PyPDF2 import PdfFileReader
-from fpdf import FPDF
 from base64 import b64encode
+import textwrap
+
+from fpdf import FPDF
+from PyPDF2 import PdfFileReader
+import tabula
+
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -73,5 +75,5 @@ class PDFHandler:
             for wrap in lines:
                 pdf.cell(0, fontsize_mm, wrap, ln=1)
         pdf.output(filename, output_file)
-        # checking wheter the file was created
+        # checking whether the file was created
         return DirFilesManagement().object_exists(filename)

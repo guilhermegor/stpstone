@@ -13,7 +13,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
-class BrazillianBanksBCB(ABCRequests):
+class BrazilianBanksBCB(ABCRequests):
 
     def __init__(
         self,

@@ -1,9 +1,11 @@
 ### API TO GRANT ACCESS TO B3 MARGIN SIMULATOR ###
 
 # pypi.org libs
+from typing import Dict, List, Union
+
 import numpy as np
 from requests import request
-from typing import List, Dict, Union
+
 # local libs
 from stpstone.utils.parsers.json import JsonFiles
 
@@ -59,7 +61,7 @@ class MarginSimulatorB3:
             'LiquidityResource': {'value': value_liquidity_resource},
             'RiskPositionList': self.dict_payload
         }
-        # check wheter it is needed to parse the params dictionary
+        # check whether it is needed to parse the params dictionary
         if bl_parse_dict_payload_data == True:
             if dict_payload != None:
                 dict_payload = JsonFiles().dict_to_json(dict_payload)

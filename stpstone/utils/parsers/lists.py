@@ -1,18 +1,19 @@
 ### HANDLING LISTS ###
 
-import re
 import bisect
-import numpy as np
-from collections import OrderedDict, Counter
-from itertools import chain, tee, product
-from numbers import Number
-from typing import List, Any, Iterable, Tuple, Dict
+from collections import Counter, OrderedDict
+from itertools import chain, product, tee
 from logging import Logger
-from typing import List, Optional
-from stpstone.utils.parsers.json import JsonFiles
-from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.parsers.numbers import NumHandler
+from numbers import Number
+import re
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+import numpy as np
+
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class ListHandler:
@@ -243,7 +244,7 @@ class ListHandler:
         list_position_chunks = NumHandler().multiples(int_chunk, len(list_to_chunk))
         inf_limit = list_position_chunks[0]
         sup_limit = list_position_chunks[1]
-        # checking wheter str_character_divides_clients is None, in this case append lists
+        # checking whether str_character_divides_clients is None, in this case append lists
         if str_character_divides_clients is None:
             return [list_to_chunk[x: x + int_chunk] for x in range(0, len(list_to_chunk), int_chunk)]
         # iterating through list to chunk, dividing in sublists with maximum size

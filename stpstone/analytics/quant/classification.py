@@ -2,20 +2,28 @@
 
 # pypi.org libs
 import matplotlib.pyplot as plt
-from sklearn.datasets import fetch_openml
-from sklearn.linear_model import SGDClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, \
-    roc_auc_score, adjusted_rand_score, silhouette_score, accuracy_score
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.cluster import KMeans
+from sklearn.datasets import fetch_openml
+from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.decomposition import PCA
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import (
+    accuracy_score,
+    adjusted_rand_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+    silhouette_score,
+)
+from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
 # local libs
 from stpstone.handling_data.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
@@ -131,7 +139,7 @@ class Classification:
                     random_state=int_random_state_seed, kernel=kernel))
         else:
             raise Exception(
-                'Multiclass classification strategy ought be wheter best, ovr'
+                'Multiclass classification strategy ought be whether best, ovr'
                 + '(one-versus-the-rest) or ovo (one-versus-one), nevertheless it was declared'
                 + ' {}, which is invalid, please revisit the parameter '.format(
                     multiclass_classification_strategy)

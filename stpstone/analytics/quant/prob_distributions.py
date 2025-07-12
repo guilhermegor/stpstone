@@ -1,12 +1,13 @@
 ### PROBABILITY DISTRIBUTIONS ###
 
-from __future__ import print_function, division
-import numpy as np
+from __future__ import division, print_function
+
 import matplotlib.pylab as plt
-import seaborn as sns
+import numpy as np
+from numpy import dot, log, multiply, ones, pi, shape, sqrt
 from scipy.special import gamma, gammaln
-from scipy.stats import t, uniform, chi2, f, bernoulli, geom, binom, poisson, sem, norm
-from numpy import shape, dot, ones, multiply, pi, sqrt, log
+from scipy.stats import bernoulli, binom, chi2, f, geom, norm, poisson, sem, t, uniform
+import seaborn as sns
 
 
 class ProbabilityDistributions:
@@ -144,7 +145,7 @@ class ProbabilityDistributions:
             PDF AND CDF ARE POSSIBLE AS WELL)
         OUTPUTS: FLOAT
         """
-        # checking wheter degrees of freedom numerator is higher than denominator
+        # checking whether degrees of freedom numerator is higher than denominator
         assert dfn > dfd
         # defining basic parameters of the distribution
         f_dist = f(dfn, dfd, mu)

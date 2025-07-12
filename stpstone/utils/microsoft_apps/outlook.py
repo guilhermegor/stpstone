@@ -1,10 +1,12 @@
 ### SENDING EMAIL THROUGH OUTLOOK CLIENT ###
 
 import os
+
 import win32com.client as win32
-from stpstone.utils.parsers.str import StrHandler
+
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.str import StrHandler
 
 
 class DealingOutlook:
@@ -139,7 +141,7 @@ class DealingOutlook:
         else:
             raise Exception(
                 "Attachments saving paths ought be a string or list of strings, please check "
-                + "wheter variable type is valid."
+                + "whether variable type is valid."
             )
         # counting all itemns in the sub-folder
         item_count = out_iter_folder.Items.Count
@@ -179,7 +181,7 @@ class DealingOutlook:
                                 dict_attch_saving_status[attch_save_path] = (
                                     DirFilesManagement().object_exists(attch_save_path)
                                 )
-                            # check wheter is important to move email to another folder
+                            # check whether is important to move email to another folder
                             if move_to_folder != None:
                                 message.Move(out_move_to_folder)
                             # check whether is important to save just the first attachment or not

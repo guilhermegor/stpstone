@@ -1,7 +1,8 @@
 ### HANDLING TGZ FILES ###
 
-import tarfile
 import os
+import tarfile
+
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -18,7 +19,7 @@ class HandlingTGZFiles:
             COMPLETE SOURCE PATH (IF THE FILE IS ALREADY IN THE DISK)
         OUTPUTS: DICTIONARY WITH BLAME DOWNLOAD TGZ FILE, DIR PATH AND EXTRACTED FILES NAMES
         """
-        # checking wheter the directory to export the file is available or not
+        # checking whether the directory to export the file is available or not
         if DirFilesManagement().object_exists(dir_exporting_path):
             DirFilesManagement().mk_new_directory(dir_exporting_path)
         # exporting complete path

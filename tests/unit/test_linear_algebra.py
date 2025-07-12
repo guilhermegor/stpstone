@@ -77,7 +77,7 @@ def test_eigenvalue_eigenvector_normal(
     eigenvalues, eigenvectors = linear_algebra.eigenvalue_eigenvector(valid_square_matrix)
     assert isinstance(eigenvalues, np.ndarray)
     assert isinstance(eigenvectors, np.ndarray)
-    # Verify A*v = λ*v for each eigenvalue/eigenvector pair
+    # verify A*v = λ*v for each eigenvalue/eigenvector pair
     for i in range(len(eigenvalues)):
         assert np.allclose(
             valid_square_matrix @ eigenvectors[:, i],
@@ -118,7 +118,7 @@ def test_power_matrix_normal(
     """Test matrix power with valid input."""
     result = linear_algebra.power_matrix(valid_square_matrix, 3)
     assert isinstance(result, np.ndarray)
-    # Verify result matches manual multiplication
+    # verify result matches manual multiplication
     expected = valid_square_matrix @ valid_square_matrix @ valid_square_matrix
     assert np.allclose(result, expected)
 
@@ -128,7 +128,7 @@ def test_power_matrix_negative_exponent(
     """Test matrix power with negative exponent."""
     result = linear_algebra.power_matrix(valid_square_matrix, -1)
     assert isinstance(result, np.ndarray)
-    # Verify result matches inverse
+    # verify result matches inverse
     expected = np.linalg.inv(valid_square_matrix)
     assert np.allclose(result, expected)
 
@@ -187,7 +187,7 @@ def test_angle_between_two_arrays_normal(
     vector2 = np.array([4, 5, 6])
     result = linear_algebra.angle_between_two_arrays(valid_vector, vector2)
     assert isinstance(result, float)
-    # Verify angle calculation
+    # verify angle calculation
     dot_product = np.dot(valid_vector, vector2)
     norm_product = np.linalg.norm(valid_vector) * np.linalg.norm(vector2)
     expected = np.arccos(dot_product / norm_product)
@@ -220,7 +220,7 @@ def test_inverse_normal(
     """Test matrix inverse with valid input."""
     result = linear_algebra.inverse(valid_square_matrix)
     assert isinstance(result, np.ndarray)
-    # Verify A * A^-1 = I
+    # verify A * A^-1 = I
     identity = np.eye(valid_square_matrix.shape[0])
     assert np.allclose(valid_square_matrix @ result, identity)
 
@@ -267,7 +267,7 @@ def test_linear_equations_solution_normal(
     linear_algebra: LinearAlgebra, valid_square_matrix: np.ndarray, valid_vector: np.ndarray
 ) -> None:
     """Test linear equations solution with valid inputs."""
-    b = valid_square_matrix @ valid_vector  # Create solvable system
+    b = valid_square_matrix @ valid_vector  # create solvable system
     result = linear_algebra.linear_equations_solution(valid_square_matrix, b)
     assert isinstance(result, np.ndarray)
     assert np.allclose(result, valid_vector)

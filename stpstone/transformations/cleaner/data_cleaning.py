@@ -1,15 +1,22 @@
 
 ### DATA CLEANING TO PREPARE DATASET ###
 
-import pandas as pd
-import numpy as np
 from zlib import crc32
+
+import numpy as np
+import pandas as pd
 from scipy.ndimage.interpolation import shift
-from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
-from sklearn.impute import SimpleImputer, KNNImputer
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, LabelEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.impute import KNNImputer, SimpleImputer
+from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
+from sklearn.preprocessing import (
+    LabelEncoder,
+    MinMaxScaler,
+    OneHotEncoder,
+    OrdinalEncoder,
+    StandardScaler,
+)
+
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 
@@ -182,7 +189,7 @@ class DataCleaning:
         OUTPUTS: DICTIONARY WITH KEYS ARRAY LABELS, ARRAY DATA CATEGORIZED IN NUMBERS AND
             ARRAY DATA CATEGORIZED IN STRINGS
         """
-        # checking wheter or not the array is a one hot encoding, when the category has one success
+        # checking whether or not the array is a one hot encoding, when the category has one success
         #   category and a failure one
         if encoder_strategy == 'one_hot_encoder':
             #   column transformer
@@ -223,7 +230,7 @@ class DataCleaning:
         OUTPUTS: DICTIONARY WITH DATA MAX, DATA MIN, SCALE, N SAMPLES, ARRAY WITH ORIGINAL DATA AND
             ARRAY WITH SCALED DATA
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_data = ExploratoryDataAnalysis().reshape_1d_arrays(array_data)
         # defining feature scaling strategy
         if type_scaler == 'normalization':

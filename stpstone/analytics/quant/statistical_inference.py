@@ -1,14 +1,17 @@
 ### STATISTICAL HYPOTHESIS TESTS ###
 
 import numpy as np
+from scipy import stats
 import statsmodels.api as sm
 import statsmodels.stats.diagnostic as dg
-from scipy import stats
+
+
 stats.chisqprob = lambda chisq, df: stats.chi2.sf(chisq, df)
 from sklearn.linear_model import LinearRegression
 from statsmodels.stats.stattools import durbin_watson
-from stpstone.analytics.quant.statistical_inference import StatiscalDescription
+
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
+from stpstone.analytics.quant.statistical_inference import StatiscalDescription
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 
@@ -34,7 +37,7 @@ class MultipleRegressionHT:
         """
         # setting variables
         list_linearity = list()
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # looping through each iv
         for idx in range(array_x.shape[1]):
@@ -77,7 +80,7 @@ class MultipleRegressionHT:
         INPUTS: ARRAY INDEPENDENT AND DEPENDENT
         OUTPUTS:
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # iterating through array iv columns to calculate vif regarding one iv and the dv
         tups_vif_ivs = [self.vif_iv(array_x[:, idx], array_y) for idx in range(array_x.shape[1])]
@@ -120,7 +123,7 @@ class MultipleRegressionHT:
             STATISTIC AND THE SECOND THE P-VALUE, WHICH OUGHT BE LESS THAN THE TEST STATISTIC TO
             ACCEPT THE H0 HYPOTHESIS)
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # defining the order p of the test
         if p is None:
@@ -183,7 +186,7 @@ class MultipleRegressionHT:
             2. THE P-VALUE FOR THE TEST.
             3. THE TEST RESULT.
         """
-        # checking wheter the array is unidimensional and reshaping it
+        # checking whether the array is unidimensional and reshaping it
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         # checking dv and ivs
         if array_y.ndim != 1:

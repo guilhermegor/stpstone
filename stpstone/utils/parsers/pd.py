@@ -1,8 +1,8 @@
 ### PANDAS DATAFRAME MODULE ###
 
 # pypi.org libs
-import os
 from logging import Logger
+import os
 from typing import Any, Dict, List, Tuple
 
 import pandas as pd
@@ -12,6 +12,7 @@ from stpstone._config.global_slots import YAML_MICROSOFT_APPS
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
+
 
 # check if this is a windows machine
 if os.name == "nt":
@@ -156,7 +157,7 @@ class DealingPd:
         Returns:
             pd.DataFrame
         """
-        # checking wheter to covert through a pandas convertion, or resort to a excel format
+        # checking whether to covert through a pandas convertion, or resort to a excel format
         #   transformation of data in date column format
         if bl_pandas_convertion:
             for col_date in list_col_date:

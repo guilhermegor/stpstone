@@ -1,6 +1,8 @@
-import pandas as pd
 from typing import Any, Dict, List, Optional
+
+import pandas as pd
 from requests import exceptions, request
+
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_API
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -312,7 +314,7 @@ class AnbimaDataFunds(AnbimaDataGen):
                     dict_xpt = dict_aux.copy()
                     for dict_data in data_cnt:
                         for key_data, data_data in dict_data.items():
-                            #   checking wheter the data instance is string, or list
+                            #   checking whether the data instance is string, or list
                             if isinstance(data_data, str) or data_data is None:
                                 dict_xpt["{}_{}".format(key_cnt, key_data)] = data_data
                             elif isinstance(data_data, list):

@@ -49,7 +49,7 @@ class ProbStatsCharts:
             SAVING PATH, NUMBER TO BE FILLED IN NON ERROR VALUES (DIAGONAL)
         OUTPUTS: -
         """
-        # checking wheter or not to focus on errors (occurrences not in diagonal)
+        # checking whether or not to focus on errors (occurrences not in diagonal)
         if bl_focus_errors == True:
             row_sums = conf_mx.sum(axis=1, keepdims=True)
             conf_mx = conf_mx / row_sums
@@ -172,7 +172,7 @@ class ProbStatsCharts:
         # labeling axis
         plt.xlabel(label_axis_x, fontsize=font_size)
         plt.ylabel(label_axis_y, fontsize=font_size)
-        # wheter place a grid or not
+        # whether place a grid or not
         plt.grid(bl_grid)
         # plot figure
         plt.figure(figsize=tup_fig_size)
@@ -210,7 +210,7 @@ class ProbStatsCharts:
         # label axis
         plt.xlabel(label_x_axis, fontsize=font_size)
         plt.ylabel(label_y_axis, fontsize=font_size)
-        # wheter place a grid or not
+        # whether place a grid or not
         plt.grid(bl_grid)
         # saving the plot, if is user's will
         if complete_saving_path != None:
@@ -356,7 +356,7 @@ class ProbStatsCharts:
         train_errors, val_errors = [], []
         # iterating through trainig set size from 1 to n
         for m in range(1, len(X_train)):
-            # fit desired model to infere wheter or not its under or overfitted
+            # fit desired model to infere whether or not its under or overfitted
             model.fit(X_train[:m], y_train[:m])
             # predict values using the fitted model
             y_train_predict = model.predict(X_train[:m])

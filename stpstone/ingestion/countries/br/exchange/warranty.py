@@ -1,11 +1,13 @@
-import pandas as pd
-from typing import Optional
-from sqlalchemy.orm import Session
 from logging import Logger
+from typing import Optional
+
+import pandas as pd
 from requests import Response
+from sqlalchemy.orm import Session
+
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
 class BondIssuersWB3(ABCRequests):
@@ -30,4 +32,4 @@ class BondIssuersWB3(ABCRequests):
         return None
 
     # ! TODO: downstream processing to standardize issuer name in both banks_rts_br and b3_bond_issuers_accp_warranty
-    # ! TODO: inner-join bond issuers accepted by b3 with banks participating in brazillian rts
+    # ! TODO: inner-join bond issuers accepted by b3 with banks participating in brazilian rts

@@ -582,7 +582,7 @@ class HandleReqResponses(UtilsRequests):
         default_int_pgs_join: int = 2
     ) -> pd.DataFrame:
         bytes_pdf = BytesIO(resp_req.content)
-        # checking wheter to read tables or use regex
+        # checking whether to read tables or use regex
         if StrHandler().match_string_like(url, "*feat=read_tables*") == True:
             return self.pdf_doc_tables_response(bytes_pdf)
         else:
@@ -826,7 +826,7 @@ class ABCRequests(HandleReqResponses):
         cookies: Optional[Dict[str, str]] = None
     ) -> Response:
         """
-        Check wheter the request method is valid and do the request with distinctions for session and
+        Check whether the request method is valid and do the request with distinctions for session and
             local proxy-based requests
         Args:
             req_method (str): request method

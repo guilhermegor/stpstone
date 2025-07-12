@@ -173,7 +173,7 @@ class ConnectionApi(metaclass=TypeChecker):
             "Authorization": "Bearer {}".format(self.token),
             "Content-Type": "application/json",
         }
-        # check wheter it is needed to parse the params dictionary
+        # check whether it is needed to parse the params dictionary
         if bl_parse_dict_params_data == True:
             if dict_params != None:
                 dict_params = JsonFiles().dict_to_json(dict_params)
@@ -200,7 +200,7 @@ class ConnectionApi(metaclass=TypeChecker):
                     if resp_req.status_code == int_status_code_ok:
                         bl_retry_request = False
                     elif resp_req.status_code in list_int_http_error_token:
-                        #   reset token wheter http error 401 has been reached
+                        #   reset token whether http error 401 has been reached
                         dict_header = {
                             "Authorization": "Bearer {}".format(self.access_token),
                             "Content-Type": "application/json",
@@ -317,7 +317,7 @@ class Operations(ConnectionApi):
                 else:
                     dict_export[dict_[key_id]][key_id] = dict_[key_id]
                     dict_export[dict_[key_id]][key_name] = dict_[key_name]
-                    #   check wheter the assets associated key already exists or not, create a list if
+                    #   check whether the assets associated key already exists or not, create a list if
                     #       it is not present, and appending a dictionary with symbol, asset, spci,
                     #       spvi, spci option and spvi option limits otherwise
                     if key_assets_associated not in dict_export[dict_[key_id]]:
