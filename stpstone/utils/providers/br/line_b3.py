@@ -1046,10 +1046,10 @@ class SystemEventManagement(ConnectionApi):
             "startTime": str_start_time,
             "endTime": str_sup_time,
             "startDate": DatesBR()
-            .sub_working_days(DatesBR().curr_date()(), int_working_days_before)
+            .sub_working_days(DatesBR().curr_date(), int_working_days_before)
             .strftime("%d/%m/%Y"),
             "endDate": DatesBR()
-            .add_working_days(DatesBR().curr_date()(), int_working_days_after)
+            .add_working_days(DatesBR().curr_date(), int_working_days_after)
             .strftime("%d/%m/%Y"),
         }
         # return json

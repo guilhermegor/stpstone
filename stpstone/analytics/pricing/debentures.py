@@ -1,9 +1,10 @@
 from datetime import date
 from typing import Optional
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class DebenturesBR(metaclass=TypeChecker):
+class DebenturesPricing(metaclass=TypeChecker):
     """
     A comprehensive class for pricing and analyzing Brazilian debentures,
     excluding float_duration-related calculations which are already implemented.
