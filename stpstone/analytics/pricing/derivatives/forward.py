@@ -1,14 +1,41 @@
+"""Forward Contract Pricing."""
 
-### PRICING FORWARD CONTRACTS ###
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class ForwardBR:
 
-    def forward_contract_pricing(self, spot, bid_forward_contract, rate_cost_period, leverage,
-                                 number_contracts):
-        """
-        DOCSTRING: FORWARD CONTRACT FEATURES
-        INPUTS: SPOT PRICE, BID AND RATE COST FOR THE PERIOD
-        OUTPUTS: DICTIONARY (MTM, PCT RETURN AND CONTRACT NOTIONAL)
+class ForwardBR(metaclass=TypeChecker):
+    """Forward contract pricing."""
+
+    def forward_contract_pricing(
+        self, 
+        spot: float, 
+        bid_forward_contract: float, 
+        rate_cost_period: float, 
+        leverage: float, 
+        number_contracts: int
+    ) -> dict[str, float]:
+        """Forward contract pricing.
+
+        Parameters
+        ----------
+        spot : float
+            Spot price
+        bid_forward_contract : float
+            Bid forward contract price
+        rate_cost_period : float
+            Rate cost period
+        leverage : float
+            Leverage multiplier
+        number_contracts : int
+            Number of contracts
+
+        Returns
+        -------
+        dict
+            Dictionary containing:
+            - mtm: Mark-to-market value
+            - pct_return: Percentage return
+            - notional: Notional value
         """
         return {
             'mtm': (float(spot) - float(bid_forward_contract) * (
