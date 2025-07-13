@@ -4,12 +4,10 @@ This module provides a class to calculate IOF and IR taxes based on Brazil's
 regressive tax tables, following the country's specific financial regulations.
 """
 
-from typing import Dict, Tuple
-
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class TaxCalculator(metaclass=TypeChecker):
+class BRRegressiveTaxSchedules(metaclass=TypeChecker):
     """A class to calculate IOF and IR taxes for Brazilian financial operations.
     
     The calculator implements Brazil's regressive tax tables for:
@@ -23,14 +21,14 @@ class TaxCalculator(metaclass=TypeChecker):
     
     Attributes
     ----------
-    iof_table : Dict[int, float]
+    iof_table : dict[int, float]
         Regressive IOF tax rates by days since investment (0-30 days)
-    ir_table : Dict[int, float]
+    ir_table : dict[int, float]
         Regressive IR tax rates by investment duration brackets
     
     Examples
     --------
-    >>> calculator = TaxCalculator()
+    >>> calculator = BRRegressiveTaxSchedules()
     >>> iof, ir, total = calculator.calculate_total_taxes(
     ...     int_cddt=200,
     ...     int_cddr=10,
@@ -41,8 +39,8 @@ class TaxCalculator(metaclass=TypeChecker):
     
     def __init__(self) -> None:
         """Initialize the tax tables for IOF and IR based on Brazilian regulations."""
-        # IOF table: days since investment -> tax rate (0-100%)
-        self.iof_table: Dict[int, float] = {
+        # IOF table: days since investment -> tax float_rate (0-100%)
+        self.iof_table: dict[int, float] = {
             1: 0.96, 2: 0.93, 3: 0.90, 4: 0.86, 5: 0.83,
             6: 0.80, 7: 0.76, 8: 0.73, 9: 0.70, 10: 0.66,
             11: 0.63, 12: 0.60, 13: 0.56, 14: 0.53, 15: 0.50,
@@ -51,8 +49,8 @@ class TaxCalculator(metaclass=TypeChecker):
             26: 0.13, 27: 0.10, 28: 0.06, 29: 0.03, 30: 0.00
         }
         
-        # IR table: days invested -> tax rate (0-100%)
-        self.ir_table: Dict[int, float] = {
+        # IR table: days invested -> tax float_rate (0-100%)
+        self.ir_table: dict[int, float] = {
             1: 22.5, 180: 20.0, 361: 17.5, 721: 15.0
         }
     
@@ -79,13 +77,13 @@ class TaxCalculator(metaclass=TypeChecker):
         Notes
         -----
         - IOF only applies to redemptions within 30 days
-        - The rate decreases progressively each day
+        - The float_rate decreases progressively each day
         """
         if int_cddr < 0:
             raise ValueError("Days since investment cannot be negative")
         
-        rate = self.iof_table.get(min(int_cddr, 30), 0.0)
-        return float_notional * rate / 100
+        float_rate = self.iof_table.get(min(int_cddr, 30), 0.0)
+        return float_notional * float_rate / 100
     
     def calculate_ir_tax(self, int_cddt: int, float_notional: float) -> float:
         """Calculate IR tax based on investment duration.
@@ -115,24 +113,24 @@ class TaxCalculator(metaclass=TypeChecker):
             - 361-720 days: 17.5%
             - 721+ days: 15%
         """
-        if int_cddt < 0:
-            raise ValueError("Days invested cannot be negative")
+        if int_cddt <= 0:
+            raise ValueError("Days invested must be positive")
         
-        rate = 22.5  # Default rate (up to 180 days)
-        for threshold, threshold_rate in sorted(self.ir_table.items()):
-            if int_cddt >= threshold:
-                rate = threshold_rate
+        float_rate = 22.5  # default float_rate (up to 180 days)
+        for int_threshold_cd, float_threshold_rate in sorted(self.ir_table.items()):
+            if int_cddt >= int_threshold_cd:
+                float_rate = float_threshold_rate
             else:
                 break
                 
-        return float_notional * rate / 100
+        return float_notional * float_rate / 100
     
     def calculate_total_taxes(
         self, 
         int_cddt: int, 
         int_cddr: int, 
         float_notional: float
-    ) -> Tuple[float, float, float]:
+    ) -> tuple[float, float, float]:
         """Calculate both IOF and IR taxes with the combined total.
         
         Parameters
@@ -146,7 +144,7 @@ class TaxCalculator(metaclass=TypeChecker):
             
         Returns
         -------
-        Tuple[float, float, float]
+        tuple[float, float, float]
             A tuple containing (iof_tax, ir_tax, total_tax)
             
         Notes
@@ -159,7 +157,7 @@ class TaxCalculator(metaclass=TypeChecker):
         return (iof_tax, ir_tax, iof_tax + ir_tax)
     
     def get_iof_rate(self, int_cddr: int) -> float:
-        """Get the IOF rate for specific days since investment.
+        """Get the IOF float_rate for specific days since investment.
         
         Parameters
         ----------
@@ -169,12 +167,12 @@ class TaxCalculator(metaclass=TypeChecker):
         Returns
         -------
         float
-            The applicable IOF rate in percentage
+            The applicable IOF float_rate in percentage
         """
         return self.iof_table.get(min(int_cddr, 30), 0.0)
     
     def get_ir_rate(self, int_cddt: int) -> float:
-        """Get the IR rate for specific investment duration.
+        """Get the IR float_rate for specific investment duration.
         
         Parameters
         ----------
@@ -184,16 +182,16 @@ class TaxCalculator(metaclass=TypeChecker):
         Returns
         -------
         float
-            The applicable IR rate in percentage
+            The applicable IR float_rate in percentage
             
         Notes
         -----
         Follows Brazil's progressive tax brackets for investments
         """
-        rate = 22.5  # Default rate
-        for threshold, threshold_rate in sorted(self.ir_table.items()):
-            if int_cddt >= threshold:
-                rate = threshold_rate
+        float_rate = 22.5  # default float_rate
+        for int_threshold_cd, float_threshold_rate in sorted(self.ir_table.items()):
+            if int_cddt >= int_threshold_cd:
+                float_rate = float_threshold_rate
             else:
                 break
-        return rate
+        return float_rate
