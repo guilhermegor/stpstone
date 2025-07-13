@@ -20,9 +20,9 @@ print(f"Black Scholes Call Option: {EuropeanOptions().general_opt_price(103.0, 1
 print(f"Black Scholes Put Option: {EuropeanOptions().general_opt_price(103.0, 100.0, 0.025, 0.25, 0.2, 0.0, 0.0, 'put')}")
 
 print("\n*** Base Converter Tester ***")
-print(f"Decimal to Binary: {BaseConverter("1027", 10, 2).convert}")
-print(f"Decimal to Hexadecimal: {BaseConverter("1027", 10, 16).convert}")
-print(f"Decimal to Octal: {BaseConverter("1027", 10, 8).convert}")
+print(f"Decimal to Binary: {BaseConverter('1027', 10, 2).convert}")
+print(f"Decimal to Hexadecimal: {BaseConverter('1027', 10, 16).convert}")
+print(f"Decimal to Octal: {BaseConverter('1027', 10, 8).convert}")
 
 print("\n***Expression Converter Tester ***")
 
