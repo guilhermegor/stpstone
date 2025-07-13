@@ -29,6 +29,8 @@ We use the following standardized variable naming conventions:
 | `float_pv`      | Present value of instrument notional (negative for purchasing, positive for selling) |
 | `float_fv`      | Future value of instrument notional (negative for purchasing, positive for selling) |
 | `float_notional`| Priced value from contract in absolute terms |
+| `float_position_value`| Accounting current market value, for taxing purposes |
+| `float_acquisition_basis`| Accounting cost basis, for taxing purposes |
 | `float_size`    | Size of instrument contract |
 | `float_xcg`     | Exchange value for instrument pricing |
 | `float_qty`     | Quantity of instruments (positive for purchasing, negative for selling) |

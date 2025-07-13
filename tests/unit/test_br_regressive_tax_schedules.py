@@ -46,8 +46,8 @@ class TestBRRegressiveTaxSchedules:
     @pytest.mark.parametrize(
         "days,expected_rate,expected_tax",
         [
-            (1, 0.96, 96.0),  # First day maximum rate
-            (10, 0.66, 66.0),  # Mid-range rate
+            (1, 0.96, 96.0),  # first day maximum rate
+            (10, 0.66, 66.0),  # mid-range rate
             (30, 0.00, 0.0),  # Last day zero rate
             (31, 0.00, 0.0),  # Beyond table (should cap at 30)
             (15, 0.50, 50.0),  # Exact middle
@@ -86,14 +86,14 @@ class TestBRRegressiveTaxSchedules:
     @pytest.mark.parametrize(
         "days,expected_rate,expected_tax",
         [
-            (1, 22.5, 2250.0),  # Minimum bracket
-            (180, 20.0, 2000.0),  # First threshold
-            (181, 20.0, 2000.0),  # Just above first threshold
-            (360, 20.0, 2000.0),  # Just below next threshold
-            (361, 17.5, 1750.0),  # Second threshold
-            (720, 17.5, 1750.0),  # Just below next threshold
-            (721, 15.0, 1500.0),  # Final threshold
-            (1000, 15.0, 1500.0),  # Well beyond final threshold
+            (1, 22.5, 2250.0),  # minimum bracket
+            (180, 20.0, 2000.0),  # first threshold
+            (181, 20.0, 2000.0),  # just above first threshold
+            (360, 20.0, 2000.0),  # just below next threshold
+            (361, 17.5, 1750.0),  # second threshold
+            (720, 17.5, 1750.0),  # just below next threshold
+            (721, 15.0, 1500.0),  # final threshold
+            (1000, 15.0, 1500.0),  # well beyond final threshold
         ],
     )
     def test_calculate_ir_tax(
@@ -129,11 +129,11 @@ class TestBRRegressiveTaxSchedules:
     @pytest.mark.parametrize(
         "cddt,cddr,expected_iof,expected_ir,expected_total",
         [
-            (1, 1, 96.0, 2250.0, 2346.0),  # Max both taxes
-            (30, 30, 0.0, 2250.0, 2250.0),  # No IOF, max IR
-            (181, 1, 96.0, 2000.0, 2096.0),  # Mid IR bracket
-            (721, 30, 0.0, 1500.0, 1500.0),  # Min IR, no IOF
-            (500, 15, 50.0, 1750.0, 1800.0),  # Mixed case
+            (1, 1, 96.0, 2250.0, 2346.0),  # max both taxes
+            (30, 30, 0.0, 2250.0, 2250.0),  # no IOF, max IR
+            (181, 1, 96.0, 2000.0, 2096.0),  # mid IR bracket
+            (721, 30, 0.0, 1500.0, 1500.0),  # min IR, no IOF
+            (500, 15, 50.0, 1750.0, 1800.0),  # mixed case
         ],
     )
     def test_calculate_total_taxes(
@@ -160,11 +160,11 @@ class TestBRRegressiveTaxSchedules:
     @pytest.mark.parametrize(
         "invalid_days,invalid_notional",
         [
-            ("1", 10000.0),  # String days
-            (1.5, 10000.0),  # Float days
-            (1, "10000"),  # String notional
-            (None, 10000.0),  # None days
-            (1, None),  # None notional
+            ("1", 10000.0),  # string days
+            (1.5, 10000.0),  # float days
+            (1, "10000"),  # string notional
+            (None, 10000.0),  # none days
+            (1, None),  # none notional
         ],
     )
     def test_invalid_types(
