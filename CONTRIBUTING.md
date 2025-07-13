@@ -62,12 +62,7 @@ All branches must follow the pattern: `<purpose>/<branch-task>`
 
 ## Commit Message Standards
 
-All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-```bash
-<type>(<scope>): <description>
-text
-```
+All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification: `<type>/<scope>`
 
 
 **Available types:**
@@ -94,6 +89,7 @@ text
 
 ## Development Setup
 
+
 1. **Dependency Management**:
    - Use Poetry (version specified in `requirements.txt`)
    - Avoid adding redundant libraries - check `pyproject.toml` first
@@ -108,10 +104,23 @@ text
      - Large file detection
      - Secret key detection
 
-3. **Testing**:
-   - Ensure all new code has corresponding tests
-   - Run tests locally before pushing
-   - Maintain 100% test coverage for critical components
+3. **Testing Framework**:
+   - Maintain the standard file structure:
+     - Implementation: `src/<feat_name>.py`
+     - Tests: `tests/test_<feat_name>.py`
+   - Run comprehensive validation with: `make test_feat MODULE=<feat_name>`
+        - This command executes:
+            - **Ruff**: Linting, formatting, and flagging deprecated Python features
+            - **Codespell**: Spelling verification in comments and docstrings
+            - **Automated tests**: All test cases matching the project's testing standards
+   - Ensure 100% test coverage for critical components
+   - Run tests locally before pushing changes
+
+4. **Test-Driven Development**:
+   - Write tests before implementation when possible
+   - Include normal operations, edge cases, error conditions, type validation, and checks for examples in docstrings
+   - Maintain test fixtures for complex scenarios
+   - Recommended to use UNIT_TEST_TEMPLATE.md for AI generation of unit tests, in order to implement test-driven development best practices and follow project standards
 
 ## Pull Request Process
 
