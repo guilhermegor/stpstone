@@ -119,12 +119,12 @@ class NotionalFromPV:
                 + "inferior than the last"
             )
         # working days from the last pmi release util the following
-        int_dudm = DatesBR().get_working_days_delta(dt_pmi_last, dt_pmi_next)
+        int_wddm = DatesBR().get_working_days_delta(dt_pmi_last, dt_pmi_next)
         # working days from the last pmi release until the reference date
         int_wddt = DatesBR().get_working_days_delta(dt_pmi_last, dt_ref)
         # prt - pmi pro-rata tempore
         float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
-            ** (int_wddt / int_dudm)
+            ** (int_wddt / int_wddm)
         # returning notional pricing
         return float_pv * float_qty * float_prt
 
@@ -449,7 +449,7 @@ class TSIR:
     def third_degree_polynomial_cubic_spline(
         self, 
         list_constants_cubic_spline: list[float], 
-        int_nper_working_days: int, 
+        int_nper_wd: int, 
         bl_sup_list: bool, 
         int_num_constants_cubic_spline: int = 8
     ) -> float:
@@ -461,7 +461,7 @@ class TSIR:
         Mathematical Form:
         - Lower segment (bl_sup_list=False): Σ (a_i * t^i) for i=0 to 3
         - Upper segment (bl_sup_list=True): Σ (b_i * t^(i-4)) for i=4 to 7
-        where t = int_nper_working_days and coefficients are in list_constants_cubic_spline
+        where t = int_nper_wd and coefficients are in list_constants_cubic_spline
 
         Parameters
         ----------
@@ -469,7 +469,7 @@ class TSIR:
             List of 8 spline coefficients ordered as [a0, a1, a2, a3, b0, b1, b2, b3]
             where a_i are coefficients for the lower polynomial segment (t <= knot point)
             and b_i are coefficients for the upper polynomial segment (t > knot point)
-        int_nper_working_days : int
+        int_nper_wd : int
             Time point (in working days) at which to evaluate the spline
         bl_sup_list : bool
             Segment selection flag:
@@ -482,7 +482,7 @@ class TSIR:
         Returns
         -------
         float
-            Evaluated spline value at int_nper_working_days
+            Evaluated spline value at int_nper_wd
 
         Raises
         ------
@@ -510,10 +510,10 @@ class TSIR:
             raise Exception('Poor defined list of constants for cubic spline, '
                             + f'ought have {int_num_constants_cubic_spline} elements')
         if not bl_sup_list:
-            return sum([list_constants_cubic_spline[x] * int_nper_working_days ** x 
+            return sum([list_constants_cubic_spline[x] * int_nper_wd ** x 
                         for x in range(0, int(int_num_constants_cubic_spline / 2))])
         else:
-            return sum([list_constants_cubic_spline[x] * int_nper_working_days \
+            return sum([list_constants_cubic_spline[x] * int_nper_wd \
                         ** (x - int_num_constants_cubic_spline / 2) 
                         for x in range(int(int_num_constants_cubic_spline / 2), 
                                        int_num_constants_cubic_spline)])
@@ -649,7 +649,7 @@ class TSIR:
         self, 
         dict_nper_rates: dict[int, float], 
         float_tau_first_assumption: float = 1.0, 
-        int_number_samples: int = None
+        int_n_smp: int = None
     ) -> dict[int, float]:
         """Nelson Siegel term structure of interest rates.
         
@@ -659,7 +659,7 @@ class TSIR:
             Dictionary of interest rates by nper.
         float_tau_first_assumption : float
             First assumption of tau.
-        int_number_samples : int
+        int_n_smp : int
             Number of samples.
 
         Returns
@@ -674,7 +674,7 @@ class TSIR:
         y, _ = calibrate_ns_ols(
             np.array(list(dict_nper_rates.keys())),
             np.array(list(dict_nper_rates.values())), float_tau_first_assumption)
-        if int_number_samples is None:
+        if int_n_smp is None:
             t = np.linspace(list(dict_nper_rates.keys())[
                             0], list(dict_nper_rates.keys())[-1], int(list(dict_nper_rates.keys())[
                                 -1] - list(dict_nper_rates.keys())[0] + 1))
@@ -682,6 +682,6 @@ class TSIR:
                 0], list(dict_nper_rates.keys())[-1])
         else:
             t = np.linspace(list(dict_nper_rates.keys())[
-                            0], list(dict_nper_rates.keys())[-1], int_number_samples)
+                            0], list(dict_nper_rates.keys())[-1], int_n_smp)
         dict_ = dict(zip(t_aux, y(t)))
         return dict_
