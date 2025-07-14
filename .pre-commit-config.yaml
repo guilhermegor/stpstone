@@ -130,6 +130,3 @@ repos:
         types:
           - file
         verbose: true
-        additional_dependencies:
-          - curl
-          - wget
