@@ -128,7 +128,7 @@ repos:
         entry: bash cli/test_urls_docstrings.sh
         language: system
         types:
-          - python
+          - file
         verbose: true
         additional_dependencies:
           - curl
