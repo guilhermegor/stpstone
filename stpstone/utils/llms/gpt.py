@@ -1,8 +1,10 @@
 from typing import List, Optional
+
 from openai import OpenAI
 from openai.api_resources.chat_completion import ChatCompletion
-from stpstone.utils.parsers.dicts import HandlingDicts
+
 from stpstone._config.global_slots import YAML_LLMS
+from stpstone.utils.parsers.dicts import HandlingDicts
 
 
 class GPT():

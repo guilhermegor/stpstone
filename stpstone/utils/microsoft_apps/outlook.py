@@ -206,7 +206,7 @@ class DealingOutlook:
     ):
         """
         REFERENCES: https://stackoverflow.com/questions/22813814/clearly-documented-reading-of-emails-functionality-with-python-win32com-outlook,
-            https://docs.microsoft.com/en-us/dotnet/api/microsoft.office.interop.outlook.mailitem?redirectedfrom=MSDN&view=outlook-pia#properties_
+           https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.interop.outlook.mailitem?view=outlook-pia&redirectedfrom=MSDN
         DOCSTRING: LAST EMAIL SUBJECT WITH RULE (OR NAME LIKE)
         INPUTS: EMAIL ACCOUNT, OUTLOOK FOLDER, SUBJECT SUBSTRING, OUTLOOK FOLDER (NONE AS DEFAULT)
         OUTPUTS: OBJECT
@@ -254,7 +254,7 @@ class DealingOutlook:
     ):
         """
         REFERENCES: https://stackoverflow.com/questions/22813814/clearly-documented-reading-of-emails-functionality-with-python-win32com-outlook,
-            https://docs.microsoft.com/en-us/dotnet/api/microsoft.office.interop.outlook.mailitem?redirectedfrom=MSDN&view=outlook-pia#properties_
+            https://learn.microsoft.com/en-us/dotnet/api/microsoft.office.interop.outlook.mailitem?view=outlook-pia&redirectedfrom=MSDN
         DOCSTRING: GET BODY CONTENT
         INPUTS: EMAIL ACCOUNT, OUTLOOK FOLDER, SUBJECT SUBSTRING, OUTLOOK FOLDER (NONE AS DEFAULT)
         OUTPUTS: OBJECT

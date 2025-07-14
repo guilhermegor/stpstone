@@ -1,10 +1,23 @@
 ### FITTING MODELS ASSESMENT
 
 import numpy as np
-from sklearn.model_selection import cross_val_score, cross_val_predict
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, \
-    roc_auc_score, adjusted_rand_score, silhouette_score, accuracy_score, r2_score
+from sklearn.metrics import (
+    accuracy_score,
+    adjusted_rand_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    r2_score,
+    recall_score,
+    roc_auc_score,
+    silhouette_score,
+)
+from sklearn.model_selection import (
+    GridSearchCV,
+    RandomizedSearchCV,
+    cross_val_predict,
+    cross_val_score,
+)
 
 
 class FitPerformance:
@@ -95,8 +108,7 @@ class FitPerformance:
                                             num_cross_validation_splitting_strategy=5,
                                             bl_return_train_score=True, bl_randomized_search=True):
         """
-        REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_sup_to_sup_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH,
-            https://towardsdatascience.com/machine-learning-gridsearchcv-randomizedsearchcv-d36b89231b10
+        REFERENCES: (FINE-TUNE YOUR MODEL) https://colab.research.google.com/github/ageron/handson-ml2/blob/master/02_sup_to_sup_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH
         DOCSTRING: FIDDLE AN ESTIMATOR WITH A COMBINATION OF HYPERPARAMETHERS AND FINDING THE
             OPTIMAL SOLUTION
         INPUTS: MODEL ESTIMATOR (NORMALLY FROM SKLEARN), PARAMETERS GRID, SCORING METHOD,

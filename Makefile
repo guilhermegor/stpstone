@@ -12,6 +12,9 @@ test_cov:
 test_feat:
 	bash cli/test_feature.sh $(MODULE)
 
+test_urls_docstrings:
+	bash cli/test_urls_docstrings.sh
+
 
 # git
 precommit_update:

@@ -1,7 +1,9 @@
-import pandas as pd
+from typing import Dict, List, Literal, Optional, Union
+
 import numpy as np
+import pandas as pd
 from scipy.stats import norm
-from typing import List, Union, Optional, Literal, Dict
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.parsers.arrays import Arrays
 

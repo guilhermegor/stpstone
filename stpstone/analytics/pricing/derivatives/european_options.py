@@ -2460,9 +2460,7 @@ class IterativeMethods(Greeks):
         
         References
         ----------
-        https://www.youtube.com/watch?v=nWslah9tHLk,
-        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
-        parameters/
+        https://www.youtube.com/watch?v=nWslah9tHLk
         """
         s, k, r, t, n, sigma = self.set_parameters(
             s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
@@ -2531,9 +2529,7 @@ class IterativeMethods(Greeks):
         
         References
         ----------
-        https://www.youtube.com/watch?v=nWslah9tHLk,
-        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
-        parameters/
+        https://www.youtube.com/watch?v=nWslah9tHLk
         """
         s, k, r, t, n, sigma = self.set_parameters(
             s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
@@ -2603,9 +2599,7 @@ class IterativeMethods(Greeks):
         
         References
         ----------
-        https://www.youtube.com/watch?v=nWslah9tHLk,
-        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
-        parameters/
+        https://www.youtube.com/watch?v=nWslah9tHLk
         """
         s, k, r, t, n, sigma = self.set_parameters(
             s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
@@ -2678,9 +2672,7 @@ class IterativeMethods(Greeks):
         
         References
         ----------
-        https://www.youtube.com/watch?v=nWslah9tHLk,
-        https://quantpy.com.au/binomial-tree-model/binomial-asset-pricing-model-choosing-
-        parameters/
+        https://www.youtube.com/watch?v=nWslah9tHLk
         """
         s, k, r, t, n, sigma = self.set_parameters(
             s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)

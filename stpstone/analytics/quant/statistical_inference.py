@@ -259,7 +259,6 @@ class NormalityHT:
 
     def kolmogorov_smirnov_test(self, array_x, alpha=0.05, factor_empirical_func=10):
         """
-        REFERENCES: http://www.portalaction.com.br/inferencia/62-teste-de-kolmogorov-smirnov
         DOCSTRING: TEST OF HYPOTHESIS KOLMOGOROV-SMIRNOV TO CHECK WHETER THE NORMAL DISTRIBUTIONS
             FITS A SAMPLE OF DATA
         INPUTS: LIST OF REAL NUMBERS, ALPHA (STANDARD VALUE IS 0.05) AND
@@ -304,7 +303,6 @@ class NormalityHT:
 
     def anderson_darling(self, array_data, alpha=0.05):
         """
-        REFERENCES: http://www.portalaction.com.br/inferencia/63-teste-de-anderson-darling,
             http://www.uel.br/projetos/experimental/pages/arquivos/Anderson_Darling.html
         DOCSTRING: TEST OF HYPOTHESIS ANDERSON-DARLING TO CHECK WHETER THE NORMAL DISTRIBUTIONS
             FITS A SAMPLE OF DATA
@@ -354,8 +352,7 @@ class NormalityHT:
 
     def shapiro_wilk(self, array_data, alpha=0.05):
         """
-        REFERENCES: http://www.portalaction.com.br/inferencia/64-teste-de-shapiro-wilk,
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.shapiro.html
+        REFERENCES: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.shapiro.html
         DOCSTRING: TEST OF HYPOTHESIS SHAPIRO-WALK TO CHECK WHETER THE NORMAL DISTRIBUTIONS
             FITS A SAMPLE OF DATA
         INPUTS: LIST OF REAL NUMBERS AND ALPHA (STANDARD VALUE IS 0.05)

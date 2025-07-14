@@ -34,7 +34,7 @@ class AnbimaDataGen:
             str_host_prd (str): string with production host
             str_host_dev (str): string with development host
 
-        Metadata: https://developers.anbima.com.br/api-portal/pt-br
+        Metadata: https://developers.anbima.com.br/pt/
         """
         self.str_client_id = str_client_id
         self.str_client_secret = str_client_secret

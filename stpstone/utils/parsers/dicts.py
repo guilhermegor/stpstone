@@ -1,12 +1,12 @@
 ### HANDLING DICTIONARIES ISSUES ###
 
-import re
 from collections import Counter, OrderedDict, defaultdict
 from functools import cmp_to_key
 from heapq import nlargest, nsmallest
 from itertools import groupby
 from numbers import Number
 from operator import itemgetter
+import re
 from typing import Any, Callable, Dict, List, Optional, Union
 
 

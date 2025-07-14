@@ -1,7 +1,8 @@
 # HANDLING NUMERCIAL SEQUENCES IN PYTHON
 
-from scipy.misc import derivative
 import math
+
+from scipy.misc import derivative
 
 
 class Fibonacci:
@@ -37,7 +38,6 @@ class Fibonacci:
 
 class TaylorSeries:
     """
-    REFERENCES: https://www.anthonymorast.com/blog/2021/10/03/taylor-series-in-python/#:~:text=The%20Taylor%20series%20of%20a,and%20using%20higher%20degree%20polynomials.
     DOCSTRING:
     INPUTS:
     OUTPUTS:

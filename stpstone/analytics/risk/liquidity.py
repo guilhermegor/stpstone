@@ -1,10 +1,9 @@
-from typing import Optional, Union, Literal
+from typing import Literal, Optional, Union
 
 
 class LiquidityRatios:
     """
-    Metadata: https://www.investopedia.com/terms/l/liquidityratios.asp,
-    https://www.toppr.com/guides/principles-and-practice-of-accounting/accounting-ratios/liquidity-ratios/
+    Metadata: https://www.investopedia.com/terms/l/liquidityratios.asp
     """
 
     def current_ratio(self, float_curr_assets: float, float_curr_liabilities: float):

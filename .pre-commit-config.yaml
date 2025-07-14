@@ -110,7 +110,8 @@ repos:
         name: test coverage check
         entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage report --fail-under=80 -m"
         language: system
-        types: [python]
+        types:
+          - python
         pass_filenames: false
         verbose: true
       
@@ -118,5 +119,17 @@ repos:
         name: coverage badge
         entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage-badge -o coverage.svg -f"
         language: system
-        types: [python]
+        types:
+          - python
         pass_filenames: false
+      
+      - id: check-urls
+        name: check urls in docstrings
+        entry: bash cli/test_urls_docstrings.sh
+        language: system
+        types:
+          - python
+        verbose: true
+        additional_dependencies:
+          - curl
+          - wget

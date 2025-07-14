@@ -5,12 +5,15 @@ https://gist.github.com/mikepsn/27dd0d768ccede849051#file-excelapp-py-L16
 http://code.activestate.com/recipes/528870-class-for-writing-content-to-excel-and-formatting-/
 """
 from __future__ import unicode_literals
-import os
+
+from ctypes import windll
 import io
+import os
+
 import pandas as pd
 from win32com.client import Dispatch, constants
 from xlwt import Workbook
-from ctypes import windll
+
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -551,8 +554,6 @@ class ExcelApp:
 class ExcelWriter(object):
     """
     Excel class for creating spreadsheets - esp writing data and formatting them
-    Based in part on #http://snippets.dzone.com/posts/show/2036,
-    and http://www.markcarter.me.uk/computing/python/excel.html
     """
 
     def __init__(self, file_name, default_sheet_name, make_visible=False):
@@ -597,7 +598,6 @@ class ExcelWriter(object):
         Activate named sheet.
         """
         sheets = self.workbook.Sheets
-        # http://mail.python.org/pipermail/python-win32/2002-February/000249.html
         sheets(sheet_name).Activate()
 
     def add2cell(self, row, col, content, sheet=None):
@@ -688,7 +688,6 @@ class ExcelWriter(object):
         To get methods etc record a macro in EXCEL and look at it.
         To get the value of Excel Constants such as xlEdgeLeft (7) or xlThin (2)
         type e.g. Debug.Print xlEdgeLeft in the Immediate window of the VBA editor and press enter.
-        http://www.ureader.com/message/33389340.aspx
         For changing the pallete of 56 colours ref: http://www.cpearson.com/excel/colors.htm
         """
         if style == STYLE_HEADING1:

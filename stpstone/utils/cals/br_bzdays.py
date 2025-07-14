@@ -3,10 +3,9 @@
 github.com/peopledoc/workalendar/blob/master/workalendar/america/brazil.py
 """
 
-from datetime import timedelta, date
+from datetime import date, timedelta
 
-from workalendar.core import WesternCalendar, ChristianMixin
-from workalendar.core import MON, SAT, SUN
+from workalendar.core import MON, SAT, SUN, ChristianMixin, WesternCalendar
 from workalendar.registry_tools import iso_register
 
 
@@ -610,8 +609,7 @@ class BrazilBankCalendar(BrazilSaoPauloCity):
     def get_last_day_of_year_for_only_internal_bank_trans(self, year):
         """
         The last day of year isn't a working day for public bank
-        transactions in Brazil. More details can be read in
-        http://www.bcb.gov.br/pre/bc_atende/port/servicos4.asp
+        transactions in Brazil.
         """
         last_day = date(year, 12, 31)
 
