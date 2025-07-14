@@ -485,20 +485,26 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         """
         return dt_.strftime("%w")
 
-    def find_working_day(self, dt_: datetime) -> datetime:
-        """Find the next working day from a given date.
+    def find_working_day(self, dt_: date, bl_next: bool = True) -> date:
+        """Correct dates for weekends and holidays.
 
         Parameters
         ----------
-        dt_ : datetime
-            Starting date
+        dt_ : date
+            Date to correct
+        bl_next : bool, optional
+            Whether to return next working day, by default True
 
         Returns
         -------
-        datetime
-            Next working day
+        date
+            Corrected date
         """
-        return self.add_working_days(self.sub_working_days(dt_, 1), 1)
+        dt_ref = self.add_working_days(self.sub_working_days(dt_, 1), 1)
+        if bl_next:
+            return dt_ref
+        else:
+            return self.sub_working_days(dt_ref, 1) if dt_ref > dt_ else dt_ref
 
     def nth_weekday_month(
         self,
@@ -535,7 +541,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             if int(self.week_number(d)) == int_weekday
         ]
 
-    def delta_calendar_days(self, dt_start: datetime, dt_end: datetime) -> int:
+    def delta_calendar_days(self, dt_start: date, dt_end: date) -> int:
         """Calculate difference in calendar days between two dates.
 
         Parameters
