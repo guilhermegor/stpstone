@@ -21,11 +21,12 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
-class InputsClassification:
+class InputsClassification(metaclass=TypeChecker):
     """Class for handling input data for classification tasks."""
 
     def fetch_sklearn_database(
@@ -92,7 +93,7 @@ class InputsClassification:
             plt.show()
 
 
-class Classification:
+class Classification(metaclass=TypeChecker):
     """Class implementing various classification algorithms."""
 
     def one_hot_vectorizer(self, list_corpus: list[str]) -> dict:
@@ -239,7 +240,7 @@ class Classification:
         array_x: np.ndarray,
         array_y: np.ndarray,
         impurity_crit: str = "gini",
-        float_max_depth: Optional[float] = None,
+        int_max_depth: Optional[int] = None,
         int_random_state_seed: int = 42
     ) -> dict:
         """Train decision tree classifier.
@@ -252,7 +253,7 @@ class Classification:
             Target array
         impurity_crit : str, optional
             Splitting criterion, default "gini"
-        float_max_depth : float, optional
+        int_max_depth : int, optional
             Max tree depth, default None
         int_random_state_seed : int, optional
             Random seed, default 42
@@ -269,7 +270,7 @@ class Classification:
         """
         model = DecisionTreeClassifier(
             criterion=impurity_crit,
-            max_depth=float_max_depth,
+            max_depth=int_max_depth if int_max_depth is not None else None,
             random_state=int_random_state_seed
         )
         model.fit(array_x, array_y)
@@ -448,7 +449,7 @@ class Classification:
         }
 
 
-class ImageProcessing:
+class ImageProcessing(metaclass=TypeChecker):
     """Class for image processing tasks."""
 
     def img_dims(self, name_path: str) -> tuple:
@@ -513,14 +514,14 @@ class ImageProcessing:
 
     def plot_subplot(
         self,
-        float_exp_var_ratio: float,
+        int_exp_var_ratio: int,
         *array_x: np.ndarray
     ) -> None:
         """Plot subplot of image array.
 
         Parameters
         ----------
-        float_exp_var_ratio : float
+        int_exp_var_ratio : int
             Explained variance ratio
         *array_x : np.ndarray
             Image arrays to plot
@@ -530,7 +531,7 @@ class ImageProcessing:
         [1] https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         matplotlib.pyplot.subplot documentation
         """
-        plt.subplot(3, 2, float_exp_var_ratio)
+        plt.subplot(3, 2, int_exp_var_ratio)
         # remove single-dimensional entries
         img = np.squeeze(array_x[0])
         plt.imshow(img, cmap="gray")

@@ -193,7 +193,7 @@ def test_svm_invalid_strategy(
 ) -> None:
     """Test SVM with invalid strategy raises error."""
     X, y = sample_classification_data
-    with pytest.raises(ValueError, match="Invalid multiclass strategy"):
+    with pytest.raises(TypeError, match="must be one of"):
         classification.svm(X, y, multiclass_classification_strategy="invalid")
 
 
@@ -369,7 +369,7 @@ def test_decision_tree_max_depth(
 ) -> None:
     """Test decision tree with max depth constraint."""
     X, y = sample_classification_data
-    result = classification.decision_tree(X, y, float_max_depth=2)
+    result = classification.decision_tree(X, y, int_max_depth=2)
     assert isinstance(result, dict)
 
 
