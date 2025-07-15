@@ -193,7 +193,7 @@ class Classification(metaclass=TypeChecker):
             Kernel type, default "rbf"
         float_regularization_parameter : float, optional
             Regularization parameter, default 1
-        multiclass_classification_strategy : str, optional
+        multiclass_classification_strategy Literal["best", "ovr", "ovo"]
             Strategy for multiclass ("best", "ovr", "ovo"), default "best"
         gamma : str, optional
             Kernel coefficient, default "auto"

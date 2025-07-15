@@ -14,6 +14,7 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 - **Type hints**:
 1. Avoid `Any` type hint whenever possible; use specific types
 2. Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid ruff linting raising warnings
+3. Add type hints to every method, function and whenever is possible
 - **Docstring format**:
 1. NumPy style
 2. Include brief description of what is being tested

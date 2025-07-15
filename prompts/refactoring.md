@@ -7,10 +7,14 @@ Please refactor the following Python code to strictly adhere to these requiremen
    - Quotes: Double quotes for all strings and dictionaries
    - Docstrings: numpy style (with Parameters/Returns/References sections)
    - Type hints: Required for all function signatures and returns
+   - Avoid from typing import Dict, List, Tuple and any typing with primitives like dict, list, tuple, in order to avoid raising errors from Ruff
+   - When the variable accepts just a few options, please use Literal (from typing), instead of str
 
 2. **Linting Requirements**:
    - Follow numpy-style docstrings (79 char line length for docstring content)
+   - Add description to module
    - Maintain all existing references in docstrings
+   - Do not trim long URLs in docstring references, break line if needed
    - Comply with flake8, pycodestyle, and mypy type checking
    - Use explicit type annotations (no implicit Any)
    - Remove all commented-out code
@@ -33,27 +37,25 @@ Please refactor the following Python code to strictly adhere to these requiremen
 
 5. **Example of Required Style**:
    ```python
-   def sample_function(param1: int, param2: str) -> dict[str, str]:
-       """
-       Brief description of function.
+   from typing import Union
+   import numpy as np
 
-       Parameters
-       ----------
-       param1 : int
-           Description of first parameter
-       param2 : str
-           Description of second parameter
 
-       Returns
-       -------
-       dict[str, str]
-           Description of return value
+   def example_function() -> dict[str, Union[np.ndarray, float]]:
+      """
+      Example function demonstrating proper typing and formatting.
 
-       References
-       ----------
-       .. [1] https://example.com/reference
-       """
-       return {"key": param2 * param1}
+      Returns
+      -------
+      dict[str, Union[np.ndarray, float]]
+         Dictionary containing either numpy arrays or float values
+
+      References
+      ----------
+      .. [1] https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html
+      .. [2] https://docs.python.org/3/library/typing.html#typing.Union
+      """
+      return {"array": np.array([1, 2, 3]), "value": 42.0}
     ```
 
 Please refactor this code:
