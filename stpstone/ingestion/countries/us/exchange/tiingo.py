@@ -28,8 +28,8 @@ class TiingoUS(ABCRequests):
         self.session = session
         self.dt_start = dt_start
         self.dt_end = dt_end
-        self.dt_inf_yyyymmdd = dt_start.strftime('%Y-%m-%d')
-        self.dt_sup_yyyymmdd = dt_end.strftime('%Y-%m-%d')
+        self.dt_start_yyyymmdd = dt_start.strftime('%Y-%m-%d')
+        self.dt_end_yyyymmdd = dt_end.strftime('%Y-%m-%d')
         self.cls_db = cls_db
         self.logger = logger
         self.token = token,

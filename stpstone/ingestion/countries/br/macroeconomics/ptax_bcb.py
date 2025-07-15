@@ -42,9 +42,9 @@ class PTAXBCB(ABCRequests):
         self.logger = logger
         self.token = token
         self.bl_debug = bl_debug
-        self.dt_sup_yyyymmdd = self.dt_end.strftime('%Y%m%d')
-        self.dt_inf_ddmmyyyy = self.dt_start.strftime('%d/%m/%Y')
-        self.dt_sup_ddmmyyyy = self.dt_end.strftime('%d/%m/%Y')
+        self.dt_end_yyyymmdd = self.dt_end.strftime('%Y%m%d')
+        self.dt_start_ddmmyyyy = self.dt_start.strftime('%d/%m/%Y')
+        self.dt_end_ddmmyyyy = self.dt_end.strftime('%d/%m/%Y')
         self.df_ids = self.source('ids', bl_fetch=True)
         self.list_slugs = list_slugs if list_slugs is not None else \
             list(self.df_ids['CURRENCY_ID'].unique())

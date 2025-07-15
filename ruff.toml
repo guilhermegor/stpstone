@@ -74,9 +74,8 @@ ignore = [
     "D206",  # docstring should be indented with spaces, not tabs
 ]
 fixable = ["I"]
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"  # allow dummy variables to start
-                                                              #     with an underscore and be
-                                                              #     followed by alphanumeric
+# allow dummy variables to start with an underscore and be followed by alphanumeric
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [lint.isort]
 force-single-line = false

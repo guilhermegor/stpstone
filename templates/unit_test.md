@@ -11,10 +11,10 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 - **Indentation**: Use tabs (4 spaces equivalent)
 - **Target Python version**: 3.9+
 - **Quote style**: Double quotes
-- **Type hints**: 
+- **Type hints**:
 1. Avoid `Any` type hint whenever possible; use specific types
 2. Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid ruff linting raising warnings
-- **Docstring format**: 
+- **Docstring format**:
 1. NumPy style
 2. Include brief description of what is being tested
 3. Include module description
@@ -66,12 +66,12 @@ except ImportError:
 # --------------------------
 def get_package_version() -> str:
     """Get the package version from pyproject.toml.
-    
+
     Returns
     -------
     str
         The version string from pyproject.toml
-    
+
     Raises
     ------
     FileNotFoundError
@@ -80,14 +80,14 @@ def get_package_version() -> str:
         If the version field is missing
     """
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
-    
+
     if sys.version_info >= (3, 11):
         with open(pyproject_path, "rb") as f:
             pyproject = tomllib.load(f)
     else:
         with open(pyproject_path, encoding="utf-8") as f:
             pyproject = tomllib.load(f)
-    
+
     return pyproject["tool"]["poetry"]["version"]
 
 
@@ -104,7 +104,7 @@ def expected_version() -> str:
 def mock_version_not_found(mocker: MockerFixture) -> type[Any]:
     """Mock importlib.metadata.version to raise PackageNotFoundError."""
     return mocker.patch(
-        "importlib.metadata.version", 
+        "importlib.metadata.version",
         side_effect=PackageNotFoundError
     )
 
@@ -326,7 +326,7 @@ def test_all_branches():
     # test condition True
     result_true = function_with_condition(True)
     assert result_true == expected_true
-    
+
     # test condition False
     result_false = function_with_condition(False)
     assert result_false == expected_false
@@ -336,11 +336,11 @@ def test_all_exception_paths():
     # test normal path
     result = function_that_might_fail("valid")
     assert result == expected
-    
+
     # test each exception path
     with pytest.raises(ValueError):
         function_that_might_fail("invalid_value")
-    
+
     with pytest.raises(TypeError):
         function_that_might_fail(123)
 
@@ -349,11 +349,11 @@ def test_loop_edge_cases():
     # test empty loop
     result = function_with_loop([])
     assert result == empty_result
-    
+
     # test single iteration
     result = function_with_loop([1])
     assert result == single_result
-    
+
     # test multiple iterations
     result = function_with_loop([1, 2, 3])
     assert result == multi_result

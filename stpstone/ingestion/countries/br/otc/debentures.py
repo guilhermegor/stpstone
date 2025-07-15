@@ -34,10 +34,10 @@ class DebenturesComBR(ABCRequests):
         self.cls_db = cls_db
         self.logger = logger
         self.dt_ref = dt_end
-        self.dt_inf_yyyymmdd = dt_start.strftime('%Y%m%d')
-        self.dt_sup_yyyymmdd = dt_end.strftime('%Y%m%d')
-        self.dt_inf_ddmmyyyy = dt_start.strftime('%d/%m/%Y')
-        self.dt_sup_ddmmyyyy = dt_end.strftime('%d/%m/%Y')
+        self.dt_start_yyyymmdd = dt_start.strftime('%Y%m%d')
+        self.dt_end_yyyymmdd = dt_end.strftime('%Y%m%d')
+        self.dt_start_ddmmyyyy = dt_start.strftime('%d/%m/%Y')
+        self.dt_end_ddmmyyyy = dt_end.strftime('%d/%m/%Y')
         super().__init__(
             dict_metadata=YAML_DEBENTURES,
             session=session,

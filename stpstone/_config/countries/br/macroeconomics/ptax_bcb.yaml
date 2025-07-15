@@ -72,7 +72,7 @@ available_currencies:
   slugs:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
-  app: Download/fechamento/M{{dt_sup_yyyymmdd}}.csv
+  app: Download/fechamento/M{{dt_end_yyyymmdd}}.csv
   bl_verify: False
   timeout: (12.0, 12.0)
   cols_from_case:
@@ -112,8 +112,8 @@ close_currency_rates:
   headers:
   payload:
     method: gerarCSVFechamentoMoedaNoPeriodo
-    DATAINI: '{{dt_inf_ddmmyyyy}}'
-    DATAFIM: '{{dt_sup_ddmmyyyy}}'
+    DATAINI: '{{dt_start_ddmmyyyy}}'
+    DATAFIM: '{{dt_end_ddmmyyyy}}'
   # iteratively_get_data placeholders:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format

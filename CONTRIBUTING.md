@@ -37,6 +37,8 @@ We use the following standardized variable naming conventions:
 | `dt_ref`        | Reference date |
 | `dt_xpt`        | Maturity date |
 | `dt_rdm`        | Redemption date |
+| `dt_start`        | Start date |
+| `dt_end`        | End date |
 | `int_n_smp`     | Number of samples |
 
 ## Branching Strategy

@@ -46,8 +46,8 @@ class ADVFNWW(ABCRequests):
         self.list_slugs = list_slugs
         self.market = str_market
         self.ticker = str_ticker
-        self.dt_inf_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_start)
-        self.dt_sup_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_end)
+        self.dt_start_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_start)
+        self.dt_end_unix_ts = DatesBR().datetime_to_unix_timestamp(dt_end)
 
     def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         re_pattern = r'\^([^ ]+)'
