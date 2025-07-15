@@ -27,8 +27,7 @@ class FitPerformance(metaclass=TypeChecker):
     """Class for evaluating model fitting performance using various metrics."""
 
     def max_llf(self, array_x: np.ndarray, array_y: np.ndarray, array_y_hat: np.ndarray) -> float:
-        """
-        Calculate the maximized log-likelihood.
+        """Calculate the maximized log-likelihood.
 
         Parameters
         ----------
@@ -57,8 +56,7 @@ regression-model-in-python
         return llf
 
     def aic(self, array_x: np.ndarray, array_y: np.ndarray, array_y_hat: np.ndarray) -> float:
-        """
-        Calculate Akaike's Information Criterion (AIC).
+        """Calculate Akaike's Information Criterion (AIC).
 
         Evaluates a collection of models that explain the same dependent variable.
         Lower values indicate better models. Better than BIC for prediction purposes.
@@ -82,8 +80,7 @@ regression-model-in-python
         return -2.0 * llf + 2.0 * p
 
     def bic(self, array_x: np.ndarray, array_y: np.ndarray, array_y_hat: np.ndarray) -> float:
-        """
-        Calculate Schwartz's Bayesian Information Criterion (BIC).
+        """Calculate Schwartz's Bayesian Information Criterion (BIC).
 
         Lower values indicate better models. Better than AIC when goodness of fit is preferred.
 
@@ -120,8 +117,7 @@ regression-model-in-python
         cross_val_model: Literal["score", "predict"] = "score",
         cross_val_model_method: str = "predict_proba",
     ) -> dict[str, Union[np.ndarray, float]]:
-        """
-        Perform cross-validation to measure estimator performance.
+        """Perform cross-validation to measure estimator performance.
 
         Parameters
         ----------
@@ -190,8 +186,7 @@ regression-model-in-python
         bl_return_train_score: bool = True,
         bl_randomized_search: bool = True,
     ) -> dict[str, Union[dict, float, object, np.ndarray]]:
-        """
-        Find optimal hyperparameters using grid search.
+        """Find optimal hyperparameters using grid search.
 
         Parameters
         ----------
@@ -270,8 +265,7 @@ regression-model-in-python
         scoring_method: str = "accuracy",
         f1_score_average: str = "macro",
     ) -> dict[str, Union[np.ndarray, float]]:
-        """
-        Evaluate model accuracy using various metrics.
+        """Evaluate model accuracy using various metrics.
 
         Parameters
         ----------
@@ -332,8 +326,7 @@ regression-model-in-python
     def fitting_perf_eval(
         self, array_y: np.ndarray, array_y_hat: np.ndarray
     ) -> dict[str, float]:
-        """
-        Evaluate fitting performance using various metrics.
+        """Evaluate fitting performance using various metrics.
 
         Parameters
         ----------

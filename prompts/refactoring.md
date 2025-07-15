@@ -5,10 +5,11 @@ Please refactor the following Python code to strictly adhere to these requiremen
    - Indentation: 4-space tabs
    - Python version: 3.9+ compatible
    - Quotes: Double quotes for all strings and dictionaries
-   - Docstrings: numpy style (with Parameters/Returns/References sections)
+   - Docstrings: numpy style (with Parameters/Returns/References/Raises sections)
    - Type hints: Required for all function signatures and returns
    - Avoid from typing import Dict, List, Tuple and any typing with primitives like dict, list, tuple, in order to avoid raising errors from Ruff
    - When the variable accepts just a few options, please use Literal (from typing), instead of str
+   - Do not use | notation, use Optional (from typing) instead
 
 2. **Linting Requirements**:
    - Follow numpy-style docstrings (79 char line length for docstring content)
