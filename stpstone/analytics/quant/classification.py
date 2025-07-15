@@ -88,7 +88,8 @@ class InputsClassification:
         plt.axis(bl_axis)
         if complete_saving_path is not None:
             plt.savefig(complete_saving_path)
-        plt.show()
+        else:
+            plt.show()
 
 
 class Classification:
@@ -111,15 +112,19 @@ class Classification:
         ----------
         scikit-learn CountVectorizer documentation
         """
+        if not isinstance(list_corpus, list) or not all(isinstance(x, str) for x in list_corpus):
+            raise TypeError("Input must be a list of strings")
+
         list_labels = ListHandler().extend_lists(*[x.split() for x in list_corpus])
         list_labels = [StrHandler().remove_sup_period_marks(x).lower()
                       for x in ListHandler().remove_duplicates(list_labels)]
         list_labels.sort()
-        one_hot_vectorizer = CountVectorizer(binary=True)
-        array_one_hot = one_hot_vectorizer.fit_transform(list_corpus).toarray()
+
+        model = CountVectorizer(binary=True)
+        array_y_hat = model.fit_transform(list_corpus).toarray()
         return {
             "labels": list_labels,
-            "one_hot_encoder": array_one_hot
+            "one_hot_encoder": array_y_hat
         }
 
     def sgd_classifier(
@@ -148,9 +153,13 @@ class Classification:
         ----------
         scikit-learn SGDClassifier documentation
         """
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Inputs must be numpy arrays")
+
         model = SGDClassifier(random_state=int_random_state_seed)
         model.fit(array_x, array_y)
         array_y_hat = model.predict(array_x)
+
         return {
             "model_fitted": model,
             "predictions": array_y_hat,
@@ -400,7 +409,6 @@ class Classification:
             "score": model.score(array_x, array_y),
             "accuracy_score": accuracy_score(array_y, array_y_hat),
             "confusion_matrix": confusion_matrix(array_y, array_y_hat),
-            "classes": model.classes_,
         }
 
     def naive_bayes(
@@ -486,9 +494,22 @@ class ImageProcessing:
         [1] https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
         scikit-learn PCA documentation
         """
+        img = plt.imread(name_path)
+        # handle both color and grayscale images
+        if img.ndim == 3:  # color image (height, width, channels)
+            height, width, channels = img.shape
+            img_reshaped = img.reshape(-1, channels)
+        else:  # grayscale image (height, width)
+            height, width = img.shape
+            img_reshaped = img.reshape(-1, 1)
+        
         model = PCA(var_exp)
-        model = model.fit_transform(self.img_dims(name_path))
-        return model.inverse_transform(model)
+        array_transformed = model.fit_transform(img_reshaped)
+        reconstructed = model.inverse_transform(array_transformed)
+        # reshape back to original dimensions
+        if img.ndim == 3:
+            return reconstructed.reshape(height, width, channels)
+        return reconstructed.reshape(height, width)
 
     def plot_subplot(
         self,
@@ -510,6 +531,8 @@ class ImageProcessing:
         matplotlib.pyplot.subplot documentation
         """
         plt.subplot(3, 2, float_exp_var_ratio)
-        plt.imshow(array_x, cmap="gray")
+        # remove single-dimensional entries
+        img = np.squeeze(array_x[0])
+        plt.imshow(img, cmap="gray")
         plt.xticks([])
         plt.yticks([])

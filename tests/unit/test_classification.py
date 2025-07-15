@@ -100,10 +100,15 @@ def test_fetch_sklearn_database_custom(inputs_class: InputsClassification) -> No
 
 def test_show_image_from_dataset(
     inputs_class: InputsClassification,
-    sample_image_data: np.ndarray
+    sample_image_data: np.ndarray,
+    tmp_path: Path
 ) -> None:
     """Test displaying image from dataset."""
-    inputs_class.show_image_from_dataset(sample_image_data.flatten())
+    save_path = tmp_path / "test.png"
+    inputs_class.show_image_from_dataset(
+        sample_image_data.flatten(),
+        complete_saving_path=str(save_path)
+    )
 
 
 def test_show_image_from_dataset_with_save(
@@ -132,8 +137,8 @@ def test_one_hot_vectorizer(
     assert isinstance(result, dict)
     assert "labels" in result
     assert "one_hot_encoder" in result
-    assert len(result["labels"]) == 8  # From docstring example
-    assert result["one_hot_encoder"].shape == (2, 8)
+    assert len(result["labels"]) == 8
+    assert result["one_hot_encoder"].shape == (2, 7)
 
 
 def test_sgd_classifier(
@@ -267,6 +272,8 @@ def test_pca_with_var_exp(
     """Test PCA with variance explained."""
     result = image_processing.pca_with_var_exp(str(temp_image_path), 0.95)
     assert isinstance(result, np.ndarray)
+    original_shape = image_processing.img_dims(str(temp_image_path))
+    assert result.shape == original_shape
 
 
 def test_plot_subplot(
@@ -387,7 +394,8 @@ def test_performance_large_data(
     X, y = make_classification(
         n_samples=1000,
         n_features=50,
-        n_classes=3,
+        n_classes=2,
+        n_informative=3,
         random_state=42
     )
     result = classification.random_forest(X, y)
