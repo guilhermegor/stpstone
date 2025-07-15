@@ -36,7 +36,7 @@ class JosephusSolver(metaclass=TypeChecker):
         if not isinstance(list_, list):
             raise TypeError("list_ must be a list")
         if not isinstance(step_interval, int):
-            raise TypeError("step_interval must be an integer")
+            raise TypeError("Step interval must be an integer")
         if step_interval <= 0:
             raise ValueError("Step interval must be positive")
         self.list_ = list_
@@ -61,7 +61,7 @@ class JosephusSolver(metaclass=TypeChecker):
         for item in self.list_:
             cls_queue.enqueue(item)
         
-        while cls_queue.size > 1:
+        while cls_queue.size() > 1:
             for _ in range(self.step_interval - 1):
                 cls_queue.enqueue(cls_queue.dequeue())
             cls_queue.dequeue()
