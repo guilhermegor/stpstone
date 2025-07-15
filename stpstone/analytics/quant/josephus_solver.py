@@ -1,4 +1,5 @@
-from typing import List, Any
+from typing import Any, List
+
 from stpstone.dsa.queues.simple_queue import Queue
 
 
