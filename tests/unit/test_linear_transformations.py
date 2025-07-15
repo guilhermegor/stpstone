@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from stpstone.analytics.quant.linear_algebra import LinearAlgebra
+from stpstone.analytics.quant.linear_transformations import LinearAlgebra
 
 
 # --------------------------
@@ -38,6 +38,193 @@ def valid_matrix_3x2() -> np.ndarray:
 def singular_matrix() -> np.ndarray:
     """Fixture providing a singular matrix."""
     return np.array([[1, 2], [1, 2]])
+
+# --------------------------
+# Test Add Method
+# --------------------------
+def test_add_normal_vectors(linear_algebra: LinearAlgebra) -> None:
+    """Test vector addition with valid inputs."""
+    # Test with numpy arrays
+    result = linear_algebra.add(np.array([1, 2, 3]), np.array([4, 5, 6]))
+    assert isinstance(result, np.ndarray)
+    assert np.array_equal(result, np.array([5, 7, 9]))
+    
+    # Test with lists
+    result = linear_algebra.add([1, 2], [3, 4])
+    assert isinstance(result, np.ndarray)
+    assert np.array_equal(result, np.array([4, 6]))
+
+def test_add_normal_matrices(linear_algebra: LinearAlgebra) -> None:
+    """Test matrix addition with valid inputs."""
+    mat1 = np.array([[1, 2], [3, 4]])
+    mat2 = np.array([[5, 6], [7, 8]])
+    result = linear_algebra.add(mat1, mat2)
+    expected = np.array([[6, 8], [10, 12]])
+    assert np.array_equal(result, expected)
+
+def test_add_broadcasting(linear_algebra: LinearAlgebra) -> None:
+    """Test broadcasting in addition operation."""
+    # Vector + scalar broadcasting
+    result = linear_algebra.add([1, 2, 3], 5)
+    assert np.array_equal(result, np.array([6, 7, 8]))
+    
+    # Matrix + vector broadcasting
+    mat = np.array([[1, 2], [3, 4]])
+    vec = np.array([10, 20])
+    result = linear_algebra.add(mat, vec)
+    expected = np.array([[11, 22], [13, 24]])
+    assert np.array_equal(result, expected)
+
+def test_add_incompatible_shapes(linear_algebra: LinearAlgebra) -> None:
+    """Test addition with incompatible shapes."""
+    with pytest.raises(ValueError):
+        linear_algebra.add([1, 2, 3], [4, 5])  # Different lengths
+        
+    with pytest.raises(ValueError):
+        linear_algebra.add([[1, 2], [3, 4]], [5, 6, 7])  # Incompatible shapes
+
+def test_add_invalid_types(linear_algebra: LinearAlgebra) -> None:
+    """Test addition with invalid input types."""
+    with pytest.raises(TypeError):
+        linear_algebra.add([1, 2], ["a", "b"])  # type: ignore
+        
+    with pytest.raises(TypeError):
+        linear_algebra.add("not_an_array", [1, 2])  # type: ignore
+
+def test_add_empty_arrays(linear_algebra: LinearAlgebra) -> None:
+    """Test addition with empty arrays."""
+    result = linear_algebra.add([], [])
+    assert isinstance(result, np.ndarray)
+    assert result.size == 0
+
+# --------------------------
+# Test Distance Method
+# --------------------------
+def test_distance_normal_vectors(linear_algebra: LinearAlgebra) -> None:
+    """Test distance calculation with valid vectors."""
+    # Simple 2D case
+    result = linear_algebra.distance([1, 0], [0, 1])
+    assert isinstance(result, float)
+    assert pytest.approx(result) == np.sqrt(2)
+    
+    # 3D case
+    result = linear_algebra.distance([1, 2, 3], [4, 5, 6])
+    assert pytest.approx(result) == np.sqrt(27)
+
+def test_distance_zero_distance(linear_algebra: LinearAlgebra) -> None:
+    """Test distance between identical vectors."""
+    vec = [1, 2, 3]
+    result = linear_algebra.distance(vec, vec)
+    assert result == 0.0
+
+def test_distance_different_lengths(linear_algebra: LinearAlgebra) -> None:
+    """Test distance with vectors of different lengths."""
+    with pytest.raises(ValueError):
+        linear_algebra.distance([1, 2, 3], [4, 5])
+
+def test_distance_invalid_types(linear_algebra: LinearAlgebra) -> None:
+    """Test distance with invalid input types."""
+    with pytest.raises(TypeError):
+        linear_algebra.distance([1, 2], ["a", "b"])  # type: ignore
+        
+    with pytest.raises(TypeError):
+        linear_algebra.distance("not_an_array", [1, 2])  # type: ignore
+
+def test_distance_empty_vectors(linear_algebra: LinearAlgebra) -> None:
+    """Test distance with empty vectors."""
+    result = linear_algebra.distance([], [])
+    assert result == 0.0
+
+# --------------------------
+# Test Scalar Multiply Method
+# --------------------------
+def test_scalar_multiply_normal(linear_algebra: LinearAlgebra) -> None:
+    """Test scalar multiplication with valid inputs."""
+    # Integer scalar
+    result = linear_algebra.scalar_multiply(2, [1, 2, 3])
+    assert np.array_equal(result, np.array([2, 4, 6]))
+    
+    # Float scalar
+    result = linear_algebra.scalar_multiply(0.5, [10, 20, 30])
+    assert np.array_equal(result, np.array([5, 10, 15]))
+    
+    # Matrix multiplication
+    mat = np.array([[1, 2], [3, 4]])
+    result = linear_algebra.scalar_multiply(3, mat)
+    expected = np.array([[3, 6], [9, 12]])
+    assert np.array_equal(result, expected)
+
+def test_scalar_multiply_zero(linear_algebra: LinearAlgebra) -> None:
+    """Test multiplication by zero."""
+    result = linear_algebra.scalar_multiply(0, [1, 2, 3])
+    assert np.array_equal(result, np.array([0, 0, 0]))
+
+def test_scalar_multiply_one(linear_algebra: LinearAlgebra) -> None:
+    """Test multiplication by one (identity operation)."""
+    vec = [1, 2, 3]
+    result = linear_algebra.scalar_multiply(1, vec)
+    assert np.array_equal(result, np.array(vec))
+
+def test_scalar_multiply_invalid_scalar(linear_algebra: LinearAlgebra) -> None:
+    """Test with invalid scalar types."""
+    with pytest.raises(TypeError):
+        linear_algebra.scalar_multiply("2", [1, 2, 3])  # type: ignore
+        
+    with pytest.raises(TypeError):
+        linear_algebra.scalar_multiply([1, 2], [1, 2, 3])  # type: ignore
+
+def test_scalar_multiply_invalid_array(linear_algebra: LinearAlgebra) -> None:
+    """Test with invalid array types."""
+    with pytest.raises(TypeError):
+        linear_algebra.scalar_multiply(2, "not_an_array")  # type: ignore
+        
+    with pytest.raises(TypeError):
+        linear_algebra.scalar_multiply(2, [1, "a"])  # type: ignore
+
+def test_scalar_multiply_empty_array(linear_algebra: LinearAlgebra) -> None:
+    """Test with empty array."""
+    result = linear_algebra.scalar_multiply(5, [])
+    assert isinstance(result, np.ndarray)
+    assert result.size == 0
+
+# --------------------------
+# Test Mixed Type Operations
+# --------------------------
+def test_mixed_input_types(linear_algebra: LinearAlgebra) -> None:
+    """Test operations with mixed input types."""
+    # Add with mixed list and array
+    result = linear_algebra.add([1, 2], np.array([3, 4]))
+    assert np.array_equal(result, np.array([4, 6]))
+    
+    # Distance with mixed types
+    result = linear_algebra.distance(np.array([1, 2]), [4, 5])
+    assert pytest.approx(result) == np.sqrt(18)
+    
+    # Scalar multiply with different array types
+    result = linear_algebra.scalar_multiply(2, (1, 2, 3))  # type: ignore
+    assert np.array_equal(result, np.array([2, 4, 6]))
+
+# --------------------------
+# Test Numerical Precision
+# --------------------------
+def test_numerical_precision(linear_algebra: LinearAlgebra) -> None:
+    """Test numerical precision of operations."""
+    # Small numbers
+    small_vec = [1e-10, 2e-10]
+    result = linear_algebra.add(small_vec, small_vec)
+    assert np.allclose(result, [2e-10, 4e-10])
+    
+    # Large numbers
+    large_vec = [1e10, 2e10]
+    result = linear_algebra.scalar_multiply(1e-10, large_vec)
+    assert np.allclose(result, [1, 2])
+    
+    # Floating point distance
+    vec1 = [1.0000001, 2.0000001]
+    vec2 = [1.0000002, 2.0000002]
+    result = linear_algebra.distance(vec1, vec2)
+    expected = np.sqrt(2e-14)
+    assert abs(result - expected) < 1e-15
 
 # --------------------------
 # Cholesky Decomposition

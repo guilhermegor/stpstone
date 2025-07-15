@@ -1,6 +1,11 @@
 """Linear Algebra."""
 
+from collections.abc import Sequence
+from numbers import Number
+from typing import Union
+
 import numpy as np
+import numpy.typing as npt
 from scipy.linalg import sqrtm
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -8,6 +13,119 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 class LinearAlgebra(metaclass=TypeChecker):
     """Class Linear Algebra."""
+
+    def add(
+        self, 
+        array_1: Union[npt.ArrayLike, Sequence[Number]], 
+        array_2: Union[npt.ArrayLike, Sequence[Number], Number]
+    ) -> np.ndarray:
+        """Element-wise addition of two arrays or vectors.
+        
+        Parameters
+        ----------
+        array_1 : ArrayLike
+            First input array (can be list, tuple, or numpy array)
+        array_2 : ArrayLike
+            Second input array (must match dimensions of array_1)
+            
+        Returns
+        -------
+        np.ndarray
+            The element-wise sum of the inputs
+            
+        Examples
+        --------
+        >>> la = LinearAlgebra()
+        >>> la.add([1, 2, 3], [4, 5, 6])
+        array([5, 7, 9])
+        
+        >>> la.add(np.array([1.5, 2.5]), np.array([0.5, 1.5]))
+        array([2., 4.])
+        
+        Notes
+        -----
+        - For matrix addition, both inputs must have identical shapes
+        - Broadcasting rules apply as per numpy's standard behavior
+        - Converts all inputs to numpy arrays before operation
+        """
+        arr1 = np.asarray(array_1)
+        arr2 = np.asarray(array_2)
+        return arr1 + arr2
+
+    def distance(
+        self, 
+        array_1: Union[npt.ArrayLike, Sequence[Number]], 
+        array_2: Union[npt.ArrayLike, Sequence[Number]]
+    ) -> float:
+        """Compute the Euclidean distance between two vectors.
+        
+        Parameters
+        ----------
+        array_1 : ArrayLike
+            First input vector
+        array_2 : ArrayLike
+            Second input vector (must match dimension of array_1)
+            
+        Returns
+        -------
+        float
+            The Euclidean distance between the vectors
+            
+        Examples
+        --------
+        >>> la = LinearAlgebra()
+        >>> la.distance([1, 0], [0, 1])
+        1.4142135623730951
+        
+        >>> la.distance(np.array([1, 2, 3]), np.array([4, 5, 6]))
+        5.196152422706632
+        
+        Notes
+        -----
+        - For n-dimensional vectors, computes sqrt(Σ(x_i - y_i)^2)
+        - Equivalent to the L2 norm of the difference vector
+        - Works with any array-like input that can be converted to numpy array
+        """
+        arr1 = np.asarray(array_1)
+        arr2 = np.asarray(array_2)
+        return float(np.linalg.norm(arr1 - arr2))
+
+    def scalar_multiply(
+        self, 
+        scalar: Number, 
+        array: Union[npt.ArrayLike, Sequence[Number]]
+    ) -> np.ndarray:
+        """Multiply an array by a scalar value.
+        
+        Parameters
+        ----------
+        scalar : Union[int, float]
+            The scalar multiplier
+        array : ArrayLike
+            The array to be multiplied
+            
+        Returns
+        -------
+        np.ndarray
+            The result of scalar multiplication
+            
+        Examples
+        --------
+        >>> la = LinearAlgebra()
+        >>> la.scalar_multiply(2, [1, 2, 3])
+        array([2, 4, 6])
+        
+        >>> la.scalar_multiply(0.5, np.array([10., 20., 30.]))
+        array([ 5., 10., 15.])
+        
+        Notes
+        -----
+        - Works with any numeric scalar (int, float)
+        - Preserves the dtype of the input array
+        - Returns a new array rather than modifying in-place
+        """
+        arr = np.asarray(array)
+        return scalar * arr
 
     def cholesky_decomposition(
         self, 
