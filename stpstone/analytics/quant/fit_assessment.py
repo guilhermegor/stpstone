@@ -1,12 +1,13 @@
 """Module for assessing model fitting performance using various metrics."""
 
-from typing import Union
+from typing import Literal, Union
 
 import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
     f1_score,
+    mean_squared_error,
     precision_score,
     r2_score,
     recall_score,
@@ -104,8 +105,10 @@ regression-model-in-python
         ----------
         .. [1] https://en.wikipedia.org/wiki/Bayesian_information_criterion
         """
-        k = array_x.shape[1] + 2
-        return k * np.log(array_x.shape[0] + 1) + self.max_llf(array_x, array_y, array_y_hat)
+        llf = self.max_llf(array_x, array_y, array_y_hat)
+        k = array_x.shape[1] + 2  # number of parameters
+        n = array_x.shape[0]      # number of observations
+        return -2 * llf + k * np.log(n)
 
     def cross_validation(
         self,
@@ -114,7 +117,7 @@ regression-model-in-python
         array_y: np.ndarray,
         cross_validation_folds: int = 3,
         scoring_method: str = "neg_mean_squared_error",
-        cross_val_model: str = "score",
+        cross_val_model: Literal["score", "predict"] = "score",
         cross_val_model_method: str = "predict_proba",
     ) -> dict[str, Union[np.ndarray, float]]:
         """
@@ -155,6 +158,8 @@ regression-model-in-python
                 scoring=scoring_method,
             )
         elif cross_val_model == "predict":
+            if not hasattr(model_fitted, cross_val_model_method):
+                cross_val_model_method = "predict"
             scores = cross_val_predict(
                 model_fitted,
                 array_x,
@@ -237,19 +242,24 @@ regression-model-in-python
         grid_search_model.fit(array_x_real_numbers, array_y_real_numbers)
         best_model_prediction = grid_search_model.best_estimator_.predict(array_x_real_numbers)
 
-        return {
+        result = {
             "best_parameters": grid_search_model.best_params_,
             "score": grid_search_model.best_score_,
             "best_estimator": grid_search_model.best_estimator_,
-            "feature_importance": grid_search_model.best_estimator_.feature_importances_,
             "cv_results": grid_search_model.cv_results_,
             "model_regression": grid_search_model,
             "predict": best_model_prediction,
-            "mse": self.mean_squared_error(array_y_real_numbers, best_model_prediction),
+            "mse": mean_squared_error(array_y_real_numbers, best_model_prediction),
             "rmse": np.sqrt(
-                self.mean_squared_error(array_y_real_numbers, best_model_prediction)
+                mean_squared_error(array_y_real_numbers, best_model_prediction)
             ),
         }
+    
+        # add feature importance only if available
+        if hasattr(grid_search_model.best_estimator_, 'feature_importances_'):
+            result["feature_importance"] = grid_search_model.best_estimator_.feature_importances_
+            
+        return result
 
     def accuracy_predictions(
         self,
@@ -258,7 +268,6 @@ regression-model-in-python
         array_x: np.ndarray,
         cross_validation_folds: int = 3,
         scoring_method: str = "accuracy",
-        key_scores: str = "scores",
         f1_score_average: str = "macro",
     ) -> dict[str, Union[np.ndarray, float]]:
         """
@@ -293,20 +302,31 @@ regression-model-in-python
         .. [1] https://colab.research.google.com/github/ageron/handson-ml2/blob/master/\
 03_classification.ipynb#scrollTo=rUZ6ahZ7G0BO
         """
-        array_cross_validation_scores = FitPerformance().cross_validation(
-            model, array_x, array_y, cross_validation_folds, scoring_method
-        )[key_scores]
-        array_confusion_matrix = confusion_matrix(array_y, array_cross_validation_scores)
-
+        # get predictions first
+        array_y_hat = cross_val_predict(
+            model, 
+            array_x,
+            array_y,
+            cv=cross_validation_folds
+        )
+        
+        # calculate scores
+        scores = cross_val_score(
+            model,
+            array_x,
+            array_y,
+            cv=cross_validation_folds,
+            scoring=scoring_method,
+        )
+        
         return {
-            "cross_validation_scores": array_cross_validation_scores,
-            "confusion_matrix": array_confusion_matrix,
-            "precision_score": precision_score(array_y, array_cross_validation_scores),
-            "recall_score": recall_score(array_y, array_cross_validation_scores),
-            "f1_score": f1_score(
-                array_y, array_cross_validation_scores, average=f1_score_average
-            ),
-            "roc_auc_score": roc_auc_score(array_y, array_cross_validation_scores),
+            "cross_validation_scores": scores,
+            "predictions": array_y_hat,
+            "confusion_matrix": confusion_matrix(array_y, array_y_hat),
+            "precision_score": precision_score(array_y, array_y_hat),
+            "recall_score": recall_score(array_y, array_y_hat),
+            "f1_score": f1_score(array_y, array_y_hat, average=f1_score_average),
+            "roc_auc_score": roc_auc_score(array_y, array_y_hat),
         }
 
     def fitting_perf_eval(
