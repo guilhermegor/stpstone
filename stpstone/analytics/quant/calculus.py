@@ -153,9 +153,19 @@ class Calculus(metaclass=TypeChecker):
         >>> y = x**2
         >>> integral = Calculus().trapz_integration(y, x)
         """
-        if np.asarray(f).size == 0 or np.asarray(variable_).size == 0:
+        try:
+            f_arr = np.asarray(f, dtype=np.float64)
+            var_arr = np.asarray(variable_, dtype=np.float64)
+        except (TypeError, ValueError) as err:
+            raise TypeError("Inputs must be array-like numerical values") from err
+
+        if f_arr.size == 0 or var_arr.size == 0:
             raise ValueError("Cannot integrate empty arrays")
-        return trapezoid(f, variable_)
+            
+        if len(f_arr) != len(var_arr):
+            raise ValueError("Input arrays must have same length")
+            
+        return trapezoid(f_arr, var_arr)
 
     def cumtrapz_integration(
         self,
