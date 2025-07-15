@@ -13,7 +13,7 @@ Please refactor the following Python code to strictly adhere to these requiremen
 
 2. **Linting Requirements**:
    - Follow numpy-style docstrings (79 char line length for docstring content)
-   - Add description to module
+   - Add description to module in the top of the file
    - Maintain all existing references in docstrings
    - Do not trim long URLs in docstring references, break line if needed
    - Comply with flake8, pycodestyle, and mypy type checking

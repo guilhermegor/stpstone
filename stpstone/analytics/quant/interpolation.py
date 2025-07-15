@@ -23,6 +23,13 @@ class Interpolation(metaclass=TypeChecker):
         -------
         np.ndarray
             Converted numpy array
+        
+        Raises
+        ------
+        TypeError
+            If input is not a list or numpy array
+        ValueError
+            If input array is empty
         """
         if not isinstance(array_, (list, np.ndarray)):
             raise TypeError("Input must be a list or numpy array")
@@ -50,6 +57,15 @@ class Interpolation(metaclass=TypeChecker):
         -------
         interp1d
             Linear interpolation function
+        
+        Raises
+        ------
+        ValueError
+            If input arrays do not have same length
+        ValueError
+            If at least 2 points are required for interpolation
+        ValueError
+            If duplicate x-values are detected
         """
         if len(array_x) != len(array_y):
             raise ValueError("Input arrays must have same length")
@@ -85,6 +101,15 @@ class Interpolation(metaclass=TypeChecker):
         -------
         CubicSpline
             Cubic spline interpolation function
+        
+        Raises
+        ------
+        ValueError
+            If input arrays do not have same length
+        ValueError
+            If at least 2 points are required for interpolation
+        ValueError
+            If first and last y values do not match for periodic boundary conditions
         """
         if len(array_x) != len(array_y):
             raise ValueError("Input arrays must have same length")
@@ -119,6 +144,13 @@ class Interpolation(metaclass=TypeChecker):
         -------
         np.poly1d
             Lagrange polynomial interpolation function
+        
+        Raises
+        ------
+        ValueError
+            If input arrays do not have same length
+        ValueError
+            If input arrays cannot be empty
         """
         if len(array_x) != len(array_y):
             raise ValueError("Input arrays must have same length")
@@ -145,6 +177,13 @@ class Interpolation(metaclass=TypeChecker):
         -------
         np.ndarray
             Divided difference coefficients matrix
+
+        Raises
+        ------
+        ValueError
+            If input arrays do not have same length
+        ValueError
+            If input arrays cannot be empty
 
         References
         ----------
@@ -190,6 +229,13 @@ class Interpolation(metaclass=TypeChecker):
         -------
         np.ndarray
             Interpolated values at new points
+        
+        Raises
+        ------
+        ValueError
+            If input arrays do not have same length
+        ValueError
+            If input arrays cannot be empty
         """
         array_x = self.set_as_array(array_x)
         array_y = self.set_as_array(array_y)

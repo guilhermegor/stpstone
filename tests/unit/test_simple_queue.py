@@ -1,36 +1,143 @@
-from unittest import TestCase, main
+"""Unit tests for Queue implementation using collections.deque."""
+
+from collections import deque
+from typing import Any
+
+import pytest
 
 from stpstone.dsa.queues.simple_queue import Queue
 
 
-class TestQueue(TestCase):
-    def setUp(self):
-        self.queue = Queue()
+# --------------------------
+# Fixtures
+# --------------------------
+@pytest.fixture
+def empty_queue() -> Queue:
+    """Fixture providing an empty Queue instance."""
+    return Queue()
 
-    def test_enqueue_and_dequeue(self):
-        self.queue.enqueue(10)
-        self.queue.enqueue(20)
-        self.assertEqual(self.queue.dequeue, 10)
-        self.assertEqual(self.queue.dequeue, 20)
 
-    def test_is_empty(self):
-        self.assertTrue(self.queue.is_empty)
-        self.queue.enqueue(5)
-        self.assertFalse(self.queue.is_empty)
-        self.queue.dequeue
-        self.assertTrue(self.queue.is_empty)
+@pytest.fixture
+def filled_queue() -> Queue:
+    """Fixture providing a Queue instance with 3 items."""
+    q = Queue()
+    for i in range(3):
+        q.enqueue(i)
+    return q
 
-    def test_size(self):
-        self.assertEqual(self.queue.size, 0)
-        self.queue.enqueue(5)
-        self.queue.enqueue(15)
-        self.assertEqual(self.queue.size, 2)
-        self.queue.dequeue
-        self.assertEqual(self.queue.size, 1)
 
-    def test_dequeue_empty_queue(self):
-        with self.assertRaises(IndexError):
-            self.queue.dequeue
+# --------------------------
+# Tests
+# --------------------------
+class TestQueueInitialization:
+    """Tests for Queue initialization and basic properties."""
 
-if __name__ == "__main__":
-    main()
+    def test_init_creates_empty_queue(self, empty_queue: Queue) -> None:
+        """Test that initialization creates an empty queue."""
+        assert empty_queue.size() == 0
+        assert empty_queue.is_empty() is True
+
+    def test_internal_storage_is_deque(self, empty_queue: Queue) -> None:
+        """Test that internal storage uses collections.deque."""
+        assert isinstance(empty_queue._items, deque)
+
+
+class TestQueueOperations:
+    """Tests for standard queue operations."""
+
+    def test_enqueue_adds_items(self, empty_queue: Queue) -> None:
+        """Test that enqueue adds items to the queue."""
+        empty_queue.enqueue(1)
+        assert empty_queue.size() == 1
+        assert empty_queue.is_empty() is False
+
+    def test_dequeue_removes_items(self, filled_queue: Queue) -> None:
+        """Test that dequeue removes items in FIFO order."""
+        assert filled_queue.dequeue() == 0
+        assert filled_queue.size() == 2
+        assert filled_queue.dequeue() == 1
+        assert filled_queue.size() == 1
+
+    def test_size_returns_correct_value(self, filled_queue: Queue) -> None:
+        """Test that size returns the correct number of items."""
+        assert filled_queue.size() == 3
+        filled_queue.dequeue()
+        assert filled_queue.size() == 2
+
+    def test_is_empty_returns_correct_state(self, empty_queue: Queue) -> None:
+        """Test that is_empty returns correct queue state."""
+        assert empty_queue.is_empty() is True
+        empty_queue.enqueue(1)
+        assert empty_queue.is_empty() is False
+
+
+class TestQueueEdgeCases:
+    """Tests for edge cases and special scenarios."""
+
+    def test_dequeue_from_empty_raises_error(self, empty_queue: Queue) -> None:
+        """Test that dequeue from empty queue raises IndexError."""
+        with pytest.raises(IndexError) as excinfo:
+            empty_queue.dequeue()
+        assert "Dequeue from an empty queue" in str(excinfo.value)
+
+    def test_queue_maintains_fifo_order(self, empty_queue: Queue) -> None:
+        """Test that queue maintains first-in-first-out order."""
+        items = ["first", "second", "third"]
+        for item in items:
+            empty_queue.enqueue(item)
+
+        for expected in items:
+            assert empty_queue.dequeue() == expected
+
+    def test_multiple_enqueue_dequeue_operations(self, empty_queue: Queue) -> None:
+        """Test alternating enqueue and dequeue operations."""
+        for i in range(5):
+            empty_queue.enqueue(i)
+            assert empty_queue.dequeue() == i
+            assert empty_queue.is_empty() is True
+
+
+class TestQueueTypeHandling:
+    """Tests for handling different data types."""
+
+    @pytest.mark.parametrize("item", [
+        None,
+        42,
+        3.14,
+        "string",
+        [1, 2, 3],
+        {"key": "value"},
+        (1, 2, 3),
+        True,
+        deque()
+    ])
+    def test_enqueue_dequeue_various_types(self, empty_queue: Queue, item: type[Any]) -> None:
+        """Test that queue can handle various data types."""
+        empty_queue.enqueue(item)
+        assert empty_queue.dequeue() == item
+
+    def test_mixed_type_operations(self, empty_queue: Queue) -> None:
+        """Test queue with mixed type operations."""
+        items = [1, "two", 3.0, None, [4]]
+        for item in items:
+            empty_queue.enqueue(item)
+
+        for expected in items:
+            assert empty_queue.dequeue() == expected
+
+
+class TestQueuePerformance:
+    """Tests for queue performance characteristics."""
+
+    def test_large_number_of_operations(self, empty_queue: Queue) -> None:
+        """Test queue with large number of operations."""
+        test_size = 10000
+        for i in range(test_size):
+            empty_queue.enqueue(i)
+            assert empty_queue.size() == i + 1
+
+        for i in range(test_size):
+            assert empty_queue.dequeue() == i
+            assert empty_queue.size() == test_size - i - 1
+
+        assert empty_queue.is_empty() is True
