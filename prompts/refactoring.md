@@ -33,7 +33,7 @@ Please refactor the following Python code to strictly adhere to these requiremen
 
 5. **Example of Required Style**:
    ```python
-   def sample_function(param1: int, param2: str) -> Dict[str, Any]:
+   def sample_function(param1: int, param2: str) -> dict[str, str]:
        """
        Brief description of function.
 
@@ -46,7 +46,7 @@ Please refactor the following Python code to strictly adhere to these requiremen
 
        Returns
        -------
-       Dict[str, Any]
+       dict[str, str]
            Description of return value
 
        References
