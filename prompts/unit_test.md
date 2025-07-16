@@ -27,6 +27,7 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 - **Zero ruff violations**: Code must pass all ruff checks without warnings
 - **Fallback testing**: Include tests for fallback mechanisms and error recovery
 - **Reload logic**: Test module reloading scenarios when applicable
+- **Variables sanity checks**: Tests for variables sanity checks within methods/functions, like values between 0 and 1, positive, negative, shapes of arrays and so on
 
 ### Feature to be Tested
 
