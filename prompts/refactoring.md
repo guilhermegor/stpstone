@@ -142,3 +142,10 @@ def process_data(
     }
     return result
     ```
+
+Please refactor this code:
+
+```python
+
+<FILL_WITH_FEATURE_IMPLEMENTED>
+```
