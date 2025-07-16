@@ -1,4 +1,4 @@
-### STATISTIC FUNCTIONS FOR SUPERVISED REGRESSION MACHINE LEARNING MODELS ###
+from typing import Any, Literal, Optional
 
 from mystic.monitors import VerboseMonitor
 from mystic.solvers import diffev2
@@ -36,59 +36,158 @@ from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 
 class LinearRegressions:
 
-    def normal_equation(self, array_x, array_y, bl_optimize=True):
+    def normal_equation(
+        self, array_x: np.ndarray, array_y: np.ndarray, bl_optimize: bool = True
+    ) -> Any:
         """
-        REFERENCE: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
-            978-1-492-03264-9.”
-        DOCSTRING: NORMAL EQUATION TO FIND THE VALUE OF THETA THAT MINIMIZES THE COST FUNCTION -
-            LEAST SQUARES REGRESSION
-        INPUTS: ARRAY DATA AND ARRAY TARGET
-        OUTPUTS: ARRAY WITH BEST THETA VECTOR, RESIDUALS, RANK
-        """
-        if bl_optimize == True:
-            return np.linalg.lstsq(array_x, array_y, rcond=None)
-        else:
-            return np.linalg.inv(array_x.T.dot(array_x)).dot(array_x.T).dot(array_y)
+        Normal equation to find the value of theta that minimizes the cost function.
 
-    def batch_gradient_descent(self, array_x, array_y, max_iter=1000, eta=0.1, m=100,
-                               theta=np.random.randn(2, 1)):
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        bl_optimize : bool, optional
+            Whether to use optimized calculation (default: True)
+
+        Returns
+        -------
+        Any
+            Tuple with best theta vector, residuals, rank if bl_optimize=True,
+            else just theta vector
+
+        References
+        ----------
+        .. [1] "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+            2nd Edition", by Aurélien Géron (O'Reilly). Copyright 2019 Kiwisoft S.A.S.,
+            978-1-492-03264-9.
         """
-        REFERENCE: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
-            978-1-492-03264-9.”
-        DOCSTRING: BATCH GRADIENT DESCENT TO FIND THE GLOBAL MINIMUM OF A LINEAR FUNCTION
-        INPUTS: ARRAY DATA, ARRAY TARGET, MAX ITERATIONS, ETA (LEARNING RATE), M (ITERATIONS,
-            100 AS DEFAULT), THETA (GIVEN A FIRST APROXIMATION AS DEFAULT)
-        OUTPUTS: ARRAY WITH BEST THETA VECTOR
-        OBSERVATIONS: 1. INCREASING THE ETA MAY IMPLY IN CONVERGING FASTER TO OPTIMAL THETA
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        if bl_optimize:
+            return np.linalg.lstsq(array_x, array_y, rcond=None)
+        return np.linalg.inv(array_x.T.dot(array_x)).dot(array_x.T).dot(array_y)
+
+    def batch_gradient_descent(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        max_iter: int = 1000,
+        eta: float = 0.1,
+        m: int = 100,
+        theta: np.ndarray = np.random.randn(2, 1),
+    ) -> np.ndarray:
         """
+        Batch gradient descent to find the global minimum of a linear function.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        max_iter : int, optional
+            Maximum iterations (default: 1000)
+        eta : float, optional
+            Learning rate (default: 0.1)
+        m : int, optional
+            Number of instances (default: 100)
+        theta : np.ndarray, optional
+            Initial theta vector (default: random initialization)
+
+        Returns
+        -------
+        np.ndarray
+            Optimized theta vector
+
+        References
+        ----------
+        .. [1] "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+            2nd Edition", by Aurélien Géron (O'Reilly). Copyright 2019 Kiwisoft S.A.S.,
+            978-1-492-03264-9.
+        """
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if max_iter <= 0:
+            raise ValueError("max_iter must be positive")
+        if eta <= 0:
+            raise ValueError("eta must be positive")
+
         for _ in range(max_iter):
-            gradients = 2 / m * \
-                array_x.T.dot(array_x.dot(theta) - array_y)
+            gradients = 2 / m * array_x.T.dot(array_x.dot(theta) - array_y)
             theta = theta - eta * gradients
         return theta
 
-    def stochastic_gradient_descent(self, array_x, array_y, method='sklearn',
-                                    n_epochs=1000, t0=5, t1=50, m=100, theta=np.random.randn(2, 1),
-                                    tolerance=1e-3, penalty=None, eta0=0.1):
+    def stochastic_gradient_descent(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        method: Literal["implemented", "sklearn"] = "sklearn",
+        n_epochs: int = 1000,
+        t0: int = 5,
+        t1: int = 50,
+        m: int = 100,
+        theta: np.ndarray = np.random.randn(2, 1),
+        tolerance: float = 1e-3,
+        penalty: Optional[str] = None,
+        eta0: float = 0.1,
+    ) -> dict[str, Any]:
         """
-        REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
-            978-1-492-03264-9.”
-        DOCSTRING: STOCHASTIC GRADIENT DESCENT TO COVER RANDOM INSTANCES OF THE TRAINING SET AT
-            EVERY STEP AND COMPUTE THE GRADIENTS BASED ONLY ON THAT SINGLE INSTANCE, AIMING TO
-            FIND THE CLOSEST SOLUTION TO THE OPTIMAL THETA
-        INPUTS: ARRAY DATA, ARRAY TARGET, N_EPOCHS (MAXIMUM ITERATIONS - 1000 AS DEFAULT),
-            T0 AND T1 LEARNING SCHEDULE HYPERPARAMETERS, M (ITERATIONS, 100 AS DEFAULT),
-            THETA (RANDOM INITIALIZATION), TOLERANCE (1E-3 AS DEFAULT), PENALTY (NONE AS DEFAULT),
-            ETA0 (INITIAL LEARNING RATE, 0.1 AS DEFAULT)
+        Stochastic gradient descent optimization.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        method : Literal["implemented", "sklearn"], optional
+            Implementation method (default: "sklearn")
+        n_epochs : int, optional
+            Maximum iterations (default: 1000)
+        t0 : int, optional
+            Learning schedule hyperparameter (default: 5)
+        t1 : int, optional
+            Learning schedule hyperparameter (default: 50)
+        m : int, optional
+            Number of instances (default: 100)
+        theta : np.ndarray, optional
+            Initial theta vector (default: random initialization)
+        tolerance : float, optional
+            Optimization tolerance (default: 1e-3)
+        penalty : Optional[str], optional
+            Regularization penalty (default: None)
+        eta0 : float, optional
+            Initial learning rate (default: 0.1)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and predictions
+
+        References
+        ----------
+        .. [1] "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+            2nd Edition", by Aurélien Géron (O'Reilly). Copyright 2019 Kiwisoft S.A.S.,
+            978-1-492-03264-9.
         """
-        if method == 'implemented':
-            # defining the learning rate at each iteration, which is gradually reduced to solve the
-            #   dilema of escaping from local optimal, but never settling at the minimal
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if n_epochs <= 0:
+            raise ValueError("n_epochs must be positive")
+        if eta0 <= 0:
+            raise ValueError("eta0 must be positive")
+
+        if method == "implemented":
             def learning_schedule(t): return t0 / (t + t1)
-            # calculating the global minimun through iteration
             for epoch in range(n_epochs):
                 for i in range(m):
                     random_index = np.random.randint(m)
@@ -98,345 +197,701 @@ class LinearRegressions:
                     eta = learning_schedule(epoch * m + i)
                     theta = theta - eta * gradients
             return theta
-        elif method == 'sklearn':
-            # defining the model
+        elif method == "sklearn":
             sgd_reg = SGDRegressor(
-                max_iter=n_epochs, tol=tolerance, penalty=penalty, eta0=eta0)
-            # fitting the model
+                max_iter=n_epochs, tol=tolerance, penalty=penalty, eta0=eta0
+            )
             sgd_reg.fit(array_x, array_y.ravel())
-            # providing predictions
             array_predictions = sgd_reg.predict(array_x)
-            # return desired data
             return {
-                'model_fitted': sgd_reg,
-                'intercept': sgd_reg.intercept_,
-                'coeficients': sgd_reg.coef_,
-                'predictions': array_predictions
-            }
-
-    def linear_regression(self, array_x, array_y):
-        """
-        DOCSTRING: BEST FITTING LINE FOR A SAMPLE OF DATA IN X ARRAY, COMAPARED TO AN Y ARRAY
-        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
-        OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH
-            INCLINATION)
-        """
-        # checking whether the array is unidimensional and reshaping it
-        array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
-        # fitting the model
-        model = LinearRegression().fit(np.array(array_x),
-                                      np.array(array_y))
-        # retrieving the results
-        if array_x.shape[1] == 1:
-            return {
-                'model_fitted': model,
-                'score': model.score(np.array(array_x), np.array(array_y)),
-                'coeficients': model.coef_,
-                'intercept': model.intercept_,
-                'predictions': model.predict(np.array(array_x)),
-                'theta_best': np.linalg.inv(np.array(array_x).T.dot(
-                    np.array(array_x))).dot(
-                        np.array(array_x).T).dot(array_y)
+                "model_fitted": sgd_reg,
+                "intercept": sgd_reg.intercept_,
+                "coeficients": sgd_reg.coef_,
+                "predictions": array_predictions,
             }
         else:
-            return {
-                'model_fitted': model,
-                'score': model.score(np.array(array_x), np.array(array_y)),
-                'coeficients': model.coef_,
-                'intercept': model.intercept_,
-                'predictions': model.predict(np.array(array_x))
-            }
+            raise ValueError("Method must be either 'implemented' or 'sklearn'")
 
-    def k_neighbors_regression(self, array_x, array_y):
+    def linear_regression(self, array_x: np.ndarray, array_y: np.ndarray) -> dict[str, Any]:
         """
-        DOCSTRING: BEST FITTING LINE FOR A SAMPLE OF DATA IN X ARRAY, COMAPARED TO AN Y ARRAY
-        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
-        OUTPUTS: DICT WIHT SCORE, COEFICIENTS, INTERCEPT, PREDICT AND THETA BEST (VECTOR WITH
-            INCLINATION)
+        Fit linear regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
         """
-        model = KNeighborsRegressor().fit(np.array(array_x),
-                                      np.array(array_y))
-        return {
-            'model_fitted': model,
-            'intercept': model.intercept_,
-            'coeficients': model.coef_,
-            'score': model.score(np.array(array_x), np.array(array_y)),
-            'predictions': model.predict(np.array(array_x)),
-            'theta_best': np.linalg.inv(np.array(array_x).T.dot(
-                np.array(array_x))).dot(
-                    np.array(array_x).T).dot(array_y)
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
+        model = LinearRegression().fit(np.array(array_x), np.array(array_y))
+
+        result = {
+            "model_fitted": model,
+            "score": model.score(np.array(array_x), np.array(array_y)),
+            "coeficients": model.coef_,
+            "intercept": model.intercept_,
+            "predictions": model.predict(np.array(array_x)),
         }
 
-    def polynomial_equations(self, array_x, array_y, int_degree=2, bl_include_bias=True):
+        if array_x.shape[1] == 1:
+            result["theta_best"] = np.linalg.inv(np.array(array_x).T.dot(np.array(array_x))).dot(
+                np.array(array_x).T).dot(array_y)
+        return result
+
+    def k_neighbors_regression(self, array_x: np.ndarray, array_y: np.ndarray) -> dict[str, Any]:
         """
-        DOCSTRING: POLYNOMIAL REGRESSION TO HANDLE WITH NON-LINEAR EQUATIONS WITH A LINEAR
-            APPROXIMATION
-        INPUTS: ARRAY DATA, INTEGER DEGREE (2 AS DEFAULT) AND BOOLEAN TO WHETER OR NOT INCLUDE BIAS
-            (FALSE AS DEFAULT)
-        OUTPUTS: DICTIONARY WITH MODEL FITTED, INTERCEPT AND COEFICIENTS
+        Fit k-nearest neighbors regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
         """
-        # checking whether the array is unidimensional and reshaping it
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        model = KNeighborsRegressor().fit(np.array(array_x), np.array(array_y))
+        return {
+            "model_fitted": model,
+            "intercept": model.intercept_,
+            "coeficients": model.coef_,
+            "score": model.score(np.array(array_x), np.array(array_y)),
+            "predictions": model.predict(np.array(array_x)),
+            "theta_best": np.linalg.inv(np.array(array_x).T.dot(np.array(array_x))).dot(
+                np.array(array_x).T
+            ).dot(array_y),
+        }
+
+    def polynomial_equations(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        int_degree: int = 2,
+        bl_include_bias: bool = True,
+    ) -> dict[str, Any]:
+        """
+        Fit polynomial regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        int_degree : int, optional
+            Polynomial degree (default: 2)
+        bl_include_bias : bool, optional
+            Whether to include bias term (default: True)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
+        """
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if int_degree < 1:
+            raise ValueError("Degree must be at least 1")
+
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
-        # defininig polynomial model
         poly_features = PolynomialFeatures(
-            degree=int_degree, include_bias=bl_include_bias)
-        # transform data to polynomial purposes
+            degree=int_degree, include_bias=bl_include_bias
+        )
         array_x_polynom = poly_features.fit_transform(array_x)
-        # fit model for polynomial equation
         model = LinearRegression()
         model.fit(array_x_polynom, array_y)
-        # predict based on array provided
         array_predictions = model.predict(array_x_polynom)
-        # return polynomial equation
+
         return {
-            'model_fitted': model,
-            'intercept': model.intercept_,
-            'coeficients': model.coef_,
-            'score': model.score(np.array(array_x_polynom), np.array(array_y)),
-            'predictions': array_predictions,
-            'poly_features': poly_features
+            "model_fitted": model,
+            "intercept": model.intercept_,
+            "coeficients": model.coef_,
+            "score": model.score(np.array(array_x_polynom), np.array(array_y)),
+            "predictions": array_predictions,
+            "poly_features": poly_features,
         }
 
-    def ridge_regression(self, array_x, array_y, alpha=0,
-                         solver_ridge_regression='cholesky'):
+    def ridge_regression(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        alpha: float = 0,
+        solver_ridge_regression: str = "cholesky",
+    ) -> dict[str, Any]:
         """
-        REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
-            978-1-492-03264-9.”
-        DOCSTRING: REGULARIZED VERSION OF LINEAR REGRESSION THAT ADDS A TERM TO THE COST
-            FUNCTION, FORCING THE LEARNING ALGORITHM TO NOT ONLY FIT THE DATA, BUT ALSO KEEP
-            THE MODEL WEIGHTS AS SMALL AS POSSIBLE
-        INPUTS: ARRAY DATA, ARRAY TARGET, ALPHA (SENSITIVITY TO MODEL WIEGHTS - 0 AS DEFAULT),
-            AND SOLVER (CHOLESKY AS DEFAULT)
+        Fit ridge regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        alpha : float, optional
+            Regularization strength (default: 0)
+        solver_ridge_regression : str, optional
+            Solver to use (default: "cholesky")
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
+
+        References
+        ----------
+        .. [1] "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+            2nd Edition", by Aurélien Géron (O'Reilly). Copyright 2019 Kiwisoft S.A.S.,
+            978-1-492-03264-9.
         """
-        # defining the model
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if alpha < 0:
+            raise ValueError("alpha must be non-negative")
+
         ridge_reg = Ridge(alpha=alpha, solver=solver_ridge_regression)
-        # fit the data
         ridge_reg.fit(array_x, array_y)
-        # predict based on array provided
         array_predictions = ridge_reg.predict(array_x)
-        # return polynomial equation
+
         return {
-            'model_fitted': ridge_reg,
-            'intercept': ridge_reg.intercept_,
-            'coeficients': ridge_reg.coef_,
-            'predictions': array_predictions
+            "model_fitted": ridge_reg,
+            "intercept": ridge_reg.intercept_,
+            "coeficients": ridge_reg.coef_,
+            "predictions": array_predictions,
         }
 
-    def lasso_regression(self, array_x, array_y, alpha=0.1):
+    def lasso_regression(
+        self, array_x: np.ndarray, array_y: np.ndarray, alpha: float = 0.1
+    ) -> dict[str, Any]:
         """
-        REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
-            978-1-492-03264-9.”
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        Fit lasso regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        alpha : float, optional
+            Regularization strength (default: 0.1)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
+
+        References
+        ----------
+        .. [1] "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+            2nd Edition", by Aurélien Géron (O'Reilly). Copyright 2019 Kiwisoft S.A.S.,
+            978-1-492-03264-9.
         """
-        # declaring the model
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if alpha <= 0:
+            raise ValueError("alpha must be positive")
+
         model = Lasso(alpha=alpha)
-        # fitting curve
         model.fit(array_x, array_y)
-        # making predictions
         array_predictions = model.predict(array_x)
-        # return polynomial equation
+
         return {
-            'model_fitted': model,
-            'intercept': model.intercept_,
-            'coeficients': model.coef_,
-            'predictions': array_predictions
+            "model_fitted": model,
+            "intercept": model.intercept_,
+            "coeficients": model.coef_,
+            "predictions": array_predictions,
         }
 
-    def elastic_net_regression(self, array_x, array_y, alpha=0.1, l1_ratio=0.5):
+    def elastic_net_regression(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        alpha: float = 0.1,
+        l1_ratio: float = 0.5,
+    ) -> dict[str, Any]:
         """
-        REFERENCES: “HANDS-ON MACHINE LEARNING WITH SCIKIT-LEARN, KERAS, AND TENSORFLOW,
-            2ND EDITION, BY AURÉLIEN GÉRON (O’REILLY). COPYRIGHT 2019 KIWISOFT S.A.S.,
-            978-1-492-03264-9.”
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        Fit elastic net regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        alpha : float, optional
+            Regularization strength (default: 0.1)
+        l1_ratio : float, optional
+            L1 ratio (default: 0.5)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
+
+        References
+        ----------
+        .. [1] "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+            2nd Edition", by Aurélien Géron (O'Reilly). Copyright 2019 Kiwisoft S.A.S.,
+            978-1-492-03264-9.
         """
-        # declaring the model
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if alpha <= 0:
+            raise ValueError("alpha must be positive")
+        if not 0 <= l1_ratio <= 1:
+            raise ValueError("l1_ratio must be between 0 and 1")
+
         model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio)
-        # fitting curve
         model.fit(array_x, array_y)
-        # making predictions
         array_predictions = model.predict(array_x)
-        # return polynomial equation
+
         return {
-            'model_fitted': model,
-            'intercept': model.intercept_,
-            'coeficients': model.coef_,
-            'predictions': array_predictions
+            "model_fitted": model,
+            "intercept": model.intercept_,
+            "coeficients": model.coef_,
+            "predictions": array_predictions,
         }
 
 
 class NonLinearRegressions:
 
-    def decision_tree_regression(self, array_x, array_y, seed=None):
+    def decision_tree_regression(
+        self, array_x: np.ndarray, array_y: np.ndarray, seed: Optional[int] = None
+    ) -> dict[str, Any]:
         """
-        DOCSTRING: DECISION TREE REGRESSION
-        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
-        OUTPUTS: DICT WIHT SCORE AND PREDICT
-        """
-        model = DecisionTreeRegressor(random_state=seed).fit(
-            np.array(array_x),
-            np.array(array_y)
-        )
-        return {
-            'model_fitted': model,
-            'score': model.score(np.array(array_x), np.array(array_y)),
-            'predictions': model.predict(np.array(array_x))
-        }
+        Fit decision tree regression model to data.
 
-    def random_forest_regression(self, array_x, array_y, seed=None, n_estimators=100):
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        seed : Optional[int], optional
+            Random seed (default: None)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
         """
-        DOCSTRING: RANDOM FOREST REGRESSION, FITTING SEVERAL DECISION TREES AND AVERAGING THE
-            PREDICTIONS --> BUILIDING A MODEL ONT TOP OF MANY OTHER MODELS IS CALLED ENSEMBLE
-            LEARNING
-        INPUTS: TWO ARRAYS '[[]]', NO NEED TO IMPORT ARRAY FUNCTION TO RECOGNISE ITS BEHAVIOUR
-        OUTPUTS: DICT WIHT SCORE AND PREDICT
-        """
-        model = RandomForestRegressor(random_state=seed, n_estimators=n_estimators).fit(
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        model = DecisionTreeRegressor(random_state=seed).fit(
             np.array(array_x), np.array(array_y)
         )
         return {
-            'model_fitted': model,
-            'score': model.score(np.array(array_x), np.array(array_y)),
-            'features_importance': model.feature_importances_,
-            'predictions': model.predict(np.array(array_x))
+            "model_fitted": model,
+            "score": model.score(np.array(array_x), np.array(array_y)),
+            "predictions": model.predict(np.array(array_x)),
         }
 
-    def support_vector_regression(self, array_x, array_y, kernel='poly',
-                                          int_degree=2, c_positive_floating_point_number=100,
-                                          epsilon=0.1):
+    def random_forest_regression(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        seed: Optional[int] = None,
+        n_estimators: int = 100,
+    ) -> dict[str, Any]:
         """
-        DOCSTRING: SUPPORT VECTOR MACHINE MODEL FOR REGRESSION PURPOSES
-        INPUTS: ARRAY DATA, ARRAY TARGET, KERNEL (POLY AS DEFAULT), INT DEGREE (DEGREE OF THE
-            POLYNOMINAL DISTRIBUTION, BEING 2 AS DEFAULT, C (FLOATING POINT NUMBER WITH 100
-            AS DEFAULT) AND EPSILON (0.1 AS DEFAULT)
-        OUTPUTS: DICTIONARY WITH SCORE, PREDICT AND MODEL KEYS
+        Fit random forest regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        seed : Optional[int], optional
+            Random seed (default: None)
+        n_estimators : int, optional
+            Number of trees (default: 100)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
         """
-        model = SVR(kernel=kernel, degree=int_degree, C=c_positive_floating_point_number,
-                   epsilon=epsilon)
-        model = model.fit(np.array(array_x), np.array(array_y))
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if n_estimators <= 0:
+            raise ValueError("n_estimators must be positive")
+
+        model = RandomForestRegressor(
+            random_state=seed, n_estimators=n_estimators
+        ).fit(np.array(array_x), np.array(array_y))
         return {
-            'model_fitted': model,
-            'score': model.score(np.array(array_x), np.array(array_y)),
-            'predictions': model.predict(np.array(array_x))
+            "model_fitted": model,
+            "score": model.score(np.array(array_x), np.array(array_y)),
+            "features_importance": model.feature_importances_,
+            "predictions": model.predict(np.array(array_x)),
+        }
+
+    def support_vector_regression(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        kernel: str = "poly",
+        int_degree: int = 2,
+        c_positive_floating_point_number: float = 100,
+        epsilon: float = 0.1,
+    ) -> dict[str, Any]:
+        """
+        Fit support vector regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        kernel : str, optional
+            Kernel type (default: "poly")
+        int_degree : int, optional
+            Polynomial degree (default: 2)
+        c_positive_floating_point_number : float, optional
+            Regularization parameter (default: 100)
+        epsilon : float, optional
+            Epsilon in epsilon-SVR model (default: 0.1)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
+        """
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if int_degree <= 0:
+            raise ValueError("Degree must be positive")
+        if c_positive_floating_point_number <= 0:
+            raise ValueError("C must be positive")
+        if epsilon <= 0:
+            raise ValueError("epsilon must be positive")
+
+        model = SVR(
+            kernel=kernel,
+            degree=int_degree,
+            C=c_positive_floating_point_number,
+            epsilon=epsilon,
+        )
+        model.fit(np.array(array_x), np.array(array_y))
+        return {
+            "model_fitted": model,
+            "score": model.score(np.array(array_x), np.array(array_y)),
+            "predictions": model.predict(np.array(array_x)),
         }
 
 
 class LogLinearRegressions:
 
-    def logistic_regression_logit(self, array_x, array_y,
-                                  c_positive_floating_point_number=1.0, l1_ratio=None,
-                                  int_max_iter=100, solver='lbfgs', penalty='l2',
-                                  mult_class_classifier='auto', float_tolerance=0.0001,
-                                  intercept_scaling=1, random_state=0, verbose=0,
-                                  bl_fit_intercept=True, bl_warm_start=False,
-                                  class_weight=None, bl_dual=False, n_jobs=None):
+    def logistic_regression_logit(
+        self,
+        array_x: np.ndarray,
+        array_y: np.ndarray,
+        c_positive_floating_point_number: float = 1.0,
+        l1_ratio: Optional[float] = None,
+        int_max_iter: int = 100,
+        solver: str = "lbfgs",
+        penalty: str = "l2",
+        mult_class_classifier: str = "auto",
+        float_tolerance: float = 0.0001,
+        intercept_scaling: int = 1,
+        random_state: int = 0,
+        verbose: int = 0,
+        bl_fit_intercept: bool = True,
+        bl_warm_start: bool = False,
+        class_weight: Optional[dict] = None,
+        bl_dual: bool = False,
+        n_jobs: Optional[int] = None,
+    ) -> dict[str, Any]:
         """
-        REFERENCE: https://realpython.com/logistic-regression-python/,
-            https://www.udemy.com/course/machinelearning/
-        DOCSTRING: LOGIT MODEL
-        INPUTS: ARRAY DATA; ARRAY TARGET; C POSITIVE FLOATING-POINT NUMBER,
-            THAT DEFINES THE RELATIVE STRENGTH OF REGULARIZATION (SMALLER VALUES INDICATE STRONGER
-            REGULARIZATION, FITTING-WISE ITS POORLY FITTED, WHEREAS LARGER C MEANS WEAKER
-            REGULARIZATION, THEREFORE HIGHER COEF_ AND INTERCEPT_ FOR THE MODEL); SOLVER (liblinear
-            FOR LOGISTIC REGRESSION LOGIT AND lbfgs FOR SOFTMAX REGRESSION); PENALTY (l1 OR l2 -
-            SCIKIT-LEARN USES L2 AS DEFAULT)
-        OUTPUTS: FIT (MODEL INSTANCE), CLASSES, INTERCEPT, COEFICIENT,
-            PREDICT PROBABILITY(MATRIX OF PROBABILITIES THAT THE PREDICTED OUTPUT IS EQUAL
-            TO ZERO, 1-p(x), OR ONE, p(x)), SCORE (RATIO OF OBSERVATIONS CLASSIFIED CORRECTLY,
-            ALSO KNOWN AS ACCURACY), CONFUSION MATRIX (PROVIDE THE ACTUAL AND PREDICTED OUTPUTS
-            REGARDING TRUE NEGATIVE (C0,0), FALSE NEGATIVE (C1,0), FALSE POSITIVES (C0,1)
-            AND TRUE POSITIVES (C1,1))
+        Fit logistic regression model to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+        c_positive_floating_point_number : float, optional
+            Inverse of regularization strength (default: 1.0)
+        l1_ratio : Optional[float], optional
+            ElasticNet mixing parameter (default: None)
+        int_max_iter : int, optional
+            Maximum iterations (default: 100)
+        solver : str, optional
+            Optimization solver (default: "lbfgs")
+        penalty : str, optional
+            Regularization penalty (default: "l2")
+        mult_class_classifier : str, optional
+            Multiclass handling (default: "auto")
+        float_tolerance : float, optional
+            Tolerance for stopping (default: 0.0001)
+        intercept_scaling : int, optional
+            Intercept scaling (default: 1)
+        random_state : int, optional
+            Random seed (default: 0)
+        verbose : int, optional
+            Verbosity level (default: 0)
+        bl_fit_intercept : bool, optional
+            Whether to fit intercept (default: True)
+        bl_warm_start : bool, optional
+            Whether to reuse solution (default: False)
+        class_weight : Optional[dict], optional
+            Class weights (default: None)
+        bl_dual : bool, optional
+            Dual formulation (default: False)
+        n_jobs : Optional[int], optional
+            Number of CPU cores (default: None)
+
+        Returns
+        -------
+        dict[str, Any]
+            Results dictionary containing model and metrics
+
+        References
+        ----------
+        .. [1] https://realpython.com/logistic-regression-python/
+        .. [2] https://www.udemy.com/course/machinelearning/
         """
-        # checking whether the array is unidimensional and reshaping it
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+        if c_positive_floating_point_number <= 0:
+            raise ValueError("C must be positive")
+        if int_max_iter <= 0:
+            raise ValueError("max_iter must be positive")
+        if float_tolerance <= 0:
+            raise ValueError("tolerance must be positive")
+
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
-        # fitting the model
-        model = LogisticRegression(C=c_positive_floating_point_number,
-                                   class_weight=class_weight, dual=bl_dual,
-                                   fit_intercept=bl_fit_intercept,
-                                   intercept_scaling=intercept_scaling,
-                                   l1_ratio=l1_ratio, max_iter=int_max_iter,
-                                   multi_class=mult_class_classifier, n_jobs=n_jobs,
-                                   penalty=penalty, random_state=random_state,
-                                   solver=solver, tol=float_tolerance, verbose=verbose,
-                                   warm_start=bl_warm_start).fit(array_x, array_y)
-        # returning model fitted
+        model = LogisticRegression(
+            C=c_positive_floating_point_number,
+            class_weight=class_weight,
+            dual=bl_dual,
+            fit_intercept=bl_fit_intercept,
+            intercept_scaling=intercept_scaling,
+            l1_ratio=l1_ratio,
+            max_iter=int_max_iter,
+            multi_class=mult_class_classifier,
+            n_jobs=n_jobs,
+            penalty=penalty,
+            random_state=random_state,
+            solver=solver,
+            tol=float_tolerance,
+            verbose=verbose,
+            warm_start=bl_warm_start,
+        ).fit(array_x, array_y)
+
         return {
-            'model_fitted': model,
-            'classes': model.classes_,
-            'intercept': model.intercept_,
-            'coeficient': model.coef_,
-            'predict_probability': model.predict_proba(array_x),
-            'predictions': model.predict(array_x),
-            'score': model.score(array_x, array_y),
-            'confusion_matrix': confusion_matrix(array_y,
-                                                 model.predict(array_x)),
-            'classification_report': classification_report(array_y,
-                                                           model.predict(
-                                                               array_x),
-                                                           output_dict=True),
-            'log_likelihood': class_likelihood_ratios(array_y, model.predict(array_x))
+            "model_fitted": model,
+            "classes": model.classes_,
+            "intercept": model.intercept_,
+            "coeficient": model.coef_,
+            "predict_probability": model.predict_proba(array_x),
+            "predictions": model.predict(array_x),
+            "score": model.score(array_x, array_y),
+            "confusion_matrix": confusion_matrix(array_y, model.predict(array_x)),
+            "classification_report": classification_report(
+                array_y, model.predict(array_x), output_dict=True
+            ),
+            "log_likelihood": class_likelihood_ratios(array_y, model.predict(array_x)),
         }
 
 
 class NonLinearEquations:
 
-    def differential_evolution(self, cost_func, list_bounds, method='scipy', max_iter=1000,
-                               max_iterations_wo_improvement=100, int_verbose_monitor=10,
-                               bl_print_convergence_messages=False, bl_print_warning_messages=True,
-                               bl_inter_monitor=False, int_size_trial_solution_population=40,
-                               tolerance=5e-5):
+    def differential_evolution(
+        self,
+        cost_func: callable,
+        list_bounds: list[tuple[float, float]],
+        method: Literal["scipy", "mystic"] = "scipy",
+        max_iter: int = 1000,
+        max_iterations_wo_improvement: int = 100,
+        int_verbose_monitor: int = 10,
+        bl_print_convergence_messages: bool = False,
+        bl_print_warning_messages: bool = True,
+        bl_inter_monitor: bool = False,
+        int_size_trial_solution_population: int = 40,
+        tolerance: float = 5e-5,
+    ) -> Any:
         """
-        REFERENCES: https://stackoverflow.com/questions/21765794/python-constrained-non-linear-optimization,
-            https://mystic.readthedocs.io/en/latest/mystic.html, https://docs.scipy.org/doc/scipy/reference/optimize.html
-        DOCSTRING: PRICE & STORN DIFFERENTIAL EVOLUTION SOLVER
-        INPUTS:
-        OUTPUTS:
+        Differential evolution optimization.
+
+        Parameters
+        ----------
+        cost_func : callable
+            Cost function to minimize
+        list_bounds : list[tuple[float, float]]
+            List of (min, max) pairs for each parameter
+        method : Literal["scipy", "mystic"], optional
+            Implementation method (default: "scipy")
+        max_iter : int, optional
+            Maximum iterations (default: 1000)
+        max_iterations_wo_improvement : int, optional
+            Maximum iterations without improvement (default: 100)
+        int_verbose_monitor : int, optional
+            Verbosity interval (default: 10)
+        bl_print_convergence_messages : bool, optional
+            Whether to print convergence messages (default: False)
+        bl_print_warning_messages : bool, optional
+            Whether to print warnings (default: True)
+        bl_inter_monitor : bool, optional
+            Whether to use verbose monitor (default: False)
+        int_size_trial_solution_population : int, optional
+            Population size (default: 40)
+        tolerance : float, optional
+            Optimization tolerance (default: 5e-5)
+
+        Returns
+        -------
+        Any
+            Optimization result
+
+        References
+        ----------
+        .. [1] https://stackoverflow.com/questions/21765794/python-constrained-non-linear-optimization
+        .. [2] https://mystic.readthedocs.io/en/latest/mystic.html
+        .. [3] https://docs.scipy.org/doc/scipy/reference/optimize.html
         """
-        if method == 'scipy':
-            return differential_evolution(cost_func, list_bounds, maxiter=max_iter, tol=tolerance,
-                                          disp=bl_print_convergence_messages)
-        elif method == 'mystic':
-            if bl_inter_monitor == True:
+        if not callable(cost_func):
+            raise TypeError("cost_func must be callable")
+        if not list_bounds or not all(
+            isinstance(b, tuple) and len(b) == 2 for b in list_bounds
+        ):
+            raise ValueError("list_bounds must contain (min, max) tuples")
+        if max_iter <= 0:
+            raise ValueError("max_iter must be positive")
+        if tolerance <= 0:
+            raise ValueError("tolerance must be positive")
+
+        if method == "scipy":
+            return differential_evolution(
+                cost_func,
+                list_bounds,
+                maxiter=max_iter,
+                tol=tolerance,
+                disp=bl_print_convergence_messages,
+            )
+        elif method == "mystic":
+            if bl_inter_monitor:
                 mon = VerboseMonitor(int_verbose_monitor)
                 return diffev2(
-                    cost_func, x0=list_bounds, bounds=list_bounds,
+                    cost_func,
+                    x0=list_bounds,
+                    bounds=list_bounds,
                     npop=int_size_trial_solution_population,
-                    gtol=max_iterations_wo_improvement, disp=bl_print_convergence_messages,
-                    full_output=bl_print_warning_messages, itermon=mon, maxiter=max_iter,
-                    ftol=tolerance)
+                    gtol=max_iterations_wo_improvement,
+                    disp=bl_print_convergence_messages,
+                    full_output=bl_print_warning_messages,
+                    itermon=mon,
+                    maxiter=max_iter,
+                    ftol=tolerance,
+                )
             else:
                 return diffev2(
-                    cost_func, x0=list_bounds, bounds=list_bounds,
+                    cost_func,
+                    x0=list_bounds,
+                    bounds=list_bounds,
                     npop=int_size_trial_solution_population,
-                    gtol=max_iterations_wo_improvement, disp=bl_print_convergence_messages,
-                    full_output=bl_print_warning_messages, maxiter=max_iter, ftol=tolerance)
+                    gtol=max_iterations_wo_improvement,
+                    disp=bl_print_convergence_messages,
+                    full_output=bl_print_warning_messages,
+                    maxiter=max_iter,
+                    ftol=tolerance,
+                )
         else:
-            raise Exception(
-                'Method not recognized, please revisit the parameter')
+            raise ValueError("Method must be either 'scipy' or 'mystic'")
 
-    def optimize_curve_fit(self, func, array_x, array_y):
+    def optimize_curve_fit(
+        self, func: callable, array_x: np.ndarray, array_y: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        return curve_fit(func, xdata=array_x, y_data=array_y)
+        Optimize curve fitting.
 
-    def polynomial_fit(self, array_x, array_y):
+        Parameters
+        ----------
+        func : callable
+            Function to fit
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray]
+            Tuple containing optimal parameters and covariance matrix
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS: ARRAY ESTIMATIVES AND ARRAY POLYNOMIAL INTERPOLATED VALUES
+        if not callable(func):
+            raise TypeError("func must be callable")
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        return curve_fit(func, xdata=array_x, ydata=array_y)
+
+    def polynomial_fit(
+        self, array_x: np.ndarray, array_y: np.ndarray
+    ) -> dict[str, np.ndarray]:
         """
-        # estimatives
-        y_est = np.polyfit(array_x, array_y)
-        # return estimatives and values interpolated
+        Fit polynomial to data.
+
+        Parameters
+        ----------
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+
+        Returns
+        -------
+        dict[str, np.ndarray]
+            Dictionary containing coefficients and interpolated values
+        """
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        array_coeff = np.polyfit(array_x, array_y)
         return {
-            'coefficients': y_est,
-            'values_interpolated': np.polyval(y_est, array_x)
+            "coefficients": array_coeff,
+            "values_interpolated": np.polyval(array_coeff, array_x),
         }
