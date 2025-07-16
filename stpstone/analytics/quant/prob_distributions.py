@@ -1,194 +1,408 @@
-### PROBABILITY DISTRIBUTIONS ###
+"""Module for probability distribution calculations.
 
-from __future__ import division, print_function
+This module provides implementations of various probability distributions including
+Bernoulli, Geometric, Binomial, Poisson, Chi-Squared, T-Student, F-Snedecor,
+Normal, and Hansen's Skewed Student distributions.
+"""
+
+from typing import Any, Literal, Optional, Union
 
 import matplotlib.pylab as plt
 import numpy as np
-from numpy import dot, log, multiply, ones, pi, shape, sqrt
+from numpy import dot, log, multiply, pi, sqrt
 from scipy.special import gamma, gammaln
-from scipy.stats import bernoulli, binom, chi2, f, geom, norm, poisson, sem, t, uniform
+from scipy.stats import (
+    bernoulli,
+    binom,
+    chi2,
+    f,
+    geom,
+    norm,
+    poisson,
+    sem,
+    t,
+    uniform,
+)
 import seaborn as sns
 
 
+# module-level constants for default plot ranges
+DEFAULT_PDF_CDF_RANGE = np.linspace(-2, 2, 100)
+DEFAULT_PPF_RANGE = np.linspace(0.01, 0.99, 100)
+
 class ProbabilityDistributions:
+    """Class implementing various probability distributions."""
 
-    def bernoulli_distribution(self, prob, num_trials=1):
+    def bernoulli_distribution(self, float_p: float, int_num_trials: int = 1) -> dict[str, Any]:
+        """Calculate Bernoulli distribution statistics.
+
+        Parameters
+        ----------
+        float_p : float
+            Probability of success (0 <= float_p <= 1)
+        int_num_trials : int, optional
+            Number of trials, by default 1
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary containing mean, variance, skewness, kurtosis and CDF
+
+        References
+        ----------
+        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bernoulli.html
         """
-        REFERENCES: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.bernoulli.html
-        DOCSTRING: BERNOULLI DISTRIBUTION TO ANALYZE PERCENTAGE OF ACCOMPLISHMENT AND FAILURE
-            FOR EACH EVENT: P(x=1) = P, E(X) = P, V(X) = P * (1-P)
-        INPUTS: PROBABILITY AND NUMBER OF TRIALS
-        OUTPUTS: ARRAY OF BERNOULLI DISTRIBUTION (MEAN, VAR, SKEW, KURT AND
-            CUMULATIVE DISTRIBUTION FUNCTION)
-        """
+        if not 0.0 <= float_p <= 1.0:
+            raise ValueError("Probability must be between 0 and 1")
+        if int_num_trials < 0:
+            raise ValueError("Number of trials must be greater than 0")
+        
         return {
-            'mean': bernoulli.stats(prob, moments='mvsk')[0],
-            'var': bernoulli.stats(prob, moments='mvsk')[1],
-            'skew': bernoulli.stats(prob, moments='mvsk')[2],
-            'kurt': bernoulli.stats(prob, moments='mvsk')[3],
-            'distribution': bernoulli.cdf(num_trials, prob)
+            "mean": bernoulli.stats(float_p, moments="mvsk")[0],
+            "var": bernoulli.stats(float_p, moments="mvsk")[1],
+            "skew": bernoulli.stats(float_p, moments="mvsk")[2],
+            "kurt": bernoulli.stats(float_p, moments="mvsk")[3],
+            "distribution": bernoulli.cdf(int_num_trials, float_p),
         }
 
-    def geometric_distribution(self, prob, num_trials):
+    def geometric_distribution(self, float_p: float, int_num_trials: int) -> dict[str, Any]:
+        """Calculate Geometric distribution statistics.
+
+        Parameters
+        ----------
+        float_p : float
+            Probability of success (0 <= float_p <= 1)
+        int_num_trials : int
+            Number of trials
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary containing mean, variance, skewness, kurtosis and PMF
+
+        References
+        ----------
+        .. [1] http://biorpy.blogspot.com/2015/02/py19-geometric-distribution-in-python.html
         """
-        REFERENCES: http://biorpy.blogspot.com/2015/02/py19-geometric-distribution-in-python.html
-        DOCSTRING: GEOMETRIC DISTRIBUTION TO INDICATE NUMBER OF INDEPENDENT TRIALS TO REACH
-            FIRST SUCCESS: P(X=N) = (1-P) ** (N-1) * P, E(X) = 1/P, V(X) = (1-P) / P ** 2
-        INPUTS: PROBABILITY (FLOAT) AND NUMBER OF TRIALS
-        OUTPUTS: DICT OF GEOMETRIC DISTRIBUTION (MEAN, VAR, SKEW, KURT AND
-            CUMULATIVE DISTRIBUTION FUNCTION)
-        """
-        p = np.zeros(num_trials)
-        for k in range(1, num_trials + 1):
-            p[k - 1] = geom.pmf(k, prob)
+        if not 0.0 <= float_p <= 1.0:
+            raise ValueError("Probability must be between 0 and 1")
+        if int_num_trials < 0:
+            raise ValueError("Number of trials must be greater than 0")
+        
+        array_pmf = np.zeros(int_num_trials)
+        for k in range(1, int_num_trials + 1):
+            array_pmf[k - 1] = geom.pmf(k, float_p)
         return {
-            'mean': geom.stats(p, moments='mvsk')[0],
-            'var': geom.stats(p, moments='mvsk')[1],
-            'skew': geom.stats(p, moments='mvsk')[2],
-            'kurt': geom.stats(p, moments='mvsk')[3],
-            'distribution': p
+            "mean": geom.stats(float_p, moments="mvsk")[0],
+            "var": geom.stats(float_p, moments="mvsk")[1],
+            "skew": geom.stats(float_p, moments="mvsk")[2],
+            "kurt": geom.stats(float_p, moments="mvsk")[3],
+            "distribution": array_pmf,
         }
 
-    def binomial_distribution(self, prob, num_trials):
+    def binomial_distribution(self, float_p: float, int_num_trials: int) -> dict[str, Any]:
+        """Calculate Binomial distribution statistics.
+
+        Parameters
+        ----------
+        float_p : float
+            Probability of success (0 <= float_p <= 1)
+        int_num_trials : int
+            Number of trials
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary containing mean, variance, skewness, kurtosis and PMF
+
+        References
+        ----------
+        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binom.html
         """
-        REFERENCES: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.binom.html
-        DOCSTRING: BINOMIAL DISRTIBUTION TO INVESTIGATE K-NUMBER OF SUCCESSES IN N-TRIALS:
-            P(X=K) = COMB(N,K) * P ** K * (1 - P) ** (N-K), E(X) = N * P, V (X) = N * P * (1-P)
-        INPUTS: PROBABILITY (FLOAT) AND NUMBER OF TRIALS
-        OUTPUTS: DICT OF BINOMIAL DISTRIBUTION (MEAN, VAR, SKEW, KURT AND
-            CUMULATIVE DISTRIBUTION FUNCTION)
-        """
-        p = np.zeros(num_trials)
-        for k in range(1, num_trials + 1):
-            p[k - 1] = binom.pmf(k, num_trials, prob)
+        if not 0.0 <= float_p <= 1.0:
+            raise ValueError("Probability must be between 0 and 1")
+        if int_num_trials < 0:
+            raise ValueError("Number of trials must be greater than 0")
+        
+        array_pmf = np.zeros(int_num_trials)
+        for k in range(1, int_num_trials + 1):
+            array_pmf[k - 1] = binom.pmf(k, int_num_trials, float_p)
         return {
-            'mean': binom.stats(num_trials, p, moments='mvsk')[0],
-            'var': binom.stats(num_trials, p, moments='mvsk')[1],
-            'skew': binom.stats(num_trials, p, moments='mvsk')[2],
-            'kurt': binom.stats(num_trials, p, moments='mvsk')[3],
-            'distribution': p
+            "mean": binom.stats(int_num_trials, float_p, moments="mvsk")[0],
+            "var": binom.stats(int_num_trials, float_p, moments="mvsk")[1],
+            "skew": binom.stats(int_num_trials, float_p, moments="mvsk")[2],
+            "kurt": binom.stats(int_num_trials, float_p, moments="mvsk")[3],
+            "distribution": array_pmf,
         }
 
-    def poisson_distribution(self, num_trials, mu):
+    def poisson_distribution(self, int_num_trials: int, float_mu: float) -> dict[str, Any]:
+        """Calculate Poisson distribution statistics.
+
+        Parameters
+        ----------
+        int_num_trials : int
+            Number of trials
+        float_mu : float
+            Expected number of occurrences
+
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary containing mean, variance, skewness, kurtosis and PMF
+
+        References
+        ----------
+        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html
         """
-        REFERENCES: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.poisson.html
-        DOCSTRING: POISSON DISTRIBUTION TO COUNT OCCURRENCES WITHIN CERTAIN AMOUNT OF TIME, ASSUMING
-            A LAMBDA MEAN:
-            P(X=K) = EXP(-LAMBDA) * LAMBA ** K / K!, E(x) = V(X) = LAMBDA * RANGE
-        INPUTS: NUMBER OF TRIALS AND MU
-        OUTPUTS: DICT OF POISSON DISTRIBUTION (MEAN, VAR, SKEW, KURT AND
-            CUMULATIVE DISTRIBUTION FUNCTION)
-        """
-        p = np.zeros(num_trials)
-        for k in range(1, num_trials + 1):
-            p[k - 1] = poisson.pmf(k, mu)
+        if not 0.0 <= float_mu <= 1.0:
+            raise ValueError("Mu must be between 0 and 1")
+        if int_num_trials < 0:
+            raise ValueError("Number of trials must be greater than 0")
+        
+        float_p = np.zeros(int_num_trials)
+        for k in range(1, int_num_trials + 1):
+            float_p[k - 1] = poisson.pmf(k, float_mu)
         return {
-            'mean': poisson.stats(mu, moments='mvsk')[0],
-            'var': poisson.stats(mu, moments='mvsk')[1],
-            'skew': poisson.stats(mu, moments='mvsk')[2],
-            'kurt': poisson.stats(mu, moments='mvsk')[3],
-            'distribution': p
+            "mean": poisson.stats(float_mu, moments="mvsk")[0],
+            "var": poisson.stats(float_mu, moments="mvsk")[1],
+            "skew": poisson.stats(float_mu, moments="mvsk")[2],
+            "kurt": poisson.stats(float_mu, moments="mvsk")[3],
+            "distribution": float_p,
         }
 
-    def chi_squared(self, p, df, probability_func='ppf', x_axis_inf_range=None,
-                    x_axis_sup_range=None, x_axis_pace=None):
-        """
-        DOCSTRING: CHI SQUARED PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY
-            DENSITY FUNCTION (PDF), AND PROBABILITY CUMULATIVE FUNCTION (CDF)
-        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS
-            PDF AND CDF ARE POSSIBLE AS WELL)
-        OUTPUTS: FLOAT
-        """
-        # setting x axis range
-        arr_ind = np.arange(x_axis_inf_range, x_axis_sup_range, x_axis_pace)
-        # getting the statistic
-        if probability_func == 'ppf':
-            return chi2.ppf(p, df)
-        elif probability_func == 'pdf':
-            return chi2.pdf(arr_ind, df)
-        elif probability_func == 'cdf':
-            return chi2.cdf(arr_ind, df)
-        else:
-            raise Exception('Error defining the probability function of interest. {} '.format(
-                probability_func)
-                + 'was given, nevertheless was expected ppf, pdf or cdf')
+    def chi_squared(
+        self,
+        float_p: float,
+        int_df: int,
+        probability_func: Literal["ppf", "pdf", "cdf"] = "ppf",
+        x_axis_inf_range: Optional[float] = None,
+        x_axis_sup_range: Optional[float] = None,
+        x_axis_pace: Optional[float] = None,
+    ) -> Union[float, np.ndarray]:
+        """Calculate Chi-Squared distribution statistics.
 
-    def t_student(self, p, df, probability_func='ppf', x_axis_inf_range=None,
-                  x_axis_sup_range=None, x_axis_pace=None):
-        """
-        DOCSTRING: T STUDENT PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY
-            DENSITY FUNCTION (PDF), AND PROBABILITY CUMULATIVE FUNCTION (CDF)
-        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS
-            PDF AND CDF ARE POSSIBLE AS WELL)
-        OUTPUTS: FLOAT
-        """
-        # setting x axis range
-        arr_ind = np.arange(x_axis_inf_range, x_axis_sup_range, x_axis_pace)
-        # getting the statistic
-        if probability_func == 'ppf':
-            return t.ppf(p, df)
-        elif probability_func == 'pdf':
-            return t.pdf(arr_ind, df)
-        elif probability_func == 'cdf':
-            return t.cdf(arr_ind, df)
-        else:
-            raise Exception('Error defining the probability function of interest. {} '.format(
-                probability_func)
-                + 'was given, nevertheless was expected ppf, pdf or cdf')
+        Parameters
+        ----------
+        float_p : float
+            Probability value
+        int_df : int
+            Degrees of freedom
+        probability_func : str, optional
+            Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
+        x_axis_inf_range : Optional[float], optional
+            Lower bound of x-axis range, by default None
+        x_axis_sup_range : Optional[float], optional
+            Upper bound of x-axis range, by default None
+        x_axis_pace : Optional[float], optional
+            Step size for x-axis range, by default None
 
-    def f_fisher_snedecor(self, dfn, dfd, mu, p=None, probability_func='ppf', x_axis_inf_range=None,
-                          x_axis_sup_range=None, x_axis_pace=None):
+        Returns
+        -------
+        Union[float, np.ndarray]
+            Result of the specified probability function
+        
+        Notes
+        -----
+        ppf: percent point function
+            Inverse of the CDF, is a statistical function that returns the value of a random \
+variable corresponding to a specified probability level (or percentile).
+        pdf: probability density function
+            The PDF is the derivative of the CDF.
+        cdf: cumulative density function
+            The CDF is the probability that a random variable is less than or equal to a given \
+value.
+
+        References
+        ----------
+        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2.html
         """
-        DOCSTRING: F-SNEDECOR PROBABILITY POINT FUNCTION (Z-SCORE, OR PPF), PROBABABILITY
-            DENSITY FUNCTION (PDF), AND PROBABILITY CUMULATIVE FUNCTION (CDF)
-        INPUTS: P (PROBABILITY), DEGREES OF FREEDOM, PROBABILITY FUNCTION (PPF, AS DEFAULT, WHEREAS
-            PDF AND CDF ARE POSSIBLE AS WELL)
-        OUTPUTS: FLOAT
+        if not 0.0 <= float_p <= 1.0:
+            raise ValueError("Probability must be between 0 and 1")
+        if int_df <= 0:
+            raise ValueError("Degrees of freedom must be positive")
+        if probability_func not in ("ppf", "pdf", "cdf"):
+            raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
+        if probability_func in ("pdf", "cdf") and (
+            x_axis_inf_range is None or x_axis_sup_range is None or x_axis_pace is None
+        ):
+            raise ValueError("Range parameters must be provided for pdf/cdf calculations")
+
+        if probability_func in ("pdf", "cdf"):
+            arr_ind = np.arange(x_axis_inf_range, x_axis_sup_range, x_axis_pace)
+            if probability_func == "pdf":
+                return chi2.pdf(arr_ind, int_df)
+            return chi2.cdf(arr_ind, int_df)
+        elif probability_func == "ppf":
+            return chi2.ppf(float_p, int_df)
+        raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
+
+    def t_student(
+        self,
+        float_p: float,
+        int_df: int,
+        probability_func: Literal["ppf", "pdf", "cdf"] = "ppf",
+        x_axis_inf_range: Optional[float] = None,
+        x_axis_sup_range: Optional[float] = None,
+        x_axis_pace: Optional[float] = None,
+    ) -> Union[float, np.ndarray]:
+        """Calculate Student's T distribution statistics.
+
+        Parameters
+        ----------
+        float_p : float
+            Probability value
+        int_df : int
+            Degrees of freedom
+        probability_func : str, optional
+            Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
+        x_axis_inf_range : Optional[float], optional
+            Lower bound of x-axis range, by default None
+        x_axis_sup_range : Optional[float], optional
+            Upper bound of x-axis range, by default None
+        x_axis_pace : Optional[float], optional
+            Step size for x-axis range, by default None
+
+        Returns
+        -------
+        Union[float, np.ndarray]
+            Result of the specified probability function
         """
-        # checking whether degrees of freedom numerator is higher than denominator
-        assert dfn > dfd
-        # defining basic parameters of the distribution
-        f_dist = f(dfn, dfd, mu)
-        # setting x axis range
-        arr_ind = np.arange(x_axis_inf_range, x_axis_sup_range, x_axis_pace)
-        # getting the statistic
-        if probability_func == 'ppf':
-            return f.ppf(p, dfn, dfd)
-        elif probability_func == 'pdf':
-            return f_dist.pdf(arr_ind)
-        elif probability_func == 'cdf':
-            return f.cdf(p, dfn, dfd)
-        else:
-            raise Exception('Error defining the probability function of interest. {} '.format(
-                probability_func)
-                + 'was given, nevertheless was expected ppf, pdf or cdf')
+        if not 0.0 <= float_p <= 1.0:
+            raise ValueError("Probability must be between 0 and 1")
+        if int_df <= 0:
+            raise ValueError("Degrees of freedom must be positive")
+        if probability_func not in ("ppf", "pdf", "cdf"):
+            raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
+        if probability_func in ("pdf", "cdf") and (
+            x_axis_inf_range is None or x_axis_sup_range is None or x_axis_pace is None
+        ):
+            raise ValueError("Range parameters must be provided for pdf/cdf calculations")
+        
+        if probability_func in ("pdf", "cdf"):
+            arr_ind = np.arange(x_axis_inf_range, x_axis_sup_range, x_axis_pace)
+            if probability_func == "pdf":
+                return t.pdf(arr_ind, int_df)
+            return t.cdf(arr_ind, int_df)
+        elif probability_func == "ppf":
+            return t.ppf(float_p, int_df)
+        raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
+
+    def f_fisher_snedecor(
+        self,
+        int_dfn: int,
+        int_dfd: int,
+        float_mu: float,
+        float_p: Optional[float] = None,
+        probability_func: Literal["ppf", "pdf", "cdf"] = "ppf",
+        x_axis_inf_range: Optional[float] = None,
+        x_axis_sup_range: Optional[float] = None,
+        x_axis_pace: Optional[float] = None,
+    ) -> Union[float, np.ndarray]:
+        """Calculate F-Snedecor distribution statistics.
+
+        Parameters
+        ----------
+        int_dfn : int
+            Degrees of freedom numerator
+        int_dfd : int
+            Degrees of freedom denominator
+        float_mu : float
+            Mean value
+        float_p : Optional[float], optional
+            Probability value, by default None
+        probability_func : str, optional
+            Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
+        x_axis_inf_range : Optional[float], optional
+            Lower bound of x-axis range, by default None
+        x_axis_sup_range : Optional[float], optional
+            Upper bound of x-axis range, by default None
+        x_axis_pace : Optional[float], optional
+            Step size for x-axis range, by default None
+
+        Returns
+        -------
+        Union[float, np.ndarray]
+            Result of the specified probability function
+
+        Raises
+        ------
+        ValueError
+            If numerator degrees of freedom <= denominator degrees of freedom
+        """
+        if int_dfn <= 0 or int_dfd <= 0:
+            raise ValueError("Degrees of freedom must be positive")
+        if int_dfn <= int_dfd:
+            raise ValueError("Numerator df must be greater than denominator df")
+        if probability_func not in ("ppf", "pdf", "cdf"):
+            raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
+        if probability_func == "ppf" and (float_p is None or not 0.0 <= float_p <= 1.0):
+            raise ValueError("Probability must be between 0 and 1 for ppf calculation")
+        if probability_func in ("pdf", "cdf") and (
+            x_axis_inf_range is None or x_axis_sup_range is None or x_axis_pace is None
+        ):
+            raise ValueError("Range parameters must be provided for pdf/cdf calculations")
+        
+        f_dist = f(int_dfn, int_dfd, float_mu)
+
+        if probability_func in ("pdf", "cdf"):
+            arr_ind = np.arange(x_axis_inf_range, x_axis_sup_range, x_axis_pace)
+            if probability_func == "pdf":
+                return f_dist.pdf(arr_ind)
+            return f.cdf(arr_ind, int_dfn, int_dfd)
+        elif probability_func == "ppf":
+            return f.ppf(float_p, int_dfn, int_dfd)
+        raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
 
 
 class NormalDistribution:
+    """Class implementing Normal distribution calculations."""
 
-    def phi(self, x):
-        """
-        DOCSTRING: RETURN THE VALUE OF THE GAUSSIAN PROBABILITY FUNCTION WITH MEAN 0.0 AND
-            STANDARD DEVIATION 1.0 AT THE GIVEN X VALUE
-        INPUTS: X
-        OUTPUS: STANDARD NORMAL PROBABILITY
-        """
-        return np.exp(-x ** 2 / 2.0) / np.sqrt(2.0 * np.pi)
+    def phi(self, x: float) -> float:
+        """Calculate standard normal probability density function.
 
-    def pdf(self, x, mu=0.0, sigma=1.0):
-        """
-        DOCSTRING: RETURN THE VALUE OF THE GAUSSIAN PROBABILITY FUNCTION WITH MEAN MU AND
-            STANDARD DEVIATION SIGMA AT THE GIVEN x VALUE
-        INPUTS: X, MU (0.0 BY DEFAULT) AND SIGMA (1.0 BY DEFAULT)
-        OUTPUTS: VALUE OF THE GAUSSIAN PROBABILITY
-        """
-        return self.phi((x - mu) / sigma) / sigma
+        Parameters
+        ----------
+        x : float
+            Input value
 
-    def cumnulative_phi(self, z):
+        Returns
+        -------
+        float
+            Probability density at x
         """
-        DOCSTRING: DENSITY FUNCTION WITH MEAN 0.0 AND STANDARD DEVIATION 1.0 AT THE GIVEN Z VALUE
-        INPUTS: Z
-        OUTPUTS: PHI
+        return np.exp(-(x**2) / 2.0) / np.sqrt(2.0 * np.pi)
+
+    def pdf(self, x: float, float_mu: float = 0.0, float_sigma: float = 1.0) -> float:
+        """Calculate normal probability density function.
+
+        Parameters
+        ----------
+        x : float
+            Input value
+        float_mu : float, optional
+            Mean, by default 0.0
+        float_sigma : float, optional
+            Standard deviation, by default 1.0
+
+        Returns
+        -------
+        float
+            Probability density at x
+        """
+        return self.phi((x - float_mu) / float_sigma) / float_sigma
+
+    def cumnulative_phi(self, z: float) -> float:
+        """Calculate standard normal cumulative distribution function.
+
+        Parameters
+        ----------
+        z : float
+            Input value
+
+        Returns
+        -------
+        float
+            Cumulative probability at z
         """
         if z < -8.0:
             return 0.0
@@ -203,290 +417,386 @@ class NormalDistribution:
             i += 2
         return 0.5 + total * self.phi(z)
 
-    def cdf(self, x, mu=0.0, sigma=1.0):
-        """
-        DOCSTRING: STANDARD GAUSSIAN CDF WITH MEAN MI AND STDDEV SIGMA, USING TAYLOR
-            APPROXIMATION - CUMULATIVE DISTRIBUTION FUNCTION - AREA BELOW GAUSSIAN CURVE -
-            NORMAL DISTRIBUTION FORMULA
-        INPUTS: X, MU(STANDARD 0.0) AND SIGMA (STANDARD 1.0)
-        OUTPUTS: CUMULATIVE DENSITY FUNCTION OF A GAUSSIAN DISTRIBUTION
-        """
-        return self.cumnulative_phi((x - mu) / sigma)
+    def cdf(self, x: float, float_mu: float = 0.0, float_sigma: float = 1.0) -> float:
+        """Calculate normal cumulative distribution function.
 
-    def inv_cdf(self, p, mu=0.0, sigma=1.0):
-        """
-        DOCSTRING: INVERSE OF THE NORMAL CULMULATIVE DISTRIBUTION FOR A SUPPLIED VALUE OF X, OR
-            A PROBABILITY, WITH A GIVEN DISTRIBUTION MEAND AND STANDARD DEVIATION
-        INPUTS: PROBABILITY, MEAN AND STANDARD DEVIATION
-        OUTPUTS: INV.NORM, OR Z-SCORE
-        """
-        return norm.ppf(p, mu, sigma)
+        Parameters
+        ----------
+        x : float
+            Input value
+        float_mu : float, optional
+            Mean, by default 0.0
+        float_sigma : float, optional
+            Standard deviation, by default 1.0
 
-    def confidence_interval_normal(self, data, confidence=0.95):
+        Returns
+        -------
+        float
+            Cumulative probability at x
         """
-        REFERENCE: https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
-        DOCSTRING: CONFIDECENCE INTERVAL FOR A NORMAL DISTRIBUTION
-        INPUTS: DATA AND CONFIDENCE
-        OUTPUTS: DICTIONARY (MEAN, INFERIOR AND SUPERIOR INTERVALS)
+        return self.cumnulative_phi((x - float_mu) / float_sigma)
+
+    def inv_cdf(self, float_p: float, float_mu: float = 0.0, float_sigma: float = 1.0) -> float:
+        """Calculate inverse normal cumulative distribution function.
+
+        Parameters
+        ----------
+        float_p : float
+            Probability value (0 <= float_p <= 1)
+        float_mu : float, optional
+            Mean, by default 0.0
+        float_sigma : float, optional
+            Standard deviation, by default 1.0
+
+        Returns
+        -------
+        float
+            Quantile corresponding to float_p
         """
+        if not 0.0 <= float_p <= 1.0:
+            raise ValueError("Probability must be between 0 and 1")
+        if float_sigma <= 0:
+            raise ValueError("Standard deviation must be positive")
+        return norm.ppf(float_p, float_mu, float_sigma)
+
+    def confidence_interval_normal(
+        self, data: np.ndarray, confidence: float = 0.95
+    ) -> dict[str, float]:
+        """Calculate confidence interval for normal distribution.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            Input data array
+        confidence : float, optional
+            Confidence level, by default 0.95
+
+        Returns
+        -------
+        dict[str, float]
+            Dictionary containing mean and confidence interval bounds
+
+        References
+        ----------
+        .. [1] https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
+        """
+        if len(data) == 0:
+            raise ValueError("Data array must not be empty")
+        if not 0.0 <= confidence <= 1.0:
+            raise ValueError("Confidence must be between 0 and 1")
+        
         a = 1.0 * np.array(data)
         n = len(a)
-        mu, se = np.mean(a), sem(a)
-        z = se * t.ppf((1 + confidence) / 2., n - 1)
+        float_mu, se = np.mean(a), sem(a)
+        z = se * t.ppf((1 + confidence) / 2.0, n - 1)
         return {
-            'mean': mu,
-            'inferior_inteval': mu - z,
-            'superior_interval': mu + z
+            "mean": float_mu,
+            "inferior_inteval": float_mu - z,
+            "superior_interval": float_mu + z,
         }
 
-    def ecdf(self, data):
+    def ecdf(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Calculate empirical cumulative distribution function.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            Input data array
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray]
+            Sorted data and corresponding ECDF values
+
+        References
+        ----------
+        .. [1] https://campus.datacamp.com/courses/statistical-thinking-in-python-part-1/
+               graphical-exploratory-data-analysis?ex=12
         """
-        REFERENCES: https://campus.datacamp.com/courses/statistical-thinking-in-python-part-1/graphical-exploratory-data-analysis?ex=12
-        DOCSTRING: COMPUTE ECDF FOR A ONE-DIMENSIONAL ARRAY OF MEASUREMENTS AN EMPIRICAL
-            CUMULATIVE DISTRIBUTION FUNCTION (ECDF)
-        INPUTS: DATA
-        OUTPUTS: X-AXIS AND Y-AXIS
-        """
-        # number of data points: n
+        if len(data) == 0:
+            raise ValueError("Data array cannot be empty")
+
         n = len(data)
-        # x-data for the ECDF: x
         x = np.sort(data)
-        # y-data for the ECDF: y
         y = np.arange(1, n + 1) / n
         return x, y
 
 
-class HansenSkewStudent(object):
+class HansenSkewStudent:
+    """Skewed Student distribution class (Hansen 1994).
 
-    """Skewed Student distribution class - This is the version introduced by Bruce E. Hansen in 1994.
-    References: https://www.ssc.wisc.edu/~bhansen/papers/ier_94.pdf
     Attributes
     ----------
     eta : float
-        Degrees of freedom. :math:`2 < \eta < \infty`
+        Degrees of freedom (2 < eta < ∞)
     lam : float
-        Skewness. :math:`-1 < \lambda < 1`
-    Methods
-    -------
-    pdf
-        Probability density function (PDF)
-    cdf
-        Cumulative density function (CDF)
-    ppf
-        Inverse cumulative density function (ICDF)
-    rvs
-        Random variates with mean zero and unit variance
+        Skewness (-1 < lam < 1)
+
+    References
+    ----------
+    .. [1] https://www.ssc.wisc.edu/~bhansen/papers/ier_94.pdf
     """
 
-    def __init__(self, eta=10., lam=-.1):
-        """Initialize the class.
+    def __init__(self, eta: float = 10.0, lam: float = -0.1) -> None:
+        """Initialize Hansen's Skewed Student distribution.
+
         Parameters
         ----------
-        eta : float
-            Degrees of freedom. :math:`2 < \eta < \infty`
-        lam : float
-            Skewness. :math:`-1 < \lambda < 1`
+        eta : float, optional
+            Degrees of freedom, by default 10.0
+        lam : float, optional
+            Skewness parameter, by default -0.1
         """
         self.eta = eta
         self.lam = lam
 
-    @property
-    def const_a(self):
-        """Compute a constant.
+    def const_a(self) -> float:
+        """Compute constant a.
+
         Returns
         -------
-        a : float
+        float
+            Constant a value
         """
         return 4 * self.lam * self.const_c() * (self.eta - 2) / (self.eta - 1)
 
-    @property
-    def const_b(self):
-        """Compute b constant.
+    def const_b(self) -> float:
+        """Compute constant b.
+
         Returns
         -------
-        b : float
+        float
+            Constant b value
         """
-        return (1 + 3 * self.lam**2 - self.const_a**2)**.5
+        return sqrt(1 + 3 * self.lam**2 - self.const_a()**2)
 
-    def const_c(self):
-        """Compute c constant.
+    def const_c(self) -> float:
+        """Compute constant c.
+
         Returns
         -------
-        c : float
+        float
+            Constant c value
         """
-        return gamma((self.eta + 1) / 2) \
-            / ((np.pi * (self.eta - 2))**.5 * gamma(self.eta / 2))
+        return gamma((self.eta + 1) / 2) / (sqrt(pi * (self.eta - 2)) * gamma(self.eta / 2))
 
-    def pdf(self, arg):
-        """Probability density function (PDF).
+    def pdf(self, arg: np.ndarray) -> np.ndarray:
+        """Calculate probability density function.
+
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate PDF at
+        arg : np.ndarray
+            Input values
+
         Returns
         -------
-        array
-            PDF values. Same shape as the input.
+        np.ndarray
+            PDF values
         """
+        if len(arg) == 0:
+            raise ValueError("Data array cannot be empty")
+        
         c = self.const_c()
-        a = self.const_a
-        b = self.const_b
+        a = self.const_a()
+        b = self.const_b()
 
-        return b * c * (1 + 1 / (self.eta - 2) * ((b * arg + a) / (1 + np.sign(
-            arg + a / b) * self.lam))**2)**(-(self.eta + 1) / 2)
+        return b * c * (1 + 1 / (self.eta - 2) * ((b * arg + a) / (
+            1 + np.sign(arg + a / b) * self.lam)) ** 2) ** (-(self.eta + 1) / 2)
 
-    def cdf(self, arg):
-        """Cumulative density function (CDF).
+    def cdf(self, arg: np.ndarray) -> np.ndarray:
+        """Calculate cumulative distribution function.
+
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate CDF at
+        arg : np.ndarray
+            Input values
+
         Returns
         -------
-        array
-            CDF values. Same shape as the input.
+        np.ndarray
+            CDF values
         """
-        a = self.const_a
-        b = self.const_b
+        if len(arg) == 0:
+            raise ValueError("Data array cannot be empty")
+        
+        a = self.const_a()
+        b = self.const_b()
 
-        y = (b * arg + a) / (1 + np.sign(arg + a / b) * self.lam) * (
-            1 - 2 / self.eta)**(-.5)
+        y = (b * arg + a) / (1 + np.sign(arg + a / b) * self.lam) * sqrt(1 - 2 / self.eta)
         cond = arg < -a / b
 
-        return cond * (1 - self.lam) * t.cdf(y, self.eta) \
-            + ~cond * (-self.lam + (1 + self.lam) * t.cdf(y, self.eta))
+        return cond * (1 - self.lam) * t.cdf(y, self.eta) + ~cond * (
+            -self.lam + (1 + self.lam) * t.cdf(y, self.eta))
 
-    def ppf(self, arg):
-        """Inverse cumulative density function (ICDF).
+    def ppf(self, arg: np.ndarray) -> np.ndarray:
+        """Calculate inverse cumulative distribution function.
+
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate ICDF at. Must belong to (0, 1)
+        arg : np.ndarray
+            Probability values (0 < arg < 1)
+
         Returns
         -------
-        array
-            ICDF values. Same shape as the input.
+        np.ndarray
+            Quantile values
         """
+        if len(arg) == 0:
+            raise ValueError("Data array cannot be empty")
+        
         arg = np.atleast_1d(arg)
-
-        a = self.const_a
-        b = self.const_b
+        a = self.const_a()
+        b = self.const_b()
 
         cond = arg < (1 - self.lam) / 2
 
         ppf1 = t.ppf(arg / (1 - self.lam), self.eta)
-        ppf2 = t.ppf(.5 + (arg - (1 - self.lam) / 2) /
-                     (1 + self.lam), self.eta)
+        ppf2 = t.ppf(0.5 + (arg - (1 - self.lam) / 2) / (1 + self.lam), self.eta)
         ppf = -999.99 * np.ones_like(arg)
-        ppf = np.nan_to_num(ppf1) * cond \
-            + np.nan_to_num(ppf2) * np.logical_not(cond)
-        ppf = (ppf * (1 + np.sign(arg - (1 - self.lam) / 2) * self.lam) * (
-            1 - 2 / self.eta)**.5 - a) / b
+        ppf = np.nan_to_num(ppf1) * cond + np.nan_to_num(ppf2) * ~cond
+        ppf = (ppf * (1 + np.sign(arg - (1 - self.lam) / 2) * self.lam) 
+               * sqrt(1 - 2 / self.eta) - a) / b
 
-        if ppf.shape == (1, ):
-            return float(ppf)
-        else:
-            return ppf
+        return float(ppf) if ppf.shape == (1,) else ppf
 
-    def rvs(self, size=1):
-        """Random variates with mean zero and unit variance.
+    def rvs(self, size: Union[int, tuple[int, ...]] = 1) -> np.ndarray:
+        """Generate random variates.
+
         Parameters
         ----------
-        size : int or tuple
-            Size of output array
+        size : Union[int, tuple[int, ...]], optional
+            Output shape, by default 1
+
         Returns
         -------
-        array
-            Array of random variates
+        np.ndarray
+            Random variates
         """
+        if size <= 0:
+            raise ValueError("Data array cannot be empty")
+        
         return self.ppf(uniform.rvs(size=size))
 
-    def plot_pdf(self, arg=np.linspace(-2, 2, 100)):
+    def plot_pdf(self, arg: Optional[np.ndarray] = None) -> None:
         """Plot probability density function.
+
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate PDF at
+        arg : Optional[np.ndarray], optional
+            Input values, by default None (uses DEFAULT_PDF_CDF_RANGE)
         """
-        scale = (self.eta / (self.eta - 2))**.5
-        plt.plot(arg, t.pdf(arg, self.eta, scale=1 / scale),
-                 label='t distribution')
-        plt.plot(arg, self.pdf(arg), label='skew-t distribution')
+        if arg is None:
+            arg = DEFAULT_PDF_CDF_RANGE
+        scale = sqrt(self.eta / (self.eta - 2))
+        plt.plot(arg, t.pdf(arg, self.eta, scale=1 / scale), label="t dist")
+        plt.plot(arg, self.pdf(arg), label="skew-t dist")
         plt.legend()
         plt.show()
 
-    def plot_cdf(self, arg=np.linspace(-2, 2, 100)):
-        """Plot cumulative density function.
+    def plot_cdf(self, arg: Optional[np.ndarray] = None) -> None:
+        """Plot cumulative distribution function.
+
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate CDF at
+        arg : Optional[np.ndarray], optional
+            Input values, by default None (uses DEFAULT_PDF_CDF_RANGE)
         """
-        scale = (self.eta / (self.eta - 2))**.5
-        plt.plot(arg, t.cdf(arg, self.eta, scale=1 / scale),
-                 label='t distribution')
-        plt.plot(arg, self.cdf(arg), label='skew-t distribution')
+        if arg is None:
+            arg = DEFAULT_PDF_CDF_RANGE
+        scale = sqrt(self.eta / (self.eta - 2))
+        plt.plot(arg, t.cdf(arg, self.eta, scale=1 / scale), label="t dist")
+        plt.plot(arg, self.cdf(arg), label="skew-t dist")
         plt.legend()
         plt.show()
 
-    def plot_ppf(self, arg=np.linspace(.01, .99, 100)):
-        """Plot inverse cumulative density function.
+    def plot_ppf(self, arg: Optional[np.ndarray] = None) -> None:
+        """Plot inverse cumulative distribution function.
+
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate ICDF at
+        arg : Optional[np.ndarray], optional
+            Probability values, by default None (uses DEFAULT_PPF_RANGE)
         """
-        scale = (self.eta / (self.eta - 2))**.5
-        plt.plot(arg, t.ppf(arg, self.eta, scale=1 / scale),
-                 label='t distribution')
-        plt.plot(arg, self.ppf(arg), label='skew-t distribution')
+        if arg is None:
+            arg = DEFAULT_PPF_RANGE
+        scale = sqrt(self.eta / (self.eta - 2))
+        plt.plot(arg, t.ppf(arg, self.eta, scale=1 / scale), label="t dist")
+        plt.plot(arg, self.ppf(arg), label="skew-t dist")
         plt.legend()
         plt.show()
+    
+    def plot_rvspdf(
+        self,
+        arg: Optional[np.ndarray] = None,
+        size: int = 1000,
+    ) -> None:
+        """Plot kernel density estimate of random sample.
 
-    def plot_rvspdf(self, arg=np.linspace(-2, 2, 100), size=1000):
-        """Plot kernel density estimate of a random sample.
         Parameters
         ----------
-        arg : array
-            Grid of point to evaluate ICDF at. Must belong to (0, 1)
+        arg : Optional[np.ndarray], optional
+            Input values, by default None (uses DEFAULT_PDF_CDF_RANGE)
+        size : int, optional
+            Sample size, by default 1000
         """
+        if size <= 0:
+            raise ValueError("Data array cannot be empty")
+        
+        if arg is None:
+            arg = DEFAULT_PDF_CDF_RANGE
         rvs = self.rvs(size=size)
         xrange = [arg.min(), arg.max()]
-        sns.kdeplot(rvs, clip=xrange, label='kernel')
-        plt.plot(arg, self.pdf(arg), label='true pdf')
+        sns.kdeplot(rvs, clip=xrange, label="kernel")
+        plt.plot(arg, self.pdf(arg), label="true pdf")
         plt.xlim(xrange)
         plt.legend()
         plt.show()
 
-    def loglikelihood(theta=None, x=None):
-        nu = theta[0]
+    def loglikelihood(
+        self, theta: Optional[np.ndarray] = None, x: Optional[np.ndarray] = None
+    ) -> float:
+        """Calculate log-likelihood function.
 
+        Parameters
+        ----------
+        theta : Optional[np.ndarray], optional
+            Parameters [eta, lambda], by default None
+        x : Optional[np.ndarray], optional
+            Input data, by default None
+
+        Returns
+        -------
+        float
+            Log-likelihood value
+        
+        Raises
+        ------
+        ValueError
+            If theta and x are not provided
+        """
+        if theta is None or x is None:
+            raise ValueError("theta and x must be provided")
+        
+        nu = theta[0]
         lambda_ = theta[1]
 
-        c = gamma((nu + 1) / 2) / \
-            (multiply(sqrt(dot(pi, (nu - 2))), gamma(nu / 2)))
-
+        c = gamma((nu + 1) / 2) / (multiply(sqrt(dot(pi, (nu - 2))), gamma(nu / 2)))
         a = multiply(multiply(dot(4, lambda_), c), ((nu - 2) / (nu - 1)))
-
         b = sqrt(1 + dot(3, lambda_ ** 2) - a ** 2)
 
         logc = gammaln((nu + 1) / 2) - gammaln(nu / 2) - \
             dot(0.5, log(dot(pi, (nu - 2))))
-
         logb = dot(0.5, log(1 + dot(3, lambda_ ** 2) - a ** 2))
 
         find1 = (x < (- a / b))
-
         find2 = (x >= (- a / b))
 
         LL1 = logb + logc - dot((nu + 1) / 2.0, log(1 + multiply(1.0 / (nu - 2), ((
             multiply(b, x) + a) / (1 - lambda_)) ** 2)))
-
         LL2 = logb + logc - dot((nu + 1) / 2.0, log(1 + multiply(1.0 / (nu - 2), ((
             multiply(b, x) + a) / (1 + lambda_)) ** 2)))
 
         LL = sum(LL1[find1]) + sum(LL2[find2])
-
         LL = -LL
 
         return LL.sum()
