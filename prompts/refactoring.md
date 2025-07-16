@@ -43,6 +43,7 @@
    - Proper numpy-style docstrings
 
 4. **Validation Checks**:
+   - Please add sanity checks for every variable within methods/functions that would be useful, with examples below
    - **0-1 Range Values**:
      - Probabilities
      - P-values  
