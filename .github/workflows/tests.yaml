@@ -81,6 +81,83 @@ jobs:
             echo "Typos found! Run 'codespell .' locally to see them."
             exit 1
           fi
+      
+      - name: Run Docstring Type Consistency Check
+        run: |
+          # First run pydocstyle for basic docstring structure
+          poetry run pydocstyle --convention=numpy --select=D412,D417,DAR stpstone/ tests/
+          
+          # Then run our custom type consistency check
+          poetry run python -c "
+          import ast
+          import sys
+          from pathlib import Path
+          from typing import Any
+          
+          def compare_types(hint: Any, doc: str) -> bool:
+              hint_str = str(hint).replace('typing.', '').lower()
+              doc = doc.lower().strip()
+              equivalences = {
+                  'list': 'sequence', 'dict': 'mapping',
+                  'np.ndarray': 'ndarray', 'pd.dataframe': 'dataframe'
+              }
+              for k, v in equivalences.items():
+                  hint_str = hint_str.replace(k.lower(), v)
+                  doc = doc.replace(k.lower(), v)
+              return hint_str == doc
+          
+          errors = 0
+          for path in Path('stpstone').rglob('*.py'):
+              try:
+                  content = path.read_text()
+                  tree = ast.parse(content)
+                  for node in ast.walk(tree):
+                      if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                          docstring = ast.get_docstring(node)
+                          if not docstring: continue
+                          
+                          # Check return type
+                          if node.returns:
+                              return_type = ast.unparse(node.returns)
+                              for line in docstring.split('\\n'):
+                                  if 'return' in line.lower() and ':' in line:
+                                      doc_type = line.split(':')[1].strip()
+                                      if not compare_types(return_type, doc_type):
+                                          print(f'❌ {path}:{node.lineno} Return type mismatch')
+                                          print(f'   Type hint: {return_type}')
+                                          print(f'   Docstring: {doc_type}')
+                                          errors += 1
+                                          break
+          
+                          # Check parameters
+                          for arg in node.args.args + node.args.kwonlyargs:
+                              if arg.arg == 'self': continue
+                              if arg.annotation:
+                                  param_type = ast.unparse(arg.annotation)
+                                  for line in docstring.split('\\n'):
+                                      if arg.arg in line and ':' in line:
+                                          doc_type = line.split(':')[1].strip()
+                                          if not compare_types(param_type, doc_type):
+                                              print(f'❌ {path}:{node.lineno} Parameter {arg.arg} type mismatch')
+                                              print(f'   Type hint: {param_type}')
+                                              print(f'   Docstring: {doc_type}')
+                                              errors += 1
+                                              break
+              except Exception as e:
+                  print(f'⚠️ Error parsing {path}: {str(e)}')
+          
+          if errors > 0:
+              sys.exit(1)
+          "
+      
+      - name: Run Ruff Linting
+        run: |
+          poetry run ruff check stpone/ tests/ --config=ruff.toml
+          if [ $? -ne 0 ]; then
+            echo "Ruff found issues! Run 'ruff check stpone/ tests/' locally to see details."
+            echo "To fix automatically, run: poetry run ruff check --fix stpone/ tests/"
+            exit 1
+          fi
 
       - name: Run Integration Tests
         run: poetry run pytest tests/integration/ -v

@@ -174,7 +174,7 @@ run_ruff() {
     local path="$1"
     local type="$2"
     print_status "info" "Running Ruff on ${type}: ${path}"
-    if ! poetry run ruff check "$path"; then
+    if ! poetry run ruff check "$path" --config=ruff.toml; then
         print_status "error" "Ruff checks failed for ${type}"
         return 1
     fi
