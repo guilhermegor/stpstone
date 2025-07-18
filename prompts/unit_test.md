@@ -14,7 +14,8 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 - **Type hints**:
 1. Avoid `Any` type hint whenever possible; use specific types
 2. Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid ruff linting raising warnings
-3. Add type hints to every method, function and whenever is possible
+3. Use from numpy.typing import NDArray, NDArray[...] (e.g. NDArray[np.float64]) instead of np.ndarray for type hints
+4. Add type hints to every method, function and whenever is possible
 - **Docstring format**:
 1. NumPy style (with Parameters/Returns/References/Raises sections)
 2. Include brief description of what is being tested
@@ -27,7 +28,111 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 - **Zero ruff violations**: Code must pass all ruff checks without warnings
 - **Fallback testing**: Include tests for fallback mechanisms and error recovery
 - **Reload logic**: Test module reloading scenarios when applicable
-- **Variables sanity checks**: Tests for variables sanity checks within methods/functions, like values between 0 and 1, positive, negative, shapes of arrays and so on
+- **Variables sanity checks**: Tests for all variables validation checks within methods/functions, like values between 0 and 1, positive, negative, shapes of arrays and so on
+```python
+"""Example of unit tests for sanity checks.
+Please create tests for every validations.
+"""
+import numpy as np
+from scipy.optimize import curve_fit
+
+class NonLinearEquations:
+
+    def optimize_curve_fit(
+        self, func: callable, array_x: np.ndarray, array_y: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Optimize curve fitting.
+
+        Parameters
+        ----------
+        func : callable
+            Function to fit
+        array_x : np.ndarray
+            Input feature array
+        array_y : np.ndarray
+            Target values
+
+        Returns
+        -------
+        tuple[np.ndarray, np.ndarray]
+            Tuple containing optimal parameters and covariance matrix
+        """
+        if not callable(func):
+            raise TypeError("func must be callable")
+        if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+            raise TypeError("Input arrays must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
+
+        return curve_fit(func, xdata=array_x, ydata=array_y)
+
+import pytest
+import numpy as np
+from unittest.mock import patch
+from typing import Any, Callable
+
+
+class TestOptimizeCurveFit:
+    """Test cases for optimize_curve_fit method."""
+
+    @pytest.fixture
+    def sample_data(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return sample data for curve fitting."""
+        x = np.array([1, 2, 3, 4, 5])
+        y = np.array([2.1, 3.9, 6.2, 8.1, 9.8])
+        return x, y
+
+    @pytest.fixture
+    def linear_func(self) -> Callable[[np.ndarray, float, float], np.ndarray]:
+        """Return a simple linear function for testing."""
+        def func(x: np.ndarray, a: float, b: float) -> np.ndarray:
+            return a * x + b
+        return func
+
+    def test_non_callable_func(
+        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray]
+    ) -> None:
+        """Test raises TypeError when func is not callable."""
+        x, y = sample_data
+        with pytest.raises(TypeError) as excinfo:
+            nonlinear_equations.optimize_curve_fit("not a function", x, y)
+        assert "func must be callable" in str(excinfo.value)
+
+    def test_non_array_input_x(
+        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+    ) -> None:
+        """Test raises TypeError when array_x is not numpy array."""
+        _, y = sample_data
+        with pytest.raises(TypeError) as excinfo:
+            nonlinear_equations.optimize_curve_fit(linear_func, [1, 2, 3], y)
+        assert "Input arrays must be numpy arrays" in str(excinfo.value)
+
+    def test_non_array_input_y(
+        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+    ) -> None:
+        """Test raises TypeError when array_y is not numpy array."""
+        x, _ = sample_data
+        with pytest.raises(TypeError) as excinfo:
+            nonlinear_equations.optimize_curve_fit(linear_func, x, [1, 2, 3])
+        assert "Input arrays must be numpy arrays" in str(excinfo.value)
+
+    def test_empty_array_x(
+        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+    ) -> None:
+        """Test raises ValueError when array_x is empty."""
+        _, y = sample_data
+        with pytest.raises(ValueError, match="Input arrays cannot be empty"):
+            nonlinear_equations.optimize_curve_fit(linear_func, np.array([]), y)
+
+    def test_empty_array_y(
+        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+    ) -> None:
+        """Test raises ValueError when array_y is empty."""
+        x, _ = sample_data
+        with pytest.raises(ValueError, match="Input arrays cannot be empty"):
+            nonlinear_equations.optimize_curve_fit(linear_func, x, np.array([]))
+```
 
 ### Feature to be Tested
 

@@ -49,7 +49,17 @@ repos:
           - commit-msg
           - manual
         always_run: true
-
+  
+  # module decoupled from ruff, due to DAR absence
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        name: pydocstyle (docstring conventions)
+        args:
+          - --convention=numpy
+          - --select=D412,D417,DAR # missing returns, missing params, docstring argument checks
+  
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.13
     hooks:

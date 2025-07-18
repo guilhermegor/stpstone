@@ -1,9 +1,16 @@
-from typing import Any, Literal, Optional
+"""Regression Module.
+
+This module provides classes and functions for performing linear and nonlinear regression
+analysis."""
+
+from typing import Any, Callable, Literal, Optional, TypedDict, Union
 
 from mystic.monitors import VerboseMonitor
 from mystic.solvers import diffev2
 import numpy as np
-from scipy.optimize import curve_fit, differential_evolution
+from numpy.typing import NDArray
+from scipy.optimize import OptimizeResult, curve_fit, differential_evolution
+from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import (
     ElasticNet,
@@ -14,31 +21,68 @@ from sklearn.linear_model import (
     SGDRegressor,
 )
 from sklearn.metrics import (
-    accuracy_score,
     class_likelihood_ratios,
     classification_report,
     confusion_matrix,
-    f1_score,
-    precision_score,
-    r2_score,
-    recall_score,
 )
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
-import statsmodels.api as sm
-from statsmodels.compat import lzip
-import statsmodels.stats.api as sms
+from typing_extensions import NotRequired
 
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class LinearRegressions:
+class LinearRegressionsResult(TypedDict):
+    """TypedDict for LinearRegressions results."""
+    model_fitted: BaseEstimator
+    score: float
+    predictions: NDArray[np.float64]
+    intercept: NotRequired[NDArray[np.float64]]
+    coefficients: NotRequired[NDArray[np.float64]]
+    theta_best: NotRequired[NDArray[np.float64]]
+    poly_features: NotRequired[NDArray[np.float64]]
+    features_importance: NotRequired[NDArray[np.float64]]
+
+class NonLinearRegressionsResult(TypedDict):
+    """TypedDict for NonLinearRegressions results."""
+    model_fitted: BaseEstimator
+    score: float
+    predictions: NDArray[np.float64]
+    features_importance: NotRequired[NDArray[np.float64]]
+
+class LogLinearRegressionsResult(TypedDict):
+    """TypedDict for LogLinearRegressions results."""
+    model_fitted: LogisticRegression
+    classes: NDArray[np.float64]
+    intercept: NDArray[np.float64]
+    coefficients: NDArray[np.float64]
+    predict_probability: NDArray[np.float64]
+    predictions: NDArray[np.float64]
+    score: float
+    confusion_matrix: NDArray[np.int64]
+    classification_report: dict[str, Any]
+    log_likelihood: tuple[float, float]
+
+class NonLinearEquationsResult(TypedDict):
+    """TypedDict for NonLinearEquations results."""
+    coefficients: NDArray[np.float64]
+    values_interpolated: NDArray[np.float64]
+
+class LinearRegressions(metaclass=TypeChecker):
+    """Class for performing linear regression analysis."""
 
     def normal_equation(
-        self, array_x: np.ndarray, array_y: np.ndarray, bl_optimize: bool = True
-    ) -> Any:
+        self, 
+        array_x: np.ndarray, 
+        array_y: np.ndarray, 
+        bl_optimize: Optional[bool] = True
+    ) -> Union[
+        NDArray[np.float64], 
+        tuple[NDArray[np.float64], NDArray[np.float64], int, NDArray[np.float64]]
+    ]:
         """
         Normal equation to find the value of theta that minimizes the cost function.
 
@@ -53,8 +97,8 @@ class LinearRegressions:
 
         Returns
         -------
-        Any
-            Tuple with best theta vector, residuals, rank if bl_optimize=True,
+        Union[np.ndarray, tuple[np.ndarray, np.ndarray, int, np.ndarray]]
+            tuple with best theta vector, residuals, rank if bl_optimize=True,
             else just theta vector
 
         References
@@ -80,7 +124,7 @@ class LinearRegressions:
         eta: float = 0.1,
         m: int = 100,
         theta: np.ndarray = np.random.randn(2, 1),
-    ) -> np.ndarray:
+    ) -> NDArray[np.float64]:
         """
         Batch gradient descent to find the global minimum of a linear function.
 
@@ -137,7 +181,7 @@ class LinearRegressions:
         tolerance: float = 1e-3,
         penalty: Optional[str] = None,
         eta0: float = 0.1,
-    ) -> dict[str, Any]:
+    ) -> Union[NDArray[np.float64], LinearRegressionsResult]:
         """
         Stochastic gradient descent optimization.
 
@@ -198,21 +242,25 @@ class LinearRegressions:
                     theta = theta - eta * gradients
             return theta
         elif method == "sklearn":
-            sgd_reg = SGDRegressor(
+            model = SGDRegressor(
                 max_iter=n_epochs, tol=tolerance, penalty=penalty, eta0=eta0
             )
-            sgd_reg.fit(array_x, array_y.ravel())
-            array_predictions = sgd_reg.predict(array_x)
+            model.fit(array_x, array_y.ravel())
+            array_predictions = model.predict(array_x)
             return {
-                "model_fitted": sgd_reg,
-                "intercept": sgd_reg.intercept_,
-                "coeficients": sgd_reg.coef_,
+                "model_fitted": model,
+                "intercept": model.intercept_,
+                "coefficients": model.coef_,
                 "predictions": array_predictions,
             }
         else:
             raise ValueError("Method must be either 'implemented' or 'sklearn'")
 
-    def linear_regression(self, array_x: np.ndarray, array_y: np.ndarray) -> dict[str, Any]:
+    def linear_regression(
+        self, 
+        array_x: np.ndarray, 
+        array_y: np.ndarray
+    ) -> LinearRegressionsResult:
         """
         Fit linear regression model to data.
 
@@ -239,7 +287,7 @@ class LinearRegressions:
         result = {
             "model_fitted": model,
             "score": model.score(np.array(array_x), np.array(array_y)),
-            "coeficients": model.coef_,
+            "coefficients": model.coef_,
             "intercept": model.intercept_,
             "predictions": model.predict(np.array(array_x)),
         }
@@ -249,7 +297,11 @@ class LinearRegressions:
                 np.array(array_x).T).dot(array_y)
         return result
 
-    def k_neighbors_regression(self, array_x: np.ndarray, array_y: np.ndarray) -> dict[str, Any]:
+    def k_neighbors_regression(
+        self, 
+        array_x: np.ndarray, 
+        array_y: np.ndarray
+    ) -> LinearRegressionsResult:
         """
         Fit k-nearest neighbors regression model to data.
 
@@ -274,7 +326,7 @@ class LinearRegressions:
         return {
             "model_fitted": model,
             "intercept": model.intercept_,
-            "coeficients": model.coef_,
+            "coefficients": model.coef_,
             "score": model.score(np.array(array_x), np.array(array_y)),
             "predictions": model.predict(np.array(array_x)),
             "theta_best": np.linalg.inv(np.array(array_x).T.dot(np.array(array_x))).dot(
@@ -288,7 +340,7 @@ class LinearRegressions:
         array_y: np.ndarray,
         int_degree: int = 2,
         bl_include_bias: bool = True,
-    ) -> dict[str, Any]:
+    ) -> LinearRegressionsResult:
         """
         Fit polynomial regression model to data.
 
@@ -327,7 +379,7 @@ class LinearRegressions:
         return {
             "model_fitted": model,
             "intercept": model.intercept_,
-            "coeficients": model.coef_,
+            "coefficients": model.coef_,
             "score": model.score(np.array(array_x_polynom), np.array(array_y)),
             "predictions": array_predictions,
             "poly_features": poly_features,
@@ -339,7 +391,7 @@ class LinearRegressions:
         array_y: np.ndarray,
         alpha: float = 0,
         solver_ridge_regression: str = "cholesky",
-    ) -> dict[str, Any]:
+    ) -> LinearRegressionsResult:
         """
         Fit ridge regression model to data.
 
@@ -379,13 +431,16 @@ class LinearRegressions:
         return {
             "model_fitted": ridge_reg,
             "intercept": ridge_reg.intercept_,
-            "coeficients": ridge_reg.coef_,
+            "coefficients": ridge_reg.coef_,
             "predictions": array_predictions,
         }
 
     def lasso_regression(
-        self, array_x: np.ndarray, array_y: np.ndarray, alpha: float = 0.1
-    ) -> dict[str, Any]:
+        self, 
+        array_x: np.ndarray, 
+        array_y: np.ndarray, 
+        alpha: float = 0.1
+    ) -> LinearRegressionsResult:
         """
         Fit lasso regression model to data.
 
@@ -423,7 +478,7 @@ class LinearRegressions:
         return {
             "model_fitted": model,
             "intercept": model.intercept_,
-            "coeficients": model.coef_,
+            "coefficients": model.coef_,
             "predictions": array_predictions,
         }
 
@@ -433,7 +488,7 @@ class LinearRegressions:
         array_y: np.ndarray,
         alpha: float = 0.1,
         l1_ratio: float = 0.5,
-    ) -> dict[str, Any]:
+    ) -> LinearRegressionsResult:
         """
         Fit elastic net regression model to data.
 
@@ -475,7 +530,7 @@ class LinearRegressions:
         return {
             "model_fitted": model,
             "intercept": model.intercept_,
-            "coeficients": model.coef_,
+            "coefficients": model.coef_,
             "predictions": array_predictions,
         }
 
@@ -483,8 +538,11 @@ class LinearRegressions:
 class NonLinearRegressions:
 
     def decision_tree_regression(
-        self, array_x: np.ndarray, array_y: np.ndarray, seed: Optional[int] = None
-    ) -> dict[str, Any]:
+        self, 
+        array_x: np.ndarray, 
+        array_y: np.ndarray, 
+        seed: Optional[int] = None
+    ) -> NonLinearRegressionsResult:
         """
         Fit decision tree regression model to data.
 
@@ -522,7 +580,7 @@ class NonLinearRegressions:
         array_y: np.ndarray,
         seed: Optional[int] = None,
         n_estimators: int = 100,
-    ) -> dict[str, Any]:
+    ) -> NonLinearRegressionsResult:
         """
         Fit random forest regression model to data.
 
@@ -567,7 +625,7 @@ class NonLinearRegressions:
         int_degree: int = 2,
         c_positive_floating_point_number: float = 100,
         epsilon: float = 0.1,
-    ) -> dict[str, Any]:
+    ) -> NonLinearRegressionsResult:
         """
         Fit support vector regression model to data.
 
@@ -637,7 +695,7 @@ class LogLinearRegressions:
         class_weight: Optional[dict] = None,
         bl_dual: bool = False,
         n_jobs: Optional[int] = None,
-    ) -> dict[str, Any]:
+    ) -> LogLinearRegressionsResult:
         """
         Fit logistic regression model to data.
 
@@ -722,7 +780,7 @@ class LogLinearRegressions:
             "model_fitted": model,
             "classes": model.classes_,
             "intercept": model.intercept_,
-            "coeficient": model.coef_,
+            "coefficient": model.coef_,
             "predict_probability": model.predict_proba(array_x),
             "predictions": model.predict(array_x),
             "score": model.score(array_x, array_y),
@@ -749,7 +807,7 @@ class NonLinearEquations:
         bl_inter_monitor: bool = False,
         int_size_trial_solution_population: int = 40,
         tolerance: float = 5e-5,
-    ) -> Any:
+    ) -> Union[OptimizeResult, tuple[NDArray[np.float64], float, int, int, int]]:
         """
         Differential evolution optimization.
 
@@ -839,8 +897,11 @@ class NonLinearEquations:
             raise ValueError("Method must be either 'scipy' or 'mystic'")
 
     def optimize_curve_fit(
-        self, func: callable, array_x: np.ndarray, array_y: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
+        self, 
+        func: Callable[..., float], 
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64]
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """
         Optimize curve fitting.
 
@@ -856,7 +917,7 @@ class NonLinearEquations:
         Returns
         -------
         tuple[np.ndarray, np.ndarray]
-            Tuple containing optimal parameters and covariance matrix
+            tuple containing optimal parameters and covariance matrix
         """
         if not callable(func):
             raise TypeError("func must be callable")
@@ -868,8 +929,10 @@ class NonLinearEquations:
         return curve_fit(func, xdata=array_x, ydata=array_y)
 
     def polynomial_fit(
-        self, array_x: np.ndarray, array_y: np.ndarray
-    ) -> dict[str, np.ndarray]:
+        self, 
+        array_x: np.ndarray, 
+        array_y: np.ndarray
+    ) -> NonLinearEquationsResult:
         """
         Fit polynomial to data.
 
