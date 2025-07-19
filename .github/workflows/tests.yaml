@@ -91,63 +91,106 @@ jobs:
           poetry run python -c "
           import ast
           import sys
-          from pathlib import Path
           from typing import Any
-          
+
           def compare_types(hint: Any, doc: str) -> bool:
-              hint_str = str(hint).replace('typing.', '').lower()
+              """Compare type hint with docstring type."""
+              if hint is Any or doc.lower() == "any":
+                  return True
+                  
+              hint_str = str(hint).replace("typing.", "").lower()
               doc = doc.lower().strip()
+              
+              # Handle common equivalences
               equivalences = {
-                  'list': 'sequence', 'dict': 'mapping',
-                  'np.ndarray': 'ndarray', 'pd.dataframe': 'dataframe'
+                  "list": "sequence",
+                  "dict": "mapping",
+                  "np.ndarray": "ndarray",
+                  "numpy.ndarray": "ndarray"
               }
+              
               for k, v in equivalences.items():
                   hint_str = hint_str.replace(k.lower(), v)
                   doc = doc.replace(k.lower(), v)
+              
               return hint_str == doc
-          
-          errors = 0
-          for path in Path('stpstone').rglob('*.py'):
-              try:
-                  content = path.read_text()
-                  tree = ast.parse(content)
-                  for node in ast.walk(tree):
-                      if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                          docstring = ast.get_docstring(node)
-                          if not docstring: continue
+
+          def check_file(filepath: str) -> int:
+              errors = 0
+              with open(filepath, 'r') as f:
+                  tree = ast.parse(f.read())
+              
+              for node in ast.walk(tree):
+                  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      if not node.returns and not any(isinstance(decorator, ast.Name) and 
+                        decorator.id == 'property' for decorator in node.decorator_list):
+                          continue
                           
-                          # Check return type
-                          if node.returns:
-                              return_type = ast.unparse(node.returns)
-                              for line in docstring.split('\\n'):
-                                  if 'return' in line.lower() and ':' in line:
-                                      doc_type = line.split(':')[1].strip()
-                                      if not compare_types(return_type, doc_type):
-                                          print(f'❌ {path}:{node.lineno} Return type mismatch')
-                                          print(f'   Type hint: {return_type}')
-                                          print(f'   Docstring: {doc_type}')
-                                          errors += 1
-                                          break
-          
-                          # Check parameters
-                          for arg in node.args.args + node.args.kwonlyargs:
-                              if arg.arg == 'self': continue
-                              if arg.annotation:
-                                  param_type = ast.unparse(arg.annotation)
-                                  for line in docstring.split('\\n'):
-                                      if arg.arg in line and ':' in line:
-                                          doc_type = line.split(':')[1].strip()
-                                          if not compare_types(param_type, doc_type):
-                                              print(f'❌ {path}:{node.lineno} Parameter {arg.arg} type mismatch')
-                                              print(f'   Type hint: {param_type}')
-                                              print(f'   Docstring: {doc_type}')
-                                              errors += 1
+                      docstring = ast.get_docstring(node)
+                      if not docstring:
+                          print(f"⚠️  Missing docstring in {node.name}()")
+                          errors += 1
+                          continue
+                          
+                      # Check return type
+                      if node.returns:
+                          returns = ast.unparse(node.returns)
+                          if "Returns" in docstring or "returns" in docstring:
+                              doc_lines = [l.strip() for l in docstring.split('\n')]
+                              found_return = False
+                              for i, line in enumerate(doc_lines):
+                                  if line.strip().lower() == "returns":
+                                      # Skip separator (e.g., -------)
+                                      j = i + 2 if doc_lines[i+1].strip().startswith("-") else i + 1
+                                      # Look for type line
+                                      while j < len(doc_lines):
+                                          candidate = doc_lines[j].strip()
+                                          if candidate:  # non-empty
+                                              if ":" in candidate:
+                                                  doc_type = candidate.split(":")[0].strip()
+                                              else:
+                                                  doc_type = candidate.split()[0].strip()
                                               break
-              except Exception as e:
-                  print(f'⚠️ Error parsing {path}: {str(e)}')
-          
-          if errors > 0:
-              sys.exit(1)
+                                          j += 1
+
+                                      if not compare_types(returns, doc_type):
+                                          print(f"❌ Return type mismatch in {node.name}():")
+                                          print(f"   Type hint: {returns}")
+                                          print(f"   Docstring: {doc_type}")
+                                          errors += 1
+                                      found_return = True
+                                      break
+                              if not found_return:
+                                  print(f"⚠️  Return type documented but no type hint in {node.name}()")
+                                  errors += 1
+                      
+                      # Check parameters
+                      for arg in node.args.args:
+                          if arg.arg == 'self':
+                              continue
+                              
+                          if arg.annotation:
+                              hint = ast.unparse(arg.annotation)
+                              arg_doc_found = False
+                              for line in docstring.split('\n'):
+                                  if arg.arg in line and ":" in line:
+                                      doc_type = line.split(":")[1].strip()
+                                      if not compare_types(hint, doc_type):
+                                          print(f"❌ Parameter type mismatch in {node.name}({arg.arg}):")
+                                          print(f"   Type hint: {hint}")
+                                          print(f"   Docstring: {doc_type}")
+                                          errors += 1
+                                      arg_doc_found = True
+                                      break
+                              if not arg_doc_found:
+                                  print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}()")
+                                  errors += 1
+              
+              return errors
+
+          if __name__ == "__main__":
+              errors = check_file(sys.argv[1])
+              sys.exit(1 if errors > 0 else 0)
           "
       
       - name: Run Ruff Linting
