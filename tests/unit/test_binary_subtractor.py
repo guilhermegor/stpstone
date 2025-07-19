@@ -18,7 +18,17 @@ class TestBinarySubtractor:
         ],
     )
     def test_subtraction_normal_cases(self, minuend: str, subtrahend: str, expected: str) -> None:
-        """Test binary subtraction with normal input cases."""
+        """Test binary subtraction with normal input cases.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        expected : str
+            The expected result of the subtraction
+        """
         sub: BinarySubtractor = BinarySubtractor(minuend, subtrahend)
         assert sub.subtract() == expected
 
@@ -30,7 +40,19 @@ class TestBinarySubtractor:
         ],
     )
     def test_different_length_inputs(self, minuend: str, subtrahend: str, expected: str) -> None:
-        """Test subtraction with inputs of different lengths."""
+        """Test subtraction with inputs of different lengths.
+        
+        This tests the case where the minuend and subtrahend have different lengths.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        expected : str
+            The expected result of the subtraction
+        """
         sub: BinarySubtractor = BinarySubtractor(minuend, subtrahend)
         assert sub.subtract() == expected
 
@@ -45,7 +67,17 @@ class TestBinarySubtractor:
         ],
     )
     def test_edge_cases(self, minuend: str, subtrahend: str, expected: str) -> None:
-        """Test binary subtraction with edge cases."""
+        """Test binary subtraction with edge cases.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        expected : str
+            The expected result of the subtraction
+        """
         sub: BinarySubtractor = BinarySubtractor(minuend, subtrahend)
         assert sub.subtract() == expected
 
@@ -59,7 +91,15 @@ class TestBinarySubtractor:
         ],
     )
     def test_empty_strings(self, minuend: str, subtrahend: str) -> None:
-        """Test with empty input strings."""
+        """Test with empty input strings.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        """
         with pytest.raises(ValueError):
             BinarySubtractor(minuend, subtrahend)
 
@@ -72,7 +112,15 @@ class TestBinarySubtractor:
         ],
     )
     def test_invalid_binary_strings(self, minuend: str, subtrahend: str) -> None:
-        """Test with invalid binary strings."""
+        """Test with invalid binary strings.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        """
         with pytest.raises(ValueError):
             BinarySubtractor(minuend, subtrahend)
 
@@ -86,7 +134,15 @@ class TestBinarySubtractor:
         ],
     )
     def test_type_validation(self, minuend: object, subtrahend: object) -> None:
-        """Test type validation of inputs."""
+        """Test type validation of inputs.
+        
+        Parameters
+        ----------
+        minuend : object
+            The minuend (the number to be subtracted from)
+        subtrahend : object
+            The subtrahend (the number to be subtracted)
+        """
         with pytest.raises(TypeError):
             BinarySubtractor(minuend, subtrahend)
 
@@ -98,7 +154,17 @@ class TestBinarySubtractor:
         ],
     )
     def test_borrow_propagation(self, minuend: str, subtrahend: str, expected: str) -> None:
-        """Test proper borrow propagation in subtraction."""
+        """Test proper borrow propagation in subtraction.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        expected : str
+            The expected result of the subtraction
+        """
         sub: BinarySubtractor = BinarySubtractor(minuend, subtrahend)
         assert sub.subtract() == expected
 
@@ -117,6 +183,16 @@ class TestBinarySubtractor:
         ],
     )
     def test_negative_results(self, minuend: str, subtrahend: str, expected: str) -> None:
-        """Test cases that produce negative results."""
+        """Test cases that produce negative results.
+        
+        Parameters
+        ----------
+        minuend : str
+            The minuend (the number to be subtracted from)
+        subtrahend : str
+            The subtrahend (the number to be subtracted)
+        expected : str
+            The expected result of the subtraction
+        """
         sub: BinarySubtractor = BinarySubtractor(minuend, subtrahend)
         assert sub.subtract() == expected
