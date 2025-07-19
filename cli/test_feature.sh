@@ -84,7 +84,7 @@ def compare_types(hint: Any, doc: str) -> bool:
     hint_str = str(hint).replace("typing.", "").lower()
     doc = doc.lower().strip()
     
-    # Handle common equivalences
+    # handle common equivalences
     equivalences = {
         "list": "sequence",
         "dict": "mapping",
@@ -115,39 +115,37 @@ def check_file(filepath: str) -> int:
                 errors += 1
                 continue
                 
-            # Check return type
+            # check return type
             if node.returns:
                 returns = ast.unparse(node.returns)
                 if "Returns" in docstring or "returns" in docstring:
-                    doc_lines = [l.strip() for l in docstring.split('\n')]
+                    doc_lines = [l.rstrip() for l in docstring.split('\n')]
                     found_return = False
                     for i, line in enumerate(doc_lines):
                         if line.strip().lower() == "returns":
-                            # Skip separator (e.g., -------)
-                            j = i + 2 if doc_lines[i+1].strip().startswith("-") else i + 1
-                            # Look for type line
+                            j = i + 1
+                            # Skip separator line (e.g. '-------')
+                            while j < len(doc_lines) and set(doc_lines[j].strip()) <= {"-", " "}:
+                                j += 1
+                            # Find the first non-empty line after that — the type
                             while j < len(doc_lines):
                                 candidate = doc_lines[j].strip()
-                                if candidate:  # non-empty
-                                    if ":" in candidate:
-                                        doc_type = candidate.split(":")[0].strip()
-                                    else:
-                                        doc_type = candidate.split()[0].strip()
+                                if candidate:
+                                    doc_type = candidate
+                                    if not compare_types(returns, doc_type):
+                                        print(f"❌ Return type mismatch in {node.name}():")
+                                        print(f"   Type hint: {returns}")
+                                        print(f"   Docstring: {doc_type}")
+                                        errors += 1
+                                    found_return = True
                                     break
                                 j += 1
-
-                            if not compare_types(returns, doc_type):
-                                print(f"❌ Return type mismatch in {node.name}():")
-                                print(f"   Type hint: {returns}")
-                                print(f"   Docstring: {doc_type}")
-                                errors += 1
-                            found_return = True
                             break
                     if not found_return:
                         print(f"⚠️  Return type documented but no type hint in {node.name}()")
                         errors += 1
             
-            # Check parameters
+            # check parameters
             for arg in node.args.args:
                 if arg.arg == 'self':
                     continue

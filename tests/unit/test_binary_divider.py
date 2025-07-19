@@ -30,13 +30,25 @@ class TestPositiveDivision:
     """Tests for division of positive numbers."""
 
     def test_exact_division(self, positive_divider: BinaryDivider) -> None:
-        """Test exact division (no remainder)."""
+        """Test exact division (no remainder).
+
+        Parameters
+        ----------
+        positive_divider : BinaryDivider
+            Instance of BinaryDivider with 12 and 2 as inputs.
+        """
         quotient, remainder = positive_divider.divide()
         assert quotient == 6
         assert remainder == 0
 
     def test_division_with_remainder(self, remainder_divider: BinaryDivider) -> None:
-        """Test division with remainder."""
+        """Test division with remainder.
+
+        Parameters
+        ----------
+        remainder_divider : BinaryDivider
+            Instance of BinaryDivider with 15 and 4 as inputs.
+        """
         quotient, remainder = remainder_divider.divide()
         assert quotient == 3
         assert remainder == 3

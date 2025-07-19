@@ -68,7 +68,7 @@ class BinaryDivider(metaclass=TypeChecker):
         Returns
         -------
         tuple[int, int]
-            A tuple containing (quotient, remainder)
+            A tuple where the first element is the quotient and the second is the remainder
 
         Raises
         ------
@@ -81,12 +81,12 @@ class BinaryDivider(metaclass=TypeChecker):
         quotient = 0
         remainder = self.dividend
         
-        # Find the highest power of 2 where divisor * 2^i <= dividend
+        # find the highest power of 2 where divisor * 2^i <= dividend
         i = 0
         while (self.divisor << (i+1)) <= self.dividend:
             i += 1
             
-        # Perform binary division
+        # perform binary division
         for power in range(i, -1, -1):
             if remainder >= (self.divisor << power):
                 remainder -= (self.divisor << power)
