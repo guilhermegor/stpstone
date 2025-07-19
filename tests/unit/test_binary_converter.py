@@ -236,12 +236,12 @@ class TestIntegration:
         converter : BinaryConverter
             The BinaryConverter instance to test with.
         """
-        # Binary -> Decimal -> Hexadecimal
+        # binary -> decimal -> hexadecimal
         decimal = converter.binary_to_decimal('11111111')
         hex_val = converter.decimal_to_hexadecimal(decimal)
         assert hex_val == 'FF'
 
-        # Hexadecimal -> Decimal -> Binary
+        # hexadecimal -> decimal -> binary
         decimal = converter.hexadecimal_to_decimal('FF')
         binary = converter.decimal_to_binary(decimal)
         assert binary == '11111111'
