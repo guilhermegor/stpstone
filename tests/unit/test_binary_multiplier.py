@@ -30,11 +30,23 @@ class TestPositiveMultiplication:
     """Tests for multiplication of positive numbers."""
 
     def test_basic_multiplication(self, basic_multiplier: BinaryMultiplier) -> None:
-        """Test basic multiplication."""
+        """Test basic multiplication.
+        
+        Parameters
+        ----------
+        basic_multiplier : BinaryMultiplier
+            Instance of BinaryMultiplier with 3 and 5 as inputs.
+        """
         assert basic_multiplier.multiply() == 15
 
     def test_binary_literals(self, binary_literal_multiplier: BinaryMultiplier) -> None:
-        """Test multiplication with binary literals."""
+        """Test multiplication with binary literals.
+        
+        Parameters
+        ----------
+        binary_literal_multiplier : BinaryMultiplier
+            Instance of BinaryMultiplier with binary literals as inputs.
+        """
         assert binary_literal_multiplier.multiply() == 120
 
     def test_larger_numbers(self) -> None:

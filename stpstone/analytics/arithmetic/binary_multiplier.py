@@ -43,7 +43,22 @@ class BinaryMultiplier(metaclass=TypeChecker):
     """
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize the Binary Multiplier with two 8-bit numbers."""
+        """Initialize the Binary Multiplier with two 8-bit numbers.
+        
+        Parameters
+        ----------
+        a : int
+            The multiplicand (must be 0-255)
+        b : int
+            The multiplier (must be 0-255)
+
+        Raises
+        ------
+        ValueError
+            If inputs are negative or exceed 8-bit range
+        TypeError
+            If inputs are not integers
+        """
         if not isinstance(a, int) or not isinstance(b, int):
             raise TypeError("Both inputs must be integers")
         if a < 0 or b < 0:
@@ -68,7 +83,7 @@ class BinaryMultiplier(metaclass=TypeChecker):
         120
         """
         result = 0
-        for i in range(8):  # Fixed 8-bit implementation
+        for i in range(8):  # fixed 8-bit implementation
             if (self.b >> i) & 1:
                 result += (self.a << i)
         return result
