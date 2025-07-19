@@ -17,9 +17,39 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 3. Use from numpy.typing import NDArray, NDArray[...] (e.g. NDArray[np.float64]) instead of np.ndarray for type hints
 4. Add type hints to every method, function and whenever is possible
 - **Docstring format**:
-1. NumPy style (with Parameters/Returns/References/Raises sections)
+1. Numpy style with 79 character line limits, Parameters/Returns/Raises/Notes/References sections
 2. Include brief description of what is being tested
 3. Include module description
+4. Example of docstring formatting:
+```python
+"""Unit tests for BinaryComparator class.
+
+Tests the binary comparison functionality with various input scenarios.
+"""
+
+import pytest
+
+from stpstone.analytics.arithmetic.binary_comparator import BinaryComparator
+
+
+# --------------------------
+# Fixtures
+# --------------------------
+@pytest.fixture
+def comparator_a_less_than_b() -> BinaryComparator:
+    """Fixture for case where a < b."""
+    return BinaryComparator(a=5, b=10)
+
+
+# --------------------------
+# Tests
+# --------------------------
+def test_init_with_valid_inputs() -> None:
+    """Test initialization with valid integer inputs."""
+    comparator = BinaryComparator(a=5, b=10)
+    assert comparator.a == 5
+    assert comparator.b == 10
+```
 - **Comments**: Use lowercase (not docstrings)
 - **Import organization**: Follow isort with single-line imports when logical
 

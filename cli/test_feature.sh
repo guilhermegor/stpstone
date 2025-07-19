@@ -61,7 +61,7 @@ check_type_consistency() {
     print_status "info" "Checking type hint/docstring consistency for ${type}: ${path}"
     
     # First check with pydocstyle (numpy convention)
-    if ! poetry run pydocstyle --select=D412,D417,DAR "$path"; then
+    if ! poetry run pydocstyle "$path"; then
         print_status "error" "pydocstyle found docstring issues in ${type}"
         print_status "warning" "Some return/parameter types may not match type hints"
         return 1
@@ -69,6 +69,8 @@ check_type_consistency() {
     
     # Custom check using python ast parsing
     local temp_file=$(mktemp)
+    local output_file=$(mktemp)
+    
     cat << 'EOF' > "$temp_file"
 import ast
 import sys
@@ -110,6 +112,7 @@ def check_file(filepath: str) -> int:
             docstring = ast.get_docstring(node)
             if not docstring:
                 print(f"⚠️  Missing docstring in {node.name}()")
+                errors += 1
                 continue
                 
             # Check return type
@@ -119,8 +122,20 @@ def check_file(filepath: str) -> int:
                     doc_lines = [l.strip() for l in docstring.split('\n')]
                     found_return = False
                     for i, line in enumerate(doc_lines):
-                        if "return" in line.lower() and ":" in line:
-                            doc_type = line.split(":")[1].strip()
+                        if line.strip().lower() == "returns":
+                            # Skip separator (e.g., -------)
+                            j = i + 2 if doc_lines[i+1].strip().startswith("-") else i + 1
+                            # Look for type line
+                            while j < len(doc_lines):
+                                candidate = doc_lines[j].strip()
+                                if candidate:  # non-empty
+                                    if ":" in candidate:
+                                        doc_type = candidate.split(":")[0].strip()
+                                    else:
+                                        doc_type = candidate.split()[0].strip()
+                                    break
+                                j += 1
+
                             if not compare_types(returns, doc_type):
                                 print(f"❌ Return type mismatch in {node.name}():")
                                 print(f"   Type hint: {returns}")
@@ -130,6 +145,7 @@ def check_file(filepath: str) -> int:
                             break
                     if not found_return:
                         print(f"⚠️  Return type documented but no type hint in {node.name}()")
+                        errors += 1
             
             # Check parameters
             for arg in node.args.args:
@@ -151,6 +167,7 @@ def check_file(filepath: str) -> int:
                             break
                     if not arg_doc_found:
                         print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}()")
+                        errors += 1
     
     return errors
 
@@ -159,13 +176,27 @@ if __name__ == "__main__":
     sys.exit(1 if errors > 0 else 0)
 EOF
 
-    if ! python "$temp_file" "$path"; then
+    # Run the check and capture output
+    python "$temp_file" "$path" > "$output_file" 2>&1
+    local exit_code=$?
+    
+    # Print the output
+    cat "$output_file"
+    
+    # Check for any warnings or errors
+    if grep -q -E "⚠️|❌" "$output_file"; then
         print_status "error" "Type hint/docstring inconsistencies found in ${type}"
-        rm "$temp_file"
+        rm "$temp_file" "$output_file"
         return 1
     fi
     
-    rm "$temp_file"
+    rm "$temp_file" "$output_file"
+    
+    if [ $exit_code -ne 0 ]; then
+        print_status "error" "Type checking script failed for ${type}"
+        return 1
+    fi
+    
     print_status "success" "Type hints and docstrings are consistent for ${type}"
     return 0
 }

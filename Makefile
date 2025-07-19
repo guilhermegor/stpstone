@@ -65,12 +65,6 @@ export_deps:
 
 
 # package
-py_path:
-	export PYTHONPATH=$(pwd)
-
-install_dev_mode:
-	pip install -e.
-
 package_tree:
 	poetry run python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
 		root_path = os.getcwd(); \
