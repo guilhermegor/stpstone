@@ -5,9 +5,22 @@ their earnings. It uses eight financial ratios to detect manipulation patterns.
 """
 
 import math
+from typing import TypedDict
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
+
+class ResultInputs(TypedDict):
+    """Inputs for the Beneish M-Score model."""
+
+    float_dsr: float
+    float_gmi: float
+    float_aqi: float
+    float_sgi: float
+    float_depi: float
+    float_sgai: float
+    float_tata: float
+    float_lvgi: float
 
 class EarningsManipulation(metaclass=TypeChecker):
     """Detect earnings manipulation using the Beneish M-Score model.
@@ -45,7 +58,7 @@ class EarningsManipulation(metaclass=TypeChecker):
         float_cfo_t: float,
         float_tl_t: float,
         float_tl_tm1: float,
-    ) -> dict[str, float]:
+    ) -> ResultInputs:
         """Compute the eight financial ratios used in the Beneish M-Score model.
 
         Parameters
@@ -97,16 +110,7 @@ class EarningsManipulation(metaclass=TypeChecker):
 
         Returns
         -------
-        dict[str, float]
-            Dictionary containing the eight Beneish ratios:
-            - float_dsr: Days' sales in receivable index
-            - float_gmi: Gross margin index
-            - float_aqi: Asset quality index
-            - float_sgi: Sales growth index
-            - float_depi: Depreciation index
-            - float_sgai: SG&A expense index
-            - float_tata: Total accruals to total assets
-            - float_lvgi: Leverage index
+        ResultInputs
         """
         self._validate_inputs(locals())
         return {
@@ -127,12 +131,13 @@ class EarningsManipulation(metaclass=TypeChecker):
         
         Parameters
         ----------
-            params: Dictionary of parameter names and values from locals()
+        params: dict
+            Dictionary of parameter names and values from locals()
             
         Raises
         ------
-            ValueError: If any parameter contains NaN or infinity
-            TypeError: If any parameter has wrong type
+        ValueError
+            If any parameter contains NaN or infinity
         """
         for param_name, param_value in params.items():
             if param_name == 'self':

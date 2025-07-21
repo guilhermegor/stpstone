@@ -50,7 +50,13 @@ def normal_financial_values() -> dict[str, float]:
 
 @pytest.fixture
 def negative_financial_values() -> dict[str, float]:
-    """Fixture providing negative financial values for testing."""
+    """Fixture providing negative financial values for testing.
+    
+    Returns
+    -------
+    dict[str, float]
+        A dictionary containing negative financial values.
+    """
     return {
         "float_ar_t": -50000.0,
         "float_sales_t": 1000000.0,
@@ -79,7 +85,13 @@ def negative_financial_values() -> dict[str, float]:
 
 @pytest.fixture
 def extreme_financial_values() -> dict[str, float]:
-    """Fixture providing extreme financial values for testing."""
+    """Fixture providing extreme financial values for testing.
+    
+    Returns
+    -------
+    dict[str, float]
+        A dictionary containing extreme financial values.
+    """
     return {
         "float_ar_t": 1e12,
         "float_sales_t": 1e15,
@@ -113,7 +125,15 @@ def test_normal_case(
         earnings_analyzer: EarningsManipulation, 
         normal_financial_values: dict[str, float]
     ) -> None:
-    """Test with typical financial values."""
+    """Test with typical financial values.
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    normal_financial_values : dict[str, float]
+        A dictionary containing normal financial values.
+    """
     ratios = earnings_analyzer.inputs_beneish_model(**normal_financial_values)
 
     # verify all ratios are calculated
@@ -136,7 +156,15 @@ def test_zero_sales(
         earnings_analyzer: EarningsManipulation, 
         normal_financial_values: dict[str, float]
     ) -> None:
-    """Test handling of zero sales edge case."""
+    """Test handling of zero sales edge case.
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    normal_financial_values : dict[str, float]
+        A dictionary containing normal financial values.
+    """
     with pytest.raises(ZeroDivisionError):
         modified_values = normal_financial_values.copy()
         modified_values["float_sales_t"] = 0.0
@@ -147,7 +175,15 @@ def test_negative_values(
         earnings_analyzer: EarningsManipulation, 
         negative_financial_values: dict[str, float]
     ) -> None:
-    """Test with negative financial values (should work mathematically)."""
+    """Test with negative financial values (should work mathematically).
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    negative_financial_values : dict[str, float]
+        A dictionary containing negative financial values.
+    """
     ratios = earnings_analyzer.inputs_beneish_model(**negative_financial_values)
     assert len(ratios) == 8
 
@@ -156,7 +192,15 @@ def test_type_validation(
         earnings_analyzer: EarningsManipulation, 
         normal_financial_values: dict[str, float]
     ) -> None:
-    """Test type validation of input parameters."""
+    """Test type validation of input parameters.
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    normal_financial_values : dict[str, float]
+        A dictionary containing normal financial values.
+    """
     with pytest.raises(TypeError):
         modified_values = normal_financial_values.copy()
         modified_values["float_ar_t"] = "50000"  # type: ignore
@@ -167,7 +211,15 @@ def test_extreme_values(
         earnings_analyzer: EarningsManipulation, 
         extreme_financial_values: dict[str, float]
     ) -> None:
-    """Test with extremely large/small values."""
+    """Test with extremely large/small values.
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    extreme_financial_values : dict[str, float]
+        A dictionary containing extreme financial values.
+    """
     ratios = earnings_analyzer.inputs_beneish_model(**extreme_financial_values)
     for val in ratios.values():
         assert not math.isnan(val)
@@ -175,7 +227,13 @@ def test_extreme_values(
 
 
 def test_m_score_interpretation(earnings_analyzer: EarningsManipulation) -> None:
-    """Test M-Score interpretation thresholds."""
+    """Test M-Score interpretation thresholds.
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    """
     # below threshold (no manipulation expected)
     low_score = earnings_analyzer.beneish_model(
         float_dsr=1.0,
@@ -207,7 +265,15 @@ def test_nan_handling(
         earnings_analyzer: EarningsManipulation, 
         normal_financial_values: dict[str, float]
     ) -> None:
-    """Test that NaN inputs raise appropriate exceptions."""
+    """Test that NaN inputs raise appropriate exceptions.
+    
+    Parameters
+    ----------
+    earnings_analyzer : EarningsManipulation
+        An instance of the EarningsManipulation class.
+    normal_financial_values : dict[str, float]
+        A dictionary containing normal financial values.
+    """
     with pytest.raises(ValueError):
         modified_values = normal_financial_values.copy()
         modified_values["float_ar_t"] = float('nan')
