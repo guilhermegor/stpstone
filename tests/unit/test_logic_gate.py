@@ -3,8 +3,6 @@
 Tests the NAND, NOR, and XOR gate implementations with various input combinations.
 """
 
-from typing import Any
-
 import pytest
 
 from stpstone.analytics.arithmetic.logic_gate import NANDGate, NORGate, XORGate
@@ -37,15 +35,25 @@ def test_nand_normal_operations(
     all_true_inputs: tuple[bool, bool],
     mixed_inputs: list[tuple[bool, bool]]
 ) -> None:
-    """Test NAND gate with normal input combinations."""
-    # Test all False case
+    """Test NAND gate with normal input combinations.
+    
+    Parameters
+    ----------
+    all_false_inputs : tuple[bool, bool]
+        (False, False) inputs
+    all_true_inputs : tuple[bool, bool]
+        (True, True) inputs
+    mixed_inputs : list[tuple[bool, bool]]
+        Mixed (True, False) and (False, True) inputs
+    """
+    # test all False case
     assert bool(NANDGate(*all_false_inputs))
     
-    # Test mixed cases
+    # test mixed cases
     for a, b in mixed_inputs:
         assert bool(NANDGate(a, b))
     
-    # Test all True case
+    # test all True case
     assert not bool(NANDGate(*all_true_inputs))
 
 def test_nand_repr() -> None:
@@ -62,15 +70,25 @@ def test_nor_normal_operations(
     all_true_inputs: tuple[bool, bool],
     mixed_inputs: list[tuple[bool, bool]]
 ) -> None:
-    """Test NOR gate with normal input combinations."""
-    # Test all False case
+    """Test NOR gate with normal input combinations.
+    
+    Parameters
+    ----------
+    all_false_inputs : tuple[bool, bool]
+        (False, False) inputs
+    all_true_inputs : tuple[bool, bool]
+        (True, True) inputs
+    mixed_inputs : list[tuple[bool, bool]]
+        Mixed (True, False) and (False, True) inputs
+    """
+    # test all False case
     assert bool(NORGate(*all_false_inputs))
     
-    # Test mixed cases
+    # test mixed cases
     for a, b in mixed_inputs:
         assert not bool(NORGate(a, b))
     
-    # Test all True case
+    # test all True case
     assert not bool(NORGate(*all_true_inputs))
 
 def test_nor_repr() -> None:
@@ -87,15 +105,25 @@ def test_xor_normal_operations(
     all_true_inputs: tuple[bool, bool],
     mixed_inputs: list[tuple[bool, bool]]
 ) -> None:
-    """Test XOR gate with normal input combinations."""
-    # Test all False case
+    """Test XOR gate with normal input combinations.
+    
+    Parameters
+    ----------
+    all_false_inputs : tuple[bool, bool]
+        (False, False) inputs
+    all_true_inputs : tuple[bool, bool]
+        (True, True) inputs
+    mixed_inputs : list[tuple[bool, bool]]
+        Mixed (True, False) and (False, True) inputs
+    """
+    # test all False case
     assert not bool(XORGate(*all_false_inputs))
     
-    # Test mixed cases
+    # test mixed cases
     for a, b in mixed_inputs:
         assert bool(XORGate(a, b))
     
-    # Test all True case
+    # test all True case
     assert not bool(XORGate(*all_true_inputs))
 
 def test_xor_repr() -> None:
@@ -108,13 +136,25 @@ def test_xor_repr() -> None:
 # Edge Case Tests
 # --------------------------
 def test_edge_case_all_false(all_false_inputs: tuple[bool, bool]) -> None:
-    """Test all gates with all False inputs."""
+    """Test all gates with all False inputs.
+    
+    Parameters
+    ----------
+    all_false_inputs : tuple[bool, bool]
+        (False, False) inputs
+    """
     assert bool(NANDGate(*all_false_inputs))
     assert bool(NORGate(*all_false_inputs))
     assert not bool(XORGate(*all_false_inputs))
 
 def test_edge_case_all_true(all_true_inputs: tuple[bool, bool]) -> None:
-    """Test all gates with all True inputs."""
+    """Test all gates with all True inputs.
+    
+    Parameters
+    ----------
+    all_true_inputs : tuple[bool, bool]
+        (True, True) inputs
+    """
     assert not bool(NANDGate(*all_true_inputs))
     assert not bool(NORGate(*all_true_inputs))
     assert not bool(XORGate(*all_true_inputs))
@@ -124,30 +164,54 @@ def test_edge_case_all_true(all_true_inputs: tuple[bool, bool]) -> None:
 # Type Validation Tests
 # --------------------------
 @pytest.mark.parametrize("a,b", [
-    (1, True),       # First input not bool
-    (False, "True"), # Second input not bool
-    (1, "True")      # Both inputs wrong type
+    (1, True),       # first input not bool
+    (False, "True"), # second input not bool
+    (1, "True")      # both inputs wrong type
 ])
-def test_type_validation_nand(a: type[Any], b: type[Any]) -> None:
-    """Test NAND gate type validation."""
+def test_type_validation_nand(a: object, b: object) -> None:
+    """Test NAND gate type validation.
+    
+    Parameters
+    ----------
+    a : object
+        First input to the gate
+    b : object
+        Second input to the gate
+    """
     with pytest.raises(TypeError):
         NANDGate(a, b)
 
 @pytest.mark.parametrize("a,b", [
-    (None, False),  # First input not bool
-    (True, 0)       # Second input not bool
+    (None, False),  # first input not bool
+    (True, 0)       # second input not bool
 ])
-def test_type_validation_nor(a: type[Any], b: type[Any]) -> None:
-    """Test NOR gate type validation."""
+def test_type_validation_nor(a: object, b: object) -> None:
+    """Test NOR gate type validation.
+    
+    Parameters
+    ----------
+    a : object
+        First input to the gate
+    b : object
+        Second input to the gate
+    """
     with pytest.raises(TypeError):
         NORGate(a, b)
 
 @pytest.mark.parametrize("a,b", [
-    (True, 1.0),   # Second input not bool
-    ([], False)    # First input not bool
+    (True, 1.0),   # second input not bool
+    ([], False)    # first input not bool
 ])
-def test_type_validation_xor(a: type[Any], b: type[Any]) -> None:
-    """Test XOR gate type validation."""
+def test_type_validation_xor(a: object, b: object) -> None:
+    """Test XOR gate type validation.
+    
+    Parameters
+    ----------
+    a : object
+        First input to the gate
+    b : object
+        Second input to the gate
+    """
     with pytest.raises(TypeError):
         XORGate(a, b)
 
@@ -160,7 +224,17 @@ def test_boolean_conversion(
     all_true_inputs: tuple[bool, bool],
     mixed_inputs: list[tuple[bool, bool]]
 ) -> None:
-    """Test that gates work properly in boolean contexts."""
+    """Test that gates work properly in boolean contexts.
+    
+    Parameters
+    ----------
+    all_false_inputs : tuple[bool, bool]
+        (False, False) inputs
+    all_true_inputs : tuple[bool, bool]
+        (True, True) inputs
+    mixed_inputs : list[tuple[bool, bool]]
+        Mixed (True, False) and (False, True) inputs
+    """
     # NAND Gate tests
     assert NANDGate(*all_false_inputs)
     assert not NANDGate(*all_true_inputs)

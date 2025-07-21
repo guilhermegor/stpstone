@@ -41,7 +41,15 @@ class NANDGate(metaclass=TypeChecker):
     """
 
     def __init__(self, a: bool, b: bool) -> None:
-        """Initialize the NAND gate with two boolean inputs."""
+        """Initialize the NAND gate with two boolean inputs.
+        
+        Parameters
+        ----------
+        a : bool
+            First input to the gate
+        b : bool
+            Second input to the gate
+        """
         self.a = a
         self.b = b
 
@@ -105,7 +113,15 @@ class NORGate(metaclass=TypeChecker):
     """
 
     def __init__(self, a: bool, b: bool) -> None:
-        """Initialize the NOR gate with two boolean inputs."""
+        """Initialize the NOR gate with two boolean inputs.
+        
+        Parameters
+        ----------
+        a : bool
+            First input to the gate
+        b : bool
+            Second input to the gate
+        """
         self.a = a
         self.b = b
 
@@ -169,7 +185,15 @@ class XORGate(metaclass=TypeChecker):
     """
 
     def __init__(self, a: bool, b: bool) -> None:
-        """Initialize the XOR gate with two boolean inputs."""
+        """Initialize the XOR gate with two boolean inputs.
+        
+        Parameters
+        ----------
+        a : bool
+            First input to the gate
+        b : bool
+            Second input to the gate
+        """
         self.a = a
         self.b = b
 
