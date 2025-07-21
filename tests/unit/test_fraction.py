@@ -378,7 +378,13 @@ class TestFractionErrorConditions:
     
     @pytest.mark.parametrize("num", [1, -1, 0, 100, -100])
     def test_zero_denominator_various_numerators(self, num: int) -> None:
-        """Test zero denominator with various numerators."""
+        """Test zero denominator with various numerators.
+        
+        Parameters
+        ----------
+        num : int
+            The numerator to test
+        """
         with pytest.raises(ValueError):
             Fraction(num, 0)
     
@@ -388,7 +394,13 @@ class TestFractionErrorConditions:
         Fraction(0, 100)
     ])
     def test_division_by_zero_various_cases(self, zero_f: Fraction) -> None:
-        """Test division by zero in various scenarios."""
+        """Test division by zero in various scenarios.
+        
+        Parameters
+        ----------
+        zero_f : Fraction
+            The fraction to divide by zero
+        """
         f = Fraction(1, 2)
         with pytest.raises(ValueError):
             f / zero_f
@@ -506,7 +518,19 @@ class TestFractionCompatibility:
         num2: int,
         den2: int
     ) -> None:
-        """Compare results with Python's standard Fraction class."""
+        """Compare results with Python's standard Fraction class.
+        
+        Parameters
+        ----------
+        num1 : int
+            The numerator of the first fraction
+        den1 : int
+            The denominator of the first fraction
+        num2 : int
+            The numerator of the second fraction
+        den2 : int
+            The denominator of the second fraction
+        """
         # our implementation
         f1 = Fraction(num1, den1)
         f2 = Fraction(num2, den2)

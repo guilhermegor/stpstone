@@ -106,17 +106,17 @@ class Fraction(metaclass=TypeChecker):
         """
         return self.denominator
 
-    def __add__(self, fraction_new_instance: "Fraction") -> "Fraction":
+    def __add__(self, fraction_new_instance: object) -> object:
         """Add two fractions and return the result as a new Fraction.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to add to this fraction
 
         Returns
         -------
-        Fraction
+        object
             The sum of the two fractions in reduced form
 
         Examples
@@ -131,7 +131,7 @@ class Fraction(metaclass=TypeChecker):
         new_denominator = self.denominator * fraction_new_instance.denominator
         return Fraction(new_numerator, new_denominator)
 
-    def __radd__(self, fraction_new_instance: int) -> "Fraction":
+    def __radd__(self, fraction_new_instance: int) -> object:
         """Add an integer to this fraction (right addition).
 
         Parameters
@@ -141,7 +141,7 @@ class Fraction(metaclass=TypeChecker):
 
         Returns
         -------
-        Fraction
+        object
             The sum as a new Fraction
 
         Examples
@@ -156,17 +156,17 @@ class Fraction(metaclass=TypeChecker):
             )
         return NotImplemented
 
-    def __iadd__(self, fraction_new_instance: "Fraction") -> "Fraction":
+    def __iadd__(self, fraction_new_instance: object) -> object:
         """Add another fraction to this fraction in-place.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to add to this fraction
 
         Returns
         -------
-        Fraction
+        object
             This fraction after addition (in reduced form)
 
         Examples
@@ -188,17 +188,17 @@ class Fraction(metaclass=TypeChecker):
             return self
         return NotImplemented
 
-    def __sub__(self, fraction_new_instance: "Fraction") -> "Fraction":
+    def __sub__(self, fraction_new_instance: object) -> object:
         """Subtract another fraction from this fraction.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to subtract from this fraction
 
         Returns
         -------
-        Fraction
+        object
             The difference as a new Fraction
 
         Examples
@@ -213,17 +213,17 @@ class Fraction(metaclass=TypeChecker):
         new_denominator = self.denominator * fraction_new_instance.denominator
         return Fraction(new_numerator, new_denominator)
 
-    def __mul__(self, fraction_new_instance: "Fraction") -> "Fraction":
+    def __mul__(self, fraction_new_instance: object) -> object:
         """Multiply this fraction by another fraction.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to multiply by
 
         Returns
         -------
-        Fraction
+        object
             The product as a new Fraction
 
         Examples
@@ -235,17 +235,17 @@ class Fraction(metaclass=TypeChecker):
         new_denominator = self.denominator * fraction_new_instance.denominator
         return Fraction(new_numerator, new_denominator)
 
-    def __truediv__(self, fraction_new_instance: "Fraction") -> "Fraction":
+    def __truediv__(self, fraction_new_instance: object) -> object:
         """Divide this fraction by another fraction.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to divide by (must not be zero)
 
         Returns
         -------
-        Fraction
+        object
             The quotient as a new Fraction
 
         Raises
@@ -264,12 +264,12 @@ class Fraction(metaclass=TypeChecker):
         new_denominator = self.denominator * fraction_new_instance.numerator
         return Fraction(new_numerator, new_denominator)
 
-    def __gt__(self, fraction_new_instance: "Fraction") -> bool:
+    def __gt__(self, fraction_new_instance: object) -> bool:
         """Check if this fraction is greater than another.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to compare with
 
         Returns
@@ -287,12 +287,12 @@ class Fraction(metaclass=TypeChecker):
             > fraction_new_instance.numerator * self.denominator
         )
 
-    def __ge__(self, fraction_new_instance: "Fraction") -> bool:
+    def __ge__(self, fraction_new_instance: object) -> bool:
         """Check if this fraction is greater than or equal to another.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to compare with
 
         Returns
@@ -310,12 +310,12 @@ class Fraction(metaclass=TypeChecker):
             >= fraction_new_instance.numerator * self.denominator
         )
 
-    def __lt__(self, fraction_new_instance: "Fraction") -> bool:
+    def __lt__(self, fraction_new_instance: object) -> bool:
         """Check if this fraction is less than another.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to compare with
 
         Returns
@@ -333,12 +333,12 @@ class Fraction(metaclass=TypeChecker):
             < fraction_new_instance.numerator * self.denominator
         )
 
-    def __le__(self, fraction_new_instance: "Fraction") -> bool:
+    def __le__(self, fraction_new_instance: object) -> bool:
         """Check if this fraction is less than or equal to another.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to compare with
 
         Returns
@@ -356,12 +356,12 @@ class Fraction(metaclass=TypeChecker):
             <= fraction_new_instance.numerator * self.denominator
         )
 
-    def __ne__(self, fraction_new_instance: "Fraction") -> bool:
+    def __ne__(self, fraction_new_instance: object) -> bool:
         """Check if this fraction is not equal to another.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to compare with
 
         Returns
@@ -376,12 +376,12 @@ class Fraction(metaclass=TypeChecker):
         """
         return not (self == fraction_new_instance)
 
-    def __eq__(self, fraction_new_instance: "Fraction") -> bool:
+    def __eq__(self, fraction_new_instance: object) -> bool:
         """Check if this fraction is equal to another.
 
         Parameters
         ----------
-        fraction_new_instance : Fraction
+        fraction_new_instance : object
             The fraction to compare with
 
         Returns

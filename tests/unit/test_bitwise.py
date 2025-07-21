@@ -4,8 +4,6 @@ This module provides comprehensive tests for the Bitwise class that implements
 basic bitwise operations including AND, OR, XOR, and NOT.
 """
 
-from typing import Any
-
 import pytest
 
 from stpstone.analytics.arithmetic.bitwise import Bitwise
@@ -21,7 +19,13 @@ def bitwise_utils() -> Bitwise:
 # Bitwise AND Tests
 # --------------------------
 def test_bitwise_and_basic_operations(bitwise_utils: Bitwise) -> None:
-    """Test basic bitwise AND operations."""
+    """Test basic bitwise AND operations.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_and(3, 5) == 1
     assert bitwise_utils.bitwise_and(0b1100, 0b1010) == 0b1000
     assert bitwise_utils.bitwise_and(7, 3) == 3  # 0b111 & 0b011 = 0b011
@@ -31,7 +35,13 @@ def test_bitwise_and_basic_operations(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_and_edge_cases(bitwise_utils: Bitwise) -> None:
-    """Test edge cases for bitwise AND."""
+    """Test edge cases for bitwise AND.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_and(0, 0) == 0
     assert bitwise_utils.bitwise_and(0, 5) == 0
     assert bitwise_utils.bitwise_and(5, 0) == 0
@@ -44,7 +54,13 @@ def test_bitwise_and_edge_cases(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_and_negative_numbers(bitwise_utils: Bitwise) -> None:
-    """Test bitwise AND with negative numbers."""
+    """Test bitwise AND with negative numbers.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_and(-1, 5) == 5  # All 1s & 5 = 5
     assert bitwise_utils.bitwise_and(-2, 7) == 6  # ...11111110 & 00000111 = 00000110
     assert bitwise_utils.bitwise_and(-5, -3) == -7  # Two's complement arithmetic
@@ -54,7 +70,13 @@ def test_bitwise_and_negative_numbers(bitwise_utils: Bitwise) -> None:
 # Bitwise OR Tests
 # --------------------------
 def test_bitwise_or_basic_operations(bitwise_utils: Bitwise) -> None:
-    """Test basic bitwise OR operations."""
+    """Test basic bitwise OR operations.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_or(3, 5) == 7
     assert bitwise_utils.bitwise_or(0b1100, 0b1010) == 0b1110
     
@@ -65,7 +87,13 @@ def test_bitwise_or_basic_operations(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_or_edge_cases(bitwise_utils: Bitwise) -> None:
-    """Test edge cases for bitwise OR."""
+    """Test edge cases for bitwise OR.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_or(0, 0) == 0
     assert bitwise_utils.bitwise_or(0, 5) == 5
     assert bitwise_utils.bitwise_or(5, 0) == 5
@@ -78,8 +106,14 @@ def test_bitwise_or_edge_cases(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_or_negative_numbers(bitwise_utils: Bitwise) -> None:
-    """Test bitwise OR with negative numbers."""
-    assert bitwise_utils.bitwise_or(-1, 5) == -1  # all 1s | anything = all 1s
+    """Test bitwise OR with negative numbers.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
+    assert bitwise_utils.bitwise_or(-1, 5) == -1  # all 1s | objectthing = all 1s
     assert bitwise_utils.bitwise_or(-8, 3) == -5  # two's complement arithmetic
     assert bitwise_utils.bitwise_or(-5, -3) == -1
 
@@ -88,7 +122,13 @@ def test_bitwise_or_negative_numbers(bitwise_utils: Bitwise) -> None:
 # Bitwise XOR Tests
 # --------------------------
 def test_bitwise_xor_basic_operations(bitwise_utils: Bitwise) -> None:
-    """Test basic bitwise XOR operations."""
+    """Test basic bitwise XOR operations.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_xor(3, 5) == 6
     assert bitwise_utils.bitwise_xor(0b1100, 0b1010) == 0b0110
     
@@ -99,7 +139,13 @@ def test_bitwise_xor_basic_operations(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_xor_edge_cases(bitwise_utils: Bitwise) -> None:
-    """Test edge cases for bitwise XOR."""
+    """Test edge cases for bitwise XOR.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_xor(0, 0) == 0
     assert bitwise_utils.bitwise_xor(0, 5) == 5
     assert bitwise_utils.bitwise_xor(5, 0) == 5
@@ -119,7 +165,13 @@ def test_bitwise_xor_edge_cases(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_xor_negative_numbers(bitwise_utils: Bitwise) -> None:
-    """Test bitwise XOR with negative numbers."""
+    """Test bitwise XOR with negative numbers.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_xor(-1, 5) == -6  # All 1s ^ 5
     assert bitwise_utils.bitwise_xor(-8, 3) == -5  # two's complement arithmetic
     assert bitwise_utils.bitwise_xor(-5, -3) == 6
@@ -129,7 +181,13 @@ def test_bitwise_xor_negative_numbers(bitwise_utils: Bitwise) -> None:
 # Bitwise NOT Tests
 # --------------------------
 def test_bitwise_not_basic_operations(bitwise_utils: Bitwise) -> None:
-    """Test basic bitwise NOT operations."""
+    """Test basic bitwise NOT operations.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_not(3) == -4
     assert bitwise_utils.bitwise_not(0b1010) == -11
     
@@ -139,7 +197,13 @@ def test_bitwise_not_basic_operations(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_not_edge_cases(bitwise_utils: Bitwise) -> None:
-    """Test edge cases for bitwise NOT."""
+    """Test edge cases for bitwise NOT.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_not(0) == -1
     
     assert bitwise_utils.bitwise_not(1) == -2
@@ -157,7 +221,13 @@ def test_bitwise_not_edge_cases(bitwise_utils: Bitwise) -> None:
 
 
 def test_bitwise_not_negative_numbers(bitwise_utils: Bitwise) -> None:
-    """Test bitwise NOT with negative numbers."""
+    """Test bitwise NOT with negative numbers.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     assert bitwise_utils.bitwise_not(-1) == 0  # ~(-1) = 0
     assert bitwise_utils.bitwise_not(-2) == 1  # ~(-2) = 1
     assert bitwise_utils.bitwise_not(-5) == 4  # ~(-5) = 4
@@ -175,8 +245,18 @@ def test_bitwise_not_negative_numbers(bitwise_utils: Bitwise) -> None:
     (None, 3),
     (5, None),
 ])
-def test_type_validation_bitwise_and(bitwise_utils: Bitwise, a: type[Any], b: type[Any]) -> None:
-    """Test type validation for bitwise_and method."""
+def test_type_validation_bitwise_and(bitwise_utils: object, a: object, b: object) -> None:
+    """Test type validation for bitwise_and method.
+    
+    Parameters
+    ----------
+    bitwise_utils : object
+        An instance of the Bitwise class from pytest fixture.
+    a : object
+        First bit input type
+    b : object
+        Second bit input type
+    """
     with pytest.raises(TypeError):
         bitwise_utils.bitwise_and(a, b)
 
@@ -187,8 +267,18 @@ def test_type_validation_bitwise_and(bitwise_utils: Bitwise, a: type[Any], b: ty
     (5.5, 3),
     ([5], 3),
 ])
-def test_type_validation_bitwise_or(bitwise_utils: Bitwise, a: type[Any], b: type[Any]) -> None:
-    """Test type validation for bitwise_or method."""
+def test_type_validation_bitwise_or(bitwise_utils: object, a: object, b: object) -> None:
+    """Test type validation for bitwise_or method.
+    
+    Parameters
+    ----------
+    bitwise_utils : object
+        An instance of the Bitwise class.
+    a : object
+        First bit input type
+    b : object
+        Second bit input type
+    """
     with pytest.raises(TypeError):
         bitwise_utils.bitwise_or(a, b)
 
@@ -199,8 +289,18 @@ def test_type_validation_bitwise_or(bitwise_utils: Bitwise, a: type[Any], b: typ
     (5.5, 3),
     ({'a': 5}, 3),
 ])
-def test_type_validation_bitwise_xor(bitwise_utils: Bitwise, a: type[Any], b: type[Any]) -> None:
-    """Test type validation for bitwise_xor method."""
+def test_type_validation_bitwise_xor(bitwise_utils: object, a: object, b: object) -> None:
+    """Test type validation for bitwise_xor method.
+    
+    Parameters
+    ----------
+    bitwise_utils : object
+        An instance of the Bitwise class.
+    a : object
+        First bit input type
+    b : object
+        Second bit input type
+    """
     with pytest.raises(TypeError):
         bitwise_utils.bitwise_xor(a, b)
 
@@ -212,8 +312,16 @@ def test_type_validation_bitwise_xor(bitwise_utils: Bitwise, a: type[Any], b: ty
     [5],
     {'a': 5},
 ])
-def test_type_validation_bitwise_not(bitwise_utils: Bitwise, a: type[Any]) -> None:
-    """Test type validation for bitwise_not method."""
+def test_type_validation_bitwise_not(bitwise_utils: Bitwise, a: object) -> None:
+    """Test type validation for bitwise_not method.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    a : object
+        First bit input type
+    """
     with pytest.raises(TypeError):
         bitwise_utils.bitwise_not(a)
 
@@ -222,7 +330,13 @@ def test_type_validation_bitwise_not(bitwise_utils: Bitwise, a: type[Any]) -> No
 # Bitwise Properties Tests
 # --------------------------
 def test_bitwise_properties(bitwise_utils: Bitwise) -> None:
-    """Test mathematical properties of bitwise operations."""
+    """Test mathematical properties of bitwise operations.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     a, b, c = 42, 73, 156
     
     # and properties
@@ -263,7 +377,13 @@ def test_bitwise_properties(bitwise_utils: Bitwise) -> None:
 
 
 def test_de_morgan_laws(bitwise_utils: Bitwise) -> None:
-    """Test De Morgan's laws for bitwise operations."""
+    """Test De Morgan's laws for bitwise operations.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     a, b = 42, 73
     
     # ~(a & b) = ~a | ~b
@@ -300,7 +420,13 @@ def test_docstring_examples() -> None:
 
 
 def test_large_numbers(bitwise_utils: Bitwise) -> None:
-    """Test operations with very large numbers."""
+    """Test operations with very large numbers.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     large_a = 2**63 - 1  # maximum positive value for 64-bit signed integer
     large_b = 2**62
     
@@ -316,7 +442,13 @@ def test_large_numbers(bitwise_utils: Bitwise) -> None:
 
 
 def test_multiple_operations_chain(bitwise_utils: Bitwise) -> None:
-    """Test chaining multiple operations together."""
+    """Test chaining multiple operations together.
+    
+    Parameters
+    ----------
+    bitwise_utils : Bitwise
+        An instance of the Bitwise class.
+    """
     a, b, c = 85, 170, 255  # 0b01010101, 0b10101010, 0b11111111
     
     # complex operation: ((a & b) | c) ^ (~a)
