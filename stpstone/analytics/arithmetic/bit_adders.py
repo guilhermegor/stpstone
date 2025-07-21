@@ -34,7 +34,20 @@ class HalfAdder(metaclass=TypeChecker):
     """
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize the half adder with two bit inputs."""
+        """Initialize the half adder with two bit inputs.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+
+        Raises
+        ------
+        ValueError
+            If inputs are not 0 or 1
+        """
         if a not in (0, 1) or b not in (0, 1):
             raise ValueError("Inputs must be 0 or 1")
         
@@ -42,11 +55,37 @@ class HalfAdder(metaclass=TypeChecker):
         self.b = b
 
     def get_sum(self) -> int:
-        """Calculate the sum output of the half adder."""
+        """Calculate the sum output of the half adder.
+        
+        Returns
+        -------
+        int
+            The sum output (0 or 1)
+        
+        Examples
+        --------
+        >>> HalfAdder(0, 0).get_sum()
+        0
+        >>> HalfAdder(1, 1).get_sum()
+        0
+        """
         return self.a ^ self.b
 
     def get_carry(self) -> int:
-        """Calculate the carry output of the half adder."""
+        """Calculate the carry output of the half adder.
+        
+        Returns
+        -------
+        int
+            The carry output (0 or 1)
+        
+        Examples
+        --------
+        >>> HalfAdder(0, 0).get_carry()
+        0
+        >>> HalfAdder(1, 1).get_carry()
+        1
+        """
         return self.a & self.b
 
 
@@ -54,7 +93,22 @@ class FullAdder(metaclass=TypeChecker):
     """A full adder circuit that adds two bits with carry-in."""
 
     def __init__(self, a: int, b: int, carry_in: int) -> None:
-        """Initialize the full adder with two bits and carry-in."""
+        """Initialize the full adder with two bits and carry-in.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        carry_in : int
+            Carry-in input (0 or 1)
+
+        Raises
+        ------
+        ValueError
+            If inputs are not 0 or 1
+        """
         if a not in (0, 1) or b not in (0, 1) or carry_in not in (0, 1):
             raise ValueError("All inputs must be 0 or 1")
         
@@ -63,11 +117,41 @@ class FullAdder(metaclass=TypeChecker):
         self.carry_in = carry_in
 
     def get_sum(self) -> int:
-        """Calculate the sum output of the full adder."""
+        """Calculate the sum output of the full adder.
+        
+        Returns
+        -------
+        int
+            The sum output (0 or 1)
+        
+        Examples
+        --------
+        >>> FullAdder(0, 0, 0).get_sum()
+        0
+        >>> FullAdder(1, 1, 0).get_sum()
+        0
+        >>> FullAdder(1, 1, 1).get_sum()
+        1
+        """
         return (self.a ^ self.b) ^ self.carry_in
 
     def get_carry_out(self) -> int:
-        """Calculate the carry-out of the full adder."""
+        """Calculate the carry-out of the full adder.
+        
+        Returns
+        -------
+        int
+            The carry-out (0 or 1)
+        
+        Examples
+        --------
+        >>> FullAdder(0, 0, 0).get_carry_out()
+        0
+        >>> FullAdder(1, 1, 0).get_carry_out()
+        1
+        >>> FullAdder(1, 1, 1).get_carry_out()
+        1
+        """
         return (self.a & self.b) | (self.carry_in & (self.a ^ self.b))
 
 
@@ -75,7 +159,20 @@ class EightBitFullAdder(metaclass=TypeChecker):
     """An 8-bit adder implemented using full adders."""
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize the 8-bit adder with two 8-bit numbers."""
+        """Initialize the 8-bit adder with two 8-bit numbers.
+        
+        Parameters
+        ----------
+        a : int
+            First 8-bit number
+        b : int
+            Second 8-bit number
+
+        Raises
+        ------
+        ValueError
+            If inputs are not 8-bit numbers (0-255)
+        """
         if a < 0 or a > 255 or b < 0 or b > 255:
             raise ValueError("Inputs must be 8-bit numbers (0-255)")
         
@@ -83,7 +180,20 @@ class EightBitFullAdder(metaclass=TypeChecker):
         self.b = b
 
     def add(self) -> tuple[int, int]:
-        """Add two 8-bit numbers and return the sum and final carry-out."""
+        """Add two 8-bit numbers and return the sum and final carry-out.
+        
+        Returns
+        -------
+        tuple[int, int]
+            A tuple containing the sum and final carry-out (0 or 1)
+        
+        Examples
+        --------
+        >>> EightBitFullAdder(0b10101010, 0b01010101).add()
+        (0b11111111, 0)
+        >>> EightBitFullAdder(0b11111111, 0b11111111).add()
+        (0b11111110, 1)
+        """
         carry = 0
         sum_result = 0
         
@@ -106,7 +216,20 @@ class ConfigurableHalfAdder(metaclass=AdvancedTypeChecker):
     }
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize with automatic type checking."""
+        """Initialize with automatic type checking.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+
+        Raises
+        ------
+        ValueError
+            If inputs are not 0 or 1
+        """
         if a not in (0, 1) or b not in (0, 1):
             raise ValueError("Inputs must be 0 or 1")
         self.a = a
@@ -136,7 +259,20 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
     }
 
     def __init__(self, a: int, b: int) -> None:
-        """Initialize with configurable type checking."""
+        """Initialize with configurable type checking.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+
+        Raises
+        ------
+        ValueError
+            If inputs are not 0 or 1
+        """
         # store raw values first for testing purposes
         self.a = a
         self.b = b
@@ -147,15 +283,45 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
                 raise ValueError("Inputs must be 0 or 1")
 
     def add_numbers(self, x: int, y: int) -> int:
-        """Add two numbers with type checking."""
+        """Add two numbers with type checking.
+        
+        Parameters
+        ----------
+        x : int
+            First number
+        y : int
+            Second number
+
+        Returns
+        -------
+        int
+            The sum of x and y
+        """
         # simple addition - let the type checker handle type validation
         # don't do internal type conversion to allow type checker to work
         return x + y
 
     def debug_method(self, data: str) -> None:
-        """Debug method excluded from type checking."""
+        """Debug method excluded from type checking.
+        
+        Parameters
+        ----------
+        data : str
+            Data to print
+        """
         print(f"Debug: {data}")
 
     def _private_helper(self, value: str) -> str:
-        """Private method - explicitly excluded from type checking."""
+        """Private method - explicitly excluded from type checking.
+        
+        Parameters
+        ----------
+        value : str
+            String to convert to uppercase
+
+        Returns
+        -------
+        str
+            Uppercase version of the input string
+        """
         return value.upper()

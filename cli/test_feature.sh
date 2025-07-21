@@ -101,17 +101,18 @@ def compare_types(hint: Any, doc: str) -> bool:
 def check_file(filepath: str) -> int:
     errors = 0
     with open(filepath, 'r') as f:
-        tree = ast.parse(f.read())
+        tree = ast.parse(f.read(), filename=filepath)
     
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            lineno = node.lineno
             if not node.returns and not any(isinstance(decorator, ast.Name) and 
                decorator.id == 'property' for decorator in node.decorator_list):
                 continue
                 
             docstring = ast.get_docstring(node)
             if not docstring:
-                print(f"⚠️  Missing docstring in {node.name}()")
+                print(f"⚠️  Missing docstring in {node.name}() at line {lineno}")
                 errors += 1
                 continue
                 
@@ -133,7 +134,7 @@ def check_file(filepath: str) -> int:
                                 if candidate:
                                     doc_type = candidate
                                     if not compare_types(returns, doc_type):
-                                        print(f"❌ Return type mismatch in {node.name}():")
+                                        print(f"❌ Return type mismatch in {node.name}() at line {lineno}:")
                                         print(f"   Type hint: {returns}")
                                         print(f"   Docstring: {doc_type}")
                                         errors += 1
@@ -142,7 +143,7 @@ def check_file(filepath: str) -> int:
                                 j += 1
                             break
                     if not found_return:
-                        print(f"⚠️  Return type documented but no type hint in {node.name}()")
+                        print(f"⚠️  Return type documented but no type hint in {node.name}() at line {lineno}")
                         errors += 1
             
             # check parameters
@@ -157,14 +158,14 @@ def check_file(filepath: str) -> int:
                         if arg.arg in line and ":" in line:
                             doc_type = line.split(":")[1].strip()
                             if not compare_types(hint, doc_type):
-                                print(f"❌ Parameter type mismatch in {node.name}({arg.arg}):")
+                                print(f"❌ Parameter type mismatch in {node.name}({arg.arg}) at line {lineno}:")
                                 print(f"   Type hint: {hint}")
                                 print(f"   Docstring: {doc_type}")
                                 errors += 1
                             arg_doc_found = True
                             break
                     if not arg_doc_found:
-                        print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}()")
+                        print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno}")
                         errors += 1
     
     return errors

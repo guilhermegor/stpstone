@@ -30,7 +30,19 @@ class TestHalfAdder:
     def test_normal_operations(
         self, a: int, b: int, expected_sum: int, expected_carry: int
     ) -> None:
-        """Test normal operations of HalfAdder."""
+        """Test normal operations of HalfAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        expected_sum : int
+            Expected sum output (0 or 1)
+        expected_carry : int
+            Expected carry output (0 or 1)
+        """
         adder: HalfAdder = HalfAdder(a, b)
         assert adder.get_sum() == expected_sum
         assert adder.get_carry() == expected_carry
@@ -45,7 +57,15 @@ class TestHalfAdder:
         ],
     )
     def test_type_validation(self, a: type[Any], b: type[Any]) -> None:
-        """Test type validation in HalfAdder."""
+        """Test type validation in HalfAdder.
+        
+        Parameters
+        ----------
+        a : type[Any]
+            First bit input type
+        b : type[Any]
+            Second bit input type
+        """
         with pytest.raises(TypeError):
             HalfAdder(a, b)
 
@@ -58,7 +78,15 @@ class TestHalfAdder:
         ],
     )
     def test_value_validation(self, a: int, b: int) -> None:
-        """Test value validation in HalfAdder."""
+        """Test value validation in HalfAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        """
         with pytest.raises(ValueError):
             HalfAdder(a, b)
 
@@ -83,7 +111,21 @@ class TestFullAdder:
         expected_sum: int,
         expected_carry_out: int,
     ) -> None:
-        """Test normal operations of FullAdder."""
+        """Test normal operations of FullAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        carry_in : int
+            Carry-in input (0 or 1)
+        expected_sum : int
+            Expected sum output (0 or 1)
+        expected_carry_out : int
+            Expected carry-out output (0 or 1)
+        """
         adder: FullAdder = FullAdder(a, b, carry_in)
         assert adder.get_sum() == expected_sum
         assert adder.get_carry_out() == expected_carry_out
@@ -97,7 +139,17 @@ class TestFullAdder:
         ],
     )
     def test_carry_propagation(self, a: int, b: int, carry_in: int) -> None:
-        """Test carry propagation in FullAdder."""
+        """Test carry propagation in FullAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        carry_in : int
+            Carry-in input (0 or 1)
+        """
         adder: FullAdder = FullAdder(a, b, carry_in)
         assert adder.get_carry_out() == 1
 
@@ -110,7 +162,17 @@ class TestFullAdder:
         ],
     )
     def test_type_validation(self, a: type[Any], b: type[Any], carry_in: type[Any]) -> None:
-        """Test type validation in FullAdder."""
+        """Test type validation in FullAdder.
+        
+        Parameters
+        ----------
+        a : type[Any]
+            First bit input type
+        b : type[Any]
+            Second bit input type
+        carry_in : type[Any]
+            Carry-in input type
+        """
         with pytest.raises(TypeError):
             FullAdder(a, b, carry_in)
 
@@ -123,7 +185,17 @@ class TestFullAdder:
         ],
     )
     def test_value_validation(self, a: int, b: int, carry_in: int) -> None:
-        """Test value validation in FullAdder."""
+        """Test value validation in FullAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        carry_in : int
+            Carry-in input (0 or 1)
+        """
         with pytest.raises(ValueError):
             FullAdder(a, b, carry_in)
 
@@ -148,7 +220,19 @@ class TestEightBitFullAdder:
     def test_operations(
         self, a: int, b: int, expected_sum: int, expected_carry: int
     ) -> None:
-        """Test various operations of EightBitFullAdder."""
+        """Test various operations of EightBitFullAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        expected_sum : int
+            Expected sum output (0 or 1)
+        expected_carry : int
+            Expected carry output (0 or 1)
+        """
         adder: EightBitFullAdder = EightBitFullAdder(a, b)
         sum_result, carry = adder.add()
         assert sum_result == expected_sum
@@ -163,7 +247,15 @@ class TestEightBitFullAdder:
         ],
     )
     def test_type_validation(self, a: type[Any], b: type[Any]) -> None:
-        """Test type validation in EightBitFullAdder."""
+        """Test type validation in EightBitFullAdder.
+        
+        Parameters
+        ----------
+        a : type[Any]
+            First bit input type
+        b : type[Any]
+            Second bit input type
+        """
         with pytest.raises(TypeError):
             EightBitFullAdder(a, b)
 
@@ -177,7 +269,15 @@ class TestEightBitFullAdder:
         ],
     )
     def test_value_validation(self, a: int, b: int) -> None:
-        """Test value validation in EightBitFullAdder."""
+        """Test value validation in EightBitFullAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        """
         with pytest.raises(ValueError):
             EightBitFullAdder(a, b)
 
@@ -215,7 +315,19 @@ class TestConfigurableHalfAdder:
     def test_normal_operations(
         self, a: int, b: int, expected_sum: int, expected_carry: int
     ) -> None:
-        """Test normal operations of ConfigurableHalfAdder."""
+        """Test normal operations of ConfigurableHalfAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        expected_sum : int
+            Expected sum output (0 or 1)
+        expected_carry : int
+            Expected carry output (0 or 1)
+        """
         adder: ConfigurableHalfAdder = ConfigurableHalfAdder(a, b)
         assert adder.get_sum() == expected_sum
         assert adder.get_carry() == expected_carry
@@ -230,7 +342,15 @@ class TestConfigurableHalfAdder:
         ],
     )
     def test_strict_type_checking(self, a: type[Any], b: type[Any]) -> None:
-        """Test strict type checking in ConfigurableHalfAdder."""
+        """Test strict type checking in ConfigurableHalfAdder.
+        
+        Parameters
+        ----------
+        a : type[Any]
+            First bit input type
+        b : type[Any]
+            Second bit input type
+        """
         with pytest.raises(TypeError):
             ConfigurableHalfAdder(a, b)
 
@@ -255,7 +375,15 @@ class TestConfigurableHalfAdder:
         ],
     )
     def test_value_validation(self, a: int, b: int) -> None:
-        """Test value validation in ConfigurableHalfAdder."""
+        """Test value validation in ConfigurableHalfAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        """
         with pytest.raises(ValueError):
             ConfigurableHalfAdder(a, b)
 
@@ -313,7 +441,15 @@ class TestFlexibleAdder:
         ],
     )
     def test_value_validation(self, a: int, b: int) -> None:
-        """Test value validation in FlexibleAdder."""
+        """Test value validation in FlexibleAdder.
+        
+        Parameters
+        ----------
+        a : int
+            First bit input (0 or 1)
+        b : int
+            Second bit input (0 or 1)
+        """
         with pytest.raises(ValueError):
             FlexibleAdder(a, b)
 
@@ -337,10 +473,38 @@ class TestFlexibleAdder:
             __type_check_config__ = {"enabled": False}
 
             def __init__(self, a: int, b: int) -> None:
+                """Initialize with configurable type checking.
+                
+                Parameters
+                ----------
+                a : int
+                    First bit input (0 or 1)
+                b : int
+                    Second bit input (0 or 1)
+                
+                Raises
+                ------
+                ValueError
+                    If inputs are not 0 or 1
+                """
                 self.a = a
                 self.b = b
 
             def add_numbers(self, x: int, y: int) -> int:
+                """Add two numbers with type checking.
+                
+                Parameters
+                ----------
+                x : int
+                    First number
+                y : int
+                    Second number
+
+                Returns
+                -------
+                int
+                    The sum of x and y
+                """
                 return str(x) + str(y)
 
         adder: DisabledAdder = DisabledAdder("not_int", 1.5)
