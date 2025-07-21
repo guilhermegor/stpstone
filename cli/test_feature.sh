@@ -60,21 +60,22 @@ check_type_consistency() {
     
     print_status "info" "Checking type hint/docstring consistency for ${type}: ${path}"
     
-    # First check with pydocstyle (numpy convention)
+    # first check with pydocstyle (numpy convention)
     if ! poetry run pydocstyle "$path"; then
         print_status "error" "pydocstyle found docstring issues in ${type}"
         print_status "warning" "Some return/parameter types may not match type hints"
         return 1
     fi
     
-    # Custom check using python ast parsing
+    # custom check using python ast parsing
     local temp_file=$(mktemp)
     local output_file=$(mktemp)
     
     cat << 'EOF' > "$temp_file"
 import ast
 import sys
-from typing import Any
+import re
+from typing import Any, List, Dict, Set
 
 def compare_types(hint: Any, doc: str) -> bool:
     """Compare type hint with docstring type."""
@@ -97,6 +98,68 @@ def compare_types(hint: Any, doc: str) -> bool:
         doc = doc.replace(k.lower(), v)
     
     return hint_str == doc
+
+def parse_raises_section(docstring: str) -> Dict[str, str]:
+    """Parse the Raises section of a docstring, supporting NumPy, Google, and reST styles."""
+    raises = {}
+    if not docstring:
+        return raises
+
+    lines = [line.rstrip() for line in docstring.splitlines()]
+    in_raises = False
+
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+
+        if re.match(r"^(Raises|Raises:)$", stripped, re.IGNORECASE):
+            in_raises = True
+            continue
+
+        if in_raises:
+            if not stripped:
+                continue
+            # End parsing if next section begins (e.g., Parameters, Returns, Notes, etc.)
+            if re.match(r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References)(:)?$", stripped, re.IGNORECASE):
+                break
+
+            # Match formats like "ValueError: explanation"
+            match = re.match(r"^([\w.]+)\s*:\s*(.*)", stripped)
+            if match:
+                exc, desc = match.groups()
+                raises[exc.strip()] = desc.strip()
+            else:
+                # Match formats like "ValueError" (without colon)
+                match = re.match(r"^([\w.]+)$", stripped)
+                if match:
+                    raises[match.group(1)] = ""
+
+    return raises
+
+def get_actual_raises(node: ast.AST) -> Set[str]:
+    """Get all exceptions actually raised in the function."""
+    raises = set()
+    
+    for n in ast.walk(node):
+        if isinstance(n, ast.Raise):
+            if n.exc is not None:
+                # Handle direct exception names
+                if isinstance(n.exc, ast.Name):
+                    raises.add(n.exc.id)
+                # Handle exception calls like ValueError("message")
+                elif isinstance(n.exc, ast.Call) and isinstance(n.exc.func, ast.Name):
+                    raises.add(n.exc.func.id)
+                # Handle attribute access like exceptions.ValueError
+                elif isinstance(n.exc, ast.Attribute):
+                    raises.add(n.exc.attr)
+                # Handle cases where exception is called directly
+                elif isinstance(n.exc, ast.Call) and hasattr(n.exc.func, 'id'):
+                    raises.add(n.exc.func.id)
+    
+    return raises
+
+def normalize_exception_name(name: str) -> str:
+    """Normalize exception names for comparison."""
+    return name.split('.')[-1]  # Get just the exception name without module
 
 def check_file(filepath: str) -> int:
     errors = 0
@@ -125,10 +188,8 @@ def check_file(filepath: str) -> int:
                     for i, line in enumerate(doc_lines):
                         if line.strip().lower() == "returns":
                             j = i + 1
-                            # Skip separator line (e.g. '-------')
                             while j < len(doc_lines) and set(doc_lines[j].strip()) <= {"-", " "}:
                                 j += 1
-                            # Find the first non-empty line after that — the type
                             while j < len(doc_lines):
                                 candidate = doc_lines[j].strip()
                                 if candidate:
@@ -167,6 +228,26 @@ def check_file(filepath: str) -> int:
                     if not arg_doc_found:
                         print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno}")
                         errors += 1
+            
+            # check Raises section
+            doc_raises = parse_raises_section(docstring)
+            actual_raises = get_actual_raises(node)
+            
+            # normalize all exception names for comparison
+            doc_exceptions = {normalize_exception_name(e) for e in doc_raises}
+            actual_exceptions = {normalize_exception_name(e) for e in actual_raises}
+            
+            # check for documented but not raised exceptions
+            for exc in doc_exceptions:
+                if exc not in actual_exceptions:
+                    print(f"⚠️  Documented but not raised exception {exc} in {node.name}() at line {lineno}")
+                    errors += 1
+            
+            # check for raised but not documented exceptions
+            for exc in actual_exceptions:
+                if exc not in doc_exceptions:
+                    print(f"⚠️  Raised but not documented exception {exc} in {node.name}() at line {lineno}")
+                    errors += 1
     
     return errors
 
@@ -175,14 +256,14 @@ if __name__ == "__main__":
     sys.exit(1 if errors > 0 else 0)
 EOF
 
-    # Run the check and capture output
+    # run the check and capture output
     python "$temp_file" "$path" > "$output_file" 2>&1
     local exit_code=$?
     
-    # Print the output
+    # print the output
     cat "$output_file"
     
-    # Check for any warnings or errors
+    # check for any warnings or errors
     if grep -q -E "⚠️|❌" "$output_file"; then
         print_status "error" "Type hint/docstring inconsistencies found in ${type}"
         rm "$temp_file" "$output_file"

@@ -481,11 +481,6 @@ class TestFlexibleAdder:
                     First bit input (0 or 1)
                 b : int
                     Second bit input (0 or 1)
-                
-                Raises
-                ------
-                ValueError
-                    If inputs are not 0 or 1
                 """
                 self.a = a
                 self.b = b
