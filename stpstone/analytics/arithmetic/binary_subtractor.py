@@ -15,13 +15,6 @@ class BinarySubtractor(metaclass=TypeChecker):
             The minuend (the number to be subtracted from)
         subtrahend : str
             The subtrahend (the number to be subtracted)
-
-        Raises
-        ------
-        ValueError
-            If minuend or subtrahend is not a binary string
-        ValueError
-            If minuend or subtrahend is empty
         """
         self._validate_inputs(minuend, subtrahend)
         max_length = max(len(minuend), len(subtrahend))

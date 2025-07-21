@@ -38,14 +38,35 @@ class HalfSubtractor(metaclass=TypeChecker):
     """
     
     def __init__(self, a: int, b: int) -> None:
-        """Initialize the half subtractor with two binary inputs."""
+        """Initialize the half subtractor with two binary inputs.
+        
+        Parameters
+        ----------
+        a : int
+            First binary input (0 or 1)
+        b : int
+            Second binary input (0 or 1)
+        """
         self._validate_binary_input(a, "a")
         self._validate_binary_input(b, "b")
         self.a = a
         self.b = b
     
     def _validate_binary_input(self, value: int, param_name: str) -> None:
-        """Validate that input is a binary value (0 or 1)."""
+        """Validate that input is a binary value (0 or 1).
+        
+        Parameters
+        ----------
+        value : int
+            The input value to validate
+        param_name : str
+            The name of the parameter being validated
+        
+        Raises
+        ------
+        ValueError
+            If input is not 0 or 1
+        """
         if value not in (0, 1):
             raise ValueError(f"{param_name} must be 0 or 1, got {value}")
     
@@ -115,7 +136,17 @@ class FullSubtractor(metaclass=TypeChecker):
     """
     
     def __init__(self, a: int, b: int, borrow_in: int) -> None:
-        """Initialize the full subtractor with two bits and borrow-in."""
+        """Initialize the full subtractor with two bits and borrow-in.
+        
+        Parameters
+        ----------
+        a : int
+            First binary input (0 or 1)
+        b : int
+            Second binary input (0 or 1)
+        borrow_in : int
+            Borrow input from previous stage (0 or 1)
+        """
         self._validate_binary_input(a, "a")
         self._validate_binary_input(b, "b")
         self._validate_binary_input(borrow_in, "borrow_in")
@@ -124,7 +155,20 @@ class FullSubtractor(metaclass=TypeChecker):
         self.borrow_in = borrow_in
     
     def _validate_binary_input(self, value: int, param_name: str) -> None:
-        """Validate that input is a binary value (0 or 1)."""
+        """Validate that input is a binary value (0 or 1).
+        
+        Parameters
+        ----------
+        value : int
+            The input value to validate
+        param_name : str
+            The name of the parameter being validated
+        
+        Raises
+        ------
+        ValueError
+            If input is not 0 or 1
+        """
         if value not in (0, 1):
             raise ValueError(f"{param_name} must be 0 or 1, got {value}")
     
