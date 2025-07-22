@@ -1,9 +1,18 @@
 """Module for ROE decomposition using DuPont Analysis."""
 
-from typing import Union
+from typing import TypedDict
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ROEDecomposition:
+class ResultDupontAnalysis(TypedDict):
+    """Typed dictionary for holding ROE decomposition results."""
+
+    roe_3_step: float
+    roe_5_step: float
+    intermediate_metrics: dict[str, float]
+
+class ROEDecomposition(metaclass=TypeChecker):
     """A class to perform ROE decomposition using DuPont Analysis (3-step and 5-step)."""
 
     def dupont_analysis(
@@ -14,7 +23,7 @@ class ROEDecomposition:
         float_avg_te: float,
         float_ebt: float,
         float_ebit: float,
-    ) -> dict[str, Union[float, dict[str, float]]]:
+    ) -> ResultDupontAnalysis:
         """
         Perform DuPont Analysis (3-step and 5-step) to decompose ROE.
 
@@ -35,11 +44,16 @@ class ROEDecomposition:
 
         Returns
         -------
-        dict: [str, Union[float, dict[str, float]]]
+        ResultDupontAnalysis
             A dictionary containing:
             - 3-step DuPont ROE
             - 5-step DuPont ROE
             - Intermediate metrics (Net Profit Margin, Asset Turnover, etc.)
+        
+        Raises
+        ------
+        ValueError
+            If any of the inputs are non-positive or zero.
         """
         # input validation
         if any(x <= 0 for x in [float_net_revenue, float_avg_ta, float_avg_te, float_ebt, 
@@ -67,7 +81,7 @@ class ROEDecomposition:
             "Operating Margin": float_opeating_margin,
         }
         return {
-            "3_step_dupont_roe": float_roe_3_step,
-            "5_step_dupont_roe": roe_5_step,
+            "roe_3_step": float_roe_3_step,
+            "roe_5_step": roe_5_step,
             "intermediate_metrics": dict_intermediate_metrics,
         }
