@@ -1,4 +1,5 @@
 """Binary subtractor implementation."""
+
 from stpstone.analytics.arithmetic.bit_subtractor import FullSubtractor
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 

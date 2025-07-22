@@ -15,7 +15,8 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 1. Avoid `Any` type hint whenever possible; use specific types
 2. Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid ruff linting raising warnings
 3. Use from numpy.typing import NDArray, NDArray[...] (e.g. NDArray[np.float64]) instead of np.ndarray for type hints
-4. Add type hints to every method, function and whenever is possible
+4. Use class Return<method_name>(TypedDict) for dictionaries typing (import from typing import TypedDict)
+5. Add type hints to every method, function and whenever is possible
 - **Docstring format**:
 1. Numpy style with 79 character line limits, Parameters/Returns/Raises/Notes/References sections
 2. Include brief description of what is being tested
@@ -162,13 +163,6 @@ class TestOptimizeCurveFit:
         x, _ = sample_data
         with pytest.raises(ValueError, match="Input arrays cannot be empty"):
             nonlinear_equations.optimize_curve_fit(linear_func, x, np.array([]))
-```
-
-### Feature to be Tested
-
-```python
-
-<FILL_WITH_FEATURE_IMPLEMENTED>
 ```
 
 ### Test Structure Template
@@ -510,3 +504,11 @@ def test_loop_edge_cases():
 - Use context managers for file operations
 - Mock time-dependent operations
 - Limit test data size for performance
+
+
+### Feature to be Tested
+
+```python
+
+<FILL_WITH_FEATURE_IMPLEMENTED>
+```

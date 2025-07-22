@@ -3,6 +3,7 @@
 This module provides functionality to compare two binary numbers and determine
 their relationship (less than, greater than, or equal to).
 """
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
