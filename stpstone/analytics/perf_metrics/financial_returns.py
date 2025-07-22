@@ -4,13 +4,21 @@ This module provides various methods for calculating stock returns and performan
 including continuous (log) returns, discrete returns, and strategy performance calculations.
 """
 
-from typing import Literal
+from typing import Literal, TypedDict, Union
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 
-from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
+
+class ResultPricingStrategy(TypedDict):
+    """A typed dictionary for holding strategy performance results."""
+
+    mtm: float
+    pct_return: float
+    notional: float
 
 
 class FinancialReturns(metaclass=TypeChecker):
@@ -20,20 +28,26 @@ class FinancialReturns(metaclass=TypeChecker):
     short fee costs, and strategy pricing metrics.
     """
 
-    def continuous_return(self, stock_d0: float, stock_d1: float) -> float:
+    def continuous_return(self, stock_d0: Union[float, int], stock_d1: Union[float, int]) -> float:
         """Calculate the continuous (log) return between two stock prices.
 
         Parameters
         ----------
-        stock_d0 : float or str
+        stock_d0 : Union[float, int]
             Initial stock price (will be converted to float)
-        stock_d1 : float or str
+        stock_d1 : Union[float, int]
             Subsequent stock price (will be converted to float)
 
         Returns
         -------
         float
             The natural logarithm of the price ratio (log return)
+
+        Raises
+        ------
+        ValueError
+            If the initial price is zero
+            If the price ratio is negative
 
         Examples
         --------
@@ -43,22 +57,31 @@ class FinancialReturns(metaclass=TypeChecker):
         """
         stock_d0 = float(stock_d0)
         stock_d1 = float(stock_d1)
+        if stock_d0 == 0:
+            raise ValueError("Initial price cannot be zero")
+        if not (stock_d1 / stock_d0) > 0:
+            raise ValueError("Price ratio must be greater than zero")
         return np.log(stock_d1 / stock_d0)
 
-    def discrete_return(self, stock_d0: float, stock_d1: float) -> float:
+    def discrete_return(self, stock_d0: Union[float, int], stock_d1: Union[float, int]) -> float:
         """Calculate the discrete (simple) return between two stock prices.
 
         Parameters
         ----------
-        stock_d0 : float or str
+        stock_d0 : Union[float, int]
             Initial stock price (will be converted to float)
-        stock_d1 : float or str
+        stock_d1 : Union[float, int]
             Subsequent stock price (will be converted to float)
 
         Returns
         -------
         float
             The simple return (d1/d0 - 1)
+
+        Raises
+        ------
+        ValueError
+            If the initial price is zero
 
         Examples
         --------
@@ -68,30 +91,32 @@ class FinancialReturns(metaclass=TypeChecker):
         """
         stock_d0 = float(stock_d0)
         stock_d1 = float(stock_d1)
+        if stock_d0 == 0:
+            raise ValueError("Initial price cannot be zero")
         return stock_d1 / stock_d0 - 1
 
     def calc_returns_from_prices(
         self,
-        list_prices: list[float],
-        type_return: Literal["ln_return", "stnd_return"]="ln_return"
-    ) -> list[float]:
+        array_prices: Union[list[float], NDArray[np.float64]],
+        type_return: Literal["ln_return", "stnd_return"] = "ln_return"
+    ) -> NDArray[np.float64]:
         """Calculate a series of returns from a list of prices.
 
         Parameters
         ----------
-        list_prices : list or array-like
+        array_prices : Union[list[float], NDArray[np.float64]]
             Sequence of stock prices
-        type_return : {'ln_return', 'stnd_return'}, optional
-            Type of return to calculate (default is 'ln_return')
+        type_return : Literal['ln_return', 'stnd_return']
+            Type of return to calculate, default 'ln_return'
 
         Returns
         -------
-        list
-            List of calculated returns
+        NDArray[np.float64]
+            Array of calculated returns
 
         Raises
         ------
-        Exception
+        ValueError
             If invalid return type is specified
 
         Examples
@@ -99,14 +124,16 @@ class FinancialReturns(metaclass=TypeChecker):
         >>> dd = FinancialReturns()
         >>> prices = [100, 110, 105, 120]
         >>> dd.calc_returns_from_prices(prices)
-        [0.09531017980432493, -0.04879016416943205, 0.13353139262452263]
+        array([ 0.09531018, -0.04879016,  0.13353139])
         """
+        if len(array_prices) < 2:
+            return np.array([], dtype=np.float64)
         if type_return == "ln_return":
-            return [self.continuous_return(list_prices[i - 1], list_prices[i])
-                    for i in range(1, len(list_prices))]
+            return np.array([self.continuous_return(array_prices[i - 1], array_prices[i])
+                    for i in range(1, len(array_prices))])
         elif type_return == "stnd_return":
-            return [self.discrete_return(list_prices[i - 1], list_prices[i])
-                    for i in range(1, len(list_prices))]
+            return np.array([self.discrete_return(array_prices[i - 1], array_prices[i])
+                    for i in range(1, len(array_prices))])
         else:
             raise ValueError(
                 "Type of return calculation must be either 'ln_return' or 'stnd_return'")
@@ -119,30 +146,30 @@ class FinancialReturns(metaclass=TypeChecker):
         col_lag_close: str = "lag_close",
         col_first_occurrence_ticker: str = "first_occ_ticker",
         col_stock_returns: str = "returns",
-        type_return: str = "ln_return"
+        type_return: Literal["ln_return", "stnd_return"] = "ln_return"
     ) -> pd.DataFrame:
         """Calculate returns from spot prices in a pandas DataFrame.
 
         Parameters
         ----------
-        df_ : pandas.DataFrame
+        df_ : pd.DataFrame
             DataFrame containing price data
         col_prices : str
             Column name containing price values
         col_dt_date : str
             Column name containing date values
-        col_lag_close : str, optional
-            Name for new column with lagged prices (default 'lag_close')
-        col_first_occurrence_ticker : str, optional
-            Name for new column marking first occurrence (default 'first_occ_ticker')
-        col_stock_returns : str, optional
-            Name for new column containing returns (default 'returns')
-        type_return : {'ln_return', 'stnd_return'}, optional
-            Type of return to calculate (default 'ln_return')
+        col_lag_close : str
+            Name for new column with lagged prices, default "lag_close"
+        col_first_occurrence_ticker : str
+            Name for new column marking first occurrence, default "first_occ_ticker"
+        col_stock_returns : str
+            Name for new column containing returns, default "returns"
+        type_return : Literal['ln_return', 'stnd_return']
+            Type of return to calculate, default 'ln_return'
 
         Returns
         -------
-        pandas.DataFrame
+        pd.DataFrame
             DataFrame with added return calculations
 
         Examples
@@ -179,31 +206,36 @@ class FinancialReturns(metaclass=TypeChecker):
 
     def short_fee_cost(
         self,
-        fee_short: float,
-        nper_cd: int,
-        short_price: float,
-        quantities: float,
-        year_cd: int = 360
+        fee_short: Union[float, int],
+        nper_cd: Union[float, int],
+        short_price: Union[float, int],
+        quantities: Union[float, int],
+        year_cd: Union[float, int] = 360
     ) -> float:
         """Calculate the cost of a short position including fees.
 
         Parameters
         ----------
-        fee_short : float
+        fee_short : Union[float, int]
             Short fee rate
-        nper_cd : int
-            Number of calendar days
-        short_price : float
-            Price at which asset was shorted
-        quantities : float
-            Number of shares/units shorted
-        year_cd : int, optional
-            Number of calendar days in year (default 360)
-
+        nper_cd : Union[float, int]
+            Number of periods per year
+        short_price : Union[float, int]
+            Price of short position
+        quantities : Union[float, int]
+            Quantity of short position
+        year_cd : Union[float, int]
+            Number of days per year, default 360
+        
         Returns
         -------
         float
             Total cost of the short position
+        
+        Raises
+        ------
+        ValueError
+            If any of the inputs are negative
 
         Examples
         --------
@@ -211,36 +243,44 @@ class FinancialReturns(metaclass=TypeChecker):
         >>> dd.short_fee_cost(0.05, 30, 100, 10)
         50.41666666666667
         """
-        return FinancialMath().compound_r(
-            fee_short, nper_cd, year_cd
-        ) * short_price * quantities
+        fee_short = float(fee_short)
+        nper_cd = float(nper_cd)
+        short_price = float(short_price)
+        quantities = float(quantities)
+        year_cd = float(year_cd)
+        
+        if any(x < 0 for x in [fee_short, nper_cd, short_price, quantities, year_cd]):
+            raise ValueError("All inputs must be non-negative")
+            
+        daily_fee = fee_short / year_cd
+        return daily_fee * nper_cd * short_price * quantities
 
     def pricing_strategy(
         self,
-        long_price: float,
-        short_price: float,
-        leverage: float,
-        operational_costs: float = 0,
+        long_price: Union[float, int],
+        short_price: Union[float, int],
+        leverage: Union[float, int],
+        operational_costs: Union[float, int] = 0,
         type_return: Literal["ln_return", "stnd_return"] = "ln_return"
-    ) -> dict[str, float]:
+    ) -> ResultPricingStrategy:
         """Calculate performance metrics for a trading strategy.
 
         Parameters
         ----------
-        long_price : float
+        long_price : Union[float, int]
             Price of long position
-        short_price : float
+        short_price : Union[float, int]
             Price of short position
-        leverage : float
-            Leverage multiplier
-        operational_costs : float, optional
-            Additional operational costs (default 0)
-        type_return : {'ln_return', 'stnd_return'}, optional
-            Type of return calculation (default 'ln_return')
+        leverage : Union[float, int]
+            Leverage
+        operational_costs : Union[float, int]
+            Operational costs, default 0
+        type_return : Literal['ln_return', 'stnd_return']
+            Type of return to calculate, default 'ln_return'
 
         Returns
         -------
-        dict
+        ResultPricingStrategy
             Dictionary containing:
             - mtm: Mark-to-market value
             - pct_return: Percentage return
@@ -255,22 +295,22 @@ class FinancialReturns(metaclass=TypeChecker):
         --------
         >>> dd = FinancialReturns()
         >>> dd.pricing_strategy(100, 110, 2)
-        {'mtm': 20.0, 'pct_retun': 0.09531017980432493, 'notional': 110.0}
+        {'mtm': 20.0, 'pct_return': 0.09531017980432493, 'notional': 110.0}
         """
+        long_price = float(long_price)
+        short_price = float(short_price)
+        leverage = float(leverage)
+        operational_costs = float(operational_costs)
+
         if type_return == "ln_return":
-            return {
-                "mtm": (float(short_price) - float(long_price)) * float(leverage) \
-                    - float(operational_costs),
-                "pct_return": self.continuous_return(float(short_price), float(long_price)),
-                "notional": float(short_price)
-            }
+            func_r = self.continuous_return
         elif type_return == "stnd_return":
-            return {
-                "mtm": (float(short_price) - float(long_price)) * float(leverage) \
-                    - float(operational_costs),
-                "pct_return": float(long_price) / float(short_price) - 1,
-                "notional": float(short_price)
-            }
+            func_r = self.discrete_return
         else:
             raise ValueError(
                 "Type of return calculation must be either 'ln_return' or 'stnd_return'")
+        return {
+            "mtm": (short_price - long_price) * leverage - operational_costs,
+            "pct_return": func_r(long_price, short_price),
+            "notional": short_price
+        }

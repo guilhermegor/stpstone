@@ -25,7 +25,10 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 ```python
 """Unit tests for BinaryComparator class.
 
-Tests the binary comparison functionality with various input scenarios.
+Tests the binary comparison functionality with various input scenarios including:
+- Initialization with valid inputs
+- Comparison operations
+- Edge cases and error conditions
 """
 
 import pytest
@@ -38,7 +41,13 @@ from stpstone.analytics.arithmetic.binary_comparator import BinaryComparator
 # --------------------------
 @pytest.fixture
 def comparator_a_less_than_b() -> BinaryComparator:
-    """Fixture for case where a < b."""
+    """Fixture providing BinaryComparator instance where a < b.
+
+    Returns
+    -------
+    BinaryComparator
+        Instance initialized with a=5 and b=10
+    """
     return BinaryComparator(a=5, b=10)
 
 
@@ -46,7 +55,13 @@ def comparator_a_less_than_b() -> BinaryComparator:
 # Tests
 # --------------------------
 def test_init_with_valid_inputs() -> None:
-    """Test initialization with valid integer inputs."""
+    """Test initialization with valid integer inputs.
+
+    Verifies that:
+    - The BinaryComparator can be initialized with integer values
+    - The values are correctly stored in the instance attributes
+    - The values maintain their original types and values
+    """
     comparator = BinaryComparator(a=5, b=10)
     assert comparator.a == 5
     assert comparator.b == 10
@@ -98,71 +113,196 @@ class NonLinearEquations:
 
         return curve_fit(func, xdata=array_x, ydata=array_y)
 
+"""Test cases for optimize_curve_fit method.
+
+This module contains unit tests for the curve fitting optimization functionality,
+verifying proper handling of various input scenarios and error conditions.
+"""
+
 import pytest
 import numpy as np
+from numpy.typing import NDArray
 from unittest.mock import patch
 from typing import Any, Callable
 
 
 class TestOptimizeCurveFit:
-    """Test cases for optimize_curve_fit method."""
+    """Test cases for optimize_curve_fit method.
+
+    This test class verifies the behavior of the curve fitting optimization
+    function with different input types and edge cases.
+    """
 
     @pytest.fixture
-    def sample_data(self) -> tuple[np.ndarray, np.ndarray]:
-        """Return sample data for curve fitting."""
-        x = np.array([1, 2, 3, 4, 5])
-        y = np.array([2.1, 3.9, 6.2, 8.1, 9.8])
+    def sample_data(self) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Fixture providing sample data for curve fitting.
+
+        Returns
+        -------
+        tuple[NDArray[np.float64], NDArray[np.float64]]
+            A tuple containing two numpy arrays:
+            - x: Input feature array [1, 2, 3, 4, 5]
+            - y: Target values array [2.1, 3.9, 6.2, 8.1, 9.8]
+        """
+        x = np.array([1, 2, 3, 4, 5], dtype=np.float64)
+        y = np.array([2.1, 3.9, 6.2, 8.1, 9.8], dtype=np.float64)
         return x, y
 
     @pytest.fixture
-    def linear_func(self) -> Callable[[np.ndarray, float, float], np.ndarray]:
-        """Return a simple linear function for testing."""
-        def func(x: np.ndarray, a: float, b: float) -> np.ndarray:
+    def linear_func(self) -> Callable[[NDArray[np.float64], float, float], NDArray[np.float64]]:
+        """Fixture providing a simple linear function for testing.
+
+        Returns
+        -------
+        Callable[[NDArray[np.float64], float, float], NDArray[np.float64]]
+            A linear function of form f(x) = a*x + b where:
+            - x: Input array
+            - a: Slope parameter
+            - b: Intercept parameter
+        """
+        def func(x: NDArray[np.float64], a: float, b: float) -> NDArray[np.float64]:
+            """Linear test function for curve fitting.
+
+            Parameters
+            ----------
+            x : NDArray[np.float64]
+                Input values
+            a : float
+                Slope parameter
+            b : float
+                Intercept parameter
+
+            Returns
+            -------
+            NDArray[np.float64]
+                Computed linear values
+            """
             return a * x + b
         return func
 
     def test_non_callable_func(
-        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray]
+        self, nonlinear_equations: Any, sample_data: tuple[NDArray[np.float64], NDArray[np.float64]]
     ) -> None:
-        """Test raises TypeError when func is not callable."""
+        """Test raises TypeError when func is not callable.
+
+        Parameters
+        ----------
+        nonlinear_equations : Any
+            Instance of the class containing optimize_curve_fit method
+        sample_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+            Tuple of (x, y) test data from fixture
+
+        Verifies
+        --------
+        That providing a non-callable function argument raises TypeError
+        with appropriate error message.
+        """
         x, y = sample_data
         with pytest.raises(TypeError) as excinfo:
             nonlinear_equations.optimize_curve_fit("not a function", x, y)
         assert "func must be callable" in str(excinfo.value)
 
     def test_non_array_input_x(
-        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+        self, nonlinear_equations: Any, 
+        sample_data: tuple[NDArray[np.float64], NDArray[np.float64]], 
+        linear_func: Callable
     ) -> None:
-        """Test raises TypeError when array_x is not numpy array."""
+        """Test raises TypeError when array_x is not numpy array.
+
+        Parameters
+        ----------
+        nonlinear_equations : Any
+            Instance of the class containing optimize_curve_fit method
+        sample_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+            Tuple of (x, y) test data from fixture
+        linear_func : Callable
+            Linear test function from fixture
+
+        Verifies
+        --------
+        That providing a non-array input for x raises TypeError
+        with appropriate error message.
+        """
         _, y = sample_data
         with pytest.raises(TypeError) as excinfo:
             nonlinear_equations.optimize_curve_fit(linear_func, [1, 2, 3], y)
         assert "Input arrays must be numpy arrays" in str(excinfo.value)
 
     def test_non_array_input_y(
-        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+        self, nonlinear_equations: Any, 
+        sample_data: tuple[NDArray[np.float64], NDArray[np.float64]], 
+        linear_func: Callable
     ) -> None:
-        """Test raises TypeError when array_y is not numpy array."""
+        """Test raises TypeError when array_y is not numpy array.
+
+        Parameters
+        ----------
+        nonlinear_equations : Any
+            Instance of the class containing optimize_curve_fit method
+        sample_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+            Tuple of (x, y) test data from fixture
+        linear_func : Callable
+            Linear test function from fixture
+
+        Verifies
+        --------
+        That providing a non-array input for y raises TypeError
+        with appropriate error message.
+        """
         x, _ = sample_data
         with pytest.raises(TypeError) as excinfo:
             nonlinear_equations.optimize_curve_fit(linear_func, x, [1, 2, 3])
         assert "Input arrays must be numpy arrays" in str(excinfo.value)
 
     def test_empty_array_x(
-        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+        self, nonlinear_equations: Any, 
+        sample_data: tuple[NDArray[np.float64], NDArray[np.float64]], 
+        linear_func: Callable
     ) -> None:
-        """Test raises ValueError when array_x is empty."""
+        """Test raises ValueError when array_x is empty.
+
+        Parameters
+        ----------
+        nonlinear_equations : Any
+            Instance of the class containing optimize_curve_fit method
+        sample_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+            Tuple of (x, y) test data from fixture
+        linear_func : Callable
+            Linear test function from fixture
+
+        Verifies
+        --------
+        That providing an empty x array raises ValueError
+        with appropriate error message.
+        """
         _, y = sample_data
         with pytest.raises(ValueError, match="Input arrays cannot be empty"):
-            nonlinear_equations.optimize_curve_fit(linear_func, np.array([]), y)
+            nonlinear_equations.optimize_curve_fit(linear_func, np.array([], dtype=np.float64), y)
 
     def test_empty_array_y(
-        self, nonlinear_equations: Any, sample_data: tuple[np.ndarray, np.ndarray], linear_func: Callable
+        self, nonlinear_equations: Any, 
+        sample_data: tuple[NDArray[np.float64], NDArray[np.float64]], 
+        linear_func: Callable
     ) -> None:
-        """Test raises ValueError when array_y is empty."""
+        """Test raises ValueError when array_y is empty.
+
+        Parameters
+        ----------
+        nonlinear_equations : Any
+            Instance of the class containing optimize_curve_fit method
+        sample_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+            Tuple of (x, y) test data from fixture
+        linear_func : Callable
+            Linear test function from fixture
+
+        Verifies
+        --------
+        That providing an empty y array raises ValueError
+        with appropriate error message.
+        """
         x, _ = sample_data
         with pytest.raises(ValueError, match="Input arrays cannot be empty"):
-            nonlinear_equations.optimize_curve_fit(linear_func, x, np.array([]))
+            nonlinear_equations.optimize_curve_fit(linear_func, x, np.array([], dtype=np.float64))
 ```
 
 ### Test Structure Template
@@ -227,13 +367,30 @@ def get_package_version() -> str:
 # --------------------------
 @pytest.fixture
 def expected_version() -> str:
-    """Fixture providing the expected package version."""
+    """Fixture providing the expected package version.
+
+    Returns
+    -------
+    str
+        The expected version string from pyproject.toml
+    """
     return get_package_version()
 
 
 @pytest.fixture
-def mock_version_not_found(mocker: MockerFixture) -> type[Any]:
-    """Mock importlib.metadata.version to raise PackageNotFoundError."""
+def mock_version_not_found(mocker: MockerFixture) -> object:
+    """Mock importlib.metadata.version to raise PackageNotFoundError.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    object
+        Mock object for importlib.metadata.version
+    """
     return mocker.patch(
         "importlib.metadata.version",
         side_effect=PackageNotFoundError
@@ -241,8 +398,21 @@ def mock_version_not_found(mocker: MockerFixture) -> type[Any]:
 
 
 @pytest.fixture
-def mock_metadata_success(mocker: MockerFixture, expected_version: str) -> type[Any]:
-    """Mock importlib.metadata.metadata to return valid version."""
+def mock_metadata_success(mocker: MockerFixture, expected_version: str) -> object:
+    """Mock importlib.metadata.metadata to return valid version.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    expected_version : str
+        The version string to return in the mock
+
+    Returns
+    -------
+    object
+        Mock object for importlib.metadata.metadata
+    """
     return mocker.patch(
         "importlib.metadata.metadata",
         return_value={"version": expected_version}
@@ -250,8 +420,19 @@ def mock_metadata_success(mocker: MockerFixture, expected_version: str) -> type[
 
 
 @pytest.fixture
-def mock_metadata_not_found(mocker: MockerFixture) -> type[Any]:
-    """Mock importlib.metadata.metadata to raise PackageNotFoundError."""
+def mock_metadata_not_found(mocker: MockerFixture) -> object:
+    """Mock importlib.metadata.metadata to raise PackageNotFoundError.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    object
+        Mock object for importlib.metadata.metadata
+    """
     return mocker.patch(
         "importlib.metadata.metadata",
         side_effect=PackageNotFoundError
@@ -259,8 +440,19 @@ def mock_metadata_not_found(mocker: MockerFixture) -> type[Any]:
 
 
 @pytest.fixture
-def mock_metadata_import_error(mocker: MockerFixture) -> type[Any]:
-    """Mock importlib.metadata.metadata to raise ImportError."""
+def mock_metadata_import_error(mocker: MockerFixture) -> object:
+    """Mock importlib.metadata.metadata to raise ImportError.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    object
+        Mock object for importlib.metadata.metadata
+    """
     return mocker.patch(
         "importlib.metadata.metadata",
         side_effect=ImportError
@@ -271,47 +463,104 @@ def mock_metadata_import_error(mocker: MockerFixture) -> type[Any]:
 # Tests
 # --------------------------
 def test_version_exists() -> None:
-    """Test that __version__ exists and is a string."""
+    """Test that __version__ exists and is a string.
+
+    Verifies that:
+    1. The package has a __version__ attribute
+    2. The attribute is a string
+    3. The string is not empty
+    """
     assert hasattr(stpstone, "__version__")
     assert isinstance(stpstone.__version__, str)
     assert len(stpstone.__version__) > 0
 
 
 def test_path_extension() -> None:
-    """Test that __path__ is properly extended."""
+    """Test that __path__ is properly extended.
+
+    Verifies that:
+    1. The package has a __path__ attribute
+    2. The attribute is a list
+    3. The list is not empty
+    """
     assert hasattr(stpstone, "__path__")
     assert isinstance(stpstone.__path__, list)
     assert len(stpstone.__path__) > 0
 
 
 def test_version_fallback_metadata(
-    mock_version_not_found: type[Any],
-    mock_metadata_success: type[Any],
+    mock_version_not_found: object,
+    mock_metadata_success: object,
     expected_version: str,
 ) -> None:
-    """Test version fallback to metadata when package not found."""
+    """Test version fallback to metadata when package not found.
+
+    Parameters
+    ----------
+    mock_version_not_found : object
+        Mock for importlib.metadata.version that raises PackageNotFoundError
+    mock_metadata_success : object
+        Mock for importlib.metadata.metadata that returns valid version
+    expected_version : str
+        The expected version string to compare against
+
+    Verifies that:
+    1. The package falls back to metadata when version is not found
+    2. The correct version is retrieved
+    3. The metadata mock was called exactly once
+    """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
     mock_metadata_success.assert_called_once_with("stpstone")
 
 
 def test_version_fallback_hardcoded(
-    mock_version_not_found: type[Any],
-    mock_metadata_not_found: type[Any],
+    mock_version_not_found: object,
+    mock_metadata_not_found: object,
     expected_version: str,
 ) -> None:
-    """Test fallback to pyproject.toml when metadata is unavailable."""
+    """Test fallback to pyproject.toml when metadata is unavailable.
+
+    Parameters
+    ----------
+    mock_version_not_found : object
+        Mock for importlib.metadata.version that raises PackageNotFoundError
+    mock_metadata_not_found : object
+        Mock for importlib.metadata.metadata that raises PackageNotFoundError
+    expected_version : str
+        The expected version string to compare against
+
+    Verifies that:
+    1. The package falls back to pyproject.toml when metadata is unavailable
+    2. The correct version is retrieved
+    3. The metadata mock was called exactly once
+    """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
     mock_metadata_not_found.assert_called_once_with("stpstone")
 
 
 def test_version_fallback_import_error(
-    mock_version_not_found: type[Any],
-    mock_metadata_import_error: type[Any],
+    mock_version_not_found: object,
+    mock_metadata_import_error: object,
     expected_version: str,
 ) -> None:
-    """Test fallback when importlib.metadata is not available."""
+    """Test fallback when importlib.metadata is not available.
+
+    Parameters
+    ----------
+    mock_version_not_found : object
+        Mock for importlib.metadata.version that raises PackageNotFoundError
+    mock_metadata_import_error : object
+        Mock for importlib.metadata.metadata that raises ImportError
+    expected_version : str
+        The expected version string to compare against
+
+    Verifies that:
+    1. The package falls back to pyproject.toml when importlib.metadata raises ImportError
+    2. The correct version is retrieved
+    3. The metadata mock was called exactly once
+    """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
     mock_metadata_import_error.assert_called_once_with("stpstone")
