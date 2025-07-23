@@ -41,7 +41,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test forward contract pricing with normal inputs."""
+        """Test forward contract pricing with normal inputs.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         result = forward_br.forward_contract_pricing(**valid_inputs)
         
         expected_mtm = (100.0 - 95.0 * 1.05) * 2.0 * 10
@@ -58,7 +66,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test with zero rate cost period."""
+        """Test with zero rate cost period.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['rate_cost_period'] = 0.0
         result = forward_br.forward_contract_pricing(**inputs)
@@ -71,7 +87,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test with single contract."""
+        """Test with single contract.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['number_contracts'] = 1
         result = forward_br.forward_contract_pricing(**inputs)
@@ -87,7 +111,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test with negative spot price."""
+        """Test with negative spot price.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['spot'] = -50.0
         result = forward_br.forward_contract_pricing(**inputs)
@@ -100,7 +132,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test with zero leverage."""
+        """Test with zero leverage.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['leverage'] = 0.0
         result = forward_br.forward_contract_pricing(**inputs)
@@ -114,7 +154,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test with very high leverage."""
+        """Test with very high leverage.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['leverage'] = 1000.0
         result = forward_br.forward_contract_pricing(**inputs)
@@ -127,7 +175,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test when spot price equals forward price."""
+        """Test when spot price equals forward price.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['spot'] = inputs['bid_forward_contract']
         result = forward_br.forward_contract_pricing(**inputs)
@@ -142,7 +198,13 @@ class TestForwardBR:
         self, 
         forward_br: type[Any]
     ) -> None:
-        """Test with missing required arguments."""
+        """Test with missing required arguments.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        """
         with pytest.raises(TypeError):
             forward_br.forward_contract_pricing()  # type: ignore
 
@@ -151,7 +213,15 @@ class TestForwardBR:
         forward_br: type[Any], 
         valid_inputs: dict[str, type[Any]]
     ) -> None:
-        """Test with invalid argument types."""
+        """Test with invalid argument types.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         # test string instead of float
         inputs = valid_inputs.copy()
         inputs['spot'] = "100"
@@ -165,7 +235,15 @@ class TestForwardBR:
             forward_br.forward_contract_pricing(**inputs)
 
     def test_none_values(self, forward_br: type[Any], valid_inputs: dict[str, type[Any]]) -> None:
-        """Test with None values."""
+        """Test with None values.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         inputs = valid_inputs.copy()
         inputs['leverage'] = None
         with pytest.raises(TypeError):
@@ -175,14 +253,28 @@ class TestForwardBR:
     # Type Validation
     # --------------------------
     def test_return_type(self, forward_br: type[Any], valid_inputs: dict[str, type[Any]]) -> None:
-        """Test that the return type is correct."""
+        """Test that the return type is correct.
+        
+        Parameters
+        ----------
+        forward_br : type[Any]
+            ForwardBR instance
+        valid_inputs : dict[str, type[Any]]
+            Valid input parameters
+        """
         result = forward_br.forward_contract_pricing(**valid_inputs)
         assert isinstance(result, dict)
         assert all(isinstance(key, str) for key in result)
         assert all(isinstance(value, float) for value in result.values())
 
     def test_integer_inputs(self, forward_br: ForwardBR) -> None:
-        """Test that integer inputs must be explicitly converted to float."""
+        """Test that integer inputs must be explicitly converted to float.
+        
+        Parameters
+        ----------
+        forward_br : ForwardBR
+            ForwardBR instance
+        """
         with pytest.raises(TypeError):
             forward_br.forward_contract_pricing(
                 spot=100,  # int - should fail

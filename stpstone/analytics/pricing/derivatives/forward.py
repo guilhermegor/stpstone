@@ -1,7 +1,16 @@
 """Forward Contract Pricing."""
 
+from typing import TypedDict
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
+
+class ResultForwardPricing(TypedDict):
+    """Forward contract pricing results."""
+    
+    mtm: float
+    pct_return: float
+    notional: float
 
 class ForwardBR(metaclass=TypeChecker):
     """Forward contract pricing."""
@@ -13,7 +22,7 @@ class ForwardBR(metaclass=TypeChecker):
         rate_cost_period: float, 
         leverage: float, 
         number_contracts: int
-    ) -> dict[str, float]:
+    ) -> ResultForwardPricing:
         """Forward contract pricing.
 
         Parameters
@@ -31,7 +40,7 @@ class ForwardBR(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        ResultForwardPricing
             Dictionary containing:
             - mtm: Mark-to-market value
             - pct_return: Percentage return
