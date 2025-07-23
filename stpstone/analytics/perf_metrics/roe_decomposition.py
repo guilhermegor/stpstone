@@ -29,17 +29,17 @@ class ROEDecomposition(metaclass=TypeChecker):
 
         Parameters
         ----------
-        float_ni: float
+        float_ni : float
             Net Income
-        float_net_revenue: float
+        float_net_revenue : float
             Net Revenue
-        float_avg_ta: float
+        float_avg_ta : float
             Average Total Assets
-        float_avg_te: float
+        float_avg_te : float
             Average Total Shareholder's Equity
-        float_ebt: float
+        float_ebt : float
             Earnings Before Taxes (EBT)
-        float_ebit: float
+        float_ebit : float
             Earnings Before Interest and Taxes (EBIT)
 
         Returns

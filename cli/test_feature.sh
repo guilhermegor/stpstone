@@ -107,6 +107,56 @@ def compare_types(hint: Any, doc: str) -> bool:
     
     return hint_str == doc
 
+def parse_numpy_parameters(docstring: str) -> Dict[str, str]:
+    """Parse NumPy-style Parameters section."""
+    params = {}
+    if not docstring:
+        return params
+    
+    lines = [line.rstrip() for line in docstring.splitlines()]
+    in_params = False
+    current_param = None
+    
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        
+        # Check for Parameters section
+        if re.match(r"^Parameters:?$", stripped, re.IGNORECASE):
+            in_params = True
+            continue
+        
+        if in_params:
+            # End if we hit another section
+            if re.match(r"^(Returns?|Yields?|Raises?|Notes?|Examples?|Attributes?|See Also|References?)(:)?$", stripped, re.IGNORECASE):
+                break
+            
+            # Skip separator lines (dashes)
+            if set(stripped) <= {"-", " "}:
+                continue
+            
+            # Empty line - continue to next parameter
+            if not stripped:
+                current_param = None
+                continue
+                
+            # Check if this is a parameter name line (not indented or starts with word : type pattern)
+            if not line.startswith(' ') and line.strip():
+                # Look for pattern "param_name : type"
+                if ' : ' in stripped:
+                    param_name, param_type = stripped.split(' : ', 1)
+                    params[param_name.strip()] = param_type.strip()
+                    current_param = None
+                else:
+                    # Just parameter name, type might be on next line
+                    current_param = stripped
+            elif current_param and line.startswith(' ') and ' : ' in stripped:
+                # This is the type line for the previous parameter
+                param_type = stripped.split(' : ', 1)[1].strip()
+                params[current_param] = param_type
+                current_param = None
+    
+    return params
+
 def parse_raises_section(docstring: str) -> Dict[str, str]:
     """Parse the Raises section of a docstring, supporting NumPy, Google, and reST styles."""
     raises = {}
@@ -215,25 +265,22 @@ def check_file(filepath: str) -> int:
                         print(f"⚠️  Return type documented but no type hint in {node.name}() at line {lineno}")
                         errors += 1
             
-            # check parameters
+            # check parameters using improved NumPy parser
+            doc_params = parse_numpy_parameters(docstring)
             for arg in node.args.args:
                 if arg.arg == 'self':
                     continue
                     
                 if arg.annotation:
                     hint = ast.unparse(arg.annotation)
-                    arg_doc_found = False
-                    for line in docstring.split('\n'):
-                        if arg.arg in line and ":" in line:
-                            doc_type = line.split(":")[1].strip()
-                            if not compare_types(hint, doc_type):
-                                print(f"❌ Parameter type mismatch in {node.name}({arg.arg}) at line {lineno}:")
-                                print(f"   Type hint: {hint}")
-                                print(f"   Docstring: {doc_type}")
-                                errors += 1
-                            arg_doc_found = True
-                            break
-                    if not arg_doc_found:
+                    if arg.arg in doc_params:
+                        doc_type = doc_params[arg.arg]
+                        if not compare_types(hint, doc_type):
+                            print(f"❌ Parameter type mismatch in {node.name}({arg.arg}) at line {lineno}:")
+                            print(f"   Type hint: {hint}")
+                            print(f"   Docstring: {doc_type}")
+                            errors += 1
+                    else:
                         print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno}")
                         errors += 1
             

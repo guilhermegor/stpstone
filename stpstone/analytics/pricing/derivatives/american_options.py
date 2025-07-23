@@ -21,7 +21,51 @@ class InitialSettings(metaclass=TypeChecker):
         d: float,
         opt_style: Literal["call", "put"] = "call"
     ) -> tuple[float, float, float, float, int, float, float]:
-        """Set parameters for the pricing model."""
+        """Set parameters for the pricing model.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        n : int
+            Number of time steps.
+        u : float
+            Up-factor in binomial models.
+        d : float
+            Down-factor in binomial models.
+        opt_style : Literal['call', 'put']
+            Option style ('call' or 'put')
+        
+        Returns
+        -------
+        Tuple[float, float, float, float, int, float, float]
+            A tuple containing:
+            - s_val: Current stock price
+            - k_val: Strike price of the option
+            - r_val: Risk-free interest rate
+            - t_val: Time to maturity in years
+            - n_val: Number of time steps
+            - u_val: Up-factor in binomial models
+            - d_val: Down-factor in binomial models
+        
+        Raises
+        ------
+        ValueError
+            If any of the parameters are invalid.
+            If stock price is negative.
+            If strike price is negative.
+            If time to maturity is negative.
+            If number of steps is negative.
+            If up factor is not positive.
+            If down factor is not positive.
+            If up factor is not greater than down factor.
+        """
         try:
             # First validate the option style
             if opt_style not in ["call", "put"]:
@@ -36,6 +80,22 @@ class InitialSettings(metaclass=TypeChecker):
             u_val = float(u)
             d_val = float(d)
             
+            # validate parameter ranges
+            if s_val < 0:
+                raise ValueError("Stock price must be non-negative")
+            if k_val < 0:
+                raise ValueError("Strike price must be non-negative")
+            if t_val < 0:
+                raise ValueError("Time to maturity must be non-negative")
+            if n_val < 0:
+                raise ValueError("Number of steps must be non-negative")
+            if u_val <= 0:
+                raise ValueError("Up factor must be positive")
+            if d_val <= 0:
+                raise ValueError("Down factor must be positive")
+            if u_val <= d_val:
+                raise ValueError("Up factor must be greater than down factor")
+
             # validate parameter ranges
             if any(x < 0 for x in (s_val, k_val, t_val, n_val, u_val, d_val)):
                 raise ValueError(
@@ -85,7 +145,7 @@ class PricingModels(InitialSettings):
             Up-factor in binomial models.
         d : float
             Down-factor in binomial models.
-        opt_style : str
+        opt_style : Literal['call', 'put']
             Option style, either 'call' or 'put'.
         h_upper : float, optional
             Upper barrier.
@@ -96,6 +156,11 @@ class PricingModels(InitialSettings):
         -------
         float
             Option value.
+
+        Raises
+        ------
+        ValueError
+            If any of the parameters are invalid.
 
         References
         ----------

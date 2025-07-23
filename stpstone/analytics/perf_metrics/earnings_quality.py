@@ -131,7 +131,7 @@ class EarningsManipulation(metaclass=TypeChecker):
         
         Parameters
         ----------
-        params: dict
+        params : dict
             Dictionary of parameter names and values from locals()
             
         Raises
