@@ -3,8 +3,6 @@
 Tests cover differentiation, integration, simplification, and gradient operations.
 """
 
-from typing import Any
-
 import numpy as np
 from numpy.typing import NDArray
 import pytest
@@ -21,33 +19,73 @@ from stpstone.analytics.quant.linear_transformations import LinearAlgebra
 # --------------------------
 @pytest.fixture
 def calc() -> Calculus:
-    """Fixture providing a Calculus instance."""
+    """Fixture providing a Calculus instance.
+    
+    Returns
+    -------
+    Calculus
+        A Calculus instance.
+    """
     return Calculus()
 
 
 @pytest.fixture
 def basic_symbols() -> tuple[Symbol, Symbol, Symbol]:
-    """Fixture providing basic symbols (x, y, z)."""
+    """Fixture providing basic symbols (x, y, z).
+    
+    Returns
+    -------
+    tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    """
     return sym.symbols("x y z")
 
 
 @pytest.fixture
 def basic_expression(basic_symbols: tuple[Symbol, Symbol, Symbol]) -> Expr:
-    """Fixture providing a basic expression (x*y + x**2 + sin(2*y))."""
+    """Fixture providing a basic expression (x*y + x**2 + sin(2*y)).
+    
+    Parameters
+    ----------
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+
+    Returns
+    -------
+    Expr
+        A basic expression.
+    """
     x, y, _ = basic_symbols
     return x * y + x**2 + sym.sin(2 * y)
 
 
 @pytest.fixture
 def rational_expression(basic_symbols: tuple[Symbol, Symbol, Symbol]) -> Expr:
-    """Fixture providing a rational expression ((x**2 + 2*x + 1)/(x + 1))."""
+    """Fixture providing a rational expression ((x**2 + 2*x + 1)/(x + 1)).
+
+    Parameters
+    ----------
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    
+    Returns
+    -------
+    Expr
+        A rational expression.
+    """
     x, _, _ = basic_symbols
     return (x**2 + 2 * x + 1) / (x + 1)
 
 
 @pytest.fixture
 def numpy_data() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Fixture providing numpy arrays for numerical integration tests."""
+    """Fixture providing numpy arrays for numerical integration tests.
+    
+    Returns
+    -------
+    tuple[NDArray[np.float64], NDArray[np.float64]]
+        A tuple of numpy arrays.
+    """
     x = np.linspace(0, 2, 100)
     y = x**2
     return x, y
@@ -57,7 +95,13 @@ def numpy_data() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
 # Test Variables
 # --------------------------
 def test_variables_creation(calc: Calculus) -> None:
-    """Test creation of symbols from space-separated string."""
+    """Test creation of symbols from space-separated string.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     symbols = calc.variables("x y z")
     assert len(symbols) == 3
     assert all(isinstance(s, Symbol) for s in symbols)
@@ -67,7 +111,13 @@ def test_variables_creation(calc: Calculus) -> None:
 
 
 def test_variables_single_symbol(calc: Calculus) -> None:
-    """Test creation of single symbol."""
+    """Test creation of single symbol.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     symbols = calc.variables("x")
     assert len(symbols) == 1
     assert isinstance(symbols[0], Symbol)
@@ -75,7 +125,13 @@ def test_variables_single_symbol(calc: Calculus) -> None:
 
 
 def test_variables_empty_string(calc: Calculus) -> None:
-    """Test behavior with empty input string."""
+    """Test behavior with empty input string.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     with pytest.raises(ValueError):
         calc.variables("")
 
@@ -86,7 +142,17 @@ def test_variables_empty_string(calc: Calculus) -> None:
 def test_differentiation_basic(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol], basic_expression: Expr
 ) -> None:
-    """Test basic differentiation."""
+    """Test basic differentiation.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    basic_expression : Expr
+        A basic expression.
+    """
     x, y, z = basic_symbols
     df_dx = calc.differentiation(basic_expression, x)
     assert str(df_dx) == "2*x + y"
@@ -96,7 +162,17 @@ def test_differentiation_basic(
 def test_differentiation_higher_order(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol], basic_expression: Expr
 ) -> None:
-    """Test higher order differentiation."""
+    """Test higher order differentiation.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    basic_expression : Expr
+        A basic expression.
+    """
     x, y, _ = basic_symbols
     df_dx2 = calc.differentiation(basic_expression, x, 2)
     assert str(df_dx2) == "2"
@@ -106,7 +182,17 @@ def test_differentiation_higher_order(
 def test_differentiation_mixed_variables(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol], basic_expression: Expr
 ) -> None:
-    """Test differentiation with respect to different variables."""
+    """Test differentiation with respect to different variables.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    basic_expression : Expr
+        A basic expression.
+    """
     _, y, _ = basic_symbols
     df_dy = calc.differentiation(basic_expression, y)
     assert str(df_dy) == "x + 2*cos(2*y)"
@@ -116,7 +202,15 @@ def test_differentiation_mixed_variables(
 def test_differentiation_invalid_variable(
     calc: Calculus, basic_expression: Expr
 ) -> None:
-    """Test differentiation with invalid variable."""
+    """Test differentiation with invalid variable.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_expression : Expr
+        A basic expression.
+    """
     w = sym.Symbol("w")
     with pytest.raises(TypeError):
         calc.differentiation(basic_expression, w)
@@ -128,7 +222,17 @@ def test_differentiation_invalid_variable(
 def test_integration_indefinite(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol], basic_expression: Expr
 ) -> None:
-    """Test indefinite integration."""
+    """Test indefinite integration.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    basic_expression : Expr
+        A basic expression.
+    """
     x, y, _ = basic_symbols
     integral = calc.integration(basic_expression, x)
     assert str(integral) == "x**3/3 + x**2*y/2 + x*sin(2*y)"
@@ -138,7 +242,17 @@ def test_integration_indefinite(
 def test_integration_definite(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol], basic_expression: Expr
 ) -> None:
-    """Test definite integration."""
+    """Test definite integration.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    basic_expression : Expr
+        A basic expression.
+    """
     x, y, _ = basic_symbols
     integral = calc.integration(basic_expression, x, 0.0, 2.0)
     assert str(integral) in ["2*y + 2*sin(2*y) + 8/3", 
@@ -149,7 +263,15 @@ def test_integration_definite(
 def test_integration_definite_numeric(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol]
 ) -> None:
-    """Test definite integration with numeric result."""
+    """Test definite integration with numeric result.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    """
     x, _, _ = basic_symbols
     integral = calc.integration(x**2, x, 0.0, 2.0)
     assert abs(float(integral) - 8 / 3) < 1e-9
@@ -158,7 +280,17 @@ def test_integration_definite_numeric(
 def test_integration_invalid_bounds(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol], basic_expression: Expr
 ) -> None:
-    """Test integration with invalid bounds."""
+    """Test integration with invalid bounds.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    basic_expression : Expr
+        A basic expression.
+    """
     x, _, _ = basic_symbols
     with pytest.raises(TypeError):
         calc.integration(basic_expression, x, "a", "b")  # type: ignore
@@ -170,7 +302,15 @@ def test_integration_invalid_bounds(
 def test_trapz_integration(
     calc: Calculus, numpy_data: tuple[NDArray[np.float64], NDArray[np.float64]]
 ) -> None:
-    """Test trapezoidal integration with numpy arrays."""
+    """Test trapezoidal integration with numpy arrays.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    numpy_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+        A tuple of numpy arrays.
+    """
     x, y = numpy_data
     integral = calc.trapz_integration(y, x)
     assert abs(integral - 8 / 3) < 0.01
@@ -179,7 +319,15 @@ def test_trapz_integration(
 def test_cumtrapz_integration(
     calc: Calculus, numpy_data: tuple[NDArray[np.float64], NDArray[np.float64]]
 ) -> None:
-    """Test cumulative trapezoidal integration."""
+    """Test cumulative trapezoidal integration.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    numpy_data : tuple[NDArray[np.float64], NDArray[np.float64]]
+        A tuple of numpy arrays.
+    """
     x, y = numpy_data
     cum_integral = calc.cumtrapz_integration(y, x)
     assert len(cum_integral) == len(x) - 1
@@ -187,7 +335,13 @@ def test_cumtrapz_integration(
 
 
 def test_numerical_integration_mismatched_lengths(calc: Calculus) -> None:
-    """Test numerical integration with mismatched array lengths."""
+    """Test numerical integration with mismatched array lengths.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     x = np.linspace(0, 1, 10)
     y = np.linspace(0, 1, 11)
     with pytest.raises(ValueError):
@@ -200,7 +354,17 @@ def test_numerical_integration_mismatched_lengths(calc: Calculus) -> None:
 def test_simplify_rational(
     calc: Calculus, rational_expression: Expr, basic_symbols: tuple[Symbol, Symbol, Symbol]
 ) -> None:
-    """Test simplification of rational expression."""
+    """Test simplification of rational expression.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    rational_expression : Expr
+        A rational expression.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    """
     simplified = calc.simplify(rational_expression)
     x, _, _ = basic_symbols
     assert str(simplified) == "x + 1"
@@ -210,7 +374,15 @@ def test_simplify_rational(
 def test_simplify_trig(
     calc: Calculus, basic_symbols: tuple[Symbol, Symbol, Symbol]
 ) -> None:
-    """Test simplification of trigonometric expression."""
+    """Test simplification of trigonometric expression.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    basic_symbols : tuple[Symbol, Symbol, Symbol]
+        A tuple of basic symbols.
+    """
     x, _, _ = basic_symbols
     expr = sym.sin(x)**2 + sym.cos(x)**2
     simplified = calc.simplify(expr)
@@ -222,24 +394,50 @@ def test_simplify_trig(
 # Test Gradient Operations
 # --------------------------
 def test_sum_of_squares_gradient(calc: Calculus) -> None:
-    """Test gradient of sum of squares function."""
+    """Test gradient of sum of squares function.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     gradient = calc.sum_of_squares_gradient([1.0, 2.0, 3.0])
     assert np.array_equal(gradient, np.array([2.0, 4.0, 6.0]))
 
 
 def test_gradient_step(calc: Calculus) -> None:
-    """Test gradient step calculation."""
+    """Test gradient step calculation.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     new_values = calc.gradient_step([1.0, 2.0, 3.0], [0.1, -0.2, 0.3], 0.1)
     assert np.allclose(new_values, np.array([1.01, 1.98, 3.03]))
 
 
 def test_gradient_step_mismatched_lengths(calc: Calculus) -> None:
-    """Test gradient step with mismatched array lengths."""
+    """Test gradient step with mismatched array lengths.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     with pytest.raises(ValueError):
         calc.gradient_step([1.0, 2.0], [0.1, -0.2, 0.3], 0.1)
 
-def test_least_gradient_vector(calc: Calculus, mocker: type[Any]) -> None:
-    """Test least gradient vector convergence."""
+def test_least_gradient_vector(calc: Calculus, mocker: object) -> None:
+    """Test least gradient vector convergence.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    mocker : object
+        A mocker instance.
+    """
     # Mock random.uniform to return fixed values
     mocker.patch("random.uniform", side_effect=[1.0, 2.0, 3.0])
     
@@ -254,7 +452,13 @@ def test_least_gradient_vector(calc: Calculus, mocker: type[Any]) -> None:
 # Test Type Validation
 # --------------------------
 def test_invalid_input_types(calc: Calculus) -> None:
-    """Test type checking for invalid inputs."""
+    """Test type checking for invalid inputs.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     with pytest.raises(TypeError):
         calc.differentiation("not an expression", "not a symbol")  # type: ignore
     
@@ -272,25 +476,52 @@ def test_invalid_input_types(calc: Calculus) -> None:
 # Test Edge Cases
 # --------------------------
 def test_empty_arrays_numerical_integration(calc: Calculus) -> None:
-    """Test numerical integration with empty arrays."""
+    """Test numerical integration with empty arrays.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     with pytest.raises(ValueError):
         calc.trapz_integration(np.array([]), np.array([]))
 
 
 def test_single_element_arrays(calc: Calculus) -> None:
-    """Test numerical integration with single-element arrays."""
+    """Test numerical integration with single-element arrays.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     result = calc.trapz_integration(np.array([1.0]), np.array([0.0]))
     assert result == 0.0
 
 
 def test_zero_step_size(calc: Calculus) -> None:
-    """Test gradient step with zero step size."""
+    """Test gradient step with zero step size.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    """
     result = calc.gradient_step([1.0, 2.0, 3.0], [0.1, -0.2, 0.3], 0.0)
     assert np.array_equal(result, np.array([1.0, 2.0, 3.0]))
 
 
-def test_large_iterations_least_gradient(calc: Calculus, mocker: type[Any]) -> None:
-    """Test least gradient vector with large iteration count."""
+def test_large_iterations_least_gradient(calc: Calculus, mocker: object) -> None:
+    """Test least gradient vector with large iteration count.
+    
+    Parameters
+    ----------
+    calc : Calculus
+        A Calculus instance.
+    mocker : object
+        A mocker instance.
+    """
+    # Mock random.uniform to return fixed values
     mocker.patch("random.uniform", return_value=10.0)
     mocker.patch("builtins.print")
     

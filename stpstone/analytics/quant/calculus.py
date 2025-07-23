@@ -18,6 +18,7 @@ class Calculus(metaclass=TypeChecker):
     """A class providing various calculus operations including differentiation and integration."""
 
     def __init__(self) -> None:
+        """Initialize the Calculus class."""
         self.linear_algebra = LinearAlgebra()
 
     def variables(self, str_symbols: str) -> tuple[Symbol, ...]:
@@ -64,6 +65,11 @@ class Calculus(metaclass=TypeChecker):
         Expr
             The nth derivative of the function.
 
+        Raises
+        ------
+        TypeError
+            If the variable is not found in the expression.
+
         Examples
         --------
         >>> x, y, z = Calculus().variables('x y z')
@@ -91,9 +97,9 @@ class Calculus(metaclass=TypeChecker):
             The function to integrate.
         variable_ : Symbol
             The variable with respect to which to integrate.
-        lower_bound : Optional[float], optional
+        lower_bound : Optional[float]
             The lower bound of the integral (default is None).
-        upper_bound : Optional[float], optional
+        upper_bound : Optional[float]
             The upper bound of the integral (default is None).
 
         Returns
@@ -137,15 +143,23 @@ class Calculus(metaclass=TypeChecker):
 
         Parameters
         ----------
-        f : array_like
+        f : npt.ArrayLike
             Function values to integrate.
-        variable_ : array_like
+        variable_ : npt.ArrayLike
             The variable values corresponding to f values.
 
         Returns
         -------
         float
             The integral approximation.
+
+        Raises
+        ------
+        TypeError
+            If the input arrays are not array-like numerical values.
+        ValueError
+            If cannot integrate empty arrays
+            If input arrays do not have same length
 
         Examples
         --------
@@ -176,15 +190,20 @@ class Calculus(metaclass=TypeChecker):
 
         Parameters
         ----------
-        f : array_like
+        f : npt.ArrayLike
             Function values to integrate.
-        variable_ : array_like
+        variable_ : npt.ArrayLike
             The variable values corresponding to f values.
 
         Returns
         -------
-        ndarray
+        npt.NDArray[np.float64]
             The cumulative integral values.
+
+        Raises
+        ------
+        ValueError
+            If cannot integrate empty arrays
 
         Examples
         --------
@@ -229,9 +248,9 @@ class Calculus(metaclass=TypeChecker):
         
         Parameters
         ----------
-        array_x : npt.NDArray[np.float64]
+        array_x : Union[list[float], npt.NDArray[np.float64]]
             Current independent variable values
-        gradient : npt.NDArray[np.float64]
+        gradient : Union[list[float], npt.NDArray[np.float64]]
             Gradient vector
         step_size : float
             Size of the step to take
@@ -240,6 +259,11 @@ class Calculus(metaclass=TypeChecker):
         -------
         npt.NDArray[np.float64]
             New independent variable values after the step
+        
+        Raises
+        ------
+        ValueError
+            If input arrays do not have same length
         """
         array_x = np.asarray(array_x, dtype=np.float64)
         gradient = np.asarray(gradient, dtype=np.float64)
@@ -289,6 +313,11 @@ class Calculus(metaclass=TypeChecker):
         -------
         list[float]
             The vector that minimizes the sum of squares.
+
+        Raises
+        ------
+        ValueError
+            If the algorithm fails to converge within the specified tolerance.
 
         Examples
         --------
