@@ -42,7 +42,13 @@ class TestDebenturesPricer:
     # Test Initialization
     # --------------------------
     def test_init_default_values(self, default_debenture: DebenturesPricer) -> None:
-        """Test initialization with default values."""
+        """Test initialization with default values.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            An instance of DebenturesPricer with default values.
+        """
         assert default_debenture.float_fv == 1000.0
         assert default_debenture.float_coupon_r == 0.1
         assert default_debenture.int_coupon_freq == 2
@@ -61,7 +67,23 @@ class TestDebenturesPricer:
     def test_init_custom_values(
         self, fv: float, coupon_r: float, freq: int, maturity: int, yield_: float, tax: float
     ) -> None:
-        """Test initialization with custom values."""
+        """Test initialization with custom values.
+        
+        Parameters
+        ----------
+        fv : float
+            The face value of the debenture.
+        coupon_r : float
+            The coupon rate of the debenture.
+        freq : int
+            The coupon frequency of the debenture.
+        maturity : int
+            The maturity years of the debenture.
+        yield_ : float
+            The yield of the debenture.
+        tax : float
+            The tax rate on the debenture's coupons.
+        """
         deb = DebenturesPricer(fv, coupon_r, freq, maturity, yield_, tax)
         assert deb.float_fv == fv
         assert deb.float_coupon_r == coupon_r
@@ -75,7 +97,13 @@ class TestDebenturesPricer:
         [0.0, -100.0],
     )
     def test_init_invalid_face_value(self, invalid_fv: float) -> None:
-        """Test initialization with invalid face values."""
+        """Test initialization with invalid face values.
+        
+        Parameters
+        ----------
+        invalid_fv : float
+            An invalid face value.
+        """
         with pytest.raises(ValueError, match="Face value must be positive"):
             DebenturesPricer(float_fv=invalid_fv)
 
@@ -84,7 +112,13 @@ class TestDebenturesPricer:
         [-0.1, 1.1],
     )
     def test_init_invalid_coupon_rate(self, invalid_coupon: float) -> None:
-        """Test initialization with invalid coupon rates."""
+        """Test initialization with invalid coupon rates.
+        
+        Parameters
+        ----------
+        invalid_coupon : float
+            An invalid coupon rate.
+        """
         with pytest.raises(ValueError, match="Coupon rate must be between 0 and 1"):
             DebenturesPricer(float_coupon_r=invalid_coupon)
 
@@ -93,7 +127,13 @@ class TestDebenturesPricer:
         [0, -1],
     )
     def test_init_invalid_coupon_freq(self, invalid_freq: int) -> None:
-        """Test initialization with invalid coupon frequencies."""
+        """Test initialization with invalid coupon frequencies.
+        
+        Parameters
+        ----------
+        invalid_freq : int
+            An invalid coupon frequency.
+        """
         with pytest.raises(ValueError, match="Coupon frequency must be positive"):
             DebenturesPricer(int_coupon_freq=invalid_freq)
 
@@ -118,7 +158,25 @@ class TestDebenturesPricer:
         yield_: float,
         tax: float, expected: float
     ) -> None:
-        """Test price calculation with normal parameters."""
+        """Test price calculation with normal parameters.
+        
+        Parameters
+        ----------
+        fv : float
+            The face value of the debenture.
+        coupon_r : float
+            The coupon rate of the debenture.
+        freq : int
+            The coupon frequency of the debenture.
+        maturity : int
+            The maturity years of the debenture.
+        yield_ : float
+            The yield of the debenture.
+        tax : float
+            The tax rate on the debenture's coupons.
+        expected : float
+            The expected calculated price.
+        """
         deb = DebenturesPricer(fv, coupon_r, freq, maturity, yield_, tax)
         assert deb.calculate_price() == expected
 
@@ -126,7 +184,13 @@ class TestDebenturesPricer:
         self,
         default_debenture: DebenturesPricer
     ) -> None:
-        """Test price calculation with zero coupon rate."""
+        """Test price calculation with zero coupon rate.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        """
         default_debenture.float_coupon_r = 0.0
         expected = 558.3947769
         assert pytest.approx(default_debenture.calculate_price(), 2) \
@@ -150,11 +214,27 @@ class TestDebenturesPricer:
         market_price: Optional[float],
         expected: float
     ) -> None:
-        """Test current yield calculation."""
+        """Test current yield calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        market_price : Optional[float]
+            The market price of the debenture.
+        expected : float
+            The expected current yield.
+        """
         assert default_debenture.current_yield(market_price) == expected
 
     def test_current_yield_tax_free(self, tax_free_debenture: DebenturesPricer) -> None:
-        """Test current yield without tax."""
+        """Test current yield without tax.
+        
+        Parameters
+        ----------
+        tax_free_debenture : DebenturesPricer
+            A debenture with no tax.
+        """
         assert tax_free_debenture.current_yield(900.0) == pytest.approx(0.1111, abs=1e-4)
 
     @pytest.mark.parametrize(
@@ -166,7 +246,15 @@ class TestDebenturesPricer:
         default_debenture: DebenturesPricer,
         invalid_price: float
     ) -> None:
-        """Test current yield with invalid prices."""
+        """Test current yield with invalid prices.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        invalid_price : float
+            An invalid price.
+        """
         with pytest.raises(ValueError, match="Price must be positive"):
             default_debenture.current_yield(invalid_price)
 
@@ -185,14 +273,30 @@ class TestDebenturesPricer:
     def test_capital_gain_yield(
         self, default_debenture: DebenturesPricer, market_price: Optional[float], expected: float
     ) -> None:
-        """Test capital gain yield calculation."""
+        """Test capital gain yield calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        market_price : Optional[float]
+            The market price of the debenture.
+        expected : float
+            The expected capital gain yield.
+        """
         assert default_debenture.capital_gain_yield(market_price) == expected
 
     # --------------------------
     # Test total_return()
     # --------------------------
     def test_total_return(self, default_debenture: DebenturesPricer) -> None:
-        """Test total return calculation."""
+        """Test total return calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        """
         current = default_debenture.current_yield()
         capital = default_debenture.capital_gain_yield()
         assert default_debenture.total_return() \
@@ -239,13 +343,35 @@ class TestDebenturesPricer:
         convention: str,
         expected: float,
     ) -> None:
-        """Test accrued interest calculation with normal cases."""
+        """Test accrued interest calculation with normal cases.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        settlement : date
+            The settlement date for the calculation.
+        last_coupon : date
+            The date of the last coupon payment.
+        next_coupon : date
+            The date of the next coupon payment.
+        convention : str
+            The day count convention for the calculation.
+        expected : float
+            The expected accrued interest.
+        """
         result = default_debenture.accrued_interest(
             settlement, last_coupon, next_coupon, convention)
         assert result == expected
 
     def test_accrued_interest_tax_free(self, tax_free_debenture: DebenturesPricer) -> None:
-        """Test accrued interest without tax."""
+        """Test accrued interest without tax.
+        
+        Parameters
+        ----------
+        tax_free_debenture : DebenturesPricer
+            A debenture with tax-free parameters.
+        """
         settlement = date(2023, 6, 10)
         last_coupon = date(2023, 3, 15)
         next_coupon = date(2023, 9, 15)
@@ -253,7 +379,13 @@ class TestDebenturesPricer:
         assert result == pytest.approx(23.6413043, abs=1e-2)
 
     def test_accrued_interest_auto_dates(self, default_debenture: DebenturesPricer) -> None:
-        """Test accrued interest with automatic date calculation."""
+        """Test accrued interest with automatic date calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        """
         # This test depends on the current date, so we need to mock or use fixed dates
         settlement = date(2023, 6, 10)
         result = default_debenture.accrued_interest(settlement)
@@ -275,7 +407,19 @@ class TestDebenturesPricer:
         last_coupon: date,
         next_coupon: date,
     ) -> None:
-        """Test accrued interest with invalid date ranges."""
+        """Test accrued interest with invalid date ranges.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        invalid_settlement : date
+            An invalid settlement date.
+        last_coupon : date
+            The date of the last coupon payment.
+        next_coupon : date
+            The date of the next coupon payment.
+        """
         if last_coupon > next_coupon:
             expected_msg = "Last coupon date must be before next coupon date"
         else:
@@ -288,7 +432,13 @@ class TestDebenturesPricer:
         self,
         default_debenture: DebenturesPricer
     ) -> None:
-        """Test accrued interest with invalid day count convention."""
+        """Test accrued interest with invalid day count convention.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        """
         with pytest.raises(ValueError, match="Unsupported day count convention"):
             default_debenture.accrued_interest(
                 date(2023, 6, 10),
@@ -301,7 +451,13 @@ class TestDebenturesPricer:
     # Test dirty_price()
     # --------------------------
     def test_dirty_price(self, default_debenture: DebenturesPricer) -> None:
-        """Test dirty price calculation."""
+        """Test dirty price calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        """
         clean_price = default_debenture.calculate_price()
         settlement = date(2023, 6, 10)
         last_coupon = date(2023, 3, 15)
@@ -331,7 +487,21 @@ class TestDebenturesPricer:
         period: float,
         expected: float,
     ) -> None:
-        """Test holding period return calculation."""
+        """Test holding period return calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        purchase : float
+            The purchase price of the bond.
+        sale : float
+            The sale price of the bond.
+        period : float
+            The holding period in years.
+        expected : float
+            The expected holding period return.
+        """
         result = default_debenture.holding_period_return(purchase, sale, period)
         assert result == expected
 
@@ -342,7 +512,15 @@ class TestDebenturesPricer:
     def test_holding_period_return_invalid_purchase(
         self, default_debenture: DebenturesPricer, invalid_purchase: float
     ) -> None:
-        """Test holding period return with invalid purchase price."""
+        """Test holding period return with invalid purchase price.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        invalid_purchase : float
+            An invalid purchase price.
+        """
         with pytest.raises(ValueError, match="Purchase price must be positive"):
             default_debenture.holding_period_return(invalid_purchase, 1000.0, 1.0)
 
@@ -353,7 +531,15 @@ class TestDebenturesPricer:
     def test_holding_period_return_invalid_period(
         self, default_debenture: DebenturesPricer, invalid_period: float
     ) -> None:
-        """Test holding period return with invalid holding period."""
+        """Test holding period return with invalid holding period.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        invalid_period : float
+            An invalid holding period.
+        """
         with pytest.raises(ValueError, match="Holding period must be positive"):
             default_debenture.holding_period_return(900.0, 1000.0, invalid_period)
 
@@ -361,7 +547,13 @@ class TestDebenturesPricer:
     # Test credit_spread()
     # --------------------------
     def test_credit_spread(self, default_debenture: DebenturesPricer) -> None:
-        """Test credit spread calculation."""
+        """Test credit spread calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        """
         risk_free = 0.05
         assert default_debenture.credit_spread(risk_free) == pytest.approx(
             default_debenture.float_yield - risk_free, abs=1e-4
@@ -385,7 +577,19 @@ class TestDebenturesPricer:
         call_date: float,
         expected: float
     ) -> None:
-        """Test early redemption value calculation."""
+        """Test early redemption value calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        call_price : float
+            The call price.
+        call_date : float
+            The call date in years.
+        expected : float
+            The expected early redemption value.
+        """
         result = default_debenture.early_redemption_value(call_price, call_date)
         assert result == expected
 
@@ -396,7 +600,15 @@ class TestDebenturesPricer:
     def test_early_redemption_invalid_dates(
         self, default_debenture: DebenturesPricer, invalid_call_date: float
     ) -> None:
-        """Test early redemption with invalid call dates."""
+        """Test early redemption with invalid call dates.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        invalid_call_date : float
+            An invalid call date.
+        """
         with pytest.raises(ValueError):
             default_debenture.early_redemption_value(1000.0, invalid_call_date)
 
@@ -418,7 +630,21 @@ class TestDebenturesPricer:
         current_price: float,
         expected: float,
     ) -> None:
-        """Test yield to call calculation."""
+        """Test yield to call calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        call_price : float
+            The call price.
+        call_date : float
+            The call date in years.
+        current_price : float
+            The current float_price.
+        expected : float
+            The expected yield to call.
+        """
         result = default_debenture.yield_to_call(call_price, call_date, current_price)
         assert result == expected
 
@@ -429,7 +655,15 @@ class TestDebenturesPricer:
     def test_yield_to_call_invalid_price(
         self, default_debenture: DebenturesPricer, invalid_price: float
     ) -> None:
-        """Test yield to call with invalid prices."""
+        """Test yield to call with invalid prices.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        invalid_price : float
+            An invalid price.
+        """
         with pytest.raises(ValueError, match="Current price must be positive"):
             default_debenture.yield_to_call(1000.0, 2.5, invalid_price)
 
@@ -447,7 +681,17 @@ class TestDebenturesPricer:
     def test_inflation_adjusted_return(
         self, default_debenture: DebenturesPricer, inflation: float, expected: float
     ) -> None:
-        """Test inflation-adjusted return calculation."""
+        """Test inflation-adjusted return calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        inflation : float
+            The inflation rate.
+        expected : float
+            The expected inflation-adjusted return.
+        """
         assert default_debenture.inflation_adjusted_return(inflation) == expected
 
     # --------------------------
@@ -464,5 +708,15 @@ class TestDebenturesPricer:
     def test_tax_adjusted_yield(
         self, default_debenture: DebenturesPricer, tax_rate: float, expected: float
     ) -> None:
-        """Test tax-adjusted yield calculation."""
+        """Test tax-adjusted yield calculation.
+        
+        Parameters
+        ----------
+        default_debenture : DebenturesPricer
+            A debenture with default parameters.
+        tax_rate : float
+            The tax rate.
+        expected : float
+            The expected tax-adjusted yield.
+        """
         assert default_debenture.tax_adjusted_yield(tax_rate) == expected

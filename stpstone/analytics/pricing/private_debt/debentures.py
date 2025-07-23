@@ -48,7 +48,13 @@ class DebenturesPricer(metaclass=TypeChecker):
         self._validate_inputs()
 
     def _validate_inputs(self) -> None:
-        """Validate input parameters."""
+        """Validate input parameters.
+        
+        Raises
+        ------
+        ValueError
+            If any input parameter is invalid
+        """
         if self.float_fv <= 0:
             raise ValueError("Face value must be positive")
         if not 0 <= self.float_coupon_r <= 1:
@@ -168,12 +174,17 @@ class DebenturesPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        float_market_price : float, optional
+        float_market_price : Optional[float]
             The current market float_price of the debenture.
 
         Returns
         -------
         float
+
+        Raises
+        ------
+        ValueError
+            If the market price is not positive.
         """
         if float_market_price is not None and float_market_price <= 0:
             raise ValueError("Price must be positive")
@@ -189,12 +200,17 @@ class DebenturesPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        float_market_price : float, optional
+        float_market_price : Optional[float]
             The current market float_price of the debenture.
 
         Returns
         -------
         float
+
+        Raises
+        ------
+        ValueError
+            If the market price is not positive.
         """
         if float_market_price is not None and float_market_price <= 0:
             raise ValueError("Price must be positive")
@@ -208,7 +224,7 @@ class DebenturesPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        float_market_price : float, optional
+        float_market_price : Optional[float]
             The current market float_price of the debenture.
 
         Returns
@@ -229,11 +245,11 @@ class DebenturesPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        dt_settlement : date, optional
+        dt_settlement : Optional[date]
             The settlement date for the calculation.
-        dt_last_coupon : date, optional
+        dt_last_coupon : Optional[date]
             The date of the last coupon payment.
-        dt_next_coupon : date, optional
+        dt_next_coupon : Optional[date]
             The date of the next coupon payment.
         str_day_count_convention : str, optional
             The day count convention for the calculation.
@@ -241,6 +257,13 @@ class DebenturesPricer(metaclass=TypeChecker):
         Returns
         -------
         float
+
+        Raises
+        ------
+        ValueError
+            If the settlement date is not provided.
+            If the last or next coupon date is not provided.
+            If the last coupon date is after the next coupon date.
         """
         # validate inputs
         if dt_settlement is None:
@@ -285,13 +308,13 @@ class DebenturesPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        float_clean_price : float, optional
+        float_clean_price : Optional[float]
             The clean price of the bond.
-        dt_settlement : date, optional
+        dt_settlement : Optional[date]
             The settlement date for the calculation.
-        dt_last_coupon : date, optional
+        dt_last_coupon : Optional[date]
             The date of the last coupon payment.
-        dt_next_coupon : date, optional
+        dt_next_coupon : Optional[date]
             The date of the next coupon payment.
         str_day_count_convention : str, optional
             The day count convention for the calculation.
@@ -330,6 +353,12 @@ class DebenturesPricer(metaclass=TypeChecker):
         Returns
         -------
         float
+
+        Raises
+        ------
+        ValueError
+            If the purchase price is not positive.
+            If the holding period is not positive.
         """
         # validate inputs
         if float_purchase_price <= 0:
@@ -370,6 +399,12 @@ class DebenturesPricer(metaclass=TypeChecker):
         Returns
         -------
         float
+
+        Raises
+        ------
+        ValueError
+            If the call date is after maturity.
+            If the call date is not positive.
         """
         # validate inputs
         if float_call_date > self.int_maturity_years:
@@ -436,6 +471,13 @@ class DebenturesPricer(metaclass=TypeChecker):
         Returns
         -------
         float
+
+        Raises
+        ------
+        ValueError
+            If the call date is not positive.
+            If the current price is not positive.
+            If yield to call calculation does not converge.
         """
         # validate inputs
         if float_call_date <= 0:
