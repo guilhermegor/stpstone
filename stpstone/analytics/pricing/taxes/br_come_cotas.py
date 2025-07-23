@@ -16,16 +16,6 @@ class ComeCotasCalculator(metaclass=TypeChecker):
     
     The 'come-cotas' is a semi-annual tax collection mechanism that anticipates
     Income Tax (IR) on earnings from certain types of investment funds in Brazil.
-    
-    Parameters
-    ----------
-    str_fund_type : str
-        Type of investment fund (must be one of the supported types)
-        
-    Attributes
-    ----------
-    FUND_TYPES : dict
-        Dictionary mapping fund types to their tax rates and characteristics
     """
     
     # supported fund types and their tax characteristics
@@ -78,7 +68,18 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         self, 
         str_fund_type: Literal["FIA", "FIRF", "FIM", "FIDC", "FIP", "FI-IE", "FII"]
     ) -> None:
-        """Initialize the calculator with a specific fund type."""
+        """Initialize the calculator with a specific fund type.
+        
+        Parameters
+        ----------
+        str_fund_type : Literal['FIA', 'FIRF', 'FIM', 'FIDC', 'FIP', 'FI-IE', 'FII']
+            Type of investment fund (must be one of the supported types)
+        
+        Raises
+        ------
+        ValueError
+            If the provided fund type is not supported
+        """
         if str_fund_type not in self.FUND_TYPES:
             raise ValueError(f"Invalid fund type. Must be one of: {list(self.FUND_TYPES.keys())}")
             
@@ -95,17 +96,18 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         
         Parameters
         ----------
-        float_position_value : float, optional
+        float_position_value : Optional[float]
             Position value to validate
-        float_acquisition_basis : float, optional
+        float_acquisition_basis : Optional[float]
             Acquisition basis to validate
-        dt_ref : date, optional
+        dt_ref : Optional[date]
             Date to validate
             
         Raises
         ------
         TypeError
-            If any input has incorrect type
+            If position value or acquisition basis is not a float
+            If date is not a date object
         """
         if float_position_value is not None and not isinstance(float_position_value, (float, int)):
             raise TypeError("Position value must be a float")
@@ -123,7 +125,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         
         Parameters
         ----------
-        dt_ref : date, optional
+        dt_ref : Optional[date]
             Date to check (defaults to current date)
             
         Returns
@@ -157,7 +159,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
             Current value of the investment position
         float_acquisition_basis : float
             Original acquisition cost (for profit calculation)
-        dt_ref : date, optional
+        dt_ref : Optional[date]
             Date for tax calculation (defaults to current date)
             
         Returns
