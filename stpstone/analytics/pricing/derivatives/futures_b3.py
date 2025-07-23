@@ -92,6 +92,11 @@ class NotionalFromPV:
         -------
         float
             Notional value of the DAP contract position in BRL
+
+        Raises
+        ------
+        ValueError
+            If dt_pmi_last is greater than dt_pmi_next
             
         Notes
         -----
@@ -322,7 +327,7 @@ class TSIR:
 
         Parameters
         ----------
-        dict_nper_rates : dict
+        dict_nper_rates : dict[int, float]
             Dictionary mapping periods to spot rates in decimal form (e.g., {1: 0.05, 2: 0.055})
             Format: {period_length: spot_rate}
             Example: {30: 0.042, 90: 0.046} for 30-day and 90-day rates
@@ -332,7 +337,7 @@ class TSIR:
 
         Returns
         -------
-        dict
+        dict[int, float]
             Dictionary of flat forward rates between consecutive periods
             Format: {period: forward_rate}
             Example: {30: 0.042, 60: 0.048} where 0.048 is the forward rate between day 30-90
@@ -386,7 +391,7 @@ class TSIR:
 
         Parameters
         ----------
-        dict_nper_rates : dict
+        dict_nper_rates : dict[int, float]
             Dictionary mapping time periods to observed market rates in decimal form.
             Format: {period: rate}
             Example: {30: 0.015, 90: 0.018, 180: 0.020, 360: 0.022}
@@ -394,7 +399,7 @@ class TSIR:
 
         Returns
         -------
-        dict
+        dict[int, float]
             Dictionary with interpolated rates at all input periods using cubic spline.
             Format: {period: interpolated_rate}
 
@@ -655,7 +660,7 @@ class TSIR:
         
         Parameters
         ----------
-        dict_nper_rates : dict
+        dict_nper_rates : dict[int, float]
             Dictionary of interest rates by nper.
         float_tau_first_assumption : float
             First assumption of tau.
@@ -664,7 +669,7 @@ class TSIR:
 
         Returns
         -------
-        dict
+        dict[int, float]
             Term structure of interest rates.
         
         References
