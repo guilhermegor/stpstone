@@ -1,14 +1,30 @@
 """European options pricing models."""
 
 from math import pi
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, TypedDict, Union
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.optimize import fsolve, minimize
 
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.analytics.quant.regression import NonLinearEquations
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
+
+class ResultVommaPositiveOutsideInterval(TypedDict):
+    """TypedDict for VommaPositiveOutsideInterval results."""
+
+    lower_boundary: float
+    upper_boundary: float
+
+
+class ResultVegaGlobalMax(TypedDict):
+    """TypedDict for VegaGlobalMax results."""
+    
+    t_max_global_vega: float
+    s_max_global_vega: float
+    vega_max_global: float
 
 
 class InitialSettings(metaclass=TypeChecker):
@@ -30,7 +46,7 @@ class InitialSettings(metaclass=TypeChecker):
         dividend yield
     b : float
         risk free rate
-    opt_type : str
+    opt_type : Literal['call', 'put']
         option type ('call' or 'put')
     """
 
@@ -53,7 +69,7 @@ class InitialSettings(metaclass=TypeChecker):
 
         Returns
         -------
-        list[float]
+        list
             List of converted numerical parameters (excluding opt_type)
 
         Raises
@@ -151,6 +167,8 @@ class BlackScholesMerton(InitialSettings):
         float
             d1 probability
         """
+        if sigma == 0:
+            return float('inf') if s != k else 0.0
         s, k, b, t, sigma, q = self.set_parameters(s=s, k=k, b=b, t=t, sigma=sigma, q=q)
         return (np.log(s / k) + (b + sigma ** 2 / 2) * t) / (sigma * np.sqrt(t))
 
@@ -209,7 +227,7 @@ class BlackScholesMerton(InitialSettings):
             dividend yield
         b : float
             risk free rate
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -275,7 +293,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             risk free rate
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -287,14 +305,19 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
+        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
+    
+        if sigma == 0:
+            if opt_type == 'call':
+                return 1.0 if s > k else 0.0
+            else:
+                return -1.0 if s < k else 0.0
+        
+        d1 = self.d1(s, k, b, t, sigma, q)
         if opt_type == 'call':
-            return np.exp((b - r) * t) * NormalDistribution().cdf(self.d1(
-                s, k, b, t, sigma, q))
-        elif opt_type == 'put':
-            return np.exp((b - r) * t) * (NormalDistribution().cdf(
-                self.d1(s, k, b, t, sigma, q)) - 1)
+            return np.exp((b - r) * t) * NormalDistribution().cdf(d1)
+        else:
+            return np.exp((b - r) * t) * (NormalDistribution().cdf(d1) - 1)
 
     def future_delta_from_spot_delta(self, delta: float, b: float, t: float) -> float:
         """Future delta from spot delta.
@@ -348,7 +371,7 @@ class Greeks(BlackScholesMerton):
             risk free rate
         delta : float
             delta
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -493,7 +516,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             risk free rate
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -636,7 +659,8 @@ class Greeks(BlackScholesMerton):
         return 2 * (1.0 + (1.0 + (8.0 * r / sigma ** 2 + 1.0) * np.log(s / k) ** 2) ** 0.5) \
             / (8.0 * r + sigma ** 2)
 
-    def vega_global_maximum(self, k: float, r: float, sigma: float, b: float) -> dict[str, float]:
+    def vega_global_maximum(self, k: float, r: float, sigma: float, b: float) \
+        -> ResultVegaGlobalMax:
         """Vega global maximum.
         
         Parameters
@@ -652,7 +676,7 @@ class Greeks(BlackScholesMerton):
 
         Returns
         -------
-        float
+        ResultVegaGlobalMax
 
         References
         ----------
@@ -740,7 +764,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             risk free rate
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -819,7 +843,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -867,7 +891,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -919,7 +943,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -967,7 +991,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -1019,7 +1043,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -1065,7 +1089,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type ('call' or 'put')
 
         Returns
@@ -1271,7 +1295,7 @@ class Greeks(BlackScholesMerton):
 
     def color_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
-        """"Color percentage.
+        """Color percentage.
          
         Rate of change of gamma with respect to changes in the cost of carry, expressed as a 
         percentage.
@@ -1388,13 +1412,15 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float, 
         bl_spot: bool = True
-    ) -> dict[str, float]:
+    ) -> ResultVommaPositiveOutsideInterval:
         """Vomma positive outside interval.
 
         Parameters
         ----------
-        s_k : float
-            spot or strike value
+        s : float
+            spot price
+        k : float
+            strike price
         r : float
             risk free rate
         t : float
@@ -1406,12 +1432,11 @@ class Greeks(BlackScholesMerton):
         b : float
             cost of carry
         bl_spot : bool, optional
-            spot or strike value, by default True
+            True if s is the spot price, False if k is the strike price, by default True
 
         Returns
         -------
-        dict
-            lower boundary and upper boundary
+        ResultVommaPositiveOutsideInterval
 
         References
         ----------
@@ -1946,7 +1971,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -1997,7 +2022,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -2046,7 +2071,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -2096,7 +2121,7 @@ class Greeks(BlackScholesMerton):
             cost of carry
         p : float
             risk-neutral probability
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -2145,7 +2170,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -2194,7 +2219,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -2245,7 +2270,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type
 
         Returns
@@ -2290,7 +2315,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        opt_type : str
+        opt_type : Literal['call', 'put']
             option type (call or put)
 
         Returns
@@ -2382,11 +2407,13 @@ class IterativeMethods(Greeks):
             Up-factor in binomial models.
         d : float
             Down-factor in binomial models.
-        opt_style : str
+        opt_type : Literal['call', 'put']
             Option style, either 'call' or 'put'.
-        h_upper : float, optional
-        h_lower : float, optional
-
+        h_upper : Optional[float]
+            Upper boundary price
+        h_lower : Optional[float]
+            Lower boundary price
+        
         Returns
         -------
         float
@@ -2451,7 +2478,7 @@ class IterativeMethods(Greeks):
             Number of time steps.
         sigma : float
             Volatility of the underlying asset.
-        opt_style : str
+        opt_type : Literal['call', 'put']
             Option style, either 'call' or 'put'.
 
         Returns
@@ -2520,7 +2547,7 @@ class IterativeMethods(Greeks):
             Number of time steps.
         sigma : float
             Volatility of the underlying asset.
-        opt_style : str
+        opt_type : Literal['call', 'put']
             Option style, either 'call' or 'put'.
 
         Returns
@@ -2590,7 +2617,7 @@ class IterativeMethods(Greeks):
             Number of time steps.
         sigma : float
             Volatility of the underlying asset.
-        opt_style : str
+        opt_type : Literal['call', 'put']
             Option style, either 'call' or 'put'.
 
         Returns
@@ -2663,7 +2690,7 @@ class IterativeMethods(Greeks):
             Number of time steps.
         sigma : float
             Volatility of the underlying asset.
-        opt_style : str
+        opt_type : Literal['call', 'put']
             Option style, either 'call' or 'put'.
 
         Returns
@@ -2721,7 +2748,7 @@ class EuropeanOptions(IterativeMethods):
         k: float, 
         r: float, 
         t: float, 
-        sigma: float, 
+        sigma: Union[float, NDArray[np.float64]], 
         q: float, 
         b: float, 
         cp0: float,
@@ -2731,23 +2758,42 @@ class EuropeanOptions(IterativeMethods):
         
         Parameters
         ----------
-        sigma : float
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        sigma : Union[float, NDArray[np.float64]]
             Volatility of the underlying asset.
-
+        q : float
+            Dividend yield.
+        b : float
+            Cost of carry.
+        cp0 : float
+            Current price of the option.
+        opt_type : Literal['call', 'put']
+            Option style, either 'call' or 'put'.
+        
         Returns
         -------
         float
         """
         if isinstance(sigma, (np.ndarray, list)):
-            sigma = sigma[0]
+            sigma = sigma.item() if sigma.size == 1 else float(sigma[0])
+        
         s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
             s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, cp0=cp0, opt_type=opt_type
         )
+
         result = np.power(
             self.general_opt_price(
                 s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type) - cp0, 
             2
         )
+
         return float(result)
 
     def implied_volatility(
@@ -2789,9 +2835,10 @@ class EuropeanOptions(IterativeMethods):
             Cost of carry.
         cp0 : float
             Current price of the option.
-        opt_type : str
+        opt_type : Literal['call', 'put']
             Option type, either 'call' or 'put'.
-        method : str, optional
+        method : Literal['newton_raphson', 'bisection', 'fsolve', 'scipy_optimize_minimize', \
+        'differential_evolution']
             Method to use for calculating the implied volatility, by default 'fsolve'.
             - 'newton_raphson': Newton-Raphson method.
             - 'bisection': Bisection method.
@@ -2806,7 +2853,7 @@ class EuropeanOptions(IterativeMethods):
             Maximum number of iterations, by default 1000.
         orig_vol : float, optional
             Original volatility, by default 0.5.
-        list_bounds : list[tuple[float, float]], optional
+        list_bounds : Optional[list[tuple[float, float]]]
             List of bounds for the implied volatility, by default [(0, 2)].
             
         Returns
@@ -2867,9 +2914,10 @@ class EuropeanOptions(IterativeMethods):
             return (float_high + float_low) / 2, False
         elif method == "fsolve":
             func = \
-                lambda sigma: self.func_non_linear(s, k, r, t, float(sigma), q, b, cp0, opt_type) # noqa: E731 - do not assign a `lambda` expression, use a def
+                lambda sigma: self.func_non_linear(s, k, r, t, sigma, q, b, cp0, opt_type) # noqa: E731 - do not assign a `lambda` expression, use a def
             result = fsolve(func, orig_vol)
-            imp_vol = result[0] if isinstance(result, (np.ndarray, list)) else result
+            imp_vol = result.item() if isinstance(result, np.ndarray) else \
+                result[0] if isinstance(result, (list, tuple)) else float(result)
             return imp_vol, False
         elif method == "scipy_optimize_minimize":
             return minimize(
@@ -2926,7 +2974,7 @@ class EuropeanOptions(IterativeMethods):
         t: float, 
         sigma: float, 
         q: float,
-        opt_type: str, 
+        opt_type: Literal["call", "put"],
         pct_moneyness_atm: float = 0.05
     ) -> str:
         """Determine whether the option is ITM, ATM, or OTM based on moneyness.
@@ -2943,7 +2991,9 @@ class EuropeanOptions(IterativeMethods):
             Time to maturity in years.
         sigma : float
             Volatility of the underlying asset.
-        opt_type : float
+        q : float
+            Dividend yield of the underlying asset.
+        opt_type : Literal['call', 'put']
             Option type, either 'call' or 'put'.
         pct_moneyness_atm : float, optional
             Percentage of the moneyness that is considered ATM, by default 0.05.
