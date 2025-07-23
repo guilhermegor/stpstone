@@ -34,7 +34,13 @@ class TestBRRegressiveTaxSchedules:
     # Test Initialization
     # --------------------------
     def test_initialization(self, tax_calculator: BRRegressiveTaxSchedules) -> None:
-        """Test that tax tables are properly initialized."""
+        """Test that tax tables are properly initialized.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         assert hasattr(tax_calculator, "iof_table")
         assert hasattr(tax_calculator, "ir_table")
         assert len(tax_calculator.iof_table) == 30
@@ -61,7 +67,21 @@ class TestBRRegressiveTaxSchedules:
         expected_rate: float,
         expected_tax: float,
     ) -> None:
-        """Test IOF tax calculation with various days since investment."""
+        """Test IOF tax calculation with various days since investment.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        sample_notional : float
+            The sample notional amount for testing.
+        days : int
+            The number of days since the investment.
+        expected_rate : float
+            The expected IOF float_rate in percentage.
+        expected_tax : float
+            The expected IOF tax amount.
+        """
         tax = tax_calculator.calculate_iof_tax(days, sample_notional)
         assert tax == pytest.approx(expected_tax, abs=0.01)
         assert tax_calculator.get_iof_rate(days) == expected_rate
@@ -69,14 +89,26 @@ class TestBRRegressiveTaxSchedules:
     def test_calculate_iof_tax_zero_notional(
         self, tax_calculator: BRRegressiveTaxSchedules
     ) -> None:
-        """Test IOF tax calculation with zero notional amount."""
+        """Test IOF tax calculation with zero notional amount.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         tax = tax_calculator.calculate_iof_tax(5, 0.0)
         assert tax == 0.0
 
     def test_calculate_iof_tax_negative_days(
         self, tax_calculator: BRRegressiveTaxSchedules
     ) -> None:
-        """Test IOF tax calculation with negative days raises ValueError."""
+        """Test IOF tax calculation with negative days raises ValueError.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         with pytest.raises(ValueError, match="cannot be negative"):
             tax_calculator.calculate_iof_tax(-1, 10000.0)
 
@@ -104,7 +136,21 @@ class TestBRRegressiveTaxSchedules:
         expected_rate: float,
         expected_tax: float,
     ) -> None:
-        """Test IR tax calculation with various investment durations."""
+        """Test IR tax calculation with various investment durations.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        sample_notional : float
+            The sample notional amount for testing.
+        days : int
+            The number of days since the investment.
+        expected_rate : float
+            The expected IR float_rate in percentage.
+        expected_tax : float
+            The expected IR tax amount.
+        """
         tax = tax_calculator.calculate_ir_tax(days, sample_notional)
         assert tax == pytest.approx(expected_tax, abs=0.01)
         assert tax_calculator.get_ir_rate(days) == expected_rate
@@ -112,14 +158,26 @@ class TestBRRegressiveTaxSchedules:
     def test_calculate_ir_tax_zero_notional(
         self, tax_calculator: BRRegressiveTaxSchedules
     ) -> None:
-        """Test IR tax calculation with zero notional amount."""
+        """Test IR tax calculation with zero notional amount.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         tax = tax_calculator.calculate_ir_tax(100, 0.0)
         assert tax == 0.0
 
     def test_calculate_ir_tax_negative_days(
         self, tax_calculator: BRRegressiveTaxSchedules
     ) -> None:
-        """Test IR tax calculation with negative days raises ValueError."""
+        """Test IR tax calculation with negative days raises ValueError.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         with pytest.raises(ValueError, match="Days invested must be positive"):
             tax_calculator.calculate_ir_tax(-1, 10000.0)
 
@@ -146,7 +204,25 @@ class TestBRRegressiveTaxSchedules:
         expected_ir: float,
         expected_total: float,
     ) -> None:
-        """Test combined tax calculation with various scenarios."""
+        """Test combined tax calculation with various scenarios.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        sample_notional : float
+            The sample notional amount for testing.
+        cddt : int
+            The total duration of investment in calendar days.
+        cddr : int
+            Days since investment when redeemed (for IOF calculation).
+        expected_iof : float
+            The expected IOF tax amount.
+        expected_ir : float
+            The expected IR tax amount.
+        expected_total : float
+            The expected total tax amount.
+        """
         iof, ir, total = tax_calculator.calculate_total_taxes(
             cddt, cddr, sample_notional
         )
@@ -173,7 +249,17 @@ class TestBRRegressiveTaxSchedules:
         invalid_days: any,
         invalid_notional: any,
     ) -> None:
-        """Test that type checker rejects invalid input types."""
+        """Test that type checker rejects invalid input types.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        invalid_days : any
+            Invalid days input.
+        invalid_notional : any
+            Invalid notional input.
+        """
         with pytest.raises(TypeError):
             tax_calculator.calculate_iof_tax(invalid_days, invalid_notional)
         with pytest.raises(TypeError):
@@ -187,19 +273,37 @@ class TestBRRegressiveTaxSchedules:
     def test_very_large_notional(
         self, tax_calculator: BRRegressiveTaxSchedules
     ) -> None:
-        """Test with extremely large notional amount."""
+        """Test with extremely large notional amount.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         large_notional = 1e12  # 1 trillion
         iof, ir, total = tax_calculator.calculate_total_taxes(100, 10, large_notional)
         assert total == pytest.approx(iof + ir, abs=0.01)
         assert total > 0
 
     def test_very_large_days(self, tax_calculator: BRRegressiveTaxSchedules) -> None:
-        """Test with extremely large days invested."""
+        """Test with extremely large days invested.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         rate = tax_calculator.get_ir_rate(1_000_000)
         assert rate == 15.0  # should cap at minimum rate
 
     def test_zero_days(self, tax_calculator: BRRegressiveTaxSchedules) -> None:
-        """Test with zero days (edge of validity)."""
+        """Test with zero days (edge of validity).
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         # zero days invested is technically invalid (raises ValueError)
         with pytest.raises(ValueError, match="Days invested must be positive"):
             tax_calculator.calculate_ir_tax(0, 10000.0)
@@ -212,7 +316,13 @@ class TestBRRegressiveTaxSchedules:
     # Test Docstring Examples
     # --------------------------
     def test_docstring_example(self, tax_calculator: BRRegressiveTaxSchedules) -> None:
-        """Test the example provided in the class docstring."""
+        """Test the example provided in the class docstring.
+        
+        Parameters
+        ----------
+        tax_calculator : BRRegressiveTaxSchedules
+            The tax calculator instance to test.
+        """
         iof, ir, total = tax_calculator.calculate_total_taxes(
             int_cddt=200,
             int_cddr=10,
