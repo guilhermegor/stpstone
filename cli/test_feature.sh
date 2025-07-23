@@ -85,6 +85,14 @@ def compare_types(hint: Any, doc: str) -> bool:
     hint_str = str(hint).replace("typing.", "").lower()
     doc = doc.lower().strip()
     
+    # Remove ", optional" from docstring type if present
+    if ", optional" in doc:
+        doc = doc.split(", optional")[0].strip()
+    
+    # Normalize whitespace and remove line breaks
+    hint_str = ' '.join(hint_str.split())
+    doc = ' '.join(doc.split())
+    
     # handle common equivalences
     equivalences = {
         "list": "sequence",
