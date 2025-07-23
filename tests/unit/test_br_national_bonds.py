@@ -42,7 +42,23 @@ class TestBRSovereignPricer:
         wddy: int,
         expected: float,
     ) -> None:
-        """Test LTN pricing with normal inputs."""
+        """Test LTN pricing with normal inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddt : int
+            Business days until maturity
+        fv : float
+            Nominal value
+        wddy : int
+            Business days in a year
+        expected : float
+            Expected result
+        """
         result = pricer.ltn(ytm, wddt, fv, wddy)
         assert pytest.approx(result, abs=1e-2) == pytest.approx(expected, abs=1e-2)
 
@@ -63,7 +79,21 @@ class TestBRSovereignPricer:
         fv: float,
         wddy: int,
     ) -> None:
-        """Test LTN pricing with edge case inputs."""
+        """Test LTN pricing with edge case inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddt : int
+            Business days until maturity
+        fv : float
+            Nominal value
+        wddy : int
+            Business days in a year
+        """
         with pytest.raises(ValueError):
             pricer.ltn(ytm, wddt, fv, wddy)
 
@@ -85,7 +115,21 @@ class TestBRSovereignPricer:
         fv: float,
         wddy: int,
     ) -> None:
-        """Test LTN pricing type validation."""
+        """Test LTN pricing type validation.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddt : int
+            Business days until maturity
+        fv : float
+            Nominal value
+        wddy : int
+            Business days in a year
+        """
         with pytest.raises(TypeError):
             pricer.ltn(ytm, wddt, fv, wddy)
 
@@ -111,12 +155,34 @@ class TestBRSovereignPricer:
         cpn_y: float,
         expected: float,
     ) -> None:
-        """Test NTN-F pricing with normal inputs."""
+        """Test NTN-F pricing with normal inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddts : list[int]
+            List of business days until maturity
+        fv : float
+            Nominal value
+        cpn_y : float
+            Nominal yield of the coupon
+        expected : float
+            Expected result
+        """
         result = pricer.ntn_f(ytm, wddts, fv, cpn_y)
         assert result == pytest.approx(expected, abs=0.01)
 
     def test_ntn_f_empty_days_list(self, pricer: BRSovereignPricer) -> None:
-        """Test NTN-F with empty days list."""
+        """Test NTN-F with empty days list.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        """
         with pytest.raises(ValueError):
             pricer.ntn_f(0.1298, [], 1000.0, 0.1)
 
@@ -133,7 +199,15 @@ class TestBRSovereignPricer:
         pricer: BRSovereignPricer,
         wddts: list[int],
     ) -> None:
-        """Test NTN-F with invalid days lists."""
+        """Test NTN-F with invalid days lists.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        wddts : list[int]
+            List of business days until maturity
+        """
         with pytest.raises(ValueError):
             pricer.ntn_f(0.1298, wddts, 1000.0, 0.1)
 
@@ -158,7 +232,26 @@ class TestBRSovereignPricer:
         pr1: float,
         expected: float,
     ) -> None:
-        """Test NTN-B pricing with normal inputs."""
+        """Test NTN-B pricing with normal inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddts : list[int]
+            List of business days until maturity
+        vna_last : float
+            Last available VNA (truncated at 6th decimal)
+        ipca : float
+            IPCA inflation rate
+        pr1 : float
+            pr1 = (number of calendar days between purchase date and the 15th of current month) / 
+          (number of calendar days between the 15th of next month and the 15th of current month)
+        expected : float
+            Expected result
+        """
         result = pricer.ntn_b(ytm, wddts, vna_last, ipca, pr1)
         assert result == pytest.approx(expected, abs=0.01)
 
@@ -179,7 +272,24 @@ class TestBRSovereignPricer:
         ipca: float,
         pr1: float,
     ) -> None:
-        """Test NTN-B with invalid values."""
+        """Test NTN-B with invalid values.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddts : list[int]
+            List of business days until maturity
+        vna_last : float
+            Last available VNA (truncated at 6th decimal)
+        ipca : float
+            IPCA inflation rate
+        pr1 : float
+            pr1 = (number of calendar days between purchase date and the 15th of current month) / 
+          (number of calendar days between the 15th of next month and the 15th of current month)
+        """
         with pytest.raises(ValueError):
             pricer.ntn_b(ytm, wddts, vna_last, ipca, pr1)
 
@@ -204,7 +314,26 @@ class TestBRSovereignPricer:
         pr1: float,
         expected: float,
     ) -> None:
-        """Test NTN-B Principal pricing with normal inputs."""
+        """Test NTN-B Principal pricing with normal inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddt : int
+            Business days until maturity
+        vna_last : float
+            Last available VNA (truncated at 6th decimal)
+        ipca : float
+            IPCA inflation rate
+        pr1 : float
+            pr1 = (number of calendar days between purchase date and the 15th of current month) / 
+          (number of calendar days between the 15th of next month and the 15th of current month)
+        expected : float
+            Expected result
+        """
         result = pricer.ntn_b_principal(ytm, wddt, vna_last, ipca, pr1)
         assert result == pytest.approx(expected, abs=0.01)
 
@@ -228,7 +357,23 @@ class TestBRSovereignPricer:
         selic: float,
         expected: float,
     ) -> None:
-        """Test LFT pricing with normal inputs."""
+        """Test LFT pricing with normal inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        ytm : float
+            Yield to maturity
+        wddt : int
+            Business days until maturity
+        vna_last : float
+            Last available VNA (truncated at 6th decimal)
+        selic : float
+            Projected annual Selic rate
+        expected : float
+            Expected result
+        """
         result = pricer.lft(ytm, wddt, vna_last, selic)
         assert result == pytest.approx(expected, abs=0.1)
 
@@ -251,7 +396,19 @@ class TestBRSovereignPricer:
         cddt: int,
         expected: float,
     ) -> None:
-        """Test custody fee calculation with normal inputs."""
+        """Test custody fee calculation with normal inputs.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        price : float
+            Price of the bond
+        cddt : int
+            Number of calendar days
+        expected : float
+            Expected result
+        """
         result = pricer.custody_fee_bmfbov(price, cddt)
         assert result == pytest.approx(expected, abs=0.01)
 
@@ -270,7 +427,17 @@ class TestBRSovereignPricer:
         price: float,
         cddt: int,
     ) -> None:
-        """Test custody fee with invalid values."""
+        """Test custody fee with invalid values.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        price : float
+            Price of the bond
+        cddt : int
+            Number of calendar days
+        """
         with pytest.raises(ValueError):
             pricer.custody_fee_bmfbov(price, cddt)
 
@@ -304,7 +471,21 @@ class TestBRSovereignPricer:
         dt_ipca_next: date,
         expected: float,
     ) -> None:
-        """Test PR1 calculation with normal dates."""
+        """Test PR1 calculation with normal dates.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        dt_ref : date
+            Reference date
+        dt_ipca_last : date
+            Last available IPCA date
+        dt_ipca_next : date
+            Next available IPCA date
+        expected : float
+            Expected result
+        """
         result = pricer.pr1(dt_ref, dt_ipca_last, dt_ipca_next)
         assert result == pytest.approx(expected, abs=1e-4)
 
@@ -326,7 +507,19 @@ class TestBRSovereignPricer:
         dt_ipca_last: date,
         dt_ipca_next: date,
     ) -> None:
-        """Test PR1 with invalid date orders."""
+        """Test PR1 with invalid date orders.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        dt_ref : date
+            Reference date
+        dt_ipca_last : date
+            Last available IPCA date
+        dt_ipca_next : date
+            Next available IPCA date
+        """
         with pytest.raises(ValueError):
             pricer.pr1(dt_ref, dt_ipca_last, dt_ipca_next)
 
@@ -334,7 +527,13 @@ class TestBRSovereignPricer:
         self,
         pricer: BRSovereignPricer,
     ) -> None:
-        """Test PR1 with weekend dates that should be adjusted."""
+        """Test PR1 with weekend dates that should be adjusted.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        """
         # Saturday reference date should adjust to Friday
         result = pricer.pr1(
             date(2023, 7, 15),  # Saturday
@@ -364,7 +563,22 @@ class TestBRSovereignPricer:
         pr1: float,
         expected: float,
     ) -> None:
-        """Test VNA projection for NTN-B bonds."""
+        """Test VNA projection for NTN-B bonds.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        vna_last : float
+            Last available VNA (truncated at 6th decimal)
+        ipca : float
+            Projected next month IPCA inflation rate
+        pr1 : float
+            pr1 = (number of calendar days between purchase date and the 15th of current month) / 
+          (number of calendar days between the 15th of next month and the 15th of current month)
+        expected : float
+            Expected result
+        """
         result = pricer.vna_ntnb_hat(vna_last, ipca, pr1)
         assert result == pytest.approx(expected, abs=0.01)
 
@@ -386,6 +600,22 @@ class TestBRSovereignPricer:
         wddy: int,
         expected: float,
     ) -> None:
-        """Test VNA projection for LFT bonds."""
+        """Test VNA projection for LFT bonds.
+        
+        Parameters
+        ----------
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
+        vna_last : float
+            Last available VNA
+        selic : float
+            Projected annual Selic rate
+        wd_cap : int
+            Compounding frequency
+        wddy : int
+            Business days in a year
+        expected : float
+            Expected result
+        """
         result = pricer.vna_lft_hat(vna_last, selic, wd_cap, wddy)
         assert pytest.approx(result, abs=1e-2) == pytest.approx(expected, abs=1e-2)

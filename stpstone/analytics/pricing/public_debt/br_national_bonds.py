@@ -41,6 +41,14 @@ class BRSovereignPricer(metaclass=TypeChecker):
         -------
         float
             Present value of the bond
+        
+        Raises
+        ------
+        ValueError
+            If the yield is negative
+            If the days to maturity are negative
+            If the face value is negative
+            If the days in a year are negative
         """
         # input validation
         if float_ytm <= 0:
@@ -84,6 +92,14 @@ class BRSovereignPricer(metaclass=TypeChecker):
         -------
         float
             Present value of the bond
+
+        Raises
+        ------
+        ValueError
+            If days list cannot be empty
+            If days cannot be negative
+            If days must be in ascending order
+            If days list contains duplicates
 
         Notes
         -----
@@ -139,6 +155,13 @@ class BRSovereignPricer(metaclass=TypeChecker):
         -------
         float
             PR1 (Projective Rate of Inflation)
+
+        Raises
+        ------
+        ValueError
+            If next IPCA date is before last IPCA date
+            If reference date is before last IPCA date
+            If reference date is after next IPCA date
         """
         # validate date order
         if dt_ipca_next <= dt_ipca_last:
@@ -182,6 +205,12 @@ class BRSovereignPricer(metaclass=TypeChecker):
         float
             Projected VNA
         
+        Raises
+        ------
+        ValueError
+            If VNA must be positive
+            If PR1 must be between 0 and 1
+        
         Notes
         -----
         - For NTN-B bonds, the base date for VNA updates is 2000-07-15
@@ -217,16 +246,13 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Last available VNA
         float_ipca_y_m_hat : float
             Projected annual IPCA inflation rate
-        dt_ref : str, optional
-            Trading date in DD/MM/YYYY format (default is next business day)
-        int_day_ipca_release : int, optional
-            Day of month when IPCA is published (default is 15)
+        float_pr1 : float
+            pr1 = (number of calendar days between purchase date and the 15th of current month) / 
+          (number of calendar days between the 15th of next month and the 15th of current month)
         int_wddy : int, optional
             Business days in a year (default is 252)
-        int_wddm : int, optional
-            Calendar days in a month (default is 30)
         float_fv : float, optional
-            Nominal value (default is 100)
+            Nominal value (default is 1)
 
         Returns
         -------
@@ -260,25 +286,26 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Last available VNA (Nominal Unit Value) before projection
         float_ipca_y_m_hat : float
             Projected annual IPCA inflation rate (decimal form)
-        dt_ref : datetime
-            Reference date for pricing calculations
-        int_day_ipca_release : int, optional
-            Day of month when IPCA is published (default: 15)
+        float_pr1 : float
+            pr1 = (number of calendar days between purchase date and the 15th of current month) / 
+          (number of calendar days between the 15th of next month and the 15th of current month)
+        float_cpn_y : float, optional
+            Nominal yield of the coupon (default is 6%)
         int_wddy : int, optional
-            Business days in a year (default: 252)
-        int_wddm : int, optional
-            Calendar days in a month (default: 30)
-        taxa_cupom_aa : float, optional
-            Annual coupon rate in decimal form (default: 0.06)
+            Business days in a year (default is 252)
         int_cpn_freq : int, optional
-            Business days between coupon payments (default: 126 = semiannual)
+            Number of days between coupons (default is 126)
 
         Returns
         -------
-        tuple[list[float], float]
-            A tuple containing:
-            - List of present values for each cash flow (coupons + principal)
-            - Total present value (float_price) of the bond
+        float
+            Present value of the bond
+        
+        Raises
+        ------
+        ValueError
+            If IPCA cannot be negative
+            If PR1 must be between 0 and 1
 
         Notes
         -----
@@ -331,6 +358,13 @@ class BRSovereignPricer(metaclass=TypeChecker):
         float
             Projected VNA
         
+        Raises
+        ------
+        ValueError
+            If VNA must be positive
+            If SELIC cannot be negative
+            If days counts must be positive
+        
         Notes
         -----
         - For LFT bonds, the base date for VNA updates is 2000-07-01
@@ -361,16 +395,16 @@ class BRSovereignPricer(metaclass=TypeChecker):
         ----------
         float_ytm : float
             Yield to maturity
+        int_wddt : int
+            Business days until maturity
         float_vna_lft_last : float
-            Last available VNA for LFT
+            Last available VNA
         float_selic_y_hat : float
             Projected annual Selic rate
         int_wd_cap : int, optional
             Compounding frequency (default is 1)
         int_wddy : int, optional
             Business days in a year (default is 252)
-        float_fv : float, optional
-            Nominal value (default is 1)
 
         Returns
         -------
@@ -401,11 +435,19 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Custody fee rate, by default 0.003
         int_cddy : int, optional
             Number of calendar days in a year, by default 365
+        float_max_fee : float, optional
+            Maximum custody fee, by default 1_500_000
 
         Returns
         -------
         float
             Custody fee
+        
+        Raises
+        ------
+        ValueError
+            If price must be positive
+            If days must be positive
         
         Notes
         -----
