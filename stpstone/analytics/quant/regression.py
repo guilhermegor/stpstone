@@ -46,12 +46,14 @@ class LinearRegressionsResult(TypedDict):
     poly_features: NotRequired[NDArray[np.float64]]
     features_importance: NotRequired[NDArray[np.float64]]
 
+
 class NonLinearRegressionsResult(TypedDict):
     """TypedDict for NonLinearRegressions results."""
     model_fitted: BaseEstimator
     score: float
     predictions: NDArray[np.float64]
     features_importance: NotRequired[NDArray[np.float64]]
+
 
 class LogLinearRegressionsResult(TypedDict):
     """TypedDict for LogLinearRegressions results."""
@@ -66,10 +68,12 @@ class LogLinearRegressionsResult(TypedDict):
     classification_report: dict[str, Any]
     log_likelihood: tuple[float, float]
 
+
 class NonLinearEquationsResult(TypedDict):
     """TypedDict for NonLinearEquations results."""
     coefficients: NDArray[np.float64]
     values_interpolated: NDArray[np.float64]
+
 
 class LinearRegressions(metaclass=TypeChecker):
     """Class for performing linear regression analysis."""

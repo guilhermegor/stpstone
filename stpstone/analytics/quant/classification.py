@@ -1,9 +1,13 @@
 """Module for classification analysis."""
 
-from typing import Literal, Optional
+from typing import Literal, Optional, TypedDict, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import NDArray
+import pandas as pd
+from scipy.sparse import csr_matrix
+from sklearn.base import BaseEstimator
 from sklearn.cluster import KMeans
 from sklearn.datasets import fetch_openml
 from sklearn.decomposition import PCA
@@ -26,6 +30,37 @@ from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
+class ResultFetchSklearn(TypedDict):
+    """TypedDict for sklearn fetch_openml results."""
+
+    data: Union[NDArray[np.float64], csr_matrix, pd.DataFrame]
+    target: NDArray[np.float64]
+    DESCR: str
+    feature_names: list[str]
+    target_names: list[str]
+    categories: Optional[dict]
+    details: dict
+    frame: pd.DataFrame
+
+
+class ResultOneHotVectorizer(TypedDict):
+    """TypedDict for one-hot vectorizer results."""
+
+    labels: list[str]
+    array: NDArray[np.float64]
+
+
+class ResultClassification(TypedDict):
+    """TypedDict for classification results."""
+
+    model_fitted: BaseEstimator
+    predictions: NDArray[np.float64]
+    adjusted_rand_score: float
+    score: float
+    accuracy_score: float
+    confusion_matrix: NDArray[np.float64]
+    classes: NDArray[np.float64]
+
 class InputsClassification(metaclass=TypeChecker):
     """Class for handling input data for classification tasks."""
 
@@ -34,7 +69,7 @@ class InputsClassification(metaclass=TypeChecker):
         database_name: str = "mnist_784", 
         version: int = 1, 
         bl_asframe: bool = False
-    ) -> dict:
+    ) -> ResultFetchSklearn:
         """Fetch dataset from sklearn openml repository.
 
         Parameters
@@ -48,7 +83,7 @@ class InputsClassification(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        ResultFetchSklearn
             Dictionary containing dataset features and targets
 
         References
@@ -59,7 +94,7 @@ class InputsClassification(metaclass=TypeChecker):
 
     def show_image_from_dataset(
         self, 
-        array_instance: np.ndarray, 
+        array_instance: NDArray[np.float64], 
         cmap: str = "binary", 
         shape: tuple = (28, 28),
         bl_axis: str = "off", 
@@ -69,7 +104,7 @@ class InputsClassification(metaclass=TypeChecker):
 
         Parameters
         ----------
-        array_instance : np.ndarray
+        array_instance : NDArray[np.float64]
             Array containing image data
         cmap : str, optional
             Color map for display, default "binary"
@@ -77,7 +112,7 @@ class InputsClassification(metaclass=TypeChecker):
             Shape to reshape image, default (28, 28)
         bl_axis : str, optional
             Show axis if "on", default "off"
-        complete_saving_path : str, optional
+        complete_saving_path : Optional[str]
             Path to save image if provided, default None
 
         References
@@ -96,7 +131,7 @@ class InputsClassification(metaclass=TypeChecker):
 class Classification(metaclass=TypeChecker):
     """Class implementing various classification algorithms."""
 
-    def one_hot_vectorizer(self, list_corpus: list[str]) -> dict:
+    def one_hot_vectorizer(self, list_corpus: list[str]) -> ResultOneHotVectorizer:
         """Convert text corpus to one-hot encoded vectors.
 
         Parameters
@@ -106,8 +141,13 @@ class Classification(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        ResultOneHotVectorizer
             Contains labels and one-hot encoded array
+
+        Raises
+        ------
+        TypeError
+            If input is not a list of strings
 
         References
         ----------
@@ -130,25 +170,32 @@ class Classification(metaclass=TypeChecker):
 
     def sgd_classifier(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray, 
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64], 
         int_random_state_seed: int = 5
-    ) -> dict:
+    ) -> ResultClassification:
         """Train SGD classifier and return metrics.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
         int_random_state_seed : int, optional
             Random seed, default 5
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
+
+        Raises
+        ------
+        TypeError
+            If inputs are not numpy arrays
+        ValueError
+            If inputs are empty
 
         References
         ----------
@@ -156,6 +203,8 @@ class Classification(metaclass=TypeChecker):
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Inputs must be numpy arrays")
+        if array_x.size == 0 or array_y.size == 0:
+            raise ValueError("Input arrays cannot be empty")
 
         model = SGDClassifier(random_state=int_random_state_seed)
         model.fit(array_x, array_y)
@@ -173,27 +222,27 @@ class Classification(metaclass=TypeChecker):
 
     def svm(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray, 
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64], 
         kernel: str = "rbf",
         float_regularization_parameter: float = 1,
         multiclass_classification_strategy: Literal["best", "ovr", "ovo"] = "best",
         gamma: str = "auto", 
         int_random_state_seed: int = 42
-    ) -> dict:
+    ) -> ResultClassification:
         """Train SVM classifier with specified multiclass strategy.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
         kernel : str, optional
             Kernel type, default "rbf"
         float_regularization_parameter : float, optional
             Regularization parameter, default 1
-        multiclass_classification_strategy Literal["best", "ovr", "ovo"]
+        multiclass_classification_strategy : Literal['best', 'ovr', 'ovo'], optional
             Strategy for multiclass ("best", "ovr", "ovo"), default "best"
         gamma : str, optional
             Kernel coefficient, default "auto"
@@ -202,8 +251,13 @@ class Classification(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
+
+        Raises
+        ------
+        ValueError
+            If invalid multiclass strategy is provided
 
         References
         ----------
@@ -237,30 +291,30 @@ class Classification(metaclass=TypeChecker):
 
     def decision_tree(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         impurity_crit: str = "gini",
         int_max_depth: Optional[int] = None,
         int_random_state_seed: int = 42
-    ) -> dict:
+    ) -> ResultClassification:
         """Train decision tree classifier.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
         impurity_crit : str, optional
             Splitting criterion, default "gini"
-        int_max_depth : int, optional
+        int_max_depth : Optional[int]
             Max tree depth, default None
         int_random_state_seed : int, optional
             Random seed, default 42
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
 
         References
@@ -287,18 +341,18 @@ class Classification(metaclass=TypeChecker):
 
     def random_forest(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         n_estimators: int = 100,
         int_random_state_seed: int = 42
-    ) -> dict:
+    ) -> ResultClassification:
         """Train random forest classifier.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
         n_estimators : int, optional
             Number of trees, default 100
@@ -307,7 +361,7 @@ class Classification(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
 
         References
@@ -333,24 +387,24 @@ class Classification(metaclass=TypeChecker):
 
     def knn_classifier(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         int_n_neighbors: int = 5
-    ) -> dict:
+    ) -> ResultClassification:
         """Train KNN classifier.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
         int_n_neighbors : int, optional
             Number of neighbors, default 5
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
 
         References
@@ -373,26 +427,26 @@ class Classification(metaclass=TypeChecker):
     def k_means(
         self,
         n_clusters: int,
-        array_y: np.ndarray,
-        array_x: np.ndarray,
+        array_y: NDArray[np.float64],
+        array_x: NDArray[np.float64],
         int_random_state_seed: int = 0
-    ) -> dict:
+    ) -> ResultClassification:
         """Perform K-means clustering.
 
         Parameters
         ----------
         n_clusters : int
             Number of clusters
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
         int_random_state_seed : int, optional
             Random seed, default 0
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
 
         References
@@ -414,21 +468,21 @@ class Classification(metaclass=TypeChecker):
 
     def naive_bayes(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray
-    ) -> dict:
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64]
+    ) -> ResultClassification:
         """Train Gaussian Naive Bayes classifier.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target array
 
         Returns
         -------
-        dict
+        ResultClassification
             Model and performance metrics
 
         References
@@ -475,7 +529,7 @@ class ImageProcessing(metaclass=TypeChecker):
         self,
         name_path: str,
         var_exp: float
-    ) -> np.ndarray:
+    ) -> NDArray[np.float64]:
         """Apply PCA with specified variance explained.
 
         Parameters
@@ -487,7 +541,7 @@ class ImageProcessing(metaclass=TypeChecker):
 
         Returns
         -------
-        np.ndarray
+        NDArray[np.float64]
             Transformed image array
 
         References
@@ -515,7 +569,7 @@ class ImageProcessing(metaclass=TypeChecker):
     def plot_subplot(
         self,
         int_exp_var_ratio: int,
-        *array_x: np.ndarray
+        *array_x: NDArray[np.float64]
     ) -> None:
         """Plot subplot of image array.
 
@@ -523,7 +577,7 @@ class ImageProcessing(metaclass=TypeChecker):
         ----------
         int_exp_var_ratio : int
             Explained variance ratio
-        *array_x : np.ndarray
+        *array_x : NDArray[np.float64]
             Image arrays to plot
 
         References
