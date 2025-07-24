@@ -1,8 +1,10 @@
 """Module for assessing model fitting performance using various metrics."""
 
-from typing import Literal, Union
+from typing import Literal, TypedDict
 
 import numpy as np
+from numpy.typing import NDArray
+from sklearn.base import BaseEstimator
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -21,6 +23,49 @@ from sklearn.model_selection import (
 )
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
+
+class ResultCrossValidation(TypedDict):
+    """TypedDict for cross-validation results."""
+
+    scores: float
+    mean: float
+    std: float
+
+
+class ResultGridSearch(TypedDict):
+    """TypedDict for grid-search results."""
+
+    best_parameters: dict
+    score: float
+    best_estimator: BaseEstimator
+    cv_results: dict
+    model_regression: BaseEstimator
+    predict: NDArray[np.float64]
+    mse: float
+    rmse: float
+
+
+class ResultAccuracyPredictions(TypedDict):
+    """TypedDict for accuracy and predictions results."""
+
+    cross_validation_scores: float
+    predictions: NDArray[np.float64]
+    confusion_matrix: NDArray[np.float64]
+    precision_score: float
+    recall_score: float
+    f1_score: float
+    roc_auc_score: float
+
+
+class ResultFittingPerformance(TypedDict):
+    """TypedDict for fitting performance results."""
+
+    accuracy: float
+    precision: float
+    recall_sensitivity: float
+    f1_score: float
+    r2_score: float
 
 
 class FitPerformance(metaclass=TypeChecker):
@@ -52,6 +97,10 @@ regression-model-in-python
         nobs2 = nobs / 2.0
         resid = array_y - array_y_hat
         ssr = np.sum(resid**2)
+
+        if ssr < 1e-10:  # near perfect fit
+            ssr = 1e-10  # small value to avoid log(0)
+        
         llf = -nobs2 * np.log(2 * np.pi) - nobs2 * np.log(ssr / nobs) - nobs2
         return llf
 
@@ -116,7 +165,7 @@ regression-model-in-python
         scoring_method: str = "neg_mean_squared_error",
         cross_val_model: Literal["score", "predict"] = "score",
         cross_val_model_method: str = "predict_proba",
-    ) -> dict[str, Union[np.ndarray, float]]:
+    ) -> ResultCrossValidation:
         """Perform cross-validation to measure estimator performance.
 
         Parameters
@@ -131,15 +180,20 @@ regression-model-in-python
             Number of cross-validation folds, by default 3
         scoring_method : str, optional
             Scoring method, by default "neg_mean_squared_error"
-        cross_val_model : str, optional
+        cross_val_model : Literal['score', 'predict'], optional
             Cross-validation model type, by default "score"
         cross_val_model_method : str, optional
             Cross-validation model method, by default "predict_proba"
 
         Returns
         -------
-        dict[str, Union[np.ndarray, float]]
+        ResultCrossValidation
             Dictionary containing scores, mean and standard deviation
+
+        Raises
+        ------
+        ValueError
+            If cross validation method does not match current possibilities
 
         References
         ----------
@@ -172,7 +226,7 @@ regression-model-in-python
         return {
             "scores": scores,
             "mean": scores.mean(),
-            "standard_deviation": scores.std(),
+            "std": scores.std(),
         }
 
     def grid_search_optimal_hyperparameters(
@@ -185,7 +239,7 @@ regression-model-in-python
         num_cross_validation_splitting_strategy: int = 5,
         bl_return_train_score: bool = True,
         bl_randomized_search: bool = True,
-    ) -> dict[str, Union[dict, float, object, np.ndarray]]:
+    ) -> ResultGridSearch:
         """Find optimal hyperparameters using grid search.
 
         Parameters
@@ -209,7 +263,7 @@ regression-model-in-python
 
         Returns
         -------
-        dict[str, Union[dict, float, object, np.ndarray]]]
+        ResultGridSearch
             Dictionary containing best parameters, scores, estimator, etc.
 
         References
@@ -264,7 +318,7 @@ regression-model-in-python
         cross_validation_folds: int = 3,
         scoring_method: str = "accuracy",
         f1_score_average: str = "macro",
-    ) -> dict[str, Union[np.ndarray, float]]:
+    ) -> ResultAccuracyPredictions:
         """Evaluate model accuracy using various metrics.
 
         Parameters
@@ -288,7 +342,7 @@ regression-model-in-python
 
         Returns
         -------
-        dict[str, Union[np.ndarray, float]]
+        ResultAccuracyPredictions
             Dictionary containing various accuracy metrics
 
         References
@@ -325,7 +379,7 @@ regression-model-in-python
 
     def fitting_perf_eval(
         self, array_y: np.ndarray, array_y_hat: np.ndarray
-    ) -> dict[str, float]:
+    ) -> ResultFittingPerformance:
         """Evaluate fitting performance using various metrics.
 
         Parameters
@@ -337,7 +391,7 @@ regression-model-in-python
 
         Returns
         -------
-        dict[str, float]
+        ResultFittingPerformance
             Dictionary containing various performance metrics
 
         References
