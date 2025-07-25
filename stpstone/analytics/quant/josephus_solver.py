@@ -4,8 +4,6 @@ The Josephus problem simulates an elimination process where every k-th
 participant is removed until only one survivor remains.
 """
 
-from typing import Any
-
 from stpstone.dsa.queues.simple_queue import Queue
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
@@ -19,7 +17,7 @@ class JosephusSolver(metaclass=TypeChecker):
 
     Parameters
     ----------
-    list_ : list[type[Any]]
+    list_ : list[object]
         List of participants in the Josephus problem.
     step_interval : int
         Step interval for elimination (k-th participant to be removed).
@@ -32,7 +30,23 @@ class JosephusSolver(metaclass=TypeChecker):
         If step_interval is not positive.
     """
 
-    def __init__(self, list_: list[type[Any]], step_interval: int) -> None:
+    def __init__(self, list_: list[object], step_interval: int) -> None:
+        """Initialize the JosephusSolver object.
+        
+        Parameters
+        ----------
+        list_ : list[object]
+            List of participants in the Josephus problem.
+        step_interval : int
+            Step interval for elimination (k-th participant to be removed).
+        
+        Raises
+        ------
+        TypeError
+            If list_ is not a list or step_interval is not an integer.
+        ValueError
+            If step_interval is not positive.
+        """
         if not isinstance(list_, list):
             raise TypeError("list_ must be a list")
         if not isinstance(step_interval, int):
@@ -42,13 +56,18 @@ class JosephusSolver(metaclass=TypeChecker):
         self.list_ = list_
         self.step_interval = step_interval
 
-    def solve(self) -> type[Any]:
+    def solve(self) -> object:
         """Solve the Josephus problem and return the last surviving participant.
 
         Returns
         -------
-        type[Any]
+        object
             The last remaining participant from the initial list.
+
+        Raises
+        ------
+        ValueError
+            If the list is empty.
 
         References
         ----------
