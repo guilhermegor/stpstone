@@ -94,7 +94,7 @@ class Interpolation(metaclass=TypeChecker):
             Independent variable data points
         array_y : Union[list[float], np.ndarray]
             Dependent variable data points
-        bc_type : Literal["natural", "clamped", "not-a-knot", "periodic"]
+        bc_type : Literal['natural', 'clamped', 'not-a-knot', 'periodic']
             Boundary condition type
 
         Returns
