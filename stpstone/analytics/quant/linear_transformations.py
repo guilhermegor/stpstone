@@ -18,19 +18,19 @@ class LinearAlgebra(metaclass=TypeChecker):
         self, 
         array_1: Union[npt.ArrayLike, Sequence[Number]], 
         array_2: Union[npt.ArrayLike, Sequence[Number], Number]
-    ) -> np.ndarray:
+    ) -> npt.NDArray[np.float64]:
         """Element-wise addition of two arrays or vectors.
         
         Parameters
         ----------
-        array_1 : ArrayLike
+        array_1 : Union[npt.ArrayLike, Sequence[Number]]
             First input array (can be list, tuple, or numpy array)
-        array_2 : ArrayLike
+        array_2 : Union[npt.ArrayLike, Sequence[Number], Number]
             Second input array (must match dimensions of array_1)
             
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             The element-wise sum of the inputs
             
         Examples
@@ -61,9 +61,9 @@ class LinearAlgebra(metaclass=TypeChecker):
         
         Parameters
         ----------
-        array_1 : ArrayLike
+        array_1 : Union[npt.ArrayLike, Sequence[Number]]
             First input vector
-        array_2 : ArrayLike
+        array_2 : Union[npt.ArrayLike, Sequence[Number]]
             Second input vector (must match dimension of array_1)
             
         Returns
@@ -94,19 +94,19 @@ class LinearAlgebra(metaclass=TypeChecker):
         self, 
         scalar: Number, 
         array: Union[npt.ArrayLike, Sequence[Number]]
-    ) -> np.ndarray:
+    ) -> npt.NDArray[np.float64]:
         """Multiply an array by a scalar value.
         
         Parameters
         ----------
-        scalar : Union[int, float]
+        scalar : Number
             The scalar multiplier
-        array : ArrayLike
+        array : Union[npt.ArrayLike, Sequence[Number]]
             The array to be multiplied
             
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             The result of scalar multiplication
             
         Examples
@@ -129,9 +129,9 @@ class LinearAlgebra(metaclass=TypeChecker):
 
     def cholesky_decomposition(
         self, 
-        array_data: np.ndarray, 
-        bl_lower_triangle: bool=True
-    ) -> np.ndarray:
+        array_data: npt.NDArray[np.float64], 
+        bl_lower_triangle: bool = True
+    ) -> npt.NDArray[np.float64]:
         """Cholesky decomposition performed on a symmetric, positive-definite matrix.
 
         Cholesky decomposition is a numerical method that factorizes a given matrix 
@@ -150,7 +150,7 @@ class LinearAlgebra(metaclass=TypeChecker):
 
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Symmetric, positive-definite matrix to be decomposed.
         bl_lower_triangle : bool, optional
             If True (default), returns the lower-triangular matrix L such that A = L @ L.T.
@@ -158,7 +158,7 @@ class LinearAlgebra(metaclass=TypeChecker):
 
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             The lower or upper triangular matrix resulting from the decomposition.
 
         References
@@ -168,128 +168,142 @@ class LinearAlgebra(metaclass=TypeChecker):
         L = np.linalg.cholesky(array_data)
         return L if bl_lower_triangle else L.T
 
-    def eigenvalue_eigenvector(self, array_data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def eigenvalue_eigenvector(
+        self, 
+        array_data: npt.NDArray[np.float64]
+    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
         """Eigenvector and Eigenvalue.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        tuple[np.ndarray, np.ndarray]
+        tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]
             Decomposed array.
         """
         return np.linalg.eig(array_data)
 
-    def transpose_matrix(self, array_data: np.ndarray) -> np.ndarray:
+    def transpose_matrix(self, array_data: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         """Transpose Matrix.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return np.transpose(array_data)
 
-    def matrix_multiplication(self, array_1: np.ndarray, array_2: np.ndarray) -> np.ndarray:
+    def matrix_multiplication(
+        self, 
+        array_1: npt.NDArray[np.float64], 
+        array_2: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
         """Matrix Multiplication.
         
         Parameters
         ----------
-        array_1 : np.ndarray
+        array_1 : npt.NDArray[np.float64]
             Array to be decomposed.
-        array_2 : np.ndarray
+        array_2 : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return array_1.dot(array_2)
 
-    def power_matrix(self, array_data: np.ndarray, n: int) -> np.ndarray:
+    def power_matrix(self, array_data: npt.NDArray[np.float64], n: int) -> npt.NDArray[np.float64]:
         """Power Matrix.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         n : int
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return np.linalg.matrix_power(array_data, n)
 
-    def sqrt_matrix(self, array_data: np.ndarray) -> np.ndarray:
-        """"Square Root Matrix.
+    def sqrt_matrix(self, array_data: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        """Square Root Matrix.
         
         Parameters
         ----------
-        array_data : np.ndarray
-            Array to be decomposed.
-        n : int
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return sqrtm(array_data)
 
-    def shape_array(self, array_data: np.ndarray) -> tuple[int, int]:
+    def shape_array(self, array_data: npt.NDArray[np.float64]) -> tuple[int, int]:
         """Shape Array.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
         tuple[int, int]
             Decomposed array.
+
+        Raises
+        ------
+        ValueError
+            If the array is empty.
         """
         if array_data.size == 0:
             raise ValueError("Cannot get the shape of an empty array.")
         return np.shape(array_data)
 
-    def covariance_arrays(self, array_data: np.ndarray) -> np.ndarray:
+    def covariance_arrays(self, array_data: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         """Covariance Arrays.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
         """
         return np.cov(array_data)
 
-    def euclidean_distance(self, array_1: np.ndarray, array_2: np.ndarray) -> float:
+    def euclidean_distance(
+        self, 
+        array_1: npt.NDArray[np.float64], 
+        array_2: npt.NDArray[np.float64]
+    ) -> float:
         """Euclidean Distance.
         
         Distance between two vectors.
         
         Parameters
         ----------
-        array_1 : np.ndarray
+        array_1 : npt.NDArray[np.float64]
             Array to be decomposed.
-        array_2 : np.ndarray
+        array_2 : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
@@ -299,7 +313,7 @@ class LinearAlgebra(metaclass=TypeChecker):
         """
         return np.linalg.norm(array_1 - array_2)
 
-    def identity(self, n: int) -> np.ndarray:
+    def identity(self, n: int) -> npt.NDArray[np.float64]:
         """Identity Matrix.
         
         Parameters
@@ -309,19 +323,23 @@ class LinearAlgebra(metaclass=TypeChecker):
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return np.identity(n)
 
-    def angle_between_two_arrays(self, array_1: np.ndarray, array_2: np.ndarray) -> float:
+    def angle_between_two_arrays(
+        self, 
+        array_1: npt.NDArray[np.float64], 
+        array_2: npt.NDArray[np.float64]
+    ) -> float:
         """Angle between two arrays.
         
         Parameters
         ----------
-        array_1 : np.ndarray
+        array_1 : npt.NDArray[np.float64]
             Array to be decomposed.
-        array_2 : np.ndarray
+        array_2 : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
@@ -332,12 +350,15 @@ class LinearAlgebra(metaclass=TypeChecker):
         return np.arccos(np.dot(array_1, array_2.T) / (
             np.linalg.norm(array_1) * np.linalg.norm(array_2)))
 
-    def determinant(self, array_data: np.ndarray) -> float:
+    def determinant(
+        self, 
+        array_data: npt.NDArray[np.float64]
+    ) -> float:
         """Matrix determinant.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
@@ -347,27 +368,27 @@ class LinearAlgebra(metaclass=TypeChecker):
         """
         return np.linalg.det(array_data)
 
-    def inverse(self, array_data: np.ndarray) -> np.ndarray:
+    def inverse(self, array_data: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         """Matrix inverse.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return np.linalg.inv(array_data)
 
-    def condition_number(self, array_data: np.ndarray) -> float:
+    def condition_number(self, array_data: npt.NDArray[np.float64]) -> float:
         """Condition number.
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
@@ -377,7 +398,7 @@ class LinearAlgebra(metaclass=TypeChecker):
         """
         return np.linalg.cond(array_data)
 
-    def matrix_rank(self, array_data: np.ndarray) -> int:
+    def matrix_rank(self, array_data: npt.NDArray[np.float64]) -> int:
         """Compute the rank of a matrix.
         
         The rank of a matrix is the maximum number of linearly independent row or column vectors
@@ -386,7 +407,7 @@ class LinearAlgebra(metaclass=TypeChecker):
         
         Parameters
         ----------
-        array_data : np.ndarray
+        array_data : npt.NDArray[np.float64]
             Input matrix of shape (M, N). The matrix can be either:
             - Real-valued (float)
             - Complex-valued (complex)
@@ -433,19 +454,23 @@ class LinearAlgebra(metaclass=TypeChecker):
         """
         return int(np.linalg.matrix_rank(array_data))
 
-    def linear_equations_solution(self, array_1: np.ndarray, array_2: np.ndarray) -> np.ndarray:
+    def linear_equations_solution(
+        self, 
+        array_1: npt.NDArray[np.float64], 
+        array_2: npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64]:
         """Linear Equations Solution.
         
         Parameters
         ----------
-        array_1 : np.ndarray
+        array_1 : npt.NDArray[np.float64]
             Array to be decomposed.
-        array_2 : np.ndarray
+        array_2 : npt.NDArray[np.float64]
             Array to be decomposed.
         
         Returns
         -------
-        np.ndarray
+        npt.NDArray[np.float64]
             Decomposed array.
         """
         return np.linalg.solve(array_1, array_2)
