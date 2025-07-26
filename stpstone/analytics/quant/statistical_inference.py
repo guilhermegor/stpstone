@@ -141,7 +141,6 @@ class MultipleRegressionHT:
 
     def durbin_watson_test(self, array_x, array_y):
         """
-        REFERENCES: https://www.statology.org/durbin-watson-test-python/
         DOCSTRING: DURBIN-WATSON SERIAL CORRELATION: ONE OF THE ASSUMPTIONS OF LINEAR REGRESSION
             IS THAT THERE IS NO CORRELATION BETWEEN THE RESIDUALS (ASSUMED TO BE INDEPENDENT),
             ONE WAY TO DETERMINE WHETER THIS ASSUMPTION IS MET IS TO PERFORM A

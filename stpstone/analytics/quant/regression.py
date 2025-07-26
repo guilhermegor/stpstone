@@ -1,7 +1,8 @@
 """Regression Module.
 
 This module provides classes and functions for performing linear and nonlinear regression
-analysis."""
+analysis.
+"""
 
 from typing import Any, Callable, Literal, Optional, TypedDict, Union
 
@@ -37,6 +38,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 class LinearRegressionsResult(TypedDict):
     """TypedDict for LinearRegressions results."""
+
     model_fitted: BaseEstimator
     score: float
     predictions: NDArray[np.float64]
@@ -49,6 +51,7 @@ class LinearRegressionsResult(TypedDict):
 
 class NonLinearRegressionsResult(TypedDict):
     """TypedDict for NonLinearRegressions results."""
+
     model_fitted: BaseEstimator
     score: float
     predictions: NDArray[np.float64]
@@ -57,6 +60,7 @@ class NonLinearRegressionsResult(TypedDict):
 
 class LogLinearRegressionsResult(TypedDict):
     """TypedDict for LogLinearRegressions results."""
+
     model_fitted: LogisticRegression
     classes: NDArray[np.float64]
     intercept: NDArray[np.float64]
@@ -71,6 +75,7 @@ class LogLinearRegressionsResult(TypedDict):
 
 class NonLinearEquationsResult(TypedDict):
     """TypedDict for NonLinearEquations results."""
+    
     coefficients: NDArray[np.float64]
     values_interpolated: NDArray[np.float64]
 
@@ -80,30 +85,35 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def normal_equation(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray, 
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64], 
         bl_optimize: Optional[bool] = True
     ) -> Union[
         NDArray[np.float64], 
         tuple[NDArray[np.float64], NDArray[np.float64], int, NDArray[np.float64]]
     ]:
-        """
-        Normal equation to find the value of theta that minimizes the cost function.
+        """Compute normal equation to find the value of theta that minimizes the cost function.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
-        bl_optimize : bool, optional
+        bl_optimize : Optional[bool]
             Whether to use optimized calculation (default: True)
 
         Returns
         -------
-        Union[np.ndarray, tuple[np.ndarray, np.ndarray, int, np.ndarray]]
-            tuple with best theta vector, residuals, rank if bl_optimize=True,
-            else just theta vector
+        Union[NDArray[np.float64], tuple[NDArray[np.float64], NDArray[np.float64], int, \
+            NDArray[np.float64]]]
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
 
         References
         ----------
@@ -122,21 +132,20 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def batch_gradient_descent(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         max_iter: int = 1000,
         eta: float = 0.1,
         m: int = 100,
-        theta: np.ndarray = np.random.randn(2, 1),
+        theta: Optional[np.ndarray] = None,
     ) -> NDArray[np.float64]:
-        """
-        Batch gradient descent to find the global minimum of a linear function.
+        """Batch gradient descent to find the global minimum of a linear function.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         max_iter : int, optional
             Maximum iterations (default: 1000)
@@ -144,13 +153,22 @@ class LinearRegressions(metaclass=TypeChecker):
             Learning rate (default: 0.1)
         m : int, optional
             Number of instances (default: 100)
-        theta : np.ndarray, optional
+        theta : Optional[np.ndarray]
             Initial theta vector (default: random initialization)
 
         Returns
         -------
-        np.ndarray
+        NDArray[np.float64]
             Optimized theta vector
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If max_iter is not positive
+            If eta is not positive
 
         References
         ----------
@@ -167,6 +185,9 @@ class LinearRegressions(metaclass=TypeChecker):
         if eta <= 0:
             raise ValueError("eta must be positive")
 
+        if theta is None:
+            theta = np.random.randn(2, 1)
+
         for _ in range(max_iter):
             gradients = 2 / m * array_x.T.dot(array_x.dot(theta) - array_y)
             theta = theta - eta * gradients
@@ -174,28 +195,27 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def stochastic_gradient_descent(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         method: Literal["implemented", "sklearn"] = "sklearn",
         n_epochs: int = 1000,
         t0: int = 5,
         t1: int = 50,
         m: int = 100,
-        theta: np.ndarray = np.random.randn(2, 1),
+        theta: Optional[np.ndarray] = None,
         tolerance: float = 1e-3,
         penalty: Optional[str] = None,
         eta0: float = 0.1,
     ) -> Union[NDArray[np.float64], LinearRegressionsResult]:
-        """
-        Stochastic gradient descent optimization.
+        """Stochastic gradient descent optimization.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
-        method : Literal["implemented", "sklearn"], optional
+        method : Literal['implemented', 'sklearn'], optional
             Implementation method (default: "sklearn")
         n_epochs : int, optional
             Maximum iterations (default: 1000)
@@ -205,7 +225,7 @@ class LinearRegressions(metaclass=TypeChecker):
             Learning schedule hyperparameter (default: 50)
         m : int, optional
             Number of instances (default: 100)
-        theta : np.ndarray, optional
+        theta : Optional[np.ndarray]
             Initial theta vector (default: random initialization)
         tolerance : float, optional
             Optimization tolerance (default: 1e-3)
@@ -216,8 +236,17 @@ class LinearRegressions(metaclass=TypeChecker):
 
         Returns
         -------
-        dict[str, Any]
+        Union[NDArray[np.float64], LinearRegressionsResult]
             Results dictionary containing model and predictions
+        
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If n_epochs is not positive
+            If eta0 is not positive
 
         References
         ----------
@@ -234,8 +263,26 @@ class LinearRegressions(metaclass=TypeChecker):
         if eta0 <= 0:
             raise ValueError("eta0 must be positive")
 
+        if theta is None:
+            theta = np.random.randn(2, 1)
+            # bias term (column of ones) to array_x to match theta's shape
+            array_x = np.c_[np.ones(array_x.shape[0]), array_x]
+
         if method == "implemented":
-            def learning_schedule(t): return t0 / (t + t1)
+            def learning_schedule(t: int) -> float:
+                """Learning schedule.
+                
+                Parameters
+                ----------
+                t : int
+                    Iteration number
+
+                Returns
+                -------
+                float
+                    Learning rate
+                """
+                return t0 / (t + t1)
             for epoch in range(n_epochs):
                 for i in range(m):
                     random_index = np.random.randint(m)
@@ -262,23 +309,29 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def linear_regression(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64]
     ) -> LinearRegressionsResult:
-        """
-        Fit linear regression model to data.
+        """Fit linear regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
 
         Returns
         -------
-        dict[str, Any]
+        LinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
@@ -288,9 +341,12 @@ class LinearRegressions(metaclass=TypeChecker):
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         model = LinearRegression().fit(np.array(array_x), np.array(array_y))
 
+        # handle single-point case
+        score = 1.0 if array_x.shape[0] == 1 else model.score(np.array(array_x), np.array(array_y))
+
         result = {
             "model_fitted": model,
-            "score": model.score(np.array(array_x), np.array(array_y)),
+            "score": score,
             "coefficients": model.coef_,
             "intercept": model.intercept_,
             "predictions": model.predict(np.array(array_x)),
@@ -303,23 +359,29 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def k_neighbors_regression(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64]
     ) -> LinearRegressionsResult:
-        """
-        Fit k-nearest neighbors regression model to data.
+        """Fit k-nearest neighbors regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
 
         Returns
         -------
-        dict[str, Any]
+        LinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
@@ -329,8 +391,6 @@ class LinearRegressions(metaclass=TypeChecker):
         model = KNeighborsRegressor().fit(np.array(array_x), np.array(array_y))
         return {
             "model_fitted": model,
-            "intercept": model.intercept_,
-            "coefficients": model.coef_,
             "score": model.score(np.array(array_x), np.array(array_y)),
             "predictions": model.predict(np.array(array_x)),
             "theta_best": np.linalg.inv(np.array(array_x).T.dot(np.array(array_x))).dot(
@@ -340,19 +400,18 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def polynomial_equations(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         int_degree: int = 2,
         bl_include_bias: bool = True,
     ) -> LinearRegressionsResult:
-        """
-        Fit polynomial regression model to data.
+        """Fit polynomial regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         int_degree : int, optional
             Polynomial degree (default: 2)
@@ -361,8 +420,17 @@ class LinearRegressions(metaclass=TypeChecker):
 
         Returns
         -------
-        dict[str, Any]
+        LinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+        ValueError
+            If degree is less than 1
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
@@ -375,35 +443,37 @@ class LinearRegressions(metaclass=TypeChecker):
         poly_features = PolynomialFeatures(
             degree=int_degree, include_bias=bl_include_bias
         )
-        array_x_polynom = poly_features.fit_transform(array_x)
+        array_x = poly_features.fit_transform(array_x)
         model = LinearRegression()
-        model.fit(array_x_polynom, array_y)
-        array_predictions = model.predict(array_x_polynom)
+        model.fit(array_x, array_y)
+        array_predictions = model.predict(array_x)
+
+        # handle single-point case
+        score = 1.0 if array_x.shape[0] == 1 else model.score(np.array(array_x), np.array(array_y))
 
         return {
             "model_fitted": model,
             "intercept": model.intercept_,
             "coefficients": model.coef_,
-            "score": model.score(np.array(array_x_polynom), np.array(array_y)),
+            "score": score,
             "predictions": array_predictions,
             "poly_features": poly_features,
         }
 
     def ridge_regression(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         alpha: float = 0,
         solver_ridge_regression: str = "cholesky",
     ) -> LinearRegressionsResult:
-        """
-        Fit ridge regression model to data.
+        """Fit ridge regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         alpha : float, optional
             Regularization strength (default: 0)
@@ -412,8 +482,16 @@ class LinearRegressions(metaclass=TypeChecker):
 
         Returns
         -------
-        dict[str, Any]
+        LinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If alpha is negative
 
         References
         ----------
@@ -441,26 +519,33 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def lasso_regression(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray, 
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64], 
         alpha: float = 0.1
     ) -> LinearRegressionsResult:
-        """
-        Fit lasso regression model to data.
+        """Fit lasso regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         alpha : float, optional
             Regularization strength (default: 0.1)
 
         Returns
         -------
-        dict[str, Any]
+        LinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If alpha is negative
 
         References
         ----------
@@ -488,19 +573,18 @@ class LinearRegressions(metaclass=TypeChecker):
 
     def elastic_net_regression(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         alpha: float = 0.1,
         l1_ratio: float = 0.5,
     ) -> LinearRegressionsResult:
-        """
-        Fit elastic net regression model to data.
+        """Fit elastic net regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         alpha : float, optional
             Regularization strength (default: 0.1)
@@ -509,8 +593,17 @@ class LinearRegressions(metaclass=TypeChecker):
 
         Returns
         -------
-        dict[str, Any]
+        LinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If alpha is negative
+            If l1_ratio is not between 0 and 1
 
         References
         ----------
@@ -539,30 +632,37 @@ class LinearRegressions(metaclass=TypeChecker):
         }
 
 
-class NonLinearRegressions:
+class NonLinearRegressions(metaclass=TypeChecker):
+    """Class for non-linear regression models."""
 
     def decision_tree_regression(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray, 
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64], 
         seed: Optional[int] = None
     ) -> NonLinearRegressionsResult:
-        """
-        Fit decision tree regression model to data.
+        """Fit decision tree regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         seed : Optional[int], optional
             Random seed (default: None)
 
         Returns
         -------
-        dict[str, Any]
+        NonLinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
@@ -580,19 +680,18 @@ class NonLinearRegressions:
 
     def random_forest_regression(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         seed: Optional[int] = None,
         n_estimators: int = 100,
     ) -> NonLinearRegressionsResult:
-        """
-        Fit random forest regression model to data.
+        """Fit random forest regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         seed : Optional[int], optional
             Random seed (default: None)
@@ -601,8 +700,16 @@ class NonLinearRegressions:
 
         Returns
         -------
-        dict[str, Any]
+        NonLinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If n_estimators is negative
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
@@ -623,21 +730,20 @@ class NonLinearRegressions:
 
     def support_vector_regression(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         kernel: str = "poly",
         int_degree: int = 2,
-        c_positive_floating_point_number: float = 100,
+        c_positive_floating_point_number: float = 100.0,
         epsilon: float = 0.1,
     ) -> NonLinearRegressionsResult:
-        """
-        Fit support vector regression model to data.
+        """Fit support vector regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         kernel : str, optional
             Kernel type (default: "poly")
@@ -650,8 +756,18 @@ class NonLinearRegressions:
 
         Returns
         -------
-        dict[str, Any]
+        NonLinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If degree is negative
+            If C is negative
+            If epsilon is negative
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
@@ -678,12 +794,13 @@ class NonLinearRegressions:
         }
 
 
-class LogLinearRegressions:
+class LogLinearRegressions(metaclass=TypeChecker):
+    """Class for log-linear regression models."""
 
     def logistic_regression_logit(
         self,
-        array_x: np.ndarray,
-        array_y: np.ndarray,
+        array_x: NDArray[np.float64],
+        array_y: NDArray[np.float64],
         c_positive_floating_point_number: float = 1.0,
         l1_ratio: Optional[float] = None,
         int_max_iter: int = 100,
@@ -700,14 +817,13 @@ class LogLinearRegressions:
         bl_dual: bool = False,
         n_jobs: Optional[int] = None,
     ) -> LogLinearRegressionsResult:
-        """
-        Fit logistic regression model to data.
+        """Fit logistic regression model to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
         c_positive_floating_point_number : float, optional
             Inverse of regularization strength (default: 1.0)
@@ -720,7 +836,7 @@ class LogLinearRegressions:
         penalty : str, optional
             Regularization penalty (default: "l2")
         mult_class_classifier : str, optional
-            Multiclass handling (default: "auto")
+            Multiclass handling (default: "ovr")
         float_tolerance : float, optional
             Tolerance for stopping (default: 0.0001)
         intercept_scaling : int, optional
@@ -742,8 +858,18 @@ class LogLinearRegressions:
 
         Returns
         -------
-        dict[str, Any]
+        LogLinearRegressionsResult
             Results dictionary containing model and metrics
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
+            If C is negative
+            If max_iter is negative
+            If tolerance is negative
 
         References
         ----------
@@ -784,7 +910,7 @@ class LogLinearRegressions:
             "model_fitted": model,
             "classes": model.classes_,
             "intercept": model.intercept_,
-            "coefficient": model.coef_,
+            "coefficients": model.coef_,
             "predict_probability": model.predict_proba(array_x),
             "predictions": model.predict(array_x),
             "score": model.score(array_x, array_y),
@@ -796,7 +922,21 @@ class LogLinearRegressions:
         }
 
 
-class NonLinearEquations:
+class NonLinearEquations(metaclass=TypeChecker):
+    """Class for non-linear equations."""
+
+    def __init__(self) -> None:
+        """Initialize class.
+        
+        Raises
+        ------
+        ImportError
+            If scipy.optimize is not installed
+        """
+        try:
+            import scipy.optimize  # noqa: F401 - ignore unused import
+        except ImportError as err:
+            raise ImportError("scipy.optimize is required for NonLinearEquations") from err
 
     def differential_evolution(
         self,
@@ -812,8 +952,7 @@ class NonLinearEquations:
         int_size_trial_solution_population: int = 40,
         tolerance: float = 5e-5,
     ) -> Union[OptimizeResult, tuple[NDArray[np.float64], float, int, int, int]]:
-        """
-        Differential evolution optimization.
+        """Differential evolution optimization.
 
         Parameters
         ----------
@@ -821,7 +960,7 @@ class NonLinearEquations:
             Cost function to minimize
         list_bounds : list[tuple[float, float]]
             List of (min, max) pairs for each parameter
-        method : Literal["scipy", "mystic"], optional
+        method : Literal['scipy', 'mystic'], optional
             Implementation method (default: "scipy")
         max_iter : int, optional
             Maximum iterations (default: 1000)
@@ -842,8 +981,17 @@ class NonLinearEquations:
 
         Returns
         -------
-        Any
+        Union[OptimizeResult, tuple[NDArray[np.float64], float, int, int, int]]
             Optimization result
+
+        Raises
+        ------
+        TypeError
+            If cost_func is not callable
+        ValueError
+            If list_bounds is not a list of (min, max) tuples
+            If max_iter is not positive
+            If tolerance is not positive
 
         References
         ----------
@@ -906,22 +1054,29 @@ class NonLinearEquations:
         array_x: NDArray[np.float64], 
         array_y: NDArray[np.float64]
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-        """
-        Optimize curve fitting.
+        """Optimize curve fitting.
 
         Parameters
         ----------
-        func : callable
+        func : Callable[..., float]
             Function to fit
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
 
         Returns
         -------
-        tuple[np.ndarray, np.ndarray]
+        tuple[NDArray[np.float64], NDArray[np.float64]]
             tuple containing optimal parameters and covariance matrix
+
+        Raises
+        ------
+        TypeError
+            If func is not callable
+            If array_x or array_y is not a numpy array
+        ValueError
+            If array_x or array_y is empty
         """
         if not callable(func):
             raise TypeError("func must be callable")
@@ -930,34 +1085,51 @@ class NonLinearEquations:
         if array_x.size == 0 or array_y.size == 0:
             raise ValueError("Input arrays cannot be empty")
 
+        # ensure 1d arrays
+        array_x = array_x.flatten()
+        array_y = array_y.flatten()
+
         return curve_fit(func, xdata=array_x, ydata=array_y)
 
     def polynomial_fit(
         self, 
-        array_x: np.ndarray, 
-        array_y: np.ndarray
+        array_x: NDArray[np.float64], 
+        array_y: NDArray[np.float64],
+        deg: int = 2
     ) -> NonLinearEquationsResult:
-        """
-        Fit polynomial to data.
+        """Fit polynomial to data.
 
         Parameters
         ----------
-        array_x : np.ndarray
+        array_x : NDArray[np.float64]
             Input feature array
-        array_y : np.ndarray
+        array_y : NDArray[np.float64]
             Target values
+        deg : int, optional
+            Degree of polynomial (default: 2)
 
         Returns
         -------
-        dict[str, np.ndarray]
+        NonLinearEquationsResult
             Dictionary containing coefficients and interpolated values
+
+        Raises
+        ------
+        TypeError
+            If input arrays are not numpy arrays
+        ValueError
+            If input arrays are empty
         """
         if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
             raise TypeError("Input arrays must be numpy arrays")
         if array_x.size == 0 or array_y.size == 0:
             raise ValueError("Input arrays cannot be empty")
 
-        array_coeff = np.polyfit(array_x, array_y)
+        # ensure 1d arrays
+        array_x = array_x.flatten()
+        array_y = array_y.flatten()
+
+        array_coeff = np.polyfit(array_x, array_y, deg=deg)
         return {
             "coefficients": array_coeff,
             "values_interpolated": np.polyval(array_coeff, array_x),
