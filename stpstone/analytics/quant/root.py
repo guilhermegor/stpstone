@@ -1,52 +1,136 @@
-# ROOT OF A FUNCTION WITH PYTHON
+"""Root-finding methods for scalar functions."""
+
+from typing import Callable
 
 import numpy as np
-from scipy.optimize import newton, fsolve
+from scipy.optimize import fsolve, newton
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class Root:
+class Root(metaclass=TypeChecker):
+    """Root-finding methods for scalar functions."""
 
-    def bisection(self, f, a, b, epsilon):
+    def bisection(
+        self,
+        func: Callable[[float], float],
+        a: float,
+        b: float,
+        epsilon: float,
+    ) -> float:
+        """Find root of a function within an interval using bisection method.
+
+        Parameters
+        ----------
+        func : Callable[[float], float]
+            Function whose root is to be found
+        a : float
+            Lower bound of the interval
+        b : float
+            Upper bound of the interval
+        epsilon : float
+            Tolerance for stopping condition
+
+        Returns
+        -------
+        float
+            Approximate root of the function
+
+        Raises
+        ------
+        ValueError
+            If a and b do not bound a root
+            If epsilon is not positive
+            If a equals b
+
+        References
+        ----------
+        .. [1] Qingkai Kong, Timmy Siauw, Alexandre M. Bayern, 
+               Python Programming and Numerical Methods, A Guide for Engineers and Scientists
         """
-        REFERENCES: PYTHON PROGRAMMING AND NUMERICAL METHODS, A GUIDE FOR ENGINEERS AND SCIENTS -
-            QINGKAI KONG, TIMMY SIAUW, ALEXANDRE M. BAYERN
-        DOCSTRING:
-        INPUTS: FUNCTION (F), A, B (BOUNDARIES) AND EPSILON (TOLERANCE)
-        OUTPUTS: FLOAT
-        """
-        # approximates a root, R, of f bounded
-        # by a and b to within tolerance
-        # |f(m)| < epsilon with m being the midpoint
-        # between a and b. Recursive implementation
-        # check if a and b bound a root
-        if np.sign(f(a)) == np.sign(f(b)):
-            raise Exception('the scalars a and b do not bound a root')
-        # get midpoint
+        if epsilon <= 0:
+            raise ValueError(f"Epsilon must be positive, got {epsilon}")
+        if a == b:
+            raise ValueError("Interval bounds a and b must be distinct")
+        if np.sign(func(a)) == np.sign(func(b)):
+            raise ValueError("The scalars a and b do not bound a root")
+
         m = (a + b) / 2
-        if np.abs(f(m)) < epsilon:
-            #   stopping condition, report m as root
+        if np.abs(func(m)) < epsilon:
             return m
-        elif np.sign(f(a)) == np.sign(f(m)):
-            #   case where m is an improvement on a.
-            #   make recursive call with a = m
-            return self.bisection(f, m, b, epsilon)
-        elif np.sign(f(b)) == np.sign(f(m)):
-            #   case where m is an improvement on b.
-            #   make recursive call with b = m
-            return self.bisection(f, a, m, epsilon)
+        if np.sign(func(a)) == np.sign(func(m)):
+            return self.bisection(func, m, b, epsilon)
+        return self.bisection(func, a, m, epsilon)
 
-    def newton_raphson(self, f, x0, epsilon):
-        """
-        DOCSTRING: NEWTHON RAPHSON METHOD TO OPTIMIZE ROOT-FINDING
-        INPUTS: F(FUNCTION), X0 (FIRST ATTEMPT) AND EPSILON
-        OUTPUTS: FLOAT
-        """
-        return newton(f, x0, tol=epsilon)
+    def newton_raphson(
+        self,
+        func: Callable[[float], float],
+        x0: float,
+        epsilon: float,
+    ) -> float:
+        """Find root of a function using Newton-Raphson method.
 
-    def fsolve(self, f, x0, epsilon):
+        Parameters
+        ----------
+        func : Callable[[float], float]
+            Function whose root is to be found
+        x0 : float
+            Initial guess for the root
+        epsilon : float
+            Tolerance for stopping condition
+
+        Returns
+        -------
+        float
+            Approximate root of the function
+
+        Raises
+        ------
+        ValueError
+            If epsilon is not positive
+
+        References
+        ----------
+        .. [1] Qingkai Kong, Timmy Siauw, Alexandre M. Bayern, 
+               Python Programming and Numerical Methods, A Guide for Engineers and Scientists
         """
-        DOCSTRING: FSOLVE METHOD TO OPTIMIZE ROOT-FINDING
-        INPUTS: F(FUNCTION), X0 (FIRST ATTEMPT) AND EPSILON
-        OUTPUTS: FLOAT
+        if epsilon <= 0:
+            raise ValueError(f"Epsilon must be positive, got {epsilon}")
+        return newton(func, x0, tol=epsilon)
+
+    def fsolve(
+        self,
+        func: Callable[[float], float],
+        x0: float,
+        epsilon: float,
+    ) -> float:
+        """Find root of a function using fsolve method.
+
+        Parameters
+        ----------
+        func : Callable[[float], float]
+            Function whose root is to be found
+        x0 : float
+            Initial guess for the root
+        epsilon : float
+            Tolerance for stopping condition
+
+        Returns
+        -------
+        float
+            Approximate root of the function
+
+        Raises
+        ------
+        ValueError
+            If epsilon is not positive
+
+        References
+        ----------
+        .. [1] Qingkai Kong, Timmy Siauw, Alexandre M. Bayern, 
+               Python Programming and Numerical Methods, A Guide for Engineers and Scientists
         """
-        return fsolve(f, x0, xtol=epsilon)
+        if epsilon <= 0:
+            raise ValueError(f"Epsilon must be positive, got {epsilon}")
+        result = fsolve(func, x0, xtol=epsilon)
+        return float(result[0])
