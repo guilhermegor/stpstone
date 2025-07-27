@@ -296,7 +296,7 @@ def test_benford_law_non_boolean_flag(
     --------
     That passing a non-boolean bl_list_number_occurrencies raises TypeError with correct message.
     """
-    with pytest.raises(TypeError, match="bl_list_number_occurrencies must be a boolean"):
+    with pytest.raises(TypeError, match="bl_list_number_occurrencies must be of type bool"):
         stat_dist_ht.benford_law(sample_data, bl_list_number_occurrencies="True")
 
 

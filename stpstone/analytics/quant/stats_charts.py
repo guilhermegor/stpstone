@@ -6,11 +6,10 @@ import numpy as np
 import seaborn as sns
 from sklearn.metrics import mean_squared_error, precision_recall_curve, roc_curve
 from sklearn.model_selection import train_test_split
-import statsmodels.api as sm
 
+from stpstone.analytics.quant.fit_assessment import FitPerformance
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
-from stpstone.quantitative_methods.fit_assessment import FitPerformance
-from stpstone.quantitative_methods.regression import LogLinearRegressions
+from stpstone.analytics.quant.regression import LogLinearRegressions
 
 
 class ProbStatsCharts:
@@ -197,27 +196,21 @@ class ProbStatsCharts:
             COMPLETE SAVING PATH OF THE FIGURE
         OUTPUTS: -
         """
-        # cross validating the model --> establishing accuracy
-        array_target_scores = HandlingClassification().cross_validation_score(
+        array_target_scores = FitPerformance().cross_validation(
             model_fitted, array_data, array_target, cross_validation_folds, scoring_method)
-        # receiver operating characteristics (roc curve responses)
-        fpr, tpr, thresholds = precision_recall_curve(
-            array_target, array_target_scores)
+        fpr, tpr, _ = roc_curve(array_target, array_target_scores)
+        plt.figure(figsize=tup_fig_size)
         plt.plot(fpr, tpr, linewidth=2, label=plot_title)
-        # dashed diagonal
         plt.plot([0, 1], [0, 1], 'k--')
         plt.axis([0, 1, 0, 1])
-        # label axis
         plt.xlabel(label_x_axis, fontsize=font_size)
         plt.ylabel(label_y_axis, fontsize=font_size)
-        # whether place a grid or not
         plt.grid(bl_grid)
-        # saving the plot, if is user's will
+        if plot_title is not None:
+            plt.title(plot_title, fontsize=font_size)
         if complete_saving_path != None:
             plt.savefig(complete_saving_path)
-        # plot figure
         plt.figure(figsize=tup_fig_size)
-        # showing plot
         plt.show()
 
     def histogram(self, sample_vector, suptitle, subtitle_vector=list(),

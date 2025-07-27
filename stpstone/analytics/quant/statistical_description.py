@@ -8,6 +8,8 @@ from numpy.typing import NDArray
 from scipy import stats
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
 
 class ReturnStatisticalDescription(TypedDict):
     """Type definition for statistical_description return value."""
@@ -32,7 +34,7 @@ class ReturnErrorMetrics(TypedDict):
     sqrt_mean_absolute_squared_error: Optional[float]
 
 
-class StatisticalDescription:
+class StatisticalDescription(metaclass=TypeChecker):
     """Class for computing statistical metrics and error measures on numerical data arrays."""
 
     def statistical_description(

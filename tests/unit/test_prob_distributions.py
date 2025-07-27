@@ -289,7 +289,7 @@ class TestProbabilityDistributions:
             assert isinstance(result, float)
         else:
             result = prob_dist.chi_squared(
-                0.95, 5, func_type, 0, 20, 0.1
+                0.95, 5, func_type, 0.0, 20.0, 0.1
             )
             assert isinstance(result, np.ndarray)
 
@@ -341,7 +341,7 @@ class TestProbabilityDistributions:
         -------
         None
         """
-        with pytest.raises(ValueError, match="must be one of"):
+        with pytest.raises(TypeError, match="must be one of"):
             prob_dist.chi_squared(0.95, 5, "invalid")
 
     def test_chi_squared_missing_range(self, prob_dist: ProbabilityDistributions) -> None:
@@ -381,7 +381,7 @@ class TestProbabilityDistributions:
             assert isinstance(result, float)
         else:
             result = prob_dist.t_student(
-                0.95, 5, func_type, -5, 5, 0.1
+                0.95, 5, func_type, -5.0, 5.0, 0.1
             )
             assert isinstance(result, np.ndarray)
 
@@ -448,7 +448,7 @@ class TestProbabilityDistributions:
         -------
         None
         """
-        result = prob_dist.f_fisher_snedecor(5, 3, 0, 0.95, "ppf")
+        result = prob_dist.f_fisher_snedecor(5, 3, 0.0, 0.95, "ppf")
         assert isinstance(result, float)
 
     def test_f_fisher_snedecor_invalid_df(
@@ -466,11 +466,11 @@ class TestProbabilityDistributions:
         None
         """
         with pytest.raises(ValueError, match="Degrees of freedom must be positive"):
-            prob_dist.f_fisher_snedecor(0, 3, 0, 0.95, "ppf")
+            prob_dist.f_fisher_snedecor(0, 3, 0.0, 0.95, "ppf")
         with pytest.raises(ValueError, match="Degrees of freedom must be positive"):
-            prob_dist.f_fisher_snedecor(5, 0, 0, 0.95, "ppf")
+            prob_dist.f_fisher_snedecor(5, 0, 0.0, 0.95, "ppf")
         with pytest.raises(ValueError, match="Numerator df must be greater than denominator df"):
-            prob_dist.f_fisher_snedecor(3, 5, 0, 0.95, "ppf")
+            prob_dist.f_fisher_snedecor(3, 5, 0.0, 0.95, "ppf")
 
     def test_f_fisher_snedecor_invalid_prob(
         self, prob_dist: ProbabilityDistributions
@@ -487,9 +487,9 @@ class TestProbabilityDistributions:
         None
         """
         with pytest.raises(ValueError, match="Probability must be between 0 and 1"):
-            prob_dist.f_fisher_snedecor(5, 3, 0, -0.1, "ppf")
+            prob_dist.f_fisher_snedecor(5, 3, 0.0, -0.1, "ppf")
         with pytest.raises(ValueError, match="Probability must be between 0 and 1"):
-            prob_dist.f_fisher_snedecor(5, 3, 0, 1.1, "ppf")
+            prob_dist.f_fisher_snedecor(5, 3, 0.0, 1.1, "ppf")
 
     def test_f_fisher_snedecor_missing_range(
         self, prob_dist: ProbabilityDistributions
@@ -505,7 +505,7 @@ class TestProbabilityDistributions:
         -------
         None
         """
-        with pytest.raises(ValueError, match="Range parameters must be provided"):
+        with pytest.raises(TypeError, match="must be of type"):
             prob_dist.f_fisher_snedecor(5, 3, 0, None, "pdf")
 
 
@@ -527,8 +527,8 @@ class TestNormalDistribution:
         -------
         None
         """
-        assert normal_dist.phi(0) == pytest.approx(0.39894228)
-        assert normal_dist.phi(1) == pytest.approx(0.24197072)
+        assert normal_dist.phi(0.0) == pytest.approx(0.39894228)
+        assert normal_dist.phi(1.0) == pytest.approx(0.24197072)
 
     def test_pdf_function(self, normal_dist: NormalDistribution) -> None:
         """Test normal PDF calculation.
@@ -542,8 +542,8 @@ class TestNormalDistribution:
         -------
         None
         """
-        assert normal_dist.pdf(0) == pytest.approx(0.39894228)
-        assert normal_dist.pdf(1, 0, 2) == pytest.approx(0.17603266)
+        assert normal_dist.pdf(0.0) == pytest.approx(0.39894228)
+        assert normal_dist.pdf(1.0, 0.0, 2.0) == pytest.approx(0.17603266)
 
     def test_cumnulative_phi(self, normal_dist: NormalDistribution) -> None:
         """Test standard normal CDF calculation.
@@ -557,9 +557,9 @@ class TestNormalDistribution:
         -------
         None
         """
-        assert normal_dist.cumnulative_phi(-8) == pytest.approx(7.216449660063518e-16, abs=1e-4)
-        assert normal_dist.cumnulative_phi(0) == pytest.approx(0.5)
-        assert normal_dist.cumnulative_phi(8) == pytest.approx(1.0, abs=1e-4)
+        assert normal_dist.cumnulative_phi(-8.0) == pytest.approx(7.216449660063518e-16, abs=1e-4)
+        assert normal_dist.cumnulative_phi(0.0) == pytest.approx(0.5)
+        assert normal_dist.cumnulative_phi(8.0) == pytest.approx(1.0, abs=1e-4)
 
     def test_cdf_function(self, normal_dist: NormalDistribution) -> None:
         """Test normal CDF calculation.
@@ -573,8 +573,8 @@ class TestNormalDistribution:
         -------
         None
         """
-        assert normal_dist.cdf(0) == pytest.approx(0.5)
-        assert normal_dist.cdf(1, 0, 2) == pytest.approx(0.69146246)
+        assert normal_dist.cdf(0.0) == pytest.approx(0.5)
+        assert normal_dist.cdf(1.0, 0.0, 2.0) == pytest.approx(0.69146246)
 
     def test_inv_cdf_function(self, normal_dist: NormalDistribution) -> None:
         """Test inverse normal CDF calculation.
@@ -621,7 +621,7 @@ class TestNormalDistribution:
         None
         """
         with pytest.raises(ValueError, match="Standard deviation must be positive"):
-            normal_dist.inv_cdf(0.5, 0, -1)
+            normal_dist.inv_cdf(0.5, 0.0, -1.0)
 
     def test_confidence_interval(
         self, normal_dist: NormalDistribution

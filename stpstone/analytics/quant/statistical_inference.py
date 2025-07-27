@@ -19,6 +19,7 @@ from statsmodels.stats.stattools import durbin_watson
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.analytics.quant.statistical_description import StatisticalDescription
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class AnovaResults(TypedDict):
@@ -200,7 +201,7 @@ def validate_scalar(
         raise ValueError(f"{name} must be at most {max_val}, got {value}")
 
 
-class MultipleRegressionHT:
+class MultipleRegressionHT(metaclass=TypeChecker):
     """Class for multiple regression hypothesis tests."""
 
     def anova(self, array_x: NDArray[np.float64], array_y: NDArray[np.float64]) -> AnovaResults:
@@ -682,7 +683,7 @@ class MultipleRegressionHT:
         return (sse_r - sse_unr) / q / (sse_unr / (n - k - 1))
 
 
-class NormalityHT:
+class NormalityHT(metaclass=TypeChecker):
     """Class for normality hypothesis tests."""
 
     def kolmogorov_smirnov_test(
@@ -854,7 +855,7 @@ class NormalityHT:
         }
 
 
-class CorrelationHT:
+class CorrelationHT(metaclass=TypeChecker):
     """Class for correlation hypothesis tests."""
 
     def pearsons_correlation_coefficient(
@@ -1054,7 +1055,7 @@ class CorrelationHT:
         }
 
 
-class StationaryHT:
+class StationaryHT(metaclass=TypeChecker):
     """Class for stationarity hypothesis tests."""
 
     def augmented_dickey_fuller(
@@ -1132,7 +1133,7 @@ class StationaryHT:
         }
 
 
-class MeansHT:
+class MeansHT(metaclass=TypeChecker):
     """Class for means hypothesis tests."""
 
     def student_s_t_test(
@@ -1234,7 +1235,7 @@ class MeansHT:
         }
 
 
-class StatisticalDistributionsHT:
+class StatisticalDistributionsHT(metaclass=TypeChecker):
     """Class for statistical distribution hypothesis tests."""
 
     def mann_whitney_u_test(
@@ -1509,7 +1510,7 @@ class StatisticalDistributionsHT:
         }
 
 
-class IndependenceHT:
+class IndependenceHT(metaclass=TypeChecker):
     """Class for independence hypothesis tests."""
 
     def pearson_chi_squared(

@@ -5,8 +5,10 @@ from typing import Callable, Optional
 
 import numdifftools as nd
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class Fibonacci:
+
+class Fibonacci(metaclass=TypeChecker):
     """A class to generate Fibonacci sequences with caching for efficiency."""
 
     def __init__(self, cache: Optional[dict[int, int]] = None) -> None:

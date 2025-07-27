@@ -27,6 +27,8 @@ from scipy.stats import (
 import seaborn as sns
 from sklearn.base import BaseEstimator
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
 
 # module-level constants for default plot ranges
 DEFAULT_PDF_CDF_RANGE = np.linspace(-2, 2, 100)
@@ -43,7 +45,7 @@ class ResultProbDistribution(TypedDict):
     distribution: BaseEstimator
 
 
-class ProbabilityDistributions:
+class ProbabilityDistributions(metaclass=TypeChecker):
     """Class implementing various probability distributions."""
 
     def bernoulli_distribution(
@@ -76,7 +78,7 @@ class ProbabilityDistributions:
         .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bernoulli.html
         """
         if not 0.0 <= float_p <= 1.0:
-            raise ValueError("Probability must be between 0 and 1")
+            raise ValueError(f"Probability must be between 0 and 1, got {float_p}")
         if int_num_trials < 0:
             raise ValueError("Number of trials must be greater than 0")
         
@@ -118,7 +120,7 @@ class ProbabilityDistributions:
         .. [1] http://biorpy.blogspot.com/2015/02/py19-geometric-distribution-in-python.html
         """
         if not 0.0 <= float_p <= 1.0:
-            raise ValueError("Probability must be between 0 and 1")
+            raise ValueError(f"Probability must be between 0 and 1, got {float_p}")
         if int_num_trials < 0:
             raise ValueError("Number of trials must be greater than 0")
         
@@ -163,7 +165,7 @@ class ProbabilityDistributions:
         .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binom.html
         """
         if not 0.0 <= float_p <= 1.0:
-            raise ValueError("Probability must be between 0 and 1")
+            raise ValueError(f"Probability must be between 0 and 1, got {float_p}")
         if int_num_trials < 0:
             raise ValueError("Number of trials must be greater than 0")
         
@@ -278,7 +280,7 @@ value.
         .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2.html
         """
         if not 0.0 <= float_p <= 1.0:
-            raise ValueError("Probability must be between 0 and 1")
+            raise ValueError(f"Probability must be between 0 and 1, got {float_p}")
         if int_df <= 0:
             raise ValueError("Degrees of freedom must be positive")
         if probability_func not in ("ppf", "pdf", "cdf"):
@@ -348,7 +350,7 @@ variable corresponding to a specified probability level (or percentile).
 value.
         """
         if not 0.0 <= float_p <= 1.0:
-            raise ValueError("Probability must be between 0 and 1")
+            raise ValueError(f"Probability must be between 0 and 1, got {float_p}")
         if int_df <= 0:
             raise ValueError("Degrees of freedom must be positive")
         if probability_func not in ("ppf", "pdf", "cdf"):
@@ -437,7 +439,7 @@ value.
         raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
 
 
-class NormalDistribution:
+class NormalDistribution(metaclass=TypeChecker):
     """Class implementing Normal distribution calculations."""
 
     def phi(self, x: float) -> float:
@@ -543,7 +545,7 @@ class NormalDistribution:
             If float_sigma is less than or equal to 0
         """
         if not 0.0 <= float_p <= 1.0:
-            raise ValueError("Probability must be between 0 and 1")
+            raise ValueError(f"Probability must be between 0 and 1, got {float_p}")
         if float_sigma <= 0:
             raise ValueError("Standard deviation must be positive")
         return norm.ppf(float_p, float_mu, float_sigma)
@@ -622,7 +624,7 @@ class NormalDistribution:
         return x, y
 
 
-class HansenSkewStudent:
+class HansenSkewStudent(metaclass=TypeChecker):
     """Skewed Student distribution class (Hansen 1994).
 
     Attributes
