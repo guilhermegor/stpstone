@@ -1,53 +1,9 @@
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 class ExploratoryDataAnalysis:
-
-    def bendford_law(self, array_data, bl_list_number_occurrencies=False):
-        """
-        REFERENCES: https://brilliant.org/wiki/benfords-law/
-        DOCSTRING: FRAUD DETECTION MODEL, WHICH EVALUATES THE NUMBER OF FIRST DIGITS OCCURRENCIES
-            IN A SAMPLE AND THE EXPECTED SET
-        INPUTS: LIST OF NUMBERS AND BOOLEAN WHICH INDICATES WHETHER THE LIST IS A SAMPLE OF REAL
-            DATA OR THE NUMBER OF INTEGER FIRST NUMBERS FROM A REAL SAMPLE IN ASCENDING ORDER
-            DISCARDING ZEROS
-        OUTPUTS: DICT (BENFORD EXPECTED ARRAY AND REAL NUMBERS OBSERVED ARRAY KEYS)
-        """
-        # expected occurrency of first numbers in a list
-        array_benford = np.zeros(9)
-        for i in range(9):
-            array_benford[i] = np.log10(i + 2) - np.log10(i + 1)
-        # observed occurrency of first numbers in a list
-        array_real_numbers = np.array(array_data)
-        # percentual occurrency of each integer
-        array_percentual_occurrency_digits = np.zeros(9)
-        # check whether the given list is a sample of real data or a list with the number of
-        #   occurrencies for a given number in ascending order of integer numbers
-        if bl_list_number_occurrencies == False:
-            # seggregate first number of each occurrency
-            for i in range(len(array_real_numbers)):
-                array_real_numbers = [str(x)[0]
-                                      for x in array_real_numbers if str(x)[0] != '0']
-            # count percentual occurrency of each int number
-            for i in range(1, 10):
-                array_percentual_occurrency_digits[i - 1] = \
-                    array_real_numbers.count(
-                        str(i)) / len(array_percentual_occurrency_digits)
-        elif bl_list_number_occurrencies == True:
-            for i in range(len(array_real_numbers)):
-                array_percentual_occurrency_digits[i] = \
-                    array_real_numbers[i] / array_real_numbers.sum()
-        else:
-            raise Exception(
-                'Boolean list number of occurrencies ought true or false')
-        # dict message benford array x array real numbers
-        dict_message = {
-            'benford_expected_array': array_benford,
-            'real_numbers_observed_array': array_percentual_occurrency_digits
-        }
-        return dict_message
 
     def is_monotonic(self, array_data):
         """

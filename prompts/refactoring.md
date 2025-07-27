@@ -12,6 +12,7 @@
   - Use built-in `dict`, `list`, `tuple` instead
   - Use from numpy.typing import NDArray, NDArray[...] (e.g. NDArray[np.float64]) instead of np.ndarray for type hints
   - Use class Return<method_name>(TypedDict) for dictionaries typing (import from typing import TypedDict)
+    - Docstring in numpy model for class Return<method_name>, skipping one row between it and the content below
 - **Literals**: Use `Literal` for variables with limited options
 - **Optionals**: Use `Optional` instead of `|` operator
 
