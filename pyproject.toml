@@ -125,6 +125,7 @@ playwright = ">=1.52.0"
 openai = ">=1.79.0"
 mystic = ">=0.4.4"
 countryinfo = ">=0.1.2"
+numdifftools = ">=0.9.41"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = ">=4.1.0"

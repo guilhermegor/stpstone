@@ -37,6 +37,7 @@
    - Maintain any existing examples
    - Use descriptive variable names
    - Add missing type hints where needed
+   - Create a description for the module at the beginning of it
 
 3. **Code Style**:
    - Break long lines using Python's implied continuation
@@ -77,6 +78,11 @@
      - Numeric type validation
      - Bounds checking
 
+5. **Packages**:
+    - Prefer packages already used in the project, instead of using new ones
+    - Python libraries with score 80+ in the snyk Advisor
+        - stpstone package is free from this restriction
+
 ## Output Format
 - Return only the refactored code
 - No additional explanations or notes
@@ -91,8 +97,7 @@ import numpy as np
 
 
 def validate_input(value: float, name: str) -> None:
-    """
-    Validate that a value is between 0 and 1.
+    """Validate that a value is between 0 and 1.
 
     Parameters
     ----------
@@ -114,8 +119,7 @@ def process_data(
     data: np.ndarray,
     method: Literal["mean", "median"] = "mean"
 ) -> dict[str, Optional[float]]:
-    """
-    Process numerical data using specified method.
+    """Process numerical data using specified method.
 
     Parameters
     ----------

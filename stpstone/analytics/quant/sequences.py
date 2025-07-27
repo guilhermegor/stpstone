@@ -1,143 +1,253 @@
-# HANDLING NUMERCIAL SEQUENCES IN PYTHON
+"""Sequences module for generating Fibonacci sequences and Taylor series approximations."""
 
 import math
+from typing import Callable, Optional
 
-from scipy.misc import derivative
+import numdifftools as nd
 
 
 class Fibonacci:
+    """A class to generate Fibonacci sequences with caching for efficiency."""
 
-    def __init__(self, set_cache={0: 0, 1: 1}):
-        self.set_cache = set_cache
+    def __init__(self, cache: Optional[dict[int, int]] = None) -> None:
+        """Initialize Fibonacci sequence generator with a cache.
 
-    def fibonacci_of_n(self, n):
-        """
-        REFERENCES: https://realpython.com/fibonacci-sequence-python/
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # base case
-        if n in self.set_cache:
-            return self.set_cache[n]
-        # compute and cache the fibonacci number
-        self.set_cache[n] = self.fibonacci_of_n(
-            n - 1) + self.fibonacci_of_n(n - 2)
-        # recursive case
-        return self.set_cache[n]
+        Parameters
+        ----------
+        cache : Optional[dict[int, int]]
+            Initial cache dictionary with Fibonacci numbers (default: {0: 0, 1: 1})
 
-    def fibonacci(self, n):
+        Notes
+        -----
+        The cache stores previously computed Fibonacci numbers to avoid redundant calculations.
         """
-        REFERENCES: https://realpython.com/fibonacci-sequence-python/
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        self.cache: dict[int, int] = cache if cache is not None else {0: 0, 1: 1}
+
+    def fibonacci_of_n(self, n: int) -> int:
+        """Calculate the nth Fibonacci number using caching.
+
+        Parameters
+        ----------
+        n : int
+            Index of the Fibonacci number to compute (must be non-negative)
+
+        Returns
+        -------
+        int
+            The nth Fibonacci number
+
+        Raises
+        ------
+        ValueError
+            If n is negative
+
+        References
+        ----------
+        .. [1] https://realpython.com/fibonacci-sequence-python/
         """
+        if n < 0:
+            raise ValueError(f"Index n must be non-negative, got {n}")
+        if n in self.cache:
+            return self.cache[n]
+        self.cache[n] = self.fibonacci_of_n(n - 1) + self.fibonacci_of_n(n - 2)
+        return self.cache[n]
+
+    def fibonacci(self, n: int) -> list[int]:
+        """Generate a list of Fibonacci numbers up to index n.
+
+        Parameters
+        ----------
+        n : int
+            Number of Fibonacci numbers to generate (must be non-negative)
+
+        Returns
+        -------
+        list[int]
+            List of Fibonacci numbers from index 0 to n-1
+
+        Raises
+        ------
+        ValueError
+            If n is negative
+
+        References
+        ----------
+        .. [1] https://realpython.com/fibonacci-sequence-python/
+        """
+        if n < 0:
+            raise ValueError(f"Number of elements n must be non-negative, got {n}")
         return [self.fibonacci_of_n(i) for i in range(n)]
 
 
 class TaylorSeries:
-    """
-    DOCSTRING:
-    INPUTS:
-    OUTPUTS:
-    """
+    """A class to compute Taylor series approximations for a given function."""
 
-    def __init__(self, function, order, center=0):
-        self.center = center
-        self.f = function
-        self.order = order
-        self.d_pts = order * 2
-        self.coefficients = []
-        # number of points (order) for scipy.misc.derivative
-        # must be odd and greater than derivative order
-        if self.d_pts % 2 == 0:
-            self.d_pts += 1
-        # find taylor series coefficients
-        self.__find_coefficients()
+    def __init__(
+        self, 
+        function: Callable[[float], float], 
+        order: int, 
+        center: float = 0.0
+    ) -> None:
+        """Initialize Taylor series for a given function.
 
-    def __find_coefficients(self):
-        """
-        DOCSTRING: FIND TAYLOR SERIES COEFFICIENTS
-        INPUTS: -
-        OUTPUTS: -
-        """
-        for i in range(0, self.order + 1):
-            self.coefficients.append(round(derivative(
-                self.f, self.center, n=i, order=self.d_pts) / math.factorial(i), 5))
+        Parameters
+        ----------
+        function : Callable[[float], float]
+            Function to approximate
+        order : int
+            Order of the Taylor series (must be non-negative)
+        center : float, optional
+            Center point of the Taylor series (default: 0.0)
 
-    def print_equation(self):
+        Raises
+        ------
+        ValueError
+            If order is negative
+        TypeError
+            If function is not callable
+
+        Notes
+        -----
+        Uses numdifftools.Derivative to compute derivatives at the center point.
         """
-        DOCSTRING: PRINT TAYLOR SERIES EQUATION
-        INPUTS: -
-        OUTPUTS: -
+        if not callable(function):
+            raise TypeError("function must be callable")
+        if order < 0:
+            raise ValueError(f"Order must be non-negative, got {order}")
+        self.center: float = center
+        self.function: Callable[[float], float] = function
+        self.order: int = order
+        self.d_pts: int = order * 2 + 1  # ensure odd number for derivative
+        self.coefficients: list[float] = []
+        self._find_coefficients()
+
+    def _find_coefficients(self) -> None:
+        """Compute Taylor series coefficients.
+
+        Notes
+        -----
+        Uses numdifftools.Derivative to compute derivatives at the center point.
         """
-        eqn_string = ''
+        for i in range(self.order + 1):
+            derivative_func = nd.Derivative(self.function, n=i, order=self.d_pts)
+            coeff = derivative_func(self.center) / math.factorial(i)
+            self.coefficients.append(round(coeff, 5))
+
+    def print_equation(self) -> None:
+        """Print the Taylor series equation as a string.
+
+        Notes
+        -----
+        Prints the equation in the format f(x) = c0 + c1(x-c) + c2(x-c)^2 + ...
+        """
+        equation = ""
         for i in range(self.order + 1):
             if self.coefficients[i] != 0:
-                eqn_string += str(self.coefficients[i]) + (
-                    '(x-{})^{}'.format(self.center, i) if i > 0 else '') + ' + '
-        eqn_string = eqn_string[:-
-                                3] if eqn_string.endswith(' + ') else eqn_string
-        print(eqn_string)
+                term = f"{self.coefficients[i]}"
+                if i > 0:
+                    term += f"(x-{self.center})^{i}"
+                equation += term + " + "
+        equation = equation[:-3] if equation.endswith(" + ") else equation
+        print(equation)
 
-    def print_coefficients(self):
-        """
-        DOCSTRING: PRINT TAYLOR SERIES' COEFFICIENTS
-        INPUTS: -
-        OUTPUTS: -
-        """
+    def print_coefficients(self) -> None:
+        """Print the Taylor series coefficients."""
         print(self.coefficients)
 
-    def approximate_value(self, x):
-        """
-        DOCSTRING: APPROXIMATES THE VALUE OF F(X) USING THE TAYLOR POLYNOMIAL.
-            X = POINT TO APPROXIMATE F(X)
-        INPUTS: FLOAT
-        OUTPUT: FLOAT
-        """
-        fx = 0
-        for i in range(len(self.coefficients)):
-            # coefficient * nth term
-            fx += self.coefficients[i] * ((x - self.center)**i)
-        return fx
+    def approximate_value(self, x: float) -> float:
+        """Approximate the function value at point x using the Taylor series.
 
-    def approximate_derivative(self, x):
+        Parameters
+        ----------
+        x : float
+            Point at which to evaluate the Taylor series
+
+        Returns
+        -------
+        float
+            Approximated function value
+
+        Raises
+        ------
+        ValueError
+            If x is not finite
         """
-        DOCSTRING: ESTIMATES THE DERIVATIVE OF A FUNCTION F(X) FROM ITS TAYLOR SERIES.
-            USELESS SINCE WE NEED THE DERIVATIVE OF THE ACTUAL FUNCTION TO FIND THE SERIES
-        INPUTS: FLOAT
-        OUTPUTS: FLOAT
+        if not math.isfinite(x):
+            raise ValueError(f"Input x must be finite, got {x}")
+        result = 0.0
+        for i in range(len(self.coefficients)):
+            result += self.coefficients[i] * (x - self.center) ** i
+        return result
+
+    def approximate_derivative(self, x: float) -> float:
+        """Estimate the derivative of the function at point x using the Taylor series.
+
+        Parameters
+        ----------
+        x : float
+            Point at which to evaluate the derivative
+
+        Returns
+        -------
+        float
+            Approximated derivative value
+
+        Raises
+        ------
+        ValueError
+            If x is not finite
+
+        Notes
+        -----
+        This method is less practical since the Taylor series requires the function's derivatives.
         """
-        value = 0
-        # coefficient * nth term
+        if not math.isfinite(x):
+            raise ValueError(f"Input x must be finite, got {x}")
+        result = 0.0
         for i in range(1, len(self.coefficients)):
-            #   differentiate each term: x^n => n*x^(n-1)
-            value += self.coefficients[i] * i * ((x - self.center)**(i - 1))
-        return value
+            result += self.coefficients[i] * i * (x - self.center) ** (i - 1)
+        return result
 
-    def approximate_integral(self, x0, x1):
-        """
-        DOCSTRING: ESTIMATES THE DEFINITE INTEGRAL OF THE FUNCTION USING THE TAYLOR SERIES EXPANSION.
-            MORE USEFUL, CONSIDER E^X * SIN(X), EASY TO DIFFERENTIATE BUT DIFFICULT TO INTEGRATE.
-            X0 - LOWER LIMIT OF INTEGRATION
-            X1 - UPPER LIMIT OF INTEGRATION
-        INPUTS: X0, X1
-        OUTPUT: FLOAT
-        """
+    def approximate_integral(self, x0: float, x1: float) -> float:
+        """Estimate the definite integral of the function from x0 to x1 using the Taylor series.
 
-        # integrals can be off by a constant since int(f(x)) = F(x) + C
-        value = 0
+        Parameters
+        ----------
+        x0 : float
+            Lower limit of integration
+        x1 : float
+            Upper limit of integration
+
+        Returns
+        -------
+        float
+            Approximated integral value
+
+        Raises
+        ------
+        ValueError
+            If x0 or x1 is not finite
+
+        Notes
+        -----
+        Useful for functions like e^x * sin(x) which are difficult to integrate analytically.
+        """
+        if not math.isfinite(x0):
+            raise ValueError(f"Lower bound x0 must be finite, got {x0}")
+        if not math.isfinite(x1):
+            raise ValueError(f"Upper bound x1 must be finite, got {x1}")
+        result = 0.0
         for i in range(len(self.coefficients)):
-            #   integrate each term: x^n => (1/n+1)*x^(n+1)
-            value += ((self.coefficients[i] * (1 / (i + 1)) * ((x1 - self.center)**(i + 1))) -
-                      (self.coefficients[i] * (1 / (i + 1)) * ((x0 - self.center)**(i + 1))))
-        return value
+            term = self.coefficients[i] * (1 / (i + 1))
+            result += term * ((x1 - self.center) ** (i + 1) - (x0 - self.center) ** (i + 1))
+        return result
 
-    def get_coefficients(self):
-        """
-        DOCSTRING: RETURNS THE COEFFICIENTS OF THE TAYLOR SERIES
-        INPUTS: -
-        OUTPUTS: -
+    def get_coefficients(self) -> list[float]:
+        """Return the Taylor series coefficients.
+
+        Returns
+        -------
+        list[float]
+            List of Taylor series coefficients
         """
         return self.coefficients

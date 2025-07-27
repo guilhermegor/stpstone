@@ -1,4 +1,9 @@
 [codespell]
+# skip specific file types
 skip = *.po,*.csv,*.json,*.xml,*.txt
+# count the number of spelling errors
 count =
+# set quiet level to suppress certain messages
 quiet-level = 3
+# ignore specific words
+ignore-words-list = nd
