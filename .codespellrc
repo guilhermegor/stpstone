@@ -6,4 +6,4 @@ count =
 # set quiet level to suppress certain messages
 quiet-level = 3
 # ignore specific words
-ignore-words-list = nd
+ignore-words-list = nd,fpr

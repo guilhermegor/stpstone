@@ -6,7 +6,11 @@
 - **Python version**: 3.9+ compatibility required
 - **Strings**: Double quotes for all strings and dictionaries
 - **Docstrings**: numpy style with 79 character line limits, Parameters/Returns/Raises/Notes/References sections
-- **Type hints**: Mandatory for all function signatures and returns
+- **Type hints**: 
+  - Mandatory for all function signatures and returns
+  - Please preserve data types that I include in the variable names
+  - Preferably set apart specific validations that should be done accross methods in a class, like if len of an array is zero than raise a ValueError
+    - This methods should have the naming format _validate_<NAME>
 - **Typing imports**: 
   - Avoid `Dict`, `List`, `Tuple`
   - Use built-in `dict`, `list`, `tuple` instead
