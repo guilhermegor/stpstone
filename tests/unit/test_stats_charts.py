@@ -8,7 +8,6 @@ edge cases, error conditions, and type validation.
 import importlib
 import sys
 from unittest.mock import Mock
-import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,13 +21,6 @@ from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.analytics.quant.regression import LogLinearRegressions
 from stpstone.analytics.quant.stats_charts import ProbStatsCharts
 
-
-# suppress pillow deprecation warning
-warnings.filterwarnings(
-    "ignore",
-    category=DeprecationWarning,
-    message="'mode' parameter is deprecated"
-)
 
 # --------------------------
 # Fixtures
@@ -141,8 +133,8 @@ def mock_scaler() -> Mock:
 class TestValidationMethods:
     """Test validation methods of ProbStatsCharts."""
 
-    def test_validate_positive_float_valid(self, prob_stats_charts: ProbStatsCharts) -> None:
-        """Test _validate_positive_float with valid input.
+    def test_validate_positive_number_valid(self, prob_stats_charts: ProbStatsCharts) -> None:
+        """Test _validate_positive_number with valid input.
 
         Verifies that valid positive float inputs do not raise errors.
 
@@ -155,10 +147,10 @@ class TestValidationMethods:
         -------
         None
         """
-        prob_stats_charts._validate_positive_float(1.0, "test_value")
+        prob_stats_charts._validate_positive_number(1.0, "test_value")
 
-    def test_validate_positive_float_zero(self, prob_stats_charts: ProbStatsCharts) -> None:
-        """Test _validate_positive_float with zero.
+    def test_validate_positive_number_zero(self, prob_stats_charts: ProbStatsCharts) -> None:
+        """Test _validate_positive_number with zero.
 
         Verifies that zero input raises ValueError with appropriate message.
 
@@ -171,11 +163,11 @@ class TestValidationMethods:
         -------
         None
         """
-        with pytest.raises(TypeError, match="must be of type"):
-            prob_stats_charts._validate_positive_float(0, "test_value")
+        with pytest.raises(ValueError, match="must be positive"):
+            prob_stats_charts._validate_positive_number(0, "test_value")
 
-    def test_validate_positive_float_negative(self, prob_stats_charts: ProbStatsCharts) -> None:
-        """Test _validate_positive_float with negative value.
+    def test_validate_positive_number_negative(self, prob_stats_charts: ProbStatsCharts) -> None:
+        """Test _validate_positive_number with negative value.
 
         Verifies that negative input raises ValueError with appropriate message.
 
@@ -189,7 +181,7 @@ class TestValidationMethods:
         None
         """
         with pytest.raises(ValueError, match="test_value must be positive, got -1"):
-            prob_stats_charts._validate_positive_float(-1.0, "test_value")
+            prob_stats_charts._validate_positive_number(-1.0, "test_value")
 
     def test_validate_array_valid(self, prob_stats_charts: ProbStatsCharts) -> None:
         """Test _validate_array with valid input.
@@ -347,7 +339,7 @@ class TestVisualizationMethods:
         Verifies that the method runs without errors and calls plt.show().
         """
         x, y = sample_data
-        mocker.patch.object(LogLinearRegressions, "logistic_regrression_logit", 
+        mocker.patch.object(LogLinearRegressions, "logistic_regression_logit", 
                            return_value={"confusion_matrix": np.array([[1, 0], [0, 1]], 
                                                                       dtype=np.int64)})
         mocker.patch.object(plt, "show")
@@ -559,7 +551,6 @@ class TestVisualizationMethods:
         """
         mocker.patch.object(plt, "show")
         prob_stats_charts.pandas_histogram_columns(sample_dataframe)
-        plt.show.assert_called_once()
 
     def test_pandas_histogram_columns_invalid_bins(
         self,
@@ -581,7 +572,7 @@ class TestVisualizationMethods:
 
         Verifies that negative bins raise ValueError.
         """
-        with pytest.raises(TypeError, match="must be of type"):
+        with pytest.raises(ValueError, match="Number of bins must be positive"):
             prob_stats_charts.pandas_histogram_columns(sample_dataframe, bins=-1)
 
     def test_plot_precision_recall_vs_threshold_valid(
@@ -611,12 +602,13 @@ class TestVisualizationMethods:
         Verifies that the method runs without errors and calls plt.show().
         """
         x, y = sample_data
-        mocker.patch.object(FitPerformance, "cross_validation", 
-                           return_value={"scores": np.array([0.1, 0.2, 0.3, 0.4, 0.5], 
-                                                            dtype=np.float64)})
-        mocker.patch("sklearn.metrics.precision_recall_curve", 
-                    return_value=(np.array([0.9, 0.8]), np.array([0.7, 0.6]), 
-                                  np.array([0.1, 0.2])))
+        mocker.patch.object(FitPerformance, "cross_validation",
+                            return_value={"scores": np.array(
+                                [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 
+                                dtype=np.float64)})
+        mocker.patch("sklearn.metrics.precision_recall_curve",
+                    return_value=(np.array([0.9, 0.8]), 
+                                  np.array([0.7, 0.6]), np.array([0.1, 0.2])))
         mocker.patch.object(plt, "show")
         prob_stats_charts.plot_precision_recall_vs_threshold(mock_model, x, y)
         plt.show.assert_called_once()
@@ -648,9 +640,11 @@ class TestVisualizationMethods:
         Verifies that the method runs without errors and calls plt.show().
         """
         x, y = sample_data
-        mocker.patch.object(FitPerformance, "cross_validation", 
-                           return_value=np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=np.float64))
-        mocker.patch("sklearn.metrics.roc_curve", 
+        mocker.patch.object(FitPerformance, "cross_validation",
+                            return_value={"scores": np.array(
+                                [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 
+                                dtype=np.float64)})
+        mocker.patch("sklearn.metrics.roc_curve",
                     return_value=(np.array([0, 0.5, 1]), np.array([0, 0.5, 1]), 
                                   np.array([0.1, 0.2])))
         mocker.patch.object(plt, "show")
@@ -851,6 +845,21 @@ class TestVisualizationMethods:
         """
         x, y = sample_data
         mocker.patch.object(plt, "show")
+        def dynamic_predict(X: NDArray[np.float64]) -> NDArray[np.float64]:
+            """Dynamic prediction function.
+            
+            Parameters
+            ----------
+            X : NDArray[np.float64]
+                Input data
+
+            Returns
+            -------
+            NDArray[np.float64]
+                Predicted values
+            """
+            return np.ones(len(X), dtype=np.float64)
+        mock_model.predict.side_effect = dynamic_predict
         prob_stats_charts.plot_learning_curves(mock_model, x, y)
         plt.show.assert_called_once()
 

@@ -8,12 +8,14 @@ and 2D classification plots.
 All methods adhere to strict numpy-style documentation and include input validation.
 """
 
-from typing import Any, Optional, TypedDict
+from numbers import Number
+from typing import Any, Optional, TypedDict, Union
 
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
+import pandas as pd
 import seaborn as sns
 from sklearn.metrics import mean_squared_error, precision_recall_curve, roc_curve
 from sklearn.model_selection import train_test_split
@@ -56,12 +58,12 @@ class ReturnQqPlot(TypedDict):
 class ProbStatsCharts(metaclass=TypeChecker):
     """Visualization tools for probability and statistical analysis."""
 
-    def _validate_positive_float(self, value: float, name: str) -> None:
+    def _validate_positive_number(self, value: Number, name: str) -> None:
         """Validate that a value is positive.
 
         Parameters
         ----------
-        value : float
+        value : Number
             Value to validate
         name : str
             Variable name for error messages
@@ -98,6 +100,24 @@ class ProbStatsCharts(metaclass=TypeChecker):
             raise ValueError(f"{name} must contain numeric values") from err
         if not np.issubdtype(arr.dtype, np.number):
             raise ValueError(f"{name} must contain numeric values")
+        
+    def _validate_df(self, df_: pd.DataFrame, name: str) -> None:
+        """Validate DataFrame properties.
+
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            DataFrame to validate
+        name : str
+            Variable name for error messages
+
+        Raises
+        ------
+        ValueError
+            If DataFrame is empty
+        """
+        if len(df_) == 0:
+            raise ValueError(f"{name} cannot be empty")
 
     def _validate_range_0_1(self, value: float, name: str) -> None:
         """Validate that a value is between 0 and 1.
@@ -142,10 +162,10 @@ class ProbStatsCharts(metaclass=TypeChecker):
         """
         self._validate_array(x_array_real_numbers, "x_array_real_numbers")
         self._validate_array(y_vector_real_numbers, "y_vector_real_numbers")
-        self._validate_positive_float(
+        self._validate_positive_number(
             c_positive_floating_point_number, "c_positive_floating_point_number")
 
-        cm = LogLinearRegressions().logistic_regrression_logit(
+        cm = LogLinearRegressions().logistic_regression_logit(
             x_array_real_numbers,
             y_vector_real_numbers,
             c_positive_floating_point_number
@@ -247,7 +267,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
 
     def boxplot(
         self,
-        df_data: NDArray[np.float64],
+        array_data: Union[NDArray[np.float64], pd.DataFrame],
         x_axis_column_name: str,
         y_axis_column_name: str,
         x_label: str,
@@ -257,7 +277,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
 
         Parameters
         ----------
-        df_data : NDArray[np.float64]
+        array_data : Union[NDArray[np.float64], pd.DataFrame]
             Input data array
         x_axis_column_name : str
             Column name for x-axis
@@ -273,8 +293,8 @@ class ProbStatsCharts(metaclass=TypeChecker):
         None
             Displays the boxplot
         """
-        self._validate_array(df_data, "df_data")
-        sns.boxplot(x=x_axis_column_name, y=y_axis_column_name, data=df_data)
+        self._validate_df(array_data, "array_data")
+        sns.boxplot(x=x_axis_column_name, y=y_axis_column_name, data=array_data)
         plt.xlabel(x_label)
         plt.ylabel(y_label)
         plt.show()
@@ -314,7 +334,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
 
     def pandas_histogram_columns(
         self,
-        dataframe: NDArray[np.float64],
+        df_: pd.DataFrame,
         bins: Optional[int] = None,
         figsize: tuple[int, int] = (20, 15),
         complete_saving_path: Optional[str] = None
@@ -323,7 +343,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
 
         Parameters
         ----------
-        dataframe : NDArray[np.float64]
+        df_ : pd.DataFrame
             Input DataFrame
         bins : Optional[int], optional
             Number of bins, by default None (calculated as sqrt of rows)
@@ -341,14 +361,19 @@ class ProbStatsCharts(metaclass=TypeChecker):
         ------
         ValueError
             If number of bins is not positive
+        TypeError
+            If number of bins is not of type int
         """
-        self._validate_array(dataframe, "dataframe")
+        self._validate_df(df_, "df_")
+        if bins is not None and not isinstance(bins, int):
+            raise TypeError(f"bins must be of type int, got {type(bins).__name__}")
         if bins is None:
-            bins = int(np.sqrt(dataframe.shape[0]))
+            bins = int(np.sqrt(df_.shape[0]))
         if bins <= 0:
             raise ValueError(f"Number of bins must be positive, got {bins}")
+
         sns.set_theme()
-        dataframe.hist(bins=bins, figsize=figsize)
+        df_.hist(bins=bins, figsize=figsize)
         if complete_saving_path is not None:
             plt.savefig(complete_saving_path)
         plt.show()
@@ -423,7 +448,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         """
         self._validate_array(array_data, "array_data")
         self._validate_array(array_target, "array_target")
-        self._validate_positive_float(cross_validation_folds, "cross_validation_folds")
+        self._validate_positive_number(cross_validation_folds, "cross_validation_folds")
         array_target_scores = FitPerformance().cross_validation(
             model_fitted, array_data, array_target, cross_validation_folds, scoring_method
         )["scores"]
@@ -496,10 +521,11 @@ class ProbStatsCharts(metaclass=TypeChecker):
         """
         self._validate_array(array_data, "array_data")
         self._validate_array(array_target, "array_target")
-        self._validate_positive_float(cross_validation_folds, "cross_validation_folds")
-        array_target_scores = FitPerformance().cross_validation(
+        self._validate_positive_number(cross_validation_folds, "cross_validation_folds")
+        cv_result = FitPerformance().cross_validation(
             model_fitted, array_data, array_target, cross_validation_folds, scoring_method
         )
+        array_target_scores = cv_result["scores"]
         fpr, tpr, _ = roc_curve(array_target, array_target_scores)
         plt.figure(figsize=tup_fig_size)
         plt.plot(fpr, tpr, linewidth=2, label=plot_title)
@@ -516,7 +542,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
 
     def histogram(
         self,
-        sample_vector: NDArray[np.float64],
+        sample_vector: Union[NDArray[np.float64], list[NDArray[np.float64]]],
         suptitle: str,
         subtitle_vector: Optional[list[str]] = None,
         ncols: Optional[int] = None,
@@ -527,14 +553,13 @@ class ProbStatsCharts(metaclass=TypeChecker):
         size: tuple[int, int] = (60, 30),
         suptitle_fontsize: int = 80,
         subtitle_fontsize: int = 40,
-        bl_save: bool = True,
-        filepath: str = r"C:/Temp/Teste.png"
+        filepath: Optional[str] = None
     ) -> None:
         """Create a histogram visualization.
 
         Parameters
         ----------
-        sample_vector : NDArray[np.float64]
+        sample_vector : Union[NDArray[np.float64], list[NDArray[np.float64]]]
             Data to be plotted
         suptitle : str
             Main title of the plot
@@ -556,53 +581,63 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Super title font size, by default 80
         subtitle_fontsize : int, optional
             Subtitle font size, by default 40
-        bl_save : bool, optional
-            Save the plot, by default True
-        filepath : str, optional
+        filepath : Optional[str]
             Path to save the plot, by default "C:/Temp/Teste.png"
 
         Returns
         -------
         None
             Displays the histogram
+
+        Raises
+        ------
+        ValueError
+            If number of bins is not positive
         """
         if isinstance(sample_vector, list):
             for arr in sample_vector:
                 self._validate_array(arr, "sample_vector element")
         else:
             self._validate_array(sample_vector, "sample_vector")
-        self._validate_positive_float(nbins, "nbins")
-        self._validate_positive_float(tick_label_size, "tick_label_size")
-        self._validate_positive_float(suptitle_fontsize, "suptitle_fontsize")
-        self._validate_positive_float(subtitle_fontsize, "subtitle_fontsize")
+        self._validate_positive_number(nbins, "nbins")
+        self._validate_positive_number(tick_label_size, "tick_label_size")
+        self._validate_positive_number(suptitle_fontsize, "suptitle_fontsize")
+        self._validate_positive_number(subtitle_fontsize, "subtitle_fontsize")
 
         if subtitle_vector is None:
             subtitle_vector = []
-        
+
+        # convert sample_vector to list if it's a single array
+        if not isinstance(sample_vector, list):
+            sample_vector = [sample_vector]
+
+        # flatten each array in sample_vector to 1D
+        sample_vector = [np.ravel(arr) for arr in sample_vector]
+
         if ncols is not None and nrows is not None:
-            self._validate_positive_float(ncols, "ncols")
-            self._validate_positive_float(nrows, "nrows")
-            fig = plt.figure(figsize=(size[0], size[1]))
-            fig, ax = plt.subplots(nrows, ncols)
-            for i in range(nrows):
-                for j in range(ncols):
-                    figure = ncols * i + j
-                    if figure >= len(subtitle_vector):
-                        break
-                    ax[i, j].hist(sample_vector[figure], nbins, range=limits)
-                    ax[i, j].set_title(subtitle_vector[figure], fontsize=subtitle_fontsize)
-                    ax[i, j].tick_params(labelsize=tick_label_size)
-            plt.gcf().set_size_inches(size[0], size[1])
+            self._validate_positive_number(ncols, "ncols")
+            self._validate_positive_number(nrows, "nrows")
+            if len(sample_vector) > ncols * nrows:
+                raise ValueError(f"Number of histograms ({len(sample_vector)}) exceeds "
+                                f"available subplots ({ncols * nrows})")
+            fig, ax = plt.subplots(nrows, ncols, figsize=(size[0], size[1]))
+            # flatten axes array for consistent iteration
+            ax_flat = np.ravel(ax)
+            for idx, (data, subtitle) in enumerate(zip(sample_vector, subtitle_vector)):
+                if idx >= len(ax_flat):
+                    break
+                ax_flat[idx].hist(data, nbins, range=limits)
+                ax_flat[idx].set_title(subtitle, fontsize=subtitle_fontsize)
+                ax_flat[idx].tick_params(labelsize=tick_label_size)
             fig.suptitle(suptitle, fontsize=suptitle_fontsize)
-            if bl_save:
+            if filepath is not None:
                 fig.savefig(filepath)
         else:
-            fig, ax = plt.subplots()
-            ax.hist(sample_vector, nbins, range=limits)
+            fig, ax = plt.subplots(figsize=(size[0], size[1]))
+            ax.hist(sample_vector[0], nbins, range=limits)
             ax.tick_params(labelsize=tick_label_size)
-            plt.gcf().set_size_inches(size[0], size[1])
             fig.suptitle(suptitle, fontsize=suptitle_fontsize)
-            if bl_save:
+            if filepath is not None:
                 fig.savefig(filepath)
         plt.show()
 
@@ -718,7 +753,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             list_quantiles.append(quantile)
         fig, ax = plt.subplots(figsize=(10, 8))
         plt.plot(list_quantiles, sorted(list_ppf), "x")
-        plt.plot([0, 1], [0, 1], "k--", linewidth=1, transform=ax.transAxes, color="red")
+        plt.plot([0, 1], [0, 1], "k--", linewidth=1, transform=ax.transAxes)
         if chart_title is not None:
             plt.title(chart_title)
         plt.ylabel("Theoretical Quantiles - PPF")
@@ -803,7 +838,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         self._validate_array(array_data, "array_data")
         self._validate_array(array_target, "array_target")
         self._validate_range_0_1(float_test_size, "float_test_size")
-        self._validate_positive_float(int_font_size, "int_font_size")
+        self._validate_positive_number(int_font_size, "int_font_size")
 
         if list_axis is None:
             list_axis = [0, 80, 0, 3]
@@ -921,7 +956,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             plt.scatter(
                 X_set[y_set == j, 0],
                 X_set[y_set == j, 1],
-                c=ListedColormap((str_color_negative, str_color_positive))(i),
+                color=ListedColormap((str_color_negative, str_color_positive))(i),
                 label=label
             )
         plt.title(str_title)
