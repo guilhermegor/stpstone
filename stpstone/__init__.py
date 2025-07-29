@@ -10,6 +10,6 @@ except PackageNotFoundError:
 
         __version__ = metadata("stpstone")["version"]
     except (PackageNotFoundError, ImportError):
-        __version__ = "2.0.30"
+        __version__ = "3.0.0"
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
