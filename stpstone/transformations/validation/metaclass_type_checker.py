@@ -56,6 +56,10 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
     if isinstance(value, Mock):
         return
     
+    # handle numpy integer types as equivalent to Python int
+    if expected_type is int and hasattr(value, 'dtype') and value.dtype.kind in ('i', 'u'):
+        return
+    
     origin = get_origin(expected_type)
     
     # handle Literal types

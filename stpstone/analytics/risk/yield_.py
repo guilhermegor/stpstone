@@ -9,7 +9,7 @@ References
 .. [1] https://corporatefinanceinstitute.com/resources/fixed-income/duration/
 """
 
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -29,7 +29,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         Yield to maturity (must be between 0 and 1)
     float_fv : float
         Face value of the bond
-    str_when : Literal["end", "begin"], optional
+    str_when : Literal["end", "begin"]
         When payments are made (default: "end")
 
     Raises
@@ -44,7 +44,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         array_cfs: NDArray[np.float64],
         float_ytm: float,
         float_fv: float,
-        str_when: Optional[Literal["end", "begin"]] = "end"
+        str_when: Literal["end", "begin"] = "end"
     ) -> None:
         """Initialize BondDuration object.
         
@@ -56,7 +56,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
             Yield to maturity (must be between 0 and 1)
         float_fv : float
             Face value of the bond
-        str_when : Literal['end', 'begin'], optional
+        str_when : Literal['end', 'begin']
             When payments are made (default: "end")
         """
         self._validate_inputs(array_cfs, float_ytm)
@@ -81,7 +81,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
             If cash flows list is empty
             If yield to maturity is not between 0 and 1
         """
-        if not array_cfs:
+        if array_cfs.size == 0:
             raise ValueError("Cash flows list cannot be empty")
         if not 0 <= float_ytm <= 1:
             raise ValueError(f"Yield to maturity must be between 0 and 1, got {float_ytm}")
@@ -169,6 +169,43 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         float_pv0 = np.sum(array_discounted_cfs)
         return -self.modified(float_y, int_n) * float_pv0
 
+    def _params_pv(self, float_delta_y: float) -> tuple[float, float, float]:
+        """Parameters of PV for bond duration calculations.
+        
+        Parameters
+        ----------
+        float_delta_y : float
+            Yield change (must be positive)
+
+        Returns
+        -------
+        tuple[float, float, float]
+            Parameters for bond duration calculations
+
+        Raises
+        ------
+        ValueError
+            If yield change is not positive
+        """
+        if float_delta_y <= 0:
+            raise ValueError(f"Yield change must be positive, got {float_delta_y}")
+        
+        array_nper = np.arange(1, len(self.array_cfs) + 1)
+        float_pv0 = np.sum([
+            self.pv(self.float_ytm, t, cf) for t, cf in zip(array_nper, self.array_cfs)
+        ])
+
+        float_pv_minus = np.sum([
+            self.pv(self.float_ytm - float_delta_y, int_t, float_cf)
+            for int_t, float_cf in zip(array_nper, self.array_cfs)
+        ])
+        float_pv_plus = np.sum([
+            self.pv(self.float_ytm + float_delta_y, int_t, float_cf)
+            for int_t, float_cf in zip(array_nper, self.array_cfs)
+        ])
+
+        return float_pv0, float_pv_minus, float_pv_plus
+
     def effective(self, float_delta_y: float) -> float:
         """Calculate effective duration.
 
@@ -181,27 +218,8 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         -------
         float
             Effective duration of the bond
-
-        Raises
-        ------
-        ValueError
-            If yield change is not positive
         """
-        if float_delta_y <= 0:
-            raise ValueError(f"Yield change must be positive, got {float_delta_y}")
-
-        array_nper, array_discounted_cfs = self.pv_cfs(
-            self.array_cfs, self.float_ytm, str_capitalization="simple", str_when="end"
-        )
-        float_pv0 = np.sum(array_discounted_cfs)
-        float_pv_minus = np.sum([
-            self.pv(self.float_ytm - float_delta_y, int_t, float_cf)
-            for int_t, float_cf in zip(array_nper, self.array_cfs)
-        ])
-        float_pv_plus = np.sum([
-            self.pv(self.float_ytm + float_delta_y, int_t, float_cf)
-            for int_t, float_cf in zip(array_nper, self.array_cfs)
-        ])
+        float_pv0, float_pv_minus, float_pv_plus = self._params_pv(float_delta_y)
         return (float_pv_minus - float_pv_plus) / (2 * float_delta_y * float_pv0)
 
     def convexity(self, float_delta_y: float) -> float:
@@ -217,21 +235,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         float
             Convexity of the bond
         """
-        if float_delta_y <= 0:
-            raise ValueError(f"Yield change must be positive, got {float_delta_y}")
-
-        array_nper, array_discounted_cfs = self.pv_cfs(
-            self.array_cfs, self.float_ytm, str_capitalization="simple", str_when="end"
-        )
-        float_pv0 = np.sum(array_discounted_cfs)
-        float_pv_minus = np.sum([
-            self.pv(self.float_ytm - float_delta_y, int_t, float_cf)
-            for int_t, float_cf in zip(array_nper, self.array_cfs)
-        ])
-        float_pv_plus = np.sum([
-            self.pv(self.float_ytm + float_delta_y, int_t, float_cf)
-            for int_t, float_cf in zip(array_nper, self.array_cfs)
-        ])
+        float_pv0, float_pv_minus, float_pv_plus = self._params_pv(float_delta_y)
         return (float_pv_minus + float_pv_plus - 2 * float_pv0) / (float_pv0 * float_delta_y**2)
 
     def dv_y(self, float_y: float, int_n: int, float_delta_y: float = 0.0001) -> float:
@@ -250,6 +254,11 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         -------
         float
             Dollar value for the given yield change
+
+        Raises
+        ------
+        ValueError
+            If yield change is not positive
         """
         if float_delta_y <= 0:
             raise ValueError(f"Yield change must be positive, got {float_delta_y}")
