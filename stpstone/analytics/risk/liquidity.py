@@ -1,145 +1,360 @@
-from typing import Literal, Optional, Union
+"""Financial ratios calculation module.
+
+This module provides classes for calculating liquidity and solvency ratios to assess a company's
+financial health. It includes robust input validation and adheres to strict type checking \
+    standards.
+"""
+
+from typing import Literal, Optional
+
+import numpy as np
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class LiquidityRatios:
+class LiquidityRatios(metaclass=TypeChecker):
+    """Calculate liquidity ratios to assess a company's ability to meet short-term obligations.
+
+    References
+    ----------
+    .. [1] https://www.investopedia.com/terms/l/liquidityratios.asp
     """
-    Metadata: https://www.investopedia.com/terms/l/liquidityratios.asp
-    """
 
-    def current_ratio(self, float_curr_assets: float, float_curr_liabilities: float):
+    def _validate_positive_float(self, value: float, name: str) -> None:
+        """Validate that a value is positive and finite.
+
+        Parameters
+        ----------
+        value : float
+            Value to validate
+        name : str
+            Variable name for error messages
+
+        Raises
+        ------
+        ValueError
+            If value is not positive or not finite
         """
-        Calculates the current ratio, which is a liquidity ratio that measures a company's ability
-        to pay short-term obligations or those due within one year. The ratio indicates the extent
-        to which current assets cover current liabilities.
+        if not np.isfinite(value):
+            raise ValueError(f"{name} must be finite, got {value}")
+        if value <= 0:
+            raise ValueError(f"{name} must be positive, got {value}")
 
-        Args:
-            float_curr_assets (float): Total current assets.
-            float_curr_liabilities (float): Total current liabilities.
+    def current_ratio(self, current_assets: float, current_liabilities: float) -> float:
+        """Calculate the current ratio to measure ability to pay short-term obligations.
 
-        Returns:
-            float: The current ratio, calculated as current assets divided by current liabilities.
+        Parameters
+        ----------
+        current_assets : float
+            Total current assets
+        current_liabilities : float
+            Total current liabilities
+
+        Returns
+        -------
+        float
+            The current ratio
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/l/liquidityratios.asp
         """
-        return float_curr_assets / float_curr_liabilities
+        self._validate_positive_float(current_assets, "current_assets")
+        self._validate_positive_float(current_liabilities, "current_liabilities")
+        
+        return current_assets / current_liabilities
 
-    def quick_ratio(self, float_curr_assets: float, float_inventories: float,
-                    float_curr_liabilities: float):
+    def quick_ratio(
+        self, 
+        current_assets: float, 
+        inventories: float, 
+        current_liabilities: float
+    ) -> float:
+        """Calculate the quick ratio.
+         
+        Measure ability to pay short-term obligations excluding inventory.
+
+        Parameters
+        ----------
+        current_assets : float
+            Total current assets
+        inventories : float
+            Inventories
+        current_liabilities : float
+            Total current liabilities
+
+        Returns
+        -------
+        float
+            The quick ratio
+
+        Raises
+        ------
+        ValueError
+            If current_assets is less than inventories
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/l/liquidityratios.asp
         """
-        Calculates the quick ratio, which is a liquidity ratio that measures a company's ability
-        to pay short-term obligations or those due within one year. The ratio indicates the extent
-        to which current assets, excluding inventory, cover current liabilities.
+        self._validate_positive_float(current_assets, "current_assets")
+        self._validate_positive_float(inventories, "inventories")
+        self._validate_positive_float(current_liabilities, "current_liabilities")
+        if current_assets < inventories:
+            raise ValueError("current_assets must be >= inventories")
 
-        Args:
-            float_curr_assets (float): Total current assets.
-            float_inventories (float): Inventories.
-            float_curr_liabilities (float): Total current liabilities.
+        return (current_assets - inventories) / current_liabilities
 
-        Returns:
-            float: The quick ratio, calculated as current assets minus inventories divided by
-            current liabilities.
+    def dso(
+        self, 
+        avg_accounts_receivable: float, 
+        revenue: float, 
+        days: Optional[Literal[252, 360, 365]] = 365
+    ) -> float:
+        """Calculate days sales outstanding to measure accounts receivable collection efficiency.
+
+        Parameters
+        ----------
+        avg_accounts_receivable : float
+            Average accounts receivable
+        revenue : float
+            Total revenue
+        days : Optional[Literal[252, 360, 365]]
+            Number of days in the period (default: 365)
+
+        Returns
+        -------
+        float
+            The days sales outstanding
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/l/liquidityratios.asp
         """
-        return (float_curr_assets - float_inventories) / float_curr_liabilities
+        self._validate_positive_float(avg_accounts_receivable, "avg_accounts_receivable")
+        self._validate_positive_float(revenue, "revenue")
+        
+        return float(days) / (revenue / avg_accounts_receivable)
 
-    def dso(self, float_avg_accounts_rec:float, float_rev:float,
-            int_wdy: Optional[Union[int, Literal[252, 365, 360]]]=365):
+    def cash_ratio(self, cash_equivalents: float, current_liabilities: float) -> float:
+        """Calculate the cash ratio to measure ability to pay short-term liabilities with cash.
+
+        Parameters
+        ----------
+        cash_equivalents : float
+            Total cash and cash equivalents
+        current_liabilities : float
+            Total current liabilities
+
+        Returns
+        -------
+        float
+            The cash ratio
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/l/liquidityratios.asp
         """
-        Calculates the days sales outstanding (DSO), which is the average number of days that
-        a company takes to collect its accounts receivable. The DSO is used to measure the
-        efficiency of a company's accounts receivable management, and it is often used to
-        evaluate the creditworthiness of a company.
-
-        Args:
-            float_avg_accounts_rec (float): Average accounts receivable.
-            float_rev (float): Total revenue.
-            int_wdy (Optional[Union[int, Literal[252, 365, 360]]], optional): Number of days in
-                the period. Defaults to 365.
-
-        Returns:
-            float: The DSO, calculated as the number of days divided by the revenue minus the
-            average accounts receivable.
-        """
-        return float(int_wdy) / (float_rev / float_avg_accounts_rec)
-
-    def cash_ratio(self, float_cash_eq: float, float_curr_liabilities: float):
-        """
-        Calculates the cash ratio, which is a liquidity ratio that measures a company's ability
-        to pay off its short-term liabilities with its most liquid assets, cash and cash equivalents.
-
-        Args:
-            float_cash_eq (float): Total cash and cash equivalents.
-            float_curr_liabilities (float): Total current liabilities.
-
-        Returns:
-            float: The cash ratio, calculated as cash and cash equivalents divided by current liabilities.
-        """
-        return float_cash_eq / float_curr_liabilities
+        self._validate_positive_float(cash_equivalents, "cash_equivalents")
+        self._validate_positive_float(current_liabilities, "current_liabilities")
+        
+        return cash_equivalents / current_liabilities
 
 
 class SolvencyRatios:
+    """Calculate solvency ratios to assess a company's long-term financial stability.
+
+    References
+    ----------
+    .. [1] https://www.investopedia.com/terms/s/solvencyratio.asp
+    .. [2] https://medium.com/quant-factory/calculating-altman-z-score-with-python-3c6697ee7aee
     """
-    Metadata: https://www.investopedia.com/terms/s/solvencyratio.asp,
-        https://medium.com/quant-factory/calculating-altman-z-score-with-python-3c6697ee7aee
-    """
 
-    def interest_coverage_ratio(self, float_ebit: float, float_int_exp: float):
+    def _validate_positive_float(self, value: float, name: str) -> None:
+        """Validate that a value is positive and finite.
+
+        Parameters
+        ----------
+        value : float
+            Value to validate
+        name : str
+            Variable name for error messages
+
+        Raises
+        ------
+        ValueError
+            If value is not positive or not finite
         """
-        Calculates the interest coverage ratio, which is a solvency ratio that measures a company's
-        ability to pay interest on its debt. The interest coverage ratio is calculated by dividing
-        earnings before interest and taxes (EBIT) by interest expenses.
+        if not np.isfinite(value):
+            raise ValueError(f"{name} must be finite, got {value}")
+        if value <= 0:
+            raise ValueError(f"{name} must be positive, got {value}")
 
-        Args:
-            float_ebit (float): Earnings before interest and taxes.
-            float_int_exp (float): Interest expenses.
+    def _validate_float(self, value: float, name: str) -> None:
+        """Validate that a value is finite.
 
-        Returns:
-            float: The interest coverage ratio, calculated as EBIT divided by interest expenses.
+        Parameters
+        ----------
+        value : float
+            Value to validate
+        name : str
+            Variable name for error messages
+
+        Raises
+        ------
+        ValueError
+            If value is not finite
         """
-        return float_ebit / float_int_exp
+        if not np.isfinite(value):
+            raise ValueError(f"{name} must be finite, got {value}")
 
-    def debt_to_assets_ratio(self, float_debt: float, float_assets: float):
-        return float_debt / float_assets
+    def interest_coverage_ratio(self, ebit: float, interest_expenses: float) -> float:
+        """Calculate the interest coverage ratio to measure ability to pay interest on debt.
 
-    def equiy_ratio(self, float_tse: float, float_assets: float):
+        Parameters
+        ----------
+        ebit : float
+            Earnings before interest and taxes
+        interest_expenses : float
+            Interest expenses
+
+        Returns
+        -------
+        float
+            The interest coverage ratio
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/s/solvencyratio.asp
         """
-        Calculates the equity ratio, which is a solvency ratio that measures the proportion of a
-        company's total assets financed by shareholders' equity. The equity ratio is an indicator of
-        financial stability, showing the percentage of assets owned by shareholders.
+        self._validate_float(ebit, "ebit")
+        self._validate_positive_float(interest_expenses, "interest_expenses")
+        
+        return ebit / interest_expenses
 
-        Args:
-            float_tse (float): Total shareholders' equity.
-            float_assets (float): Total assets.
+    def debt_to_assets_ratio(self, debt: float, assets: float) -> float:
+        """Calculate the debt to assets ratio to measure financial leverage.
 
-        Returns:
-            float: The equity ratio, calculated as total shareholders' equity divided by total assets.
+        Parameters
+        ----------
+        debt : float
+            Total debt
+        assets : float
+            Total assets
+
+        Returns
+        -------
+        float
+            The debt to assets ratio
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/s/solvencyratio.asp
         """
-        return float_tse / float_assets
+        self._validate_positive_float(debt, "debt")
+        self._validate_positive_float(assets, "assets")
+        
+        return debt / assets
 
-    def debt_to_equity_ratio(self, float_debt: float, float_equity: float):
-        return float_debt / float_equity
+    def equity_ratio(self, total_shareholders_equity: float, assets: float) -> float:
+        """Calculate the equity ratio to measure proportion of assets financed by equity.
 
-    def altmans_z_score(self, float_nwk_cap: float, float_total_assets: float,
-                        float_ret_earnings: float, float_ebit: float,
-                        float_mkt_cap: float, float_total_liabilities: float, float_sales: float):
+        Parameters
+        ----------
+        total_shareholders_equity : float
+            Total shareholders' equity
+        assets : float
+            Total assets
+
+        Returns
+        -------
+        float
+            The equity ratio
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/s/solvencyratio.asp
         """
-        Calculates the Altman Z-score, which is a credit-strength test that assesses a company's
-        likelihood of bankruptcy. The Z-score is calculated from five financial ratios: working
-        capital to total assets, retained earnings to total assets, earnings before interest and
-        taxes (EBIT) to total assets, market capitalization to total liabilities, and sales to total
-        assets.
+        self._validate_positive_float(total_shareholders_equity, "total_shareholders_equity")
+        self._validate_positive_float(assets, "assets")
+        
+        return total_shareholders_equity / assets
 
-        Args:
-            float_nwk_cap (float): Working capital.
-            float_total_assets (float): Total assets.
-            float_ret_earnings (float): Retained earnings.
-            float_ebit (float): Earnings before interest and taxes.
-            float_mkt_cap (float): Market capitalization.
-            float_total_liabilities (float): Total liabilities.
-            float_sales (float): Sales.
+    def debt_to_equity_ratio(self, debt: float, equity: float) -> float:
+        """Calculate the debt to equity ratio to measure financial leverage.
 
-        Returns:
-            float: The Altman Z-score.
+        Parameters
+        ----------
+        debt : float
+            Total debt
+        equity : float
+            Total equity
+
+        Returns
+        -------
+        float
+            The debt to equity ratio
+
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/s/solvencyratio.asp
         """
-        return 1.2 * (float_nwk_cap / float_total_assets) \
-            + 1.4 * (float_ret_earnings / float_total_assets) \
-            + 3.3 * (float_ebit / float_total_assets) \
-            + 0.6 * (float_mkt_cap / float_total_liabilities) \
-            + 1.0 * (float_sales / float_total_assets)
+        self._validate_positive_float(debt, "debt")
+        self._validate_positive_float(equity, "equity")
+        
+        return debt / equity
+
+    def altmans_z_score(
+        self,
+        working_capital: float,
+        total_assets: float,
+        retained_earnings: float,
+        ebit: float,
+        market_capitalization: float,
+        total_liabilities: float,
+        sales: float
+    ) -> float:
+        """Calculate the Altman Z-score to assess bankruptcy risk.
+
+        Parameters
+        ----------
+        working_capital : float
+            Working capital
+        total_assets : float
+            Total assets
+        retained_earnings : float
+            Retained earnings
+        ebit : float
+            Earnings before interest and taxes
+        market_capitalization : float
+            Market capitalization
+        total_liabilities : float
+            Total liabilities
+        sales : float
+            Sales
+
+        Returns
+        -------
+        float
+            The Altman Z-score
+        
+        References
+        ----------
+        .. [1] https://www.investopedia.com/terms/s/solvencyratio.asp
+        .. [2] https://medium.com/quant-factory/calculating-altman-z-score-with-python-3c6697ee7aee
+        """
+        self._validate_float(working_capital, "working_capital")
+        self._validate_positive_float(total_assets, "total_assets")
+        self._validate_float(retained_earnings, "retained_earnings")
+        self._validate_float(ebit, "ebit")
+        self._validate_positive_float(market_capitalization, "market_capitalization")
+        self._validate_positive_float(total_liabilities, "total_liabilities")
+        self._validate_positive_float(sales, "sales")
+
+        return (
+            1.2 * (working_capital / total_assets)
+            + 1.4 * (retained_earnings / total_assets)
+            + 3.3 * (ebit / total_assets)
+            + 0.6 * (market_capitalization / total_liabilities)
+            + 1.0 * (sales / total_assets)
+        )

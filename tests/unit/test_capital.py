@@ -102,7 +102,7 @@ class TestCR1Calculator:
         - TypeError is raised for non-numeric EAD
         - Error message is correct
         """
-        with pytest.raises(TypeError, match="Exposure at Default must be numeric"):
+        with pytest.raises(TypeError, match="must be of type"):
             CR1Calculator(float_ead="1000", float_pd=0.1, float_lgd=0.5)
 
     def test_invalid_pd_type(self) -> None:
@@ -113,7 +113,7 @@ class TestCR1Calculator:
         - TypeError is raised for non-numeric PD
         - Error message is correct
         """
-        with pytest.raises(TypeError, match="Probability of Default must be numeric"):
+        with pytest.raises(TypeError, match="must be of type"):
             CR1Calculator(float_ead=1000.0, float_pd="0.1", float_lgd=0.5)
 
     def test_invalid_lgd_type(self) -> None:
@@ -124,7 +124,7 @@ class TestCR1Calculator:
         - TypeError is raised for non-numeric LGD
         - Error message is correct
         """
-        with pytest.raises(TypeError, match="Loss Given Default must be numeric"):
+        with pytest.raises(TypeError, match="must be of type"):
             CR1Calculator(float_ead=1000.0, float_pd=0.1, float_lgd="0.5")
 
     def test_negative_ead(self) -> None:

@@ -9,6 +9,8 @@ from typing import TypedDict
 
 import numpy as np
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
 
 class ReturnSummary(TypedDict):
     """Dictionary containing CR1 calculation parameters and results.
@@ -34,7 +36,7 @@ class ReturnSummary(TypedDict):
     CR1: float
 
 
-class CR1Calculator:
+class CR1Calculator(metaclass=TypeChecker):
     """Calculator for Capital Requirement 1 (CR1) of financial instruments.
 
     Parameters
