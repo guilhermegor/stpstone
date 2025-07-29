@@ -238,7 +238,7 @@ class TestBondDuration:
         """
         dollar_duration = bond_duration.dollar(0.05, 2)
         assert isinstance(dollar_duration, float)
-        assert dollar_duration < 0  # Dollar duration should be negative
+        assert dollar_duration < 0  # dollar duration should be negative
 
     # --------------------------
     # Effective Duration Tests
