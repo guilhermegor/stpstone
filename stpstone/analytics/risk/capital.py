@@ -1,59 +1,173 @@
-### A CLASS TO CALCULATE CAPITAL REQUIREMENT 1 (CR1) FOR FINANCIAL INSTRUMENTS ###
+"""Capital Requirement 1 (CR1) calculation for financial instruments.
 
-from typing import Dict
+This module provides a class to calculate Capital Requirement 1 (CR1) based on
+Exposure at Default (EAD), Probability of Default (PD), and Loss Given Default (LGD).
+It includes input validation and follows strict numerical bounds checking.
+"""
+
+from typing import TypedDict
+
+import numpy as np
+
+
+class ReturnSummary(TypedDict):
+    """Dictionary containing CR1 calculation parameters and results.
+
+    Parameters
+    ----------
+    EAD : float
+        Exposure at Default
+    PD : float
+        Probability of Default
+    LGD : float
+        Loss Given Default
+    K : float
+        Capital requirement factor
+    CR1 : float
+        Capital Requirement 1
+    """
+
+    EAD: float
+    PD: float
+    LGD: float
+    K: float
+    CR1: float
 
 
 class CR1Calculator:
+    """Calculator for Capital Requirement 1 (CR1) of financial instruments.
+
+    Parameters
+    ----------
+    float_ead : float
+        Exposure at Default, must be non-negative
+    float_pd : float
+        Probability of Default, must be in [0, 1]
+    float_lgd : float
+        Loss Given Default, must be in [0, 1]
+
+    Attributes
+    ----------
+    float_ead : float
+        Exposure at Default value
+    float_pd : float
+        Probability of Default value
+    float_lgd : float
+        Loss Given Default value
+    """
 
     def __init__(self, float_ead: float, float_pd: float, float_lgd: float) -> None:
+        """Initialize CR1Calculator.
+        
+        Parameters
+        ----------
+        float_ead : float
+            Exposure at Default
+        float_pd : float
+            Probability of Default
+        float_lgd : float
+            Loss Given Default
+        
+        Returns
+        -------
+        None
         """
-        Args:
-            float_ead (float): Exposure at Default.
-            float_pd (float): Probability of Default.
-            float_lgd (float): Loss Given Default.
-        """
+        self._validate_inputs(float_ead, float_pd, float_lgd)
         self.float_ead = float_ead
         self.float_pd = float_pd
         self.float_lgd = float_lgd
 
-    @property
-    def calculate_k(self) -> float:
-        """
-        Calculates the capital requirement k, which is the product of the loss given default (LGD)
-        and the probability of default (PD).
+    def _validate_inputs(self, float_ead: float, float_pd: float, float_lgd: float) -> None:
+        """Validate input parameters for CR1 calculation.
 
-        Returns:
-            float: The capital requirement k.
+        Parameters
+        ----------
+        float_ead : float
+            Exposure at Default to validate
+        float_pd : float
+            Probability of Default to validate
+        float_lgd : float
+            Loss Given Default to validate
+
+        Raises
+        ------
+        ValueError
+            If EAD is negative, or PD/LGD is outside [0, 1]
+        TypeError
+            If inputs are not numeric
+        """
+        if not isinstance(float_ead, (int, float)):
+            raise TypeError("Exposure at Default must be numeric")
+        if not isinstance(float_pd, (int, float)):
+            raise TypeError("Probability of Default must be numeric")
+        if not isinstance(float_lgd, (int, float)):
+            raise TypeError("Loss Given Default must be numeric")
+
+        if float_ead < 0:
+            raise ValueError(f"Exposure at Default must be non-negative, got {float_ead}")
+        if not 0 <= float_pd <= 1:
+            raise ValueError(f"Probability of Default must be in [0, 1], got {float_pd}")
+        if not 0 <= float_lgd <= 1:
+            raise ValueError(f"Loss Given Default must be in [0, 1], got {float_lgd}")
+
+        if not np.isfinite(float_ead):
+            raise ValueError("Exposure at Default must be finite")
+        if not np.isfinite(float_pd):
+            raise ValueError("Probability of Default must be finite")
+        if not np.isfinite(float_lgd):
+            raise ValueError("Loss Given Default must be finite")
+
+    def calculate_k(self) -> float:
+        """Calculate capital requirement factor K.
+
+        Returns
+        -------
+        float
+            Product of Loss Given Default and Probability of Default
+
+        Notes
+        -----
+        K = LGD * PD
         """
         return self.float_lgd * self.float_pd
 
-    @property
     def calculate_cr1(self) -> float:
-        """
-        Calculates the capital requirement 1 (CR1) by multiplying the exposure at default (EAD)
-        by the capital requirement k, which is the product of the loss given default (LGD) and
-        the probability of default (PD), and then by 12.5.
+        """Calculate Capital Requirement 1 (CR1).
 
-        Returns:
-            float: The capital requirement 1 (CR1).
-        """
-        return 12.5 * self.calculate_k * self.float_ead
+        Returns
+        -------
+        float
+            Capital Requirement 1 calculated as 12.5 * K * EAD
 
-    @property
-    def summary(self) -> Dict[str, float]:
-        """
-        A summary of all the values used to calculate the capital requirement 1 (CR1)
+        Raises
+        ------
+        ValueError
+            If CR1 calculation results in non-finite value
 
-        Returns:
-            Dict[str, float]: A dictionary containing the exposure at default (EAD),
-            the probability of default (PD),
-            the loss given default (LGD), the capital requirement k, and the capital
-            requirement 1 (CR1).
+        Notes
+        -----
+        CR1 = 12.5 * K * EAD, where K = LGD * PD
         """
+        k = self.calculate_k()
+        result = 12.5 * k * self.float_ead
+        if not np.isfinite(result):
+            raise ValueError("CR1 calculation resulted in non-finite value")
+        return result
+
+    def summary(self) -> ReturnSummary:
+        """Generate summary of CR1 calculation parameters and results.
+
+        Returns
+        -------
+        ReturnSummary
+            Dictionary containing EAD, PD, LGD, K, and CR1 values
+        """
+        k = self.calculate_k()
+        cr1 = self.calculate_cr1()
         return {
-            'EAD': self.float_ead,
-            'PD': self.float_pd,
-            'LGD': self.float_lgd,
-            'K': self.calculate_k,
-            'CR1': self.calculate_cr1
+            "EAD": self.float_ead,
+            "PD": self.float_pd,
+            "LGD": self.float_lgd,
+            "K": k,
+            "CR1": cr1
         }

@@ -97,6 +97,12 @@
 
 ## Example Implementation
 ```python
+"""Data processing utilities for numerical arrays.
+
+This module provides functions for validating and processing numerical data using NumPy.
+It includes input validation and statistical computations with a focus on robust error handling.
+"""
+
 from typing import Optional, Literal
 import numpy as np
 
@@ -153,7 +159,7 @@ def process_data(
         "valid": True
     }
     return result
-    ```
+```
 
 Please refactor this code:
 
