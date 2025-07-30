@@ -14,8 +14,10 @@ References
 
 from typing import Optional
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class BTreeNode:
+
+class BTreeNode(metaclass=TypeChecker):
     """Node class for B-tree implementation.
 
     Parameters
@@ -41,7 +43,7 @@ class BTreeNode:
         self.is_leaf: bool = is_leaf
 
 
-class BTree:
+class BTree(metaclass=TypeChecker):
     """B-tree implementation with search, insert, and delete operations.
 
     Parameters
@@ -140,14 +142,14 @@ class BTree:
         full_child = parent.children[child_index]
         new_child = BTreeNode(is_leaf=full_child.is_leaf)
 
-        # Insert median key into parent
+        # insert median key into parent
         parent.keys.insert(child_index, full_child.keys[self.min_degree - 1])
 
-        # Split keys between the two children
+        # split keys between the two children
         new_child.keys = full_child.keys[self.min_degree:(2 * self.min_degree) - 1]
         full_child.keys = full_child.keys[0:self.min_degree - 1]
 
-        # Split children if not leaf
+        # split children if not leaf
         if not full_child.is_leaf:
             new_child.children = full_child.children[self.min_degree:2 * self.min_degree]
             full_child.children = full_child.children[0:self.min_degree]

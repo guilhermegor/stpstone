@@ -11,8 +11,10 @@ References
 
 from typing import Optional
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class CacheObliviousAVLNode:
+
+class CacheObliviousAVLNode(metaclass=TypeChecker):
     """Node class for cache-oblivious AVL tree implementation.
 
     Parameters
@@ -39,7 +41,7 @@ class CacheObliviousAVLNode:
         self.height: int = 1
 
 
-class CacheObliviousAVLTree:
+class CacheObliviousAVLTree(metaclass=TypeChecker):
     """Cache-oblivious AVL tree implementation.
 
     Cache-oblivious AVL trees optimize memory access patterns to improve performance across
