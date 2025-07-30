@@ -43,11 +43,6 @@ class Stack(metaclass=TypeChecker):
         ----------
         initial_capacity : int, optional
             Initial capacity of the stack (default: 10)
-
-        Raises
-        ------
-        ValueError
-            If initial_capacity is not positive
         """
         self._validate_capacity(initial_capacity)
         self._items = np.empty(initial_capacity, dtype=object)
@@ -80,7 +75,7 @@ class Stack(metaclass=TypeChecker):
         """
         return self._size == 0
 
-    def push(self, item: Any) -> None:
+    def push(self, item: Any) -> None: # noqa: ANN401 - typing.Any disallowed
         """Add an item to the top of the stack.
 
         Parameters
@@ -97,18 +92,13 @@ class Stack(metaclass=TypeChecker):
         self._items[self._size] = item
         self._size += 1
 
-    def pop(self) -> Any:
+    def pop(self) -> Any: # noqa: ANN401 - typing.Any disallowed
         """Remove and return the top item from the stack.
 
         Returns
         -------
         Any
             The top item from the stack
-
-        Raises
-        ------
-        IndexError
-            If stack is empty
         """
         self._validate_not_empty()
         self._size -= 1
@@ -128,18 +118,13 @@ class Stack(metaclass=TypeChecker):
             raise IndexError("Operation on an empty stack")
 
     @property
-    def peek(self) -> Any:
+    def peek(self) -> Any: # noqa: ANN401 - typing.Any disallowed
         """Return the top item without removing it.
 
         Returns
         -------
         Any
             The top item from the stack
-
-        Raises
-        ------
-        IndexError
-            If stack is empty
         """
         self._validate_not_empty()
         return self._items[self._size - 1]

@@ -92,7 +92,7 @@ class TestInitialization:
             Stack(invalid_capacity)
 
     @pytest.mark.parametrize("invalid_type", [1.5, "10", None, []])
-    def test_non_integer_initial_capacity(self, invalid_type: Any) -> None:
+    def test_non_integer_initial_capacity(self, invalid_type: Any) -> None: # noqa: ANN401
         """Test initialization with non-integer capacities.
 
         Parameters
@@ -103,7 +103,7 @@ class TestInitialization:
         Verifies that:
         - ValueError is raised for non-integer capacities
         """
-        with pytest.raises(ValueError, match="Capacity must be a positive integer"):
+        with pytest.raises(TypeError, match="must be of type"):
             Stack(invalid_type)
 
 
@@ -256,7 +256,7 @@ class TestPeekOperations:
         - Size remains 0
         """
         with pytest.raises(IndexError, match="Operation on an empty stack"):
-            empty_stack.peek
+            _ = empty_stack.peek
         assert empty_stack.size == 0
 
 
@@ -364,7 +364,7 @@ class TestTypeHandling:
     """Test cases for stack type handling."""
 
     @pytest.mark.parametrize("item", [1, "str", 3.14, None, [1, 2], {"key": "value"}])
-    def test_push_different_types(self, item: Any, empty_stack: Stack) -> None:
+    def test_push_different_types(self, item: Any, empty_stack: Stack) -> None: # noqa: ANN401
         """Test pushing various types to stack.
 
         Parameters
