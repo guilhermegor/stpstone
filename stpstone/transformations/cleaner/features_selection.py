@@ -17,6 +17,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class ReturnDimensionalityReductionStandard(TypedDict):
@@ -42,7 +43,7 @@ class ReturnPca(TypedDict):
     components: NDArray[np.float64]
 
 
-class DimensionalityReduction:
+class DimensionalityReduction(metaclass=TypeChecker):
     """Class for performing dimensionality reduction and feature selection techniques."""
 
     def _validate_array(self, array: NDArray, name: str) -> None:
@@ -632,7 +633,7 @@ class DimensionalityReduction:
             if col != target_col:
                 if np.issubdtype(df_[col].dtype, np.number) \
                     and df_[col].nunique() > min_bins_monotonic:
-                    class_col, remarks, df_binned = self.prepare_bins(
+                    class_col, remarks, df_binned = ExploratoryDataAnalysis().prepare_bins(
                         df_[[col, target_col]].copy(), col, target_col, max_bins
                     )
                     df_agg_data = self.iv_woe_iter(df_binned.copy(), target_col, class_col)

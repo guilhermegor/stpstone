@@ -99,7 +99,7 @@ class TestValidationMethods:
         -------
         None
         """
-        with pytest.raises(TypeError, match="test_array must be a numpy array"):
+        with pytest.raises(TypeError, match="must be of type"):
             dimensionality_reduction._validate_array([1, 2, 3], "test_array")
 
     def test_validate_array_empty(
@@ -283,7 +283,7 @@ class TestValidationMethods:
         -------
         None
         """
-        with pytest.raises(TypeError, match="test_df must be a pandas DataFrame"):
+        with pytest.raises(TypeError, match="must be of type"):
             dimensionality_reduction._validate_dataframe([1, 2, 3], "test_df")
 
     def test_validate_dataframe_empty(
@@ -458,7 +458,7 @@ class TestFeatureSelectionMethods:
             dimensionality_reduction.backward_elimination(X, np.array([]))
             
         # invalid estimator
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError, match="must be one of"):
             dimensionality_reduction.backward_elimination(X, y, str_estimator="invalid")
             
         # invalid cv
