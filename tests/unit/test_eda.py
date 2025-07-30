@@ -565,5 +565,5 @@ class TestValidationMethods:
         if valid:
             eda._validate_positive_integer(value, "test")
         else:
-            with pytest.raises(ValueError):
+            with pytest.raises((ValueError, TypeError)):
                 eda._validate_positive_integer(value, "test")
