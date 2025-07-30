@@ -55,8 +55,8 @@ class TestQueueInitialization:
         -------
         None
         """
-        assert empty_queue.size() == 0
-        assert empty_queue.is_empty() is True
+        assert empty_queue.size == 0
+        assert empty_queue.is_empty is True
 
     def test_internal_storage_is_deque(self, empty_queue: Queue) -> None:
         """Test that internal storage uses collections.deque.
@@ -89,8 +89,8 @@ class TestQueueOperations:
         None
         """
         empty_queue.enqueue(1)
-        assert empty_queue.size() == 1
-        assert empty_queue.is_empty() is False
+        assert empty_queue.size == 1
+        assert empty_queue.is_empty is False
 
     def test_dequeue_removes_items(self, filled_queue: Queue) -> None:
         """Test that dequeue removes items in FIFO order.
@@ -105,9 +105,9 @@ class TestQueueOperations:
         None
         """
         assert filled_queue.dequeue() == 0
-        assert filled_queue.size() == 2
+        assert filled_queue.size == 2
         assert filled_queue.dequeue() == 1
-        assert filled_queue.size() == 1
+        assert filled_queue.size == 1
 
     def test_size_returns_correct_value(self, filled_queue: Queue) -> None:
         """Test that size returns the correct number of items.
@@ -121,9 +121,9 @@ class TestQueueOperations:
         -------
         None
         """
-        assert filled_queue.size() == 3
+        assert filled_queue.size == 3
         filled_queue.dequeue()
-        assert filled_queue.size() == 2
+        assert filled_queue.size == 2
 
     def test_is_empty_returns_correct_state(self, empty_queue: Queue) -> None:
         """Test that is_empty returns correct queue state.
@@ -137,9 +137,9 @@ class TestQueueOperations:
         -------
         None
         """
-        assert empty_queue.is_empty() is True
+        assert empty_queue.is_empty is True
         empty_queue.enqueue(1)
-        assert empty_queue.is_empty() is False
+        assert empty_queue.is_empty is False
 
 
 class TestQueueEdgeCases:
@@ -195,7 +195,7 @@ class TestQueueEdgeCases:
         for i in range(5):
             empty_queue.enqueue(i)
             assert empty_queue.dequeue() == i
-            assert empty_queue.is_empty() is True
+            assert empty_queue.is_empty is True
 
 
 class TestQueueTypeHandling:
@@ -267,10 +267,10 @@ class TestQueuePerformance:
         test_size = 10000
         for i in range(test_size):
             empty_queue.enqueue(i)
-            assert empty_queue.size() == i + 1
+            assert empty_queue.size == i + 1
 
         for i in range(test_size):
             assert empty_queue.dequeue() == i
-            assert empty_queue.size() == test_size - i - 1
+            assert empty_queue.size == test_size - i - 1
 
-        assert empty_queue.is_empty() is True
+        assert empty_queue.is_empty is True

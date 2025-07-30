@@ -12,10 +12,12 @@ References
 from heapq import heappop, heappush
 from typing import Generic, TypeVar
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
 
 T = TypeVar('T')
 
-class PriorityQueue(Generic[T]):
+class PriorityQueue(Generic[T], metaclass=TypeChecker):
     """Priority queue implementation using heapq.
 
     Attributes

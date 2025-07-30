@@ -8,8 +8,10 @@ as the underlying data structure.
 from collections import deque
 from typing import Any
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class Deque:
+
+class Deque(metaclass=TypeChecker):
     """Double-ended queue implementation.
 
     Attributes

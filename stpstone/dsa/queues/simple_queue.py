@@ -3,8 +3,10 @@
 from collections import deque
 from typing import Any
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class Queue:
+
+class Queue(metaclass=TypeChecker):
     """
     A queue implementation using collections.deque.
 
@@ -18,6 +20,7 @@ class Queue:
         """Initialize an empty queue."""
         self._items = deque()
 
+    @property
     def is_empty(self) -> bool:
         """
         Check if the queue is empty.
@@ -27,26 +30,26 @@ class Queue:
         bool
             True if queue is empty, False otherwise.
         """
-        return not self._items
+        return len(self._items) == 0
 
-    def enqueue(self, item: type[Any]) -> None:
+    def enqueue(self, item: Any) -> None: # noqa: ANN401 - typing.Any disallowed
         """
         Add an item to the end of the queue.
 
         Parameters
         ----------
-        item : type[Any]
+        item : Any
             The item to be added to the queue.
         """
-        self._items.appendleft(item)
+        self._items.append(item)
 
-    def dequeue(self) -> type[Any]:
+    def dequeue(self) -> Any: # noqa: ANN401 - typing.Any disallowed
         """
         Remove and return the first item from the queue.
 
         Returns
         -------
-        type[Any]
+        Any
             The first item in the queue.
 
         Raises
@@ -54,10 +57,11 @@ class Queue:
         IndexError
             If attempting to dequeue from an empty queue.
         """
-        if self.is_empty():
+        if self.is_empty:
             raise IndexError("Dequeue from an empty queue")
-        return self._items.pop()
+        return self._items.popleft()
 
+    @property
     def size(self) -> int:
         """
         Get the current number of items in the queue.
