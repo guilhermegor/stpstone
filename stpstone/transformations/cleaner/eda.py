@@ -19,8 +19,10 @@ import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class ExploratoryDataAnalysis:
+
+class ExploratoryDataAnalysis(metaclass=TypeChecker):
     """Class containing exploratory data analysis utilities."""
 
     def is_monotonic(self, array_data: NDArray[np.float64]) -> bool:

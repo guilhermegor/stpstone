@@ -620,7 +620,7 @@ class TestReplaceNaNValues:
         -------
         None
         """
-        with pytest.raises(TypeError, match="parameter of SimpleImputer must be a str among"):
+        with pytest.raises(TypeError, match="must be one of"):
             data_cleaner.replace_nan_values(
                 sample_array_with_nans, 
                 strategy="invalid"
@@ -704,7 +704,7 @@ class TestConvertCategoriesFromStringsToArray:
         -------
         None
         """
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError, match="must be one of"):
             data_cleaner.convert_categories_from_strings_to_array(
                 sample_categorical_data,
                 [0, 1],
@@ -782,7 +782,7 @@ class TestFeatureScaling:
         None
         """
         arr = np.nan_to_num(sample_array_with_nans)
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError, match="must be one of"):
             data_cleaner.feature_scaling(arr, "invalid_scaler")
 
 
@@ -898,7 +898,7 @@ class TestValidateTestRatio:
         -------
         None
         """
-        for ratio in [0, 0.5, 1]:
+        for ratio in [0.0, 0.5, 1.0]:
             data_cleaner._validate_test_ratio(ratio)
 
     def test_invalid_ratios_raise_error(

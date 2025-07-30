@@ -34,6 +34,7 @@ from sklearn.preprocessing import (
 )
 
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
 class ReturnReplaceNaNValues(TypedDict):
@@ -71,7 +72,7 @@ class ReturnRemoveNoiseFromData:
     data_training_enhanced: NDArray[np.float64]
 
 
-class DataCleaning:
+class DataCleaning(metaclass=TypeChecker):
     """Class for cleaning and preparing datasets for machine learning."""
 
     def test_set_check_hash(self, identifier: int, test_ratio: float) -> bool:
