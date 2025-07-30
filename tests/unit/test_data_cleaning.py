@@ -22,7 +22,7 @@ from stpstone.transformations.cleaner.data_cleaning import DataCleaning
 # Fixtures
 # --------------------------
 @pytest.fixture
-def data_cleaner() -> "DataCleaning":
+def data_cleaner() -> DataCleaning:
     """Fixture providing DataCleaning instance.
 
     Returns
@@ -106,7 +106,17 @@ class TestTestSetCheckHash:
     """Tests for test_set_check_hash method."""
 
     def test_returns_boolean(self, data_cleaner: DataCleaning) -> None:
-        """Test returns boolean value."""
+        """Test returns boolean value.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.test_set_check_hash(123, 0.2)
         assert isinstance(result, bool)
 
@@ -114,7 +124,17 @@ class TestTestSetCheckHash:
         self, 
         data_cleaner: DataCleaning
     ) -> None:
-        """Test invalid test ratio raises ValueError."""
+        """Test invalid test ratio raises ValueError.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+
+        Returns
+        -------
+        None
+        """
         with pytest.raises(ValueError, match="test_ratio must be between 0 and 1"):
             data_cleaner.test_set_check_hash(123, -0.1)
         with pytest.raises(ValueError, match="test_ratio must be between 0 and 1"):
@@ -129,7 +149,19 @@ class TestSplitTrainTest:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test returns tuple of two dataframes."""
+        """Test returns tuple of two dataframes.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train, test = data_cleaner.split_train_test(sample_dataframe)
         assert isinstance(train, pd.DataFrame)
         assert isinstance(test, pd.DataFrame)
@@ -139,7 +171,19 @@ class TestSplitTrainTest:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test split maintains requested ratio."""
+        """Test split maintains requested ratio.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train, test = data_cleaner.split_train_test(sample_dataframe, test_ratio=0.3)
         assert len(test) / len(sample_dataframe) == pytest.approx(0.3, abs=0.01)
 
@@ -148,7 +192,19 @@ class TestSplitTrainTest:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test stratified split maintains proportions."""
+        """Test stratified split maintains proportions.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train, test = data_cleaner.split_train_test(
             sample_dataframe, 
             stratify_col="category"
@@ -166,7 +222,19 @@ class TestSplitStratifiedTrainTest:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test returns tuple of two dataframes."""
+        """Test returns tuple of two dataframes.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train, test = data_cleaner.split_stratified_train_test(
             sample_dataframe, 
             "category"
@@ -179,7 +247,19 @@ class TestSplitStratifiedTrainTest:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test maintains category proportions."""
+        """Test maintains category proportions.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train, test = data_cleaner.split_stratified_train_test(
             sample_dataframe, 
             "category"
@@ -199,7 +279,19 @@ class TestSplitTrainTestById:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test returns tuple of two dataframes."""
+        """Test returns tuple of two dataframes.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train, test = data_cleaner.split_train_test_by_id(
             sample_dataframe, 
             0.2, 
@@ -213,7 +305,19 @@ class TestSplitTrainTestById:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test produces same split on repeated calls."""
+        """Test produces same split on repeated calls.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         train1, test1 = data_cleaner.split_train_test_by_id(
             sample_dataframe, 
             0.2, 
@@ -236,7 +340,19 @@ class TestCreateCategoryStratifiedTrainTestSet:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test adds new category column."""
+        """Test adds new category column.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.create_category_stratified_train_test_set(
             sample_dataframe,
             "feature",
@@ -251,7 +367,19 @@ class TestCreateCategoryStratifiedTrainTestSet:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test values are properly binned."""
+        """Test values are properly binned.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.create_category_stratified_train_test_set(
             sample_dataframe,
             "feature",
@@ -271,7 +399,19 @@ class TestRemoveCategoryStratifiedTrainTestSet:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test removes specified column from both dataframes."""
+        """Test removes specified column from both dataframes.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         df_with_cat = data_cleaner.create_category_stratified_train_test_set(
             sample_dataframe,
             "feature",
@@ -295,7 +435,19 @@ class TestDataFrameIdColumnProportions:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test returns pandas Series."""
+        """Test returns pandas Series.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.dataframe_id_column_prportions(
             sample_dataframe, 
             "category"
@@ -307,7 +459,19 @@ class TestDataFrameIdColumnProportions:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test proportions sum to 1."""
+        """Test proportions sum to 1.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.dataframe_id_column_prportions(
             sample_dataframe, 
             "category"
@@ -323,7 +487,19 @@ class TestCompareStratifiedRandomSamplesProportions:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test returns pandas DataFrame."""
+        """Test returns pandas DataFrame.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         df_with_cat = data_cleaner.create_category_stratified_train_test_set(
             sample_dataframe,
             "feature",
@@ -345,7 +521,19 @@ class TestCompareStratifiedRandomSamplesProportions:
         data_cleaner: DataCleaning, 
         sample_dataframe: pd.DataFrame
     ) -> None:
-        """Test result contains error percentage columns."""
+        """Test result contains error percentage columns.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_dataframe : pd.DataFrame
+            Sample dataframe for testing
+
+        Returns
+        -------
+        None
+        """
         df_with_cat = data_cleaner.create_category_stratified_train_test_set(
             sample_dataframe,
             "feature",
@@ -372,7 +560,19 @@ class TestReplaceNaNValues:
         data_cleaner: DataCleaning, 
         sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test returns dictionary with numpy arrays."""
+        """Test returns dictionary with numpy arrays.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.replace_nan_values(sample_array_with_nans, "mean")
         assert isinstance(result, dict)
         assert isinstance(result["array_after_adjustments"], np.ndarray)
@@ -383,7 +583,19 @@ class TestReplaceNaNValues:
         data_cleaner: DataCleaning, 
         sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test KNN imputation works."""
+        """Test KNN imputation works.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.replace_nan_values(
             sample_array_with_nans, 
             n_neighbors=3
@@ -395,8 +607,20 @@ class TestReplaceNaNValues:
         data_cleaner: DataCleaning, 
         sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test invalid imputation strategy raises error."""
-        with pytest.raises(ValueError):
+        """Test invalid imputation strategy raises error.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(TypeError, match="parameter of SimpleImputer must be a str among"):
             data_cleaner.replace_nan_values(
                 sample_array_with_nans, 
                 strategy="invalid"
@@ -411,7 +635,19 @@ class TestConvertCategoriesFromStringsToArray:
         data_cleaner: DataCleaning, 
         sample_categorical_data: NDArray[np.str_]
     ) -> None:
-        """Test one-hot encoding produces numeric output."""
+        """Test one-hot encoding produces numeric output.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_categorical_data : NDArray[np.str_]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.convert_categories_from_strings_to_array(
             sample_categorical_data,
             [0, 1],
@@ -427,7 +663,19 @@ class TestConvertCategoriesFromStringsToArray:
         data_cleaner: DataCleaning, 
         sample_categorical_data: NDArray[np.str_]
     ) -> None:
-        """Test ordinal encoding produces numeric output."""
+        """Test ordinal encoding produces numeric output.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_categorical_data : NDArray[np.str_]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.convert_categories_from_strings_to_array(
             sample_categorical_data,
             [0, 1],
@@ -443,7 +691,19 @@ class TestConvertCategoriesFromStringsToArray:
         data_cleaner: DataCleaning, 
         sample_categorical_data: NDArray[np.str_]
     ) -> None:
-        """Test invalid encoder strategy raises error."""
+        """Test invalid encoder strategy raises error.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_categorical_data : NDArray[np.str_]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         with pytest.raises(ValueError):
             data_cleaner.convert_categories_from_strings_to_array(
                 sample_categorical_data,
@@ -460,7 +720,19 @@ class TestFeatureScaling:
         data_cleaner: DataCleaning, 
         sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test normalization scales to [0,1] range."""
+        """Test normalization scales to [0,1] range.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         arr = np.nan_to_num(sample_array_with_nans)
         result = data_cleaner.feature_scaling(arr, "normalization")
         scaled = result["array_scaled_data"]
@@ -472,7 +744,19 @@ class TestFeatureScaling:
         data_cleaner: DataCleaning, 
         sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test standardization produces mean~0, std~1."""
+        """Test standardization produces mean~0, std~1.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         arr = np.nan_to_num(sample_array_with_nans)
         result = data_cleaner.feature_scaling(arr, "standardisation")
         scaled = result["array_scaled_data"]
@@ -484,7 +768,19 @@ class TestFeatureScaling:
         data_cleaner: DataCleaning, 
         sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test invalid scaler type raises error."""
+        """Test invalid scaler type raises error.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         arr = np.nan_to_num(sample_array_with_nans)
         with pytest.raises(ValueError):
             data_cleaner.feature_scaling(arr, "invalid_scaler")
@@ -495,20 +791,42 @@ class TestRemoveNoiseFromData:
 
     def test_returns_dict_with_arrays(
         self, 
-        data_cleaner: DataCleaning
+        data_cleaner: DataCleaning, 
+        sample_array_with_nans: NDArray[np.float64]
     ) -> None:
-        """Test returns dictionary with numpy arrays."""
-        train = np.random.rand(10, 784)
-        test = np.random.rand(5, 784)
-        result = data_cleaner.remove_noise_from_data(test, train)
+        """Test returns dictionary with numpy arrays.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_array_with_nans : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
+        result = data_cleaner.replace_nan_values(sample_array_with_nans, "mean")
         assert isinstance(result, dict)
-        assert all(isinstance(v, np.ndarray) for v in result.values())
+        assert isinstance(result["array_after_adjustments"], np.ndarray)
+        assert not np.isnan(result["array_after_adjustments"]).any()
 
     def test_output_shapes(
         self, 
         data_cleaner: DataCleaning
     ) -> None:
-        """Test output arrays have correct shapes."""
+        """Test output arrays have correct shapes.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+
+        Returns
+        -------
+        None
+        """
         train = np.random.rand(10, 784)
         test = np.random.rand(5, 784)
         result = data_cleaner.remove_noise_from_data(test, train)
@@ -524,7 +842,19 @@ class TestShiftImage:
         data_cleaner: DataCleaning, 
         sample_image_data: NDArray[np.float64]
     ) -> None:
-        """Test returns numpy array."""
+        """Test returns numpy array.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_image_data : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.shift_image(sample_image_data, 1, 1)
         assert isinstance(result, np.ndarray)
 
@@ -533,7 +863,19 @@ class TestShiftImage:
         data_cleaner: DataCleaning, 
         sample_image_data: NDArray[np.float64]
     ) -> None:
-        """Test output has correct shape."""
+        """Test output has correct shape.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+        sample_image_data : NDArray[np.float64]
+            Sample array for testing
+
+        Returns
+        -------
+        None
+        """
         result = data_cleaner.shift_image(sample_image_data, 1, 1)
         assert result.shape == (784,)
 
@@ -545,7 +887,17 @@ class TestValidateTestRatio:
         self, 
         data_cleaner: DataCleaning
     ) -> None:
-        """Test valid ratios don't raise errors."""
+        """Test valid ratios don't raise errors.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+
+        Returns
+        -------
+        None
+        """
         for ratio in [0, 0.5, 1]:
             data_cleaner._validate_test_ratio(ratio)
 
@@ -553,7 +905,17 @@ class TestValidateTestRatio:
         self, 
         data_cleaner: DataCleaning
     ) -> None:
-        """Test invalid ratios raise ValueError."""
+        """Test invalid ratios raise ValueError.
+        
+        Parameters
+        ----------
+        data_cleaner : DataCleaning
+            Instance of DataCleaning class
+
+        Returns
+        -------
+        None
+        """
         with pytest.raises(ValueError):
             data_cleaner._validate_test_ratio(-0.1)
         with pytest.raises(ValueError):

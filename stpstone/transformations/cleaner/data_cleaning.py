@@ -40,7 +40,7 @@ class ReturnReplaceNaNValues(TypedDict):
     """Return type for replace_nan_values function."""
     
     model: BaseEstimator
-    array_replacers: NDArray[np.float64]
+    array_replacers: Optional[NDArray[np.float64]]
     array_before_adjustments: NDArray[np.float64]
     array_after_adjustments: NDArray[np.float64]
 
@@ -91,7 +91,8 @@ class DataCleaning:
 
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         """
         self._validate_test_ratio(test_ratio)
@@ -124,15 +125,17 @@ class DataCleaning:
 
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         """
         self._validate_test_ratio(test_ratio)
+        stratify = df_data[stratify_col] if stratify_col else None
         return train_test_split(
             df_data,
             test_size=test_ratio,
             random_state=random_seed,
-            stratify=stratify_col,
+            stratify=stratify,
         )
 
     def split_stratified_train_test(
@@ -165,7 +168,8 @@ class DataCleaning:
 
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         """
         self._validate_test_ratio(test_size)
@@ -203,7 +207,8 @@ class DataCleaning:
 
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         """
         self._validate_test_ratio(test_ratio)
@@ -268,8 +273,8 @@ class DataCleaning:
         tuple[pd.DataFrame, pd.DataFrame]
             Dataframes with column removed
         """
-        for set_ in (df_train_set, df_test_set):
-            set_.drop(id_column_category, axis=1, inplace=True)
+        df_train_set = df_train_set.drop(id_column_category, axis=1)
+        df_test_set = df_test_set.drop(id_column_category, axis=1)
         return df_train_set, df_test_set
 
     def dataframe_id_column_prportions(
@@ -293,7 +298,8 @@ class DataCleaning:
 
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         """
         return df_data[id_column].value_counts() / len(df_data)
@@ -325,7 +331,8 @@ class DataCleaning:
 
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         """
         df_compare_props = pd.DataFrame({
@@ -347,7 +354,7 @@ class DataCleaning:
     def replace_nan_values(
         self,
         array_data: NDArray[np.float64],
-        model: Optional[str] = None,
+        strategy: Optional[Literal["mean", "median", "most_frequent"]] = None,
         missing_values: float = np.nan,
         n_neighbors: Optional[int] = None,
     ) -> ReturnReplaceNaNValues:
@@ -357,7 +364,7 @@ class DataCleaning:
         ----------
         array_data : NDArray[np.float64]
             Input array with missing values
-        model : Optional[str]
+        strategy : Optional[Literal['mean', 'median', 'most_frequent']]
             Imputation model (None for KNN)
         missing_values : float
             Value representing missing data
@@ -370,18 +377,25 @@ class DataCleaning:
             Dictionary with imputation results and statistics
         """
         array_data_copy = array_data.copy()
+
         if n_neighbors is None:
-            imputer = SimpleImputer(model=model, missing_values=missing_values)
+            model = SimpleImputer(strategy=strategy, missing_values=missing_values)
         else:
-            imputer = KNNImputer(n_neighbors=n_neighbors, missing_values=np.nan)
-        imputer.fit(array_data_copy)
-        array_data_copy = imputer.transform(array_data_copy)
-        return {
-            "model": imputer.model,
-            "array_replacers": imputer.statistics_,
-            "array_before_adustments": array_data,
+            model = KNNImputer(n_neighbors=n_neighbors, missing_values=np.nan)
+        model.fit(array_data_copy)
+        array_data_copy = model.transform(array_data_copy)
+
+        dict_ = {
+            "model": model,
+            "array_before_adjustments": array_data,
             "array_after_adjustments": array_data_copy,
         }
+        if isinstance(model, SimpleImputer):
+            dict_["array_replacers"] = model.statistics_
+        else:
+            dict_["array_replacers"] = None
+        
+        return dict_
 
     def convert_categories_from_strings_to_array(
         self,
@@ -398,13 +412,19 @@ class DataCleaning:
             Input array with categorical data
         list_idx_target_cols : list
             Column indices to encode
-        encoder_strategy : Literal["one_hot_encoder", "ordinal_encoder", "label_encoder"]
+        encoder_strategy :  Literal['one_hot_encoder', 'ordinal_encoder', 'label_encoder']
             Encoding model to use
 
         Returns
         -------
         ReturnConvertCartegories
             Dictionary with encoded arrays and original data
+
+        Raises
+        ------
+        ValueError
+            If encoder_strategy is not one of: 'one_hot_encoder', 'ordinal_encoder', \
+                'label_encoder'
         """
         if encoder_strategy == "one_hot_encoder":
             ct = ColumnTransformer(
@@ -441,7 +461,7 @@ class DataCleaning:
         ----------
         array_data : NDArray[np.float64]
             Input array to scale
-        type_scaler : Literal["normalization", "standardisation"]
+        type_scaler : Literal['normalization', 'standardisation']
             Scaling method
         tup_feature_range : tuple[float, float]
             Range for normalization
@@ -451,9 +471,15 @@ class DataCleaning:
         ReturnFeatureScaling
             Dictionary with scaling results and statistics
 
+        Raises
+        ------
+        ValueError
+            If type_scaler is not one of: 'normalization', 'standardisation'
+
         References
         ----------
-        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow.
+        .. [1] Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras, and \
+            TensorFlow.
                O'Reilly Media, Inc. ISBN 978-1-492-03264-9.
         .. [2] https://stackoverflow.com/questions/40758562/can-anyone-explain-me-standardscaler
         """
