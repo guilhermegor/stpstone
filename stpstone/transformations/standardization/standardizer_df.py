@@ -165,7 +165,7 @@ class DFStandardization(metaclass=TypeChecker):
                 x = StrHandler().remove_diacritics(x)
                 x = x.encode('ascii', errors='ignore').decode('ascii')
             return x
-        return df_.apply(clean_cell)
+        return df_.apply(lambda x: clean_cell(x) if isinstance(x, str) else x)
 
     def coluns_names_case(self, df_: pd.DataFrame) -> pd.DataFrame:
         """Convert column names to the desired case.
@@ -182,10 +182,10 @@ class DFStandardization(metaclass=TypeChecker):
         """
         list_valid_cases = ["camel", "pascal", "snake", "kebab", 
                   "upper_constant", "lower_constant", "upper_first"]
-        if (self.cols_from_case is not None and 
-            self.cols_to_case is not None and
-            self.cols_from_case in list_valid_cases and
-            self.cols_to_case in list_valid_cases):
+        if self.cols_from_case \
+            and self.cols_to_case \
+            and self.cols_from_case in list_valid_cases \
+            and self.cols_to_case in list_valid_cases:
             list_cols = [
                 StrHandler().convert_case(
                     StrHandler().remove_diacritics(col_),

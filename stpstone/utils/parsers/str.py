@@ -11,10 +11,9 @@ This module provides a wide range of string processing utilities including:
 
 import base64
 from fnmatch import fnmatch
-import json
 import re
-from string import ascii_lowercase, ascii_uppercase, digits
-from typing import Optional, Union
+from string import ascii_letters, ascii_lowercase, ascii_uppercase, digits
+from typing import Literal, Optional, TypedDict, TypeVar, Union
 from unicodedata import combining, normalize
 from urllib.parse import parse_qs, urlparse
 import uuid
@@ -25,6 +24,26 @@ import ftfy
 from unidecode import unidecode
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
+
+TypeCaseFrom = TypeVar(
+    "TypeCaseFrom", 
+    bound=Literal["camel", "pascal", "kebab", "upper_constant", "lower_constant", "snake", 
+                  "upper_first", "default"]
+)
+
+TypeToCase = TypeVar(
+    "TypeToCase", 
+    bound=Literal["camel", "pascal", "snake", "kebab", "upper_constant", "lower_constant", 
+                  "upper_first"]
+)
+
+class ReturnUUID(TypedDict):
+    """TypedDict for returning UUID information."""
+
+    uuid: uuid.UUID
+    uuid_hex_digits_str: str
+    uuid_32_character_hexadecimal_str: str
 
 
 class StrHandler(metaclass=TypeChecker):
@@ -47,23 +66,35 @@ class StrHandler(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        dict[str, str]
             Combined mapping table for character replacements.
         """
-        single_map = str.maketrans("""‚ƒ„†ˆ‹‘’“”•–—˜›""", '""'f"*^<''""---~>""") # noqa: F541 
-        # - f-string without placeholders
-        multi_map = str.maketrans(
-            {
-                "€": "<euro>",
-                "…": "...",
-                "OE": "OE",
-                "™": "(TM)",
-                "oe": "oe",
-                "‰": "<per mille>",
-                "‡": "**",
-            }
-        )
-        return multi_map.update(single_map)
+        single_map = {
+            ord("‚"): '"',
+            ord("ƒ"): "f", 
+            ord("„"): '"',
+            ord("†"): "*",
+            ord("ˆ"): "^",
+            ord("‹"): "<",
+            ord("‘"): "'",
+            ord("’"): "'",
+            ord("“"): '"',
+            ord("”"): '"',
+            ord("•"): "-",
+            ord("–"): "-",
+            ord("—"): "-",
+            ord("˜"): "~",
+            ord("›"): ">"
+        }
+        multi_map = {
+            ord("€"): "<euro>",
+            ord("…"): "...",
+            ord("™"): "(TM)",
+            ord("‰"): "<per mille>",
+            ord("‡"): "**"
+        }
+        multi_map.update(single_map)
+        return multi_map
 
     def get_between(self, s: str, first: str, last: str) -> str:
         """Extract substring between two delimiters.
@@ -157,7 +188,10 @@ class StrHandler(metaclass=TypeChecker):
         str
             The converted string
         """
-        return str_.encode("latin1").decode("utf-8")
+        try:
+            return str_.encode("latin1").decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            return str_
 
     def decode_special_characters_ftfy(self, str_: str) -> str:
         """Fix mojibake and other encoding issues using ftfy.
@@ -172,7 +206,7 @@ class StrHandler(metaclass=TypeChecker):
         str
             The corrected string
         """
-        return ftfy.fix_str_(str_)
+        return ftfy.fix_text(str_)
 
     def removing_accents(self, str_: str) -> str:
         """Remove accents from Latin alphabet characters.
@@ -294,11 +328,11 @@ class StrHandler(metaclass=TypeChecker):
         keepers = []
         for c in norm_txt:
             if combining(c) and latin_base:
-                continue  # ignore diacritic on Latin base char
+                continue  # ignore diacritic on latin base char
             keepers.append(c)
             # if it isn't combining char, it's a new base char
             if not combining(c):
-                latin_base = c in str_.ascii_letters
+                latin_base = c in ascii_letters
         shaved = "".join(keepers)
         return normalize("NFC", shaved)
 
@@ -407,7 +441,7 @@ class StrHandler(metaclass=TypeChecker):
         """
         return encode(userid, password)
 
-    def base64_str_encode(self, str_: str, code_method: str = "ascii") -> str:
+    def base64_str_encode(self, str_: str) -> str:
         """Encode a string in Base64.
 
         Parameters
@@ -422,16 +456,14 @@ class StrHandler(metaclass=TypeChecker):
         str
             The Base64 encoded string
         """
-        if not isinstance(str_, str):
-            raise TypeError("Input must be a string")
         return base64.b64encode(str_.encode()).decode()
 
-    def universally_unique_identifier(self) -> dict:
+    def universally_unique_identifier(self) -> ReturnUUID:
         """Generate a universally unique identifier (UUID).
 
         Returns
         -------
-        dict
+        ReturnUUID
             Dictionary containing:
             - uuid: UUID object
             - uuid_hex_digits_str: UUID as hex string
@@ -458,7 +490,7 @@ class StrHandler(metaclass=TypeChecker):
             Number of letters to include, by default 21
         first_letter_alphabet : str, optional
             Starting letter, by default "f"
-        list_not_in_range : list, optional
+        list_not_in_range : Optional[list]
             Letters to exclude, by default ["i", "l", "o", "p", "r", "s", "t", "w", "y"]
 
         Returns
@@ -466,21 +498,21 @@ class StrHandler(metaclass=TypeChecker):
         dict
             Mapping of letters to numbers
         """
+        dict_ = dict()
+        i_aux = 0
+
         if list_not_in_range is None:
             list_not_in_range = ["i", "l", "o", "p", "r", "s", "t", "w", "y"]
-            
-        dict_message = dict()
-        i_aux = 0
 
         for i in range(
             ord(first_letter_alphabet), ord(first_letter_alphabet) + letters_in_alphabet
         ):
             if chr(i) not in list_not_in_range:
-                dict_message[chr(i)] = i - 101 - i_aux
+                dict_[chr(i)] = i - 101 - i_aux
             else:
                 i_aux += 1
 
-        return json.loads(json.dumps(dict_message))
+        return dict_
 
     def alphabetic_range(self, case: str = "upper") -> list:
         """Get the alphabet as a list of letters.
@@ -497,11 +529,9 @@ class StrHandler(metaclass=TypeChecker):
 
         Raises
         ------
-        Exception
-            If case is neither "upper" nor "lower"
+        ValueError
+            If case is not "upper" or "lower"
         """
-        if not isinstance(case, str):
-            raise TypeError("case must be a string")
         case = case.lower()
         if case == "upper":
             return list(ascii_uppercase)
@@ -527,9 +557,9 @@ class StrHandler(metaclass=TypeChecker):
         bool
             True if string matches pattern
         """
-        return re.match(regex_match, str_) is not None
+        return bool(str_ and re.match(regex_match, str_))
 
-    def bl_has_numbers(self, str_: str) -> bool:
+    def has_numbers(self, str_: str) -> bool:
         """Check if string contains any digits.
 
         Parameters
@@ -579,7 +609,7 @@ class StrHandler(metaclass=TypeChecker):
         return normalize("NFC", str1).casefold() == normalize("NFC", str2).casefold()
 
     def remove_non_alphanumeric_chars(
-        self, str_: str, str_pattern_maintain: str = r'[\W_]', str_replace: str = ''
+        self, str_: str, str_pattern_maintain: str = r"[\W_]", str_replace: str = ""
     ) -> str:
         r"""Remove non-alphanumeric characters from a string.
 
@@ -630,7 +660,7 @@ class StrHandler(metaclass=TypeChecker):
         bool
             True if string is properly capitalized
         """
-        if not str_:  # Handle empty string case
+        if not str_:  # handle empty string case
             return False
             
         str_ = self.remove_diacritics(str_)
@@ -638,13 +668,13 @@ class StrHandler(metaclass=TypeChecker):
         
         try:
             if bl_simple_validation:
-                # For single character, just check if it's uppercase
+                # for single character, just check if it's uppercase
                 if len(str_) == 1:
                     return str_[0].isupper()
-                # For longer strings, check first is upper and second is lower
+                # for longer strings, check first is upper and second is lower
                 return str_[0].isupper() and str_[1].islower()
             else:
-                # Strict validation - first upper, rest lower
+                # strict validation - first upper, rest lower
                 return str_[0].isupper() and all(char.islower() for char in str_[1:])
         except IndexError:
             return False
@@ -683,17 +713,17 @@ class StrHandler(metaclass=TypeChecker):
         str
             String with replacements made
         """
-        if not str_replaced:  # Handle empty string to replace
+        if not str_replaced:  # handle empty string to replace
             return str_
             
         return re.sub(
-            re.escape(str_replaced),  # Escape special regex characters
-            lambda m: str_replace,    # Simple replacement (no case transformation)
+            re.escape(str_replaced),  # escape special regex characters
+            lambda m: str_replace,    # simple replacement (no case transformation)
             str_,
             flags=re.IGNORECASE
         )
 
-    def matchcase(self, str_: str) -> callable:
+    def matchcase(self) -> callable:
         """Create a case-matching replacement function.
 
         Parameters
@@ -707,6 +737,18 @@ class StrHandler(metaclass=TypeChecker):
             A function that applies the same case pattern to matched text
         """
         def replace(m: re.Match) -> str:
+            """Replace matched text with original case.
+            
+            Parameters
+            ----------
+            m : re.Match
+                The match object
+            
+            Returns
+            -------
+            str
+                The matched text
+            """
             str_ = m.group()
             if str_.isupper():
                 return str_.upper()
@@ -739,6 +781,18 @@ class StrHandler(metaclass=TypeChecker):
             return str_
 
         def matchcase(match: re.Match) -> str:
+            """Replace matched text with original case.
+            
+            Parameters
+            ----------
+            match : re.Match
+                The match object
+            
+            Returns
+            -------
+            str
+                The matched text
+            """
             text = match.group()
             if not text:
                 return str_replace
@@ -756,14 +810,14 @@ class StrHandler(metaclass=TypeChecker):
             flags=re.IGNORECASE
         )
 
-    def replace_all(self, str_: str, dict_replacers: dict) -> str:
+    def replace_all(self, str_: str, dict_replacers: dict[str, str]) -> str:
         """Perform multiple string replacements.
 
         Parameters
         ----------
         str_ : str
             The original string
-        dict_replacers : dict
+        dict_replacers : dict[str, str]
             Mapping of substrings to their replacements
 
         Returns
@@ -794,12 +848,10 @@ class StrHandler(metaclass=TypeChecker):
             element.insert_after('\n')
             element.insert_before('\n')
         text = soup.get_text()
-        # clean up excessive newlines and whitespace
-        text = re.sub(r'\n\s*\n', '\n', text)  # replace multiple newlines with single
-        text = text.strip()  # remove leading/trailing whitespace
-        return text
+        text = re.sub(r'\n\s*\n', '\n', text)
+        return text.strip()
 
-    def extract_urls(self, str_: str) -> list:
+    def extract_urls(self, str_: str) -> list[str]:
         """Extract all URLs from a string.
 
         Parameters
@@ -809,7 +861,7 @@ class StrHandler(metaclass=TypeChecker):
 
         Returns
         -------
-        list
+        list[str]
             List of found URLs
         """
         url_pattern = re.compile(r"https?://\S+|www\.\S+")
@@ -828,13 +880,20 @@ class StrHandler(metaclass=TypeChecker):
         bool
             True if the string is non-numeric
         """
+        if not _value:
+            return False
         try:
             float(_value)
             return False
         except ValueError:
             return True
 
-    def convert_case(self, str_: str, from_case: str, to_case: str) -> str:
+    def convert_case(
+        self, 
+        str_: str, 
+        from_case: TypeCaseFrom, 
+        to_case: TypeToCase
+    ) -> str:
         """Convert string between different naming conventions.
 
         Supported cases:
@@ -843,6 +902,7 @@ class StrHandler(metaclass=TypeChecker):
         - kebab-case ('kebab')
         - UPPER_CONSTANT ('upper_constant')
         - lower_constant ('lower_constant')
+        - snake_case ('snake')
         - UpperFirst ('upper_first')
         - Default (words separated by spaces, hyphens or underscores) ('default')
 
@@ -850,9 +910,9 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to convert
-        from_case : str
+        from_case : TypeCaseFrom
             Current case of the string
-        to_case : str
+        to_case : TypeToCase
             Desired case of the string
 
         Returns
@@ -867,20 +927,21 @@ class StrHandler(metaclass=TypeChecker):
         """
         if not str_:
             return ""
+        
         # from case
         if from_case == "camel":
-            words = re.sub(r"([a-z])([A-Z])", r"\1_\2", str_)
-            words = re.sub(r"([a-zA-Z])(\d)", r"\1_\2", words)
-            words = re.sub(r"(\d)([a-zA-Z])", r"\1_\2", words)
-            words = words.lower().split("_")
+            list_words = re.sub(r"([a-z])([A-Z])", r"\1_\2", str_)
+            list_words = re.sub(r"([a-zA-Z])(\d)", r"\1_\2", list_words)
+            list_words = re.sub(r"(\d)([a-zA-Z])", r"\1_\2", list_words)
+            list_words = list_words.lower().split("_")
         elif from_case == "pascal":
-            words = re.sub(r"([a-z])([A-Z])", r"\1_\2", str_).lower().split("_")
+            list_words = re.sub(r"([a-z])([A-Z])", r"\1_\2", str_).lower().split("_")
         elif from_case == "kebab":
-            words = str_.lower().split("-")
-        elif from_case in ("upper_constant", "lower_constant"):
-            words = str_.lower().split("-") if "-" in str_ else str_.upper().split("_")
+            list_words = str_.lower().split("-")
+        elif from_case in ("upper_constant", "lower_constant", "snake"):
+            list_words = str_.lower().split("_")
         elif from_case == "upper_first":
-            words = [str_[0].upper() + str_[1:].lower()]
+            list_words = [str_[0].upper() + str_[1:].lower()]
         elif from_case == "default":
             str_ = str_.replace(" - ", " ")
             str_ = str_.replace("-", " ")
@@ -889,30 +950,28 @@ class StrHandler(metaclass=TypeChecker):
             str_ = str_.replace(" (", " ")
             str_ = str_.replace(") ", " ")
             str_ = str_.replace(r"\n", " ")
-            words = str_.lower().split()
+            list_words = str_.lower().split()
         else:
             raise ValueError(
                 "Invalid from_case. Choose from ['camel', 'pascal', 'snake', 'kebab', "
                 "'upper_constant', 'lower_constant', 'upper_first']"
             )
-        if not words:
+        if not list_words:
             return ""
 
         # converting to case
         if to_case == "camel":
-            return words[0] + "".join(word.capitalize() for word in words[1:])
+            return list_words[0] + "".join(word.capitalize() for word in list_words[1:])
         elif to_case == "pascal":
-            return "".join(word.capitalize() for word in words)
-        elif to_case == "snake":
-            return "_".join(words).lower()
+            return "".join(word.capitalize() for word in list_words)
+        elif to_case in ("snake", "lower_constant"):
+            return "_".join(list_words).lower()
         elif to_case == "kebab":
-            return "-".join(words).lower()
+            return "-".join(list_words).lower()
         elif to_case == "upper_constant":
-            return "_".join(words).upper()
-        elif to_case == "lower_constant":
-            return "_".join(words).lower()
+            return "_".join(list_words).upper()
         elif to_case == "upper_first":
-            return words[0].capitalize()
+            return list_words[0].capitalize() + " " + " ".join(word for word in list_words[1:])
         else:
             raise ValueError(
                 "Invalid to_case. Choose from ['camel', 'pascal', 'snake', 'kebab', "
@@ -921,7 +980,7 @@ class StrHandler(metaclass=TypeChecker):
 
     def extract_info_between_braces(
         self, str_: str, str_pattern: str = r"\{\{(.*?)\}\}"
-    ) -> list:
+    ) -> list[str]:
         r"""Extract all text between double curly braces.
 
         Parameters
@@ -933,7 +992,7 @@ class StrHandler(metaclass=TypeChecker):
 
         Returns
         -------
-        list
+        list[str]
             List of found matches
         """
         return re.findall(str_pattern, str_)
@@ -1004,7 +1063,7 @@ class StrHandler(metaclass=TypeChecker):
 
         Returns
         -------
-        dict
+        dict[str, Union[str, list[str]]]
             Dictionary of parameters (single values as strings, multiple as lists)
         """
         parsed_url = urlparse(url)

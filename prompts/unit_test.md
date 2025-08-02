@@ -57,10 +57,15 @@ def comparator_a_less_than_b() -> BinaryComparator:
 def test_init_with_valid_inputs() -> None:
     """Test initialization with valid integer inputs.
 
-    Verifies that:
+    Verifies
+    --------
     - The BinaryComparator can be initialized with integer values
     - The values are correctly stored in the instance attributes
     - The values maintain their original types and values
+
+    Returns
+    -------
+    None
     """
     comparator = BinaryComparator(a=5, b=10)
     assert comparator.a == 5
@@ -185,6 +190,11 @@ class TestOptimizeCurveFit:
     ) -> None:
         """Test raises TypeError when func is not callable.
 
+        Verifies
+        --------
+        That providing a non-callable function argument raises TypeError
+        with appropriate error message.
+
         Parameters
         ----------
         nonlinear_equations : Any
@@ -192,10 +202,9 @@ class TestOptimizeCurveFit:
         sample_data : tuple[NDArray[np.float64], NDArray[np.float64]]
             Tuple of (x, y) test data from fixture
 
-        Verifies
-        --------
-        That providing a non-callable function argument raises TypeError
-        with appropriate error message.
+        Returns
+        -------
+        None
         """
         x, y = sample_data
         with pytest.raises(TypeError) as excinfo:
@@ -209,6 +218,11 @@ class TestOptimizeCurveFit:
     ) -> None:
         """Test raises TypeError when array_x is not numpy array.
 
+        Verifies
+        --------
+        That providing a non-array input for x raises TypeError
+        with appropriate error message.
+
         Parameters
         ----------
         nonlinear_equations : Any
@@ -218,10 +232,9 @@ class TestOptimizeCurveFit:
         linear_func : Callable
             Linear test function from fixture
 
-        Verifies
-        --------
-        That providing a non-array input for x raises TypeError
-        with appropriate error message.
+        Returns
+        -------
+        None
         """
         _, y = sample_data
         with pytest.raises(TypeError) as excinfo:
@@ -235,6 +248,11 @@ class TestOptimizeCurveFit:
     ) -> None:
         """Test raises TypeError when array_y is not numpy array.
 
+        Verifies
+        --------
+        That providing a non-array input for y raises TypeError
+        with appropriate error message.
+
         Parameters
         ----------
         nonlinear_equations : Any
@@ -244,10 +262,9 @@ class TestOptimizeCurveFit:
         linear_func : Callable
             Linear test function from fixture
 
-        Verifies
-        --------
-        That providing a non-array input for y raises TypeError
-        with appropriate error message.
+        Returns
+        -------
+        None
         """
         x, _ = sample_data
         with pytest.raises(TypeError) as excinfo:
@@ -261,6 +278,11 @@ class TestOptimizeCurveFit:
     ) -> None:
         """Test raises ValueError when array_x is empty.
 
+        Verifies
+        --------
+        That providing an empty x array raises ValueError
+        with appropriate error message.
+
         Parameters
         ----------
         nonlinear_equations : Any
@@ -270,10 +292,9 @@ class TestOptimizeCurveFit:
         linear_func : Callable
             Linear test function from fixture
 
-        Verifies
-        --------
-        That providing an empty x array raises ValueError
-        with appropriate error message.
+        Returns
+        -------
+        None
         """
         _, y = sample_data
         with pytest.raises(ValueError, match="Input arrays cannot be empty"):
@@ -286,6 +307,11 @@ class TestOptimizeCurveFit:
     ) -> None:
         """Test raises ValueError when array_y is empty.
 
+        Verifies
+        --------
+        That providing an empty y array raises ValueError
+        with appropriate error message.
+
         Parameters
         ----------
         nonlinear_equations : Any
@@ -295,10 +321,9 @@ class TestOptimizeCurveFit:
         linear_func : Callable
             Linear test function from fixture
 
-        Verifies
-        --------
-        That providing an empty y array raises ValueError
-        with appropriate error message.
+        Returns
+        -------
+        None
         """
         x, _ = sample_data
         with pytest.raises(ValueError, match="Input arrays cannot be empty"):
@@ -465,10 +490,15 @@ def mock_metadata_import_error(mocker: MockerFixture) -> object:
 def test_version_exists() -> None:
     """Test that __version__ exists and is a string.
 
-    Verifies that:
+    Verifies
+    --------
     1. The package has a __version__ attribute
     2. The attribute is a string
     3. The string is not empty
+
+    Returns
+    -------
+    None
     """
     assert hasattr(stpstone, "__version__")
     assert isinstance(stpstone.__version__, str)
@@ -478,10 +508,15 @@ def test_version_exists() -> None:
 def test_path_extension() -> None:
     """Test that __path__ is properly extended.
 
-    Verifies that:
+    Verifies
+    --------
     1. The package has a __path__ attribute
     2. The attribute is a list
     3. The list is not empty
+
+    Returns
+    -------
+    None
     """
     assert hasattr(stpstone, "__path__")
     assert isinstance(stpstone.__path__, list)
@@ -495,6 +530,12 @@ def test_version_fallback_metadata(
 ) -> None:
     """Test version fallback to metadata when package not found.
 
+    Verifies
+    --------
+    1. The package falls back to metadata when version is not found
+    2. The correct version is retrieved
+    3. The metadata mock was called exactly once
+
     Parameters
     ----------
     mock_version_not_found : object
@@ -504,10 +545,9 @@ def test_version_fallback_metadata(
     expected_version : str
         The expected version string to compare against
 
-    Verifies that:
-    1. The package falls back to metadata when version is not found
-    2. The correct version is retrieved
-    3. The metadata mock was called exactly once
+    Returns
+    -------
+    None
     """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
@@ -521,6 +561,12 @@ def test_version_fallback_hardcoded(
 ) -> None:
     """Test fallback to pyproject.toml when metadata is unavailable.
 
+    Verifies
+    --------
+    1. The package falls back to pyproject.toml when metadata is unavailable
+    2. The correct version is retrieved
+    3. The metadata mock was called exactly once
+
     Parameters
     ----------
     mock_version_not_found : object
@@ -530,10 +576,9 @@ def test_version_fallback_hardcoded(
     expected_version : str
         The expected version string to compare against
 
-    Verifies that:
-    1. The package falls back to pyproject.toml when metadata is unavailable
-    2. The correct version is retrieved
-    3. The metadata mock was called exactly once
+    Returns
+    -------
+    None
     """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
@@ -547,6 +592,12 @@ def test_version_fallback_import_error(
 ) -> None:
     """Test fallback when importlib.metadata is not available.
 
+    Verifies
+    --------
+    1. The package falls back to pyproject.toml when importlib.metadata raises ImportError
+    2. The correct version is retrieved
+    3. The metadata mock was called exactly once
+
     Parameters
     ----------
     mock_version_not_found : object
@@ -556,10 +607,9 @@ def test_version_fallback_import_error(
     expected_version : str
         The expected version string to compare against
 
-    Verifies that:
-    1. The package falls back to pyproject.toml when importlib.metadata raises ImportError
-    2. The correct version is retrieved
-    3. The metadata mock was called exactly once
+    Returns
+    -------
+    None
     """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version

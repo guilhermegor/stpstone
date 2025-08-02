@@ -18,7 +18,7 @@
   - Use class Return<method_name>(TypedDict) for dictionaries typing (import from typing import TypedDict)
     - Docstring in numpy model for class Return<method_name>, skipping one row between it and the content below
 - **Literals**: Use `Literal` for variables with limited options
-- **Optionals**: Use `Optional` instead of `|` operator
+- **Optionals**: Use `Optional` instead of `|` operator for python 3.9 compatibility
 
 ## Linting Requirements
 - Strict numpy-style docstring compliance
@@ -49,6 +49,7 @@
    - Consistent spacing around operators
    - Prefer f-strings over .format()
    - Proper numpy-style docstrings
+   - Prefer the usage of " instead of ', where possible
 
 4. **Validation Checks**:
    - Please add sanity checks for every variable within methods/functions that would be useful, with examples below
