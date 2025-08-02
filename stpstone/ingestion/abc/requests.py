@@ -29,7 +29,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from sqlalchemy.orm import Session
 import urllib3
 
-from stpstone.transformations.standardization.dataframe import DFStandardization
+from stpstone.transformations.standardization.standardizer_df import DFStandardization
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
