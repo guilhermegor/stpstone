@@ -4,8 +4,10 @@ This module provides methods to identify color families (e.g., green, red) from 
 by analyzing their RGB component dominance relationships.
 """
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class ColorIdentifier:
+
+class ColorIdentifier(metaclass=TypeChecker):
     """Identify if a hex color belongs to a specific color family (e.g., green, red).
 
     Parameters
