@@ -13,13 +13,18 @@ from collections import Counter, OrderedDict, defaultdict
 from functools import cmp_to_key
 from heapq import nlargest, nsmallest
 from itertools import groupby
-from numbers import Number
 from operator import itemgetter
 import re
-from typing import Any, Callable, Literal, Optional, Union
+from typing import Any, Callable, Literal, Optional, TypeVar, Union
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class HandlingDicts:
+TypeFilter = TypeVar("TypeFilter", bound=Literal["equal", "not_equal", "less_than", 
+                                                 "greater_than", "less_than_or_equal_to", 
+                                                 "greater_than_or_equal_to", "isin"])
+
+class HandlingDicts(metaclass=TypeChecker):
     """Collection of dictionary manipulation utilities."""
 
     def _validate_dict_not_empty(self, dict_: dict) -> None:
@@ -50,6 +55,11 @@ class HandlingDicts:
         -------
         dict[str, Any]
             Tuple containing (key, value) of minimum value
+
+        Raises
+        ------
+        ValueError
+            If dictionary is empty or contains only None values
             
         Examples
         --------
@@ -58,7 +68,10 @@ class HandlingDicts:
         ("a", 1)
         """
         self._validate_dict_not_empty(dict_)
-        return min(dict_.items(), key=itemgetter(1))
+        list_filt_items = [(k, v) for k, v in dict_.items() if v is not None]
+        if not list_filt_items:
+            raise ValueError("Dictionary contains only None values")
+        return min(list_filt_items, key=itemgetter(1))
 
     def max_val_key(self, dict_: dict) -> dict[str, Any]:
         """Get the key-value pair with the maximum value in a dictionary.
@@ -72,9 +85,17 @@ class HandlingDicts:
         -------
         dict[str, Any]
             Tuple containing (key, value) of maximum value
+
+        Raises
+        ------
+        ValueError
+            If dictionary is empty or contains only None values
         """
         self._validate_dict_not_empty(dict_)
-        return max(dict_.items(), key=itemgetter(1))
+        list_filt_items = [(k, v) for k, v in dict_.items() if v is not None]
+        if not list_filt_items:
+            raise ValueError("Dictionary contains only None values")
+        return max(list_filt_items, key=itemgetter(1))
 
     def merge_n_dicts(self, *dicts: dict) -> dict[str, Any]:
         """Merge multiple dictionaries into one.
@@ -203,10 +224,11 @@ class HandlingDicts:
         dict_ = defaultdict(list)
         
         if list_keys_merge is not None:
-            for dict_ in list_ser:
-                for key, value in dict_.items():
+            for dict_aux in list_ser:
+                for key, value in dict_aux.items():
                     if key in list_keys_merge:
-                        dict_[key].append(value)
+                        if isinstance(dict_[key], list):
+                            dict_[key].append(value)
                     else:
                         dict_[key] = value
                         
@@ -224,11 +246,8 @@ class HandlingDicts:
         self,
         list_ser: list[dict[str, Any]],
         foreigner_key: str,
-        k_value: Number,
-        str_filter_type: Literal[
-            "equal", "not_equal", "less_than", "greater_than",
-            "less_than_or_equal_to", "greater_than_or_equal_to", "isin"
-        ] = "equal",
+        k_value: Any, # noqa ANN401: typing.Any is not allowed
+        str_filter_type: TypeFilter = "equal",
     ) -> list[dict[str, Any]]:
         """Filter list of dictionaries based on key condition.
         
@@ -238,9 +257,9 @@ class HandlingDicts:
             List of dictionaries to filter
         foreigner_key : str
             Key to filter on
-        k_value : Number
-            Value to compare against
-        str_filter_type : Literal
+        k_value : Any
+            Value to filter on
+        str_filter_type : TypeFilter
             Type of comparison to perform
             
         Returns

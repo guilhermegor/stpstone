@@ -669,6 +669,7 @@ def test_version_fallback_import_error(
 - **Dependency updates**: Test behavior when dependencies change
 
 ### 7. Examples in Docstrings
+- **Examples section**: Add code examples from docstrings in unit tests
 
 ### 8. Coverage Validation
 - **Line coverage**: Ensure every line of code is executed
