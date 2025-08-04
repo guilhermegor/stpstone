@@ -5,20 +5,30 @@ and converting between different formats. It handles various JSON operations wit
 error handling and type validation.
 """
 
-import ast
 import json
 import os
 from typing import Any, Optional, Union
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.parsers.str import StrHandler
 
 
 class JsonFiles(metaclass=TypeChecker):
     """Handles JSON file operations including loading, saving, and format conversion."""
 
-    def _validate_message_dict(self, message: Any) -> None:
+    def _validate_message_dict(
+        self, 
+        message: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Validate that input is a dictionary.
+
+        Parameters
+        ----------
+        message : Any
+            Input message to validate
+
+        Returns
+        -------
+        None
 
         Raises
         ------
@@ -31,6 +41,15 @@ class JsonFiles(metaclass=TypeChecker):
     def _validate_file_path(self, file_path: str) -> None:
         """Validate file path.
 
+        Parameters
+        ----------
+        file_path : str
+            Path to the file to validate
+
+        Returns
+        -------
+        None
+
         Raises
         ------
         ValueError
@@ -42,6 +61,15 @@ class JsonFiles(metaclass=TypeChecker):
     def _validate_file_exists(self, file_path: str) -> None:
         """Validate that file exists.
 
+        Parameters
+        ----------
+        file_path : str
+            Path to the file to check
+
+        Returns
+        -------
+        None
+
         Raises
         ------
         FileNotFoundError
@@ -50,8 +78,20 @@ class JsonFiles(metaclass=TypeChecker):
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"File not found: {file_path}")
 
-    def _validate_json_list(self, json_data: Any) -> None:
+    def _validate_json_list(
+        self, 
+        json_data: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Validate input is a non-empty list of dictionaries.
+
+        Parameters
+        ----------
+        json_data : Any
+            Input data to validate
+
+        Returns
+        -------
+        None
 
         Raises
         ------
@@ -81,13 +121,6 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         bool
             True if file saving was successful, False otherwise
-
-        Raises
-        ------
-        TypeError
-            If message is not a dictionary
-        ValueError
-            If json_file is not a valid path
         """
         self._validate_message_dict(message)
         self._validate_file_path(json_file)
@@ -121,18 +154,11 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         Union[dict, list]
             Loaded JSON data
-
-        Raises
-        ------
-        FileNotFoundError
-            If json_file doesn't exist
-        ValueError
-            If file contains invalid JSON
         """
         self._validate_file_exists(json_file)
 
         if encoding is None:
-            with open(json_file, "r", errors=errors) as read_file:
+            with open(json_file, errors=errors) as read_file:
                 return json.load(read_file)
         else:
             with open(json_file, errors=errors, encoding=encoding) as read_file:
@@ -150,11 +176,6 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         Union[dict, list]
             Parsed JSON data
-
-        Raises
-        ------
-        ValueError
-            If message is not valid JSON
         """
         return json.loads(message)
 
@@ -170,11 +191,6 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         str
             JSON string representation
-
-        Raises
-        ------
-        TypeError
-            If message is not a dictionary
         """
         self._validate_message_dict(message)
         return json.dumps(message)
@@ -191,11 +207,6 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         dict
             JSON-compatible dictionary
-
-        Raises
-        ------
-        TypeError
-            If message is not JSON-serializable
         """
         return json.loads(json.dumps(message))
 
@@ -211,12 +222,25 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         dict
             Decoded JSON message
-        """
-        jsonify_message = ast.literal_eval(StrHandler().get_between(
-            str(byte_message), "b'", "'"))
-        return self.send_json(jsonify_message)
 
-    def normalize_json_keys(self, json_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        Raises
+        ------
+        ValueError
+            If byte message cannot be decoded or parsed as JSON
+        """
+        try:
+            str_message = byte_message.decode('utf-8')
+            if str_message.startswith("b'") and str_message.endswith("'"):
+                str_message = str_message[2:-1]
+            json_data = json.loads(str_message)
+            return self.send_json(json_data)
+        except (UnicodeDecodeError, json.JSONDecodeError) as e:
+            raise ValueError(f"Failed to convert byte message to JSON: {str(e)}") from e
+
+    def normalize_json_keys(
+        self, 
+        json_data: list[dict[str, Any]] # noqa ANN401: typing.Any is not allowed
+    ) -> list[dict[str, Any]]: # noqa ANN401: typing.Any is not allowed
         """Normalize JSON keys across dictionaries in a list.
 
         Parameters
@@ -228,13 +252,6 @@ class JsonFiles(metaclass=TypeChecker):
         -------
         list[dict[str, Any]]
             list with all dictionaries containing the same keys
-
-        Raises
-        ------
-        TypeError
-            If input is not a list of dictionaries
-        ValueError
-            If input list is empty
         """
         self._validate_json_list(json_data)
 

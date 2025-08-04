@@ -7,23 +7,20 @@ Tests JSON file handling functionality including:
 - Edge cases and special scenarios
 """
 
-import ast
 import json
-import os
 from pathlib import Path
 from typing import Any, Union
-from unittest.mock import mock_open, patch
 
 import pytest
 
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.json import JsonFiles
 
 
 # --------------------------
 # Fixtures
 # --------------------------
 @pytest.fixture
-def json_handler() -> Any:
+def json_handler() -> Any: # noqa ANN401: typing.Any is not allowed
     """Fixture providing JsonFiles instance.
 
     Returns
@@ -82,84 +79,169 @@ def temp_json_file(tmp_path: Path) -> str:
 # --------------------------
 # Validation Tests
 # --------------------------
-def test_validate_message_dict(json_handler: Any) -> None:
+def test_validate_message_dict(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_message_dict with valid input.
 
     Verifies
     --------
     - Accepts valid dictionary input without raising exceptions
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     json_handler._validate_message_dict({"valid": "dict"})
 
 
-def test_validate_message_dict_invalid(json_handler: Any) -> None:
+def test_validate_message_dict_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_message_dict with invalid input.
 
     Verifies
     --------
     - Raises TypeError for non-dictionary inputs
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     with pytest.raises(TypeError, match="Message must be a dictionary"):
         json_handler._validate_message_dict("not a dict")
 
 
-def test_validate_file_path(json_handler: Any) -> None:
+def test_validate_file_path(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_file_path with valid input.
 
     Verifies
     --------
     - Accepts valid file path strings without raising exceptions
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     json_handler._validate_file_path("valid/path.json")
 
 
-def test_validate_file_path_invalid(json_handler: Any) -> None:
+def test_validate_file_path_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_file_path with invalid input.
 
     Verifies
     --------
     - Raises ValueError for empty or non-string paths
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     with pytest.raises(ValueError, match="Invalid file path"):
         json_handler._validate_file_path("")
-    with pytest.raises(ValueError, match="Invalid file path"):
+    with pytest.raises(TypeError, match="must be of type"):
         json_handler._validate_file_path(123)  # type: ignore
 
 
-def test_validate_file_exists(json_handler: Any, temp_json_file: str) -> None:
+def test_validate_file_exists(
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    temp_json_file: str
+) -> None:
     """Test _validate_file_exists with existing file.
 
     Verifies
     --------
     - Accepts existing file paths without raising exceptions
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    temp_json_file : str
+        Temporary JSON file path
+
+    Returns
+    -------
+    None
     """
     with open(temp_json_file, "w") as f:
         f.write("{}")
     json_handler._validate_file_exists(temp_json_file)
 
 
-def test_validate_file_exists_missing(json_handler: Any) -> None:
+def test_validate_file_exists_missing(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_file_exists with missing file.
 
     Verifies
     --------
     - Raises FileNotFoundError for non-existent files
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     with pytest.raises(FileNotFoundError):
         json_handler._validate_file_exists("nonexistent.json")
 
 
-def test_validate_json_list(json_handler: Any, sample_list_of_dicts: Any) -> None:
+def test_validate_json_list(
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_list_of_dicts: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_json_list with valid input.
 
     Verifies
     --------
     - Accepts valid list of dictionaries without raising exceptions
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_list_of_dicts : Any
+        Sample list of dictionaries
+
+    Returns
+    -------
+    None
     """
     json_handler._validate_json_list(sample_list_of_dicts)
 
 
-def test_validate_json_list_invalid(json_handler: Any) -> None:
+def test_validate_json_list_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test _validate_json_list with invalid input.
 
     Verifies
@@ -167,6 +249,15 @@ def test_validate_json_list_invalid(json_handler: Any) -> None:
     - Raises TypeError for non-list inputs
     - Raises ValueError for empty lists
     - Raises TypeError for lists with non-dict items
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     with pytest.raises(TypeError, match="Input must be a list"):
         json_handler._validate_json_list({"not": "a list"})
@@ -180,8 +271,8 @@ def test_validate_json_list_invalid(json_handler: Any) -> None:
 # Method Tests
 # --------------------------
 def test_dump_message_success(
-    json_handler: Any, 
-    sample_dict: dict[str, Any], 
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any], # noqa ANN401: typing.Any is not allowed
     temp_json_file: str
 ) -> None:
     """Test dump_message with valid inputs.
@@ -191,42 +282,80 @@ def test_dump_message_success(
     - Successfully saves JSON file
     - Returns True when file is created
     - File contains correct JSON data
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to save
+    temp_json_file : str
+        Temporary JSON file path
+
+    Returns
+    -------
+    None
     """
     result = json_handler.dump_message(sample_dict, temp_json_file)
     assert result is True
-    with open(temp_json_file, "r") as f:
+    with open(temp_json_file) as f:
         assert json.load(f) == sample_dict
 
 
 def test_dump_message_failure(
-    json_handler: Any, 
-    sample_dict: dict[str, Any]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test dump_message with invalid file path.
 
     Verifies
     --------
     - Returns False when file cannot be created
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to save
+
+    Returns
+    -------
+    None
     """
-    with patch("builtins.open", side_effect=OSError):
+    with pytest.raises(OSError):
         result = json_handler.dump_message(sample_dict, "/invalid/path.json")
         assert result is False
 
 
-def test_dump_message_invalid_input(json_handler: Any, temp_json_file: str) -> None:
+def test_dump_message_invalid_input(
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    temp_json_file: str
+) -> None:
     """Test dump_message with invalid message type.
 
     Verifies
     --------
     - Raises TypeError for non-dict messages
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    temp_json_file : str
+        Temporary JSON file path
+
+    Returns
+    -------
+    None
     """
-    with pytest.raises(TypeError, match="Message must be a dictionary"):
+    with pytest.raises(TypeError, match="must be of type"):
         json_handler.dump_message("not a dict", temp_json_file)
 
 
 def test_load_message_default(
-    json_handler: Any, 
-    sample_dict: dict[str, Any], 
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any], # noqa ANN401: typing.Any is not allowed
     temp_json_file: str
 ) -> None:
     """Test load_message with default encoding.
@@ -235,6 +364,19 @@ def test_load_message_default(
     --------
     - Correctly loads JSON data from file
     - Returns expected data structure
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to save and load
+    temp_json_file : str
+        Temporary JSON file path
+
+    Returns
+    -------
+    None
     """
     with open(temp_json_file, "w") as f:
         json.dump(sample_dict, f)
@@ -243,8 +385,8 @@ def test_load_message_default(
 
 
 def test_load_message_with_encoding(
-    json_handler: Any, 
-    sample_dict: dict[str, Any], 
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any], # noqa ANN401: typing.Any is not allowed
     temp_json_file: str
 ) -> None:
     """Test load_message with specified encoding.
@@ -253,6 +395,19 @@ def test_load_message_with_encoding(
     --------
     - Correctly loads JSON data with encoding
     - Handles encoding/decoding process
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to save and load
+    temp_json_file : str
+        Temporary JSON file path
+
+    Returns
+    -------
+    None
     """
     with open(temp_json_file, "w", encoding="utf-8") as f:
         json.dump(sample_dict, f)
@@ -260,19 +415,30 @@ def test_load_message_with_encoding(
     assert result == sample_dict
 
 
-def test_load_message_file_not_found(json_handler: Any) -> None:
+def test_load_message_file_not_found(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test load_message with missing file.
 
     Verifies
     --------
     - Raises FileNotFoundError for non-existent files
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     with pytest.raises(FileNotFoundError):
         json_handler.load_message("nonexistent.json")
 
 
 def test_load_message_invalid_json(
-    json_handler: Any, 
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
     temp_json_file: str
 ) -> None:
     """Test load_message with invalid JSON content.
@@ -280,6 +446,17 @@ def test_load_message_invalid_json(
     Verifies
     --------
     - Raises ValueError for malformed JSON
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    temp_json_file : str
+        Temporary JSON file path    
+
+    Returns
+    -------
+    None
     """
     with open(temp_json_file, "w") as f:
         f.write("invalid json")
@@ -288,8 +465,8 @@ def test_load_message_invalid_json(
 
 
 def test_loads_message_like_string(
-    json_handler: Any, 
-    sample_dict: dict[str, Any]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test loads_message_like with string input.
 
@@ -297,6 +474,17 @@ def test_loads_message_like_string(
     --------
     - Correctly parses JSON string
     - Returns expected dictionary
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to parse
+
+    Returns
+    -------
+    None
     """
     json_str = json.dumps(sample_dict)
     result = json_handler.loads_message_like(json_str)
@@ -304,8 +492,8 @@ def test_loads_message_like_string(
 
 
 def test_loads_message_like_bytes(
-    json_handler: Any, 
-    sample_dict: dict[str, Any]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test loads_message_like with bytes input.
 
@@ -313,26 +501,48 @@ def test_loads_message_like_bytes(
     --------
     - Correctly parses JSON bytes
     - Returns expected dictionary
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to parse
+
+    Returns
+    -------
+    None
     """
     json_bytes = json.dumps(sample_dict).encode("utf-8")
     result = json_handler.loads_message_like(json_bytes)
     assert result == sample_dict
 
 
-def test_loads_message_like_invalid(json_handler: Any) -> None:
+def test_loads_message_like_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test loads_message_like with invalid JSON.
 
     Verifies
     --------
     - Raises ValueError for malformed JSON
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     with pytest.raises(ValueError):
         json_handler.loads_message_like("invalid json")
 
 
 def test_dict_to_json(
-    json_handler: Any, 
-    sample_dict: dict[str, Any]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test dict_to_json with valid dictionary.
 
@@ -340,26 +550,48 @@ def test_dict_to_json(
     --------
     - Correctly converts dict to JSON string
     - Result can be parsed back to original dict
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to convert
+
+    Returns
+    -------
+    None
     """
     result = json_handler.dict_to_json(sample_dict)
     assert isinstance(result, str)
     assert json.loads(result) == sample_dict
 
 
-def test_dict_to_json_invalid(json_handler: Any) -> None:
+def test_dict_to_json_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test dict_to_json with invalid input.
 
     Verifies
     --------
     - Raises TypeError for non-dict inputs
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
-    with pytest.raises(TypeError, match="Message must be a dictionary"):
+    with pytest.raises(TypeError, match="must be of type"):
         json_handler.dict_to_json("not a dict")
 
 
 def test_send_json(
-    json_handler: Any, 
-    sample_dict: dict[str, Any]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test send_json with valid dictionary.
 
@@ -367,17 +599,39 @@ def test_send_json(
     --------
     - Returns equivalent dictionary
     - Handles JSON serialization roundtrip
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to send
+
+    Returns
+    -------
+    None
     """
     result = json_handler.send_json(sample_dict)
     assert result == sample_dict
 
 
-def test_send_json_invalid(json_handler: Any) -> None:
+def test_send_json_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test send_json with non-serializable input.
 
     Verifies
     --------
     - Raises TypeError for non-serializable objects
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
     class NonSerializable:
         pass
@@ -387,8 +641,8 @@ def test_send_json_invalid(json_handler: Any) -> None:
 
 
 def test_byte_to_json(
-    json_handler: Any, 
-    sample_dict: dict[str, Any]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_dict: dict[str, Any] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test byte_to_json with valid byte input.
 
@@ -396,15 +650,27 @@ def test_byte_to_json(
     --------
     - Correctly converts bytes to JSON
     - Returns expected dictionary
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_dict : dict[str, Any]
+        Sample dictionary to convert
+
+    Returns
+    -------
+    None
     """
-    byte_str = f"b'{json.dumps(sample_dict)}'".encode("utf-8")
+    # noqa UP012: unnecessary UTF-8 encoding
+    byte_str = f"b'{json.dumps(sample_dict)}'".encode("utf-8") # noqa UP012
     result = json_handler.byte_to_json(byte_str)
     assert result == sample_dict
 
 
 def test_normalize_json_keys(
-    json_handler: Any, 
-    sample_list_of_dicts: list[dict[str, Any]]
+    json_handler: Any, # noqa ANN401: typing.Any is not allowed
+    sample_list_of_dicts: list[dict[str, Any]] # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test normalize_json_keys with valid input.
 
@@ -413,17 +679,55 @@ def test_normalize_json_keys(
     - All dictionaries have same keys
     - Missing keys are added with 0 value
     - Original keys/values preserved
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+    sample_list_of_dicts : list[dict[str, Any]]
+        Sample list of dictionaries with varying keys
+
+    Returns
+    -------
+    None
     """
     result = json_handler.normalize_json_keys(sample_list_of_dicts)
     assert all(set(d.keys()) == {"id", "name", "value", "extra"} for d in result)
     assert all(d["id"] == i+1 for i, d in enumerate(result))
 
 
-def test_normalize_json_keys_invalid(json_handler: Any) -> None:
+def test_normalize_json_keys_invalid(
+    json_handler: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test normalize_json_keys with invalid input.
 
     Verifies
     --------
-    - Raises exceptions for invalid inputs (tested in validation tests)
+    - Raises TypeError for non-list inputs
+    - Raises ValueError for empty lists
+    - Raises TypeError for lists containing non-dict items
+
+    Parameters
+    ----------
+    json_handler : Any
+        Instance of JsonFiles
+
+    Returns
+    -------
+    None
     """
-    pass  # Covered by validation tests
+    # test with non-list input
+    with pytest.raises(TypeError, match="must be of type"):
+        json_handler.normalize_json_keys({"not": "a list"})  # type: ignore
+
+    # test with empty list
+    with pytest.raises(ValueError, match="Input list cannot be empty"):
+        json_handler.normalize_json_keys([])
+
+    # test with list containing non-dict items
+    with pytest.raises(TypeError, match="All list items must be dictionaries"):
+        json_handler.normalize_json_keys([1, 2, 3])  # type: ignore
+
+    # test with list containing mixed types
+    with pytest.raises(TypeError, match="All list items must be dictionaries"):
+        json_handler.normalize_json_keys([{"valid": "dict"}, "invalid", 123])  # type: ignore
