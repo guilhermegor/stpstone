@@ -1,8 +1,9 @@
+import inspect
 import logging
 import os
 import time
-import inspect
 from typing import Literal, Optional
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
@@ -89,7 +90,9 @@ class CreateLog(metaclass=TypeChecker):
             method_name = frame.f_code.co_name
         formatted_message = f"[{class_name}.{method_name}] {message}"
         if logger is not None:
-            log_method = getattr(self, log_level, self.locals()[log_level])
+            log_method = getattr(self, log_level, None)
+            if log_method is None:
+                raise ValueError(f"Invalid log level: {log_level}")
             log_method(logger, formatted_message)
         else:
             level = log_level.upper()

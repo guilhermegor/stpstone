@@ -21,7 +21,7 @@
 
 ## Linting Requirements
 - Strict numpy-style docstring compliance
-- Preserve all references exactly as provided
+- Preserve all references exactly as provided, in the references section of the docstring
 - Allow URL breaks in docstrings when necessary
 - Full compliance with:
   - flake8
