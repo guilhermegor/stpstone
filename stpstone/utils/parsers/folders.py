@@ -1,448 +1,773 @@
-### DIRECTORY AND FILES MANAGEMENT ###
+"""Directory and file management utilities.
 
-import os
-import re
-import shutil
-import tempfile
-import pycurl
-import os
-import fnmatch
-import wget
-import py7zr
-import hashlib
-import tarfile
-import chardet
+This module provides classes for handling file system operations including directory traversal,
+file manipulation, compression/decompression, and remote file operations.
+"""
+
+from collections.abc import Iterable
 from datetime import datetime
-from zipfile import ZipFile, ZIP_DEFLATED
-from io import BytesIO, TextIOWrapper, BufferedReader
-from typing import Tuple, List, Union, Iterable, Optional
-from requests import Response
+import fnmatch
+import hashlib
+from io import BufferedReader, BytesIO, TextIOWrapper
+import os
 from pathlib import Path
-from stpstone.utils.parsers.str import StrHandler
+import shutil
+import tarfile
+import tempfile
+from typing import Literal, Optional, TypedDict, Union
+from zipfile import ZIP_DEFLATED, ZipFile
+
+import chardet
+import py7zr
+import pycurl
+from requests import Response
+import wget
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
 
 
-class DirFilesManagement:
+class ReturnGetFileMetadata(TypedDict):
+    """Typed dictionary for file metadata return values.
 
-    @property
-    def get_cur_dir(self):
+    Attributes
+    ----------
+    size : int
+        File size in bytes
+    creation_time : datetime
+        File creation timestamp
+    modification_time : datetime
+        Last modification timestamp
+    access_time : datetime
+        Last access timestamp
+    """
+
+    size: int
+    creation_time: datetime
+    modification_time: datetime
+    access_time: datetime
+
+
+class DirFilesManagement(metaclass=TypeChecker):
+    """Class for directory and file management operations."""
+
+    def _validate_safe_path(self, base_path: str, file_path: str) -> bool:
+        """Validate that a file path is safe to extract.
+
+        Parameters
+        ----------
+        base_path : str
+            The base directory where files should be extracted
+        file_path : str
+            The file path to validate
+
+        Returns
+        -------
+        bool
+            True if the path is safe, False otherwise
         """
-        DOCSTRING: GET CURRENT DIRECTORY
-        INPUTS: -
-        OUTPUTS: CURRENT DIRECTORY
+        base_path = os.path.abspath(base_path)
+        file_path = os.path.abspath(os.path.join(base_path, file_path))
+        return file_path.startswith(base_path)
+
+    def get_curr_dir(self) -> str:
+        """Get current working directory.
+
+        Returns
+        -------
+        str
+            Current working directory path
         """
         return os.getcwd()
 
-    def list_dir_files(self, dir_path=None):
-        """
-        DOCSTRING: RETURN SUBFOLDERS OR FILE NAMES
-        INPUTS: DIR NAME (IN CASE THIS ARGUMENT IS NONE THE RETURNED VALUE
-        IS FILES IN THE FOLDER)
-        OUTPUTS: LIST OF FILES OR SUBFOLDERS
-        """
-        return os.listdir(dir_path)
+    def list_dir_files(self, dir_path: Optional[str] = None) -> list[str]:
+        """List files and subdirectories in given directory.
 
-    def change_dir(self, dir_path):
+        Parameters
+        ----------
+        dir_path : Optional[str]
+            Directory path (defaults to current directory if None)
+
+        Returns
+        -------
+        list[str]
+            List of files and subdirectories
         """
-        DOCSTRING: CHANGE CURRENT DIRECTORY
-        INPUTS: DIRECTORY NAME
-        OUTPUTS: -
+        return os.listdir(dir_path if dir_path else self.get_curr_dir)
+
+    def change_dir(self, dir_path: str) -> None:
+        """Change current working directory.
+
+        Parameters
+        ----------
+        dir_path : str
+            Target directory path
+
+        Raises
+        ------
+        FileNotFoundError
+            If directory doesn't exist
         """
+        if not os.path.exists(dir_path):
+            raise FileNotFoundError(f"Directory not found: {dir_path}")
         os.chdir(dir_path)
 
-    def mk_new_directory(self, dir_path):
-        """
-        DOCSTRING: MAKE A NEW DIRECTORY
-        INPUSTS: NAME OF THE DIRECTORY
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
+    def mk_new_directory(self, dir_path: str) -> bool:
+        """Create new directory.
+
+        Parameters
+        ----------
+        dir_path : str
+            Path of directory to create
+
+        Returns
+        -------
+        bool
+            True if created, False if already existed
         """
         if not os.path.exists(dir_path):
             os.mkdir(dir_path)
             return True
-        else:
-            return False
+        return False
 
-    def move_file(self, old_file_name, new_file_name):
+    def move_file(self, old_file_name: str, new_file_name: str) -> bool:
+        """Move/rename a file.
+
+        Parameters
+        ----------
+        old_file_name : str
+            Source file path
+        new_file_name : str
+            Destination file path
+
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
         """
-        DOCSTRING: MOVE A FILE FROM ORIGINAL DIRECTORY TO ANOTHER (IT DELETES THE OLD ONE)
-        INPUTS: OLD AND NEW COMPLETE PATH NAME, AND DELETE OLD ONE
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
-        """
+        self._validate_file_exists(old_file_name)
         shutil.move(old_file_name, new_file_name)
         return self.object_exists(new_file_name)
 
-    def rename_dir_file(self, old_object_name, new_object_name):
-        """
-        DOCSTRING: RENAMING FILES OR FOLDERS
-        INPUTS: OLD AND NEW COMPLETE PATH
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
-        """
-        # renaming
-        os.rename(old_object_name, new_object_name)
-        # return status of accomplishment
-        if os.path.exists(new_object_name):
-            return True
-        else:
-            return False
+    def rename_dir_file(self, old_object_name: str, new_object_name: str) -> bool:
+        """Rename a file or directory.
 
-    def removing_dir(self, dir_path):
+        Parameters
+        ----------
+        old_object_name : str
+            Current path
+        new_object_name : str
+            New path
+
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
         """
-        DOCSTRING: REMOVE A DIRECTORY
-        INPUTS: COMPLETE PATH OF THE DIRECTORY
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
+        self._validate_object_exists(old_object_name)
+        os.rename(old_object_name, new_object_name)
+        return self.object_exists(new_object_name)
+
+    def removing_dir(self, dir_path: str) -> bool:
+        """Remove a directory.
+
+        Parameters
+        ----------
+        dir_path : str
+            Directory path to remove
+
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
         """
+        self._validate_object_exists(dir_path)
         if len(self.list_dir_files(dir_path)) == 0:
             os.rmdir(dir_path)
         else:
             shutil.rmtree(dir_path)
-        if not os.path.exists(dir_path):
-            return True
-        else:
-            return False
+        return not os.path.exists(dir_path)
 
-    def removing_file(self, file_path):
+    def removing_file(self, file_path: str) -> bool:
+        """Remove a file.
+
+        Parameters
+        ----------
+        file_path : str
+            File path to remove
+
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
         """
-        DOCSTRING: REMOVE A FILE
-        INPUTS: COMPLETE NAME
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
-        """
+        self._validate_file_exists(file_path)
         os.remove(file_path)
-        if not os.path.exists(file_path):
-            return True
-        else:
-            return False
+        return not os.path.exists(file_path)
 
-    def object_exists(self, object_path):
-        """
-        DOCSTRING: BLAMES WHETER OR NOT FILE/FOLDER HAS BEEN CREATED
-        INPUTS: OBJECT PATH
-        OUTPUTS: OK/NOK
-        """
-        if os.path.exists(object_path):
-            return True
-        else:
-            return False
+    def object_exists(self, object_path: str) -> bool:
+        """Check if file/directory exists.
 
-    def time_last_edition(self, object_path, bl_to_datetime=False):
-        """
-        DOCSTRING: TIMESTAMP WITH LAST SAVED EDITION IN THE FILE
-        INPUTS: OBJECT PATH
-        OUTPUTS: TUPLE WITH TIMESTAMP OF LAST EDITION AND WHETER FILE EXISTS OR NOT
-        """
-        if os.path.exists(object_path):
-            if bl_to_datetime == True:
-                return (datetime.fromtimestamp(os.path.getmtime(object_path)), True)
-            else:
-                return (os.path.getmtime(object_path), True)
-        else:
-            return ('INTERNAL ERROR', False)
+        Parameters
+        ----------
+        object_path : str
+            Path to check
 
-    def time_creation(self, object_path):
+        Returns
+        -------
+        bool
+            True if exists, False otherwise
         """
-        DOCSTRING: TIMESTAMP WITH CREATION OF FILE
-        INPUTS: OBJECT PATH
-        OUTPUTS: TUPLE WITH TIMESTAMP OF FILE CREATION AND WHETER FILE EXISTS OR NOT
-        """
-        if os.path.exists(object_path):
-            return (os.path.getctime(object_path), True)
-        else:
-            return ('INTERNAL ERROR', False)
+        return os.path.exists(object_path)
 
-    def time_last_access(self, object_path):
-        """
-        DOCSTRING: TIMESTAMP WITH LAST ACCESS TO THE FILE
-        INPUTS: OBJECT PATH
-        OUTPUTS: TUPLE WITH TIMESTAMP OF FILE LAST ACCESS AND WHETER FILE EXISTS OR NOT
-        """
-        if os.path.exists(object_path):
-            return (os.path.getatime(object_path), True)
-        else:
-            return ('INTERNAL ERROR', False)
+    def time_last_edition(self, object_path: str, bl_to_datetime: bool = False) -> tuple:
+        """Get last modification time of file/directory.
 
-    def get_file_name_path_split(self, complete_file_name):
+        Parameters
+        ----------
+        object_path : str
+            Path to check
+        bl_to_datetime : bool
+            Whether to return as datetime object
+
+        Returns
+        -------
+        tuple
+            (timestamp, exists_flag)
         """
-        DOCSTRING: GET FILE PATH AND NAME IN A TUPLE
-        INPUTS: COMPLETE FILE NAME
-        OUTPUT: RETURNS TUPLE WITH FILE NAME HEAD (PATH) AND TAIL (NAME)
+        if not self.object_exists(object_path):
+            return ("INTERNAL ERROR", False)
+        timestamp = os.path.getmtime(object_path)
+        return (datetime.fromtimestamp(timestamp) if bl_to_datetime else timestamp, True)
+
+    def time_creation(self, object_path: str) -> tuple:
+        """Get creation time of file/directory.
+
+        Parameters
+        ----------
+        object_path : str
+            Path to check
+
+        Returns
+        -------
+        tuple
+            (timestamp, exists_flag)
+        """
+        if not self.object_exists(object_path):
+            return ("INTERNAL ERROR", False)
+        return (os.path.getctime(object_path), True)
+
+    def time_last_access(self, object_path: str) -> tuple:
+        """Get last access time of file/directory.
+
+        Parameters
+        ----------
+        object_path : str
+            Path to check
+
+        Returns
+        -------
+        tuple
+            (timestamp, exists_flag)
+        """
+        if not self.object_exists(object_path):
+            return ("INTERNAL ERROR", False)
+        return (os.path.getatime(object_path), True)
+
+    def get_file_name_path_split(self, complete_file_name: str) -> tuple[str, str]:
+        """Split file path into directory and filename components.
+
+        Parameters
+        ----------
+        complete_file_name : str
+            Full file path
+
+        Returns
+        -------
+        tuple[str, str]
+            (directory_path, filename)
         """
         return os.path.split(complete_file_name)
 
-    def join_n_path_components(self, *path_components):
+    def join_n_path_components(self, *path_components: str) -> str:
+        """Join multiple path components.
+
+        Parameters
+        ----------
+        *path_components : str
+            Path components to join
+
+        Returns
+        -------
+        str
+            Combined path
         """
-        DOCSTRING: JOIN PATH COMPONENTS
-        INPUTS: N-PATH COMPONENTS
-        OUTPUTS: OUTPUT COMPLETE PATH
-        """
-        path_output = ''
+        path_output = ""
         for path_component in path_components:
             path_output = os.path.join(path_output, path_component)
         return path_output
 
-    def get_filename_parts_from_url(self, url):
-        """
-        DOCSTRING: GET FILE NAME FROM A COMPLETE URL
-        INPUTS: COMPLETE URL
-        OUTPUTS: FILENAME WITH AND WITHOUT EXTENSION, IN STR AND LIST TYPES, RESPECTIVELLY
-        """
-        fullname = url.split('/')[-1].split('#')[0].split('?')[0]
-        t = list(os.path.splitext(fullname))
-        if t[1]:
-            t[1] = t[1][1:]
-        return t
+    def get_filename_parts_from_url(self, url: str) -> list[str]:
+        """Extract filename parts from URL.
 
-    def get_file_extensions(self, file_path: str) -> List[Union[str, None]]:
-        return re.findall(r'\.([a-zA-Z0-9_]+)(?:[\?#]|$)', file_path)
+        Parameters
+        ----------
+        url : str
+            URL to parse
 
-    def get_last_file_extension(self, file_path: str) -> str:
-        list_ = self.get_file_extensions(file_path)
-        if len(list_) > 0:
-            return list_[-1]
-        else:
-            return None
+        Returns
+        -------
+        list[str]
+            [filename_without_ext, extension]
+        """
+        fullname = url.split("/")[-1].split("#")[0].split("?")[0]
+        parts = list(os.path.splitext(fullname))
+        if parts[1]:
+            parts[1] = parts[1][1:]
+        return parts
 
-    def download_web_file(self, url, filepath=None):
+    def get_file_extensions(self, file_path: str) -> list[str]:
+        """Get all extensions from a file path.
+
+        Parameters
+        ----------
+        file_path : str
+            File path to parse
+
+        Returns
+        -------
+        list[str]
+            List of file extensions
         """
-        DOCSTRING: DOWNLOAD FILE FROM WEB (DOWNLOADED TEMPORARY FILENAME IF NO FILEPATH IS PROVIDED)
-        INPUTS: COMPLETE PATH TO FILE AND FILE NAME WITH EXTENSION
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
-        OBS: IF IT IS NEEDED TO PASS CREDENTIALS PARAMETER URL_PATH OUGHT BE DECLARED AS:
-            'ftp://username:password@server/path/to/file'
+        parts = os.path.basename(file_path).split('.')
+        return parts[1:] if len(parts) > 1 else []
+
+    def get_last_file_extension(self, file_path: str) -> Optional[str]:
+        """Get the last extension from a file path.
+
+        Parameters
+        ----------
+        file_path : str
+            File path to parse
+
+        Returns
+        -------
+        Optional[str]
+            Last extension or None if no extensions
         """
-        # removing previous version
-        if self.object_exists(filepath) == True:
-            _ = self.removing_file(filepath)
-        # fetching data
+        extensions = self.get_file_extensions(file_path)
+        return extensions[-1] if extensions else None
+
+    def download_web_file(self, url: str, filepath: Optional[str] = None) -> bool:
+        """Download file from web.
+
+        Parameters
+        ----------
+        url : str
+            URL to download from
+        filepath : Optional[str]
+            Destination path (uses temp file if None)
+
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
+        """
+        if filepath and self.object_exists(filepath):
+            self.removing_file(filepath)
+
         if not filepath:
             _, suffix = self.get_filename_parts_from_url(url)
-            f = tempfile.NamedTemporaryFile(suffix='.' + suffix, delete=False)
-            filepath = f.name
-        else:
-            f = open(filepath, 'wb')
-        c = pycurl.Curl()
-        c.setopt(pycurl.URL, str(url))
-        c.setopt(pycurl.WRITEFUNCTION, f.write)
-        try:
-            c.perform()
-            c.close()
-            f.close()
-            return self.object_exists(filepath)
-        except:
-            c.close()
-            f.close()
-            _ = self.removing_file(filepath)
-            wget.download(url, filepath)
-            return self.object_exists(filepath)
+            with tempfile.NamedTemporaryFile(suffix=f".{suffix}", delete=False) as f:
+                filepath = f.name
 
-    def unzip_files_from_dir(self, destination_path):
+        try:
+            with pycurl.Curl() as c:
+                c.setopt(pycurl.URL, str(url))
+                with open(filepath, "wb") as f:
+                    c.setopt(pycurl.WRITEFUNCTION, f)
+                    c.perform()
+                # Check HTTP status code
+                if c.getinfo(pycurl.HTTP_CODE) != 200:
+                    raise pycurl.error(f"HTTP error: {c.getinfo(pycurl.HTTP_CODE)}")
+        except pycurl.error:
+            try:
+                # Use wget as fallback
+                wget.download(url, out=filepath)
+            except Exception:
+                return False
+
+        return self.object_exists(filepath)
+
+    def unzip_files_from_dir(self, destination_path: str) -> list[list[str]]:
+        """Unzip all zip files in a directory.
+
+        Parameters
+        ----------
+        destination_path : str
+            Directory containing zip files
+
+        Returns
+        -------
+        list[list[str]]
+            List of lists of extracted filenames
+
+        Raises
+        ------
+        ValueError
+            If path traversal is detected
         """
-        DOCSTRING: UNZIP ALL FILES FROM A FOLDER
-        INPUTS: DESTINATION PATH
-        OUTPUTS: NONE
-        """
-        list_files_unz = list()
-        files = os.listdir(destination_path)
-        for file in files:
-            if file.endswith('.zip'):
-                filePath = destination_path + '/' + file
-                zip_file = ZipFile(filePath)
-                list_files_unz.append(zip_file.namelist())
-                for names in zip_file.namelist():
-                    zip_file.extract(names, destination_path)
-                zip_file.close()
+        list_files_unz = []
+        for file in os.listdir(destination_path):
+            if file.endswith(".zip"):
+                file_path = os.path.join(destination_path, file)
+                with ZipFile(file_path) as zip_file:
+                    list_files_unz.append(zip_file.namelist())
+                    for name in zip_file.namelist():
+                        if not self._validate_safe_path(destination_path, name):
+                            raise ValueError(f"Path traversal detected in zip file: {name}")
+                        zip_file.extract(name, destination_path)
         return list_files_unz
 
-    def unzip_file(self, zippedfile_path, dir_destiny):
+    def unzip_file(self, zippedfile_path: str, dir_destiny: str) -> list[str]:
+        """Unzip a single zip file.
+
+        Parameters
+        ----------
+        zippedfile_path : str
+            Path to zip file
+        dir_destiny : str
+            Destination directory
+
+        Returns
+        -------
+        list[str]
+            List of extracted filenames
+
+        Raises
+        ------
+        ValueError
+            If path traversal is detected
         """
-        DOCSTRING: UNZIP ONE SINGULAR ZIP FILE TO A DESTINATION
-        INPUTS: ZIPPED FILE PATH AN DESTINATION PATH
-        OUTPUTS: LIST OF UNZIPPED FILES
-        """
-        with ZipFile(zippedfile_path, 'r') as zipobj:
+        with ZipFile(zippedfile_path, "r") as zipobj:
             list_zip_files = zipobj.namelist()
-            zipobj.extractall(dir_destiny)
+            for name in list_zip_files:
+                if not self._validate_safe_path(dir_destiny, name):
+                    raise ValueError(f"Path traversal detected in zip file: {name}")
+                zipobj.extract(name, dir_destiny)
         return list_zip_files
 
-    def compress_to_zip(self, list_files_archive, zfilename):
+    def compress_to_zip(self, list_files_archive: list[str], zfilename: str) -> bool:
+        """Compress files to zip archive.
+
+        Parameters
+        ----------
+        list_files_archive : list[str]
+            List of files to compress
+        zfilename : str
+            Output zip filename
+
+        Returns
+        -------
+        bool
+            True if successful
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # creating object of zipfile compression
-        zout = ZipFile(zfilename, 'w', ZIP_DEFLATED)
-        # looping through archive files
-        for fname in list_files_archive:
-            zout.write(fname)
+        with ZipFile(zfilename, "w", ZIP_DEFLATED) as zout:
+            for fname in list_files_archive:
+                zout.write(fname, arcname=os.path.basename(fname))
         return True
 
-    def compress_to_7z_file(self, file_path_7z, object_to_compress, method='w'):
-        """
-        REFERENCES: https://github.com/miurahr/py7zr
-        DOCSTRING: ZIP FILE TO 7ZR, OBJECT TO COMPRESS PATH, AND METHOD (WRTIE AS DEFAULT)
-        INPUTS: 7ZR FILE NAME, DESTINY DIRECTORY
-        OUTPUTS: STATUS OF ACCOMPLISHMENT
+    def compress_to_7z_file(
+        self, 
+        file_path_7z: str, 
+        object_to_compress: str, 
+        method: str = "w"
+    ) -> bool:
+        """Compress files to 7z archive.
+
+        Parameters
+        ----------
+        file_path_7z : str
+            Output 7z filename
+        object_to_compress : str
+            Path to file/directory to compress
+        method : str
+            Write mode (default: "w")
+
+        Returns
+        -------
+        bool
+            True if successful
         """
         with py7zr.SevenZipFile(file_path_7z, mode=method) as archive:
             archive.writeall(object_to_compress)
         return self.object_exists(file_path_7z)
 
-    def decompress_7z_file(self, file_path_7z, method='r'):
-        """
-        REFERENCES: https://github.com/miurahr/py7zr
-        DOCSTRING: ZIP FILE TO 7ZR
-        INPUTS: 7ZR FILE NAME, STR ARCNAME (BASE AS DEFAULT) AND STR MODE (READ AS DEFAULT)
-        OUTPUTS: LIST OF FILE NAMES COMPRESSED
+    def decompress_7z_file(self, file_path_7z: str, method: str = "r") -> list[str]:
+        """Decompress 7z archive.
+
+        Parameters
+        ----------
+        file_path_7z : str
+            7z file to extract
+        method : str
+            Read mode (default: "r")
+
+        Returns
+        -------
+        list[str]
+            List of extracted filenames
+
+        Raises
+        ------
+        ValueError
+            If path traversal is detected
         """
         with py7zr.SevenZipFile(file_path_7z, mode=method) as archive:
             list_file_names = archive.getnames()
-            archive.extractall()
+            for name in list_file_names:
+                if not self._validate_safe_path(os.path.dirname(file_path_7z), name):
+                    raise ValueError(f"Path traversal detected in 7z file: {name}")
+                archive.extract(path=os.path.dirname(file_path_7z), targets=[name])
         return list_file_names
 
-    def choose_last_saved_file_w_rule(self, parent_dir, name_like):
+    def choose_last_saved_file_w_rule(self, parent_dir: str, name_like: str) -> Union[str, bool]:
+        """Find most recently modified file matching pattern.
+
+        Parameters
+        ----------
+        parent_dir : str
+            Directory to search
+        name_like : str
+            Filename pattern to match
+
+        Returns
+        -------
+        Union[str, bool]
+            Path of matching file or False if none found
         """
-        DOCSTRING: CHOOSE LAST SAVED FILE WITH RULE
-        INPUTS: PARENT DIR AND PART OF THE NAME OF THE FILE
-        OUTPUTS: NOK OR COMPLETE NAME OF THE FILE
-        """
-        # setting passaging variables
-        files_dir = os.listdir(parent_dir)
-        file_dir = None
         file_name_return = None
-        # looping through all files in the folder and returning the last edited one with the
-        #   name like given
-        for file_dir in files_dir:
+        for file_dir in os.listdir(parent_dir):
             if fnmatch.fnmatch(file_dir, name_like):
                 if file_name_return is None:
                     file_name_return = file_dir
                 else:
-                    if os.path.getmtime(parent_dir
-                                        + file_dir) > os.path.getmtime(
-                                            os.path.join(parent_dir, file_name_return)):
+                    current_mtime = os.path.getmtime(os.path.join(parent_dir, file_dir))
+                    stored_mtime = os.path.getmtime(os.path.join(parent_dir, file_name_return))
+                    if current_mtime > stored_mtime:
                         file_name_return = file_dir
-        # return the complete file path, or NOK whether it has not been found
-        if file_name_return is None:
-            return False
-        else:
-            return os.path.join(parent_dir, file_name_return)
+        return os.path.join(parent_dir, file_name_return) if file_name_return else False
 
-    def copy_file(self, org_file_path, dest_direcory):
-        """
-        DOCSTRING: COPY FILE TO A FOLDER
-        INPUTS: ORIGINAL AND DESTINATION COMPLETE FILE PATH
-        OUTPUTS: STATUS OF ACCOMPLISHMENT - NO ORIGINAL FILE/OK
-        """
-        if os.path.exists(org_file_path):
-            shutil.copy(org_file_path, dest_direcory)
-            return True
-        else:
-            return 'NO ORIGINAL FILE'
+    def copy_file(self, org_file_path: str, dest_direcory: str) -> Union[bool, str]:
+        """Copy file to destination.
 
-    def walk_folder_subfolder_w_rule(self, root_directory, list_name_like):
+        Parameters
+        ----------
+        org_file_path : str
+            Source file path
+        dest_direcory : str
+            Destination directory
+
+        Returns
+        -------
+        Union[bool, str]
+            True if successful, "NO ORIGINAL FILE" if source doesn't exist
         """
-        DOCSTRING: WALK THROUGH ALL FILES IN A FOLDER AND ITS SUBFOLDERS, RETURNING COMPLETE PATH OF
-            FILES WITH A NAME LIKE OF INTEREST
-        INPUTS: ROOT DIRECTORY
-        OUTPUTS: LIST OF FILE PATHS
+        if not self.object_exists(org_file_path):
+            return "NO ORIGINAL FILE"
+        shutil.copy(org_file_path, dest_direcory)
+        return True
+
+    def walk_folder_subfolder_w_rule(
+        self, 
+        root_directory: str, 
+        list_name_like: list[str]
+    ) -> list[str]:
+        """Recursively find files matching patterns.
+
+        Parameters
+        ----------
+        root_directory : str
+            Directory to search
+        list_name_like : list[str]
+            List of filename patterns to match
+
+        Returns
+        -------
+        list[str]
+            List of matching file paths
         """
-        list_paths = list()
+        list_paths = []
         for directory, _, files in os.walk(root_directory):
             for file in files:
-                if any([fnmatch.fnmatch(file, name_like) == True for name_like in list_name_like]):
+                if any(fnmatch.fnmatch(file, name_like) for name_like in list_name_like):
                     list_paths.append(os.path.join(directory, file))
         return list_paths
 
-    def walk_folder_subfolder(self, root_directory):
-        """
-        DOCSTRING: WALK THROUGH ALL FILES IN A FOLDER AND ITS SUBFOLDERS
-        INPUTS: ROOT DIRECTORY
-        OUTPUTS: LIST OF FILES PATHS
-        """
-        list_paths = list()
-        for directory, _, files in os.walk(root_directory):
-            for file in files:
-                list_paths.append(os.path.join(directory, file))
-        return list_paths
+    def walk_folder_subfolder(self, root_directory: str) -> list[str]:
+        """Recursively list all files in directory.
 
-    def loop_files_w_rule(self, directory, name_like, bl_first_last_edited=True,
-                          bl_to_datetime=True, key_file_name='file_name',
-                          key_file_last_edition='file_last_edition'):
+        Parameters
+        ----------
+        root_directory : str
+            Directory to search
+
+        Returns
+        -------
+        list[str]
+            List of all file paths
         """
-        DOCSTRING: RETURN FILES FROM A FOLDER WITH A GIVEN RULE
-        INPUTS: DIRECTORY AND RULE (NAME_LIKE)
-        OUTPUTS: RETURNS FILES PATHS WITH A GIVEN RULE
+        return [
+            os.path.join(directory, file)
+            for directory, _, files in os.walk(root_directory)
+            for file in files
+        ]
+
+    def loop_files_w_rule(
+        self,
+        directory: str,
+        name_like: str,
+        bl_first_last_edited: bool = True,
+        bl_to_datetime: bool = True,
+        key_file_name: str = "file_name",
+        key_file_last_edition: str = "file_last_edition"
+    ) -> list[str]:
+        """Get files matching pattern, optionally sorted by modification time.
+
+        Parameters
+        ----------
+        directory : str
+            Directory to search
+        name_like : str
+            Filename pattern to match
+        bl_first_last_edited : bool
+            Whether to sort by modification time
+        bl_to_datetime : bool
+            Whether to return timestamps as datetime objects
+        key_file_name : str
+            Dictionary key for filename
+        key_file_last_edition : str
+            Dictionary key for modification time
+
+        Returns
+        -------
+        list[str]
+            List of matching file paths
         """
-        # creating list of files in a given directory with a given part of name
-        list_files_names_like = [file_name for file_name in os.listdir(directory)
-                                 if StrHandler().match_string_like(file_name, name_like)]
-        # checking whether it is necessary to retrieve the files in a last edition order
-        if bl_first_last_edited == False:
+        list_files_names_like = [
+            file_name for file_name in os.listdir(directory)
+            if StrHandler().match_string_like(file_name, name_like)
+        ]
+
+        if not bl_first_last_edited:
             return list_files_names_like
-        else:
-            #   list of last edition times
-            list_files_last_edition = [self.time_last_edition(os.path.join(
-                directory, file_name), bl_to_datetime=bl_to_datetime)
-                for file_name in list_files_names_like]
-            #   creating a list of dictionaries with name and last edition time
-            list_ser_file_name_last_edition = [{
+
+        list_files_last_edition = [
+            self.time_last_edition(
+                os.path.join(directory, file_name),
+                bl_to_datetime=bl_to_datetime
+            )
+            for file_name in list_files_names_like
+        ]
+
+        list_ser_file_name_last_edition = [
+            {
                 key_file_name: list_files_names_like[i],
                 key_file_last_edition: list_files_last_edition[i][0]
-            } for i in range(len(list_files_last_edition))]
-            #   sort list of dictionaries
-            return [os.path.join(directory, dict_[key_file_name]) for dict_
-                    in HandlingDicts().multikeysort(list_ser_file_name_last_edition,
-                                                    ['-' + key_file_last_edition])]
+            }
+            for i in range(len(list_files_last_edition))
+        ]
 
-    def list_dir_files(self, dir_path=None):
-        """
-        DOCSTRING: RETURN SUBFOLDERS OR FILE NAMES
-        INPUTS: DIR NAME (IN CASE THIS ARGUMENT IS NONE THE RETURNED VALUE
-        IS FILES IN THE FOLDER)
-        OUTPUTS: LIST OF FILES OR SUBFOLDERS
-        """
-        return os.listdir(dir_path)
+        return [
+            os.path.join(directory, dict_[key_file_name])
+            for dict_ in HandlingDicts().multikeysort(
+                list_ser_file_name_last_edition,
+                [f"-{key_file_last_edition}"]
+            )
+        ]
 
-    def find_project_root(self, marker:str='pyproject.toml') -> Path:
+    def find_project_root(
+        self, 
+        marker: str = "pyproject.toml", 
+        start_path: Optional[str] = None
+    ) -> Path:
+        """Find project root directory by marker file.
+
+        Parameters
+        ----------
+        marker : str
+            Filename to identify project root
+        start_path : Optional[str]
+            Directory to start search
+
+        Returns
+        -------
+        Path
+            Path to project root
+
+        Raises
+        ------
+        FileNotFoundError
+            If marker file not found
         """
-        Traverse up the directory tree to find the project root
-        by looking for a marker file (e.g., pyproject.toml, README.md, .git).
-        """
-        current_path = Path(__file__).resolve()
-        while current_path != current_path.parent:  # Stop at the filesystem root
+        current_path = Path(start_path) if start_path else Path(__file__).resolve()
+        while current_path != current_path.parent:
             if (current_path / marker).exists():
                 return current_path
             current_path = current_path.parent
         raise FileNotFoundError(f"Could not find project root with marker: {marker}")
 
-    def get_file_format_from_file_name(self, filename):
-        """
-        DOCSTRING: GET FILE FORMAT FROM FILEN NAME
-        INPUTS: FILE NAME
-        OUTPUTS: FORMAT
-        """
-        return filename.split('.')[-1]
+    def get_file_format_from_file_name(self, filename: str) -> str:
+        """Get file extension from filename.
 
-    def get_file_size(self, filename):
+        Parameters
+        ----------
+        filename : str
+            Filename to parse
+
+        Returns
+        -------
+        str
+            File extension
         """
-        DOCSTRING: GET FILE SIZE IN BYTES
-        INPUTS: FILENAME
-        OUTPUTS: FLOAT
+        return filename.split(".")[-1]
+
+    def get_file_size(self, filename: str) -> int:
+        """Get file size in bytes.
+
+        Parameters
+        ----------
+        filename : str
+            File to check
+
+        Returns
+        -------
+        int
+            File size in bytes
         """
         return os.path.getsize(filename)
 
     def recursive_extract_zip(self, zip_file_path: str, extract_dir: str) -> None:
-        """
-        Recursively extracts the contents of a ZIP file and any nested ZIP files to a target
-        directory, until no ZIP file is available
+        """Recursively extract zip files including nested zips.
 
-        Args:
-            zip_file_path (str): The path to the ZIP file to be extracted.
-            extract_dir (str): The directory where the contents of the ZIP file should be extracted.
+        Parameters
+        ----------
+        zip_file_path : str
+            Zip file to extract
+        extract_dir : str
+            Destination directory
 
-        Returns:
-            None
+        Raises
+        ------
+        ValueError
+            If path traversal is detected
         """
         with ZipFile(zip_file_path, "r") as zip_ref:
-            zip_ref.extractall(extract_dir)
+            for name in zip_ref.namelist():
+                if not self._validate_safe_path(extract_dir, name):
+                    raise ValueError(f"Path traversal detected in zip file: {name}")
+                zip_ref.extract(name, extract_dir)
         os.remove(zip_file_path)
         for root_path, _, files in os.walk(extract_dir):
             for file in files:
@@ -450,49 +775,122 @@ class DirFilesManagement:
                     nested_zip_path = os.path.join(root_path, file)
                     self.recursive_extract_zip(nested_zip_path, root_path)
 
+    def _validate_file_exists(self, file_path: str) -> None:
+        """Validate that a file exists.
 
-class RemoteFiles(DirFilesManagement):
+        Parameters
+        ----------
+        file_path : str
+            Path to validate
+
+        Raises
+        ------
+        FileNotFoundError
+            If file doesn't exist
+        """
+        if not os.path.isfile(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+    def _validate_object_exists(self, object_path: str) -> None:
+        """Validate that a file/directory exists.
+
+        Parameters
+        ----------
+        object_path : str
+            Path to validate
+
+        Raises
+        ------
+        FileNotFoundError
+            If object doesn't exist
+        """
+        if not os.path.exists(object_path):
+            raise FileNotFoundError(f"Path not found: {object_path}")
 
     def get_file_from_zip(
         self,
         resp_req: Response,
         path_dir: Union[str, tempfile.TemporaryDirectory, Path],
-        tup_endswith: Tuple[str]
+        tup_endswith: tuple[str]
     ) -> str:
+        """Extract file from zip response matching extensions.
+
+        Parameters
+        ----------
+        resp_req : Response
+            HTTP response containing zip file
+        path_dir : Union[str, tempfile.TemporaryDirectory, Path]
+            Extraction directory
+        tup_endswith : tuple[str]
+            Tuple of valid file extensions
+
+        Returns
+        -------
+        str
+            Path to extracted file
+
+        Raises
+        ------
+        ValueError
+            If no matching file found
+        """
         zip_file_path = os.path.join(path_dir, "archive.zip")
         with open(zip_file_path, "wb") as zip_file:
             zip_file.write(resp_req.content)
         self.recursive_extract_zip(zip_file_path, path_dir)
-        ex_file_path = None
+
         for root_path, _, list_files in os.walk(path_dir):
             for file in list_files:
                 if file.endswith(tup_endswith):
-                    ex_file_path = os.path.join(root_path, file)
-                    break
-            if ex_file_path:
-                break
-        if not ex_file_path:
-            raise ValueError("No file found in the extracted .zip archive. "
-                             + f"- considerered extensions: {tup_endswith}")
-        return ex_file_path
+                    return os.path.join(root_path, file)
+
+        raise ValueError(
+            "No file found in the extracted .zip archive. "
+            f"- considerered extensions: {tup_endswith}"
+        )
 
     def get_zip_from_web_in_memory(
         self,
         resp_req: Response,
         bl_io_interpreting: bool = False
-    ) -> Union[TextIOWrapper, BufferedReader, List[BufferedReader]]:
+    ) -> Union[TextIOWrapper, BufferedReader, list[BufferedReader]]:
+        """Extract zip contents from web response in memory.
+
+        Parameters
+        ----------
+        resp_req : Response
+            HTTP response containing zip file
+        bl_io_interpreting : bool
+            Whether to return as text wrapper
+
+        Returns
+        -------
+        Union[TextIOWrapper, BufferedReader, list[BufferedReader]]
+            Extracted file object(s)
+        """
         zipfile = ZipFile(BytesIO(resp_req.content))
         zip_names = zipfile.namelist()
         if len(zip_names) == 1:
             file_name = zip_names.pop()
             extracted_file = zipfile.open(file_name)
-            if bl_io_interpreting == True:
-                return TextIOWrapper(extracted_file)
-            else:
-                return extracted_file
+            return TextIOWrapper(extracted_file) if bl_io_interpreting else extracted_file
         return [zipfile.open(file_name) for file_name in zip_names]
 
-    def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> str:
+    def calculate_file_hash(self, file_path: str, algorithm: str = "sha256") -> str:
+        """Calculate file hash.
+
+        Parameters
+        ----------
+        file_path : str
+            File to hash
+        algorithm : str
+            Hashing algorithm (default: "sha256")
+
+        Returns
+        -------
+        str
+            Hex digest of file hash
+        """
         hash_func = getattr(hashlib, algorithm)()
         with open(file_path, "rb") as file:
             for chunk in iter(lambda: file.read(4096), b""):
@@ -500,47 +898,76 @@ class RemoteFiles(DirFilesManagement):
         return hash_func.hexdigest()
 
     def validate_file_hash(
-        self, file_path: Union[str, Path], expected_hash: str, algorithm: str = "sha256") -> bool:
+        self,
+        file_path: Union[str, Path],
+        expected_hash: str,
+        algorithm: str = "sha256"
+    ) -> bool:
+        """Validate file against expected hash.
+
+        Parameters
+        ----------
+        file_path : Union[str, Path]
+            File to validate
+        expected_hash : str
+            Expected hash value
+        algorithm : str
+            Hashing algorithm (default: "sha256")
+
+        Returns
+        -------
+        bool
+            True if hash matches, False otherwise
         """
-        Validates the integrity of a file by comparing its hash with an expected value.
+        return self.calculate_file_hash(file_path, algorithm) == expected_hash
 
-        Args:
-            file_path (Union[str, Path]): The path to the file.
-            expected_hash (str): The expected hash value.
-            algorithm (str): The hashing algorithm to use (e.g., "md5", "sha256").
+    def extract_file(
+        self,
+        archive_path: Union[str, Path],
+        extract_dir: Union[str, Path],
+        format: Literal["zip", "tar", "7z"] = "zip"
+    ) -> bool:
+        """Extract archive file.
 
-        Returns:
-            bool: True if the hash matches, False otherwise.
-        """
-        hash_func = getattr(hashlib, algorithm)()
-        with open(file_path, "rb") as file:
-            for chunk in iter(lambda: file.read(4096), b""):
-                hash_func.update(chunk)
-        return hash_func.hexdigest() == expected_hash
+        Parameters
+        ----------
+        archive_path : Union[str, Path]
+            Archive file path
+        extract_dir : Union[str, Path]
+            Extraction directory
+        format : Literal['zip', 'tar', '7z']
+            Archive format (default: "zip")
 
-    def extract_file(self, archive_path: Union[str, Path], extract_dir: Union[str, Path],
-                     format: str = "zip") -> bool:
-        """
-        Extracts files from an archive to a specified directory.
+        Returns
+        -------
+        bool
+            True if successful, False otherwise
 
-        Args:
-            archive_path (Union[str, Path]): The path to the archive file.
-            extract_dir (Union[str, Path]): The directory where files should be extracted.
-            format (str): The format of the archive (e.g., "zip", "tar", "7z").
-
-        Returns:
-            bool: True if extraction was successful, False otherwise.
+        Raises
+        ------
+        ValueError
+            For unsupported archive formats
         """
         try:
+            extract_dir = str(extract_dir)
             if format == "zip":
                 with ZipFile(archive_path, "r") as zip_ref:
-                    zip_ref.extractall(extract_dir)
+                    for name in zip_ref.namelist():
+                        if not self._validate_safe_path(extract_dir, name):
+                            raise ValueError(f"Path traversal detected in zip file: {name}")
+                        zip_ref.extract(name, extract_dir)
             elif format == "tar":
                 with tarfile.open(archive_path, "r:*") as tar_ref:
-                    tar_ref.extractall(extract_dir)
+                    for member in tar_ref.getmembers():
+                        if not self._validate_safe_path(extract_dir, member.name):
+                            raise ValueError(f"Path traversal detected in tar file: {member.name}")
+                        tar_ref.extract(member, extract_dir)
             elif format == "7z":
                 with py7zr.SevenZipFile(archive_path, mode="r") as seven_zip_ref:
-                    seven_zip_ref.extractall(extract_dir)
+                    for name in seven_zip_ref.getnames():
+                        if not self._validate_safe_path(extract_dir, name):
+                            raise ValueError(f"Path traversal detected in 7z file: {name}")
+                        seven_zip_ref.extract(path=extract_dir, targets=[name])
             else:
                 raise ValueError(f"Unsupported archive format: {format}")
             return True
@@ -548,130 +975,206 @@ class RemoteFiles(DirFilesManagement):
             print(f"Failed to extract archive: {e}")
             return False
 
-    def get_file_metadata(self, file_path: Union[str, Path]) -> dict:
+    def get_file_metadata(self, file_path: Union[str, Path]) -> ReturnGetFileMetadata:
+        """Get file metadata.
+
+        Parameters
+        ----------
+        file_path : Union[str, Path]
+            File to inspect
+
+        Returns
+        -------
+        ReturnGetFileMetadata
+            Dictionary containing file metadata
+        """
         stat = os.stat(file_path)
+        creation_time = stat.st_ctime  # fallback for platforms without st_birthtime
+        if hasattr(stat, 'st_birthtime'):
+            creation_time = stat.st_birthtime
         return {
             "size": stat.st_size,
-            "creation_time": datetime.fromtimestamp(stat.st_birthtime),
+            "creation_time": datetime.fromtimestamp(creation_time),
             "modification_time": datetime.fromtimestamp(stat.st_mtime),
             "access_time": datetime.fromtimestamp(stat.st_atime),
         }
 
     def stream_file(self, resp_req: Response, chunk_size: int = 8192) -> Iterable[bytes]:
-        """
-        Streams a file from a remote URL in chunks.
+        """Stream file from response in chunks.
 
-        Args:
-            url (str): The URL of the file to stream.
-            chunk_size (int): The size of each chunk in bytes.
+        Parameters
+        ----------
+        resp_req : Response
+            HTTP response to stream
+        chunk_size : int
+            Chunk size in bytes (default: 8192)
 
-        Returns:
-            Iterable[bytes]: An iterable yielding file chunks.
+        Yields
+        ------
+        Iterable[bytes]
+            File chunks
         """
-        for chunk in resp_req.iter_content(chunk_size=chunk_size):
-            yield chunk
+        yield from resp_req.iter_content(chunk_size=chunk_size)
 
     def check_separator_consistency(
         self,
         req_content: bytes,
         int_skip_rows: int = 0,
         int_skip_footer: int = 0,
-        list_sep: Optional[List[str]] = [",", ";", "\t"]
+        list_sep: Optional[list[str]] = None
     ) -> bool:
+        """Check if content uses consistent separators.
+
+        Parameters
+        ----------
+        req_content : bytes
+            Content to check
+        int_skip_rows : int
+            Rows to skip at start (default: 0)
+        int_skip_footer : int
+            Rows to skip at end (default: 0)
+        list_sep : Optional[list[str]]
+            List of possible separators
+
+        Returns
+        -------
+        bool
+            True if consistent separators found
+        """
+        if list_sep is None:
+            list_sep = [",", ";", "\t"]
+
         result = chardet.detect(req_content)
         encoding = result["encoding"] if result["encoding"] is not None else "latin-1"
         decoded_content = req_content.decode(encoding)
         list_lines = decoded_content.splitlines()
         int_skip_footer = len(list_lines) - int_skip_footer
         list_lines = list_lines[int_skip_rows:int_skip_footer]
+
         for sep in list_sep:
             list_sep_counts = [len(line.split(sep)) for line in list_lines]
-            if (len(set(list_sep_counts)) == 1) and (all(x > 1 for x in  list_sep_counts)):
+            if len(set(list_sep_counts)) == 1 and all(x > 1 for x in list_sep_counts):
                 return True
         return False
 
 
 class FoldersTree:
-    def __init__(self, str_path, bl_ignore_dot_folders=False, list_ignored_folders=None,
-                 bl_add_linebreak_markdown=False):
-        """
-        DOCSTRING: INITIALIZE THE CLASS
-        INPUTS: PATH, IGNORE DOT FOLDERS (OPTIONAL), LIST OF IGNORED FOLDERS (OPTIONAL)
-        OUTPUTS: -
+    """Class for generating directory tree structures."""
+
+    def __init__(
+        self,
+        str_path: str,
+        bl_ignore_dot_folders: bool = False,
+        list_ignored_folders: Optional[list[str]] = None,
+        bl_add_linebreak_markdown: bool = False
+    ) -> None:
+        """Initialize FoldersTree instance.
+
+        Parameters
+        ----------
+        str_path : str
+            Root directory path
+        bl_ignore_dot_folders : bool
+            Whether to ignore dot folders (default: False)
+        list_ignored_folders : Optional[list[str]]
+            List of folders to ignore (default: ["__pycache__"])
+        bl_add_linebreak_markdown : bool
+            Whether to add markdown line breaks (default: False)
+
+        Returns
+        -------
+        None
         """
         self.str_path = str_path
         self.bl_ignore_dot_folders = bl_ignore_dot_folders
-        self.list_ignored_folders = list_ignored_folders or ['__pycache__']
+        self.list_ignored_folders = list_ignored_folders or ["__pycache__"]
         self.bl_add_linebreak_markdown = bl_add_linebreak_markdown
 
-    def generate_tree(self, str_curr_path=None, bl_is_last=True, str_prefix='', bl_include_root=True,
-                      str_tree_structure=''):
+    def generate_tree(
+        self,
+        str_curr_path: Optional[str] = None,
+        str_prefix: str = "",
+        bl_include_root: bool = True,
+        str_tree_structure: str = ""
+    ) -> str:
+        """Generate directory tree structure.
+
+        Parameters
+        ----------
+        str_curr_path : Optional[str]
+            Current directory path (default: root path)
+        str_prefix : str
+            Prefix for tree lines (default: "")
+        bl_include_root : bool
+            Whether to include root directory (default: True)
+        str_tree_structure : str
+            Accumulated tree structure (default: "")
+
+        Returns
+        -------
+        str
+            Generated tree structure
         """
-        DOCSTRING: GENERATE A TREE STRUCTURE OF THE DIRECTORY
-        INPUTS: CURRENT PATH (OPTIONAL), IS LAST ENTRY (OPTIONAL), PREFIX (OPTIONAL),
-            INCLUDE ROOT (OPTIONAL)
-        OUTPUTS: A string representation of the directory tree structure.
-        """
-        # initializing the tree structure
         if str_curr_path is None:
             str_curr_path = self.str_path
-        # line break if bl_add_linebreak_markdown is True
-        if self.bl_add_linebreak_markdown == True:
-            str_linebreak_md = '<br>'
-        else:
-            str_linebreak_md = ''
-        # add the parent folder name as the first line if bl_include_root is True
+
+        str_linebreak_md = "<br>" if self.bl_add_linebreak_markdown else ""
+
         if bl_include_root:
-            str_tree_structure += f'{os.path.basename(self.str_path)}{str_linebreak_md}\n'
-            #   reset str_prefix for the root folder
-            str_prefix = ''
-        # sort the entries
+            str_tree_structure += f"{os.path.basename(self.str_path)}{str_linebreak_md}\n"
+            str_prefix = ""
+
         list_entries = sorted(os.listdir(str_curr_path))
-        # loop through the entries
+
         for idx, str_entry in enumerate(list_entries):
             str_entry_path = os.path.join(str_curr_path, str_entry)
-            # skip ignored folders
-            if self.bl_ignore_dot_folders and str_entry.startswith('.'):
+
+            if self.bl_ignore_dot_folders and str_entry.startswith("."):
                 continue
             if str_entry in self.list_ignored_folders:
                 continue
-            # creating brach prefix
+
             bl_is_directory = os.path.isdir(str_entry_path)
             bl_is_last_entry = idx == len(list_entries) - 1
-            str_branch_prefix = '└── ' if bl_is_last_entry else '├── '
-            str_tree_structure += f'{str_prefix}{str_branch_prefix}{str_entry}{str_linebreak_md}\n'
-            # if the str_entry is a directory recursively add subdirectories
+            str_branch_prefix = "└── " if bl_is_last_entry else "├── "
+            str_tree_structure += f"{str_prefix}{str_branch_prefix}{str_entry}{str_linebreak_md}\n"
+
             if bl_is_directory:
-                # Recursively add subdirectories
-                str_new_prefix = str_prefix + ('    ' if bl_is_last_entry else '│   ')
+                str_new_prefix = str_prefix + ("    " if bl_is_last_entry else "│   ")
                 str_tree_structure += self.generate_tree(
                     str_entry_path,
-                    bl_is_last=bl_is_last_entry,
                     str_prefix=str_new_prefix,
                     bl_include_root=False
                 )
-        # return the tree structure
-        return str_tree_structure
 
-    @property
-    def print_tree(self):
-        """
-        DOCSTRING: PRINT THE TREE STRUCTURE
-        INPUTS:
-        OUTPUTS:
+        return str_tree_structure
+    
+    def print_tree(self) -> None:
+        """Print generated tree structure.
+        
+        Returns
+        -------
+        None
         """
         print(self.generate_tree())
 
-    def export_tree(self, filename=None):
-        """
-        DOCSTRING: EXPORT THE TREE STRUCTURE TO A FILE
-        INPUTS: FILENAME (OPTIONAL)
-        OUTPUTS: -
+    def export_tree(self, filename: Optional[str] = None) -> Optional[str]:
+        """Export tree structure to file or return as string.
+
+        Parameters
+        ----------
+        filename : Optional[str]
+            File to write to (returns string if None)
+
+        Returns
+        -------
+        Optional[str]
+            Tree structure if filename is None
         """
         str_tree_structure = self.generate_tree()
         if filename:
-            with open(filename, 'w', encoding='utf-8') as file:
+            with open(filename, "w", encoding="utf-8") as file:
                 file.write(str_tree_structure)
-            print(f'Tree structure has been written to {filename}')
+            print(f"Tree structure has been written to {filename}")
         else:
             return str_tree_structure

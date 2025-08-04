@@ -34,7 +34,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.folders import DirFilesManagement, RemoteFiles
+from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
@@ -343,7 +343,7 @@ class HandleReqResponses(UtilsRequests):
             if dict_df_read_params.get("encoding") is not None:
                 resp_req.encoding = dict_df_read_params.get("encoding")
             if (bl_separator_consistency_check == True) \
-                and (RemoteFiles().check_separator_consistency(
+                and (DirFilesManagement().check_separator_consistency(
                     resp_req.content,
                     dict_df_read_params.get("skiprows", 0),
                     dict_df_read_params.get("skipfooter", 0)
@@ -610,7 +610,7 @@ class HandleReqResponses(UtilsRequests):
     ) -> pd.DataFrame:
         list_ser = list()
         with tempfile.TemporaryDirectory() as temp_dir_path:
-            ex_file_path = RemoteFiles().get_file_from_zip(
+            ex_file_path = DirFilesManagement().get_file_from_zip(
                 resp_req, temp_dir_path, (".ex_")
             )
             os.chmod(ex_file_path, 0o755)
@@ -649,7 +649,7 @@ class HandleReqResponses(UtilsRequests):
             and (".zip" in resp_req.headers.get("Content-Disposition"))
         ):
             with tempfile.TemporaryDirectory() as temp_dir_path:
-                file_path = RemoteFiles().get_file_from_zip(
+                file_path = DirFilesManagement().get_file_from_zip(
                     resp_req, temp_dir_path, (".fwf", ".dat", ".txt", "")
                 )
                 return pd.read_fwf(

@@ -1,11 +1,13 @@
 ### CVM DATA - https://dados.cvm.gov.br/dados
 
-import pandas as pd
-import numpy as np
 from io import StringIO
-from typing import Dict, Any
-from stpstone.utils.loggs.create_logs import CreateLog
+from typing import Any, Dict
+
+import numpy as np
+import pandas as pd
+
 from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -135,7 +137,7 @@ class CVMDATA:
         # url
         url = f'{self.str_host_cvm}{str_app}'
         # downloading zip file into memory
-        list_main_zip = RemoteFiles().get_zip_from_web_in_memory(
+        list_main_zip = DirFilesManagement().get_zip_from_web_in_memory(
             url,
             bl_io_interpreting=False,
             bl_verify=False

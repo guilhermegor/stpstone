@@ -12,7 +12,7 @@ from stpstone._config.global_slots import YAML_B3_SEARCH_BY_TRADING_SESSION
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.utils.parsers.folders import RemoteFiles
+from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.object import HandlingObjects
@@ -151,7 +151,7 @@ class SearchByTradingB3(ABCRequests):
             self.dt_ref.strftime("%y%m%d"))
         # carga para a memória margens teóricas máximas b3
         resp_req = request("GET", url_mtm)
-        zipfile = RemoteFiles().get_zip_from_web_in_memory(
+        zipfile = DirFilesManagement().get_zip_from_web_in_memory(
             resp_req, bl_io_interpreting=False)
         # retorno é um novo zip com um xlsx
         zipfile = ZipFile(zipfile)
@@ -325,7 +325,7 @@ class SearchByTradingB3(ABCRequests):
             url_acoes_units_etfs_aceitos_garantia_b3
         # openning zip in memory
         resp_req = request("GET", url_acoes_units_etfs_aceitos_garantia_b3)
-        list_unzipped_files = RemoteFiles().get_zip_from_web_in_memory(resp_req)
+        list_unzipped_files = DirFilesManagement().get_zip_from_web_in_memory(resp_req)
         if str(type(list_unzipped_files)) != "<class 'list'>":
             list_unzipped_files = [list_unzipped_files]
         # looping within files in zip
@@ -388,7 +388,7 @@ class SearchByTradingB3(ABCRequests):
         resp_req = request("GET", url_risk_curve_type_scenarios)
         resp_req.raise_for_status()
         # baixando em memória zip com cenário de tipo curva da b3
-        list_txts_curve_type_scenarios = RemoteFiles().get_zip_from_web_in_memory(
+        list_txts_curve_type_scenarios = DirFilesManagement().get_zip_from_web_in_memory(
             resp_req, bl_io_interpreting=False)
         # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
         for extracted_file_curve_type_scenarios in list_txts_curve_type_scenarios:
@@ -458,7 +458,7 @@ class SearchByTradingB3(ABCRequests):
             resp_req = request("GET", url_cenarios_tipo_spot)
             resp_req.raise_for_status()
             # baixando em memória zip com cenário de tipo curva da b3
-            list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
+            list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
                 resp_req,
                 bl_io_interpreting=False
             )
@@ -467,7 +467,7 @@ class SearchByTradingB3(ABCRequests):
                 self.dt_ref.strftime("%y%m%d"))
             resp_req = request("GET", url_cenarios_tipo_spot)
             resp_req.raise_for_status()
-            list_txts_tipos_spot_cenarios = RemoteFiles().get_zip_from_web_in_memory(
+            list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
                 url_cenarios_tipo_spot, bl_verify=False,
                 bl_io_interpreting=False
             )
