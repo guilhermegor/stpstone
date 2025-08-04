@@ -150,11 +150,8 @@ class TestImgHandler:
         """
         test_path = f"/path/to/image.{invalid_format}"
 
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(TypeError, match="must be one of"):
             img_handler.img_to_html(test_path, invalid_format)
-        
-        assert "Unsupported image format" in str(excinfo.value)
-        assert "jpeg" in str(excinfo.value)
 
     def test_file_not_found(self, img_handler: ImgHandler) -> None:
         """Test FileNotFoundError is raised for missing files.
@@ -251,10 +248,8 @@ class TestImgHandler:
         """
         test_path = "/path/to/image.jpeg"
 
-        with patch("builtins.open", mock_image_file):
-            result = img_handler.img_to_html(test_path, "JPEG")
-
-        assert 'image/jpeg' in result.lower()
+        with pytest.raises(TypeError, match="must be one of"):
+            _ = img_handler.img_to_html(test_path, "JPEG")
 
     def test_validate_format_method(
         self,

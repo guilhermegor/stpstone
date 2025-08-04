@@ -7,8 +7,10 @@ using base64 encoding for inline display.
 from base64 import b64encode
 from typing import Literal
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
-class ImgHandler:
+
+class ImgHandler(metaclass=TypeChecker):
     """Handler for converting images to HTML format.
 
     This class provides methods to convert image files to HTML image tags

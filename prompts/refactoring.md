@@ -12,8 +12,7 @@
   - Preferably set apart specific validations that should be done accross methods in a class, like if len of an array is zero than raise a ValueError
     - This methods should have the naming format _validate_<NAME>
 - **Typing imports**: 
-  - Avoid `Dict`, `List`, `Tuple`
-  - Use built-in `dict`, `list`, `tuple` instead
+  - Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid ruff linting raising warnings
   - Use from numpy.typing import NDArray, NDArray[...] (e.g. NDArray[np.float64]) instead of np.ndarray for type hints
   - Use class Return<method_name>(TypedDict) for dictionaries typing (import from typing import TypedDict)
     - Docstring in numpy model for class Return<method_name>, skipping one row between it and the content below
@@ -52,6 +51,7 @@
    - Prefer the usage of " instead of ', where possible
 
 4. **Validation Checks**:
+   - _validate_<NAME> methods please include in the beginning of the class
    - Please add sanity checks for every variable within methods/functions that would be useful, with examples below
    - **0-1 Range Values**:
      - Probabilities
@@ -95,6 +95,7 @@
 - Include all original imports
 - Maintain exact file structure
 - Preserve all functionality
+- Do not return OK/NOK but True or False instead
 
 ## Example Implementation
 ```python
