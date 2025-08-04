@@ -1,25 +1,95 @@
-from requests import HTTPError, Response
+"""HTML handling and building utilities.
+
+This module provides classes for parsing HTML content using BeautifulSoup and lxml,
+and for building HTML tags programmatically. Includes error handling and various
+output formatting options.
+"""
+
+from typing import Optional, Union
+
 from bs4 import BeautifulSoup
-from lxml import html, etree
-from typing import Union
+from lxml import etree, html
+from requests import HTTPError, Response
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class HtmlHandler:
+class HtmlHandler(metaclass=TypeChecker):
+    """Handler for parsing and processing HTML content.
 
-    def bs_parser(self, resp_req: Response, parser:str="html.parser") -> Union[BeautifulSoup, str]:
+    Provides methods for parsing HTML using different libraries and converting
+    HTML to formatted text representations.
+    """
+
+    def bs_parser(
+        self, 
+        resp_req: Response, 
+        parser: str = "html.parser"
+    ) -> Union[BeautifulSoup, str]:
+        """Parse HTML content using BeautifulSoup.
+
+        Parameters
+        ----------
+        resp_req : Response
+            HTTP response object containing HTML content
+        parser : str, optional
+            BeautifulSoup parser to use (default: "html.parser")
+
+        Returns
+        -------
+        Union[BeautifulSoup, str]
+            Parsed BeautifulSoup object or error message string
+        """
         try:
             return BeautifulSoup(resp_req.content, parser)
         except HTTPError as e:
-            return "HTTP Error: {}".format(e)
+            return f"HTTP Error: {e}"
+        except Exception as e:
+            return f"Error: {e}"
 
-    def lxml_parser(self, resp_req:Response) -> html.HtmlElement:
+    def lxml_parser(self, resp_req: Response) -> html.HtmlElement:
+        """Parse HTML content using lxml.
+
+        Parameters
+        ----------
+        resp_req : Response
+            HTTP response object containing HTML content
+
+        Returns
+        -------
+        html.HtmlElement
+            Parsed HTML element tree
+        """
         page = resp_req.content
         return html.fromstring(page)
 
-    def lxml_xpath(self, html_content, str_xpath):
+    def lxml_xpath(self, html_content: html.HtmlElement, str_xpath: str) -> list:
+        """Execute XPath query on HTML content.
+
+        Parameters
+        ----------
+        html_content : html.HtmlElement
+            Parsed HTML element tree
+        str_xpath : str
+            XPath expression to evaluate
+
+        Returns
+        -------
+        list
+            List of elements matching the XPath query
+        """
         return html_content.xpath(str_xpath)
 
-    def html_tree(self, html_root:html.HtmlElement, file_path:str=None) -> None:
+    def html_tree(self, html_root: html.HtmlElement, file_path: Optional[str] = None) -> None:
+        """Convert HTML tree to string and optionally save to file.
+
+        Parameters
+        ----------
+        html_root : html.HtmlElement
+            Root element of HTML tree
+        file_path : Optional[str]
+            Path to save HTML content (if None, prints to stdout)
+        """
         html_string = etree.tostring(html_root, pretty_print=True, encoding="unicode")
         if file_path:
             with open(file_path, "w", encoding="utf-8") as file:
@@ -27,91 +97,109 @@ class HtmlHandler:
         else:
             print(html_string)
 
-    def to_txt(self, html_):
-        soup = BeautifulSoup(html_, features="lxml")
-        return soup(html_)
+    def to_txt(self, html_: str) -> BeautifulSoup:
+        """Convert HTML to text using BeautifulSoup.
 
-    def parse_html_to_string(self, html_, parsing_lib="html.parser",
-                             str_body_html="",
-                             join_td_character="|", td_size_ajust_character=" "):
-        # setting variables
-        list_ = list()
-        list_tr_html = list()
-        dict_ = dict()
-        dict_fill_blanks_td = dict()
-        # creating a parseable object
-        obj_soup = BeautifulSoup(html_, parsing_lib)
-        html_parsed_raw = obj_soup.get_text()
-        # creating a raw parsed html body
-        list_body_html = html_parsed_raw.split("\n")
-        # looping through tables and periods in the raw parsed html body
-        for str_ in list_body_html:
-            #   append to tr, provided the value is different from empty, what is an indicative of
-            #       line scape
-            if str_ != "":
-                list_.append(str_)
-            else:
-                if len(list_) > 0:
-                    list_tr_html.append(list_)
-                list_ = list()
-            #   add tr to the list, without reseting the intermediary list, provided it is the
-            #       last instance of list body html
-            if (str_ == list_body_html[-1]) and (len(list_) > 0):
-                list_tr_html.append(list_)
-        # looping through each tr to find the maximum td length
-        for i in range(len(list_tr_html)):
-            #   if tr length is greater than 1 its a sign of a row from a table, otherwise its is
-            #   considered a period from a phrase
-            if len(list_tr_html[i]) > 1:
-                dict_[i] = {j: len(list_tr_html[i][j])
-                            for j in range(len(list_tr_html[i]))}
-        # build dictionary with blank spaces, aiming to reach columns of same size
-        for _, dict_j in dict_.items():
-            for j, _ in dict_j.items():
-                dict_fill_blanks_td[j] = max([dict_[i][j]
-                                              for i in list(dict_.keys()) if i in dict_ and j in
-                                              dict_[i]])
-        # joining td"s with a separator
-        for i in range(len(list_tr_html)):
-            #   filling blanks to construct columns of the same size
-            str_body_html += join_td_character.join([list_tr_html[i][j]
-                                                     + td_size_ajust_character *
-                                                     (dict_fill_blanks_td[j] -
-                                                      len(list_tr_html[i][j]))
-                                                     for j in range(len(list_tr_html[i]))])
-            #   adding line scapes
-            try:
-                if len(list_tr_html[i]) == len(list_tr_html[i + 1]):
-                    str_body_html += "\n"
-                else:
-                    str_body_html += 2 * "\n"
-            except IndexError:
-                continue
-        # returning html body parsed
-        return str_body_html
+        Parameters
+        ----------
+        html_ : str
+            HTML content to parse
 
-
-class HtmlBuilder:
-
-    def tag(self, name, *content, cls=None, **attrs):
+        Returns
+        -------
+        BeautifulSoup
+            Parsed BeautifulSoup object
         """
-        REFERENCES: - FLUENT PYTHON BY LUCIANO RAMALHO (O’REILLY). COPYRIGHT 2015 LUCIANO RAMALHO, 978-1-491-94600-8.
-        DOCSTRINGS: HTML TAG CONSTRUCTOR
-        INPUTS: *ARGUMENTS, AND **ATTRIBUTES, BESIDE A CLS WORKAROUND SINCE CLASS IS A SPECIAL
-            WORD FOR PYTHON
-        OUTPUTS: STRING
+        return BeautifulSoup(html_, features="lxml")
+
+    def parse_html_to_string(
+        self,
+        html_: str,
+        parsing_lib: str = "html.parser",
+        str_body_html: str = "",
+        join_td_character: str = "|",
+        td_size_ajust_character: str = " "
+    ) -> str:
+        """Parse HTML content to formatted string representation.
+
+        Parameters
+        ----------
+        html_ : str
+            HTML content to parse
+        parsing_lib : str, optional
+            Parser to use (default: "html.parser")
+        str_body_html : str, optional
+            Initial string to append results to (default: "")
+        join_td_character : str, optional
+            Character to join table cells (default: "|")
+        td_size_ajust_character : str, optional
+            Character used for padding cells (default: " ")
+
+        Returns
+        -------
+        str
+            Formatted string representation of HTML content
         """
-        # defining tag & method
+        soup = BeautifulSoup(html_, parsing_lib)
+    
+        # handle tables specifically
+        for table in soup.find_all('table'):
+            rows = []
+            for tr in table.find_all('tr'):
+                cells = []
+                for td in tr.find_all(['td', 'th']):
+                    text = td.get_text().strip()
+                    cells.append(text)
+                if cells:  # only add rows with cells
+                    rows.append(join_td_character.join(cells))
+            
+            if rows:
+                str_body_html += "\n".join(rows) + "\n\n"
+        
+        # handle non-table content
+        for element in soup.find_all(True):
+            if element.name not in ['table', 'tr', 'td', 'th'] \
+                and not element.find_parent('table'):
+                text = element.get_text().strip()
+                if text:
+                    str_body_html += text + "\n\n"
+        
+        return str_body_html.strip()
+
+
+class HtmlBuilder(metaclass=TypeChecker):
+    """Builder for creating HTML tags programmatically."""
+
+    def tag(self, name: str, *content: str, cls: Optional[str] = None, **attrs: str) -> str:
+        """Create HTML tag with specified content and attributes.
+
+        References
+        ----------
+        .. [1] Fluent Python by Luciano Ramalho (O'Reilly). Copyright 2015 Luciano Ramalho,
+           978-1-491-94600-8.
+
+        Parameters
+        ----------
+        name : str
+            Tag name (e.g., "div", "span")
+        *content : str
+            Content to place inside the tag
+        cls : Optional[str]
+            Class attribute value (special handling for Python keyword)
+        **attrs : str
+            Additional attributes as keyword arguments
+
+        Returns
+        -------
+        str
+            Formatted HTML tag string
+        """
         if cls is not None:
             attrs["class"] = cls
-        if attrs:
-            attr_str = ''.join(' {}="{}"'.format(attr, value) for attr, value
-                               in sorted(attrs.items()))
-        else:
-            attr_str = ''
-        # defining element
+
+        attr_str = "".join(f' {attr}="{value}"' for attr, value in sorted(attrs.items())) \
+            if attrs else ""
+
         if content:
-            return '\n'.join('<{}{}>{}</{}>'.format(name, attr_str, c,
-                                                    name) for c in content)
-        else:
-            return '<{}{} />'.format(name, attr_str)
+            return "\n".join(f"<{name}{attr_str}>{c}</{name}>" for c in content)
+        return f"<{name}{attr_str} />"
