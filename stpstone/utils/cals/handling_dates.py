@@ -292,7 +292,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         return datetime.now().time()
 
     def curr_date_time(
-        self, bool_timestamp: bool = Falsebool_crop_time: bool = False
+        self, bool_timestamp: bool = False, bool_crop_time: bool = False
     ) -> Union[int, datetime]:
         """Get current datetime with optional timestamp conversion.
 

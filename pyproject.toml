@@ -126,6 +126,7 @@ openai = ">=1.79.0"
 mystic = ">=0.4.4"
 countryinfo = ">=0.1.2"
 numdifftools = ">=0.9.41"
+xlsxwriter = "^3.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = ">=4.1.0"

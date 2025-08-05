@@ -235,9 +235,14 @@ class DirFilesManagement(metaclass=TypeChecker):
         -------
         tuple
             (timestamp, exists_flag)
+
+        Raises
+        ------
+        FileNotFoundError
+            If object doesn't exist
         """
         if not self.object_exists(object_path):
-            return ("INTERNAL ERROR", False)
+            raise FileNotFoundError(f"Object not found: {object_path}")
         timestamp = os.path.getmtime(object_path)
         return (datetime.fromtimestamp(timestamp) if bool_to_datetime else timestamp, True)
 
@@ -666,7 +671,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         list_files_last_edition = [
             self.time_last_edition(
                 os.path.join(directory, file_name),
-                bool_to_datetimbool_to_datetime
+                bool_to_datetime=bool_to_datetime
             )
             for file_name in list_files_names_like
         ]
@@ -1086,9 +1091,9 @@ class FoldersTree:
         None
         """
         self.str_path = str_path
-        self.bool_ignore_dot_folders bool_ignore_dot_folders
+        self.bool_ignore_dot_folders = bool_ignore_dot_folders
         self.list_ignored_folders = list_ignored_folders or ["__pycache__"]
-        self.bool_add_linebreak_markdown bool_add_linebreak_markdown
+        self.bool_add_linebreak_markdown = bool_add_linebreak_markdown
 
     def generate_tree(
         self,
