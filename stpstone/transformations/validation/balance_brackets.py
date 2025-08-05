@@ -1,4 +1,4 @@
-from stpstone.dsa.stacks.simple_stack import Stack
+from stpstone.utils.dsa.stacks.simple_stack import Stack
 
 
 class BalanceBrackets:

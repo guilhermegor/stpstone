@@ -7,7 +7,7 @@ for the JosephusSolver class.
 import pytest
 
 from stpstone.analytics.quant.josephus_solver import JosephusSolver
-from stpstone.dsa.queues.simple_queue import Queue
+from stpstone.utils.dsa.queues.simple_queue import Queue
 
 
 # --------------------------

@@ -10,7 +10,7 @@ Tests the AVL tree functionality including:
 
 import pytest
 
-from stpstone.dsa.trees.avl_tree import (
+from stpstone.utils.dsa.trees.avl_tree import (
     CacheObliviousAVLNode,
     CacheObliviousAVLTree,
 )

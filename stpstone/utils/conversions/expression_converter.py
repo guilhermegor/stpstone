@@ -1,6 +1,7 @@
 from typing import Literal
-from stpstone.dsa.stacks.simple_stack import Stack
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.dsa.stacks.simple_stack import Stack
 
 
 class ExpressionConverter(metaclass=TypeChecker):

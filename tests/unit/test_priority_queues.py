@@ -11,7 +11,7 @@ from typing import TypeVar
 
 import pytest
 
-from stpstone.dsa.queues.priority_queues import PriorityQueue
+from stpstone.utils.dsa.queues.priority_queues import PriorityQueue
 
 
 T = TypeVar('T')

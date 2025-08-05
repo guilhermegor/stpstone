@@ -6,7 +6,7 @@ covering normal operations, edge cases, and error conditions.
 
 import pytest
 
-from stpstone.dsa.trees.b_tree import BTree, BTreeNode
+from stpstone.utils.dsa.trees.b_tree import BTree, BTreeNode
 
 
 class TestBTreeNode:

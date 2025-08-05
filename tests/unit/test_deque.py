@@ -1,6 +1,6 @@
 from unittest import TestCase, main
 
-from stpstone.dsa.queues.simple_deque import Deque
+from stpstone.utils.dsa.queues.simple_deque import Deque
 
 
 class TestDeque(TestCase):

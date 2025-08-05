@@ -4,7 +4,7 @@ from collections import deque
 
 import pytest
 
-from stpstone.dsa.queues.simple_queue import Queue
+from stpstone.utils.dsa.queues.simple_queue import Queue
 
 
 # --------------------------

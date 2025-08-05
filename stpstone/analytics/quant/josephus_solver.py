@@ -4,8 +4,8 @@ The Josephus problem simulates an elimination process where every k-th
 participant is removed until only one survivor remains.
 """
 
-from stpstone.dsa.queues.simple_queue import Queue
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.dsa.queues.simple_queue import Queue
 
 
 class JosephusSolver(metaclass=TypeChecker):
