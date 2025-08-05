@@ -23,35 +23,35 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
     def __init__(
         self,
-        bl_new_proxy: bool = True,
+        bool_new_proxy: bool = True,
         dict_proxies: Union[Dict[str, str], None] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
-        bl_alive: bool = True,
+        bool_l_alive: bool = True,
         list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: Union[List[str]] = ["http", "https"],
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
-        bl_ssl: Union[bool, None] = None,
+        bool_l_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
-        bl_use_timer: bool = False,
+        bool_l_use_timer: bool = False,
         list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None
     ):
-        self.bl_new_proxy = bl_new_proxy
+        self.bool_l_new_proxy bool_ool_new_proxy
         self.dict_proxies = dict_proxies
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
-        self.bl_alive = bl_alive
+        self.bool_l_alive bool_ool_alive
         self.list_anonymity_value = list_anonymity_value
         self.list_protocol = list_protocol if isinstance(list_protocol, list) else [list_protocol]
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
-        self.bl_ssl = bl_ssl
+        self.bool_l_ssl bool_ool_ssl
         self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
         self.float_max_timeout = float_max_timeout
-        self.bl_use_timer = bl_use_timer
+        self.bool_l_use_timer bool_ool_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.logger = logger
         self.create_log = CreateLog()
@@ -69,11 +69,11 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     ) -> None:
         for proxy in list_proxies:
             list_missing_keys = {
-                "protocol", "bl_alive", "status", "alive_since", "anonymity",
+                "protocol", "bool_l_alive", "status", "alive_since", "anonymity",
                 "average_timeout", "first_seen", "ip_data", "ip_name", "timezone",
                 "continent", "continent_code", "country", "country_code", "city",
-                "district", "region_name", "zip", "bl_hosting", "isp", "latitude",
-                "longitude", "organization", "proxy", "ip", "port", "bl_ssl",
+                "district", "region_name", "zip", "bool_l_hosting", "isp", "latitude",
+                "longitude", "organization", "proxy", "ip", "port", "bool_l_ssl",
                 "timeout", "times_alive", "times_dead", "ratio_times_alive_dead",
                 "uptime"
             } - proxy.keys()
@@ -151,7 +151,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     def _available_proxies(self):
         pass
 
-    def _test_proxy(self, str_ip:str, int_port:int, bl_return_availability:bool=True) -> bool:
+    def _test_proxy(self, str_ip:str, int_port:int, bool_l_return_availability:bool=True) -> bool:
         try:
             session = self._configure_session(
                 dict_proxy={
@@ -161,13 +161,13 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 int_retries=0,
                 int_backoff_factor=0
             )
-            return self.ip_infos(session, bl_return_availability=bl_return_availability)
+            return self.ip_infos(session, bool_l_return_availabilitbool_ool_return_availability)
         except (ProxyError, ConnectTimeout, SSLError, ConnectionError):
             return False
 
     @property
     def get_proxy(self) -> Dict[str, str]:
-        @conditional_timeit(bl_use_timer=self.bl_use_timer)
+        @conditional_timeit(bool_l_use_timer=selbool_ool_use_timer)
         def retrieve_proxy():
             list_ser = self._filtered_proxies
             shuffle(list_ser)
@@ -175,7 +175,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 str_ip = dict_proxy["ip"]
                 int_port = dict_proxy["port"]
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    if self._test_proxy(str_ip, int_port, bl_return_availability=True) == True:
+                    if self._test_proxy(str_ip, int_port, bool_l_return_availability=True) == True:
                         return {"ip": str_ip, "port": int_port}
             return None
         return retrieve_proxy()
@@ -183,20 +183,20 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     @property
     def get_proxies(self) -> List[Dict[str, str]]:
         list_ = list()
-        @conditional_timeit(bl_use_timer=self.bl_use_timer)
+        @conditional_timeit(bool_l_use_timer=selbool_ool_use_timer)
         def retrieve_proxy():
             list_ser = self._filtered_proxies
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
                 int_port = dict_proxy["port"]
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    bl_test_proxy = self._test_proxy(str_ip, int_port, bl_return_availability=True)
+                    bool_l_test_proxy = self._test_proxy(str_ip, int_portbool_ool_return_availability=True)
                     self.create_log.log_message(
                         self.logger,
-                        f"Testing proxy {str_ip}:{int_port} - Healthy: {bl_test_proxy}",
+                        f"Testing proxy {str_ip}:{int_port} - Healthy: {bool_l_test_proxy}",
                         log_level="info"
                     )
-                    if bl_test_proxy == True:
+                    if bool_l_test_proxy == True:
                         list_.append({"ip": str_ip, "port": int_port})
             self.create_log.log_message(
                 self.logger,
@@ -209,7 +209,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 return None
         return retrieve_proxy()
 
-    def ip_infos(self, session:Session, bl_return_availability:bool=False,
+    def ip_infos(self, session:Session, bool_l_return_availability:bool=False,
                  tup_timeout:Tuple[int, int]=(5,5)) -> Union[List[Dict[str, Any]], None]:
         dict_payload = {}
         dict_headers = {
@@ -230,7 +230,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         resp_req = session.get("https://lumtest.com/myip.json", headers=dict_headers,
                                 data=dict_payload, timeout=tup_timeout)
         resp_req.raise_for_status()
-        if bl_return_availability == True:
+        if bool_l_return_availability == True:
             return True
         else:
             return resp_req.json()
@@ -245,10 +245,10 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         )
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
-            ("bl_alive", self.bl_alive, "equal"),
+            ("bool_l_alive", selbool_ool_alive, "equal"),
             ("anonymity", self.list_anonymity_value, "isin"),
             ("protocol", self.list_protocol, "isin"),
-            ("bl_ssl", self.bl_ssl, "equal"),
+            ("bool_l_ssl", selbool_ool_ssl, "equal"),
             ("ratio_times_alive_dead", self.float_min_ratio_times_alive_dead,
                 "greater_than_or_equal_to"),
             ("timeout", self.float_max_timeout, "less_than_or_equal_to"),
@@ -297,7 +297,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
     @property
     def session(self):
-        proxy = self.get_proxy if self.bl_new_proxy == True else None
+        proxy = self.get_proxy if self.bool_l_new_proxy == True else None
         dict_proxy = self.dict_proxies if self.dict_proxies is not None else (
             self._dict_proxy(proxy["ip"], proxy["port"])
             if proxy is not None else None
@@ -306,7 +306,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
     @property
     def configured_sessions(self):
-        if self.bl_new_proxy == False: return None
+        if self.bool_l_new_proxy == False: return None
         list_ser = self.get_proxies
         if list_ser is None: return None
         list_sessions = list()

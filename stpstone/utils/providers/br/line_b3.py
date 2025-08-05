@@ -42,7 +42,7 @@ class ConnectionApi(metaclass=TypeChecker):
         int_max_retrieves: int = 1000,
         int_status_code_ok: int = 200,
         int_status_code_iteration: int = 400,
-        bl_verify: bool = False,
+        bool_verify: bool = False,
         app: str = "/api/v1.0/token/authorization",
     ) -> str:
         # passing variables
@@ -61,7 +61,7 @@ class ConnectionApi(metaclass=TypeChecker):
                     method=method,
                     url=self.hostname_api_line_b3 + app,
                     headers=dict_headers,
-                    verify=bl_verify,
+                    verify=bool_l_verify,
                 )
             except:
                 continue
@@ -83,8 +83,8 @@ class ConnectionApi(metaclass=TypeChecker):
         key_refresh_token: str = "refresh_token",
         key_access_token: str = "access_token",
         key_expires_in: str = "expires_in",
-        bl_str_dict_params: bool = False,
-        bl_verify: bool = False,
+        bool_l_str_dict_params: bool = False,
+        bool_l_verify: bool = False,
         i_retrieves: int = 0,
         i_aux: int = 0,
         int_expiration_time: int = 0,
@@ -114,7 +114,7 @@ class ConnectionApi(metaclass=TypeChecker):
                     "refresh_token": refresh_token,
                 }
             #   coverting to string, if its user will
-            if bl_str_dict_params == True:
+            if bool_l_str_dict_params == True:
                 dict_params = "&".join(
                     "{}={}".format(k, v) for k, v in dict_params.items()
                 )
@@ -128,7 +128,7 @@ class ConnectionApi(metaclass=TypeChecker):
                         url=self.hostname_api_line_b3 + app,
                         headers=dict_headers,
                         params=dict_params,
-                        verify=bl_verify,
+                        verify=bool_l_verify,
                     )
                 except:
                     continue
@@ -155,10 +155,10 @@ class ConnectionApi(metaclass=TypeChecker):
         app_line_b3: str,
         dict_params: Optional[Dict[str, Any]] = None,
         dict_payload: Optional[List[Dict[str, Any]]] = None,
-        bl_parse_dict_params_data: bool = False,
-        bl_retry_if_error: bool = False,
-        bl_retry_request: bool = True,
-        bl_debug_mode: bool = False,
+        bool_l_parse_dict_params_data: bool = False,
+        bool_l_retry_if_error: bool = False,
+        bool_l_retry_request: bool = True,
+        bool_l_debug_mode: bool = False,
         int_max_retrieves: int = 100,
         float_secs_sleep: Optional[float] = None,
         float_secs_sleep_increase_error: float = 1.0,
@@ -174,15 +174,15 @@ class ConnectionApi(metaclass=TypeChecker):
             "Content-Type": "application/json",
         }
         # check whether it is needed to parse the params dictionary
-        if bl_parse_dict_params_data == True:
+        if bool_l_parse_dict_params_data == True:
             if dict_params != None:
                 dict_params = JsonFiles().dict_to_json(dict_params)
             if dict_payload != None:
                 dict_payload = JsonFiles().dict_to_json(dict_payload)
         # request instrument informations - id, symbol and asset
-        if bl_retry_if_error == True:
-            while (bl_retry_request == True) and (i <= int_max_retrieves):
-                if bl_debug_mode == True:
+        if bool_l_retry_if_error == True:
+            while (bool_l_retry_request == True) and (i <= int_max_retrieves):
+                if bool_l_debug_mode == True:
                     print("*** ATTEMPT REQUEST #{} ***".format(i))
                 # # request
                 # print('URL: {}'.format(self.hostname_api_line_b3 + app_line_b3))
@@ -198,7 +198,7 @@ class ConnectionApi(metaclass=TypeChecker):
                     )
                     # print('ENDPOINT + API: {}'.format(resp_req.url))
                     if resp_req.status_code == int_status_code_ok:
-                        bl_retry_request = False
+                        bool_l_retry_request = False
                     elif resp_req.status_code in list_int_http_error_token:
                         #   reset token whether http error 401 has been reached
                         dict_header = {
@@ -207,11 +207,11 @@ class ConnectionApi(metaclass=TypeChecker):
                         }
                     else:
                         float_secs_sleep_iteration += float_secs_sleep_increase_error
-                    if bl_debug_mode == True:
+                    if bool_l_debug_mode == True:
                         print("REQUEST SUCCESFULLY MADE")
                 except:
-                    bl_retry_request = True
-                    if bl_debug_mode == True:
+                    bool_l_retry_request = True
+                    if bool_l_debug_mode == True:
                         print("EXCEPTION IN REQUEST #{}".format(i))
                 # wait
                 if float_secs_sleep_iteration != None:
@@ -228,7 +228,7 @@ class ConnectionApi(metaclass=TypeChecker):
                 params=dict_params,
                 data=dict_payload,
             )
-            if bl_debug_mode == True:
+            if bool_l_debug_mode == True:
                 print("REQUEST SUCCESFULLY MADE")
         #   raises exception when not a 2xx response
         resp_req.raise_for_status()
@@ -246,13 +246,13 @@ class Operations(ConnectionApi):
         self,
         method: str = "GET",
         app: str = "/api/v1.0/exchangeLimits/spxi/{}",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         return self.app_request(
             self.token,
             method,
             app.format(self.broker_code),
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
     @property
@@ -260,31 +260,31 @@ class Operations(ConnectionApi):
         self,
         method: str = "GET",
         app: str = "/api/v1.0/exchangeLimits/autorizedMarkets",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         return self.app_request(
-            self.token, method, app, bl_retry_if_error=bl_retry_if_error
+            self.token, method, app, bool_l_retry_if_errobool_ool_retry_if_error
         )
 
     def intruments_per_group(
         self,
         group_id: str,
         method: str = "POST",
-        str_bl_settled: str = "true",
-        bl_parse_dict_params_data: bool = True,
+        str_bool_l_settled: str = "true",
+        bool_l_parse_dict_params_data: bool = True,
         float_secs_sleep: Optional[float] = None,
         app: str = "/api/v1.0/exchangeLimits/findInstruments",
     ) -> Union[List[Dict[str, Any]], int]:
         dict_payload = {
             "authorizedMarketGroupId": group_id,
-            "isLimitSetted": str_bl_settled,
+            "isLimitSetted": str_bool_l_settled,
         }
         return self.app_request(
             self.token,
             method,
             app,
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
             float_secs_sleep=float_secs_sleep,
         )
 
@@ -367,10 +367,10 @@ class Resources(Operations):
         self,
         method: str = "GET",
         app: str = "/api/v1.0/symbol",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         return self.app_request(
-            self.token, method, app, bl_retry_if_error=bl_retry_if_error
+            self.token, method, app, bool_l_retry_if_errobool_ool_retry_if_error
         )
 
     @property
@@ -422,8 +422,8 @@ class AccountsData(ConnectionApi):
     def client_infos(
         self,
         account_code: str,
-        bl_retry_if_error: bool = True,
-        bl_debug_mode: bool = False,
+        bool_l_retry_if_error: bool = True,
+        bool_l_debug_mode: bool = False,
         float_secs_sleep: Optional[float] = None,
         method: str = "GET",
         app: str = "/api/v1.0/account",
@@ -440,9 +440,9 @@ class AccountsData(ConnectionApi):
             method,
             app,
             dict_params=dict_params,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_retry_if_errobool_ool_retry_if_error,
             float_secs_sleep=float_secs_sleep,
-            bl_debug_mode=bl_debug_mode,
+            bool_l_debug_modbool_ool_debug_mode,
         )
 
     def spxi_get(
@@ -462,7 +462,7 @@ class AccountsData(ConnectionApi):
         self,
         account_id: str,
         dict_payload: Union[List[Dict[str, Any]], None],
-        bl_parse_dict_params_data: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
         method: str = "POST",
         app: str = "/api/v1.0/account/{}/lmt/spxi",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -472,7 +472,7 @@ class AccountsData(ConnectionApi):
             account_id (str): account id
             dict_payload (dict):
                 [{'instrumentId': int, 'isRemoved': 'false', 'spci': int, 'spvi': int, 'symbol': str}, ...]
-            bl_parse_dict_params_data (bool): parse dictionary params data
+            bool_l_parse_dict_params_data (bool): parse dictionary params data
             method (str): method
             app (str): app
         INPUTS: ACCOUNT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
@@ -485,14 +485,14 @@ class AccountsData(ConnectionApi):
             method,
             app.format(account_id),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
         )
 
     def spxi_instrument_delete(
         self,
         account_id: str,
         dict_payload: Union[List[Dict[str, Any]], None],
-        bl_parse_dict_params_data=True,
+        bool_l_parse_dict_params_data=True,
         method="POST",
         app="/api/v1.0/account/{}/lmt/spxi",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -502,7 +502,7 @@ class AccountsData(ConnectionApi):
             account_id (str): account id
             dict_payload (dict):
                 [{'instrumentId': int, 'isRemoved': 'false', 'symbol': str}, ...]
-            bl_parse_dict_params_data (bool): parse dictionary params data
+            bool_l_parse_dict_params_data (bool): parse dictionary params data
             method (str): method
             app (str): app
         INPUTS: ACCOUNT ID, DICTIONARY PAYLOAD (LIST OF DICTIONARIES WITH KEYS: 'instrumentId': int,
@@ -515,7 +515,7 @@ class AccountsData(ConnectionApi):
             method,
             app.format(account_id),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
         )
 
     def spxi_tmox_global_metrics_remove(
@@ -559,7 +559,7 @@ class DocumentsData(ConnectionApi):
     def doc_info(
         self,
         doc_code: str,
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
         method: str = "GET",
         app: str = "/api/v1.0/document",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -581,15 +581,15 @@ class DocumentsData(ConnectionApi):
             method,
             app,
             dict_params=dict_params,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
     def block_unblock_doc(
         self,
         doc_id: str,
-        bl_isblocked: bool = True,
-        bl_parse_dict_params_data: bool = True,
-        bl_retry_if_error: bool = True,
+        bool_l_isblocked: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
+        bool_l_retry_if_error: bool = True,
         method: str = "POST",
         app: str = "/api/v1.0/document/{}",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -599,24 +599,24 @@ class DocumentsData(ConnectionApi):
         OUTPUTS: STATUS OF ACCOMPLISHMENT
         """
         # payload
-        dict_params = {"id": str(doc_id), "isBlocked": bl_isblocked}
+        dict_params = {"id": str(doc_id), "isBlocked": bool_l_isblocked}
         # retrieving json
         return self.app_request(
             self.token,
             method,
             app.format(str(doc_id)),
             dict_params=dict_params,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
     def update_profile(
         self,
         doc_id: str,
         doc_profile_id: str,
-        bl_parse_dict_params_data: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
         int_rmkt_evaluation: int = 0,
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
         method: str = "POST",
         app: str = "/api/v1.0/document/{}",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -637,16 +637,16 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(str(doc_id)),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
     def is_protection_mode(
         self,
         doc_id: str,
-        bl_protect: bool = True,
-        bl_parse_dict_params_data: bool = True,
-        bl_retry_if_error: bool = True,
+        bool_l_protect: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
+        bool_l_retry_if_error: bool = True,
         method: str = "POST",
         app: str = "/api/v1.0/document/{}",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -658,7 +658,7 @@ class DocumentsData(ConnectionApi):
         # payload
         dict_payload = {
             "id": str(doc_id),
-            "isProtected": str(bl_protect).lower(),
+            "isProtected": str(bool_l_protect).lower(),
         }
         #   retrieving json
         return self.app_request(
@@ -666,16 +666,16 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(str(doc_id)),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
     def client_infos(
         self,
         doc_id: str,
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
         float_secs_sleep: Optional[float] = None,
-        bl_debug_mode: bool = False,
+        bool_l_debug_mode: bool = False,
         method: str = "GET",
         app: str = "/api/v1.0/account",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -699,9 +699,9 @@ class DocumentsData(ConnectionApi):
             method,
             app,
             dict_params=dict_params,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_retry_if_errobool_ool_retry_if_error,
             float_secs_sleep=float_secs_sleep,
-            bl_debug_mode=bl_debug_mode,
+            bool_l_debug_modbool_ool_debug_mode,
         )
 
     def doc_profile(
@@ -711,7 +711,7 @@ class DocumentsData(ConnectionApi):
         app: str = "/api/v2.0/document/v2.0/document/{}",
         key_api_line_b3_profile_full: str = "profileFull",
         key_api_line_b3_profile_name: str = "profileName",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         """
         DOCSTRING: DOC PROFILE (INTEGER AND NAME)
@@ -720,7 +720,7 @@ class DocumentsData(ConnectionApi):
         """
         #   fetch json
         json_doc = self.app_request(
-            self.token, method, app.format(doc_id), bl_retry_if_error=bl_retry_if_error
+            self.token, method, app.format(doc_id), bool_l_retry_if_errobool_ool_retry_if_error
         )
         #   returning profile info
         return {
@@ -751,10 +751,10 @@ class DocumentsData(ConnectionApi):
         self,
         doc_id: str,
         dict_payload: Union[List[Dict[str, Any]], None],
-        bl_parse_dict_params_data=True,
+        bool_l_parse_dict_params_data=True,
         method="POST",
         app="/api/v1.0/document/{}/lmt/spxi",
-        bl_retry_if_error=True,
+        bool_l_retry_if_error=True,
     ) -> Union[List[Dict[str, Any]], int]:
         """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
@@ -768,15 +768,15 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(doc_id),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
     def spxi_instrument_delete(
         self,
         doc_id: str,
         dict_payload: Union[List[Dict[str, Any]], None],
-        bl_parse_dict_params_data: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
         method: str = "POST",
         app: str = "/api/v1.0/document/{}/lmt/spxi",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -792,7 +792,7 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(doc_id),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
         )
 
 
@@ -841,9 +841,9 @@ class Professional(ConnectionApi):
         int_items_per_page: int = 50,
         method: str = "POST",
         app: str = "https://api.line.trd.cert.bvmfnet.com.br/api/v2.0/position/hstry",
-        bl_retry_if_error: bool = True,
-        bl_debug_mode: bool = True,
-        bl_parse_dict_params_data: bool = True,
+        bool_l_retry_if_error: bool = True,
+        bool_l_debug_mode: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
         float_secs_sleep: Optional[float] = None,
     ) -> Union[List[Dict[str, Any]], int]:
         """
@@ -863,7 +863,7 @@ class Professional(ConnectionApi):
             "registryDateStart": dt_start,
             "traderCode": professional_code,
         }
-        if bl_debug_mode == True:
+        if bool_l_debug_mode == True:
             pprint(dict_payload)
         # retrieving professional positions
         return self.app_request(
@@ -871,9 +871,9 @@ class Professional(ConnectionApi):
             method,
             app,
             dict_payload=dict_payload,
-            bl_retry_if_error=bl_retry_if_error,
-            bl_debug_mode=bl_debug_mode,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
+            bool_l_retry_if_errobool_ool_retry_if_error,
+            bool_l_debug_modbool_ool_debug_mode,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
             float_secs_sleep=float_secs_sleep,
         )
 
@@ -896,7 +896,7 @@ class ProfilesData(ConnectionApi):
         id_profile: str,
         method: str = "GET",
         app: str = "/api/v1.0/riskProfile/enty",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         """
         DOCSTRING: ENTITY DOCUMENTS LINKED TO THE PROFILE
@@ -909,7 +909,7 @@ class ProfilesData(ConnectionApi):
             "pnpCode": self.category_code,
         }
         return self.app_request(
-            self.token, method, app, dict_params, bl_retry_if_error=bl_retry_if_error
+            self.token, method, app, dict_params, bool_l_retry_if_errobool_ool_retry_if_error
         )
 
     def profile_global_limits_get(
@@ -930,7 +930,7 @@ class ProfilesData(ConnectionApi):
         prof_id: str,
         method: str = "GET",
         app: str = "/api/v1.0/riskProfile/{}/lmt/mkta",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         """
         DOCSTRING: GET PROFILE MARKET LIMITS BY ITS ID
@@ -938,7 +938,7 @@ class ProfilesData(ConnectionApi):
         OUTPUTS: JSON WITH ID, NAME, BLOCKED/PROTECTED, PROFILE ID/NAME AND PROFESSIONAL CODE
         """
         return self.app_request(
-            self.token, method, app.format(prof_id), bl_retry_if_error=bl_retry_if_error
+            self.token, method, app.format(prof_id), bool_l_retry_if_errobool_ool_retry_if_error
         )
 
     def profile_spxi_limits_get(
@@ -971,10 +971,10 @@ class ProfilesData(ConnectionApi):
         self,
         prof_id: str,
         dict_payload: List[Dict[str, Any]],
-        bl_parse_dict_params_data: bool = True,
+        bool_l_parse_dict_params_data: bool = True,
         method: str = "POST",
         app: str = "/api/v1.0/riskProfile/{}/lmt/tmox",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         """
         DOCSTRING: SPXI INCLUSION TO DOCUMENT
@@ -988,8 +988,8 @@ class ProfilesData(ConnectionApi):
             method,
             app.format(prof_id),
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
-            bl_retry_if_error=bl_retry_if_error,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
+            bool_l_retry_if_errobool_ool_retry_if_error,
         )
 
 
@@ -1000,7 +1000,7 @@ class Monitoring(ConnectionApi):
         self,
         method: str = "GET",
         app: str = "/api/v1.0/alert/lastalerts?filterRead=true",
-        bl_retry_if_error: bool = True,
+        bool_l_retry_if_error: bool = True,
     ) -> Union[List[Dict[str, Any]], int]:
         """
         DOCSTRING: INSTRUMENTS INFORMATION
@@ -1008,7 +1008,7 @@ class Monitoring(ConnectionApi):
         OUTPUTS: JSON (ID, SYMBOL AND ASSET)
         """
         return self.app_request(
-            self.token, method, app, bl_retry_if_error=bl_retry_if_error
+            self.token, method, app, bool_l_retry_if_errobool_ool_retry_if_error
         )
 
 
@@ -1023,7 +1023,7 @@ class SystemEventManagement(ConnectionApi):
         str_null: str = "null",
         int_entity_type: int = 3,
         method: str = "POST",
-        bl_parse_dict_params_data: str = True,
+        bool_l_parse_dict_params_data: str = True,
         float_secs_sleep: Optional[float] = None,
         app: str = "/api/v1.0/systemEvent",
     ) -> Union[List[Dict[str, Any]], int]:
@@ -1058,6 +1058,6 @@ class SystemEventManagement(ConnectionApi):
             method,
             app,
             dict_payload=dict_payload,
-            bl_parse_dict_params_data=bl_parse_dict_params_data,
+            bool_l_parse_dict_params_datbool_ool_parse_dict_params_data,
             float_secs_sleep=float_secs_sleep,
         )

@@ -7,13 +7,13 @@ from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
 
 
 cls_session = YieldFreeProxy(
-    bl_new_proxy=True,
+    bool_new_proxy=True,
     str_country_code="BR",
     str_continent_code=None,
-    bl_alive=True,
+    bool_l_alive=True,
     list_anonymity_value=["elite", "anonymous"],
     list_protocol=["http", "https"],
-    bl_ssl=None,
+    bool_l_ssl=None,
     float_min_ratio_times_alive_dead=None,
     float_max_timeout=10000,
 )
@@ -27,11 +27,11 @@ cls_ = AnbimaDataDebentures(
     list_slugs=["AEAM22", "AALM11"],
     str_user_agent=UserAgents().get_random_user_agent,
     int_wait_load_seconds=30,
-    bl_headless=False,
-    bl_incognito=True
+    bool_l_headless=False,
+    bool_l_incognito=True
 )
 
-# df_ = cls_.source("debentures_available", bl_fetch=True)
+# df_ = cls_.source("debentures_available", bool_l_fetch=True)
 # print(f"DF DEBENTURES AVL: \n{df_}")
 # df_.info()
 # df_.to_csv("data/anbima-debentures-avl_{}_{}_{}.csv".format(
@@ -40,7 +40,7 @@ cls_ = AnbimaDataDebentures(
 #     DatesBR().curr_time().strftime('%H%M%S')
 # ), index=False)
 
-df_ = cls_.source("debentures_registries", bl_fetch=True)
+df_ = cls_.source("debentures_registries", bool_l_fetch=True)
 print(f"DF DEBENTURES REGISTRIES: \n{df_}")
 df_.info()
 df_.to_csv("data/anbima-debentures-registries_{}_{}_{}.csv".format(

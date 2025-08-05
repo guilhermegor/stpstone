@@ -53,7 +53,9 @@
 4. **Validation Checks**:
    - _validate_<NAME> methods please include in the beginning of the class
    - Please add sanity checks for every variable within methods/functions that would be useful, with examples below
-   - When using try except, use as err for error and from err in the implementation of raise, in order to avoid the Ruff error B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling. Please follow the example below:
+   - When using try except, use as err for error and from err in the implementation of raise, in order to avoid the Ruff error B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling. 
+      . Docuemnt the Raise reason, within the docstring in the appropriate section mentioned above
+      . Please follow the example below:
 ```python
 """HTML data extraction utilities using lxml and requests.
 
@@ -81,7 +83,9 @@ class HandlingLXML:
         Raises
         ------
         ValueError
-            If URL is empty or invalid
+            If URL is empty 
+            If URL is not a string
+            If URL does not start with http:// or https://
         """
         if not url:
             raise ValueError("URL cannot be empty")

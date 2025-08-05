@@ -20,10 +20,10 @@ class DealingOutlook:
         mail_attachments=None,
         send_behalf_of=None,
         auto_send_email=False,
-        bl_frame_sender=False,
-        bl_read_receipt=False,
-        bl_delivery_receipt=False,
-        bl_image_display=False,
+        bool_frame_sender=False,
+        bool_l_read_receipt=False,
+        bool_l_delivery_receipt=False,
+        bool_l_image_display=False,
         str_html_signature=None,
     ):
         """
@@ -52,7 +52,7 @@ class DealingOutlook:
         if send_behalf_of:
             #   if the frame email is false the send on behalf of ought change the sender account,
             #       nonetheless it will use the main account with a frame to send the email
-            if bl_frame_sender == False:
+            if bool_l_frame_sender == False:
                 for account in outlook.Session.Accounts:
                     if str(account) == send_behalf_of:
                         send_behalf_of_account = account
@@ -72,14 +72,14 @@ class DealingOutlook:
                 if os.path.exists(mail_attachment):
                     mail.Attachments.Add(Source=mail_attachment)
         # request read receipt
-        mail.ReadReceiptRequested = bl_read_receipt
+        mail.ReadReceiptRequested = bool_l_read_receipt
         # request delivery receipt
-        mail.OriginatorDeliveryReportRequested = bl_delivery_receipt
+        mail.OriginatorDeliveryReportRequested = bool_l_delivery_receipt
         # display created email
         if auto_send_email == False:
             mail.Display()
         elif auto_send_email == True:
-            if bl_image_display:
+            if bool_l_image_display:
                 try:
                     mail.Display()
                     mail.Send()
@@ -99,13 +99,13 @@ class DealingOutlook:
         outlook_folder,
         subj_sub_string,
         attch_save_path,
-        bl_save_file_w_original_name=False,
+        bool_l_save_file_w_original_name=False,
         list_fileformat=None,
         outlook_subfolder=None,
         move_to_folder=None,
         save_only_first_event=False,
-        bl_leave_after_first_occurance=False,
-        bl_break_loops=False,
+        bool_l_leave_after_first_occurance=False,
+        bool_l_break_loops=False,
     ):
         """
         DOCTRING: DOWNLOAD A FILE FROM AN SPECIFIC EMAIL
@@ -148,7 +148,7 @@ class DealingOutlook:
         if item_count > 0:
             for i in range(item_count):
                 # in case user wants to download only the first occurance, leave
-                if bl_break_loops == True:
+                if bool_l_break_loops == True:
                     break
                 # defining com object of the current message
                 message = out_iter_folder.Items[i]
@@ -156,13 +156,13 @@ class DealingOutlook:
                 if StrHandler().find_substr_str(message.Subject, subj_sub_string):
                     for attch_save_path in list_attch_save_path:
                         # in case user wants to download only the first occurance, leave
-                        if bl_break_loops == True:
+                        if bool_l_break_loops == True:
                             break
                         for attch in message.Attachments:
                             # if save file with original name is true, and the file format is the
                             #   desired one, save it in the local source
                             if (
-                                bl_save_file_w_original_name == True
+                                bool_l_save_file_w_original_name == True
                                 and DirFilesManagement().get_file_format_from_file_name(
                                     attch.FileName
                                 )
@@ -176,7 +176,7 @@ class DealingOutlook:
                                 )
                             # elif complete path to save file is provided, procceed with saving to
                             #   to local source
-                            elif bl_save_file_w_original_name == False:
+                            elif bool_l_save_file_w_original_name == False:
                                 attch.SaveAsFile(attch_save_path)
                                 dict_attch_saving_status[attch_save_path] = (
                                     DirFilesManagement().object_exists(attch_save_path)
@@ -191,8 +191,8 @@ class DealingOutlook:
                             ):
                                 return JsonFiles().send_json(dict_attch_saving_status)
                         # in case user wants to download only the first occurance, leave
-                        if bl_leave_after_first_occurance == True:
-                            bl_break_loops = True
+                        if bool_l_leave_after_first_occurance == True:
+                            bool_l_break_loops = True
         # return infos with respect to downloaded attachments
         return JsonFiles().send_json(dict_attch_saving_status)
 
@@ -300,7 +300,7 @@ class DealingOutlook:
         mail_cc=None,
         mail_bcc=None,
         auto_send_email=False,
-        bl_image_display=False,
+        bool_l_image_display=False,
         outlook_subfolder=None,
     ):
         """
@@ -347,7 +347,7 @@ class DealingOutlook:
         if auto_send_email == False:
             reply.Display()
         elif auto_send_email == "Y":
-            if bl_image_display:
+            if bool_l_image_display:
                 try:
                     reply.Display()
                     reply.Send()

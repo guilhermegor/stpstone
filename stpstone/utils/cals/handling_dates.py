@@ -75,16 +75,16 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             year=year, month=month, day=day, hour=hour, minute=minute, second=second
         )
 
-    def date_to_datetime(self, date: date, bl_timestamp: bool = False) -> Union[int, datetime]:
+    def date_to_datetime(self, date: date, bool_timestamp: bool = False) -> Union[int, datetime]:
         """Convert a date object to datetime with optional timestamp conversion.
 
         Parameters
         ----------
         date : date
             The date to convert
-        bl_crop_time : bool, optional
+        bool_l_crop_time : bool, optional
             Whether to crop time to midnight, by default True
-        bl_timestamp : bool, optional
+        bool_l_timestamp : bool, optional
             Whether to convert to timestamp, by default True
 
         Returns
@@ -93,7 +93,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             The resulting datetime object
         """
         datetime_ = datetime.combine(date, datetime.min.time())
-        if bl_timestamp:
+        if bool_l_timestamp:
             return int(datetime_.timestamp())
         return datetime_
 
@@ -292,15 +292,15 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         return datetime.now().time()
 
     def curr_date_time(
-        self, bl_timestamp: bool = False, bl_crop_time: bool = False
+        self, bool_l_timestamp: bool = Falsebool_ool_crop_time: bool = False
     ) -> Union[int, datetime]:
         """Get current datetime with optional timestamp conversion.
 
         Parameters
         ----------
-        bl_timestamp : bool, optional
+        bool_l_timestamp : bool, optional
             Whether to return as timestamp, by default False
-        bl_crop_time : bool, optional
+        bool_l_crop_time : bool, optional
             Whether to crop time, by default False
 
         Returns
@@ -308,8 +308,8 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         Union[int, datetime]
             Current datetime or timestamp
         """
-        datetime_ = datetime.now().timestamp_dt() if bl_timestamp else datetime.now()
-        if bl_crop_time:
+        datetime_ = datetime.now().timestamp_dt() if bool_l_timestamp else datetime.now()
+        if bool_l_crop_time:
             return int(datetime_)
         else:
             return datetime_
@@ -364,7 +364,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
     def month_name(
         self,
         dt_: Union[date, datetime],
-        bl_abbrv: bool = False,
+        bool_l_abbrv: bool = False,
         local_zone: Optional[str] = None,
     ) -> str:
         """Get month name in local language.
@@ -373,7 +373,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         ----------
         dt_ : Union[date, datetime]
             Date/datetime object
-        bl_abbrv : bool, optional
+        bool_l_abbrv : bool, optional
             Whether to return abbreviated name, by default False
         local_zone : str, optional
             Locale setting, by default "pt-BR"
@@ -389,7 +389,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             locale.setlocale(locale.LC_TIME, local_zone)
         except locale.Error:
             locale.setlocale(locale.LC_TIME, "")
-        if bl_abbrv:
+        if bool_l_abbrv:
             return dt_.strftime("%b")
         else:
             return dt_.strftime("%B")
@@ -420,14 +420,14 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         # returning dates
         return dt_start, dt_end
 
-    def month_number(self, dt_: datetime, bl_month_mm: bool = False) -> Union[int, str]:
+    def month_number(self, dt_: datetime, bool_l_month_mm: bool = False) -> Union[int, str]:
         """Extract month from datetime as integer or string.
 
         Parameters
         ----------
         dt_ : datetime
             Datetime object
-        bl_month_mm : bool, optional
+        bool_l_month_mm : bool, optional
             Whether to return as two-digit string, by default False
 
         Returns
@@ -435,13 +435,13 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         Union[int, str]
             Month component as integer or string
         """
-        if not bl_month_mm:
+        if not bool_l_month_mm:
             return int(dt_.strftime("%m"))
         else:
             return dt_.strftime("%m")
 
     def week_name(
-        self, dt_: datetime, bl_abbrv: bool = False, local_zone: Optional[str] = None
+        self, dt_: datetime, bool_l_abbrv: bool = False, local_zone: Optional[str] = None
     ) -> str:
         """Get weekday name in local language.
 
@@ -449,7 +449,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         ----------
         dt_ : datetime
             Datetime object
-        bl_abbrv : bool, optional
+        bool_l_abbrv : bool, optional
             Whether to return abbreviated name, by default False
         local_zone : str, optional
             Locale setting, by default "pt-BR"
@@ -465,7 +465,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             locale.setlocale(locale.LC_TIME, local_zone)
         except locale.Error:
             locale.setlocale(locale.LC_TIME, "")
-        if bl_abbrv:
+        if bool_l_abbrv:
             return dt_.strftime("%a")
         else:
             return dt_.strftime("%A")
@@ -485,14 +485,14 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
         """
         return dt_.strftime("%w")
 
-    def find_working_day(self, dt_: date, bl_next: bool = True) -> date:
+    def find_working_day(self, dt_: date, bool_l_next: bool = True) -> date:
         """Correct dates for weekends and holidays.
 
         Parameters
         ----------
         dt_ : date
             Date to correct
-        bl_next : bool, optional
+        bool_l_next : bool, optional
             Whether to return next working day, by default True
 
         Returns
@@ -501,7 +501,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             Corrected date
         """
         dt_ref = self.add_working_days(self.sub_working_days(dt_, 1), 1)
-        if bl_next:
+        if bool_l_next:
             return dt_ref
         else:
             return self.sub_working_days(dt_ref, 1) if dt_ref > dt_ else dt_ref
@@ -952,7 +952,7 @@ class DatesBR(BrazilBankCalendar, metaclass=TypeChecker):
             Input format, by default "%b/%Y"
         format_output : str, optional
             Output format, by default "%Y-%m"
-        bl_dtbr : bool, optional
+        bool_l_dtbr : bool, optional
             Whether to use Brazilian month abbreviations, by default True
 
         Returns

@@ -160,7 +160,7 @@ class UtilsRequests(ABC):
                 list_pages.append(str_)
                 str_ = ""
         for i, str_page in enumerate(list_pages):
-            str_page = StrHandler().remove_diacritics_nfkd(str_page, bl_lower_case=True)
+            str_page = StrHandler().remove_diacritics_nfkd(str_page, bool_lower_case=True)
             if (len(dict_count_matches) > 0) \
                 and (all(count > 0 for count in dict_count_matches.values())): break
             for str_event, dict_l1 in dict_regex_patterns.items():
@@ -170,7 +170,7 @@ class UtilsRequests(ABC):
                     if dict_count_matches[str_event] > 0:
                         break
                     regex_pattern = StrHandler().remove_diacritics_nfkd(
-                        regex_pattern, bl_lower_case=False
+                        regex_pattern, bool_l_lower_case=False
                     )
                     regex_match = re.search(
                         regex_pattern,
@@ -237,7 +237,7 @@ class UtilsRequests(ABC):
                 if str_event not in dict_count_matches:
                     dict_count_matches[str_event] = 0
                 regex_pattern = StrHandler().remove_diacritics_nfkd(
-                    regex_pattern, bl_lower_case=False
+                    regex_pattern, bool_l_lower_case=False
                 )
                 regex_matches = list(re.finditer(regex_pattern, html_content, re.MULTILINE))
                 if regex_matches:
@@ -332,17 +332,17 @@ class HandleReqResponses(UtilsRequests):
                 selenium_wd
             )
         elif str_file_extension in ["csv", "txt", "asp", "do", "tex"]:
-            if StrHandler().match_string_like(url, "*bl_separator_consistency_check=*") == True:
-                bl_separator_consistency_check = (
-                    self.get_query_params(url, "bl_separator_consistency_check")
-                    if self.get_query_params(url, "bl_separator_consistency_check") is not None
+            if StrHandler().match_string_like(url, "*bool_l_separator_consistency_check=*") == True:
+                bool_l_separator_consistency_check = (
+                    self.get_query_params(url, "bool_l_separator_consistency_check")
+                    if self.get_query_params(url, "bool_l_separator_consistency_check") is not None
                     else True
                 )
             else:
-                bl_separator_consistency_check = True
+                bool_l_separator_consistency_check = True
             if dict_df_read_params.get("encoding") is not None:
                 resp_req.encoding = dict_df_read_params.get("encoding")
-            if (bl_separator_consistency_check == True) \
+            if (bool_l_separator_consistency_check == True) \
                 and (DirFilesManagement().check_separator_consistency(
                     resp_req.content,
                     dict_df_read_params.get("skiprows", 0),
@@ -682,9 +682,9 @@ class ABCRequests(HandleReqResponses):
         str_user_agent: Optional[str] = None,
         int_wait_load_seconds: int = 10,
         int_delay_seconds: int = 10,
-        bl_headless: bool = False,
-        bl_incognito: bool = False,
-        bl_ts_log_str: bool = True
+        bool_l_headless: bool = False,
+        bool_l_incognito: bool = False,
+        bool_l_ts_log_str: bool = True
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
@@ -697,9 +697,9 @@ class ABCRequests(HandleReqResponses):
         self.str_user_agent = str_user_agent
         self.int_wait_load_seconds = int_wait_load_seconds
         self.int_delay_seconds = int_delay_seconds
-        self.bl_headless = bl_headless
-        self.bl_incognito = bl_incognito
-        self.bl_ts_log_str = bl_ts_log_str
+        self.bool_l_headless bool_ool_headless
+        self.bool_l_incognito bool_ool_incognito
+        self.bool_l_ts_log_str bool_ool_ts_log_str
         self.list_options_wd = None \
             if self.dict_metadata["credentials"].get("web_driver", None) is None \
             else self.dict_metadata["credentials"]["web_driver"]["options"]
@@ -728,7 +728,7 @@ class ABCRequests(HandleReqResponses):
         resp_req = self.generic_req(
             self.dict_metadata["credentials"]["token"]["get"]["req_method"],
             url_token,
-            self.dict_metadata["credentials"]["token"]["get"]["bl_verify"],
+            self.dict_metadata["credentials"]["token"]["get"]["bool_l_verify"],
             self.dict_metadata["credentials"]["token"]["get"]["timeout"],
             self.dict_metadata["credentials"]["token"].get("headers", None),
         )
@@ -752,7 +752,7 @@ class ABCRequests(HandleReqResponses):
         self,
         req_method: str,
         url: str,
-        bl_verify: bool,
+        bool_l_verify: bool,
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Union[str, Dict[str, str]]] = None,
@@ -763,15 +763,15 @@ class ABCRequests(HandleReqResponses):
             resp_req = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
             req_preppped = self.session.prepare_request(resp_req)
             req_preppped.url = url
-            resp_req = self.session.send(req_preppped, verify=bl_verify)
+            resp_req = self.session.send(req_preppped, verify=bool_l_verify)
         else:
             if req_method == "GET":
                 resp_req = self.session.get(
-                    url, verify=bl_verify, headers=dict_headers, params=payload, cookies=cookies
+                    url, verify=bool_l_verify, headers=dict_headers, params=payload, cookies=cookies
                 )
             elif req_method == "POST":
                 resp_req = self.session.post(
-                    url, verify=bl_verify, headers=dict_headers, data=payload, cookies=cookies
+                    url, verify=bool_l_verify, headers=dict_headers, data=payload, cookies=cookies
                 )
         resp_req.raise_for_status()
         return resp_req
@@ -789,7 +789,7 @@ class ABCRequests(HandleReqResponses):
         self,
         req_method: str,
         url: str,
-        bl_verify: bool,
+        bool_l_verify: bool,
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Dict[str, str]] = None,
@@ -800,12 +800,12 @@ class ABCRequests(HandleReqResponses):
             req = Request(req_method, url, headers=dict_headers, params=payload, cookies=cookies)
             req_preppped = req.prepare()
             with ReqSession() as session:
-                resp_req = session.send(req_preppped, verify=bl_verify)
+                resp_req = session.send(req_preppped, verify=bool_l_verify)
         else:
             return request(
                 req_method,
                 url,
-                verify=bl_verify,
+                verify=bool_l_verify,
                 headers=dict_headers,
                 params=payload if req_method == "GET" else None,
                 data=payload if req_method == "POST" else None,
@@ -819,7 +819,7 @@ class ABCRequests(HandleReqResponses):
         self,
         req_method: Literal["GET", "POST"],
         url: str,
-        bl_verify: bool,
+        bool_l_verify: bool,
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Dict[str, str]] = None,
@@ -831,7 +831,7 @@ class ABCRequests(HandleReqResponses):
         Args:
             req_method (str): request method
             url (str): request url
-            bl_verify (bool): verify request
+            bool_l_verify (bool): verify request
             tup_timeout (Tuple[float, float]): request timeout
         Returns:
             Tuple[Response, str]
@@ -841,7 +841,7 @@ class ABCRequests(HandleReqResponses):
         else:
             func_generic_req = self.generic_req_wo_session
         resp_req = func_generic_req(
-            req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
+            req_method, url, bool_l_verify, tup_timeout, dict_headers, payload, cookies
         )
         return resp_req
 
@@ -853,7 +853,7 @@ class ABCRequests(HandleReqResponses):
         dict_headers: Optional[Dict[str, str]] = None,
         payload: Optional[Dict[str, str]] = None,
         app: Optional[str] = None,
-        bl_verify: bool = False,
+        bool_l_verify: bool = False,
         tup_timeout: Tuple[float, float] = (12.0, 12.0),
         cookies: Optional[Dict[str, str]] = None,
         cols_from_case: Optional[str] = None,
@@ -885,7 +885,7 @@ class ABCRequests(HandleReqResponses):
                 str_proxy = None
             selenium_wd = SeleniumWD(
                 url, self.path_webdriver, self.int_port, self.str_user_agent, self.int_wait_load_seconds,
-                self.int_delay_seconds, str_proxy, self.bl_headless, self.bl_incognito,
+                self.int_delay_seconds, str_proxy, self.bool_l_headless, selbool_ool_incognito,
                 list_options_wd
             )
             if xpath_el_wait_until_loaded is not None:
@@ -894,7 +894,7 @@ class ABCRequests(HandleReqResponses):
         else:
             selenium_wd = None
             resp_req = self.generic_req(
-                req_method, url, bl_verify, tup_timeout, dict_headers, payload, cookies
+                req_method, url, bool_l_verify, tup_timeout, dict_headers, payload, cookies
             )
         df_ = self.handle_response(
             resp_req,
@@ -923,23 +923,23 @@ class ABCRequests(HandleReqResponses):
             logger=self.logger,
         )
         df_ = cls_df_stdz.pipeline(df_)
-        df_ = DBLogs().audit_log(df_, url, self.dt_ref, self.bl_ts_log_str)
+        df_ = DBLogs().audit_log(df_, url, self.dt_ref, self.bool_l_ts_log_str)
         return df_
 
     def insert_table(
         self,
         str_resource: str,
         list_ser: Optional[List[Dict[str, Any]]] = None,
-        bl_insert_or_ignore: bool = False,
-        bl_schema: bool = True,
+        bool_l_insert_or_ignore: bool = False,
+        bool_l_schema: bool = True,
     ) -> None:
         """
         Insert data into data table
         Args:
             str_resource (str): resource name
             list_ser (List[Dict[str, Any]]): data to insert
-            bl_insert_or_ignore (bool): False as default
-            bl_schema (bool): some databases, like SQLite, don't have schemas - True as default
+            bool_l_insert_or_ignore (bool): False as default
+            bool_l_schema (bool): some databases, like SQLite, don't have schemas - True as default
         Raises:
             Exception: If database or data is not defined
         """
@@ -958,35 +958,35 @@ class ABCRequests(HandleReqResponses):
         elif str_resource == "metadata":
             for _, dict_ in self.dict_metadata[str_resource].items():
                 str_table_name = dict_["table_name"]
-                if bl_schema == False:
+                if bool_l_schema == False:
                     str_table_name = f"{dict_['schema']}_{str_table_name}"
                 self.cls_db.insert(
                     dict_["data"],
                     str_table_name=str_table_name,
-                    bl_insert_or_ignore=True,
+                    bool_l_insert_or_ignore=True,
                 )
         else:
             str_table_name = self.dict_metadata[str_resource]["table_name"]
-            if bl_schema == False:
+            if bool_l_schema == False:
                 str_table_name = f"{self.dict_metadata[str_resource]['schema']}_{str_table_name}"
             self.cls_db.insert(
                 list_ser,
                 str_table_name=str_table_name,
-                bl_insert_or_ignore=bl_insert_or_ignore,
+                bool_l_insert_or_ignorbool_ool_insert_or_ignore,
             )
 
     def non_iteratively_get_data(
         self,
         str_resource: str,
         host: Optional[str] = None,
-        bl_fetch: bool = False,
+        bool_l_fetch: bool = False,
     ) -> Optional[pd.DataFrame]:
         """
         Non-iteratively get raw data
         Args:
             str_resource (str): resource name
             host (Optional[str]): host name
-            bl_fetch (bool): False as default
+            bool_l_fetch (bool): False as default
         Returns:
             pd.DataFrame
         """
@@ -1043,7 +1043,7 @@ class ABCRequests(HandleReqResponses):
                 dict_headers,
                 payload,
                 app_,
-                self.dict_metadata[str_resource]["bl_verify"],
+                self.dict_metadata[str_resource]["bool_l_verify"],
                 self.dict_metadata[str_resource]["timeout"],
                 self.dict_metadata[str_resource].get("cookies", None),
                 self.dict_metadata[str_resource]["cols_from_case"],
@@ -1081,10 +1081,10 @@ class ABCRequests(HandleReqResponses):
             self.insert_table(
                 str_resource,
                 df_.to_dict(orient="records"),
-                self.dict_metadata[str_resource]["bl_insert_or_ignore"],
-                self.dict_metadata[str_resource]["bl_schema"],
+                self.dict_metadata[str_resource]["bool_l_insert_or_ignore"],
+                self.dict_metadata[str_resource]["bool_l_schema"],
             )
-        if bl_fetch == True:
+        if bool_l_fetch == True:
             return df_
         else:
             return None
@@ -1093,14 +1093,14 @@ class ABCRequests(HandleReqResponses):
         self,
         str_resource: str,
         host: Optional[str] = None,
-        bl_fetch: bool = False,
+        bool_l_fetch: bool = False,
     ) -> Optional[pd.DataFrame]:
         """
         Iteratively get raw data
         Args:
             str_resource (str): resource name
             host (Optional[str]): host name
-            bl_fetch (bool): False as default
+            bool_l_fetch (bool): False as default
         Returns:
             Optional[pd.DataFrame]
         """
@@ -1172,7 +1172,7 @@ class ABCRequests(HandleReqResponses):
                             dict_headers,
                             payload,
                             StrHandler().fill_placeholders(app_, {"slug": str_slug}),
-                            self.dict_metadata[str_resource]["bl_verify"],
+                            self.dict_metadata[str_resource]["bool_l_verify"],
                             self.dict_metadata[str_resource]["timeout"],
                             self.dict_metadata[str_resource].get("cookies", None),
                             self.dict_metadata[str_resource]["cols_from_case"],
@@ -1198,10 +1198,10 @@ class ABCRequests(HandleReqResponses):
                             self.insert_table(
                                 str_resource,
                                 list_ser,
-                                self.dict_metadata[str_resource]["bl_insert_or_ignore"],
-                                self.dict_metadata[str_resource]["bl_schema"],
+                                self.dict_metadata[str_resource]["bool_l_insert_or_ignore"],
+                                self.dict_metadata[str_resource]["bool_l_schema"],
                             )
-                            if bl_fetch == False:
+                            if bool_l_fetch == False:
                                 list_ser = list()
                     except tuple(list_ignorable_exceptions) as e:
                         self.create_log.log_message(
@@ -1239,7 +1239,7 @@ class ABCRequests(HandleReqResponses):
                             StrHandler().fill_placeholders(
                                 app_, {"chunk_slugs": str_chunk_slugs}
                             ),
-                            self.dict_metadata[str_resource]["bl_verify"],
+                            self.dict_metadata[str_resource]["bool_l_verify"],
                             self.dict_metadata[str_resource]["timeout"],
                             self.dict_metadata[str_resource].get("cookies", None),
                             self.dict_metadata[str_resource]["cols_from_case"],
@@ -1264,10 +1264,10 @@ class ABCRequests(HandleReqResponses):
                             self.insert_table(
                                 str_resource,
                                 list_ser,
-                                self.dict_metadata[str_resource]["bl_insert_or_ignore"],
-                                self.dict_metadata[str_resource]["bl_schema"],
+                                self.dict_metadata[str_resource]["bool_l_insert_or_ignore"],
+                                self.dict_metadata[str_resource]["bool_l_schema"],
                             )
-                            if bl_fetch == False:
+                            if bool_l_fetch == False:
                                 list_ser = list()
                     except tuple(list_ignorable_exceptions) as e:
                         self.create_log.log_message(
@@ -1302,7 +1302,7 @@ class ABCRequests(HandleReqResponses):
                             dict_headers,
                             payload,
                             StrHandler().fill_placeholders(app_, {"i": i}),
-                            self.dict_metadata[str_resource]["bl_verify"],
+                            self.dict_metadata[str_resource]["bool_l_verify"],
                             self.dict_metadata[str_resource]["timeout"],
                             self.dict_metadata[str_resource].get("cookies", None),
                             self.dict_metadata[str_resource]["cols_from_case"],
@@ -1326,10 +1326,10 @@ class ABCRequests(HandleReqResponses):
                         self.insert_table(
                             str_resource,
                             list_ser,
-                            self.dict_metadata[str_resource]["bl_insert_or_ignore"],
-                            self.dict_metadata[str_resource]["bl_schema"],
+                            self.dict_metadata[str_resource]["bool_l_insert_or_ignore"],
+                            self.dict_metadata[str_resource]["bool_l_schema"],
                         )
-                        if bl_fetch == False:
+                        if bool_l_fetch == False:
                             list_ser = list()
                     i += 1
                 except tuple(list_ignorable_exceptions) as e:
@@ -1358,7 +1358,7 @@ class ABCRequests(HandleReqResponses):
         self,
         str_resource: str,
         host: Optional[str] = None,
-        bl_fetch: bool = False,
+        bool_l_fetch: bool = False,
     ) -> Optional[pd.DataFrame]:
         """
         Get/load raw data - if a class database is passed, the data collected will be inserted into
@@ -1366,7 +1366,7 @@ class ABCRequests(HandleReqResponses):
         Args:
             str_resource (str): resource name
             host (Optional[str]): host name
-            bl_fetch (bool): False as default
+            bool_l_fetch (bool): False as default
         Returns:
             Optional[pd.DataFrame]
         """
@@ -1384,4 +1384,4 @@ class ABCRequests(HandleReqResponses):
             func_get_data = self.iteratively_get_data
         else:
             func_get_data = self.non_iteratively_get_data
-        return func_get_data(str_resource, host, bl_fetch)
+        return func_get_data(str_resource, host, bool_l_fetch)

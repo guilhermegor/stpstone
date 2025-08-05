@@ -19,8 +19,8 @@ class TestSeleniumWDDuckDuckGo(TestCase):
         ]
         selenium_wd = SeleniumWD(
             url=self.url,
-            bl_headless=self.headless,
-            bl_incognito=True
+            bool_headless=self.headless,
+            bool_l_incognito=True
         )
         try:
             selenium_wd.wait(self.timeout)

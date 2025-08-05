@@ -53,18 +53,18 @@ class FuturesClosingAdjB3(ABCRequests):
         int_init_td = 0
         int_end_td = None
         # for using this workaround, please pass a dummy variable to the url, within the YAML file,
-        #   like https://example.com/app/#source=dummy_1&bl_debug=True
+        #   like https://example.com/app/#source=dummy_1&bool_debug=True
         return list_headers, int_init_td, int_end_td
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        bl_debug = (
+        bool_l_debug = (
             True
-            if StrHandler().match_string_like(resp_req.url, "*bl_debug=True*") == True
+            if StrHandler().match_string_like(resp_req.url, "*bool_l_debug=True*") == True
             else False
         )
         root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
-        if bl_debug == True:
+        if bool_l_debug == True:
             path_project = DirFilesManagement().find_project_root(
                 marker="pyproject.toml"
             )
@@ -92,7 +92,7 @@ class FuturesClosingAdjB3(ABCRequests):
         ]
         # deal with data/headers specificity for the project
         list_headers, int_init_td, int_end_td = self.td_th_parser(resp_req, list_th)
-        if bl_debug == True:
+        if bool_l_debug == True:
             print(list_headers)
             print(f"LEN LIST HEADERS: {len(list_headers)}")
             print(list_td[int_init_td:int_end_td])

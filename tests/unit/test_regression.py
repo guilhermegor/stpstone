@@ -216,7 +216,7 @@ class TestLinearRegressions:
     def test_normal_equation_non_optimized(
         self, linear_regressions: LinearRegressions, sample_1d_data: tuple[np.ndarray, np.ndarray]
     ) -> None:
-        """Test normal_equation with bl_optimize=False.
+        """Test normal_equation with bool_optimize=False.
         
         Parameters
         ----------
@@ -230,7 +230,7 @@ class TestLinearRegressions:
         None
         """
         x, y = sample_1d_data
-        result = linear_regressions.normal_equation(x, y, bl_optimize=False)
+        result = linear_regressions.normal_equation(x, y, bool_l_optimize=False)
         assert isinstance(result, np.ndarray)
 
     def test_normal_equation_invalid_input_type(

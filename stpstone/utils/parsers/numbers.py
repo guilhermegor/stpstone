@@ -1,25 +1,46 @@
-### HANDLING NUMERICAL ISSUES ###
+"""Numerical operations and validation utilities.
 
-import re
-import math
-import operator
-import functools
+This module provides a collection of methods for handling numerical operations including
+multiples generation, rounding, conversions, and mathematical computations. It includes
+robust input validation and type checking through metaclass.
+"""
+
 from fractions import Fraction
+import functools
+import math
 from math import gcd
 from numbers import Number
-from typing import Any, Union, Dict, List, Optional
-from stpstone.utils.parsers.str import StrHandler
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+import operator
+import re
+from typing import Any, Optional, Union
 
 
 class NumHandler(metaclass=TypeChecker):
+    """Class for handling numerical operations and conversions."""
 
-    def multiples(self, m: int, closest_ceiling_num: int) -> List[Number]:
-        """Generate a list of numerical multiples of a given number m, until it reaches or passes
-        a given number closest_ceiling_num. The last element of the list will be the closest
-        multiple of m to closest_ceiling_num.
+    def _validate_positive_int(self, value: int, name: str) -> None:
+        """Validate that a value is a positive integer.
 
-        For example, if m = 3 and closest_ceiling_num = 10, the output will be [0, 3, 6, 9].
+        Parameters
+        ----------
+        value : int
+            Value to validate
+        name : str
+            Variable name for error messages
+
+        Raises
+        ------
+        ValueError
+            If value is not a positive integer
+        """
+        if not isinstance(value, int) or value <= 0:
+            raise ValueError(f"{name} must be a positive integer, got {value}")
+
+    def multiples(self, m: int, closest_ceiling_num: int) -> list[Number]:
+        """Generate a list of numerical multiples of a given number m.
+
+        The list includes multiples until reaching or passing closest_ceiling_num.
+        The last element will be the closest multiple of m to closest_ceiling_num.
 
         Parameters
         ----------
@@ -30,43 +51,62 @@ class NumHandler(metaclass=TypeChecker):
 
         Returns
         -------
-        list
+        list[Number]
             A list of multiples of m, stopping at closest_ceiling_num
+
+        Examples
+        --------
+        >>> multiples(3, 10)
+        [0, 3, 6, 9]
         """
-        # appending multiples
-        list_numerical_mulptiples = list()
+        self._validate_positive_int(m, "m")
+        self._validate_positive_int(closest_ceiling_num, "closest_ceiling_num")
+
+        list_numerical_multiples = []
         count = int(closest_ceiling_num / m) + 2
         for i in range(0, count * m, m):
-            list_numerical_mulptiples.append(i)
-        # replacing last value
-        if list_numerical_mulptiples[-1] > closest_ceiling_num:
-            list_numerical_mulptiples[-1] = closest_ceiling_num
-        # output
-        return list_numerical_mulptiples
+            list_numerical_multiples.append(i)
+
+        if list_numerical_multiples[-1] > closest_ceiling_num:
+            list_numerical_multiples[-1] = closest_ceiling_num
+
+        return list_numerical_multiples
 
     def nearest_multiple(self, number: Number, multiple: Number) -> int:
-        """Return the nearest multiple of a given number. For example, if number = 10.7 and multiple = 3,
-        the output will be 9, which is the nearest multiple of 3 to 10.7.
-        
+        """Return the nearest multiple of a given number.
+
         Parameters
         ----------
-        number : int or float
+        number : Number
             The number for which to find the nearest multiple
-        multiple : int
+        multiple : Number
             The number of which to find the nearest multiple
-        
+
         Returns
         -------
         int
             The nearest multiple of multiple to number
+
+        Examples
+        --------
+        >>> nearest_multiple(10.7, 3)
+        9
         """
+        if not self.is_number(number):
+            raise ValueError("number must be a valid number")
+        if not self.is_number(multiple) or multiple == 0:
+            raise ValueError("multiple must be a non-zero number")
+
         return multiple * int(number / multiple)
 
-    def round_up(self, float_number_to_round: float, float_base: float, float_ceiling: float) \
-        -> float:
-        """Round a given number up to the nearest multiple of a given base number.
-        The new number is capped at a given ceiling.
-        
+    def round_up(
+        self,
+        float_number_to_round: float,
+        float_base: float,
+        float_ceiling: float
+    ) -> float:
+        """Round a number up to nearest multiple of base, capped at ceiling.
+
         Parameters
         ----------
         float_number_to_round : float
@@ -75,39 +115,44 @@ class NumHandler(metaclass=TypeChecker):
             The base number to round up to
         float_ceiling : float
             The maximum value the new number can take
-        
+
         Returns
         -------
         float
-            The rounded up number, capped at the given ceiling
+            The rounded up number, capped at ceiling
         """
-        # correcting variables to float type
-        float_number_to_round, float_base, float_ceiling = (float(x) for x in
-                                                            [float_number_to_round, float_base, 
-                                                             float_ceiling])
-        # defining next multiple with a ceiling
-        if float(float_base + self.truncate(float_number_to_round / float_base, 0)
-                 * float_base) < float_ceiling:
-            return float(float_base + self.truncate(float_number_to_round / float_base, 0)
-                         * float_base)
-        else:
-            return float_ceiling
+        try:
+            float_number_to_round, float_base, float_ceiling = (
+                float(x) for x in [float_number_to_round, float_base, float_ceiling]
+            )
+        except ValueError as err:
+            raise ValueError("All inputs must be convertible to float") from err
+
+        next_multiple = float_base + self.truncate(float_number_to_round / float_base, 0) * float_base
+        return float(next_multiple) if next_multiple < float_ceiling else float_ceiling
 
     def decimal_to_fraction(self, decimal_number: Number) -> Fraction:
-        """Converts a decimal number to a fraction.
+        """Convert a decimal number to a fraction.
 
         Parameters
         ----------
-        decimal_number : float or str
-            The decimal number to convert. Can be a float or a string that 
-            represents a decimal number.
+        decimal_number : Number
+            The decimal number to convert
 
         Returns
         -------
         Fraction
-            A Fraction object representing the decimal number as a fraction.
+            A Fraction object representing the decimal number
+
+        Raises
+        ------
+        ValueError
+            If input cannot be converted to decimal
         """
-        return Fraction(decimal_number)
+        try:
+            return Fraction(decimal_number)
+        except (TypeError, ValueError) as err:
+            raise ValueError(f"Could not convert {decimal_number} to fraction") from err
 
     def greatest_common_divisor(self, int1: int, int2: int) -> int:
         """Calculate the greatest common divisor (GCD) of two integers.
@@ -115,177 +160,235 @@ class NumHandler(metaclass=TypeChecker):
         Parameters
         ----------
         int1 : int
-            The first integer.
+            The first integer
         int2 : int
-            The second integer.
+            The second integer
 
         Returns
         -------
         int
-            The greatest common divisor of int1 and int2.
+            The GCD of int1 and int2
         """
         return gcd(int1, int2)
 
     def truncate(self, number: Union[float, int], digits: int) -> float:
-        """Truncates a given number to a given number of decimal places.
+        """Truncate a number to specified decimal places.
 
         Parameters
         ----------
-        number : float or int
-            The number to truncate.
+        number : Union[float, int]
+            The number to truncate
         digits : int
-            The number of decimal places to truncate to.
+            Number of decimal places to truncate to
 
         Returns
         -------
         float
-            The number truncated to the given number of decimal places.
+            Truncated number
+
+        Raises
+        ------
+        ValueError
+            If digits is negative
         """
+        if digits < 0:
+            raise ValueError("Digits must be non-negative")
         stepper = 10.0 ** digits
         return math.trunc(stepper * number) / stepper
 
-    def sumproduct(self, *lists: List[List[int]]) -> int:
-        """Compute the sum of the products of corresponding elements of a list of lists.
-        
+    def sumproduct(self, *lists: list[list[int]]) -> int:
+        """Compute sum of products of corresponding elements in lists.
+
         Parameters
         ----------
-        *lists : list of lists
-            The lists of which to compute the sum of products.
-        
+        *lists : list[list[int]]
+            Lists to compute sumproduct
+
         Returns
         -------
         int
-            The sum of the products of corresponding elements of the lists.
+            Sum of products
+
+        Raises
+        ------
+        ValueError
+            If lists are empty or have unequal lengths
         """
+        if not lists:
+            raise ValueError("At least one list required")
+        if len({len(lst) for lst in lists}) > 1:
+            raise ValueError("All lists must have same length")
+
         return sum(functools.reduce(operator.mul, data) for data in zip(*lists))
 
-    def number_sign(self, number: Union[float, int], base_number: Union[float, int] = 1) -> float:
-        """Determine the sign of a number.
+    def number_sign(
+        self,
+        number: Union[float, int],
+        base_number: Union[float, int] = 1
+    ) -> float:
+        """Determine sign of number applied to base_number.
 
         Parameters
         ----------
-        number : float or int
-            The number whose sign is to be determined.
-        base_number : float or int, optional
-            The base number whose sign will be returned. Default is 1.
+        number : Union[float, int]
+            Number whose sign to use
+        base_number : Union[float, int], optional
+            Number to apply sign to (default: 1)
 
         Returns
         -------
         float
-            A float with the magnitude of base_number and the sign of number.
+            base_number with sign of number
         """
         return math.copysign(base_number, number)
 
     def multiply_n_elements(self, *args: int) -> int:
-        """Multiply the given elements together.
+        """Multiply all integer arguments.
 
         Parameters
         ----------
         *args : int
-            A variable number of integer arguments to be multiplied.
+            Integers to multiply
 
         Returns
         -------
         int
-            The product of the given integer arguments.
+            Product of arguments
+
+        Raises
+        ------
+        ValueError
+            If no arguments provided
         """
-        product = 1
-        for a in args:
-            product *= a
-        return product
+        if not args:
+            raise ValueError("At least one argument required")
+        return functools.reduce(operator.mul, args, 1)
 
     def sum_n_elements(self, *args: Union[int, float]) -> Union[int, float]:
-        """Calculate the sum of a variable number of arguments.
+        """Sum all numerical arguments.
 
         Parameters
         ----------
-        *args : int or float
-            A variable number of numerical arguments to be summed.
+        *args : Union[int, float]
+            Numbers to sum
 
         Returns
         -------
-        int or float
-            The sum of the provided arguments.
+        Union[int, float]
+            Sum of arguments
+
+        Raises
+        ------
+        ValueError
+            If no arguments provided
         """
-        sum_ = 0
-        for a in args:
-            sum_ += a
-        return sum_
+        if not args:
+            raise ValueError("At least one argument required")
+        return sum(args)
 
     def factorial(self, n: int) -> int:
-        """Calculate the factorial of a given positive integer n.
+        """Calculate factorial of positive integer.
 
         Parameters
         ----------
         n : int
-            A positive integer for which the factorial is to be calculated.
+            Positive integer
 
         Returns
         -------
         int
-            The factorial of the input integer n.
+            Factorial of n
+
+        Raises
+        ------
+        ValueError
+            If n is negative
         """
+        self._validate_positive_int(n, "n")
         return functools.reduce(operator.mul, range(1, n + 1))
 
-    def range_floats(self, float_epsilon, float_inf, float_sup, float_pace):
-        """Generate a list of float values from float_inf to float_sup, with a step size of
-        float_pace. The list is generated by multiplying each of the input parameters by
-        float_epsilon, and then dividing each element of the list by float_epsilon. This
-        allows the method to be used with any unit of measurement, such as days, hours,
-        minutes, etc.
+    def range_floats(
+        self,
+        float_epsilon: float,
+        float_inf: float,
+        float_sup: float,
+        float_pace: float
+    ) -> list[float]:
+        """Generate range of float values with given pace.
 
         Parameters
         ----------
         float_epsilon : float
-            The unit of measurement for the output list.
+            Unit of measurement
         float_inf : float
-            The lower bound of the range.
+            Lower bound
         float_sup : float
-            The upper bound of the range.
+            Upper bound
         float_pace : float
-            The step size of the range.
+            Step size
 
         Returns
         -------
-        list
-            A list of float values from float_inf to float_sup, with a step size of
-            float_pace.
+        list[float]
+            Generated range
+
+        Raises
+        ------
+        ValueError
+            If bounds are invalid or pace is non-positive
         """
-        return [float(x) / float_epsilon for x in range(int(float_inf * float_epsilon),
-                                                        int(float_sup * float_epsilon),
-                                                        int(float_pace * float_epsilon))]
+        if float_inf >= float_sup:
+            raise ValueError("Lower bound must be less than upper bound")
+        if float_pace <= 0:
+            raise ValueError("Pace must be positive")
+
+        return [
+            float(x) / float_epsilon
+            for x in range(
+                int(float_inf * float_epsilon),
+                int(float_sup * float_epsilon),
+                int(float_pace * float_epsilon)
+            )
+        ]
 
     def clamp(self, n: float, minn: float, maxn: float) -> float:
-        """Clamp a number n to the range [minn, maxn].
-        
+        """Clamp number between min and max values.
+
         Parameters
         ----------
         n : float
-            The number to clamp.
+            Number to clamp
         minn : float
-            The lower bound of the range.
+            Minimum value
         maxn : float
-            The upper bound of the range.
-        
+            Maximum value
+
         Returns
         -------
         float
-            The clamped number.
+            Clamped value
+
+        Raises
+        ------
+        ValueError
+            If min > max
         """
+        if minn > maxn:
+            raise ValueError("minn must be less than or equal to maxn")
         return max(min(maxn, n), minn)
 
     def is_numeric(self, str_: str) -> bool:
-        """Check whether a given string is a valid number.
+        """Check if string represents a valid number.
 
         Parameters
         ----------
         str_ : str
-            The string to check.
+            String to check
 
         Returns
         -------
         bool
-            True if the string is a valid number, False otherwise.
+            True if string is numeric
         """
         try:
             float(str_)
@@ -294,131 +397,95 @@ class NumHandler(metaclass=TypeChecker):
             return False
 
     def is_number(self, value_: Any) -> bool:
-        """Check whether a given value is a number (int, float, etc.).
+        """Check if value is a number (excluding bool).
 
         Parameters
         ----------
         value_ : Any
-            The value to check.
+            Value to check
 
         Returns
         -------
         bool
-            True if the value is a number, False otherwise.
+            True if value is a number
         """
-        return isinstance(value_, (Number)) and not isinstance(value_, bool)
+        return isinstance(value_, Number) and not isinstance(value_, bool)
 
     def transform_to_float(
         self,
-        value_: Union[str, int, float, bool], 
+        value_: Union[str, int, float, bool],
         int_precision: Optional[int] = None
     ) -> Union[float, str, bool]:
-        """Convert a given value to a float, handling a variety of possible formats and
-        edge cases.
+        """Convert value to float handling various formats.
 
         Parameters
         ----------
         value_ : Union[str, int, float, bool]
-            The value to convert.
+            Value to convert
         int_precision : Optional[int]
-            The number of decimal places to round to. If None, the original precision is
-            preserved.
+            Decimal places to round to
 
         Returns
         -------
         Union[float, str, bool]
-            The converted float value, or the original value if conversion fails.
+            Converted value or original if conversion fails
 
         Notes
         -----
-        This method is designed to handle a wide range of possible number formats, including
-        European and American number formats, percentages, basis points, and others. It also
-        handles negative numbers and edge cases like empty strings and non-numeric input.
-
-        Examples
-        --------
-        >>> transform_to_float('3,132.45%')
-        31.3245
-        >>> transform_to_float('1.234,56')
-        1234.56
-        >>> transform_to_float('1,234,567.89')
-        1234567.89
-        >>> transform_to_float('4.56 bp')
-        0.000456
-        >>> transform_to_float('(-)912.412.911,231')
-        -912412911.231
-        >>> transform_to_float(True)
-        True
-        >>> transform_to_float('Text Tried')
-        'Text Tried'
-        >>> transform_to_float('-0,10%')
-        -0.001
-        >>> transform_to_float('0,10%')
-        0.001
-        >>> transform_to_float('9888 Example')
-        '9888 Example'
+        Handles European/American formats, percentages, basis points.
+        Preserves boolean values and non-convertible strings.
         """
-        # return boolean values as-is
         if isinstance(value_, bool):
             return value_
-        # handle non-string cases
+
         if isinstance(value_, (int, float)):
             return round(value_, int_precision) if int_precision is not None else float(value_)
+
         original = str(value_).strip()
         s = original
-        # first check if this is clearly a mixed number/text case that should remain unchanged
+
         if re.search(r'[a-zA-Z].*\d|\d.*[a-zA-Z]', s) and not (
             '%' in s or re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE)):
             return original
-        # check for percentage or basis points
-        bl_percentage = '%' in s
-        bl_bp = re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE) is not None
-        # handle negative numbers (check original string)
-        bl_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
-        # remove percentage signs, parentheses, and + signs but keep negative signs
+
+        bool_percentage = '%' in s
+        bool_bp = re.search(r'(bp|b\.p\.?)$', s, flags=re.IGNORECASE) is not None
+        bool_negative = re.search(r'\(.*\)|^-', original.strip()) is not None
+
         s = re.sub(r'[%\+\(\)]', '', s).strip()
-        s = s.replace(')', '')  # remove closing parentheses if any
-        # remove only known suffixes (bp, b.p.) but preserve other text
-        if bl_bp:
+        s = s.replace(')', '')
+
+        if bool_bp:
             s_clean = re.sub(r'(bp|b\.p\.?)$', '', s, flags=re.IGNORECASE).strip()
         else:
             s_clean = s
-        # count separators to determine format
+
         comma_count = s_clean.count(',')
         dot_count = s_clean.count('.')
-        # handle number formatting
+
         if comma_count == 1 and dot_count > 0:
-            # if there's exactly one comma and it comes after a dot, assume European format
             if s_clean.find(',') > s_clean.find('.'):
                 s_clean = s_clean.replace('.', '').replace(',', '.')
             else:
-                # otherwise assume American format (1,234.56)
                 s_clean = s_clean.replace(',', '')
         elif comma_count > 1:
-            # multiple commas - assume American thousands separator (1,234,567.89)
             s_clean = s_clean.replace(',', '')
         elif dot_count > 1:
-            # multiple dots - could be European thousands separator (1.234.567,89)
             parts = s_clean.split('.')
             if all(len(p) == 3 for p in parts[:-1]):
-                # all parts except last have length 3 → thousands separators
                 s_clean = s_clean.replace('.', '')
             else:
-                # might be decimal points, but unclear - try removing all dots
                 s_clean = s_clean.replace('.', '')
         elif comma_count == 1 and dot_count == 0:
-            # single comma - could be European decimal
-            # replace comma with decimal point
             s_clean = s_clean.replace(',', '.')
-        # try to convert to float
+
         try:
             num = float(s_clean)
-            if bl_negative:
+            if bool_negative:
                 num = -abs(num)
-            # apply percentage or basis point conversion
-            if bl_percentage:
+            if bool_percentage:
                 num /= 100
-            elif bl_bp:
+            elif bool_bp:
                 num /= 10_000
             if int_precision is not None:
                 num = round(num, int_precision)

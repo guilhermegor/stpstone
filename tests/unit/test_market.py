@@ -385,7 +385,7 @@ class TestMarkowitzPortf:
         portf = MarkowitzPortf(
             sample_returns_df, 
             sample_weights_df,
-            bl_validate_w=True
+            bool_validate_w=True
         )
         assert isinstance(portf.array_r, np.ndarray)
         assert isinstance(portf.array_w, np.ndarray)
@@ -411,7 +411,7 @@ class TestMarkowitzPortf:
         """
         invalid_weights = np.full(10, 0.11)  # Sums to 1.1
         with pytest.raises(ValueError, match="must sum to 1"):
-            MarkowitzPortf(sample_returns, invalid_weights, bl_validate_w=True)
+            MarkowitzPortf(sample_returns, invalid_weights, bool_l_validate_w=True)
 
     def test_weight_validation_disabled(
         self,
@@ -433,7 +433,7 @@ class TestMarkowitzPortf:
         None
         """
         invalid_weights = np.full(10, 0.11)  # Sums to 1.1
-        portf = MarkowitzPortf(sample_returns, invalid_weights, bl_validate_w=False)
+        portf = MarkowitzPortf(sample_returns, invalid_weights, bool_l_validate_w=False)
         assert portf is not None
 
     def test_mu_calculation(self, markowitz_portf: MarkowitzPortf) -> None:

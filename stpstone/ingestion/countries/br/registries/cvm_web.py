@@ -32,9 +32,9 @@ class CVMWeb_WS_Funds:
         port:Optional[str]=None,
         time_wait_page_load:Optional[int]=10,
         time_wait_el:Optional[int]=10,
-        bl_open_minimized:Optional[bool]=True,
-        bl_parallel:bool=False,
-        bl_insert_or_ignore:bool=True,
+        bool_open_minimized:Optional[bool]=True,
+        bool_l_parallel:bool=False,
+        bool_l_insert_or_ignore:bool=True,
         cls_db:type=None,
         int_sleep:object=1,
         int_ncpus:int=mp.cpu_count() - 2 if mp.cpu_count() > 2 else 1,
@@ -69,7 +69,7 @@ class CVMWeb_WS_Funds:
         self.port = port
         self.time_wait_page_load = time_wait_page_load
         self.time_wait_el = time_wait_el
-        self.bl_open_minimized = bl_open_minimized
+        self.bool_l_open_minimized bool_ool_open_minimized
         self.str_cookie = str_cookie if str_cookie is not None else self.cookie_govbr(
             str_id,
             str_passw,
@@ -77,10 +77,10 @@ class CVMWeb_WS_Funds:
             port,
             time_wait_page_load,
             time_wait_el,
-            bl_open_minimized
+            bool_l_open_minimized
         )
-        self.bl_parallel = bl_parallel
-        self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.bool_l_parallel bool_ool_parallel
+        self.bool_l_insert_or_ignore bool_ool_insert_or_ignore
         self.cls_db = cls_db
         self.int_sleep = int_sleep
         self.int_ncpus = int_ncpus
@@ -111,7 +111,7 @@ class CVMWeb_WS_Funds:
         port:str,
         time_wait_page_load:int=30,
         time_wait_el:int=30,
-        bl_open_minimized:bool=False,
+        bool_l_open_minimized:bool=False,
         url:str='https://cvmweb.cvm.gov.br/swb/default.asp?sg_sistema=scw',
         str_frame_name:str='Main',
         xpath_click_login:str='//*[@id="linkGovBr"]/img',
@@ -126,7 +126,7 @@ class CVMWeb_WS_Funds:
         cls_selenium = SeleniumWD()
         # create driver element, wait until page is loaded and the login button is available
         driver = cls_selenium.selenium_web_driver(url, webdriver_path, port, time_wait_page_load,
-            bl_open_minimized)
+            bool_l_open_minimized)
         cls_selenium.selenium_element_is_clickable(driver, xpath_click_login,
             frame_name=str_frame_name)
         # click login button
@@ -143,7 +143,7 @@ class CVMWeb_WS_Funds:
         raise Exception('BREAK')
 
     def generic_req(self, str_method:str, url:str, str_header_ref:str, dict_data:dict={},
-        bl_allow_redirects:bool=True, tup_timeout:Tuple[float, float]=(12.0, 21.0)) -> html.HtmlElement:
+        bool_l_allow_redirects:bool=True, tup_timeout:Tuple[float, float]=(12.0, 21.0)) -> html.HtmlElement:
         """
         DOCSTRING:
         INPUTS:
@@ -172,7 +172,7 @@ class CVMWeb_WS_Funds:
             headers=dict_headers,
             data=dict_data,
             cookies=self.dict_cookie,
-            allow_redirects=bl_allow_redirects,
+            allow_redirects=bool_l_allow_redirects,
             timeout=tup_timeout
         )
         resp_req.raise_for_status()
@@ -194,7 +194,7 @@ class CVMWeb_WS_Funds:
         str_xpath_funds:str='//select[@id="PK_PARTIC"]/option',
         str_xpath_value:str='./@value',
         str_method:str='GET',
-        bl_allow_redirects:bool=True
+        bool_l_allow_redirects:bool=True
     ) -> pd.DataFrame:
         """
         DOCSTRING: AVAILABLE FUND CODES AND CNPJ
@@ -205,7 +205,7 @@ class CVMWeb_WS_Funds:
         list_ser = list()
         # request html
         html_content = self.generic_req(str_method, self.str_host_ex_fund + str_app,
-                                        str_header_ref, bl_allow_redirects=bl_allow_redirects)
+                                        str_header_ref, bool_l_allow_redirectbool_ool_allow_redirects)
         # print(f'HTML CONTENT: \n{html_content}')
         # print('OPTION FUND: {}'.format(HtmlHandler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
         # looping within available funds and filling serialized list
@@ -268,7 +268,7 @@ class CVMWeb_WS_Funds:
             self.cls_db.insert(
                 df_funds.to_dict(orient='records'),
                 str_table_nane,
-                bl_insert_or_ignore=self.bl_insert_or_ignore
+                bool_l_insert_or_ignore=selbool_ool_insert_or_ignore
             )
         # returning dataframe
         return df_funds
@@ -280,7 +280,7 @@ class CVMWeb_WS_Funds:
         str_header_ref:str='SelecPartic.aspx?CD_TP_INFORM=15',
         str_app:str='ConsInfDiario.aspx?PK_PARTIC={}&PK_SUBCLASSE=-1',
         str_method:str='GET',
-        bl_allow_redirects:bool=False,
+        bool_l_allow_redirects:bool=False,
     ) -> Tuple[html.HtmlElement, str]:
         """
         DOCSTRING: GENERAL FUND DAILY REPORT WITH THE MOST RECENT DATE
@@ -294,7 +294,7 @@ class CVMWeb_WS_Funds:
                 self.str_host_post_fund + str_app.format(str_fund_code),
                 str_header_ref,
                 dict_data,
-                bl_allow_redirects=bl_allow_redirects,
+                bool_l_allow_redirectbool_ool_allow_redirects,
             ), \
             self.str_host_post_fund + str_app.format(str_fund_code)
 
@@ -330,7 +330,7 @@ class CVMWeb_WS_Funds:
             self.cls_db.insert(
                 list_avl_dts_fund,
                 str_table_nane,
-                bl_insert_or_ignore=self.bl_insert_or_ignore
+                bool_l_insert_or_ignore=selbool_ool_insert_or_ignore
             )
         return list_dts
 
@@ -350,7 +350,7 @@ class CVMWeb_WS_Funds:
         str_header_ref:str='SelecPartic.aspx?CD_TP_INFORM=15',
         str_app:str='ConsInfDiario.aspx?PK_PARTIC={}&PK_SUBCLASSE=-1',
         str_method_fund_report_dt:str='POST',
-        bl_allow_redirects:bool=False
+        bool_l_allow_redirects:bool=False
     ):
         """
         DOCSTRING: SIMULATION OF JAVASCRIPT CODE EXECUTION WHEN THE REFERENCE DATE IS CHANGED IN THE
@@ -384,7 +384,7 @@ class CVMWeb_WS_Funds:
             #     self.str_host_post_fund + str_app.format(str_fund_code),
             #     str_header_ref,
             #     dict_data,
-            #     bl_allow_redirects=bl_allow_redirects,
+            #     bool_l_allow_redirectbool_ool_allow_redirects,
             # )
             resp_req = request(
                 method=str_method_fund_report_dt,
@@ -502,7 +502,7 @@ class CVMWeb_WS_Funds:
             self.cls_db.insert(
                 list_ser,
                 str_table_nane,
-                bl_insert_or_ignore=self.bl_insert_or_ignore
+                bool_l_insert_or_ignore=selbool_ool_insert_or_ignore
             )
         # wait for the next iteration, if is user's will
         if self.int_sleep is not None:
@@ -535,7 +535,7 @@ class CVMWeb_WS_Funds:
                         str_dt, format=str_dt_fmt_1).strftime(str_strftime_format)
             dict_dts_funds[str_fund_code] = list_dts
         #   parallelized fetch, if is user's will
-        if self.bl_parallel == True:
+        if self.bool_l_parallel == True:
             #   preparing task arguments
             list_task_args = [
                 (

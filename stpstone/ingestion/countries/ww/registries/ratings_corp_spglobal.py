@@ -49,7 +49,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
     def get_bearer(self) -> str:
         regex_pattern = "(?i)system_access_token=([^*]+?);"
         url = "https://disclosure.spglobal.com/ratings/en/regulatory/ratings-actions"
-        cls_selenium = SeleniumWD(url, bl_headless=True, bl_incognito=True)
+        cls_selenium = SeleniumWD(url, bool_headless=True, bool_incognito=True)
         cls_selenium.wait(60)
         cls_selenium.wait_until_el_loaded('//a[@class="link-black link-black-hover text-underline"]')
         sleep(60)
@@ -98,7 +98,7 @@ class RatingsCorpSPGlobalProduct:
         for i in range(1, 100):
             try:
                 cls_ = RatingsCorpSPGlobalConcreteCreator(pg_number=i, bearer=str_bearer)
-                df_ = cls_.source("ratings_corp", bl_fetch=True)
+                df_ = cls_.source("ratings_corp", bool_l_fetch=True)
                 list_ser.extend(df_.to_dict(orient="records"))
                 sleep(10)
             except Exception as e:
@@ -111,7 +111,7 @@ class RatingsCorpSPGlobalProduct:
         for i in range(1, 100):
             try:
                 cls_ = RatingsCorpSPGlobalConcreteCreator(pg_number=i, bearer=str_bearer)
-                _ = cls_.source("ratings_corp", bl_fetch=False)
+                _ = cls_.source("ratings_corp", bool_l_fetch=False)
                 sleep(10)
             except Exception as e:
                 CreateLog().log_message(self.logger, f"Error: {e}", log_level="warning")

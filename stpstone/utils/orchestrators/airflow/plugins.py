@@ -19,5 +19,5 @@ class AirflowPlugins:
             None
         """
         ti = kwargs['ti']
-        bl_workng_day = DatesBR().is_working_day(kwargs['ds'])
-        ti.xcom_push(key='bl_continue', value=bl_workng_day)
+        bool_workng_day = DatesBR().is_working_day(kwargs['ds'])
+        ti.xcom_push(key='bool_l_continue', valubool_ool_workng_day)

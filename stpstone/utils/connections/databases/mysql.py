@@ -1,8 +1,9 @@
 ### CONNECTING TO MYSQL DATABASE ###
 
-import pymysql
 import json
+
 import pandas as pd
+import pymysql
 from sqlalchemy import create_engine
 
 
@@ -20,7 +21,7 @@ class MySQLDatabase:
         # return SQL result as DataFrame
         return pd.read_sql(query, con=conn)
 
-    def engine(self, host, port, database, user, password, query, bl_insert_db=False):
+    def engine(self, host, port, database, user, password, query, bool_insert_db=False):
         """
         DOCSTRING:
         RUN SQL QUERIES FOR MYSQL DATABASE
@@ -39,7 +40,7 @@ class MySQLDatabase:
             cur = conn.cursor()
             cur.execute(query)
             #   if it's not an insert query, fetch the results
-            if not bl_insert_db:
+            if not bool_l_insert_db:
                 list_rows = cur.fetchall()
             else:
                 conn.commit()

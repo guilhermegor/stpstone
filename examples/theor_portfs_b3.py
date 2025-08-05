@@ -9,7 +9,7 @@ from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 
 
-# session = YieldFreeProxy(bl_new_proxy=True).session
+# session = YieldFreeProxy(bool_new_proxy=True).session
 
 cls_ = IndexesTheorPortfB3(
     session=None,
@@ -18,21 +18,21 @@ cls_ = IndexesTheorPortfB3(
 )
 
 print('*** IBOV THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibov', bl_debug=False, bl_fetch=True)
+df_ = cls_.source('ibov', bool_l_debug=Falsebool_ool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()
 
 print('\n*** IBRX100 THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibrx100', bl_debug=False, bl_fetch=True)
+df_ = cls_.source('ibrx100', bool_l_debug=Falsebool_ool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()
 
 print('\n*** IBRX50 THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibrx50', bl_debug=False, bl_fetch=True)
+df_ = cls_.source('ibrx50', bool_l_debug=Falsebool_ool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()
 
 print('\n*** IBRA THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibra', bl_debug=False, bl_fetch=True)
+df_ = cls_.source('ibra', bool_l_debug=Falsebool_ool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()

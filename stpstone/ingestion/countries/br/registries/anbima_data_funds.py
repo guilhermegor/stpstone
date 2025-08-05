@@ -11,16 +11,16 @@ from stpstone.utils.cals.handling_dates import DatesBR
 class FundsDecrypt(AnbimaDataDecrypt):
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
-                 bl_schema: bool = True, str_tbl_name: Optional[str] = None,
+                 bool_schema: bool = True, str_tbool_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None,
-                 bl_insert_or_ignore: Optional[bool] = False,
+                 bool_l_insert_or_ignore: Optional[bool] = False,
                  logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bl_schema = bl_schema
-        self.str_tbl_name = str_tbl_name
+        self.bool_l_schema bool_ool_schema
+        self.str_tbool_l_name = strbool_ool_name
         self.str_schema_name = str_schema_name
-        self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.bool_l_insert_or_ignore bool_ool_insert_or_ignore
         self.logger = logger
 
 
@@ -99,7 +99,7 @@ class FundsConsolidated:
     def funds_infos_ts(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         list_ser = list()
         list_objects_s3 = self.client_s3.list_objects(
-            bucket_name=self.bucket_name, bl_include_version=False)
+            bucket_name=self.bucket_name, bool_l_include_version=False)
         for i, obj_name in enumerate(list_objects_s3):
             html_bytes = self.client_s3.get_object_as_bytes(
                 bucket_name=self.bucket_name,

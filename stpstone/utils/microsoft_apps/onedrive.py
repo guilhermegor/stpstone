@@ -1,6 +1,7 @@
 ### HANDLING ONEDRIVE ISSUES ###
 
 from getpass import getuser
+
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -9,7 +10,7 @@ class OneDrive:
     @property
     def check_sync_status(self,
                           dir_path_business='C:\\Users\\{}\\AppData\\Local\\Microsoft\\OneDrive\\logs\\Business1\\',
-                          name_like='SyncEngine-*', bl_to_datetime=True):
+                          name_like='SyncEngine-*', bool_to_datetime=True):
         """
         DOCSTRING: CHECK WHETHER SYNC SERVICE IN LOCAL MACHINE IS ALIVE
         INPUTS: -
@@ -22,4 +23,4 @@ class OneDrive:
             dir_path_business, name_like)
         # return last edition datetime
         return DirFilesManagement().time_last_edition(complete_status_file_path,
-                                                      bl_to_datetime=bl_to_datetime)
+                                                      bool_l_to_datetimbool_ool_to_datetime)

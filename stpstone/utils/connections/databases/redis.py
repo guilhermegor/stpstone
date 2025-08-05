@@ -11,7 +11,7 @@ class RedisClient:
     """
     _instance = None
 
-    def __init__(self, str_host:str='localhost', int_port:int=6379, bl_decode_resp:bool=True) -> None:
+    def __init__(self, str_host:str='localhost', int_port:int=6379, bool_decode_resp:bool=True) -> None:
         """
         DOCSTRING: STORE THE CONNECTION CONFIGURATION
         INPUTS: HOST:STR, PORT:INT, DECODE_RESP:BOOL
@@ -19,7 +19,7 @@ class RedisClient:
         """
         self.str_host = str_host
         self.int_port = int_port
-        self.bl_decode_resp = bl_decode_resp
+        self.bool_l_decode_resp bool_ool_decode_resp
 
     def __new__(cls, *args, **kwargs) -> RedisClient:
         """
@@ -35,33 +35,33 @@ class RedisClient:
         return cls._instance
 
     @staticmethod
-    def _load_config(str_host:str, int_port:int, bl_decode_resp:bool) -> Dict[str, object]:
+    def _load_config(str_host:str, int_port:int, bool_l_decode_resp:bool) -> Dict[str, object]:
         """
         DOCSTRING: LOAD REDIS CONFIGURATION PARAMETERS
         INPUTS:
             - str_host: REDIS HOST
             - int_port: REDIS PORT
-            - bl_decode_resp: WHETHER TO DECODE RESPONSES
+            - bool_l_decode_resp: WHETHER TO DECODE RESPONSES
         OUTPUTS: CONFIGURATION DICTIONARY
         """
         return {
             'host': str_host,
             'port': int_port,
-            'decode_responses': bl_decode_resp
+            'decode_responses': bool_l_decode_resp
         }
 
     @classmethod
-    def _connect(cls, str_host:str, int_port:int, bl_decode_resp:bool) -> redis.StrictRedis:
+    def _connect(cls, str_host:str, int_port:int, bool_l_decode_resp:bool) -> redis.StrictRedis:
         """
         DOCSTRING: ESTABLISH A CONNECTION TO REDIS
         INPUTS:
             - str_host: REDIS HOST
             - int_port: REDIS PORT
-            - bl_decode_resp: WHETHER TO DECODE RESPONSES
+            - bool_l_decode_resp: WHETHER TO DECODE RESPONSES
         OUTPUTS: REDIS CLIENT INSTANCE
         """
         # load configuration parameters
-        config = cls._load_config(str_host, int_port, bl_decode_resp)
+        config = cls._load_config(str_host, int_port, bool_l_decode_resp)
         # create and return a redis client instance
         return redis.StrictRedis(**config)
 

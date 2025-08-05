@@ -1,13 +1,13 @@
-import os
-import sys
-import subprocess
 from logging import Logger
+import os
+import subprocess
+import sys
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
-from psycopg import connect, Connection, Cursor
+from psycopg import Connection, Cursor, connect
 from psycopg.rows import dict_row
-from psycopg.sql import Composable, Identifier, SQL
+from psycopg.sql import SQL, Composable, Identifier
 
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.abc import ABCDatabase
@@ -85,7 +85,7 @@ class PostgreSQLDB(ABCDatabase):
         self,
         json_data: List[Dict[str, Any]],
         str_table_name: str,
-        bl_insert_or_ignore: bool = False,
+        bool_insert_or_ignore: bool = False,
     ) -> None:
         # validate json, in order to have the same keys
         json_data = JsonFiles().normalize_json_keys(json_data)
@@ -98,7 +98,7 @@ class PostgreSQLDB(ABCDatabase):
         table = Identifier(str_table_name)
         cols = SQL(",").join(map(Identifier, columns))
 
-        if bl_insert_or_ignore:
+        if bool_l_insert_or_ignore:
             query = SQL("""
                 INSERT INTO {table} ({cols})
                 VALUES ({placeholders})

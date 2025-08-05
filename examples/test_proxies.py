@@ -1,20 +1,22 @@
 import time
+
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
+
 
 time_ = time.time()
 
 test_proxies = YieldFreeProxy(
-    bl_new_proxy=True,
+    bool_new_proxy=True,
     str_country_code="BR",
     str_continent_code=None,
-    bl_alive=True,
+    bool_l_alive=True,
     list_anonymity_value=["elite", "anonymous"],
     list_protocol=["http", "https"],
-    bl_ssl=None,
+    bool_l_ssl=None,
     float_min_ratio_times_alive_dead=None,
     float_max_timeout=10000,
-    bl_use_timer=False,
+    bool_l_use_timer=False,
     list_status_forcelist=[429, 500, 502, 503, 504],
     logger=None,
     str_plan_id_webshare="free",

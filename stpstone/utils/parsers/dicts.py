@@ -203,7 +203,7 @@ class HandlingDicts(metaclass=TypeChecker):
         self,
         list_ser: list[dict],
         list_keys_merge: Optional[list[str]] = None,
-        bl_sum_values_key: bool = True
+        bool_sum_values_key: bool = True
     ) -> dict:
         """Merge dictionaries by summing values for selected keys.
         
@@ -213,7 +213,7 @@ class HandlingDicts(metaclass=TypeChecker):
             List of dictionaries to process
         list_keys_merge : Optional[list[str]]
             Keys to merge (sum values). If None, sum all values.
-        bl_sum_values_key : bool
+        bool_l_sum_values_key : bool
             Whether to sum values (True) or keep as lists (False)
             
         Returns
@@ -232,7 +232,7 @@ class HandlingDicts(metaclass=TypeChecker):
                     else:
                         dict_[key] = value
                         
-            if bl_sum_values_key:
+            if bool_l_sum_values_key:
                 return {
                     k: (sum(v) if isinstance(v, list) else v)
                     for k, v in dict_.items()

@@ -1,15 +1,17 @@
 ### CONNECTING TO SQLITE DATABASE ###
 
-import sqlite3
-import backoff
 from logging import Logger
+import sqlite3
+from typing import Any, Dict, List, Optional
+
+import backoff
 import pandas as pd
-from typing import List, Dict, Any, Optional
+
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.parsers.json import JsonFiles
-from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.utils.parsers.pd import DealingPd
 from stpstone.utils.connections.databases.abc import ABCDatabase
+from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.json import JsonFiles
+from stpstone.utils.parsers.pd import DealingPd
 
 
 class SQLiteDB(ABCDatabase):
@@ -73,7 +75,7 @@ class SQLiteDB(ABCDatabase):
         self,
         json_data: List[Dict[str, Any]],
         str_table_name: str,
-        bl_insert_or_ignore: bool = False,
+        bool_insert_or_ignore: bool = False,
     ) -> None:
         """
         DOCSTRING: INSERTS DATA FROM A JSON OBJECT INTO A SQLITE TABLE
@@ -85,7 +87,7 @@ class SQLiteDB(ABCDatabase):
         # sql insert statement
         list_columns = ", ".join(json_data[0].keys())
         list_data = ", ".join(["?" for _ in json_data[0]])
-        if bl_insert_or_ignore == True:
+        if bool_l_insert_or_ignore == True:
             str_query = (
                 f"INSERT OR IGNORE INTO {str_table_name} "
                 + f"({list_columns}) VALUES ({list_data})"

@@ -257,14 +257,14 @@ class StrHandler(metaclass=TypeChecker):
         shaved = "".join(c for c in norm_txt if not combining(c))
         return normalize("NFC", shaved)
 
-    def remove_diacritics_nfkd(self, str_: str, bl_lower_case: bool = True) -> str:
+    def remove_diacritics_nfkd(self, str_: str, bool_lower_case: bool = True) -> str:
         """Remove diacritics using NFKD normalization.
 
         Parameters
         ----------
         str_ : str
             The string to process
-        bl_lower_case : bool, optional
+        bool_l_lower_case : bool, optional
             Whether to convert to lowercase first, by default True
 
         Returns
@@ -272,7 +272,7 @@ class StrHandler(metaclass=TypeChecker):
         str
             The processed string
         """
-        if bl_lower_case:
+        if bool_l_lower_case:
             str_ = str_.lower()
         str_ = str_.replace("\n", "")
         return "".join(c for c in normalize("NFKD", str_) if not combining(c))
@@ -645,14 +645,14 @@ class StrHandler(metaclass=TypeChecker):
         def_remove_digits = str.maketrans("", "", digits)
         return str_.translate(def_remove_digits)
 
-    def is_capitalized(self, str_: str, bl_simple_validation: bool = True) -> bool:
+    def is_capitalized(self, str_: str, bool_l_simple_validation: bool = True) -> bool:
         """Check if a string is properly capitalized.
 
         Parameters
         ----------
         str_ : str
             The string to check
-        bl_simple_validation : bool, optional
+        bool_l_simple_validation : bool, optional
             If True, only checks first character is uppercase, by default True
 
         Returns
@@ -667,7 +667,7 @@ class StrHandler(metaclass=TypeChecker):
         str_ = self.remove_non_alphanumeric_chars(str_)
         
         try:
-            if bl_simple_validation:
+            if bool_l_simple_validation:
                 # for single character, just check if it's uppercase
                 if len(str_) == 1:
                     return str_[0].isupper()
@@ -1050,7 +1050,7 @@ class StrHandler(metaclass=TypeChecker):
             raise ValueError("Total length is too small for the given inputs.")
         return f"{str_prefix}{'0' * required_zeros}{str_num}"
 
-    def get_url_query(self, url: str, bl_include_fragment: bool = False) \
+    def get_url_query(self, url: str, bool_l_include_fragment: bool = False) \
         -> dict[str, Union[str, list[str]]]:
         """Extract query parameters from a URL.
 
@@ -1058,7 +1058,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         url : str
             The URL to parse
-        bl_include_fragment : bool, optional
+        bool_l_include_fragment : bool, optional
             Whether to include fragment parameters, by default False
 
         Returns
@@ -1068,7 +1068,7 @@ class StrHandler(metaclass=TypeChecker):
         """
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
-        if bl_include_fragment:
+        if bool_l_include_fragment:
             fragment_params = parse_qs(parsed_url.fragment)
             query_params.update(fragment_params)
         return {

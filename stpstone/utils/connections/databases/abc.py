@@ -1,6 +1,6 @@
 from abc import ABC, ABCMeta, abstractmethod
 from logging import Logger
-from typing import Any, Dict, List, Optional, Union, Protocol, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, Union, runtime_checkable
 
 import pandas as pd
 from pydantic_core import core_schema
@@ -150,7 +150,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         self,
         json_data: List[Dict[str, Any]],
         str_table_name: str,
-        bl_insert_or_ignore: bool = False,
+        bool_insert_or_ignore: bool = False,
     ) -> None:
         """
         Insert data into a table.
@@ -161,7 +161,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
             Data to insert (list of dicts)
         str_table_name : str
             Target table name
-        bl_insert_or_ignore : bool, optional
+        bool_l_insert_or_ignore : bool, optional
             If True, ignore duplicates, defaults to False
         """
         pass

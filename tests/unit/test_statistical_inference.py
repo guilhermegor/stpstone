@@ -263,7 +263,7 @@ def test_benford_law_valid_occurrence_data(
     That benford_law processes occurrence counts correctly and returns expected distributions.
     """
     result: BenfordResults = stat_dist_ht.benford_law(occurrence_data, 
-                                                      bl_list_number_occurrencies=True)
+                                                      bool_list_number_occurrencies=True)
     expected_benford = np.array([np.log10(i + 2) - np.log10(i + 1) for i in range(9)])
     assert isinstance(result, dict)
     assert "benford_expected_array" in result
@@ -294,10 +294,10 @@ def test_benford_law_non_boolean_flag(
 
     Verifies
     --------
-    That passing a non-boolean bl_list_number_occurrencies raises TypeError with correct message.
+    That passing a non-boolean bool_l_list_number_occurrencies raises TypeError with correct message.
     """
-    with pytest.raises(TypeError, match="bl_list_number_occurrencies must be of type bool"):
-        stat_dist_ht.benford_law(sample_data, bl_list_number_occurrencies="True")
+    with pytest.raises(TypeError, match="bool_l_list_number_occurrencies must be of type bool"):
+        stat_dist_ht.benford_law(sample_data, bool_l_list_number_occurrencies="True")
 
 
 def test_benford_law_zero_sum_occurrence(stat_dist_ht: StatisticalDistributionsHT) -> None:
@@ -318,7 +318,7 @@ def test_benford_law_zero_sum_occurrence(stat_dist_ht: StatisticalDistributionsH
     """
     invalid_data = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.float64)
     with pytest.raises(ValueError, match="Sum of array_data cannot be zero"):
-        stat_dist_ht.benford_law(invalid_data, bl_list_number_occurrencies=True)
+        stat_dist_ht.benford_law(invalid_data, bool_l_list_number_occurrencies=True)
 
 
 def test_benford_law_all_zero_digits(stat_dist_ht: StatisticalDistributionsHT) -> None:

@@ -466,7 +466,7 @@ class TestDirFilesManagement:
         assert isinstance(timestamp, float)
         
         # With datetime conversion
-        dt, exists = dir_manager.time_last_edition(test_file, bl_to_datetime=True)
+        dt, exists = dir_manager.time_last_edition(test_file, bool_to_datetime=True)
         assert exists
         assert isinstance(dt, datetime)
         
@@ -1064,7 +1064,7 @@ class TestDirFilesManagement:
         os.utime(file2, (os.path.getatime(file1), os.path.getmtime(file1) + 10))
         
         # Test without sorting
-        result = dir_manager.loop_files_w_rule(temp_dir, "*.txt", bl_first_last_edited=False)
+        result = dir_manager.loop_files_w_rule(temp_dir, "*.txt", bool_l_first_last_edited=False)
         assert isinstance(result, list)
         assert len(result) == 2
         
@@ -1284,7 +1284,7 @@ class TestDirFilesManagement:
         assert hasattr(result, 'read')  # Check it's a file-like object instead of specific type
         
         # Test with text wrapper
-        result = dir_manager.get_zip_from_web_in_memory(mock_response, bl_io_interpreting=True)
+        result = dir_manager.get_zip_from_web_in_memory(mock_response, bool_l_io_interpreting=True)
         assert isinstance(result, TextIOWrapper)
         
         # Test multiple files
@@ -1570,7 +1570,7 @@ class TestFoldersTree:
         assert "file2.txt" in result
         
         # With markdown line breaks
-        tree = FoldersTree(root_dir, bl_add_linebreak_markdown=True)
+        tree = FoldersTree(root_dir, bool_l_add_linebreak_markdown=True)
         result = tree.generate_tree()
         assert "<br>" in result
 

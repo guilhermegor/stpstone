@@ -139,8 +139,8 @@ class CVMDATA:
         # downloading zip file into memory
         list_main_zip = DirFilesManagement().get_zip_from_web_in_memory(
             url,
-            bl_io_interpreting=False,
-            bl_verify=False
+            bool_io_interpreting=False,
+            bool_l_verify=False
         )
         # iterate through files in the ZIP
         for file_info in list_main_zip:

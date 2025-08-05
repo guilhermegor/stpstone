@@ -7,10 +7,10 @@ from stpstone.utils.cals.handling_dates import DatesBR
 # ### --- AVAILABLE FUNDS --- ###
 
 # cls_ = MaisRetornoFunds(list_slugs=range(1, 10), int_wait_load_seconds=60,
-#                         int_delay_seconds=30, bl_save_html=False,
-#                         bl_headless=False, bl_incognito=True)
+#                         int_delay_seconds=30, bool_save_html=False,
+#                         bool_l_headless=Falsebool_ool_incognito=True)
 
-# df_ = cls_.source("avl_funds", bl_fetch=True)
+# df_ = cls_.source("avl_funds", bool_l_fetch=True)
 # print(f"DF MAIS RETORNO AVAILABLE FUNDS: \n{df_}")
 # df_.to_csv("data/mais-retorno-available-funds_{}_{}_{}.csv".format(
 #     getuser(),
@@ -32,8 +32,8 @@ from stpstone.utils.cals.handling_dates import DatesBR
 #               "zurich-anga-previdenciario-cp-fim", "zunar-prev-fim", "zula-fif-mult-cp-rl-1",
 #               "zula-2-fif-acoes-rl-1"]
 
-# cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bl_save_html=False,
-#                         bl_headless=False, bl_incognito=True, list_slugs=list_slugs)
+# cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bool_l_save_html=False,
+#                         bool_l_headless=Falsebool_ool_incognito=True, list_slugs=list_slugs)
 
 # df_ = cls_.source("fund_properties")
 # print(f"DF MAIS RETORNO FUNDS: \n{df_}")
@@ -49,11 +49,11 @@ from stpstone.utils.cals.handling_dates import DatesBR
 
 # for instruments_class in ["lista-fi-infra", "lista-fip", "lista-fiagro"]:
 #     cls_ = MaisRetornoFunds(list_slugs=range(1, 10), int_wait_load_seconds=60,
-#                             int_delay_seconds=30, bl_save_html=False,
-#                             bl_headless=True, bl_incognito=True,
+#                             int_delay_seconds=30, bool_l_save_html=False,
+#                             bool_l_headless=Truebool_ool_incognito=True,
 #                             instruments_class=instruments_class)
 #     print(f"\n*** INSTURMENT CLASS - {instruments_class.upper()} ***")
-#     df_ = cls_.source("avl_instruments", bl_fetch=True)
+#     df_ = cls_.source("avl_instruments", bool_l_fetch=True)
 #     print(f"DF MAIS RETORNO AVAILABLE INSTRUMENTS - {instruments_class.upper()}: \n{df_}")
 #     df_.to_csv("data/mais-retorno-available-instruments_{}_{}_{}.csv".format(
 #         getuser(),
@@ -71,10 +71,10 @@ from stpstone.utils.cals.handling_dates import DatesBR
 #     (["cdi", "dolar", "bdrx", "gptw", "ibbr", "ibhb", "iblv", "ibov-usd", "ibov"], "indice"),
 #     (["bidb11", "binc11", "bodb11", "cdii11", "cpti11", "divs11", "exif11", "ifra11", "ifri11"], "fi-infra"),
 # ]:
-#     cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bl_save_html=False,
-#                             bl_headless=True, bl_incognito=True, list_slugs=list_slugs,
+#     cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bool_l_save_html=False,
+#                             bool_l_headless=Truebool_ool_incognito=True, list_slugs=list_slugs,
 #                             instruments_class=url_slug)
-#     df_ = cls_.source("instruments_historical_rentability", bl_fetch=True)
+#     df_ = cls_.source("instruments_historical_rentability", bool_l_fetch=True)
 #     print(f"DF MAIS RETORNO - INSTRUMENTS HISTORIC RENTABILITY - CLASS: {url_slug.upper()}: \n{df_}")
 #     df_.to_csv("data/mais-retorno-instruments-historic-rentability_{}_{}_{}.csv".format(
 #         getuser(),
@@ -91,10 +91,10 @@ from stpstone.utils.cals.handling_dates import DatesBR
 #     (["cdi", "dolar", "bdrx", "gptw", "ibbr", "ibhb", "iblv", "ibov-usd", "ibov"], "indice"),
 #     (["bidb11", "binc11", "bodb11", "cdii11", "cpti11", "divs11", "exif11", "ifra11", "ifri11"], "fi-infra"),
 # ]:
-#     cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bl_save_html=False,
-#                             bl_headless=True, bl_incognito=True, list_slugs=list_slugs,
+#     cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bool_l_save_html=False,
+#                             bool_l_headless=Truebool_ool_incognito=True, list_slugs=list_slugs,
 #                             instruments_class=url_slug)
-#     df_ = cls_.source("instruments_stats", bl_fetch=True)
+#     df_ = cls_.source("instruments_stats", bool_l_fetch=True)
 #     print(f"DF MAIS RETORNO - INSTRUMENTS STATS - CLASS: {url_slug.upper()}: \n{df_}")
 #     df_.to_csv("data/mais-retorno-instruments-stats_{}_{}_{}.csv".format(
 #         getuser(),
@@ -110,10 +110,10 @@ for list_slugs, url_slug in [
     (["cdi", "dolar", "bdrx", "gptw", "ibbr", "ibhb", "iblv", "ibov-usd", "ibov"], "indice"),
     (["bidb11", "binc11", "bodb11", "cdii11", "cpti11", "divs11", "exif11", "ifra11", "ifri11"], "fi-infra"),
 ]:
-    cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bl_save_html=False,
-                            bl_headless=True, bl_incognito=True, list_slugs=list_slugs,
+    cls_ = MaisRetornoFunds(int_wait_load_seconds=60, int_delay_seconds=30, bool_l_save_html=False,
+                            bool_l_headless=Truebool_ool_incognito=True, list_slugs=list_slugs,
                             instruments_class=url_slug)
-    df_ = cls_.source("instruments_consistency", bl_fetch=True)
+    df_ = cls_.source("instruments_consistency", bool_l_fetch=True)
     print(f"DF MAIS RETORNO - INSTRUMENTS CONSISTENCY - CLASS: {url_slug.upper()}: \n{df_}")
     df_.to_csv("data/mais-retorno-instruments-consistency_{}_{}_{}.csv".format(
         getuser(),

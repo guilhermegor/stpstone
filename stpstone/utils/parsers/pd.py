@@ -32,12 +32,12 @@ class DealingPd:
         self,
         filename: str,
         list_tup_df_sheet_name: List[Tuple[pd.DataFrame, str]],
-        bl_header: bool = True,
-        bl_index: int = 0,
+        bool_header: bool = True,
+        bool_l_index: int = 0,
         mode: str = "w",
         label_sensitivity: str = "internal",
-        bl_set_sensitivity_label: bool = False,
-        bl_debug_mode: bool = False,
+        bool_l_set_sensitivity_label: bool = False,
+        bool_l_debug_mode: bool = False,
     ) -> None:
         """
         Append dataframe to Excel
@@ -45,27 +45,27 @@ class DealingPd:
         Args:
             filename (str): Path to Excel file
             list_tup_df_sheet_name (List[Tuple[pd.DataFrame, str]]): List of tuples with dataframe and sheet name
-            bl_header (bool): Whether to write headers
-            bl_index (int): Whether to write index
+            bool_l_header (bool): Whether to write headers
+            bool_l_index (int): Whether to write index
             mode (str): Mode to open Excel file
             label_sensitivity (str): Label sensitivity
-            bl_set_sensitivity_label (bool): Whether to set sensitivity label
-            bl_debug_mode (bool): Whether to print debug messages
+            bool_l_set_sensitivity_label (bool): Whether to set sensitivity label
+            bool_l_debug_mode (bool): Whether to print debug messages
 
         Returns:
             None
         """
-        if bl_debug_mode == True:
+        if bool_l_debug_mode == True:
             print("LIST_TUP_DF_SHEET_NAME: {}".format(list_tup_df_sheet_name))
             print("FILENAME: {}".format(filename))
             print("MODE: {}".format(mode))
-            print("BL_INDEX: {}".format(bl_index))
+            print("BL_INDEX: {}".format(bool_l_index))
         with pd.ExcelWriter(filename, engine="xlsxwriter", mode=mode) as writer:
             for df_, sheet_name in list_tup_df_sheet_name:
-                if bl_index == 0:
+                if bool_l_index == 0:
                     df_.reset_index(drop=True, inplace=True)
-                df_.to_excel(writer, sheet_name, index=bl_index, header=bl_header)
-        if (bl_set_sensitivity_label == True) and (os.name == "nt"):
+                df_.to_excel(writer, sheet_name, index=bool_l_index, headebool_ool_header)
+        if (bool_l_set_sensitivity_label == True) and (os.name == "nt"):
             DealingExcel().xlsx_sensitivity_label(
                 filename,
                 self.dict_sensitivity_labels_office,
@@ -78,8 +78,8 @@ class DealingPd:
         path_xlsx: str,
         list_tup_df_sheet_name: List[Tuple[pd.DataFrame, str]],
         range_columns: str = "A:CC",
-        bl_adjust_layout: bool = False,
-        bl_debug_mode: bool = False,
+        bool_l_adjust_layout: bool = False,
+        bool_l_debug_mode: bool = False,
     ) -> bool:
         """
         Export dataframe to Excel
@@ -89,8 +89,8 @@ class DealingPd:
             - path_xlsx (str): Path to Excel file
             - list_tup_df_sheet_name (list): List of tuples of DataFrames and sheet names
             - range_columns (str): Range of columns to autofit
-            - bl_adjust_layout (bool): Whether to adjust layout of Excel file
-            - bl_debug_mode (bool): Whether to print debug messages
+            - bool_l_adjust_layout (bool): Whether to adjust layout of Excel file
+            - bool_l_debug_mode (bool): Whether to print debug messages
 
         Returns:
             bool
@@ -98,13 +98,13 @@ class DealingPd:
         self.append_df_to_Excel(
             path_xlsx,
             list_tup_df_sheet_name,
-            bl_header=True,
-            bl_index=0,
-            bl_debug_mode=bl_debug_mode,
+            bool_l_header=True,
+            bool_l_index=0,
+            bool_l_debug_modbool_ool_debug_mode,
         )
         blame_xpt = DirFilesManagement().object_exists(path_xlsx)
         if blame_xpt == True:
-            if bl_adjust_layout == True:
+            if bool_l_adjust_layout == True:
                 for _, sheet_name in list_tup_df_sheet_name:
                     xl_app, wb = DealingExcel().open_xl(path_xlsx)
                     DealingExcel().autofit_range_columns(
@@ -121,7 +121,7 @@ class DealingPd:
     def settingup_pandas(
         self,
         int_decimal_places: int = 3,
-        bl_wrap_repr: bool = False,
+        bool_l_wrap_repr: bool = False,
         int_max_rows: int = 25,
     ) -> None:
         """
@@ -129,21 +129,21 @@ class DealingPd:
 
         Args:
             int_decimal_places (int): Number of decimal places to display in output
-            bl_wrap_repr (bool): Whether to wrap repr(DataFrame) across additional lines
+            bool_l_wrap_repr (bool): Whether to wrap repr(DataFrame) across additional lines
             int_max_rows (int): Maximum number of rows to display in output
 
         Returns:
             None
         """
         pd.set_option("display.precision", int_decimal_places)
-        pd.set_option("display.expand_frame_repr", bl_wrap_repr)
+        pd.set_option("display.expand_frame_repr", bool_l_wrap_repr)
         pd.set_option("display.max_rows", int_max_rows)
 
     def convert_datetime_columns(
         self,
         df_: pd.DataFrame,
         list_col_date: List[str],
-        bl_pandas_convertion: bool = True,
+        bool_l_pandas_convertion: bool = True,
     ) -> pd.DataFrame:
         """
         Convert datetime columns
@@ -151,14 +151,14 @@ class DealingPd:
         Args:
             df_ (pandas.DataFrame): DataFrame to convert
             list_col_date (list): List of columns to convert
-            bl_pandas_convertion (bool): Whether to use pandas conversion or excel format
+            bool_l_pandas_convertion (bool): Whether to use pandas conversion or excel format
 
         Returns:
             pd.DataFrame
         """
         # checking whether to covert through a pandas convertion, or resort to a excel format
         #   transformation of data in date column format
-        if bl_pandas_convertion:
+        if bool_l_pandas_convertion:
             for col_date in list_col_date:
                 df_.loc[:, col_date] = pd.to_datetime(df_[col_date], unit="s").dt.date
         else:

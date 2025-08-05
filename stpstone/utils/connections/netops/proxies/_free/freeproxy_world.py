@@ -10,37 +10,37 @@ class FreeProxyWorld(ABCSession):
 
     def __init__(
         self,
-        bl_new_proxy: bool = True,
+        bool_new_proxy: bool = True,
         dict_proxies: Union[Dict[str, str], None] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
-        bl_alive: bool = True,
+        bool_l_alive: bool = True,
         list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
-        bl_ssl: Union[bool, None] = None,
+        bool_l_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
-        bl_use_timer: bool = False,
+        bool_l_use_timer: bool = False,
         list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None,
         int_wait_load_seconds: int = 10,
     ) -> None:
         super().__init__(
-            bl_new_proxy=bl_new_proxy,
+            bool_l_new_proxbool_ool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bl_alive=bl_alive,
+            bool_l_alivbool_ool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bl_ssl=bl_ssl,
+            bool_l_ssbool_ool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bl_use_timer=bl_use_timer,
+            bool_l_use_timebool_ool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
@@ -55,8 +55,8 @@ class FreeProxyWorld(ABCSession):
         while True:
             cls_selenium_wd = SeleniumWD(
                 url=self.fstr_url.format(self.str_country_code.upper(), int_pg),
-                bl_headless=True,
-                bl_incognito=True,
+                bool_l_headless=True,
+                bool_l_incognito=True,
                 int_wait_load_seconds=self.int_wait_load_seconds
             )
             try:
@@ -94,7 +94,7 @@ class FreeProxyWorld(ABCSession):
                                                     + f'[{i_tr}]/td[8]').text
                     list_ser.append({
                         "protocol": type_.lower(),
-                        "bl_alive": True,
+                        "bool_l_alive": True,
                         "status": "success",
                         "alive_since": self.composed_time_ago_to_ts_unix(last_checked),
                         "anonymity": anonymity.lower(),
@@ -113,7 +113,7 @@ class FreeProxyWorld(ABCSession):
                         "district": "",
                         "region_name": "",
                         "zip": "",
-                        "bl_hosting": True,
+                        "bool_l_hosting": True,
                         "isp": "",
                         "latitude": 0.0,
                         "longitude": 0.0,
@@ -121,7 +121,7 @@ class FreeProxyWorld(ABCSession):
                         "proxy": True,
                         "ip": ip,
                         "port": port,
-                        "bl_ssl": True,
+                        "bool_l_ssl": True,
                         "timeout": 1.0 / self.proxy_speed_to_float(speed),
                         "times_alive": 1,
                         "times_dead": "",

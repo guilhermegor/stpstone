@@ -22,7 +22,7 @@ list_ser = list()
 
 # getting proxy
 cls_session = YieldFreeProxy(
-    bl_new_proxy=True,
+    bool_new_proxy=True,
     float_min_ratio_times_alive_dead=0.01,
     float_max_timeout=1000
 )
@@ -50,12 +50,12 @@ for i in range(450, 506):
         str_proxy=str_proxy
     )
     web_driver = cls_selenium.web_driver
-    bl_retry = True
+    bool_l_retry = True
     i_loop = int_max_retries
     #   loop within cards - funds available
     for i_fund_info in range(1, 101):
         while \
-            (bl_retry == True) \
+            (bool_l_retry == True) \
             and (i_loop > 0):
             try:
                 a_fund_infos = cls_selenium.find_element(
@@ -63,7 +63,7 @@ for i in range(450, 506):
                     xpath_fund_infos.format(i_fund_info)
                 )
                 str_anbima_fund_info = a_fund_infos.get_attribute('href')
-                bl_retry = False
+                bool_l_retry = False
             except (NoSuchElementException, WebDriverException, ReadTimeoutError):
                 sleep(randint(10, 60))
                 if list_ser_proxies is not None:
@@ -84,7 +84,7 @@ for i in range(450, 506):
                 )
                 web_driver = cls_selenium.web_driver
             i_loop -= 1
-        if bl_retry == True:
+        if bool_l_retry == True:
             raise Exception('MAX RETRIES EXCEEDED')
         p_ein_number = cls_selenium.find_element(a_fund_infos, xpath_ein_number)
         str_ein_number = p_ein_number.text
@@ -92,7 +92,7 @@ for i in range(450, 506):
             'CNPJ': str_ein_number,
             'URL_ANBIMA_FUND': str_anbima_fund_info
         })
-        bl_retry = True
+        bool_l_retry = True
     df_ = pd.DataFrame(list_ser)
     df_.to_csv(
         "data/anbima-avl-funds-pg-{}_{}_{}_{}.csv".format(

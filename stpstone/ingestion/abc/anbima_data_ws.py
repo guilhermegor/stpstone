@@ -15,15 +15,15 @@ from stpstone.utils.loggs.create_logs import CreateLog
 class AnbimaDataUtils:
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
-                 bl_schema: bool = True, str_tbl_name: Optional[str] = None,
-                 str_schema_name: Optional[str] = None, bl_insert_or_ignore: Optional[bool] = False,
+                 bool_schema: bool = True, str_tbool_name: Optional[str] = None,
+                 str_schema_name: Optional[str] = None, bool_l_insert_or_ignore: Optional[bool] = False,
                  logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bl_schema = bl_schema
-        self.str_tbl_name = str_tbl_name
+        self.bool_l_schema bool_ool_schema
+        self.str_tbool_l_name = strbool_ool_name
         self.str_schema_name = str_schema_name
-        self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.bool_l_insert_or_ignore bool_ool_insert_or_ignore
         self.logger = logger
 
     def _log_info(self, message: str):
@@ -41,27 +41,27 @@ class AnbimaDataUtils:
             return self.dict_metadata["credentials"].get(property_, None)
 
     def insert_db(self, list_ser) -> None:
-        if self.bl_schema == False:
-            str_table_name = f"{self.str_schema_name}_{self.str_tbl_name}"
+        if self.bool_l_schema == False:
+            str_table_name = f"{self.str_schema_name}_{self.str_tbool_l_name}"
         self.cls_db.insert(
             list_ser,
             str_table_name=str_table_name,
-            bl_insert_or_ignore=self.bl_insert_or_ignore,
+            bool_l_insert_or_ignore=selbool_ool_insert_or_ignore,
         )
 
 
 class AnbimaDataDecrypt(AnbimaDataUtils):
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
-                 bl_schema: bool = True, str_tbl_name: Optional[str] = None,
+                 bool_l_schema: bool = True, strbool_ool_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None,
-                 bl_insert_or_ignore: Optional[bool] = False) -> None:
+                 bool_l_insert_or_ignore: Optional[bool] = False) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bl_schema = bl_schema
-        self.str_tbl_name = str_tbl_name
+        self.bool_l_schema bool_ool_schema
+        self.str_tbool_l_name = strbool_ool_name
         self.str_schema_name = str_schema_name
-        self.bl_insert_or_ignore = bl_insert_or_ignore
+        self.bool_l_insert_or_ignore bool_ool_insert_or_ignore
 
     def urls_funds_builder(
         self,
