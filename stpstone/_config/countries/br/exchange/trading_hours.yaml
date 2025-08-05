@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -31,8 +31,8 @@ stocks:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/#source=stocks&bl_debug=False
-  bl_verify: False
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/#source=stocks&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -43,8 +43,8 @@ stocks:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_stocks
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     MERCADO: str
     CANCELAMENTO_DE_OFERTAS_INICIO: str
@@ -63,7 +63,7 @@ stocks:
     AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_FIM: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -80,8 +80,8 @@ stock_options:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/#source=stock_options&bl_debug=False
-  bl_verify: False
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/#source=stock_options&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -92,8 +92,8 @@ stock_options:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_stock_options
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     MERCADO: str
     EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_INICIO: str
@@ -106,7 +106,7 @@ stock_options:
     EXERCICIO_AUTOMATICO_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -123,8 +123,8 @@ pmi_future:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/#source=pmi_future&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/#source=pmi_future&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -135,8 +135,8 @@ pmi_future:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_pmi_future
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -153,7 +153,7 @@ pmi_future:
     AFTER_HOURS_T_1_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -170,8 +170,8 @@ stock_index_futures:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/#source=stock_index_futures&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/#source=stock_index_futures&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -182,8 +182,8 @@ stock_index_futures:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_stock_index_futures
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -200,7 +200,7 @@ stock_index_futures:
     AFTER_HOURS_T_1_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -217,8 +217,8 @@ interest_rates:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/#source=interest_rates&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/#source=interest_rates&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -229,8 +229,8 @@ interest_rates:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_interest_rates
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -247,7 +247,7 @@ interest_rates:
     AFTER_HOURS_T_1_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -264,8 +264,8 @@ usd_interest_rates:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/#source=usd_interest_rates&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/#source=usd_interest_rates&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -276,8 +276,8 @@ usd_interest_rates:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_usd_interest_rates
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -294,7 +294,7 @@ usd_interest_rates:
     AFTER_HOURS_T_1_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -311,8 +311,8 @@ commodities:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/#source=commodities&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/#source=commodities&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -323,8 +323,8 @@ commodities:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_commodities
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -334,7 +334,7 @@ commodities:
     AFTER_HOURS_T_1_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -351,8 +351,8 @@ crypto:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/#source=crypto&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/#source=crypto&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -363,8 +363,8 @@ crypto:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_crypto
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRATO: str
     TICKER: str
@@ -379,7 +379,7 @@ crypto:
     EXTENDED_HOURS_T_0_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -396,8 +396,8 @@ foreign_exchange_and_dollar_spot:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/#source=foreign_exchange_and_dollar_spot&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/#source=foreign_exchange_and_dollar_spot&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -408,8 +408,8 @@ foreign_exchange_and_dollar_spot:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_foreign_exchange_and_dollar_spot
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -426,7 +426,7 @@ foreign_exchange_and_dollar_spot:
     AFTER_HOURS_T_1_CLOSING: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -443,8 +443,8 @@ otc:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/balcao-organizado/#source=otc&bl_debug=False
-  bl_verify: False
+  app: pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/balcao-organizado/#source=otc&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -455,8 +455,8 @@ otc:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_otc
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     MERCADO: str
     CANCELAMENTO_DE_OFERTAS_INICIO: str
@@ -479,7 +479,7 @@ otc:
     AFTER_MARKET_NEGOCIACAO_FIM: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //*[@id="conteudo-principal"]/div[4]/div/div/table/thead/tr/th
     list_td: //table/tbody/tr/td
 
@@ -496,8 +496,8 @@ opf_before_exc:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/#source=opf_before_exc_date&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/#source=opf_before_exc_date&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -508,8 +508,8 @@ opf_before_exc:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_opf_before_exc
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -517,7 +517,7 @@ opf_before_exc:
     PURCHASE_FOR_BLOCKING_WITH_EXERCISE_RISK: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td
 
@@ -534,8 +534,8 @@ opf_after_exc:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/#source=opf_after_exc_date&bl_debug=False
-  bl_verify: False
+  app: en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/#source=opf_after_exc_date&bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -546,8 +546,8 @@ opf_after_exc:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_trading_hours_opf_after_exc
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CONTRACT: str
     TICKER: str
@@ -556,6 +556,6 @@ opf_after_exc:
     BLOCKING_HOLDER: str
   df_read_params:
   xpaths:
-    bl_debug_html: True
+    bool_debug_html: True
     list_th: //table[@class="responsive"]/thead/tr/th
     list_td: //table[@class="responsive"]/tbody/tr/td

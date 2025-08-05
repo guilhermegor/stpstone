@@ -50,9 +50,9 @@ class ConcreteCreatorReq(ABCRequests):
         list_slugs: Optional[List[str]] = None,
         int_wait_load_seconds: int = 60,
         int_delay_seconds: int = 30,
-        bl_save_html: bool = False,
-        bl_headless: bool = False,
-        bl_incognito: bool = False,
+        bool_save_html: bool = False,
+        bool_headless: bool = False,
+        bool_incognito: bool = False,
     ) -> None:
         super().__init__(
             dict_metadata=YAML_EXAMPLE,
@@ -72,9 +72,9 @@ class ConcreteCreatorReq(ABCRequests):
         self.list_slugs = list_slugs
         self.int_wait_load_seconds = int_wait_load_seconds
         self.int_delay_seconds = int_delay_seconds
-        self.bl_save_html = bl_save_html
-        self.bl_headless = bl_headless
-        self.bl_incognito = bl_incognito
+        self.bool_save_html = bool_save_html
+        self.bool_headless = bool_headless
+        self.bool_incognito = bool_incognito
 
     def td_iterative(self, i: int, scraper: PlaywrightScraper) -> Dict[str, Any]:
         pass
@@ -87,18 +87,18 @@ class ConcreteCreatorReq(ABCRequests):
         list_ser = list()
         source = self.get_query_params(resp_req.url, "source")
         scraper = PlaywrightScraper(
-            bl_headless=self.bl_headless,
+            bool_headless=self.bool_headless,
             int_default_timeout=self.int_wait_load_seconds * 1_000,
-            bl_incognito=self.bl_incognito
+            bool_incognito=self.bool_incognito
         )
         with scraper.launch():
             if scraper.navigate(resp_req.url):
-                if self.bl_save_html:
+                if self.bool_save_html:
                     scraper.export_html(
                         scraper.page.content(),
                         folder_path="data",
                         filename="html-mais-retorno-avl-funds",
-                        bl_include_timestamp=True
+                        bool_include_timestamp=True
                     )
                 if source == "iterative":
                     while True:

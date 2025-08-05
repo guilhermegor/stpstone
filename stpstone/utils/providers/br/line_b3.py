@@ -641,7 +641,7 @@ class DocumentsData(ConnectionApi):
             bl_retry_if_error=bl_retry_if_error,
         )
 
-    def bl_protection_mode(
+    def is_protection_mode(
         self,
         doc_id: str,
         bl_protect: bool = True,

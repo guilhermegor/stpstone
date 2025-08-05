@@ -40,7 +40,7 @@ class DFStandardization(metaclass=TypeChecker):
         str_dt_fillna: Optional[str] = None,
         str_tz: str = "UTC",
         encoding: str = "latin-1",
-        bl_debug: bool = False,
+        bool_debug: bool = False,
         logger: Optional[Logger] = None,
     ) -> None:
         """Initialize the DFStandardization class.
@@ -71,7 +71,7 @@ class DFStandardization(metaclass=TypeChecker):
             The timezone to use for date columns.
         encoding : str, optional
             The encoding to use for string columns.
-        bl_debug : bool, optional
+        bool_debug : bool, optional
             Whether to print debug messages.
         logger : Optional[Logger]
             The logger to use for logging messages.
@@ -109,7 +109,7 @@ class DFStandardization(metaclass=TypeChecker):
         self.list_cols_dt = [key for key, value in dict_dtypes.items() if value == "date"]
         self.str_tz = str_tz
         self.encoding = encoding
-        self.bl_debug = bl_debug
+        self.bool_debug = bool_debug
         self.logger = logger
 
     def check_if_empty(self, df_: pd.DataFrame) -> pd.DataFrame:
@@ -223,7 +223,7 @@ class DFStandardization(metaclass=TypeChecker):
                 "list of columns excluded: "
                 + f"{[x for x in list(df_.columns) if x not in list(self.dict_dtypes.keys())]}",
             )
-        if self.bl_debug:
+        if self.bool_debug:
             print(f"list cols dataframe before filtering: {list(df_.columns)}")
             print(f"list cols to filter: {list(self.dict_dtypes.keys())}")
             print(

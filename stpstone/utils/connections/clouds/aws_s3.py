@@ -15,7 +15,7 @@ from stpstone.utils.loggs.create_logs import CreateLog
 class S3Client:
 
     def __init__(self, str_default_region:str='us-west-1', logger:Optional[Logger]=None,
-                 bl_debug_mode:bool=False) -> None:
+                 bool_debug_mode:bool=False) -> None:
         """
         DOCSTRING:
         INPUTS:
@@ -41,7 +41,7 @@ class S3Client:
             region_name=self._envs['region_name']
         )
         self.logger = logger
-        self.bl_debug_mode = bl_debug_mode
+        self.bool_debug_mode = bool_debug_mode
 
     def handle_error(self, e:Exception, action:Optional[str]=None, s3_key:Optional[str]=None) \
         -> None:
@@ -66,7 +66,7 @@ class S3Client:
         # logging or printing, in case of debug mode
         if self.logger:
             CreateLog().critical(self.logger, message)
-        if self.bl_debug_mode:
+        if self.bool_debug_mode:
             print(message)
 
     def upload_file(self, data:BytesIO, s3_key:str) -> None:

@@ -9,7 +9,7 @@ credentials:
     app:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -60,7 +60,7 @@ debentures_registries:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: debentures/{{slug}}/caracteristicas#delay_next_s=30
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -72,8 +72,8 @@ debentures_registries:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_data_debentures_registries
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -176,7 +176,7 @@ debentures_available:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: busca/debentures?size=100&page=0#iter_min=0&iter_max=10&delay_next_s=30
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -188,8 +188,8 @@ debentures_available:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_data_debentures_available
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

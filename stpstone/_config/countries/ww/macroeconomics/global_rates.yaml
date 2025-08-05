@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -53,10 +53,10 @@ euribor:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/interest-rates/euribor/#bl_debug=True&source=euribor
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/interest-rates/euribor/#bool_debug=True&source=euribor
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -67,8 +67,8 @@ euribor:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_euribor
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -115,10 +115,10 @@ libor:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/interest-rates/libor/#bl_debug=True&source=libor
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/interest-rates/libor/#bool_debug=True&source=libor
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -129,8 +129,8 @@ libor:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_libor
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -176,10 +176,10 @@ ester:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/interest-rates/ester/#bl_debug=True&source=ester
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/interest-rates/ester/#bool_debug=True&source=ester
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -190,8 +190,8 @@ ester:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_ester
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -238,10 +238,10 @@ sonia:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/interest-rates/sonia/#bl_debug=True&source=sonia
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/interest-rates/sonia/#bool_debug=True&source=sonia
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -252,8 +252,8 @@ sonia:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_sonia
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -300,10 +300,10 @@ sofr:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/interest-rates/sofr/#bl_debug=True&source=sofr
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/interest-rates/sofr/#bool_debug=True&source=sofr
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -314,8 +314,8 @@ sofr:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_sofr
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -362,10 +362,10 @@ central_banks:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/interest-rates/central-banks/#bl_debug=True&source=central_banks
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/interest-rates/central-banks/#bool_debug=True&source=central_banks
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -376,8 +376,8 @@ central_banks:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_central_banks
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -427,10 +427,10 @@ usa_cpi:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/inflation/cpi/4/united-states/#bl_debug=True&source=usa_cpi
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/inflation/cpi/4/united-states/#bool_debug=True&source=usa_cpi
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -441,8 +441,8 @@ usa_cpi:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_usa_cpi
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -489,10 +489,10 @@ british_cpi:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/inflation/cpi/60/united-kingdom/#bl_debug=True&source=british_cpi
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/inflation/cpi/60/united-kingdom/#bool_debug=True&source=british_cpi
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -503,8 +503,8 @@ british_cpi:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_british_cpi
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -551,10 +551,10 @@ canadian_cpi:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/inflation/cpi/37/canada/#bl_debug=True&source=canadian_cpi
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/inflation/cpi/37/canada/#bool_debug=True&source=canadian_cpi
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -565,8 +565,8 @@ canadian_cpi:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_canadian_cpi
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -613,10 +613,10 @@ european_cpi:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: en/inflation/hicp/3/europe/#bl_debug=True&source=european_cpi
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: en/inflation/hicp/3/europe/#bool_debug=True&source=european_cpi
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -627,8 +627,8 @@ european_cpi:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_globalrates_european_cpi
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

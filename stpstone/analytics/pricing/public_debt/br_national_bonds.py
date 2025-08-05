@@ -176,7 +176,7 @@ class BRSovereignPricer(metaclass=TypeChecker):
             return 0.0
         
         # adjust for business days
-        dt_ref = DatesBR().find_working_day(dt_ref, bl_next=False)
+        dt_ref = DatesBR().find_working_day(dt_ref, bool_next=False)
         delta_ref = DatesBR().delta_calendar_days(dt_ref, dt_ipca_last)
         delta_total = DatesBR().delta_calendar_days(dt_ipca_next, dt_ipca_last)
         print(f"PR1: {delta_ref} / {delta_total} = {delta_ref / delta_total}")

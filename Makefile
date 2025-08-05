@@ -69,8 +69,8 @@ package_tree:
 	poetry run python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
 		root_path = os.getcwd(); \
 		cls_tree = FoldersTree(os.path.join(root_path, 'stpstone'), \
-			bl_ignore_dot_folders=True, list_ignored_folders=['__pycache__'], \
-			bl_add_linebreak_markdown=False); \
+			bool_ignore_dot_folders=True, list_ignored_folders=['__pycache__'], \
+			bool_add_linebreak_markdown=False); \
 		cls_tree.export_tree(os.path.join(root_path, 'data', 'package_tree.txt'))"
 
 bump_version:

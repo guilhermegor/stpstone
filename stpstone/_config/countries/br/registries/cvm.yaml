@@ -16,7 +16,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -40,7 +40,7 @@ pubicly_traded_cos:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/CIA_ABERTA/CAD/DADOS/cad_cia_aberta.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -51,8 +51,8 @@ pubicly_traded_cos:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_pubicly_traded_cos
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CNPJ_CIA: str
     DENOM_SOCIAL: str
@@ -119,7 +119,7 @@ independent_fin_advs:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/AGENTE_AUTON/CAD/DADOS/cad_agente_auton.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -130,8 +130,8 @@ independent_fin_advs:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_independent_fin_advs
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     NOME: str
     DT_REG: date
@@ -171,7 +171,7 @@ fiduciary_agents:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/AGENTE_FIDUC/CAD/DADOS/cad_agente_fiduc.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -182,8 +182,8 @@ fiduciary_agents:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_fiduciary_agents
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     AGENTE_FIDUC: str
     DT_REG: date
@@ -220,7 +220,7 @@ foreign_cos:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -231,8 +231,8 @@ foreign_cos:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_foreign_cos
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CNPJ: str
     DENOM_SOCIAL: str
@@ -301,7 +301,7 @@ incentivized_cos:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/CIA_INCENT/CAD/DADOS/cad_cia_incent.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -312,8 +312,8 @@ incentivized_cos:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_incentivized_cos
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CNPJ: str
     ST_CIA_INCENT_REG: category
@@ -380,7 +380,7 @@ securities_consultants:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/CONSULTOR_VLMOB/CAD/DADOS/cad_consultor_vlmob.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -391,8 +391,8 @@ securities_consultants:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_securities_consultants
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CNPJ: str
     DIRETOR: str
@@ -439,7 +439,7 @@ crowdfunding:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/CROWDFUNDING/CAD/DADOS/cad_crowdfunding.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -450,8 +450,8 @@ crowdfunding:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_crowdfunding
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CNPJ: str
     DENOM_SOCIAL: str
@@ -490,7 +490,7 @@ funds_registries:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/FI/CAD/DADOS/cad_fi.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -501,8 +501,8 @@ funds_registries:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_funds_registries
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_FUNDO: category
     CNPJ_FUNDO: str
@@ -563,7 +563,7 @@ funds_daily_infos:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{{month_ref}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -574,8 +574,8 @@ funds_daily_infos:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_funds_daily_infos
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_FUNDO_CLASSE: category
     CNPJ_FUNDO_CLASSE: str
@@ -606,7 +606,7 @@ funds_fact_sheet:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: dados/FI/DOC/LAMINA/DADOS/lamina_fi_{{month_ref}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -617,8 +617,8 @@ funds_fact_sheet:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_funds_fact_sheet
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_FUNDO_CLASSE: category
     CNPJ_FUNDO_CLASSE: str
@@ -738,7 +738,7 @@ funds_monthly_profile:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FI/DOC/PERFIL_MENSAL/DADOS/perfil_mensal_fi_{{month_ref}}.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -749,8 +749,8 @@ funds_monthly_profile:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_funds_monthly_profile
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_FUNDO_CLASSE: category
     CNPJ_FUNDO_CLASSE: str
@@ -886,7 +886,7 @@ monthly_infos_fidcs:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FIDC/DOC/INF_MENSAL/DADOS/inf_mensal_fidc_{{month_ref}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -897,8 +897,8 @@ monthly_infos_fidcs:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_monthly_infos_fidcs
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_FUNDO_CLASSE: category
     CNPJ_FUNDO_CLASSE: str
@@ -944,7 +944,7 @@ specially_constitued_investment_fund:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FIE/MEDIDAS/DADOS/medidas_mes_fie_{{month_ref}}.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -955,8 +955,8 @@ specially_constitued_investment_fund:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_specially_constitued_investment_fund
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_FUNDO: category
     CNPJ_FUNDO: str
@@ -991,7 +991,7 @@ reits_monthly_profile:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/FII/DOC/INF_MENSAL/DADOS/inf_mensal_fii_{{year_ref}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -1002,8 +1002,8 @@ reits_monthly_profile:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_reits_monthly_profile
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CNPJ_FUNDO_CLASSE: str
     DATA_REFERENCIA: date
@@ -1144,7 +1144,7 @@ banks_registry:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/INTERMED/CAD/DADOS/cad_intermed.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -1155,8 +1155,8 @@ banks_registry:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_banks_registry
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TP_PARTIC: category
     CNPJ: str
@@ -1217,7 +1217,7 @@ public_distribution_offerings:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: dados/OFERTA/DISTRIB/DADOS/oferta_distribuicao.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -1228,8 +1228,8 @@ public_distribution_offerings:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_cvm_public_distribution_offerings
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     NUMERO_PROCESSO: str
     NUMERO_REGISTRO_OFERTA: str

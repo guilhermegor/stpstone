@@ -64,14 +64,14 @@ class WWGeography(metaclass=TypeChecker):
             "official_name": getattr(country, "official_name", ""),
         }
 
-    def bl_valid_country_code(self, country_code: str) -> bool:
+    def is_valid_country_code(self, country_code: str) -> bool:
         return bool(
             pycountry.countries.get(alpha_2=country_code.upper())
             or pycountry.countries.get(alpha_3=country_code.upper())
         )
 
     def get_country_flag_emoji(self, country_code: str) -> Optional[str]:
-        if not self.bl_valid_country_code(country_code.upper()):
+        if not self.is_valid_country_code(country_code.upper()):
             return None
         return "".join(chr(ord(c) + 127397) for c in country_code.upper())
 
@@ -82,7 +82,7 @@ class WWGeography(metaclass=TypeChecker):
         return None
 
     def get_continent_by_country_code(self, country_code: str) -> Optional[str]:
-        if not self.bl_valid_country_code(country_code):
+        if not self.is_valid_country_code(country_code):
             return None
         try:
             continent_code = pc.country_alpha2_to_continent_code(country_code.upper())
@@ -93,7 +93,7 @@ class WWGeography(metaclass=TypeChecker):
     def get_continent_code_by_country_code(
         self, country_code: str
     ) -> Literal["AF", "AS", "EU", "NA", "SA", "OC", "AN"]:
-        if not self.bl_valid_country_code(country_code):
+        if not self.is_valid_country_code(country_code):
             return None
         try:
             return pc.country_alpha2_to_continent_code(country_code.upper()).upper()

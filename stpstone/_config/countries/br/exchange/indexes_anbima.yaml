@@ -26,7 +26,7 @@ credentials:
     app:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -60,10 +60,10 @@ anbima_indexes_mkt_data:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  app: informacoes/ima/arqs/ima_completo.txt#bl_separator_consistency_check=False&file_extension=.csv_url
-  bl_verify: False
+  app: informacoes/ima/arqs/ima_completo.txt#bool_separator_consistency_check=False&file_extension=.csv_url
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -75,8 +75,8 @@ anbima_indexes_mkt_data:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_indexes_mkt_data
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -155,10 +155,10 @@ anbima_indexes_portf_composition:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  app: informacoes/ima/arqs/ima_completo.txt#bl_separator_consistency_check=False&file_extension=.csv_url
-  bl_verify: False
+  app: informacoes/ima/arqs/ima_completo.txt#bool_separator_consistency_check=False&file_extension=.csv_url
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -170,8 +170,8 @@ anbima_indexes_portf_composition:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_indexes_portf_composition
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

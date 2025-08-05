@@ -87,7 +87,7 @@ class LinearRegressions(metaclass=TypeChecker):
         self, 
         array_x: NDArray[np.float64], 
         array_y: NDArray[np.float64], 
-        bl_optimize: Optional[bool] = True
+        bool_optimize: Optional[bool] = True
     ) -> Union[
         NDArray[np.float64], 
         tuple[NDArray[np.float64], NDArray[np.float64], int, NDArray[np.float64]]
@@ -100,7 +100,7 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        bl_optimize : Optional[bool]
+        bool_optimize : Optional[bool]
             Whether to use optimized calculation (default: True)
 
         Returns
@@ -126,7 +126,7 @@ class LinearRegressions(metaclass=TypeChecker):
         if array_x.size == 0 or array_y.size == 0:
             raise ValueError("Input arrays cannot be empty")
 
-        if bl_optimize:
+        if bool_optimize:
             return np.linalg.lstsq(array_x, array_y, rcond=None)
         return np.linalg.inv(array_x.T.dot(array_x)).dot(array_x.T).dot(array_y)
 
@@ -403,7 +403,7 @@ class LinearRegressions(metaclass=TypeChecker):
         array_x: NDArray[np.float64],
         array_y: NDArray[np.float64],
         int_degree: int = 2,
-        bl_include_bias: bool = True,
+        bool_include_bias: bool = True,
     ) -> LinearRegressionsResult:
         """Fit polynomial regression model to data.
 
@@ -415,7 +415,7 @@ class LinearRegressions(metaclass=TypeChecker):
             Target values
         int_degree : int, optional
             Polynomial degree (default: 2)
-        bl_include_bias : bool, optional
+        bool_include_bias : bool, optional
             Whether to include bias term (default: True)
 
         Returns
@@ -441,7 +441,7 @@ class LinearRegressions(metaclass=TypeChecker):
 
         array_x = ExploratoryDataAnalysis().reshape_1d_arrays(array_x)
         poly_features = PolynomialFeatures(
-            degree=int_degree, include_bias=bl_include_bias
+            degree=int_degree, include_bias=bool_include_bias
         )
         array_x = poly_features.fit_transform(array_x)
         model = LinearRegression()
@@ -811,10 +811,10 @@ class LogLinearRegressions(metaclass=TypeChecker):
         intercept_scaling: int = 1,
         random_state: int = 0,
         verbose: int = 0,
-        bl_fit_intercept: bool = True,
-        bl_warm_start: bool = False,
+        bool_fit_intercept: bool = True,
+        bool_warm_start: bool = False,
         class_weight: Optional[dict] = None,
-        bl_dual: bool = False,
+        bool_dual: bool = False,
         n_jobs: Optional[int] = None,
     ) -> LogLinearRegressionsResult:
         """Fit logistic regression model to data.
@@ -845,13 +845,13 @@ class LogLinearRegressions(metaclass=TypeChecker):
             Random seed (default: 0)
         verbose : int, optional
             Verbosity level (default: 0)
-        bl_fit_intercept : bool, optional
+        bool_fit_intercept : bool, optional
             Whether to fit intercept (default: True)
-        bl_warm_start : bool, optional
+        bool_warm_start : bool, optional
             Whether to reuse solution (default: False)
         class_weight : Optional[dict], optional
             Class weights (default: None)
-        bl_dual : bool, optional
+        bool_dual : bool, optional
             Dual formulation (default: False)
         n_jobs : Optional[int], optional
             Number of CPU cores (default: None)
@@ -891,8 +891,8 @@ class LogLinearRegressions(metaclass=TypeChecker):
         model = LogisticRegression(
             C=c_positive_floating_point_number,
             class_weight=class_weight,
-            dual=bl_dual,
-            fit_intercept=bl_fit_intercept,
+            dual=bool_dual,
+            fit_intercept=bool_fit_intercept,
             intercept_scaling=intercept_scaling,
             l1_ratio=l1_ratio,
             max_iter=int_max_iter,
@@ -903,7 +903,7 @@ class LogLinearRegressions(metaclass=TypeChecker):
             solver=solver,
             tol=float_tolerance,
             verbose=verbose,
-            warm_start=bl_warm_start,
+            warm_start=bool_warm_start,
         ).fit(array_x, array_y)
 
         return {
@@ -946,9 +946,9 @@ class NonLinearEquations(metaclass=TypeChecker):
         max_iter: int = 1000,
         max_iterations_wo_improvement: int = 100,
         int_verbose_monitor: int = 10,
-        bl_print_convergence_messages: bool = False,
-        bl_print_warning_messages: bool = True,
-        bl_inter_monitor: bool = False,
+        bool_print_convergence_messages: bool = False,
+        bool_print_warning_messages: bool = True,
+        bool_inter_monitor: bool = False,
         int_size_trial_solution_population: int = 40,
         tolerance: float = 5e-5,
     ) -> Union[OptimizeResult, tuple[NDArray[np.float64], float, int, int, int]]:
@@ -968,11 +968,11 @@ class NonLinearEquations(metaclass=TypeChecker):
             Maximum iterations without improvement (default: 100)
         int_verbose_monitor : int, optional
             Verbosity interval (default: 10)
-        bl_print_convergence_messages : bool, optional
+        bool_print_convergence_messages : bool, optional
             Whether to print convergence messages (default: False)
-        bl_print_warning_messages : bool, optional
+        bool_print_warning_messages : bool, optional
             Whether to print warnings (default: True)
-        bl_inter_monitor : bool, optional
+        bool_inter_monitor : bool, optional
             Whether to use verbose monitor (default: False)
         int_size_trial_solution_population : int, optional
             Population size (default: 40)
@@ -1016,10 +1016,10 @@ class NonLinearEquations(metaclass=TypeChecker):
                 list_bounds,
                 maxiter=max_iter,
                 tol=tolerance,
-                disp=bl_print_convergence_messages,
+                disp=bool_print_convergence_messages,
             )
         elif method == "mystic":
-            if bl_inter_monitor:
+            if bool_inter_monitor:
                 mon = VerboseMonitor(int_verbose_monitor)
                 return diffev2(
                     cost_func,
@@ -1027,8 +1027,8 @@ class NonLinearEquations(metaclass=TypeChecker):
                     bounds=list_bounds,
                     npop=int_size_trial_solution_population,
                     gtol=max_iterations_wo_improvement,
-                    disp=bl_print_convergence_messages,
-                    full_output=bl_print_warning_messages,
+                    disp=bool_print_convergence_messages,
+                    full_output=bool_print_warning_messages,
                     itermon=mon,
                     maxiter=max_iter,
                     ftol=tolerance,
@@ -1040,8 +1040,8 @@ class NonLinearEquations(metaclass=TypeChecker):
                     bounds=list_bounds,
                     npop=int_size_trial_solution_population,
                     gtol=max_iterations_wo_improvement,
-                    disp=bl_print_convergence_messages,
-                    full_output=bl_print_warning_messages,
+                    disp=bool_print_convergence_messages,
+                    full_output=bool_print_warning_messages,
                     maxiter=max_iter,
                     ftol=tolerance,
                 )

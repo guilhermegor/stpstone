@@ -26,7 +26,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -57,10 +57,10 @@ futures_closing_adj:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
-  app: pages/portal/bmfbovespa/lumis/lum-ajustes-do-pregao-ptBR.asp?dData1={{repr_dt_ref}}/#bl_debug=False
-  bl_verify: False
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
+  app: pages/portal/bmfbovespa/lumis/lum-ajustes-do-pregao-ptBR.asp?dData1={{repr_dt_ref}}/#bool_debug=False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -71,8 +71,8 @@ futures_closing_adj:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_futures_closing_adj
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

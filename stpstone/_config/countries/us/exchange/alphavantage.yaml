@@ -9,7 +9,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -38,7 +38,7 @@ ohlcv_not_adjusted:
   #   - slug (str): https://example.com/{{slug}}
   slugs:
   app: query?function=TIME_SERIES_DAILY&symbol={{slug}}&apikey={{token}}&datatype=json&outputsize=compact
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case:
   cols_to_case:
@@ -48,8 +48,8 @@ ohlcv_not_adjusted:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: us_alphav_ohlcv_not_adjusted
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATE: date
     TICKER: str

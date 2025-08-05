@@ -185,7 +185,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         self,
         conf_mx: NDArray[np.float64],
         cmap: str = "gray",
-        bl_focus_errors: bool = True,
+        bool_focus_errors: bool = True,
         complete_saving_path: Optional[str] = None,
         int_fill_non_error_values: int = 0
     ) -> None:
@@ -197,7 +197,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Confusion matrix
         cmap : str, optional
             Colormap name, by default "gray"
-        bl_focus_errors : bool, optional
+        bool_focus_errors : bool, optional
             If True, normalize by row sums and fill diagonal with int_fill_non_error_values, \
                 by default True
         complete_saving_path : Optional[str], optional
@@ -213,14 +213,14 @@ class ProbStatsCharts(metaclass=TypeChecker):
         Raises
         ------
         ValueError
-            If confusion matrix row sums are zero when bl_focus_errors is True
+            If confusion matrix row sums are zero when bool_focus_errors is True
         """
         self._validate_array(conf_mx, "conf_mx")
-        if bl_focus_errors:
+        if bool_focus_errors:
             row_sums = conf_mx.sum(axis=1, keepdims=True)
             if np.any(row_sums == 0):
                 raise ValueError(
-                    "Confusion matrix row sums cannot be zero when bl_focus_errors is True")
+                    "Confusion matrix row sums cannot be zero when bool_focus_errors is True")
             conf_mx = conf_mx / row_sums
             np.fill_diagonal(conf_mx, int_fill_non_error_values)
         plt.matshow(conf_mx, cmap=plt.get_cmap(cmap))
@@ -394,7 +394,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         label_axis_x: str = "Threshold",
         label_axis_y: str = "Percentage",
         font_size: int = 16,
-        bl_grid: bool = True,
+        bool_grid: bool = True,
         tup_fig_size: tuple[int, int] = (8, 4),
         complete_saving_path: Optional[str] = None
     ) -> None:
@@ -430,7 +430,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Y-axis label, by default "Percentage"
         font_size : int, optional
             Font size, by default 16
-        bl_grid : bool, optional
+        bool_grid : bool, optional
             Show grid, by default True
         tup_fig_size : tuple[int, int], optional
             Figure size, by default (8, 4)
@@ -461,7 +461,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         plt.legend(loc=localization_legend, fontsize=font_size)
         plt.xlabel(label_axis_x, fontsize=font_size)
         plt.ylabel(label_axis_y, fontsize=font_size)
-        plt.grid(bl_grid)
+        plt.grid(bool_grid)
         if complete_saving_path is not None:
             plt.savefig(complete_saving_path)
         plt.show()
@@ -477,7 +477,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         label_x_axis: str = "False Positive Rate (Fall-Out)",
         label_y_axis: str = "True Positive Rate (Recall)",
         font_size: int = 16,
-        bl_grid: bool = True,
+        bool_grid: bool = True,
         tup_fig_size: tuple[int, int] = (8, 4),
         complete_saving_path: Optional[str] = None
     ) -> None:
@@ -503,7 +503,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Y-axis label, by default "True Positive Rate (Recall)"
         font_size : int, optional
             Font size, by default 16
-        bl_grid : bool, optional
+        bool_grid : bool, optional
             Show grid, by default True
         tup_fig_size : tuple[int, int], optional
             Figure size, by default (8, 4)
@@ -533,7 +533,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         plt.axis([0, 1, 0, 1])
         plt.xlabel(label_x_axis, fontsize=font_size)
         plt.ylabel(label_y_axis, fontsize=font_size)
-        plt.grid(bl_grid)
+        plt.grid(bool_grid)
         if plot_title is not None:
             plt.title(plot_title, fontsize=font_size)
         if complete_saving_path is not None:
@@ -716,7 +716,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         list_raw_data: NDArray[np.float64],
         chart_title: Optional[str] = None,
         complete_saving_path: Optional[str] = None,
-        bl_show_plot: bool = True,
+        bool_show_plot: bool = True,
         j: int = 0
     ) -> ReturnQqPlot:
         """Create a Q-Q plot to compare distributions.
@@ -731,7 +731,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Chart title, by default None
         complete_saving_path : Optional[str], optional
             Path to save the plot, by default None
-        bl_show_plot : bool, optional
+        bool_show_plot : bool, optional
             Show the plot, by default True
         j : int, optional
             Starting index (unused, kept for compatibility), by default 0
@@ -761,7 +761,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         plt.grid()
         if complete_saving_path is not None:
             plt.savefig(complete_saving_path)
-        if bl_show_plot:
+        if bool_show_plot:
             plt.show()
         return {"quantiles": list_quantiles}
 

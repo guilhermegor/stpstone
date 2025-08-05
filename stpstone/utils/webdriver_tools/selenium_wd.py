@@ -23,8 +23,8 @@ class SeleniumWD:
         int_wait_load_seconds: int = 10,
         int_delay_seconds: int = 10,
         str_proxy: Optional[str] = None,
-        bl_headless: bool = False,
-        bl_incognito: bool = False,
+        bool_headless: bool = False,
+        bool_incognito: bool = False,
         list_args: Optional[List[str]] = None
     ) -> None:
         """
@@ -38,9 +38,9 @@ class SeleniumWD:
             int_wait_load_seconds (int, optional): time to wait for page to load. Defaults to 10.
             int_delay_seconds (int, optional): time to wait between actions. Defaults to 10.
             str_proxy (str, optional): proxy to use. Defaults to None.
-            bl_opn_min (bool, optional): open in minimal mode. Defaults to False.
-            bl_headless (bool, optional): open in headless mode. Defaults to False.
-            bl_incognito (bool, optional): open in incognito mode. Defaults to False.
+            bool_opn_min (bool, optional): open in minimal mode. Defaults to False.
+            bool_headless (bool, optional): open in headless mode. Defaults to False.
+            bool_incognito (bool, optional): open in incognito mode. Defaults to False.
             list_args (Optional[List[str]], optional): webdriver arguments. Defaults to None.
 
         Returns:
@@ -58,8 +58,8 @@ class SeleniumWD:
             else "Mozilla/5.0 (Windowns NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"
         self.int_wait_load_seconds = int_wait_load_seconds
         self.int_delay_seconds = int_delay_seconds
-        self.bl_headless = bl_headless
-        self.bl_incognito = bl_incognito
+        self.bool_headless = bool_headless
+        self.bool_incognito = bool_incognito
         self.list_default_args = list_args if list_args is not None else [
             "--no-sandbox",
             "--disable-gpu",
@@ -78,9 +78,9 @@ class SeleniumWD:
             f"--user-agent={str_user_agent}"
         ]
         # set headless mode for operations without graphical user interface (GUI) - if true
-        if self.bl_headless == True:
+        if self.bool_headless == True:
             self.list_default_args.append("--headless=new")
-        if self.bl_incognito == True:
+        if self.bool_incognito == True:
             self.list_default_args.append("--incognito")
         if str_proxy is not None:
             self.list_default_args.append(f"--proxy-server={str_proxy}")

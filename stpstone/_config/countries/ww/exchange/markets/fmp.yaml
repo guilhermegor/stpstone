@@ -9,7 +9,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -38,7 +38,7 @@ mkt_hours_exchanges_yesterday:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
   app: all-exchange-market-hours?apikey={{token}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -48,8 +48,8 @@ mkt_hours_exchanges_yesterday:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_mkts_hours_yesterday
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     EXCHANGE: str
     NAME: str
@@ -73,7 +73,7 @@ crypto_ohlcv_yesterday:
     - SOLUSD
     - ETHUSD
   app: quote?symbol={{slug}}&apikey={{token}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -83,8 +83,8 @@ crypto_ohlcv_yesterday:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_crypto_ohlcv_yesterday
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SYMBOL: str
     NAME: str
@@ -118,7 +118,7 @@ stocks_ohlcv_yesterday:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs: 10
   app: batch-quote?symbols={{chunk_slugs}}&apikey={{token}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -128,8 +128,8 @@ stocks_ohlcv_yesterday:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_stocks_ohlcv_yesterday
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SYMBOL: str
     NAME: str
@@ -163,7 +163,7 @@ etfs_ohlcv_yesterday:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   app: batch-etf-quotes?apikey={{token}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -173,8 +173,8 @@ etfs_ohlcv_yesterday:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_etfs_ohlcv_yesterday
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SYMBOL: str
     PRICE: float
@@ -195,7 +195,7 @@ commodities_ohlcv_yesterday:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   app: batch-commodity-quotes?apikey={{token}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -205,8 +205,8 @@ commodities_ohlcv_yesterday:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_fmp_commodities_ohlcv_yesterday
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SYMBOL: str
     PRICE: float

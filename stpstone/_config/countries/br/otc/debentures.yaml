@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -34,7 +34,7 @@ mtm:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
   app: emissoesdedebentures/puhistorico_e.asp?op_exc=Nada&ativo=&dt_ini={{dt_start_ddmmyyyy}}&dt_fim={{dt_end_ddmmyyyy}}&Submit.x=30&Submit.y=6.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -44,8 +44,8 @@ mtm:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_debenturescom_mtm
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     Data do PU: date
     Ativo: str
@@ -71,7 +71,7 @@ infos:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
   app: emissoesdedebentures/caracteristicas_e.asp
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -81,8 +81,8 @@ infos:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_debenturescom_infos
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     Codigo do Ativo: str
     Empresa: str
@@ -184,7 +184,7 @@ otc_pvs:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
   app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={{dt_start_yyyymmdd}}&dt_fim={{dt_end_yyyymmdd}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -194,8 +194,8 @@ otc_pvs:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_debenturescom_otc_pvs
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     Data: date
     Emissor: str
@@ -223,7 +223,7 @@ primary_offers:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
   app: volumeporperiodo_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={{dt_start_ddmmyyyy}}&dt_fim={{dt_end_ddmmyyyy}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -233,8 +233,8 @@ primary_offers:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_debenturescom_primary_offers
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     Código do Ativo: str
     Emissor: str
@@ -259,7 +259,7 @@ secondary_otc_volume:
   payload:
   # for iteratively_get_data, please use i as placeholder, as https://example.com/{i}
   app: mercadosecundario/precosdenegociacao_e.asp?op_exc=Nada&emissor=&isin=&ativo=&dt_ini={{dt_start_yyyymmdd}}&dt_fim={{dt_end_ddmmyyyy}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -269,8 +269,8 @@ secondary_otc_volume:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: dbr_debenturescom_secondary_otc_volume
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     Data: date
     Emissor: str

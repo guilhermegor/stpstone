@@ -455,7 +455,7 @@ class TSIR:
         self, 
         list_constants_cubic_spline: list[float], 
         int_nper_wd: int, 
-        bl_sup_list: bool, 
+        bool_sup_list: bool, 
         int_num_constants_cubic_spline: int = 8
     ) -> float:
         """Evaluate a cubic spline polynomial segment for term structure modeling.
@@ -464,8 +464,8 @@ class TSIR:
         used in financial curve construction, particularly for yield curve interpolation.
 
         Mathematical Form:
-        - Lower segment (bl_sup_list=False): Σ (a_i * t^i) for i=0 to 3
-        - Upper segment (bl_sup_list=True): Σ (b_i * t^(i-4)) for i=4 to 7
+        - Lower segment (bool_sup_list=False): Σ (a_i * t^i) for i=0 to 3
+        - Upper segment (bool_sup_list=True): Σ (b_i * t^(i-4)) for i=4 to 7
         where t = int_nper_wd and coefficients are in list_constants_cubic_spline
 
         Parameters
@@ -476,7 +476,7 @@ class TSIR:
             and b_i are coefficients for the upper polynomial segment (t > knot point)
         int_nper_wd : int
             Time point (in working days) at which to evaluate the spline
-        bl_sup_list : bool
+        bool_sup_list : bool
             Segment selection flag:
             - False: Evaluate lower polynomial segment (a coefficients)
             - True: Evaluate upper polynomial segment (b coefficients)
@@ -514,7 +514,7 @@ class TSIR:
         if len(list_constants_cubic_spline) != int_num_constants_cubic_spline:
             raise Exception('Poor defined list of constants for cubic spline, '
                             + f'ought have {int_num_constants_cubic_spline} elements')
-        if not bl_sup_list:
+        if not bool_sup_list:
             return sum([list_constants_cubic_spline[x] * int_nper_wd ** x 
                         for x in range(0, int(int_num_constants_cubic_spline / 2))])
         else:
@@ -526,7 +526,7 @@ class TSIR:
     def literal_cubic_spline(
         self, 
         dict_nper_rates: dict[int, float], 
-        bl_debug: bool = False
+        bool_debug: bool = False
     ) -> dict[int, float]:
         """Construct a natural cubic spline interpolation of the term structure of interest rates.
 
@@ -557,7 +557,7 @@ class TSIR:
             - Minimum of 3 points required for cubic spline
             - Rates should be in decimal form (e.g., 0.015 for 1.5%)
 
-        bl_debug : bool, optional
+        bool_debug : bool, optional
             Debug flag to print intermediate calculations, by default False
             When True, prints:
             - Current working day being calculated
@@ -607,7 +607,7 @@ class TSIR:
             if len(dict_lower_mid_upper_bound_nper.keys()) == 4:
                 # working days for each bound and boolean of whether its the ending element of
                 #   original list within or not
-                du1, du2, du3, bl_sup_list = dict_lower_mid_upper_bound_nper.values()
+                du1, du2, du3, bool_sup_list = dict_lower_mid_upper_bound_nper.values()
                 i1, i2, i3 = [dict_nper_rates[v]
                               for k, v in dict_lower_mid_upper_bound_nper.items()
                               if k != 'end_of_list']
@@ -642,10 +642,10 @@ class TSIR:
             print(array_constants_solution)
             # rates of return (IRR, ytm) for the current working day nper
             dict_[curr_nper_wrkdays] = self.third_degree_polynomial_cubic_spline(
-                array_constants_solution, curr_nper_wrkdays, bl_sup_list,
+                array_constants_solution, curr_nper_wrkdays, bool_sup_list,
                 len(array_constants_solution)
             )
-            if bl_debug:
+            if bool_debug:
                 print(curr_nper_wrkdays, dict_[curr_nper_wrkdays])
         # output - term structure of interest rates
         return dict_

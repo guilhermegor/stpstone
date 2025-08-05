@@ -146,7 +146,7 @@ class MarkowitzPortf(metaclass=TypeChecker):
         array_r: Union[NDArray[np.float64], pd.DataFrame],
         array_w: Union[NDArray[np.float64], pd.DataFrame],
         float_lambda: Optional[float] = 0.94,
-        bl_validate_w: Optional[bool] = True,
+        bool_validate_w: Optional[bool] = True,
         float_atol: Optional[float] = 1e-4
     ) -> None:
         """Initialize portfolio with returns and weights.
@@ -159,7 +159,7 @@ class MarkowitzPortf(metaclass=TypeChecker):
             Array of portfolio weights
         float_lambda : Optional[float]
             EWMA smoothing factor (default: 0.94)
-        bl_validate_w : Optional[bool]
+        bool_validate_w : Optional[bool]
             Flag to validate weights (default: True)
         float_atol : Optional[float]
             Absolute tolerance for weight sum validation (default: 1e-4)
@@ -172,7 +172,7 @@ class MarkowitzPortf(metaclass=TypeChecker):
         self.array_r = Arrays().to_array(array_r)
         self.array_w = Arrays().to_array(array_w)
         
-        if bl_validate_w:
+        if bool_validate_w:
             self._validate_weights(float_atol)
 
     def _validate_weights(self, float_atol: float) -> None:
@@ -663,7 +663,7 @@ class PortfVar(VaR):
         float_cl: Optional[float] = 0.95,
         int_t: Optional[int] = 1,
         float_lambda: Optional[float] = 0.94,
-        bl_validate_w: Optional[bool] = True,
+        bool_validate_w: Optional[bool] = True,
         float_atol: Optional[float] = 1e-4
     ) -> None:
         """Initialize portfolio VaR calculator.
@@ -680,7 +680,7 @@ class PortfVar(VaR):
             Time horizon (default: 1)
         float_lambda : Optional[float]
             EWMA smoothing factor (default: 0.94)
-        bl_validate_w : Optional[bool]
+        bool_validate_w : Optional[bool]
             Flag to validate weights (default: True)
         float_atol : Optional[float]
             Absolute tolerance for weight validation (default: 1e-4)
@@ -718,7 +718,7 @@ class PortfVar(VaR):
             array_r,
             array_w,
             float_lambda,
-            bl_validate_w,
+            bool_validate_w,
             float_atol
         )
         super().__init__(

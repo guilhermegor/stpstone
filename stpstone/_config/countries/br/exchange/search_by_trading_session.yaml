@@ -12,7 +12,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -80,8 +80,8 @@ metadata:
 up2data_b3:
   web_driver:
     xpath_el_wait_until_loaded:
-  bl_verify: False
-  bl_io_interpreting: False
+  bool_verify: False
+  bool_io_interpreting: False
   str_sep: ';'
   str_decimal: ','
   request_token: 'https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={}'
@@ -106,7 +106,7 @@ up2data_b3:
   instruments: 'https://arquivos.b3.com.br/tabelas/InstrumentsConsolidated/{}?lang=pt'
   key_token: token
   url_daily_trades: https://arquivos.b3.com.br/apinegocios/tickercsv/{}/
-  bl_io_interpretin: False
+  bool_io_interpretin: False
   str_input_date_format: AAAA-MM-DD
   col_dt_ref: DataReferencia
   col_instrument: CodigoInstrumento
@@ -149,7 +149,7 @@ standardized_instruments_groups:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=AI{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -160,8 +160,8 @@ standardized_instruments_groups:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_standardized_instruments_groups
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TIPO: int
     ID_GRUPO_INSTRUMENTOS: int
@@ -203,7 +203,7 @@ index_report:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=IR{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -214,8 +214,8 @@ index_report:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_index_report
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TCKR_SYMB: str
     ID: int
@@ -285,7 +285,7 @@ price_report:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PR{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -296,8 +296,8 @@ price_report:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_price_report
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DT: date
     TCKR_SYMB: str
@@ -377,7 +377,7 @@ registration_indicator_instruments:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=II{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -388,8 +388,8 @@ registration_indicator_instruments:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_registration_indicator_instruments
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     ID: str
     PRTRY: int
@@ -466,7 +466,7 @@ fee_daily_unit_cost:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=DI{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -477,8 +477,8 @@ fee_daily_unit_cost:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_fee_daily_unit_cost
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SGMT: int
     MKT: int
@@ -532,7 +532,7 @@ fee_monthly_unit_cost:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=UN{{dt_start_month_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -543,8 +543,8 @@ fee_monthly_unit_cost:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_fee_monthly_unit_cost
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SGMT: int
     MKT: int
@@ -596,7 +596,7 @@ primitive_risk_factors:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=FP{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -607,8 +607,8 @@ primitive_risk_factors:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_primitive_risk_factors
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TIPO: int
     ID_FPR: int
@@ -663,7 +663,7 @@ risk_formulas:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=FR{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -674,8 +674,8 @@ risk_formulas:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_risk_formulas
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TIPO: int
     ID_FORMULA_RISCO: int
@@ -714,7 +714,7 @@ variable_fees_monthly_updt:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=VA{{dt_start_month_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -725,8 +725,8 @@ variable_fees_monthly_updt:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_variable_fees_monthly_updt
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     SGMT: int
     MKT: int
@@ -777,7 +777,7 @@ daily_liquidity_limit:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=LD{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -788,8 +788,8 @@ daily_liquidity_limit:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_daily_liquidity_limit
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     ID_CAMARA: category
     ORIGIEM_INSTRUMENTO: category
@@ -838,7 +838,7 @@ daily_liquidity_limit_other_limits:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=LA{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -849,8 +849,8 @@ daily_liquidity_limit_other_limits:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_daily_liquidity_limit_others
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     ID_CAMARA: category
     ORIGIEM_INSTRUMENTO: category
@@ -895,7 +895,7 @@ tradable_security_list:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=SecurityList{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -906,8 +906,8 @@ tradable_security_list:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_tradable_security_list
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1013,7 +1013,7 @@ mapping_otc_instrument_groups:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MO{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1024,8 +1024,8 @@ mapping_otc_instrument_groups:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_mapping_otc_instrument_groups
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1080,7 +1080,7 @@ mapping_standardized_instrument_groups:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MP{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1091,8 +1091,8 @@ mapping_standardized_instrument_groups:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_mapping_standardized_instrument_groups
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1147,7 +1147,7 @@ mtm_b3:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip#source=mtm_b3
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1158,8 +1158,8 @@ mtm_b3:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_mtm_b3
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1243,7 +1243,7 @@ option_theor_premiums:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PE{{dt_ref_yymmdd}}.ex_
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1254,8 +1254,8 @@ option_theor_premiums:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_option_theor_premiums
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1307,7 +1307,7 @@ fx_markets_traded_rates:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=CT{{dt_ref_yymmdd}}.zip#file_extension=.fwf
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1318,8 +1318,8 @@ fx_markets_traded_rates:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_fx_markets_traded_rates
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1418,7 +1418,7 @@ fx_market_volume_settled:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=CV{{dt_ref_yymmdd}}.zip#file_extension=.fwf
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1429,8 +1429,8 @@ fx_market_volume_settled:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_fx_volume_settled
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1485,7 +1485,7 @@ list_isin_numbers_swaps:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=IS{{dt_ref_yymmdd}}.ex_
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1496,8 +1496,8 @@ list_isin_numbers_swaps:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_list_isin_numbers_swaps
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1547,7 +1547,7 @@ id_us_dollar_swap_mtm:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=MM{{dt_ref_yymmdd}}.ex_
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1558,8 +1558,8 @@ id_us_dollar_swap_mtm:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_id_us_dollar_swap_mtm
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1653,7 +1653,7 @@ swap_market_rates:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=TS{{dt_ref_yymmdd}}.ex_
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1664,8 +1664,8 @@ swap_market_rates:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_swap_market_rates
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1751,7 +1751,7 @@ brazillian_sovereign_bonds:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PU{{dt_ref_yymmdd}}.ex_
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1762,8 +1762,8 @@ brazillian_sovereign_bonds:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_brazillian_sovereign_bonds
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1815,7 +1815,7 @@ instrument_group_parameters:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pesquisapregao/download?filelist=PG{{dt_ref_yymmdd}}.zip
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1826,8 +1826,8 @@ instrument_group_parameters:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_instrument_group_parameters
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1888,7 +1888,7 @@ spot_accepted_collateral_b3:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: pt_br/produtos-e-servicos/compensacao-e-liquidacao/clearing/administracao-de-riscos/garantias/limites-de-renda-variavel/#source=spot_accepted_collateral_b3
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1899,8 +1899,8 @@ spot_accepted_collateral_b3:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_spot_accepted_collateral
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1937,7 +1937,7 @@ risk_scenarios_curve_types:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: FTP/IPNv2/RISCO/CenariosTipoCurva{{data_ref}}.zip#source=risk_scenarios_curve_types
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1948,8 +1948,8 @@ risk_scenarios_curve_types:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_risk_scenarios_curve_types
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -1986,7 +1986,7 @@ primitive_risk_factors_merged:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: FTP/IPNv2/RISCO/CenariosTipoCurva{{data_ref}}.zip#source=primitive_risk_factors_merged
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
   cols_to_case: upper_constant
@@ -1997,8 +1997,8 @@ primitive_risk_factors_merged:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_primitive_risk_factors_merged
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

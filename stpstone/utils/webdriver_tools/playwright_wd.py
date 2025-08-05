@@ -11,34 +11,34 @@ from stpstone.utils.loggs.create_logs import CreateLog
 class PlaywrightScraper:
     def __init__(
         self,
-        bl_headless: bool = True,
+        bool_headless: bool = True,
         user_agent: Optional[str] = None,
         proxy: Optional[str] = None,
         viewport: Dict[str, int] = None,
         int_default_timeout: int = 30000,
-        bl_accept_cookies: bool = True, 
-        bl_incognito: bool = False,
+        bool_accept_cookies: bool = True, 
+        bool_incognito: bool = False,
         logger: Optional[Logger] = None
     ):
         """
         Initialize a generic Playwright scraper
         
         Args:
-            bl_headless (bool): Run in bl_headless mode
+            bool_headless (bool): Run in bool_headless mode
             user_agent (str): Custom user agent string
             proxy (str): Proxy server address
             viewport (dict): Browser viewport settings {"width": 1920, "height": 1080}
             int_default_timeout (int): Default timeout in milliseconds
-            bl_accept_cookies (bool): Attempt to accept cookies if popup appears
-            bl_incognito (bool): Run in incognito mode
+            bool_accept_cookies (bool): Attempt to accept cookies if popup appears
+            bool_incognito (bool): Run in incognito mode
         """
-        self.bl_headless = bl_headless
+        self.bool_headless = bool_headless
         self.user_agent = user_agent or "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         self.proxy = proxy
         self.viewport = viewport or {"width": 1920, "height": 1080}
         self.int_default_timeout = int_default_timeout
-        self.bl_accept_cookies = bl_accept_cookies
-        self.bl_incognito = bl_incognito
+        self.bool_accept_cookies = bool_accept_cookies
+        self.bool_incognito = bool_incognito
         self.logger = logger
         self.playwright = None
         self.browser = None
@@ -51,10 +51,10 @@ class PlaywrightScraper:
         try:
             self.playwright = sync_playwright().start()
             browser_args = {
-                "headless": self.bl_headless,
+                "headless": self.bool_headless,
                 "proxy": {"server": self.proxy} if self.proxy else None
             }
-            if self.bl_incognito:
+            if self.bool_incognito:
                 self.context = self.playwright.chromium.launch_persistent_context(
                     user_data_dir=None,
                     **browser_args,
@@ -90,7 +90,7 @@ class PlaywrightScraper:
         """Navigate to a URL"""
         try:
             self.page.goto(url, timeout=timeout or self.int_default_timeout)
-            if self.bl_accept_cookies:
+            if self.bool_accept_cookies:
                 self._handle_cookie_popup()
             return True
         except Exception as e:
@@ -302,7 +302,7 @@ class PlaywrightScraper:
         content: str,
         folder_path: str = "scraped_data",
         filename: Optional[str] = None,
-        bl_include_timestamp: bool = True
+        bool_include_timestamp: bool = True
     ) -> str:
         """
         Export HTML content to a file in the specified folder.
@@ -311,7 +311,7 @@ class PlaywrightScraper:
             content (str): HTML content to save
             folder_path (str): Path to the output folder (default: "scraped_data")
             filename (str): Optional custom filename (without extension)
-            bl_include_timestamp (bool): Whether to append bl_include_timestamp to filename
+            bool_include_timestamp (bool): Whether to append bool_include_timestamp to filename
             
         Returns:
             str: Path to the saved file
@@ -321,7 +321,7 @@ class PlaywrightScraper:
             if not filename:
                 url = self.page.url if hasattr(self, "page") and self.page else "scraped"
                 filename = url.split("//")[-1].replace("/", "_").replace("?", "_").replace("=", "_")
-            if bl_include_timestamp:
+            if bool_include_timestamp:
                 timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"{filename}_{timestamp_str}"
             if not filename.endswith(".html"):

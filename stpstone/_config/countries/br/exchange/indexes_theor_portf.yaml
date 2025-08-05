@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -32,7 +32,7 @@ ibov:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQk9WIiwic2VnbWVudCI6IjEifQ==
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -43,8 +43,8 @@ ibov:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_ibov_theor_portf
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATE: date
     SEGMENT: str
@@ -70,7 +70,7 @@ ibrx100:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlhYIiwic2VnbWVudCI6IjEifQ==
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -81,8 +81,8 @@ ibrx100:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_ibrx100_theor_portf
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATE: date
     SEGMENT: str
@@ -108,7 +108,7 @@ ibrx50:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlhMIiwic2VnbWVudCI6IjEifQ==
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -119,8 +119,8 @@ ibrx50:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_ibrx50_theor_portf
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATE: date
     SEGMENT: str
@@ -146,7 +146,7 @@ ibra:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: indexProxy/indexCall/GetPortfolioDay/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMCwiaW5kZXgiOiJJQlJBIiwic2VnbWVudCI6IjEifQ==
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -157,8 +157,8 @@ ibra:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_ibra_theor_portf
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATE: date
     SEGMENT: str

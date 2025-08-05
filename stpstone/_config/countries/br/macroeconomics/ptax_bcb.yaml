@@ -11,7 +11,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -41,7 +41,7 @@ ids:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   app: ptax_internet/consultaBoletim.do
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case:
   cols_to_case:
@@ -51,8 +51,8 @@ ids:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_bcb_ptax_ids
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CURRENCY_ID: int
     CURRENCY_NAME: str
@@ -73,7 +73,7 @@ available_currencies:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   app: Download/fechamento/M{{dt_end_yyyymmdd}}.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case:
   cols_to_case:
@@ -83,8 +83,8 @@ available_currencies:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_bcb_available_currencies
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     NAME: str
@@ -122,7 +122,7 @@ close_currency_rates:
   # use this argument only if {{chunk_slugs}} is passed to app
   int_chunk_slugs:
   app: ptax_internet/consultaBoletim.do?ChkMoeda={{slug}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case:
   cols_to_case:
@@ -135,8 +135,8 @@ close_currency_rates:
     - TypeError
   schema: raw
   table_name: br_bcb_close_currency_rates
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATE: date
     CURRENCY_CODE: str

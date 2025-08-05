@@ -30,7 +30,7 @@ credentials:
 
 raw_indicadores_fundos:
   app: fundos/{{slug}}/indicadores
-  bl_verify: False
+  bool_verify: False
 
 trt_indicadores_fundos:
   re_patterns:

@@ -237,8 +237,8 @@ regression-model-in-python
         array_x_real_numbers: np.ndarray,
         array_y_real_numbers: np.ndarray,
         num_cross_validation_splitting_strategy: int = 5,
-        bl_return_train_score: bool = True,
-        bl_randomized_search: bool = True,
+        bool_return_train_score: bool = True,
+        bool_randomized_search: bool = True,
     ) -> ResultGridSearch:
         """Find optimal hyperparameters using grid search.
 
@@ -256,9 +256,9 @@ regression-model-in-python
             Array of real numbers (target)
         num_cross_validation_splitting_strategy : int, optional
             Number of CV splits, by default 5
-        bl_return_train_score : bool, optional
+        bool_return_train_score : bool, optional
             Whether to return train scores, by default True
-        bl_randomized_search : bool, optional
+        bool_randomized_search : bool, optional
             Whether to use randomized search, by default True
 
         Returns
@@ -271,13 +271,13 @@ regression-model-in-python
         .. [1] https://colab.research.google.com/github/ageron/handson-ml2/blob/master/\
 02_sup_to_sup_machine_learning_project.ipynb#scrollTo=HwzPGGhkEagH
         """
-        if bl_randomized_search:
+        if bool_randomized_search:
             grid_search_model = RandomizedSearchCV(
                 model_fitted,
                 param_grid,
                 cv=num_cross_validation_splitting_strategy,
                 scoring=scoring_method,
-                return_train_score=bl_return_train_score,
+                return_train_score=bool_return_train_score,
             )
         else:
             grid_search_model = GridSearchCV(
@@ -285,7 +285,7 @@ regression-model-in-python
                 param_grid,
                 cv=num_cross_validation_splitting_strategy,
                 scoring=scoring_method,
-                return_train_score=bl_return_train_score,
+                return_train_score=bool_return_train_score,
             )
 
         grid_search_model.fit(array_x_real_numbers, array_y_real_numbers)

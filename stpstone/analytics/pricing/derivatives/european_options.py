@@ -1411,7 +1411,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        bl_spot: bool = True
+        bool_spot: bool = True
     ) -> ResultVommaPositiveOutsideInterval:
         """Vomma positive outside interval.
 
@@ -1431,7 +1431,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        bl_spot : bool, optional
+        bool_spot : bool, optional
             True if s is the spot price, False if k is the strike price, by default True
 
         Returns
@@ -1445,7 +1445,7 @@ class Greeks(BlackScholesMerton):
         s, k, r, t, sigma, q, b = self.set_parameters(
             s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         # sign of cost of carry, according to s_k being a spot or strike value
-        if bl_spot:
+        if bool_spot:
             sign_ = 1
             s_k = s
         else:

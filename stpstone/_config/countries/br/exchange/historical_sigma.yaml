@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -41,7 +41,7 @@ group_1:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOj{{slug}}sInBhZ2VTaXplIjoiMjAifQ==
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -52,8 +52,8 @@ group_1:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_historical_sigma
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     TRADING_NAME: str
@@ -96,7 +96,7 @@ group_2:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOjE{{slug}}LCJwYWdlU2l6ZSI6IjIwIn0=
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -107,8 +107,8 @@ group_2:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_historical_sigma
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     TRADING_NAME: str
@@ -145,7 +145,7 @@ group_3:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: securitiesVolatilityProxy/SecuritiesVolatilityCall/GetListVolatilities/eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOjI{{slug}}LCJwYWdlU2l6ZSI6IjIwIn0=
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -156,8 +156,8 @@ group_3:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_historical_sigma
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     TRADING_NAME: str

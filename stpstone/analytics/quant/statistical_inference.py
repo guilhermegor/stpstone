@@ -33,7 +33,7 @@ class LinearityResults(TypedDict):
 
     r_squared: dict[str, float]
     h0: str
-    bl_reject_h0: dict[str, bool]
+    bool_reject_h0: dict[str, bool]
 
 
 class VifResults(TypedDict):
@@ -42,7 +42,7 @@ class VifResults(TypedDict):
     vif_ivs: dict[str, float]
     r_squared_mc_ivs: dict[str, float]
     h0: str
-    bl_reject_h0: dict[str, bool]
+    bool_reject_h0: dict[str, bool]
 
 
 class BreuschGodfreyResults(TypedDict):
@@ -50,7 +50,7 @@ class BreuschGodfreyResults(TypedDict):
 
     breush_godfrey_tup: tuple[float, float, int, dict[float, float]]
     h0: str
-    bl_reject_h0: bool
+    bool_reject_h0: bool
 
 
 class DurbinWatsonResults(TypedDict):
@@ -58,7 +58,7 @@ class DurbinWatsonResults(TypedDict):
 
     test_value: float
     h0: str
-    bl_reject_h0: bool
+    bool_reject_h0: bool
 
 
 class BreuschPaganResults(TypedDict):
@@ -67,7 +67,7 @@ class BreuschPaganResults(TypedDict):
     lagrange_multiplier: float
     p_value: float
     h0: str
-    bl_reject_h0: bool
+    bool_reject_h0: bool
 
 
 class CooksDistanceResults(TypedDict):
@@ -298,7 +298,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             "r_squared": \
                 {list_cols_iv[idx]: linearity_results[idx] for idx in range(len(list_cols_iv))},
             "h0": "linear relationship between X and y",
-            "bl_reject_h0": {
+            "bool_reject_h0": {
                 list_cols_iv[idx]: linearity_results[idx] < r_squared_cut
                 for idx in range(len(list_cols_iv))
             },
@@ -395,7 +395,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             "vif_ivs": {col: vif_results[idx][0] for idx, col in enumerate(list_cols_iv)},
             "r_squared_mc_ivs": {col: vif_results[idx][1] for idx, col in enumerate(list_cols_iv)},
             "h0": "lack of multicollinearity",
-            "bl_reject_h0": {
+            "bool_reject_h0": {
                 col: vif_results[idx][0] > float_r_squared_mc_cut 
                 for idx, col in enumerate(list_cols_iv)
             },
@@ -489,7 +489,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
         return {
             "breush_godfrey_tup": test_result,
             "h0": "no serial correlation of any order up to p",
-            "bl_reject_h0": test_result[0] < test_result[1],
+            "bool_reject_h0": test_result[0] < test_result[1],
         }
 
     def durbin_watson_test(
@@ -529,7 +529,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
         return {
             "test_value": test_value,
             "h0": "no autocorrelation among the residuals",
-            "bl_reject_h0": (test_value <= 1.5) or (test_value >= 2.5),
+            "bool_reject_h0": (test_value <= 1.5) or (test_value >= 2.5),
         }
 
     def breusch_pagan_test(
@@ -591,7 +591,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             "lagrange_multiplier": lagrange_multiplier,
             "p_value": p_value,
             "h0": "homoscedasticity",
-            "bl_reject_h0": alpha > p_value,
+            "bool_reject_h0": alpha > p_value,
         }
 
     def cooks_distance(
@@ -1437,7 +1437,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
     def benford_law(
         self, 
         array_data: NDArray[np.float64], 
-        bl_list_number_occurrencies: bool = False
+        bool_list_number_occurrencies: bool = False
     ) -> BenfordResults:
         """Apply Benford's Law for fraud detection by evaluating first digit occurrences.
 
@@ -1445,7 +1445,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
         ----------
         array_data : NDArray[np.float64]
             Input data array, either raw numbers or counts of first digits (1-9).
-        bl_list_number_occurrencies : bool, optional
+        bool_list_number_occurrencies : bool, optional
             If True, array_data contains counts of first digits; if False, raw numbers, \
                 by default False.
 
@@ -1457,7 +1457,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
         Raises
         ------
         TypeError
-            If bl_list_number_occurrencies is not a boolean.
+            If bool_list_number_occurrencies is not a boolean.
         ValueError
             If boolean list is not either True or False.
 
@@ -1465,14 +1465,14 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
         ----------
         .. [1] https://brilliant.org/wiki/benfords-law/
         """
-        if not isinstance(bl_list_number_occurrencies, bool):
-            raise TypeError("bl_list_number_occurrencies must be a boolean")
+        if not isinstance(bool_list_number_occurrencies, bool):
+            raise TypeError("bool_list_number_occurrencies must be a boolean")
         validate_array(array_data, "array_data", min_samples=1)
 
         array_benford_expected = np.array([np.log10(i + 2) - np.log10(i + 1) for i in range(9)])
         array_percentual_occurrence = np.zeros(9)
 
-        if not bl_list_number_occurrencies:
+        if not bool_list_number_occurrencies:
             list_first_digits: list[int] = []
             for x in array_data:
                 abs_x = abs(x)
@@ -1494,7 +1494,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
         else:
             if array_data.sum() == 0:
                 raise ValueError(
-                    "Sum of array_data cannot be zero when bl_list_number_occurrencies is True")
+                    "Sum of array_data cannot be zero when bool_list_number_occurrencies is True")
             for i in range(9):
                 array_percentual_occurrence[i] = array_data[i] / array_data.sum()
                 validate_scalar(

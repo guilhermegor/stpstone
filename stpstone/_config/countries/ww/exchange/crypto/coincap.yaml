@@ -10,7 +10,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -42,7 +42,7 @@ ohlcv_latest:
     - solaris
     - ethereum
   app: assets/{{slug}}
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel
   cols_to_case: upper_constant
@@ -52,8 +52,8 @@ ohlcv_latest:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_coincap_ohlcv_latest
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     ID: str
     RANK: int

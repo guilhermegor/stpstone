@@ -9,7 +9,7 @@ credentials:
     app: api/download/requestname?fileName=InstrumentsConsolidatedFile&date={{dt_ref}}&recaptchaToken=
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -42,7 +42,7 @@ instruments_list:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: api/download/?token={{token}}#format=.csv
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -53,8 +53,8 @@ instruments_list:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_tradable_securities_instruments_list
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

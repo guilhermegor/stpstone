@@ -15,14 +15,14 @@ class MinioClient:
         user: str,
         password: str,
         endpoint: Optional[str] = "localhost:9000",
-        bl_secure: Optional[bool] = True,
+        bool_secure: Optional[bool] = True,
         logger: Optional[Logger] = None
     ):
         self.client = Minio(
             endpoint,
             access_key=user,
             secret_key=password,
-            secure=bl_secure
+            secure=bool_secure
         )
         self.logger = logger
 
@@ -155,12 +155,12 @@ class MinioClient:
     def list_objects(
         self,
         bucket_name: str,
-        bl_include_version: bool = False,
+        bool_include_version: bool = False,
         prefix: Optional[str] = None,
         recursive: bool = False
     ) -> Optional[list]:
         try:
-            objects = self.client.list_objects(bucket_name, include_version=bl_include_version,
+            objects = self.client.list_objects(bucket_name, include_version=bool_include_version,
                                                prefix=prefix, recursive=recursive)
             return [obj.object_name for obj in objects]
         except S3Error as e:

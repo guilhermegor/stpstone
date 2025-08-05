@@ -68,7 +68,7 @@ class InputsClassification(metaclass=TypeChecker):
         self, 
         database_name: str = "mnist_784", 
         version: int = 1, 
-        bl_asframe: bool = False
+        bool_asframe: bool = False
     ) -> ResultFetchSklearn:
         """Fetch dataset from sklearn openml repository.
 
@@ -78,7 +78,7 @@ class InputsClassification(metaclass=TypeChecker):
             Name of dataset to fetch, default "mnist_784"
         version : int, optional
             Version of dataset, default 1
-        bl_asframe : bool, optional
+        bool_asframe : bool, optional
             Return as pandas DataFrame if True, default False
 
         Returns
@@ -90,14 +90,14 @@ class InputsClassification(metaclass=TypeChecker):
         ----------
         scikit-learn fetch_openml documentation
         """
-        return fetch_openml(database_name, version=version, as_frame=bl_asframe)
+        return fetch_openml(database_name, version=version, as_frame=bool_asframe)
 
     def show_image_from_dataset(
         self, 
         array_instance: NDArray[np.float64], 
         cmap: str = "binary", 
         shape: tuple = (28, 28),
-        bl_axis: str = "off", 
+        bool_axis: str = "off", 
         complete_saving_path: Optional[str] = None
     ) -> None:
         """Display image from dataset array.
@@ -110,7 +110,7 @@ class InputsClassification(metaclass=TypeChecker):
             Color map for display, default "binary"
         shape : tuple, optional
             Shape to reshape image, default (28, 28)
-        bl_axis : str, optional
+        bool_axis : str, optional
             Show axis if "on", default "off"
         complete_saving_path : Optional[str]
             Path to save image if provided, default None
@@ -121,7 +121,7 @@ class InputsClassification(metaclass=TypeChecker):
         """
         array_instance = array_instance.reshape(shape)
         plt.imshow(array_instance, cmap=cmap)
-        plt.axis(bl_axis)
+        plt.axis(bool_axis)
         if complete_saving_path is not None:
             plt.savefig(complete_saving_path)
         else:

@@ -9,7 +9,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -57,7 +57,7 @@ ohlcv_latest:
     - sol-solana
     - etc-ethereum-classic
   app: coins/{{slug}}/ohlcv/latest
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: lower_constant
   cols_to_case: upper_constant
@@ -67,8 +67,8 @@ ohlcv_latest:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: ww_coinpaprika_ohlcv_latest
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     TIME_OPEN: str
     TIME_CLOSE: str

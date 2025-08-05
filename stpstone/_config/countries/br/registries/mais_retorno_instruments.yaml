@@ -10,7 +10,7 @@ credentials:
     headers:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -54,12 +54,12 @@ avl_funds:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: lista-fundos-investimentos/page/{{slug}}#source=avl_funds
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -71,8 +71,8 @@ avl_funds:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_available_funds
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -118,12 +118,12 @@ avl_instruments:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "{{instruments_class}}/page/{{slug}}#source=avl_instruments"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -135,8 +135,8 @@ avl_instruments:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_available_instruments
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -187,12 +187,12 @@ avl_indexes:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: lista-indices/page/{{slug}}#source=avl_indexes
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -204,8 +204,8 @@ avl_indexes:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_available_indexes
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -255,12 +255,12 @@ fund_properties:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: fundo/{{slug}}#source=fund_properties
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -272,8 +272,8 @@ fund_properties:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_funds_properties
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -376,12 +376,12 @@ instruments_historical_rentability:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "{{instruments_class}}/{{slug}}#source=instruments_historical_rentability"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -393,8 +393,8 @@ instruments_historical_rentability:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_instruments_historic_rentability
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -449,12 +449,12 @@ instruments_stats:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "{{instruments_class}}/{{slug}}#source=instruments_stats"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -466,8 +466,8 @@ instruments_stats:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_instruments_stats
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -515,12 +515,12 @@ instruments_consistency:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "{{instruments_class}}/{{slug}}#source=instruments_consistency"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -532,8 +532,8 @@ instruments_consistency:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_mais_retorno_instruments_consistency
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

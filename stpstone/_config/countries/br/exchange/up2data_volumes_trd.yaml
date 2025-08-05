@@ -33,14 +33,14 @@ instruments_trd_volumes:
   payload:
   app: api/download/?token={token}
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: False
+  bool_verify: False
+  bool_io_interpreting: False
   timeout: (12.0, 12.0)
   str_fmt_dt: YYYY-MM-DD
   schema: raw
   table_name: br_b3_instruments_trd_volumes
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     RPT_DT: date
     TCKR_SYMB: str
@@ -98,14 +98,14 @@ instruments_trd_volumes:
 daily_trades:
   app: apinegocios/tickercsv/{{dt_ref}}/
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: False
+  bool_verify: False
+  bool_io_interpreting: False
   timeout: (12.0, 12.0)
   str_fmt_dt: YYYY-MM-DD
   schema: raw
   table_name: br_b3_daily_trades
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     DATA_REFERENCIA: date
     CODIGO_INSTRUMENTO: str
@@ -122,8 +122,8 @@ daily_trades:
 loan_balance:
   req_method: GET
   app: tabelas/table/LoanBalance/{{dt_ref}}/{{i}}
-  bl_verify: False
-  bl_io_interpreting: False
+  bool_verify: False
+  bool_io_interpreting: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -132,8 +132,8 @@ loan_balance:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_b3_loan_balance
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     RPT_DT: date
     TCKR_SYMB: str
@@ -151,8 +151,8 @@ loan_balance:
 lending_open_position:
   req_method: GET
   app: tabelas/table/LendingOpenPosition/{dt_ref}/{i}
-  bl_verify: False
-  bl_io_interpreting: False
+  bool_verify: False
+  bool_io_interpreting: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
   cols_to_case: upper_constant
@@ -161,8 +161,8 @@ lending_open_position:
   strategy_keep_when_dupl: first
   schema: raw
   table_name: br_b3_lending_open_position
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     RPT_DT: date
     TCKR_SYMB: str

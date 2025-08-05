@@ -17,7 +17,7 @@ credentials:
     headers:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -51,12 +51,12 @@ non_farm_payroll_forecasts:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: united-states/non-farm-payrolls#source=non_farm_payroll_forecasts
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -68,8 +68,8 @@ non_farm_payroll_forecasts:
   list_ignorable_exceptions:
   schema: raw
   table_name: us_trading_economics_non_farm_payroll_forecasts
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -113,12 +113,12 @@ non_farm_payroll_components:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: united-states/non-farm-payrolls#source=non_farm_payroll_components
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -130,8 +130,8 @@ non_farm_payroll_components:
   list_ignorable_exceptions:
   schema: raw
   table_name: us_trading_economics_non_farm_payroll_components
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -172,12 +172,12 @@ non_farm_payroll_related:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: united-states/non-farm-payrolls#source=non_farm_payroll_related
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -189,8 +189,8 @@ non_farm_payroll_related:
   list_ignorable_exceptions:
   schema: raw
   table_name: us_trading_economics_non_farm_payroll_related
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -231,12 +231,12 @@ non_farm_payroll_stats:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: united-states/non-farm-payrolls#source=non_farm_payroll_stats
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -248,8 +248,8 @@ non_farm_payroll_stats:
   list_ignorable_exceptions:
   schema: raw
   table_name: us_trading_economics_non_farm_payroll_stats
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -294,12 +294,12 @@ wages_usa:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: united-states/wages#source=wages_usa
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -311,8 +311,8 @@ wages_usa:
   list_ignorable_exceptions:
   schema: raw
   table_name: us_trading_economics_wages
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

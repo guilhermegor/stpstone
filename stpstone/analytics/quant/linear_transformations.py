@@ -130,7 +130,7 @@ class LinearAlgebra(metaclass=TypeChecker):
     def cholesky_decomposition(
         self, 
         array_data: npt.NDArray[np.float64], 
-        bl_lower_triangle: bool = True
+        bool_lower_triangle: bool = True
     ) -> npt.NDArray[np.float64]:
         """Cholesky decomposition performed on a symmetric, positive-definite matrix.
 
@@ -138,8 +138,8 @@ class LinearAlgebra(metaclass=TypeChecker):
         into the product of a lower triangular matrix and its transpose. Specifically, 
         for a symmetric positive-definite matrix A, the decomposition yields:
 
-            A = L @ L.T    if bl_lower_triangle is True, or
-            A = U.T @ U    if bl_lower_triangle is False,
+            A = L @ L.T    if bool_lower_triangle is True, or
+            A = U.T @ U    if bool_lower_triangle is False,
 
         where L is a lower triangular matrix and U is its transpose (an upper triangular matrix).
 
@@ -152,7 +152,7 @@ class LinearAlgebra(metaclass=TypeChecker):
         ----------
         array_data : npt.NDArray[np.float64]
             Symmetric, positive-definite matrix to be decomposed.
-        bl_lower_triangle : bool, optional
+        bool_lower_triangle : bool, optional
             If True (default), returns the lower-triangular matrix L such that A = L @ L.T.
             If False, returns the upper-triangular matrix U such that A = U.T @ U.
 
@@ -166,7 +166,7 @@ class LinearAlgebra(metaclass=TypeChecker):
         https://www.quantstart.com/articles/Cholesky-Decomposition-in-Python-and-NumPy/
         """
         L = np.linalg.cholesky(array_data)
-        return L if bl_lower_triangle else L.T
+        return L if bool_lower_triangle else L.T
 
     def eigenvalue_eigenvector(
         self, 

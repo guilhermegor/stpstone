@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -40,7 +40,7 @@ bcb_registry:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: Fis/CODCOMPE/Tabela.pdf#feat=read_tables&int_pgs_join=3
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -51,8 +51,8 @@ bcb_registry:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_bcb_brazilian_banks
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     COD_COMPENSACAO: str
     CNPJ: str

@@ -10,7 +10,7 @@ credentials:
     headers:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -44,12 +44,12 @@ min_wage:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: salariomi.html#source=min_wage
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -61,8 +61,8 @@ min_wage:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_yahii_min_wage
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -101,12 +101,12 @@ inss_contribution:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: inss.html#source=inss_contribution
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -118,8 +118,8 @@ inss_contribution:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_yahii_inss_contribution
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -159,12 +159,12 @@ daily_usdbrl:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: dolardiario{{year_yy}}.html#source=daily_usdbrl
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -176,8 +176,8 @@ daily_usdbrl:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_yahii_daily_usdbrl
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -216,12 +216,12 @@ daily_eurbrl:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: eurodiario{{year_yy}}.html#source=daily_eurbrl
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -233,8 +233,8 @@ daily_eurbrl:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_yahii_daily_eurbrl
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

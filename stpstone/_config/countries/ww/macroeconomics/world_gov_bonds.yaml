@@ -10,7 +10,7 @@ credentials:
     headers:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -44,12 +44,12 @@ sovereign_spreads:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "#source=sovereign_spreads"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -61,8 +61,8 @@ sovereign_spreads:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_wgb_sovereign_spreads
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -105,12 +105,12 @@ countries_ratings:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "world-credit-ratings/#source=countries_ratings"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -122,8 +122,8 @@ countries_ratings:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_wgb_countries_ratings
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -164,12 +164,12 @@ sovereign_cds:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "sovereign-cds/#source=sovereign_cds"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -181,8 +181,8 @@ sovereign_cds:
   list_ignorable_exceptions:
   schema: raw
   table_name: ww_wgb_sovereign_cds
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

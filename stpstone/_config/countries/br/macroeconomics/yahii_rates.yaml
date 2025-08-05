@@ -10,7 +10,7 @@ credentials:
     headers:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -90,7 +90,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 8
       int_cols_tbl: 8
-      int_step_tbl_begin: 89
+      int_step_tbool_begin: 89
       int_start_acc: 40
       int_year_min: 2000
     inpc:
@@ -152,7 +152,7 @@ pmi_rf_rates:
       int_y: 2
       int_m: 17
       int_cols_tbl: 8
-      int_step_tbl_begin: 198
+      int_step_tbool_begin: 198
       int_start_acc: 40
       int_year_min: 1995
     tjlp:
@@ -160,7 +160,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 9
       int_cols_tbl: 9
-      int_step_tbl_begin: 100
+      int_step_tbool_begin: 100
       int_start_acc: 40
       int_year_min: 1995
     tlp_fixa:
@@ -174,7 +174,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 8
       int_cols_tbl: 8
-      int_step_tbl_begin: 89
+      int_step_tbool_begin: 89
       int_start_acc: 40
       int_year_min: 1995
     tr:
@@ -182,7 +182,7 @@ pmi_rf_rates:
       int_y: 2
       int_m: 21
       int_cols_tbl: 10
-      int_step_tbl_begin: 254
+      int_step_tbool_begin: 254
       int_year_min: 1991
       int_start_acc: 256
     ufesp:
@@ -244,12 +244,12 @@ pmi_rf_rates:
   #   - feat=read_tables
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
-  #   - bl_separator_consistency_check == False, as default
+  #   - bool_separator_consistency_check == False, as default
   #   - start with a commentary hash and separate params with &
-  # for using source and bl_debug dummy variables, please pass #source=dummy_1&bl_debug=True within
-  #   the app; example: application/name/#source=dummy_1&bl_debug=True
+  # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
+  #   the app; example: application/name/#source=dummy_1&bool_debug=True
   app: "{{slug}}.html#source={{slug}}"
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -261,8 +261,8 @@ pmi_rf_rates:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_yahii_pmis_rf_rates
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

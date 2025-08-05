@@ -8,7 +8,7 @@ credentials:
     host:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -38,7 +38,7 @@ volumes:
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
   app: sig/FormConsultaNegociacoes.asp?strTipoResumo=RES_NEGOCIACOES&strSocEmissora=B3SA&strDtReferencia={{dt_ref_mm_yyyy}}&strIdioma=P&intCodNivel=1&intCodCtrl=100
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: default
   cols_to_case: upper_constant
@@ -49,8 +49,8 @@ volumes:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_b3_volumes
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     MERCADO: str
     NEGOCIACOES: int

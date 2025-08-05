@@ -80,13 +80,13 @@ metadata:
 companies:
   app: Empresas{{i}}.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_companies
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     EIN_COMPANY: str
     COMPANY_NAME: str
@@ -100,13 +100,13 @@ companies:
 businesses:
   app: Estabelecimentos{{i}}.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_businesses
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     EIN_BASIC: str
     EIN_ORDER: str
@@ -142,13 +142,13 @@ businesses:
 simplified_taxation_system:
   app: Simples.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_simp_tax_sys
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     EIN_BASIC: str
     CODE_SIMPL_TX: str
@@ -161,13 +161,13 @@ simplified_taxation_system:
 shareholders:
   app: Socios{{i}}.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_shareholders
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     EIN_BASIC: str
     ID_PERSON_TYPE: str
@@ -184,13 +184,13 @@ shareholders:
 countries:
   app: Paises.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_countries
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     NAME: str
@@ -198,13 +198,13 @@ countries:
 cities:
   app: Municipios.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_cities
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     NAME: str
@@ -212,13 +212,13 @@ cities:
 shareholders_education:
   app: Qualificacoes.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_shareholders_education
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -226,12 +226,12 @@ shareholders_education:
 legal_form:
   app: Naturezas.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   schema: raw
   table_name: br_irs_legal_form
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -240,13 +240,13 @@ legal_form:
 ncea:
   app: Cnaes.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_ncea
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str
@@ -254,13 +254,13 @@ ncea:
 registration_status:
   app: Motivos.zip
   req_method: GET
-  bl_verify: False
-  bl_io_interpreting: True
+  bool_verify: False
+  bool_io_interpreting: True
   str_fmt_dt: 'YYYYMMDD'
   schema: raw
   table_name: br_irs_registration_status
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   dtypes:
     CODE: str
     DESCRIPTION: str

@@ -9,7 +9,7 @@ credentials:
     app:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -45,7 +45,7 @@ ima_geral:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: arquivos/indices-historico/IMAGERAL-HISTORICO.xls#file_extension=.xl_url
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -57,8 +57,8 @@ ima_geral:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_data_indexes_ima_geral
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -114,7 +114,7 @@ ida_geral:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: arquivos/indices-historico/IDAGERAL-HISTORICO.xls#file_extension=.xl_url
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -126,8 +126,8 @@ ida_geral:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_data_indexes_ida_geral
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -181,7 +181,7 @@ ida_liq_geral:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: arquivos/indices-historico/IDALIQGERAL-HISTORICO.xls#file_extension=.xl_url
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -193,8 +193,8 @@ ida_liq_geral:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_data_indexes_ida_liq_geral
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log
@@ -248,7 +248,7 @@ idka_pre_1a:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: arquivos/indices-historico/IDKAPRE1A-HISTORICO.xls#file_extension=.xl_url
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -260,8 +260,8 @@ idka_pre_1a:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_anbima_data_indexes_idka_pre_1a
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

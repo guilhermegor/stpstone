@@ -48,16 +48,16 @@ class MarkowitzEff(metaclass=TypeChecker):
         col_last_close: str = 'last_close', 
         col_min_w: str = 'min_w',
         col_max_date: str = 'max_date', 
-        bl_constraints: bool = True, 
-        bl_opt_possb_comb: bool = False,
-        bl_progress_printing_opt: bool = False, 
+        bool_constraints: bool = True, 
+        bool_opt_possb_comb: bool = False,
+        bool_progress_printing_opt: bool = False, 
         nth_try: int = 100, 
         n_attempts_opt_prf: int = 10000,
         int_wdy:int=252, int_round_close: int = 2, 
         path_fig: Optional[str] = None,
-        bl_debug_mode: bool = True, 
-        bl_show_plot: bool = True, 
-        bl_non_zero_w_eff: bool = False,
+        bool_debug_mode: bool = True, 
+        bool_show_plot: bool = True, 
+        bool_non_zero_w_eff: bool = False,
         title_text: str = 'Markowitz Risk x Return Portfolios',
         yaxis_title: str = 'Return (%)', 
         xaxis_title: str = 'Risk (%)'
@@ -88,11 +88,11 @@ class MarkowitzEff(metaclass=TypeChecker):
             Column name for minimum weight, by default 'min_w'.
         col_max_date : str
             Column name for maximum date, by default 'max_date'.
-        bl_constraints : bool
+        bool_constraints : bool
             Flag to include constraints, by default True.
-        bl_opt_possb_comb : bool
+        bool_opt_possb_comb : bool
             Flag to optimize possible combinations, by default False.
-        bl_progress_printing_opt : bool
+        bool_progress_printing_opt : bool
             Flag to print optimization progress, by default False.
         nth_try : int
             Number of attempts for optimization, by default 100.
@@ -104,11 +104,11 @@ class MarkowitzEff(metaclass=TypeChecker):
             Number of decimal places for rounding, by default 2.
         path_fig : Optional[str]
             Path to save figure, by default None.
-        bl_debug_mode : bool
+        bool_debug_mode : bool
             Flag to enable debug mode, by default True.
-        bl_show_plot : bool
+        bool_show_plot : bool
             Flag to show plot, by default True.
-        bl_non_zero_w_eff : bool
+        bool_non_zero_w_eff : bool
             Flag to include non-zero weights in efficient frontier, by default False.
         title_text : str
             Title text for plot, by default 'Markowitz Risk x Return Portfolios'.
@@ -135,15 +135,15 @@ class MarkowitzEff(metaclass=TypeChecker):
         self.col_last_close = col_last_close
         self.col_max_date = col_max_date
         self.float_rf = float_rf
-        self.bl_constraints = bl_constraints
-        self.bl_opt_possb_comb = bl_opt_possb_comb
-        self.bl_progress_printing_opt = bl_progress_printing_opt
+        self.bool_constraints = bool_constraints
+        self.bool_opt_possb_comb = bool_opt_possb_comb
+        self.bool_progress_printing_opt = bool_progress_printing_opt
         self.nth_try = nth_try
         self.int_wdy = int_wdy
         self.int_round_close = int_round_close
-        self.bl_debug_mode = bl_debug_mode
-        self.bl_show_plot = bl_show_plot
-        self.bl_non_zero_w_eff = bl_non_zero_w_eff
+        self.bool_debug_mode = bool_debug_mode
+        self.bool_show_plot = bool_show_plot
+        self.bool_non_zero_w_eff = bool_non_zero_w_eff
         self.title_text = title_text
         self.yaxis_title = yaxis_title
         self.xaxis_title = xaxis_title
@@ -173,13 +173,13 @@ class MarkowitzEff(metaclass=TypeChecker):
             self.array_returns, self.list_uuids = \
                 self.random_portfolios(
                     self.df_mktdata, int_n_portfolios, self.col_ticker, self.col_dt, 
-                    self.col_returns, self.col_min_w, self.float_rf, self.bl_constraints, 
-                    self.bl_opt_possb_comb, self.nth_try, self.int_wdy
+                    self.col_returns, self.col_min_w, self.float_rf, self.bool_constraints, 
+                    self.bool_opt_possb_comb, self.nth_try, self.int_wdy
                 )
         # optimal portfolios
         self.array_eff_weights, self.array_eff_returns, self.array_eff_risks = \
             self.optimal_portfolios(
-                self.array_returns, self.n_attempts_opt_prf, self.bl_progress_printing_opt,
+                self.array_returns, self.n_attempts_opt_prf, self.bool_progress_printing_opt,
                 self.int_wdy
             )
         # efficient frontier
@@ -314,12 +314,12 @@ class MarkowitzEff(metaclass=TypeChecker):
     def random_weights(
         self, 
         int_n_assets: int, 
-        bl_constraints: bool = False, 
-        bl_opt_possb_comb: bool = False, 
+        bool_constraints: bool = False, 
+        bool_opt_possb_comb: bool = False, 
         array_min_w: Optional[NDArray[np.float64]] = None, 
         nth_try: int = 100, 
         int_idx_val: int = 2, 
-        bl_valid_weights: bool = False, 
+        bool_valid_weights: bool = False, 
         i_attempts: int = 0, 
         float_atol_sum: float = 1e-4, 
         float_atol_w: float = 10000.0
@@ -330,9 +330,9 @@ class MarkowitzEff(metaclass=TypeChecker):
         ----------
         int_n_assets : int
             Number of assets.
-        bl_constraints : bool, optional
+        bool_constraints : bool, optional
             Enable constraints (default is False).
-        bl_opt_possb_comb : bool, optional
+        bool_opt_possb_comb : bool, optional
             Enable optimization of possible combinations (default is False).
         array_min_w : Optional[NDArray[np.float64]], optional
             Minimum weights per asset (default is None).
@@ -340,7 +340,7 @@ class MarkowitzEff(metaclass=TypeChecker):
             Number of attempts (default is 100).
         int_idx_val : int, optional
             Index value (default is 2).
-        bl_valid_weights : bool, optional
+        bool_valid_weights : bool, optional
             Check if weights are valid (default is False).
         i_attempts : int, optional
             Number of attempts (default is 0).
@@ -367,7 +367,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         else:
             int_idx_val = int_idx_val
         # check whether the constraints are enabled
-        if bl_constraints:
+        if bool_constraints:
             #   sanity check for constraints
             if array_min_w is None:
                 raise ValueError('Min invest per asset must be provided as a list when '
@@ -384,14 +384,14 @@ class MarkowitzEff(metaclass=TypeChecker):
             if any(x == 0 for x in array_min_w):
                 raise ValueError('Every min invest per asset must be greater than 0.')
             #   initializing variables
-            bl_valid_weights = False
+            bool_valid_weights = False
             list_combs = [
                 comb
                 for r in range(2, int_idx_val + 1)
                 for comb in combinations(array_min_w, r)
             ]
             #   recursive call to get valid weights
-            while not bl_valid_weights:
+            while not bool_valid_weights:
                 #   increment the try counter
                 i_attempts += 1
                 #   resetting variables
@@ -406,7 +406,7 @@ class MarkowitzEff(metaclass=TypeChecker):
                     return array_w
                 #   if multiplier is enabled, build a list of possible indexes combinations in
                 #       order to sum 1.0 or less
-                if bl_opt_possb_comb:
+                if bool_opt_possb_comb:
                     #   combinations where sum is less than 1.0 - flatten list
                     list_i = ListHandler().remove_duplicates([
                         idx
@@ -427,7 +427,7 @@ class MarkowitzEff(metaclass=TypeChecker):
                     )
                     #   building the float weight with any given value above the minimum or a
                     #       multiple of the minimum
-                    if bl_opt_possb_comb:
+                    if bool_opt_possb_comb:
                         int_max_mult = max(
                             int((1.0 - sum(array_w)) // array_min_w[i]),
                             1
@@ -453,7 +453,7 @@ class MarkowitzEff(metaclass=TypeChecker):
                     if sum(array_w) >= 1.0:
                         break
                 #   normalize only if the total weight is non-zero, if multiplier is disabled
-                if not bl_opt_possb_comb \
+                if not bool_opt_possb_comb \
                     or np.count_nonzero(array_w) == 1:
                     total_weight = np.sum(array_w)
                     if total_weight > 0:
@@ -463,7 +463,7 @@ class MarkowitzEff(metaclass=TypeChecker):
                 #       2 - sum must be equal to 1
                 #       3 - the minimum must be respected, or zero for a given asset
                 #       4 - some weight must be positive
-                bl_valid_weights = (
+                bool_valid_weights = (
                     np.all(array_w >= 0)
                     and np.isclose(np.sum(array_w), 1, atol=float_atol_sum)
                     and all([
@@ -484,8 +484,8 @@ class MarkowitzEff(metaclass=TypeChecker):
         self, 
         array_returns: NDArray[np.float64], 
         float_rf: float, 
-        bl_constraints: bool = False, 
-        bl_opt_possb_comb: bool = False, 
+        bool_constraints: bool = False, 
+        bool_opt_possb_comb: bool = False, 
         array_min_w: Optional[NDArray[np.float64]] = None,
         nth_try: int = 100, 
         int_wdy: int = 252
@@ -498,9 +498,9 @@ class MarkowitzEff(metaclass=TypeChecker):
             Asset returns.
         float_rf : float
             Risk free rate.
-        bl_constraints : bool, optional
+        bool_constraints : bool, optional
             Whether to apply constraints, by default False.
-        bl_opt_possb_comb : bool, optional
+        bool_opt_possb_comb : bool, optional
             Whether to optimize the possible combinations of weights, by default False.
         array_min_w : Optional[NDArray[np.float64]], optional
             Minimum weights, by default None.
@@ -518,7 +518,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         array_r = np.array(array_returns)
         float_rf = float(float_rf)
         # random weights for the current portfolio
-        array_weights = self.random_weights(array_r.shape[0], bl_constraints, bl_opt_possb_comb,
+        array_weights = self.random_weights(array_r.shape[0], bool_constraints, bool_opt_possb_comb,
                                             array_min_w, nth_try)
         # mean returns for assets
         array_returns = np.array(np.mean(array_r, axis=1))
@@ -542,8 +542,8 @@ class MarkowitzEff(metaclass=TypeChecker):
         col_returns: str,
         col_min_w: str = 'min_w', 
         float_rf: float = 0.0, 
-        bl_constraints: bool = False, 
-        bl_opt_possb_comb: bool = False, 
+        bool_constraints: bool = False, 
+        bool_opt_possb_comb: bool = False, 
         nth_try: int = 100, 
         int_wdy: int = 252
     ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], 
@@ -566,9 +566,9 @@ class MarkowitzEff(metaclass=TypeChecker):
             Minimum weights column, by default 'min_w'.
         float_rf : float, optional
             Risk free rate, by default 0.0.
-        bl_constraints : bool, optional
+        bool_constraints : bool, optional
             Whether to apply constraints, by default False.
-        bl_opt_possb_comb : bool, optional
+        bool_opt_possb_comb : bool, optional
             Whether to optimize the possible combinations of weights, by default False.
         nth_try : int, optional
             Number of attempts to find a valid portfolio, by default 100.
@@ -603,8 +603,8 @@ class MarkowitzEff(metaclass=TypeChecker):
                 self.random_portfolio(
                     array_returns,
                     float_rf,
-                    bl_constraints,
-                    bl_opt_possb_comb,
+                    bool_constraints,
+                    bool_opt_possb_comb,
                     array_min_w,
                     nth_try,
                     int_wdy
@@ -621,7 +621,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         self, 
         array_returns: NDArray[np.float64], 
         n_attempts: int = 1000, 
-        bl_progress_printing_opt: bool = False, 
+        bool_progress_printing_opt: bool = False, 
         int_wdy: int = 252
     ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Calculate optimal portfolios using quadratic programming.
@@ -632,7 +632,7 @@ class MarkowitzEff(metaclass=TypeChecker):
             Array of returns.
         n_attempts : int, optional
             Number of attempts to find a valid portfolio, by default 1000.
-        bl_progress_printing_opt : bool, optional
+        bool_progress_printing_opt : bool, optional
             Whether to print progress, by default False.
         int_wdy : int, optional
             Working days per year, by default 252.
@@ -643,7 +643,7 @@ class MarkowitzEff(metaclass=TypeChecker):
             Returns, standard deviation and sharpes ratio.
         """
         # turn on/off progress printing
-        opt.solvers.options['show_progress'] = bl_progress_printing_opt
+        opt.solvers.options['show_progress'] = bool_progress_printing_opt
         # configuring data types
         array_returns = np.array(array_returns)
         # definig the number of portfolios to be created
@@ -780,7 +780,7 @@ class MarkowitzEff(metaclass=TypeChecker):
         min_sigma_mu = self.array_mus[idx_min_sigma]
         min_sigma_sigma = self.array_sigmas[idx_min_sigma]
         # maximum sharpe portfolio
-        if self.bl_debug_mode:
+        if self.bool_debug_mode:
             print('### MAXIMUM SHARPE PORTFOLIO ###')
             print(f'SHARPES ARGMAX: {self.array_sharpes.argmax()}')
             print(f'WEIGHTS: {self.array_weights[self.array_sharpes.argmax()]}')
@@ -906,7 +906,7 @@ class MarkowitzEff(metaclass=TypeChecker):
                 height=720
             )
         # display plot
-        if self.bl_show_plot:
+        if self.bool_show_plot:
             fig.show()
 
     def max_sharpe(self) -> ResultMaxSharpe:
@@ -923,7 +923,7 @@ class MarkowitzEff(metaclass=TypeChecker):
             No available portfolios with non-zero weights
         """
         # ensuring that all weights are non-zero, if is user's interest
-        if self.bl_non_zero_w_eff:
+        if self.bool_non_zero_w_eff:
             array_valid_indices = np.where((self.array_weights != 0).all(axis=1))[0]
             if len(array_valid_indices) == 0:
                 raise ValueError('No available portfolios with non-zero weights')
@@ -969,7 +969,7 @@ class MarkowitzEff(metaclass=TypeChecker):
             No available portfolios with non-zero weights
         """
         # ensuring that all weights are non-zero, if is user's interest
-        if self.bl_non_zero_w_eff:
+        if self.bool_non_zero_w_eff:
             array_valid_indices = np.where((self.array_weights != 0).all(axis=1))[0]
             if len(array_valid_indices) == 0:
                 raise ValueError('No available portfolios with non-zero weights')

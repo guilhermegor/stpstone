@@ -9,7 +9,7 @@ credentials:
     app:
     get:
       req_method: GET
-      bl_verify: False
+      bool_verify: False
       timeout: (12.0, 12.0)
     keys:
       token: token
@@ -72,7 +72,7 @@ investment_funds_bylaws:
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
   app: app/fundosweb/fundos/regulamento/obter/por/arquivo/{{slug}}#int_pgs_join=3
-  bl_verify: False
+  bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
   cols_from_case: default
@@ -84,8 +84,8 @@ investment_funds_bylaws:
   list_ignorable_exceptions:
   schema: raw
   table_name: br_investment_funds_bylaws
-  bl_insert_or_ignore: False
-  bl_schema: True
+  bool_insert_or_ignore: False
+  bool_schema: True
   ignored_file_extensions:
     - tmp
     - log

@@ -78,7 +78,7 @@ print(f"First Numeric (no numbers): {ListHandler().first_numeric(['abc', 'def', 
 
 # Example 3: Extend multiple lists
 print(f"Extend Lists: {ListHandler().extend_lists([1, 2, 3], [4, 5, 6], [7, 8, 9])}")
-print(f"Extend Lists (with duplicates): {ListHandler().extend_lists([1, 2, 3], [3, 4, 5], [5, 6, 7], bl_remove_duplicates=False)}")
+print(f"Extend Lists (with duplicates): {ListHandler().extend_lists([1, 2, 3], [3, 4, 5], [5, 6, 7], bool_remove_duplicates=False)}")
 
 print("\n*** List Handler Mathematical Operations ***")
 # Example 4: Find closest number
@@ -98,7 +98,7 @@ print(f"Sort Alphanumeric: {ListHandler().sort_alphanumeric(['item10', 'item2', 
 
 # Example 8: First occurrence operations
 test_list = ['apple', 'BANANA', 'cherry', 'DATE']
-print(f"First Uppercase: {ListHandler().get_first_occurrence_within_list(test_list, bl_uppercase=True)}")
+print(f"First Uppercase: {ListHandler().get_first_occurrence_within_list(test_list, bool_uppercase=True)}")
 # Using exact match that exists in the list to avoid StopIteration error
 print(f"First Occurrence Like 'banana': {ListHandler().first_occurrence_like(['apple', 'banana', 'cherry'], 'banana')}")
 print(f"First Occurrence with obj_occurrence: {ListHandler().get_first_occurrence_within_list(['apple', 'banana', 'cherry'], obj_occurrence='banana')}")
