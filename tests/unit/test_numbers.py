@@ -166,8 +166,9 @@ class TestNumHandler:
         if multiple == 0:
             with pytest.raises(ValueError, match="multiple must be a non-zero number"):
                 num_handler.nearest_multiple(number, multiple)
-        with pytest.raises(TypeError, match="must be of type"):
-            num_handler.nearest_multiple(number, multiple)
+        else:
+            with pytest.raises(TypeError, match="must be of type"):
+                num_handler.nearest_multiple(number, multiple)
 
     # --------------------------
     # round_up() tests
@@ -250,7 +251,7 @@ class TestNumHandler:
     @pytest.mark.parametrize("decimal, expected", [
         (0.5, Fraction(1, 2)),
         (0.75, Fraction(3, 4)),
-        ("0.125", Fraction(1, 8)),
+        (0.125, Fraction(1, 8)),
     ])
     def test_decimal_to_fraction_valid(
         self, num_handler: TypeChecker, decimal: Union[float, str], expected: Fraction
@@ -275,9 +276,6 @@ class TestNumHandler:
         -------
         None
         """
-        if isinstance(decimal, str):
-            with pytest.raises(TypeError, match="must be of type"):
-                num_handler.decimal_to_fraction(decimal)
         assert num_handler.decimal_to_fraction(decimal) == expected
 
     @pytest.mark.parametrize("decimal", [
@@ -617,7 +615,7 @@ class TestNumHandler:
     # --------------------------
     @pytest.mark.parametrize("epsilon, inf, sup, pace, expected", [
         (1.0, 0.0, 1.0, 0.2, [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]),
-        (10.0, 0.1, 0.5, 0.1, [0.1, 0.2, 0.3, 0.4]),
+        (10.0, 0.1, 0.5, 0.1, [0.1, 0.2, 0.3, 0.4, 0.5]),
     ])
     def test_range_floats_valid(
         self, num_handler: TypeChecker, epsilon: float, inf: float, sup: float, 

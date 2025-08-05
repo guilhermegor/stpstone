@@ -71,8 +71,8 @@ class NumHandler(metaclass=TypeChecker):
 
         if list_numerical_multiples[-1] > closest_ceiling_num:
             list_numerical_multiples[-1] = closest_ceiling_num
-
-        return list_numerical_multiples
+        
+        return list(set(list_numerical_multiples))
 
     def nearest_multiple(self, number: Number, multiple: Number) -> int:
         """Return the nearest multiple of a given number.
@@ -355,15 +355,11 @@ class NumHandler(metaclass=TypeChecker):
             raise ValueError("Lower bound must be less than upper bound")
         if float_pace <= 0:
             raise ValueError("Pace must be positive")
+        if float_epsilon <= 0:
+            raise ValueError("Epsilon must be positive")
 
-        return [
-            float(x) / float_epsilon
-            for x in range(
-                int(float_inf * float_epsilon),
-                int(float_sup * float_epsilon),
-                int(float_pace * float_epsilon)
-            )
-        ]
+        num_steps = int((float_sup - float_inf) / float_pace) + 1
+        return [float_inf + i * float_pace for i in range(num_steps)]
 
     def clamp(self, n: float, minn: float, maxn: float) -> float:
         """Clamp number between min and max values.
