@@ -87,7 +87,7 @@ class SQLiteDB(ABCDatabase):
         # sql insert statement
         list_columns = ", ".join(json_data[0].keys())
         list_data = ", ".join(["?" for _ in json_data[0]])
-        if bool_l_insert_or_ignore == True:
+        if bool_insert_or_ignore == True:
             str_query = (
                 f"INSERT OR IGNORE INTO {str_table_name} "
                 + f"({list_columns}) VALUES ({list_data})"

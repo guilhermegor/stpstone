@@ -13,41 +13,41 @@ class ProxyNova(ABCSession):
         dict_proxies: Union[Dict[str, str], None] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
-        bool_l_alive: bool = True,
+        bool_alive: bool = True,
         list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
-        bool_l_ssl: Union[bool, None] = None,
+        bool_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
-        bool_l_use_timer: bool = False,
+        bool_use_timer: bool = False,
         list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None
     ) -> None:
         super().__init__(
-            bool_l_new_proxbool_ool_new_proxy,
+            bool_new_proxbool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_l_alivbool_ool_alive,
+            bool_alivbool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_l_ssbool_ool_ssl,
+            bool_ssbool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_l_use_timebool_ool_use_timer,
+            bool_use_timebool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
         self.fstr_url = "https://www.proxynova.com/proxy-server-list/country-{}/"
-        self.xpath_tr = '//*[@id="tbool_l_proxy_list"]/tbody/tr'
+        self.xpath_tr = '//*[@id="tbool_proxy_list"]/tbody/tr'
         self.url = self.fstr_url.format(str_country_code.lower())
         self.selenium_wd = SeleniumWD(
             url=self.url,
-            bool_l_headless=True
+            bool_headless=True
         )
         self.driver = self.selenium_wd.get_web_driver
 
@@ -69,7 +69,7 @@ class ProxyNova(ABCSession):
             anonymity = self.selenium_wd.find_element(el_tr, './td[7]').text
             list_ser.append({
                 "protocol": "http",
-                "bool_l_alive": True,
+                "bool_alive": True,
                 "status": "success",
                 "alive_since": self.time_ago_to_ts_unix(last_checked),
                 "anonymity": anonymity.lower(),
@@ -88,7 +88,7 @@ class ProxyNova(ABCSession):
                 "district": "",
                 "region_name": "",
                 "zip": "",
-                "bool_l_hosting": True,
+                "bool_hosting": True,
                 "isp": "",
                 "latitude": 0.0,
                 "longitude": 0.0,
@@ -96,7 +96,7 @@ class ProxyNova(ABCSession):
                 "proxy": True,
                 "ip": ip,
                 "port": port,
-                "bool_l_ssl": True,
+                "bool_ssl": True,
                 "timeout": 1.0 / self.proxy_speed_to_float(proxy_speed),
                 "times_alive": int_times_alive,
                 "times_dead": "",

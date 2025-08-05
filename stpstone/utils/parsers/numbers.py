@@ -14,6 +14,8 @@ import operator
 import re
 from typing import Any, Optional, Union
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
 
 class NumHandler(metaclass=TypeChecker):
     """Class for handling numerical operations and conversions."""
@@ -87,6 +89,12 @@ class NumHandler(metaclass=TypeChecker):
         int
             The nearest multiple of multiple to number
 
+        Raises
+        ------
+        ValueError
+            If number or multiple is not a valid number
+            If multiple is zero
+
         Examples
         --------
         >>> nearest_multiple(10.7, 3)
@@ -120,6 +128,11 @@ class NumHandler(metaclass=TypeChecker):
         -------
         float
             The rounded up number, capped at ceiling
+
+        Raises
+        ------
+        ValueError
+            If inputs cannot be converted to float
         """
         try:
             float_number_to_round, float_base, float_ceiling = (
@@ -128,7 +141,8 @@ class NumHandler(metaclass=TypeChecker):
         except ValueError as err:
             raise ValueError("All inputs must be convertible to float") from err
 
-        next_multiple = float_base + self.truncate(float_number_to_round / float_base, 0) * float_base
+        next_multiple = float_base + self.truncate(float_number_to_round / float_base, 0) \
+            * float_base
         return float(next_multiple) if next_multiple < float_ceiling else float_ceiling
 
     def decimal_to_fraction(self, decimal_number: Number) -> Fraction:
@@ -212,10 +226,14 @@ class NumHandler(metaclass=TypeChecker):
         Raises
         ------
         ValueError
-            If lists are empty or have unequal lengths
+            If lists are empty
+            If lists are empty
+            If lists have different lengths
         """
         if not lists:
             raise ValueError("At least one list required")
+        if all(len(lst) == 0 for lst in lists):
+            raise ValueError("At least one non-empty list required")
         if len({len(lst) for lst in lists}) > 1:
             raise ValueError("All lists must have same length")
 
@@ -242,17 +260,17 @@ class NumHandler(metaclass=TypeChecker):
         """
         return math.copysign(base_number, number)
 
-    def multiply_n_elements(self, *args: int) -> int:
+    def multiply_n_elements(self, *args: Union[int, float]) -> Union[int, float]:
         """Multiply all integer arguments.
 
         Parameters
         ----------
-        *args : int
-            Integers to multiply
+        *args : Union[int, float]
+            Numbers to multiply
 
         Returns
         -------
-        int
+        Union[int, float]
             Product of arguments
 
         Raises
@@ -298,11 +316,6 @@ class NumHandler(metaclass=TypeChecker):
         -------
         int
             Factorial of n
-
-        Raises
-        ------
-        ValueError
-            If n is negative
         """
         self._validate_positive_int(n, "n")
         return functools.reduce(operator.mul, range(1, n + 1))
@@ -335,7 +348,8 @@ class NumHandler(metaclass=TypeChecker):
         Raises
         ------
         ValueError
-            If bounds are invalid or pace is non-positive
+            If bounds are invalid
+            If pace is not positive
         """
         if float_inf >= float_sup:
             raise ValueError("Lower bound must be less than upper bound")
@@ -396,7 +410,10 @@ class NumHandler(metaclass=TypeChecker):
         except ValueError:
             return False
 
-    def is_number(self, value_: Any) -> bool:
+    def is_number(
+        self, 
+        value_: Any # noqa ANN401: typing.Any is not allowed
+    ) -> bool:
         """Check if value is a number (excluding bool).
 
         Parameters
@@ -454,12 +471,8 @@ class NumHandler(metaclass=TypeChecker):
 
         s = re.sub(r'[%\+\(\)]', '', s).strip()
         s = s.replace(')', '')
-
-        if bool_bp:
-            s_clean = re.sub(r'(bp|b\.p\.?)$', '', s, flags=re.IGNORECASE).strip()
-        else:
-            s_clean = s
-
+        s_clean = re.sub(r'(bp|b\.p\.?)$', '', s, flags=re.IGNORECASE).strip() if bool_bp else s
+        
         comma_count = s_clean.count(',')
         dot_count = s_clean.count('.')
 

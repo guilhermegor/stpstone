@@ -41,7 +41,7 @@ class MarginSimulatorB3:
     @property
     def total_deficit_surplus(self, method:str='POST', app:str='/web/V1.0/RiskCalculation',
                               value_liquidity_resource:np.int64=4_700_000_000, bool_verify:bool=False,
-                              bool_l_parse_dict_payload_data:bool=True) \
+                              bool_parse_dict_payload_data:bool=True) \
                                 -> List[Dict[str, Union[str, int, float]]]:
         """
         REFERENCES: https://simulador.b3.com.br/
@@ -62,12 +62,12 @@ class MarginSimulatorB3:
             'RiskPositionList': self.dict_payload
         }
         # check whether it is needed to parse the params dictionary
-        if bool_l_parse_dict_payload_data == True:
+        if bool_parse_dict_payload_data == True:
             if dict_payload != None:
                 dict_payload = JsonFiles().dict_to_json(dict_payload)
         # resquet host REST information
         resp_req = request(method=method, host=self.host + app,
-                           headers=dict_headers, data=dict_payload, verify=bool_l_verify)
+                           headers=dict_headers, data=dict_payload, verify=bool_verify)
         # raises exception when not a 2xx response
         resp_req.raise_for_status()
         # getting authheader

@@ -200,7 +200,7 @@ def test_get_first_uppercase_not_found(
     None
     """
     assert list_handler.get_first_occurrence_within_list(
-        ["apple", "banana"], bool_l_uppercase=True) == -1
+        ["apple", "banana"], bool_uppercase=True) == -1
 
 
 def test_get_first_object_occurrence(
@@ -275,7 +275,7 @@ def test_get_first_non_alphanumeric(
     """
     test_list = ["abc", "123", "a1b2", "a@b", "x_y"]
     assert list_handler.get_first_occurrence_within_list(
-        test_list, bool_l_regex_alphanumeric_false=True) == 3
+        test_list, bool_regex_alphanumeric_false=True) == 3
 
 
 def test_get_first_non_alphanumeric_not_found(
@@ -297,7 +297,7 @@ def test_get_first_non_alphanumeric_not_found(
     None
     """
     assert list_handler.get_first_occurrence_within_list(
-        ["abc", "123"], bool_l_regex_alphanumeric_false=True) == -1
+        ["abc", "123"], bool_regex_alphanumeric_false=True) == -1
 
 
 def test_get_first_occurrence_invalid_args(
@@ -787,7 +787,7 @@ def test_extend_lists_no_duplicates(
     """
     list1 = [1, 2]
     list2 = [2, 3]
-    result = list_handler.extend_lists(list1, list2, bool_l_remove_duplicates=True)
+    result = list_handler.extend_lists(list1, list2, bool_remove_duplicates=True)
     assert result == [1, 2, 3]
 
 
@@ -812,7 +812,7 @@ def test_extend_lists_with_duplicates(
     """
     list1 = [1, 2]
     list2 = [2, 3]
-    result = list_handler.extend_lists(list1, list2, bool_l_remove_duplicates=False)
+    result = list_handler.extend_lists(list1, list2, bool_remove_duplicates=False)
     assert result == [1, 2, 2, 3]
 
 

@@ -76,11 +76,11 @@ class ListHandler(metaclass=TypeChecker):
         list_: list[str],
         obj_occurrence: Optional[str] = None,
         bool_uppercase: bool = False,
-        bool_l_last_uppercase_before_capitalized: bool = False,
+        bool_last_uppercase_before_capitalized: bool = False,
         int_error: int = -1,
         int_error_obj_occurrence: int = -2,
-        bool_l_regex_alphanumeric_false: bool = False,
-        bool_l_ignore_sole_letter: bool = True,
+        bool_regex_alphanumeric_false: bool = False,
+        bool_ignore_sole_letter: bool = True,
     ) -> int:
         """Get index of first occurrence matching specified criteria.
         
@@ -90,17 +90,17 @@ class ListHandler(metaclass=TypeChecker):
             List to search through
         obj_occurrence : Optional[str]
             String pattern to match (case insensitive)
-        bool_l_uppercase : bool
+        bool_uppercase : bool
             Find first all-uppercase string
-        bool_l_last_uppercase_before_capitalized : bool
+        bool_last_uppercase_before_capitalized : bool
             Find last uppercase num_before capitalized/lowercase
         int_error : int
             Return value if no uppercase found
         int_error_obj_occurrence : int
             Return value if object occurrence not found
-        bool_l_regex_alphanumeric_false : bool
+        bool_regex_alphanumeric_false : bool
             Find first non-alphanumeric string
-        bool_l_ignore_sole_letter : bool
+        bool_ignore_sole_letter : bool
             Ignore single-letter uppercase strings
         str_original_replace_1 : str
             First character to replace in strings
@@ -121,7 +121,7 @@ class ListHandler(metaclass=TypeChecker):
         """
         self._validate_list_not_empty(list_)
         
-        if bool_l_uppercase:
+        if bool_uppercase:
             try:
                 return list_.index(next(obj for obj in list_ if obj.isupper()))
             except StopIteration:
@@ -136,7 +136,7 @@ class ListHandler(metaclass=TypeChecker):
                     return i
             return int_error_obj_occurrence
             
-        if bool_l_last_uppercase_before_capitalized:
+        if bool_last_uppercase_before_capitalized:
             first_el = list_[0].replace(",", "")
             if self.str_handler.is_capitalized(first_el) or first_el.islower():
                 return int_error
@@ -146,14 +146,14 @@ class ListHandler(metaclass=TypeChecker):
                 next_el = list_[i + 1].replace(",", "")
                 if (current.isupper() and 
                     (self.str_handler.is_capitalized(next_el) or next_el.islower())):
-                    if bool_l_ignore_sole_letter:
+                    if bool_ignore_sole_letter:
                         if len(self.str_handler.remove_non_alphanumeric_chars(current)) == 1:
                             return i - 1
                         return i
                     return i
             return int_error
             
-        if bool_l_regex_alphanumeric_false:
+        if bool_regex_alphanumeric_false:
             for i, el in enumerate(list_):
                 if not el.isalnum():
                     return i
@@ -433,7 +433,7 @@ class ListHandler(metaclass=TypeChecker):
     def extend_lists(
         self, 
         *lists: list[Any], # noqa ANN401: typing.Any is not allowed 
-        bool_l_remove_duplicates: bool = True
+        bool_remove_duplicates: bool = True
     ) -> list[Any]: # noqa ANN401: typing.Any is not allowed
         """Combine multiple lists with optional deduplication.
         
@@ -441,7 +441,7 @@ class ListHandler(metaclass=TypeChecker):
         ----------
         *lists : list[Any]
             Variable number of lists to combine
-        bool_l_remove_duplicates : bool
+        bool_remove_duplicates : bool
             Whether to remove duplicates
             
         Returns
@@ -450,14 +450,14 @@ class ListHandler(metaclass=TypeChecker):
             Combined list
         """
         combined = list(chain.from_iterable(lists))
-        return self.remove_duplicates(combined) if bool_l_remove_duplicates else combined
+        return self.remove_duplicates(combined) if bool_remove_duplicates else combined
 
     def chunk_list(
         self,
         list_to_chunk: list[Any], # noqa ANN401: typing.Any is not allowed 
         str_join_char: Optional[str] = " ",
         int_chunk: int = 150,
-        bool_l_remove_duplicates: bool = True
+        bool_remove_duplicates: bool = True
     ) -> list[Any]: # noqa ANN401: typing.Any is not allowed 
         """Split list into chunks with optional joining.
         
@@ -469,7 +469,7 @@ class ListHandler(metaclass=TypeChecker):
             Joining character (None for sublists)
         int_chunk : int
             Maximum chunk size
-        bool_l_remove_duplicates : bool
+        bool_remove_duplicates : bool
             Whether to remove duplicates first
             
         Returns
@@ -484,7 +484,7 @@ class ListHandler(metaclass=TypeChecker):
             ]
 
         list_chunked = list()
-        if bool_l_remove_duplicates:
+        if bool_remove_duplicates:
             list_to_chunk = self.remove_duplicates(list_to_chunk)
         list_position_chunks = NumHandler().multiples(int_chunk, len(list_to_chunk))
         inf_limit = list_position_chunks[0]

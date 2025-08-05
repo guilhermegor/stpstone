@@ -10,6 +10,6 @@ df_ = cls_.source("anbima_indexes_mkt_data", bool_fetch=True)
 print(f"DF ANBIMA INDEXES MKT DATA: \n{df_}")
 df_.info()
 
-df_ = cls_.source("anbima_indexes_portf_composition", bool_l_fetch=True)
+df_ = cls_.source("anbima_indexes_portf_composition", bool_fetch=True)
 print(f"DF ANBIMA INDEXES PORTF COMPOSITION: \n{df_}")
 df_.info()

@@ -124,7 +124,7 @@ def conditional_timeit(bool_use_timer: bool) -> callable:
         a function wrapped with the @timeit decorator if `use_timer` is true.
     """
     def decorator(method):
-        if bool_l_use_timer:
+        if bool_use_timer:
             return timeit(method)
         return method
     return decorator

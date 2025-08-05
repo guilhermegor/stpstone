@@ -18,7 +18,7 @@ df_.to_csv("data/anbima-ima-geral_{}_{}_{}.csv".format(
     DatesBR().curr_time().strftime('%H%M%S')
 ), index=False)
 
-df_ = cls_.source("ida_geral", bool_l_fetch=True)
+df_ = cls_.source("ida_geral", bool_fetch=True)
 print(f"DF ANBIMA DATA IDA GERAL: \n{df_}")
 df_.info()
 df_.to_csv("data/anbima-ida-geral_{}_{}_{}.csv".format(
@@ -27,7 +27,7 @@ df_.to_csv("data/anbima-ida-geral_{}_{}_{}.csv".format(
     DatesBR().curr_time().strftime('%H%M%S')
 ), index=False)
 
-df_ = cls_.source("ida_liq_geral", bool_l_fetch=True)
+df_ = cls_.source("ida_liq_geral", bool_fetch=True)
 print(f"DF ANBIMA DATA IDA LIQ GERAL: \n{df_}")
 df_.info()
 df_.to_csv("data/anbima-ida-liq-geral_{}_{}_{}.csv".format(
@@ -36,7 +36,7 @@ df_.to_csv("data/anbima-ida-liq-geral_{}_{}_{}.csv".format(
     DatesBR().curr_time().strftime('%H%M%S')
 ), index=False)
 
-df_ = cls_.source("idka_pre_1a", bool_l_fetch=True)
+df_ = cls_.source("idka_pre_1a", bool_fetch=True)
 print(f"DF ANBIMA DATA IDKA PRE 1A: \n{df_}")
 df_.info()
 df_.to_csv("data/anbima-idka-pre-1a_{}_{}_{}.csv".format(

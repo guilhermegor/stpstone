@@ -140,7 +140,7 @@ class CVMDATA:
         list_main_zip = DirFilesManagement().get_zip_from_web_in_memory(
             url,
             bool_io_interpreting=False,
-            bool_l_verify=False
+            bool_verify=False
         )
         # iterate through files in the ZIP
         for file_info in list_main_zip:

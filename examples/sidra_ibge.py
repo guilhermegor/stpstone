@@ -7,11 +7,11 @@ from stpstone.ingestion.countries.br.macroeconomics.sidra_ibge import SidraIBGE
 # df_.info()
 
 # cls_ = SidraIBGE()
-# df_ = cls_.source("sidra_modification_dates", bool_l_fetch=True)
+# df_ = cls_.source("sidra_modification_dates", bool_fetch=True)
 # print(f"DF SIDRA MODIFICATION DATES: \n{df_}")
 # df_.info()
 
 cls_ = SidraIBGE()
-df_ = cls_.source("sidra_variables", bool_l_fetch=True)
+df_ = cls_.source("sidra_variables", bool_fetch=True)
 print(f"DF SIDRA VARIABLES: \n{df_}")
 df_.info()

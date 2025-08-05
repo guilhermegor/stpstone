@@ -419,7 +419,7 @@ class TestVisualizationMethods:
         """
         conf_mx = np.array([[0, 0], [0, 0]], dtype=np.float64)
         with pytest.raises(ValueError, match="Confusion matrix row sums cannot be zero"):
-            prob_stats_charts.confusion_mtx_nxn(conf_mx, bool_l_focus_errors=True)
+            prob_stats_charts.confusion_mtx_nxn(conf_mx, bool_focus_errors=True)
 
     def test_ecdf_chart_valid(
         self,

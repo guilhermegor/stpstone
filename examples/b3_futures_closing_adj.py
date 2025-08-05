@@ -9,7 +9,7 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 
 session = YieldFreeProxy(
     bool_new_proxy=True,
-    bool_l_use_timer=True,
+    bool_use_timer=True,
     float_min_ratio_times_alive_dead=0.02,
     float_max_timeout=600
 ).session
@@ -19,6 +19,6 @@ cls_ = FuturesClosingAdjB3(
     session=None, dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 3), cls_db=None
 )
 
-df_ = cls_.source("futures_closing_adj", bool_l_fetch=True)
+df_ = cls_.source("futures_closing_adj", bool_fetch=True)
 print(f"DF FUTURES CLOSING ADJ B3: \n{df_}")
 df_.info()

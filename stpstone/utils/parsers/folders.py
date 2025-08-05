@@ -228,7 +228,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         ----------
         object_path : str
             Path to check
-        bool_l_to_datetime : bool
+        bool_to_datetime : bool
             Whether to return as datetime object
 
         Returns
@@ -239,7 +239,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         if not self.object_exists(object_path):
             return ("INTERNAL ERROR", False)
         timestamp = os.path.getmtime(object_path)
-        return (datetime.fromtimestamp(timestamp) if bool_l_to_datetime else timestamp, True)
+        return (datetime.fromtimestamp(timestamp) if bool_to_datetime else timestamp, True)
 
     def time_creation(self, object_path: str) -> tuple:
         """Get creation time of file/directory.
@@ -628,8 +628,8 @@ class DirFilesManagement(metaclass=TypeChecker):
         self,
         directory: str,
         name_like: str,
-        bool_l_first_last_edited: bool = True,
-        bool_l_to_datetime: bool = True,
+        bool_first_last_edited: bool = True,
+        bool_to_datetime: bool = True,
         key_file_name: str = "file_name",
         key_file_last_edition: str = "file_last_edition"
     ) -> list[str]:
@@ -641,9 +641,9 @@ class DirFilesManagement(metaclass=TypeChecker):
             Directory to search
         name_like : str
             Filename pattern to match
-        bool_l_first_last_edited : bool
+        bool_first_last_edited : bool
             Whether to sort by modification time
-        bool_l_to_datetime : bool
+        bool_to_datetime : bool
             Whether to return timestamps as datetime objects
         key_file_name : str
             Dictionary key for filename
@@ -660,13 +660,13 @@ class DirFilesManagement(metaclass=TypeChecker):
             if StrHandler().match_string_like(file_name, name_like)
         ]
 
-        if not bool_l_first_last_edited:
+        if not bool_first_last_edited:
             return list_files_names_like
 
         list_files_last_edition = [
             self.time_last_edition(
                 os.path.join(directory, file_name),
-                bool_l_to_datetimbool_ool_to_datetime
+                bool_to_datetimbool_to_datetime
             )
             for file_name in list_files_names_like
         ]
@@ -852,7 +852,7 @@ class DirFilesManagement(metaclass=TypeChecker):
     def get_zip_from_web_in_memory(
         self,
         resp_req: Response,
-        bool_l_io_interpreting: bool = False
+        bool_io_interpreting: bool = False
     ) -> Union[TextIOWrapper, BufferedReader, list[BufferedReader]]:
         """Extract zip contents from web response in memory.
 
@@ -860,7 +860,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         ----------
         resp_req : Response
             HTTP response containing zip file
-        bool_l_io_interpreting : bool
+        bool_io_interpreting : bool
             Whether to return as text wrapper
 
         Returns
@@ -873,7 +873,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         if len(zip_names) == 1:
             file_name = zip_names.pop()
             extracted_file = zipfile.open(file_name)
-            return TextIOWrapper(extracted_file) if bool_l_io_interpreting else extracted_file
+            return TextIOWrapper(extracted_file) if bool_io_interpreting else extracted_file
         return [zipfile.open(file_name) for file_name in zip_names]
 
     def calculate_file_hash(self, file_path: str, algorithm: str = "sha256") -> str:
@@ -1064,9 +1064,9 @@ class FoldersTree:
     def __init__(
         self,
         str_path: str,
-        bool_l_ignore_dot_folders: bool = False,
+        bool_ignore_dot_folders: bool = False,
         list_ignored_folders: Optional[list[str]] = None,
-        bool_l_add_linebreak_markdown: bool = False
+        bool_add_linebreak_markdown: bool = False
     ) -> None:
         """Initialize FoldersTree instance.
 
@@ -1074,11 +1074,11 @@ class FoldersTree:
         ----------
         str_path : str
             Root directory path
-        bool_l_ignore_dot_folders : bool
+        bool_ignore_dot_folders : bool
             Whether to ignore dot folders (default: False)
         list_ignored_folders : Optional[list[str]]
             List of folders to ignore (default: ["__pycache__"])
-        bool_l_add_linebreak_markdown : bool
+        bool_add_linebreak_markdown : bool
             Whether to add markdown line breaks (default: False)
 
         Returns
@@ -1086,15 +1086,15 @@ class FoldersTree:
         None
         """
         self.str_path = str_path
-        self.bool_l_ignore_dot_folders bool_ool_ignore_dot_folders
+        self.bool_ignore_dot_folders bool_ignore_dot_folders
         self.list_ignored_folders = list_ignored_folders or ["__pycache__"]
-        self.bool_l_add_linebreak_markdown bool_ool_add_linebreak_markdown
+        self.bool_add_linebreak_markdown bool_add_linebreak_markdown
 
     def generate_tree(
         self,
         str_curr_path: Optional[str] = None,
         str_prefix: str = "",
-        bool_l_include_root: bool = True,
+        bool_include_root: bool = True,
         str_tree_structure: str = ""
     ) -> str:
         """Generate directory tree structure.
@@ -1105,7 +1105,7 @@ class FoldersTree:
             Current directory path (default: root path)
         str_prefix : str
             Prefix for tree lines (default: "")
-        bool_l_include_root : bool
+        bool_include_root : bool
             Whether to include root directory (default: True)
         str_tree_structure : str
             Accumulated tree structure (default: "")
@@ -1118,9 +1118,9 @@ class FoldersTree:
         if str_curr_path is None:
             str_curr_path = self.str_path
 
-        str_linebreak_md = "<br>" if self.bool_l_add_linebreak_markdown else ""
+        str_linebreak_md = "<br>" if self.bool_add_linebreak_markdown else ""
 
-        if bool_l_include_root:
+        if bool_include_root:
             str_tree_structure += f"{os.path.basename(self.str_path)}{str_linebreak_md}\n"
             str_prefix = ""
 
@@ -1129,22 +1129,22 @@ class FoldersTree:
         for idx, str_entry in enumerate(list_entries):
             str_entry_path = os.path.join(str_curr_path, str_entry)
 
-            if self.bool_l_ignore_dot_folders and str_entry.startswith("."):
+            if self.bool_ignore_dot_folders and str_entry.startswith("."):
                 continue
             if str_entry in self.list_ignored_folders:
                 continue
 
-            bool_l_is_directory = os.path.isdir(str_entry_path)
-            bool_l_is_last_entry = idx == len(list_entries) - 1
-            str_branch_prefix = "└── " if bool_l_is_last_entry else "├── "
+            bool_is_directory = os.path.isdir(str_entry_path)
+            bool_is_last_entry = idx == len(list_entries) - 1
+            str_branch_prefix = "└── " if bool_is_last_entry else "├── "
             str_tree_structure += f"{str_prefix}{str_branch_prefix}{str_entry}{str_linebreak_md}\n"
 
-            if bool_l_is_directory:
-                str_new_prefix = str_prefix + ("    " if bool_l_is_last_entry else "│   ")
+            if bool_is_directory:
+                str_new_prefix = str_prefix + ("    " if bool_is_last_entry else "│   ")
                 str_tree_structure += self.generate_tree(
                     str_entry_path,
                     str_prefix=str_new_prefix,
-                    bool_l_include_root=False
+                    bool_include_root=False
                 )
 
         return str_tree_structure

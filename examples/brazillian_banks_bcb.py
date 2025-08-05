@@ -12,7 +12,7 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 
 # session = YieldFreeProxy(
 #     bool_new_proxy=True,
-#     bool_l_use_timer=True,
+#     bool_use_timer=True,
 #     float_min_ratio_times_alive_dead=0.02,
 #     float_max_timeout=600
 # ).session
@@ -21,6 +21,6 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 cls_ = BrazilianBanksBCB(
     session=None
 )
-df_ = cls_.source("bcb_registry" , bool_l_fetch=True)
+df_ = cls_.source("bcb_registry" , bool_fetch=True)
 print(f"DF VOLUMES: \n{df_}")
 df_.info()

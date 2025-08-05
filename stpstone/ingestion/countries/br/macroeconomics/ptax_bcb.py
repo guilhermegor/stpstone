@@ -41,11 +41,11 @@ class PTAXBCB(ABCRequests):
         self.cls_db = cls_db
         self.logger = logger
         self.token = token
-        self.bool_l_debug bool_ool_debug
+        self.bool_debug bool_debug
         self.dt_end_yyyymmdd = self.dt_end.strftime('%Y%m%d')
         self.dt_start_ddmmyyyy = self.dt_start.strftime('%d/%m/%Y')
         self.dt_end_ddmmyyyy = self.dt_end.strftime('%d/%m/%Y')
-        self.df_ids = self.source('ids', bool_l_fetch=True)
+        self.df_ids = self.source('ids', bool_fetch=True)
         self.list_slugs = list_slugs if list_slugs is not None else \
             list(self.df_ids['CURRENCY_ID'].unique())
 
@@ -86,7 +86,7 @@ class PTAXBCB(ABCRequests):
         Metadata: https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes
         """
         df_available_currencies = super().source(
-            'available_currencies', bool_l_fetch=Truebool_ool_debug=sbool_.bool_debug)
+            'available_currencies', bool_fetch=Truebool_debug=sbool_.bool_debug)
         df_available_currencies = df_available_currencies.merge(
             self.df_ids,
             how='left',
@@ -95,7 +95,7 @@ class PTAXBCB(ABCRequests):
             suffixes=('_', '')
         )
         df_close_currency_rates = super().source(
-            'close_currency_rates', bool_l_fetch=Truebool_ool_debug=sbool_.bool_debug)
+            'close_currency_rates', bool_fetch=Truebool_debug=sbool_.bool_debug)
         df_close_currency_rates = df_close_currency_rates.merge(
             df_available_currencies,
             how='left',

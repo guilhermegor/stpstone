@@ -8,15 +8,15 @@ from stpstone.utils.connections.netops.proxies._free.spysone import SpysOneCount
 #     dict_proxies=None,
 #     int_retries=10,
 #     int_backoff_factor=1,
-#     bool_l_alive=True,
+#     bool_alive=True,
 #     list_anonymity_value=["anonymous", "elite"],
 #     list_protocol="http",
 #     str_continent_code=None,
 #     str_country_code="BR",
-#     bool_l_ssl=None,
+#     bool_ssl=None,
 #     float_min_ratio_times_alive_dead=0.02,
 #     float_max_timeout=600,
-#     bool_l_use_timer=False,
+#     bool_use_timer=False,
 #     list_status_forcelist=[429, 500, 502, 503, 504],
 #     logger=None
 # )
@@ -24,19 +24,19 @@ from stpstone.utils.connections.netops.proxies._free.spysone import SpysOneCount
 # print(cls_._available_proxies)
 
 # cls_ = FreeProxyNet(
-#     bool_l_new_proxy=True,
+#     bool_new_proxy=True,
 #     dict_proxies=None,
 #     int_retries=10,
 #     int_backoff_factor=1,
-#     bool_l_alive=True,
+#     bool_alive=True,
 #     list_anonymity_value=["anonymous", "elite"],
 #     list_protocol=["http", "https"],
 #     str_continent_code=None,
 #     str_country_code="BR",
-#     bool_l_ssl=None,
+#     bool_ssl=None,
 #     float_min_ratio_times_alive_dead=0.02,
 #     float_max_timeout=600,
-#     bool_l_use_timer=False,
+#     bool_use_timer=False,
 #     list_status_forcelist=[429, 500, 502, 503, 504],
 #     logger=None
 # )
@@ -44,19 +44,19 @@ from stpstone.utils.connections.netops.proxies._free.spysone import SpysOneCount
 # print(cls_._available_proxies)
 
 cls_ = SpysOneCountry(
-    bool_l_new_proxy=True,
+    bool_new_proxy=True,
     dict_proxies=None,
     int_retries=10,
     int_backoff_factor=1,
-    bool_l_alive=True,
+    bool_alive=True,
     list_anonymity_value=["anonymous", "elite"],
     list_protocol=["http", "https"],
     str_continent_code=None,
     str_country_code="BR",
-    bool_l_ssl=None,
+    bool_ssl=None,
     float_min_ratio_times_alive_dead=0.02,
     float_max_timeout=600,
-    bool_l_use_timer=False,
+    bool_use_timer=False,
     list_status_forcelist=[429, 500, 502, 503, 504],
     logger=None
 )

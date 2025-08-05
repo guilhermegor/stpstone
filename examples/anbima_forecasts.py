@@ -10,11 +10,11 @@ df_ = cls_.source("mp1", bool_fetch=True)
 print(f"DF ANBIMA FORECASTS MP1: \n{df_}")
 df_.info()
 
-df_ = cls_.source("mp2", bool_l_fetch=True)
+df_ = cls_.source("mp2", bool_fetch=True)
 print(f"DF ANBIMA FORECASTS MP2: \n{df_}")
 df_.info()
 
-df_ = cls_.source("ltm", bool_l_fetch=True)
+df_ = cls_.source("ltm", bool_fetch=True)
 print(f"DF ANBIMA FORECASTS LTM: \n{df_}")
 df_.info()
 

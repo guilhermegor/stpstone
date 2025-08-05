@@ -142,11 +142,11 @@ class YahiiRatesBRMacro(ABCRequests):
                 int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                     "int_start"] \
                     + int_num_tbl * YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
-                        "int_step_tbool_l_begin"]
+                        "int_step_tbool_begin"]
                 int_cols_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                     "int_cols_tbl"]
-                int_step_tbool_l_begin = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
-                    "int_step_tbool_l_begin"]
+                int_step_tbool_begin = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
+                    "int_step_tbool_begin"]
                 int_year_min = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                     "int_year_min"]
                 int_start_acc = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
@@ -154,7 +154,7 @@ class YahiiRatesBRMacro(ABCRequests):
             else:
                 int_num_tbl = 0
                 int_cols_tbl = 0
-                int_step_tbool_l_begin = 0
+                int_step_tbool_begin = 0
                 int_year_min = 0
                 int_start_acc = 0
                 int_start_tbl = YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
@@ -181,7 +181,7 @@ class YahiiRatesBRMacro(ABCRequests):
                         "INT_Y": YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_y"],
                         "INT_M": YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]["int_m"],
                         "INT_COLS_TBL": int_cols_tbl,
-                        "INT_STEP_TBL_BEGIN": int_step_tbool_l_begin,
+                        "INT_STEP_TBL_BEGIN": int_step_tbool_begin,
                         "INT_YEAR_MIN": int_year_min,
                         "INT_START_ACC": int_start_acc,
                         "INT_NUM_TBL": int_num_tbl,
@@ -222,7 +222,7 @@ class YahiiRatesBRMacro(ABCRequests):
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         try:
             source = self.get_query_params(resp_req.url, "source").lower()
-            cls_selenium_wd = SeleniumWD(resp_req.url, bool_l_headless=Truebool_ool_incognito=True)
+            cls_selenium_wd = SeleniumWD(resp_req.url, bool_headless=True, bool_incognito=True)
             web_driver = cls_selenium_wd.get_web_driver
             list_th_td = self.list_web_elements(
                 cls_selenium_wd, web_driver, YAML_YAHII_RATES["pmi_rf_rates"]['xpaths']['list_th_td'])

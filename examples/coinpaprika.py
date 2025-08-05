@@ -14,5 +14,5 @@ df_ = CoinPaprika(
     session=session,
     dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
     cls_db=None
-).source('ohlcv_latest', bool_l_debug=Truebool_ool_fetch=True)
+).source('ohlcv_latest', bool_debug=Truebool_fetch=True)
 print(f'DF MKTDATA COIN PAPRIKA: \n{df_}')

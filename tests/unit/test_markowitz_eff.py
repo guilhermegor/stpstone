@@ -79,7 +79,7 @@ def valid_markowitz_args(sample_market_data: pd.DataFrame) -> dict[str, Any]:
         "col_dt": "dt_date",
         "col_returns": "daily_return",
         "bool_constraints": True,
-        "bool_l_debug_mode": False
+        "bool_debug_mode": False
     }
 
 
@@ -305,7 +305,7 @@ class TestRandomWeights:
         min_weights = np.array([0.1, 0.2, 0.05])
         weights = markowitz_instance.random_weights(
             int_n_assets=3,
-            bool_l_constraints=True,
+            bool_constraints=True,
             array_min_w=min_weights,
             nth_try=100
         )
@@ -332,7 +332,7 @@ class TestRandomWeights:
         min_weights = np.array([0.6, 0.6])
         weights = markowitz_instance.random_weights(
             int_n_assets=2,
-            bool_l_constraints=True,
+            bool_constraints=True,
             array_min_w=min_weights,
             nth_try=5  # Low number to force early fallback
         )
@@ -364,7 +364,7 @@ class TestRandomWeights:
         with pytest.raises(ValueError, match="length of min invest per asset must match"):
             markowitz_instance.random_weights(
                 int_n_assets=3,
-                bool_l_constraints=True,
+                bool_constraints=True,
                 array_min_w=np.array([0.1, 0.2])
             )
             
@@ -372,13 +372,13 @@ class TestRandomWeights:
         with pytest.raises(ValueError, match="Min invest per asset must be positive"):
             markowitz_instance.random_weights(
                 int_n_assets=2,
-                bool_l_constraints=True,
+                bool_constraints=True,
                 array_min_w=np.array([-0.1, 0.2])
             )
         with pytest.raises(ValueError, match="Min invest per asset must be below 1.0"):
             markowitz_instance.random_weights(
                 int_n_assets=2,
-                bool_l_constraints=True,
+                bool_constraints=True,
                 array_min_w=np.array([1.1, 0.2])
             )
 
@@ -651,8 +651,8 @@ class TestPlotting:
         # call plotting function
         markowitz_instance.plot_risk_return_portfolio()
         
-        # verify show was called if bool_l_show_plot is True
-        if markowitz_instance.bool_l_show_plot:
+        # verify show was called if bool_show_plot is True
+        if markowitz_instance.bool_show_plot:
             mock_show.assert_called_once()
         else:
             mock_show.assert_not_called()
@@ -682,7 +682,7 @@ class TestPlotting:
         """
         # set path for saving
         valid_markowitz_args["path_fig"] = "test_plot.png"
-        valid_markowitz_args["bool_l_show_plot"] = False
+        valid_markowitz_args["bool_show_plot"] = False
         
         # initialize instance
         instance = MarkowitzEff(**valid_markowitz_args)

@@ -29,7 +29,7 @@ class AnbimaDataGen:
             str_client_id (str): string with client id
             str_client_secret (str): string with client secret
             str_env (str): string with environment
-            bool_l_debug (bool): boolean with debug mode
+            bool_debug (bool): boolean with debug mode
             int_chunk (int): integer with chunk size
             str_host_prd (str): string with production host
             str_host_dev (str): string with development host
@@ -38,7 +38,7 @@ class AnbimaDataGen:
         """
         self.str_client_id = str_client_id
         self.str_client_secret = str_client_secret
-        self.bool_l_debug bool_ool_debug
+        self.bool_debug bool_debug
         self.int_chunk = int_chunk
         self.str_host_prd = str_host_prd
         self.str_host = locals()[f"str_host_{str_env.lower()}"]
@@ -63,14 +63,14 @@ class AnbimaDataGen:
             headers=dict_headers,
             data=JsonFiles().dict_to_json(dict_payload),
         )
-        if self.bool_l_debug == True:
+        if self.bool_debug == True:
             print("TOKEN: {}".format(resp_req.json()["access_token"]))
         resp_req.raise_for_status()
         return resp_req.json()
 
     def generic_request(self, str_app: str, str_method: str) -> List[Dict[str, Any]]:
         str_url = self.str_host + str_app
-        if self.bool_l_debug == True:
+        if self.bool_debug == True:
             print(f"URL: {str_url}")
         dict_headers = {
             "accept": "application/json",

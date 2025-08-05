@@ -71,15 +71,15 @@ class WorldGovBonds(ABCRequests):
                 item_curr != "N/A" and
                 item_curr not in list_ratings_agencies
             )
-            if bool_l_country_name:
+            if bool_country_name:
                 if i + 1 < n:
                     next_item = list_td[i+1]
-                    bool_l_next_numeric = (
+                    bool_next_numeric = (
                         (isinstance(next_item, str) and next_item.endswith('%'))
                         or (isinstance(NumHandler().transform_to_float(next_item, int_precision=6),
                                        (int, float)))
                     )
-                    if bool_l_next_numeric:
+                    if bool_next_numeric:
                         list_.append("N/A")
             i += 1
         return list_
@@ -88,7 +88,7 @@ class WorldGovBonds(ABCRequests):
         source = self.get_query_params(resp_req.url, "source")
         list_th = list(YAML_WW_WORLD_GOV_BONDS[source]["dtypes"].keys())
         scraper = PlaywrightScraper(
-            bool_l_headless=True,
+            bool_headless=True,
             int_default_timeout=100_000
         )
         with scraper.launch():

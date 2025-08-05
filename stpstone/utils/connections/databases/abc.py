@@ -161,7 +161,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
             Data to insert (list of dicts)
         str_table_name : str
             Target table name
-        bool_l_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool, optional
             If True, ignore duplicates, defaults to False
         """
         pass

@@ -258,10 +258,10 @@ class TradingHoursB3(ABCRequests):
 
     def req_trt_injection(self, resp_req:Response) -> Optional[pd.DataFrame]:
         bool_debug = True if StrHandler().match_string_like(
-            resp_req.url, '*&bool_l_debug=True*') == True else False
+            resp_req.url, '*&bool_debug=True*') == True else False
         root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
-        if bool_l_debug == True:
+        if bool_debug == True:
             path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
             HtmlHandler().html_tree(root, file_path=rf'{path_project}/data/test.html')
         list_th = [
@@ -275,12 +275,12 @@ class TradingHoursB3(ABCRequests):
                 root, YAML_B3_TRADING_HOURS_B3['stocks']['xpaths']['list_td']
             )
         ]
-        if bool_l_debug == True:
+        if bool_debug == True:
             print(f'LIST TH RAW: {list_th}')
             print(f'LIST TD RAW: {list_td}')
         # deal with data/headers specificity for the project
         list_headers, int_init_td, int_end_td = self.td_th_parser(resp_req, list_th)
-        if bool_l_debug == True:
+        if bool_debug == True:
             print(f'LIST TH TRT: {list_headers}')
             print(f'LEN LIST HEADERS: {len(list_headers)}')
             print(f'LIST TD TRT: {list_td[int_init_td:int_end_td]}')

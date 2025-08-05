@@ -11,7 +11,7 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 
 # session = YieldFreeProxy(
 #     bool_new_proxy=True,
-#     bool_l_use_timer=True,
+#     bool_use_timer=True,
 #     float_min_ratio_times_alive_dead=0.02,
 #     float_max_timeout=600
 # ).session
@@ -23,103 +23,103 @@ cls_ = SearchByTradingB3(
     cls_db=None
 )
 
-# df_ = cls_.source("standardized_instruments_groups", bool_l_fetch=True)
+# df_ = cls_.source("standardized_instruments_groups", bool_fetch=True)
 # print(f"DF STANDARDIZED INSTRUMENTS GROUPS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("index_report", bool_l_fetch=True)
+# df_ = cls_.source("index_report", bool_fetch=True)
 # print(f"DF INDEX REPORT B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("price_report", bool_l_fetch=True)
+# df_ = cls_.source("price_report", bool_fetch=True)
 # print(f"DF PRICE REPORT B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("registration_indicator_instruments", bool_l_fetch=True)
+# df_ = cls_.source("registration_indicator_instruments", bool_fetch=True)
 # print(f"DF REGISTRATION INDICATOR INSTRUMENTS FILE B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("fee_daily_unit_cost", bool_l_fetch=True)
+# df_ = cls_.source("fee_daily_unit_cost", bool_fetch=True)
 # print(f"DF FEE DAILY UNIT COST FILE B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("fee_monthly_unit_cost", bool_l_fetch=True)
+# df_ = cls_.source("fee_monthly_unit_cost", bool_fetch=True)
 # print(f"DF FEE MONTHLY UNIT COST FILE B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("primitive_risk_factors", bool_l_fetch=True)
+# df_ = cls_.source("primitive_risk_factors", bool_fetch=True)
 # print(f"DF PRIMITIVE RISK FACTORS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("risk_formulas", bool_l_fetch=True)
+# df_ = cls_.source("risk_formulas", bool_fetch=True)
 # print(f"DF RISK FORMULAS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("variable_fees_monthly_updt", bool_l_fetch=True)
+# df_ = cls_.source("variable_fees_monthly_updt", bool_fetch=True)
 # print(f"DF FEE VARIABLES B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("daily_liquidity_limit", bool_l_fetch=True)
+# df_ = cls_.source("daily_liquidity_limit", bool_fetch=True)
 # print(f"DF DAILY LIQUIDITY LIMIT B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("daily_liquidity_limit_other_limits", bool_l_fetch=True)
+# df_ = cls_.source("daily_liquidity_limit_other_limits", bool_fetch=True)
 # print(f"DF DAILY LIQUIDITY LIMIT - OTHER LIMITS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("tradable_security_list", bool_l_fetch=True)
+# df_ = cls_.source("tradable_security_list", bool_fetch=True)
 # print(f"DF TRADABLE SECURITY LIST B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("tradable_security_list", bool_l_fetch=True)
+# df_ = cls_.source("tradable_security_list", bool_fetch=True)
 # print(f"DF TRADABLE SECURITY LIST B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("mapping_otc_instrument_groups", bool_l_fetch=True)
+# df_ = cls_.source("mapping_otc_instrument_groups", bool_fetch=True)
 # print(f"DF MAPPING OTC INSTRUMENT GROUPS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("mapping_standardized_instrument_groups", bool_l_fetch=True)
+# df_ = cls_.source("mapping_standardized_instrument_groups", bool_fetch=True)
 # print(f"DF MAPPING STANDARDIZED INSTRUMENT GROUPS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("mtm_b3", bool_l_fetch=True)
+# df_ = cls_.source("mtm_b3", bool_fetch=True)
 # print(f"DF MTM B3: \n{df_}")
 # print(f"TEST HAIRCUT B3: \n{df_[df_["TICKER"] == "PETR4"]}")
 # df_.info()
 
-# df_ = cls_.source("option_theor_premiums", bool_l_fetch=True)
+# df_ = cls_.source("option_theor_premiums", bool_fetch=True)
 # print(f"DF OPTIONS THEORETICAL PREMIUMS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("fx_markets_traded_rates", bool_l_fetch=True)
+# df_ = cls_.source("fx_markets_traded_rates", bool_fetch=True)
 # print(f"DF FX MARKETS TRADED RATES B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("fx_market_volume_settled", bool_l_fetch=True)
+# df_ = cls_.source("fx_market_volume_settled", bool_fetch=True)
 # print(f"DF FX MARKETS VOLUMES SETTLED B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("list_isin_numbers_swaps", bool_l_fetch=True)
+# df_ = cls_.source("list_isin_numbers_swaps", bool_fetch=True)
 # print(f"DF LIST ISIN NUMBER SWAPS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("swap_market_rates", bool_l_fetch=True)
+# df_ = cls_.source("swap_market_rates", bool_fetch=True)
 # print(f"DF SWAP MARKET RATES B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("instrument_group_parameters", bool_l_fetch=True)
+# df_ = cls_.source("instrument_group_parameters", bool_fetch=True)
 # print(f"DF INSTRUMENT GROUP PARAMETERS B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("spot_accepted_collateral_b3", bool_l_fetch=True)
+# df_ = cls_.source("spot_accepted_collateral_b3", bool_fetch=True)
 # print(f"DF SPOT ACCEPTED COLLATERAL B3: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("risk_scenarios_curve_types", bool_l_fetch=True)
+# df_ = cls_.source("risk_scenarios_curve_types", bool_fetch=True)
 # print(f"DF RISK SCENARIOS CURVE TYPES B3: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("primitive_risk_factors_merged", bool_l_fetch=True)
+df_ = cls_.source("primitive_risk_factors_merged", bool_fetch=True)
 print(f"DF PRIMITIVE RISK FACTORS MERGED B3: \n{df_}")
 df_.info()

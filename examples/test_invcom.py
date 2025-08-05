@@ -29,7 +29,7 @@ class MDInvestingDotCom:
         resp_req = request(
             str_method,
             str_host.format(str_ticker),
-            verify=bool_l_verify,
+            verify=bool_verify,
             headers=dict_headers
         )
         resp_req.raise_for_status()

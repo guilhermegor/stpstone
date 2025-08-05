@@ -29,7 +29,7 @@ class DBLogs:
         """
         df_[YAML_GEN["audit_log_cols"]["url"]] = str_url
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
-        if bool_l_ts_log_str == True:
+        if bool_ts_log_str == True:
             df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = DatesBR().utc_log_ts().strftime(
                 "%Y-%m-%d %H:%M:%S.%f%z")
         else:

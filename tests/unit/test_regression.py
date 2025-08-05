@@ -230,7 +230,7 @@ class TestLinearRegressions:
         None
         """
         x, y = sample_1d_data
-        result = linear_regressions.normal_equation(x, y, bool_l_optimize=False)
+        result = linear_regressions.normal_equation(x, y, bool_optimize=False)
         assert isinstance(result, np.ndarray)
 
     def test_normal_equation_invalid_input_type(

@@ -32,7 +32,7 @@ class EtfDBVettaFi(ABCRequests):
         list_slugs: Optional[List[str]] = None,
         int_wait_load_seconds: int = 10,
         bool_headless: bool = False,
-        bool_l_incognito: bool = False
+        bool_incognito: bool = False
     ) -> None:
         super().__init__(
             dict_metadata=YAML_US_ETFDB_VETTAFI,
@@ -43,8 +43,8 @@ class EtfDBVettaFi(ABCRequests):
             token=token,
             list_slugs=list_slugs,
             int_wait_load_seconds=int_wait_load_seconds,
-            bool_l_headlesbool_ool_headless,
-            bool_l_incognitbool_ool_incognito
+            bool_headlesbool_headless,
+            bool_incognitbool_incognito
         )
         self.session = session
         self.dt_ref = dt_ref

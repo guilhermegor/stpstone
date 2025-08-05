@@ -32,8 +32,8 @@ class MaisRetornoFunds(ABCRequests):
         int_wait_load_seconds: int = 60,
         int_delay_seconds: int = 30,
         bool_save_html: bool = False,
-        bool_l_headless: bool = False,
-        bool_l_incognito: bool = False,
+        bool_headless: bool = False,
+        bool_incognito: bool = False,
         instruments_class: Optional[str] = None
     ) -> None:
         super().__init__(
@@ -54,9 +54,9 @@ class MaisRetornoFunds(ABCRequests):
         self.list_slugs = list_slugs
         self.int_wait_load_seconds = int_wait_load_seconds
         self.int_delay_seconds = int_delay_seconds
-        self.bool_l_save_html bool_ool_save_html
-        self.bool_l_headless bool_ool_headless
-        self.bool_l_incognito bool_ool_incognito
+        self.bool_save_html bool_save_html
+        self.bool_headless = bool_headless
+        self.bool_incognito = bool_incognito
         self.instruments_class = instruments_class
         self.list_months = [
             "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
@@ -309,15 +309,15 @@ class MaisRetornoFunds(ABCRequests):
                 "NICKNAME": h1_fund_nickname.get("text", None),
                 "FUND_NAME": p_fund_full_name.get("text", None),
                 "STATUS": span_status.get("text", None),
-                "BL_POOL_OPEN": ColorIdentifier(hex_pool_open).bool_l_green() \
+                "BL_POOL_OPEN": ColorIdentifier(hex_pool_open).bool_green() \
                     if hex_pool_open is not None else False,
-                "BL_QUALIFIED_INVESTOR": ColorIdentifier(hex_qualified_investor).bool_l_green() \
+                "BL_QUALIFIED_INVESTOR": ColorIdentifier(hex_qualified_investor).bool_green() \
                     if hex_qualified_investor is not None else False,
-                "BL_EXCLUSIVE_FUND": ColorIdentifier(hex_exclusive_fund).bool_l_green() \
+                "BL_EXCLUSIVE_FUND": ColorIdentifier(hex_exclusive_fund).bool_green() \
                     if hex_exclusive_fund is not None else False,
-                "BL_LONG_TERM_TAXATION": ColorIdentifier(hex_long_term_taxation).bool_l_green() \
+                "BL_LONG_TERM_TAXATION": ColorIdentifier(hex_long_term_taxation).bool_green() \
                     if hex_long_term_taxation is not None else False,
-                "BL_PENSION_FUND": ColorIdentifier(hex_pension_fund).bool_l_green() \
+                "BL_PENSION_FUND": ColorIdentifier(hex_pension_fund).bool_green() \
                     if hex_pension_fund is not None else False,
                 "CNPJ": p_cnpj_fund.get("text", None),
                 "BENCHMARK": p_benchmark.get("text", None),
@@ -415,7 +415,7 @@ class MaisRetornoFunds(ABCRequests):
         list_td_rentabilities = self._convert_nums(list_td_rentabilities, str_instrument)
         list_td_alpha = self._convert_nums(list_td_alpha, str_instrument)
         list_ = ListHandler().extend_lists(list_td_rentabilities, list_td_alpha,
-                                           bool_l_remove_duplicates=False)
+                                           bool_remove_duplicates=False)
         list_ser = HandlingDicts().pair_headers_with_data(list_cols, list_)
         df_ = pd.DataFrame(list_ser)
         df_["YEAR"] = list_years
@@ -473,18 +473,18 @@ class MaisRetornoFunds(ABCRequests):
         list_ser = list()
         source = self.get_query_params(resp_req.url, "source")
         scraper = PlaywrightScraper(
-            bool_l_headless=selbool_ool_headless,
+            bool_headless=selbool_headless,
             int_default_timeout=self.int_wait_load_seconds * 1_000,
-            bool_l_incognito=selbool_ool_incognito
+            bool_incognito=selbool_incognito
         )
         with scraper.launch():
             if scraper.navigate(resp_req.url):
-                if self.bool_l_save_html:
+                if self.bool_save_html:
                     scraper.export_html(
                         scraper.page.content(),
                         folder_path="data",
                         filename="html-mais-retorno-avl-funds",
-                        bool_l_include_timestamp=True
+                        bool_include_timestamp=True
                     )
                 if source == "avl_funds":
                     while True:

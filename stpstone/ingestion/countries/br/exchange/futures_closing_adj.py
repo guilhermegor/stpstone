@@ -57,14 +57,14 @@ class FuturesClosingAdjB3(ABCRequests):
         return list_headers, int_init_td, int_end_td
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        bool_l_debug = (
+        bool_debug = (
             True
-            if StrHandler().match_string_like(resp_req.url, "*bool_l_debug=True*") == True
+            if StrHandler().match_string_like(resp_req.url, "*bool_debug=True*") == True
             else False
         )
         root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
-        if bool_l_debug == True:
+        if bool_debug == True:
             path_project = DirFilesManagement().find_project_root(
                 marker="pyproject.toml"
             )
@@ -92,7 +92,7 @@ class FuturesClosingAdjB3(ABCRequests):
         ]
         # deal with data/headers specificity for the project
         list_headers, int_init_td, int_end_td = self.td_th_parser(resp_req, list_th)
-        if bool_l_debug == True:
+        if bool_debug == True:
             print(list_headers)
             print(f"LEN LIST HEADERS: {len(list_headers)}")
             print(list_td[int_init_td:int_end_td])

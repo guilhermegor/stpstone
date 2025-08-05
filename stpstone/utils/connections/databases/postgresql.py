@@ -98,7 +98,7 @@ class PostgreSQLDB(ABCDatabase):
         table = Identifier(str_table_name)
         cols = SQL(",").join(map(Identifier, columns))
 
-        if bool_l_insert_or_ignore:
+        if bool_insert_or_ignore:
             query = SQL("""
                 INSERT INTO {table} ({cols})
                 VALUES ({placeholders})

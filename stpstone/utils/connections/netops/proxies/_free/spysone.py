@@ -17,33 +17,33 @@ class SpysOneCountry(ABCSession):
         dict_proxies: Union[Dict[str, str], None] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
-        bool_l_alive: bool = True,
+        bool_alive: bool = True,
         list_anonymity_value: List[str] = ["anonymous", "elite"],
         list_protocol: str = 'http',
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
-        bool_l_ssl: Union[bool, None] = None,
+        bool_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
-        bool_l_use_timer: bool = False,
+        bool_use_timer: bool = False,
         list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None,
         int_wait_load_seconds: int = 10,
     ) -> None:
         super().__init__(
-            bool_l_new_proxbool_ool_new_proxy,
+            bool_new_proxbool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_l_alivbool_ool_alive,
+            bool_alivbool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_l_ssbool_ool_ssl,
+            bool_ssbool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_l_use_timebool_ool_use_timer,
+            bool_use_timebool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
@@ -88,8 +88,8 @@ class SpysOneCountry(ABCSession):
         list_ser = list()
         cls_selenium_wd = SeleniumWD(
             url=self.fstr_url.format(self.str_country_code.upper()),
-            bool_l_headless=True,
-            bool_l_incognito=True,
+            bool_headless=True,
+            bool_incognito=True,
             int_wait_load_seconds=self.int_wait_load_seconds
         )
         try:
@@ -130,7 +130,7 @@ class SpysOneCountry(ABCSession):
                 ts_check_date = self.composed_time_ago_to_ts_unix(str_check_date)
                 list_ser.append({
                     "protocol": str_protocol,
-                    "bool_l_alive": True,
+                    "bool_alive": True,
                     "status": "success",
                     "alive_since": ts_check_date,
                     "anonymity": str_anonimity,
@@ -150,7 +150,7 @@ class SpysOneCountry(ABCSession):
                     "district": str_region,
                     "region_name": str_region,
                     "zip": "",
-                    "bool_l_hosting": False,
+                    "bool_hosting": False,
                     "isp": "",
                     "latitude": 0.0,
                     "longitude": 0.0,
@@ -158,7 +158,7 @@ class SpysOneCountry(ABCSession):
                     "proxy": f"{str_ip}:{str_port}",
                     "ip": str_ip,
                     "port": str_port,
-                    "bool_l_ssl": True,
+                    "bool_ssl": True,
                     "timeout": 1.0 / float_latency,
                     "times_alive": 0,
                     "times_dead": 0,

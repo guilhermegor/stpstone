@@ -16,14 +16,14 @@ cls_ = YahiiOthersBR(
 # print(f"DF YAHII MIN WAGE: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("inss_contribution", bool_l_fetch=True)
+df_ = cls_.source("inss_contribution", bool_fetch=True)
 print(f"DF YAHII INSS CONTRIBUTION: \n{df_}")
 df_.info()
 
-# df_ = cls_.source("daily_usdbrl", bool_l_fetch=True)
+# df_ = cls_.source("daily_usdbrl", bool_fetch=True)
 # print(f"DF YAHII DAILY USD/BRL: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("daily_eurbrl", bool_l_fetch=True)
+# df_ = cls_.source("daily_eurbrl", bool_fetch=True)
 # print(f"DF YAHII DAILY EUR/BRL: \n{df_}")
 # df_.info()

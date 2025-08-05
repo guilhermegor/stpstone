@@ -10,10 +10,10 @@ cls_session = YieldFreeProxy(
     bool_new_proxy=True,
     str_country_code="BR",
     str_continent_code=None,
-    bool_l_alive=True,
+    bool_alive=True,
     list_anonymity_value=["elite", "anonymous"],
     list_protocol=["http", "https"],
-    bool_l_ssl=None,
+    bool_ssl=None,
     float_min_ratio_times_alive_dead=None,
     float_max_timeout=10000,
 )
@@ -27,11 +27,11 @@ cls_ = AnbimaDataDebentures(
     list_slugs=["AEAM22", "AALM11"],
     str_user_agent=UserAgents().get_random_user_agent,
     int_wait_load_seconds=30,
-    bool_l_headless=False,
-    bool_l_incognito=True
+    bool_headless=False,
+    bool_incognito=True
 )
 
-# df_ = cls_.source("debentures_available", bool_l_fetch=True)
+# df_ = cls_.source("debentures_available", bool_fetch=True)
 # print(f"DF DEBENTURES AVL: \n{df_}")
 # df_.info()
 # df_.to_csv("data/anbima-debentures-avl_{}_{}_{}.csv".format(
@@ -40,7 +40,7 @@ cls_ = AnbimaDataDebentures(
 #     DatesBR().curr_time().strftime('%H%M%S')
 # ), index=False)
 
-df_ = cls_.source("debentures_registries", bool_l_fetch=True)
+df_ = cls_.source("debentures_registries", bool_fetch=True)
 print(f"DF DEBENTURES REGISTRIES: \n{df_}")
 df_.info()
 df_.to_csv("data/anbima-debentures-registries_{}_{}_{}.csv".format(

@@ -98,7 +98,7 @@ class RatingsCorpSPGlobalProduct:
         for i in range(1, 100):
             try:
                 cls_ = RatingsCorpSPGlobalConcreteCreator(pg_number=i, bearer=str_bearer)
-                df_ = cls_.source("ratings_corp", bool_l_fetch=True)
+                df_ = cls_.source("ratings_corp", bool_fetch=True)
                 list_ser.extend(df_.to_dict(orient="records"))
                 sleep(10)
             except Exception as e:
@@ -111,7 +111,7 @@ class RatingsCorpSPGlobalProduct:
         for i in range(1, 100):
             try:
                 cls_ = RatingsCorpSPGlobalConcreteCreator(pg_number=i, bearer=str_bearer)
-                _ = cls_.source("ratings_corp", bool_l_fetch=False)
+                _ = cls_.source("ratings_corp", bool_fetch=False)
                 sleep(10)
             except Exception as e:
                 CreateLog().log_message(self.logger, f"Error: {e}", log_level="warning")

@@ -40,7 +40,7 @@ class MySQLDatabase:
             cur = conn.cursor()
             cur.execute(query)
             #   if it's not an insert query, fetch the results
-            if not bool_l_insert_db:
+            if not bool_insert_db:
                 list_rows = cur.fetchall()
             else:
                 conn.commit()

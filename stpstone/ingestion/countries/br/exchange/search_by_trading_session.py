@@ -131,7 +131,7 @@ class SearchByTradingB3(ABCRequests):
                                 list_source_names)][key_ticker].tolist()))
                 list_markets_classified.extend(list_source_names)
         # defining markets not classified, if is user"s will
-        if bool_l_return_markets_not_classified == True:
+        if bool_return_markets_not_classified == True:
             return ListHandler().remove_duplicates(
                 df_instruments_register_b3_raw[
                     ~df_instruments_register_b3_raw[col_security_category_name].isin(
@@ -152,7 +152,7 @@ class SearchByTradingB3(ABCRequests):
         # carga para a memória margens teóricas máximas b3
         resp_req = request("GET", url_mtm)
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
-            resp_req, bool_l_io_interpreting=False)
+            resp_req, bool_io_interpreting=False)
         # retorno é um novo zip com um xlsx
         zipfile = ZipFile(zipfile)
         # coletando nome do arquivo txt contido dentro do zip
@@ -389,7 +389,7 @@ class SearchByTradingB3(ABCRequests):
         resp_req.raise_for_status()
         # baixando em memória zip com cenário de tipo curva da b3
         list_txts_curve_type_scenarios = DirFilesManagement().get_zip_from_web_in_memory(
-            resp_req, bool_l_io_interpreting=False)
+            resp_req, bool_io_interpreting=False)
         # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
         for extracted_file_curve_type_scenarios in list_txts_curve_type_scenarios:
             #   caso a variável list_risk_curve_type_scenarios seja diferente de none, o usuário tem
@@ -460,7 +460,7 @@ class SearchByTradingB3(ABCRequests):
             # baixando em memória zip com cenário de tipo curva da b3
             list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
                 resp_req,
-                bool_l_io_interpreting=False
+                bool_io_interpreting=False
             )
         except:
             url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
@@ -468,8 +468,8 @@ class SearchByTradingB3(ABCRequests):
             resp_req = request("GET", url_cenarios_tipo_spot)
             resp_req.raise_for_status()
             list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(
-                url_cenarios_tipo_spot, bool_l_verify=False,
-                bool_l_io_interpreting=False
+                url_cenarios_tipo_spot, bool_verify=False,
+                bool_io_interpreting=False
             )
         # loopando em torno dos arquivos em txt, abrindo em memória no dataframe pandas
         for extracted_file_tipo_curva_cenario in list_txts_tipos_spot_cenarios:
@@ -515,7 +515,7 @@ class SearchByTradingB3(ABCRequests):
         list_scenarios_risk_spot: List[str] = \
             ["2962", "2906", "2945", "2924", "2944", "2925", "2946", "2901", "2902", "2934"],
         int_cenario_sup_avaliacao: int = 529,
-        bool_l_debug: bool = False
+        bool_debug: bool = False
     ) -> pd.DataFrame:
         """
         DOCSTRING: UNINDO FATORES PRIMITIVOS DE RISCO, CURVAS SPOT E POR TIPO EM UM DATAFRAME COM
@@ -546,7 +546,7 @@ class SearchByTradingB3(ABCRequests):
             list(dict_prfs.keys())[0]: int,
             list(dict_prfs.keys())[1]: str,
         })
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** TIPO FRPS ***")
             print(df_tipos_fprs)
         # * arquivos de pregão b3 - cenários tipo curva
@@ -559,7 +559,7 @@ class SearchByTradingB3(ABCRequests):
         # eliminando cenários prospectivos
         df_risk_scenarios_curve_type = df_risk_scenarios_curve_type[df_risk_scenarios_curve_type["ID_CENARIO"].isin(
             range(1, int_cenario_sup_avaliacao))].reset_index(drop=True)
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** TIPO CURVA ***")
             print(df_risk_scenarios_curve_type.info())
             print(df_risk_scenarios_curve_type)
@@ -576,29 +576,29 @@ class SearchByTradingB3(ABCRequests):
         # eliminando cenários prospectivos
         df_cenarios_tipo_spot = df_cenarios_tipo_spot[df_cenarios_tipo_spot["ID_CENARIO"].isin(
             range(1, int_cenario_sup_avaliacao))].reset_index(drop=True)
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** TIPO SPOT ***")
             print(df_cenarios_tipo_spot.info())
             print(df_cenarios_tipo_spot)
         # * arquivos de pregão b3 - fatores primitivos de risco
-        df_fpr_b3 = self.source("primitive_risk_factors", bool_l_fetch=True)
+        df_fpr_b3 = self.source("primitive_risk_factors", bool_fetch=True)
         # removendo colunas de interesse
         df_fpr_b3.drop(["TIPO"], axis=1, inplace=True)
         # limitando fprs de interesse para fins de cálculo de swaps
         df_fpr_b3 = df_fpr_b3[df_fpr_b3["ID_FPR"].isin(list(dict_fprs.keys()))]
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** TIPO FPR ***")
             print(df_fpr_b3.info())
             print(df_fpr_b3)
         # * início tratamento de dados
         # inner-join fprs com dataframe de tipos de frps
         list_colunas_frps = df_fpr_b3.columns
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** COLUNAS FRPS ***")
             print(list_colunas_frps)
         list_colunas_frp = ["ID_FPR", "ID_CENARIO", "TIPO_FPR"] + list_colunas_frps.drop([
             "ID_FPR", "NOME_FPR"]).to_list()
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** TIPO FPR B3 ***")
             print(df_fpr_b3)
             print("*** TIPOS FPRS ***")
@@ -609,7 +609,7 @@ class SearchByTradingB3(ABCRequests):
         # concat cenários tipo curva e spot
         df_risk_scenarios_curve_type = pd.concat([df_risk_scenarios_curve_type, df_cenarios_tipo_spot],
                                            ignore_index=True, sort=False)
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** CENÁRIOS TIPO CURVA & SPOT ***")
             print(df_risk_scenarios_curve_type)
         # inner-join fprs com cenarios spot e tipo curvas
@@ -647,7 +647,7 @@ class SearchByTradingB3(ABCRequests):
         df_fpr_b3.rename(columns={
             "ID_CENARIO_y": "ID_CENARIO"
         }, inplace=True)
-        if bool_l_debug == True:
+        if bool_debug == True:
             print("*** DF FPRS CONSOLIDADO ***")
             print(df_fpr_b3)
         # retornando fpr completo

@@ -11,10 +11,10 @@ df_ = cls_.source("sovereign_spreads", bool_fetch=True)
 print(f"DF WORLD GOV BONDS - SOVEREIGN SPREADS: \n{df_}")
 df_.info()
 
-df_ = cls_.source("countries_ratings", bool_l_fetch=True)
+df_ = cls_.source("countries_ratings", bool_fetch=True)
 print(f"DF WORLD GOV BONDS - COUNTRIES RATINGS: \n{df_}")
 df_.info()
 
-df_ = cls_.source("sovereign_cds", bool_l_fetch=True)
+df_ = cls_.source("sovereign_cds", bool_fetch=True)
 print(f"DF WORLD GOV BONDS - SOVEREIGN CDS: \n{df_}")
 df_.info()

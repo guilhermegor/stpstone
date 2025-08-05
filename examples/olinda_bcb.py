@@ -11,14 +11,14 @@ cls_ = OlindaBCB(
 # print(f"DF OLINDA BCB - CURRENCIES: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("closing_usdbrl_ptax_series", bool_l_fetch=True)
+# df_ = cls_.source("closing_usdbrl_ptax_series", bool_fetch=True)
 # print(f"DF OLINDA BCB - CLOSING USD/BRL PTAX SERIES: \n{df_}")
 # df_.info()
 
-# df_ = cls_.source("currencies_ts", bool_l_fetch=True)
+# df_ = cls_.source("currencies_ts", bool_fetch=True)
 # print(f"DF OLINDA BCB - CLOSING USD/BRL PTAX SERIES: \n{df_}")
 # df_.info()
 
-df_ = cls_.source("annual_mkt_expectations", bool_l_fetch=True)
+df_ = cls_.source("annual_mkt_expectations", bool_fetch=True)
 print(f"DF OLINDA BCB - ANNUAL MARKET EXPECTATIONS: \n{df_}")
 df_.info()

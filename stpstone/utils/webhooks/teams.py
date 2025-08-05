@@ -18,6 +18,6 @@ class WebhookTeams:
         teams_message = pymsteams.connectorcard(self.url_webhook)
         teams_message.title(str_title)
         teams_message.text(str_msg)
-        if bool_l_print_message == True:
+        if bool_print_message == True:
             teams_message.printme()
         teams_message.send()

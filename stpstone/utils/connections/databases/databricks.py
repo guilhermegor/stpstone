@@ -27,7 +27,7 @@ class Databricks:
         INPUTS: CONNECTION STRING
         OUTPUTS: OBJECT WITH DATABRICKS CONNECTION
         """
-        return pyo.connect('DSN={}'.format(dsn_conn), autocommit=bool_l_autocommit, timeout=int_timeout)
+        return pyo.connect('DSN={}'.format(dsn_conn), autocommit=bool_autocommit, timeout=int_timeout)
 
     def fetch_data_from_databricks(self, connection):
         """
@@ -37,8 +37,8 @@ class Databricks:
         """
         return pd.read_sql(self.str_query, connection)
 
-    def conn_databricks(self, bool_l_conn=False, int_max_wait=480, str_error='CONNECTION TIMEOUT EXPIRED',
-                        bool_l_kill_process_when_databricks_down=False):
+    def conn_databricks(self, bool_conn=False, int_max_wait=480, str_error='CONNECTION TIMEOUT EXPIRED',
+                        bool_kill_process_when_databricks_down=False):
         """
         DOCSTRING: CONNECTION WITH DATABRICKS IN THE FIRST VALID DSN
         INPUTS: QUERT, LIST OF DSNS, LOGGER
@@ -52,7 +52,7 @@ class Databricks:
                 df_databricks = func_timeout(int_max_wait, self.fetch_data_from_databricks,
                                              args=(connection))
                 #   if the connection was established break the loop, otherwise log error
-                bool_l_conn = True
+                bool_conn = True
                 break
             except FunctionTimedOut:
                 if self.logger != None:
@@ -63,12 +63,12 @@ class Databricks:
                     CreateLog().warning(self.logger, 'Connection could not be established '
                                          + 'in the DSN {}. Error: {}. '.format(dsn, e))
         # caso a conexão não tenha sido estabelecida retornar um erro
-        if bool_l_conn == False:
+        if bool_conn == False:
             if self.logger != None:
                 CreateLog().warning(self.logger, 'Connection to Databricks could not be established '
                                      + 'in any of the DSNs, please validate the stability of the service. List of DSNs '
                                      + 'configured on the machine: {}'.format(self.list_dsns))
-                if bool_l_kill_process_when_databricks_down == True:
+                if bool_kill_process_when_databricks_down == True:
                     raise Exception(self.logger, 'Connection to Databricks could not be established '
                                     + 'in any of the DSNs, please validate the stability of the service. List of DSNs '
                                     + 'configured on the machine: {}'.format(self.list_dsns))

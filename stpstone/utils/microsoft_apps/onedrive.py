@@ -23,4 +23,4 @@ class OneDrive:
             dir_path_business, name_like)
         # return last edition datetime
         return DirFilesManagement().time_last_edition(complete_status_file_path,
-                                                      bool_l_to_datetimbool_ool_to_datetime)
+                                                      bool_to_datetimbool_to_datetime)

@@ -11,7 +11,7 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 
 session = YieldFreeProxy(
     bool_new_proxy=True,
-    bool_l_use_timer=True,
+    bool_use_timer=True,
     float_min_ratio_times_alive_dead=0.02,
     float_max_timeout=600
 ).session
@@ -23,56 +23,56 @@ cls_ = TradingHoursB3(
 )
 
 print('*** STOCKS TRADING HOURS ***')
-df_ = cls_.source('stocks', bool_l_fetch=True)
+df_ = cls_.source('stocks', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** STOCK OPTIONS TRADING HOURS ***')
-df_ = cls_.source('stock_options', bool_l_fetch=True)
+df_ = cls_.source('stock_options', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** PMI FUTURES TRADING HOURS ***')
-df_ = cls_.source('pmi_future', bool_l_fetch=True)
+df_ = cls_.source('pmi_future', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** STOCK INDEX FUTURES TRADING HOURS ***')
-df_ = cls_.source('stock_index_futures', bool_l_fetch=True)
+df_ = cls_.source('stock_index_futures', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** INTEREST RATES FUTURES TRADING HOURS ***')
-df_ = cls_.source('interest_rates', bool_l_fetch=True)
+df_ = cls_.source('interest_rates', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** USD INTEREST RATES FUTURES TRADING HOURS ***')
-df_ = cls_.source('usd_interest_rates', bool_l_fetch=True)
+df_ = cls_.source('usd_interest_rates', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** COMMODITIES TRADING HOURS ***')
-df_ = cls_.source('commodities', bool_l_fetch=True)
+df_ = cls_.source('commodities', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** CRYPTO TRADING HOURS ***')
-df_ = cls_.source('crypto', bool_l_fetch=True)
+df_ = cls_.source('crypto', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** FOREIGN EXCHANGE AND DOLLAR SPOT TRADING HOURS ***')
-df_ = cls_.source('foreign_exchange_and_dollar_spot', bool_l_fetch=True)
+df_ = cls_.source('foreign_exchange_and_dollar_spot', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** OPF (BEFORE EXERCISE DATE) TRADING HOURS ***')
-df_ = cls_.source('opf_before_exc', bool_l_fetch=True)
+df_ = cls_.source('opf_before_exc', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()
 
 print('\n*** OPF (AFTER EXERCISE DATE) TRADING HOURS ***')
-df_ = cls_.source('opf_after_exc', bool_l_fetch=True)
+df_ = cls_.source('opf_after_exc', bool_fetch=True)
 print(f'DF : \n{df_}')
 df_.info()

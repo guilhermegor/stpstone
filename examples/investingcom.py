@@ -11,7 +11,7 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 
 session = YieldFreeProxy(
     bool_new_proxy=True,
-    bool_l_use_timer=True,
+    bool_use_timer=True,
     float_min_ratio_times_alive_dead=0.02,
     float_max_timeout=600
 ).session
@@ -23,6 +23,6 @@ cls_investingcom = InvestingCom(
     dt_end=DatesBR().sub_working_days(DatesBR().curr_date(), 0),
     str_ticker='PETR4'
 )
-df_ = cls_investingcom.source('daily_ohlcv', bool_l_fetch=True)
+df_ = cls_investingcom.source('daily_ohlcv', bool_fetch=True)
 print(f'DF OHLCV: \n{df_}')
 print(df_.info())

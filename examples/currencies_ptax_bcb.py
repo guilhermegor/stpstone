@@ -16,7 +16,7 @@ class_ptax = PTAXBCB(
     dt_start=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
     dt_end=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
     cls_db=None,
-    bool_l_debug=False
+    bool_debug=False
 )
 df_composition_ptax = class_ptax.composition_currency
 print(f'DF PTAX BCB: \n{df_composition_ptax}')

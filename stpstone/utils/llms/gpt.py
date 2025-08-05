@@ -23,7 +23,7 @@ class GPT():
             Maximum number of tokens for the completion. Defaults to 100.
         str_context : Optional[str], optional
             Optional context to provide to the model. Defaults to None.
-        bool_l_stream : bool, optional
+        bool_stream : bool, optional
             Whether to stream the completion. Defaults to False.
 
         Returns
@@ -47,7 +47,7 @@ class GPT():
         self.str_model = str_model
         self.int_max_tokens = int_max_tokens
         self.str_context = str_context
-        self.bool_l_strebool_ool_stream,
+        self.bool_strebool_stream,
         self.client = OpenAI(api_key=self.api_key)
 
     def run_prompt(self, list_tuple:List[tuple]) -> ChatCompletion:
@@ -109,5 +109,5 @@ class GPT():
             model=self.str_model,
             messages=list_prompt,
             max_tokens=self.int_max_tokens,
-            strem=self.bool_l_strem
+            strem=self.bool_strem
         )

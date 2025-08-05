@@ -118,10 +118,10 @@ class BMFInterestRates(ABCRequests):
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         list_dfs = list()
         bool_debug = True if StrHandler().match_string_like(
-            resp_req.url, '*bool_l_debug=True*') == True else False
+            resp_req.url, '*bool_debug=True*') == True else False
         root = HtmlHandler().lxml_parser(resp_req)
         # export html tree to data folder, if is user's will
-        if bool_l_debug == True:
+        if bool_debug == True:
             path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
             HtmlHandler().html_tree(root, file_path=rf'{path_project}/data/test.html')
         for i in range(1, 5):

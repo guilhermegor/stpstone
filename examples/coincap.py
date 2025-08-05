@@ -22,5 +22,5 @@ df_ = CoinCap(
     dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
     cls_db=None,
     token=get_password('COIN_CAP', 'API_KEY')
-).source('ohlcv_latest', bool_l_fetch=True)
+).source('ohlcv_latest', bool_fetch=True)
 print(f'DF MKTDATA COINCAP: \n{df_}')

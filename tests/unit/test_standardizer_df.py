@@ -110,7 +110,7 @@ def ml_standardization_instance(sample_data: dict[str, Any]) -> Any: # noqa: ANN
         str_data_fillna="MISSING",
         str_dt_fillna="1900-01-01",
         encoding="utf-8",
-        bool_l_debug=False,
+        bool_debug=False,
         logger=None
     )
 

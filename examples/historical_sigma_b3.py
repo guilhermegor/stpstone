@@ -11,7 +11,7 @@ from stpstone.utils.connections.netops.proxies.managers.free import YieldFreePro
 
 # session = YieldFreeProxy(
 #     bool_new_proxy=True,
-#     bool_l_use_timer=True,
+#     bool_use_timer=True,
 #     float_min_ratio_times_alive_dead=0.02,
 #     float_max_timeout=600
 # ).session
@@ -23,17 +23,17 @@ cls_ = HistoricalSigmaB3(
 )
 
 # print('*** HISTORICAL SIGMA B3 - GROUP 1 ***')
-# df_ = cls_.source('group_1', bool_l_fetch=True)
+# df_ = cls_.source('group_1', bool_fetch=True)
 # print(f'DF : \n{df_}')
 # df_.info()
 
 # print('*** HISTORICAL SIGMA B3 - GROUP 2 ***')
-# df_ = cls_.source('group_2', bool_l_fetch=True)
+# df_ = cls_.source('group_2', bool_fetch=True)
 # print(f'DF : \n{df_}')
 # df_.info()
 
 # print('*** HISTORICAL SIGMA B3 - GROUP 3 ***')
-# df_ = cls_.source('group_3', bool_l_fetch=True)
+# df_ = cls_.source('group_3', bool_fetch=True)
 # print(f'DF : \n{df_}')
 # df_.info()
 

@@ -16,14 +16,14 @@ class AnbimaDataUtils:
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
                  bool_schema: bool = True, str_tbool_name: Optional[str] = None,
-                 str_schema_name: Optional[str] = None, bool_l_insert_or_ignore: Optional[bool] = False,
+                 str_schema_name: Optional[str] = None, bool_insert_or_ignore: Optional[bool] = False,
                  logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bool_l_schema bool_ool_schema
-        self.str_tbool_l_name = strbool_ool_name
+        self.bool_schema bool_schema
+        self.str_tbool_name = strbool_name
         self.str_schema_name = str_schema_name
-        self.bool_l_insert_or_ignore bool_ool_insert_or_ignore
+        self.bool_insert_or_ignore bool_insert_or_ignore
         self.logger = logger
 
     def _log_info(self, message: str):
@@ -41,27 +41,27 @@ class AnbimaDataUtils:
             return self.dict_metadata["credentials"].get(property_, None)
 
     def insert_db(self, list_ser) -> None:
-        if self.bool_l_schema == False:
-            str_table_name = f"{self.str_schema_name}_{self.str_tbool_l_name}"
+        if self.bool_schema == False:
+            str_table_name = f"{self.str_schema_name}_{self.str_tbool_name}"
         self.cls_db.insert(
             list_ser,
             str_table_name=str_table_name,
-            bool_l_insert_or_ignore=selbool_ool_insert_or_ignore,
+            bool_insert_or_ignore=selbool_insert_or_ignore,
         )
 
 
 class AnbimaDataDecrypt(AnbimaDataUtils):
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
-                 bool_l_schema: bool = True, strbool_ool_name: Optional[str] = None,
+                 bool_schema: bool = True, strbool_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None,
-                 bool_l_insert_or_ignore: Optional[bool] = False) -> None:
+                 bool_insert_or_ignore: Optional[bool] = False) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bool_l_schema bool_ool_schema
-        self.str_tbool_l_name = strbool_ool_name
+        self.bool_schema bool_schema
+        self.str_tbool_name = strbool_name
         self.str_schema_name = str_schema_name
-        self.bool_l_insert_or_ignore bool_ool_insert_or_ignore
+        self.bool_insert_or_ignore bool_insert_or_ignore
 
     def urls_funds_builder(
         self,

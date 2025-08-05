@@ -413,7 +413,7 @@ class TestGridSearchOptimalHyperparameters:
         x, y, _ = sample_regression_data
         result = fit_performance.grid_search_optimal_hyperparameters(
             dummy_regressor, sample_param_grid, "neg_mean_squared_error", x, y,
-            bool_l_randomized_search=False
+            bool_randomized_search=False
         )
         assert isinstance(result, dict)
         assert isinstance(result["model_regression"], GridSearchCV)

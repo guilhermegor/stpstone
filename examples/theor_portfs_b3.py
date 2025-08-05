@@ -18,21 +18,21 @@ cls_ = IndexesTheorPortfB3(
 )
 
 print('*** IBOV THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibov', bool_l_debug=Falsebool_ool_fetch=True)
+df_ = cls_.source('ibov', bool_debug=Falsebool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()
 
 print('\n*** IBRX100 THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibrx100', bool_l_debug=Falsebool_ool_fetch=True)
+df_ = cls_.source('ibrx100', bool_debug=Falsebool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()
 
 print('\n*** IBRX50 THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibrx50', bool_l_debug=Falsebool_ool_fetch=True)
+df_ = cls_.source('ibrx50', bool_debug=Falsebool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()
 
 print('\n*** IBRA THEORETICAL PORTFOLIO ***')
-df_ = cls_.source('ibra', bool_l_debug=Falsebool_ool_fetch=True)
+df_ = cls_.source('ibra', bool_debug=Falsebool_fetch=True)
 print(f'DF: \n{df_}')
 df_.info()

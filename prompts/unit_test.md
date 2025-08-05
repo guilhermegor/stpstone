@@ -75,7 +75,7 @@ def test_init_with_valid_inputs() -> None:
 - **Import organization**: Follow isort with single-line imports when logical
 
 ### Test Quality Standards
-- **100% code coverage**: All lines, branches, and edge cases must be tested
+- **100% code coverage**: All functions, classes and methods
 - **Zero ruff violations**: Code must pass all ruff checks without warnings
 - **Fallback testing**: Include tests for fallback mechanisms and error recovery
 - **Reload logic**: Test module reloading scenarios when applicable
