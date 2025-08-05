@@ -126,14 +126,30 @@ def create_type_checked_method(original_method: Callable[..., Any]) -> Callable[
             # if we can't get type hints, just call the original method
             return original_method(*args, **kwargs)
         
-        # get parameter names
+        # get parameter names and inspect signature
         sig = inspect.signature(original_method)
-        param_names = list(sig.parameters.keys())
+        params = sig.parameters
         
         # validate positional arguments
-        for _, (arg, param_name) in enumerate(zip(args, param_names)):
-            if param_name in type_hints and param_name != 'self':
-                validate_type(arg, type_hints[param_name], param_name)
+        pos_arg_idx = 0
+        for param_name, param in params.items():
+            if param_name == 'self':
+                pos_arg_idx += 1
+                continue
+            if param.kind == inspect.Parameter.VAR_POSITIONAL:
+                # validate all remaining positional args against varargs type
+                varargs_type = type_hints.get(param_name, Any)
+                varargs_type = get_args(varargs_type)[0] if get_origin(varargs_type) is list \
+                    else varargs_type
+                while pos_arg_idx < len(args):
+                    validate_type(args[pos_arg_idx], varargs_type, f"{param_name}[{pos_arg_idx}]")
+                    pos_arg_idx += 1
+            elif param.kind in (inspect.Parameter.POSITIONAL_ONLY, 
+                                inspect.Parameter.POSITIONAL_OR_KEYWORD):
+                if pos_arg_idx < len(args):
+                    if param_name in type_hints:
+                        validate_type(args[pos_arg_idx], type_hints[param_name], param_name)
+                    pos_arg_idx += 1
         
         # validate keyword arguments
         for param_name, value in kwargs.items():

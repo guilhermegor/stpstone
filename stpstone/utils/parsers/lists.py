@@ -26,6 +26,7 @@ from typing import Any, Optional, TypedDict
 import numpy as np
 from numpy.typing import NDArray
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.str import StrHandler
@@ -47,7 +48,7 @@ class ReturnGetLowerMidUpperBound(TypedDict):
     end_of_list: bool
 
 
-class ListHandler:
+class ListHandler(metaclass=TypeChecker):
     """Handler class for advanced list operations and manipulations."""
 
     def __init__(self) -> None:

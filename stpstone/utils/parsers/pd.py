@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Tuple
 import pandas as pd
 
 # local libs
-from stpstone._config.global_slots import YAML_MICROSOFT_APPS
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement

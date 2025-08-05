@@ -53,6 +53,76 @@
 4. **Validation Checks**:
    - _validate_<NAME> methods please include in the beginning of the class
    - Please add sanity checks for every variable within methods/functions that would be useful, with examples below
+   - When using try except, use as err for error and from err in the implementation of raise, in order to avoid the Ruff error B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling. Please follow the example below:
+```python
+"""HTML data extraction utilities using lxml and requests.
+
+This module provides a class for fetching and parsing HTML content from URLs
+using lxml for XPath-based data extraction and requests for HTTP operations.
+"""
+
+from typing import Literal
+
+from lxml import html
+from requests import request
+
+
+class HandlingLXML:
+    """Class for handling HTML data extraction using lxml."""
+
+    def _validate_url(self, url: str) -> None:
+        """Validate URL format and content.
+
+        Parameters
+        ----------
+        url : str
+            URL to validate
+
+        Raises
+        ------
+        ValueError
+            If URL is empty or invalid
+        """
+        if not url:
+            raise ValueError("URL cannot be empty")
+        if not isinstance(url, str):
+            raise ValueError("URL must be a string")
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise ValueError("URL must start with http:// or https://")
+
+    def fetch(self, url: str, method: Literal["get", "post"] = "get") -> html.ElementTree:
+        """Fetch and parse HTML document for XPath selection.
+
+        Parameters
+        ----------
+        url : str
+            URL to fetch HTML content from
+        method : Literal['get', 'post']
+            HTTP request method (default: "get")
+
+        Returns
+        -------
+        html.ElementTree
+            Parsed HTML document
+
+        Raises
+        ------
+        ValueError
+            If URL is invalid or request fails
+
+        References
+        ----------
+        .. [1] https://stackoverflow.com/questions/26944078/extracting-value-of-url-source-by-xpath-in-python
+        """
+        self._validate_url(url)
+        try:
+            content = request(method, url).content
+            if not content:
+                raise ValueError("Received empty response from URL")
+            return html.fromstring(content)
+        except Exception as err:
+            raise ValueError(f"Failed to fetch or parse URL: {str(err)}") from err
+```
    - **0-1 Range Values**:
      - Probabilities
      - P-values  
