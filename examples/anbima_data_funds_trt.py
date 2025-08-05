@@ -16,7 +16,7 @@ path_env = f"{path_project}/.env"
 load_dotenv(path_env)
 
 client_minio = MinioClient(os.getenv("MINIO_USER"), os.getenv("MINIO_PASSWORD"),
-                           "127.0.0.1:9000", bl_secure=False)
+                           "127.0.0.1:9000", bool_secure=False)
 cls_funds_cons = FundsConsolidated(
     client_minio, "html", r"//script[contains(text(), 'self.__next_f.push')]/text()",
     YAML_ANBIMA_DATA_FUNDS["trt_indicadores_fundos"]["re_patterns"]

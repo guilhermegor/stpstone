@@ -10,5 +10,5 @@ fred_ts = FredUSMacro(
     dt_end=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
     api_key=fred_api_key
 )
-df_ = fred_ts.source("resource", bl_fetch=True)
+df_ = fred_ts.source("resource", bool_fetch=True)
 print(f"DF FRED TS: \n{df_}")

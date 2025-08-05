@@ -1,9 +1,11 @@
 import os
+
 from dotenv import load_dotenv
 import pandas as pd
+
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_FUNDS
-from stpstone.utils.connections.clouds.minio import MinioClient
 from stpstone.ingestion.countries.br.registries.anbima_data_funds import FundsFetcher
+from stpstone.utils.connections.clouds.minio import MinioClient
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -13,7 +15,7 @@ path_env = f"{path_project}/.env"
 load_dotenv(path_env)
 
 client_minio = MinioClient(os.getenv("MINIO_USER"), os.getenv("MINIO_PASSWORD"),
-                           "127.0.0.1:9000", bl_secure=False)
+                           "127.0.0.1:9000", bool_secure=False)
 
 file_anbima_funds = "data/anbima-avl-funds-cons.csv"
 reader = pd.read_csv(file_anbima_funds, sep=",")

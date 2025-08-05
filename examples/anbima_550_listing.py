@@ -8,6 +8,6 @@ cls_ = Anbima550Listing(
     dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
 )
 
-df_ = cls_.source("550_listing", bl_fetch=True)
+df_ = cls_.source("550_listing", bool_fetch=True)
 print(f"DF ANBIMA 550 LISTING: \n{df_}")
 df_.info()
