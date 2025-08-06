@@ -131,8 +131,8 @@ class HandlingTXTFiles(metaclass=TypeChecker):
         
         with open(complete_path) as file_in:
             data = file_in.read().splitlines(True)
-        with open(complete_path, "w") as file_out:
-            file_out.writelines(data[n:])
+        with open(complete_path, "w") as f:
+            f.writelines(data[n:])
 
     def write_file(
         self,
@@ -167,8 +167,8 @@ class HandlingTXTFiles(metaclass=TypeChecker):
         if not isinstance(file_complete_path, str):
             raise ValueError("File path must be a string")
 
-        with open(file_complete_path, method) as file_output:
-            file_output.write(data_content)
+        with open(file_complete_path, method) as f:
+            f.write(data_content)
         
         if not self.cls_dir_files.object_exists(file_complete_path):
             raise ValueError(f"Failed to create file at path: {file_complete_path}")
