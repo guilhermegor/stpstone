@@ -885,7 +885,7 @@ class ABCRequests(HandleReqResponses):
                 str_proxy = None
             selenium_wd = SeleniumWD(
                 url, self.path_webdriver, self.int_port, self.str_user_agent, self.int_wait_load_seconds,
-                self.int_delay_seconds, str_proxy, self.bool_headless, selbool_incognito,
+                self.int_delay_seconds, str_proxy, self.bool_headless, self.bool_incognito,
                 list_options_wd
             )
             if xpath_el_wait_until_loaded is not None:
@@ -972,7 +972,7 @@ class ABCRequests(HandleReqResponses):
             self.cls_db.insert(
                 list_ser,
                 str_table_name=str_table_name,
-                bool_insert_or_ignorbool_insert_or_ignore,
+                bool_insert_or_ignore = bool_insert_or_ignore,
             )
 
     def non_iteratively_get_data(

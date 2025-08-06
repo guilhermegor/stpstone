@@ -274,7 +274,6 @@ class DebenturesPricer(metaclass=TypeChecker):
             dt_next_coupon = dt_next_coupon or next_cp
         if dt_last_coupon > dt_next_coupon:
             raise ValueError("Last coupon date must be before next coupon date")
-        print(f"***** Settlement: {dt_settlement}, Last: {dt_last_coupon}, Next: {dt_next_coupon}, Test: {dt_last_coupon <= dt_settlement <= dt_next_coupon}") # noqa
         if not (dt_last_coupon <= dt_settlement <= dt_next_coupon):
             raise ValueError("Settlement date must be between coupon dates")
 

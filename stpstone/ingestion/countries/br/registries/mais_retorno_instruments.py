@@ -473,9 +473,9 @@ class MaisRetornoFunds(ABCRequests):
         list_ser = list()
         source = self.get_query_params(resp_req.url, "source")
         scraper = PlaywrightScraper(
-            bool_headless=selbool_headless,
+            bool_headless=self.bool_headless,
             int_default_timeout=self.int_wait_load_seconds * 1_000,
-            bool_incognito=selbool_incognito
+            bool_incognito=self.bool_incognito
         )
         with scraper.launch():
             if scraper.navigate(resp_req.url):

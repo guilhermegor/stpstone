@@ -1,9 +1,11 @@
-from requests import request
-from typing import Dict, Union, List, Optional
 from logging import Logger
-from stpstone.utils.connections.netops.proxies.abc import ABCSession
+from typing import Dict, List, Optional, Union
+
+from requests import request
+
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.geography.ww import WWTimezones, WWGeography
+from stpstone.utils.connections.netops.proxies.abc import ABCSession
+from stpstone.utils.geography.ww import WWGeography, WWTimezones
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler
 
@@ -29,19 +31,19 @@ class FreeProxyNet(ABCSession):
         logger: Optional[Logger] = None
     ) -> None:
         super().__init__(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )

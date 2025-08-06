@@ -284,7 +284,7 @@ class Operations(ConnectionApi):
             method,
             app,
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             float_secs_sleep=float_secs_sleep,
         )
 
@@ -485,7 +485,7 @@ class AccountsData(ConnectionApi):
             method,
             app.format(account_id),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
         )
 
     def spxi_instrument_delete(
@@ -515,7 +515,7 @@ class AccountsData(ConnectionApi):
             method,
             app.format(account_id),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
         )
 
     def spxi_tmox_global_metrics_remove(
@@ -606,7 +606,7 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(str(doc_id)),
             dict_params=dict_params,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             bool_retry_if_errobool_retry_if_error,
         )
 
@@ -637,7 +637,7 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(str(doc_id)),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             bool_retry_if_errobool_retry_if_error,
         )
 
@@ -666,7 +666,7 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(str(doc_id)),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             bool_retry_if_errobool_retry_if_error,
         )
 
@@ -768,7 +768,7 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(doc_id),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             bool_retry_if_errobool_retry_if_error,
         )
 
@@ -792,7 +792,7 @@ class DocumentsData(ConnectionApi):
             method,
             app.format(doc_id),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
         )
 
 
@@ -873,7 +873,7 @@ class Professional(ConnectionApi):
             dict_payload=dict_payload,
             bool_retry_if_errobool_retry_if_error,
             bool_debug_modbool_debug_mode,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             float_secs_sleep=float_secs_sleep,
         )
 
@@ -988,7 +988,7 @@ class ProfilesData(ConnectionApi):
             method,
             app.format(prof_id),
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             bool_retry_if_errobool_retry_if_error,
         )
 
@@ -1058,6 +1058,6 @@ class SystemEventManagement(ConnectionApi):
             method,
             app,
             dict_payload=dict_payload,
-            bool_parse_dict_params_datbool_parse_dict_params_data,
+            bool_parse_dict_params_datbl_parse_dict_params_data,
             float_secs_sleep=float_secs_sleep,
         )

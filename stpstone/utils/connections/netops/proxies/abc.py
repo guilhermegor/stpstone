@@ -1,18 +1,19 @@
-import time
-import re
-from random import shuffle
-from requests import Session
-from requests.adapters import HTTPAdapter
-from requests.exceptions import ProxyError, ConnectTimeout, SSLError, ConnectionError
-from typing import List, Dict, Union, Tuple, Any, Optional
 from abc import ABC, ABCMeta, abstractmethod
-from urllib3.util import Retry
 from datetime import datetime, timedelta
 from logging import Logger
-from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.loggs.create_logs import conditional_timeit
+from random import shuffle
+import re
+import time
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from requests import Session
+from requests.adapters import HTTPAdapter
+from requests.exceptions import ConnectionError, ConnectTimeout, ProxyError, SSLError
+from urllib3.util import Retry
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.loggs.create_logs import CreateLog, conditional_timeit
+from stpstone.utils.parsers.dicts import HandlingDicts
 
 
 class ABCMetaClass(TypeChecker, ABCMeta):
@@ -39,19 +40,19 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
         logger: Optional[Logger] = None
     ):
-        self.bool_new_proxy bool_new_proxy
+        self.bool_new_proxy = bool_new_proxy
         self.dict_proxies = dict_proxies
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
-        self.bool_alive bool_alive
+        self.bool_alive = bool_alive
         self.list_anonymity_value = list_anonymity_value
         self.list_protocol = list_protocol if isinstance(list_protocol, list) else [list_protocol]
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
-        self.bool_ssl bool_ssl
+        self.bool_ssl = bool_ssl
         self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
         self.float_max_timeout = float_max_timeout
-        self.bool_use_timer bool_use_timer
+        self.bool_use_timer = bool_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.logger = logger
         self.create_log = CreateLog()
@@ -161,13 +162,13 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 int_retries=0,
                 int_backoff_factor=0
             )
-            return self.ip_infos(session, bool_return_availabilitbool_return_availability)
+            return self.ip_infos(session, bool_return_availability = bool_return_availability)
         except (ProxyError, ConnectTimeout, SSLError, ConnectionError):
             return False
 
     @property
     def get_proxy(self) -> Dict[str, str]:
-        @conditional_timeit(bool_use_timer=selbool_use_timer)
+        @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxy():
             list_ser = self._filtered_proxies
             shuffle(list_ser)
@@ -183,14 +184,14 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     @property
     def get_proxies(self) -> List[Dict[str, str]]:
         list_ = list()
-        @conditional_timeit(bool_use_timer=selbool_use_timer)
+        @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxy():
             list_ser = self._filtered_proxies
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
                 int_port = dict_proxy["port"]
                 if all([x is not None for x in [str_ip, int_port]]) == True:
-                    bool_test_proxy = self._test_proxy(str_ip, int_portbool_return_availability=True)
+                    bool_test_proxy = self._test_proxy(str_ip, int_portbl_return_availability=True)
                     self.create_log.log_message(
                         self.logger,
                         f"Testing proxy {str_ip}:{int_port} - Healthy: {bool_test_proxy}",
@@ -245,10 +246,10 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         )
         self._validate_proxy_structure(list_ser)
         for k_filt, v_filt, str_strategy in [
-            ("bool_alive", selbool_alive, "equal"),
+            ("bool_alive", self.bool_alive, "equal"),
             ("anonymity", self.list_anonymity_value, "isin"),
             ("protocol", self.list_protocol, "isin"),
-            ("bool_ssl", selbool_ssl, "equal"),
+            ("bool_ssl", self.bool_ssl, "equal"),
             ("ratio_times_alive_dead", self.float_min_ratio_times_alive_dead,
                 "greater_than_or_equal_to"),
             ("timeout", self.float_max_timeout, "less_than_or_equal_to"),

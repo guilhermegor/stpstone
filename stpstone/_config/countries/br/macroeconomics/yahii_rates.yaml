@@ -90,7 +90,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 8
       int_cols_tbl: 8
-      int_step_tbool_begin: 89
+      int_step_tbl_begin: 89
       int_start_acc: 40
       int_year_min: 2000
     inpc:
@@ -152,7 +152,7 @@ pmi_rf_rates:
       int_y: 2
       int_m: 17
       int_cols_tbl: 8
-      int_step_tbool_begin: 198
+      int_step_tbl_begin: 198
       int_start_acc: 40
       int_year_min: 1995
     tjlp:
@@ -160,7 +160,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 9
       int_cols_tbl: 9
-      int_step_tbool_begin: 100
+      int_step_tbl_begin: 100
       int_start_acc: 40
       int_year_min: 1995
     tlp_fixa:
@@ -174,7 +174,7 @@ pmi_rf_rates:
       int_y: 1
       int_m: 8
       int_cols_tbl: 8
-      int_step_tbool_begin: 89
+      int_step_tbl_begin: 89
       int_start_acc: 40
       int_year_min: 1995
     tr:
@@ -182,7 +182,7 @@ pmi_rf_rates:
       int_y: 2
       int_m: 21
       int_cols_tbl: 10
-      int_step_tbool_begin: 254
+      int_step_tbl_begin: 254
       int_year_min: 1991
       int_start_acc: 256
     ufesp:

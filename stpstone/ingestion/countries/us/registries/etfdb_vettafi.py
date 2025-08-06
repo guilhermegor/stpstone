@@ -44,7 +44,7 @@ class EtfDBVettaFi(ABCRequests):
             list_slugs=list_slugs,
             int_wait_load_seconds=int_wait_load_seconds,
             bool_headlesbool_headless,
-            bool_incognitbool_incognito
+            bool_incognitbl_incognito
         )
         self.session = session
         self.dt_ref = dt_ref

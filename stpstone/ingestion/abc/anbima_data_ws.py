@@ -1,29 +1,31 @@
-import backoff
-import re
-from logging import Logger
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, List, Any
-from requests import request, Response
-from requests.exceptions import ReadTimeout, ConnectTimeout, ChunkedEncodingError, ConnectionError
+from logging import Logger
+import re
+from typing import Any, Dict, List, Optional
+
+import backoff
 from lxml import html
+from requests import Response, request
+from requests.exceptions import ChunkedEncodingError, ConnectionError, ConnectTimeout, ReadTimeout
+
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
-from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.html import HtmlHandler
+from stpstone.utils.parsers.str import StrHandler
 
 
 class AnbimaDataUtils:
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
-                 bool_schema: bool = True, str_tbool_name: Optional[str] = None,
+                 bool_schema: bool = True, str_tbl_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None, bool_insert_or_ignore: Optional[bool] = False,
                  logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bool_schema bool_schema
-        self.str_tbool_name = strbool_name
+        self.bool_schema = bool_schema
+        self.str_tbl_name = str_tbl_name
         self.str_schema_name = str_schema_name
-        self.bool_insert_or_ignore bool_insert_or_ignore
+        self.bool_insert_or_ignore = bool_insert_or_ignore
         self.logger = logger
 
     def _log_info(self, message: str):
@@ -42,11 +44,11 @@ class AnbimaDataUtils:
 
     def insert_db(self, list_ser) -> None:
         if self.bool_schema == False:
-            str_table_name = f"{self.str_schema_name}_{self.str_tbool_name}"
+            str_table_name = f"{self.str_schema_name}_{self.str_tbl_name}"
         self.cls_db.insert(
             list_ser,
             str_table_name=str_table_name,
-            bool_insert_or_ignore=selbool_insert_or_ignore,
+            bool_insert_or_ignore=self.bool_insert_or_ignore,
         )
 
 
@@ -58,10 +60,10 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
                  bool_insert_or_ignore: Optional[bool] = False) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bool_schema bool_schema
-        self.str_tbool_name = strbool_name
+        self.bool_schema = bool_schema
+        self.str_tbl_name = strbool_name
         self.str_schema_name = str_schema_name
-        self.bool_insert_or_ignore bool_insert_or_ignore
+        self.bool_insert_or_ignore = bool_insert_or_ignore
 
     def urls_funds_builder(
         self,

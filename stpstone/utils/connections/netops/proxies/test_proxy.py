@@ -1,8 +1,9 @@
 import time
-from typing import Dict, Any, Union, List
-from urllib3.util import Retry
+from typing import Any, Dict, List, Union
+
 from requests import Session
 from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
 
 
 class ProxyTester:

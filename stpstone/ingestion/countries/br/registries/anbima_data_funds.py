@@ -1,26 +1,32 @@
-import pandas as pd
-from typing import Dict, Optional, Any, List, Union, Tuple
-from lxml import html
 from logging import Logger
-from stpstone.ingestion.abc.anbima_data_ws import AnbimaDataDecrypt, AnbimaDataFetcher, AnbimaDataTrt
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from lxml import html
+import pandas as pd
+
+from stpstone.ingestion.abc.anbima_data_ws import (
+    AnbimaDataDecrypt,
+    AnbimaDataFetcher,
+    AnbimaDataTrt,
+)
+from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.cals.handling_dates import DatesBR
 
 
 class FundsDecrypt(AnbimaDataDecrypt):
 
     def __init__(self, dict_metadata: Dict[str, str], cls_db: Optional[Any] = None,
-                 bool_schema: bool = True, str_tbool_name: Optional[str] = None,
+                 bool_schema: bool = True, str_tbl_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None,
                  bool_insert_or_ignore: Optional[bool] = False,
                  logger: Optional[Logger] = None) -> None:
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
-        self.bool_schema bool_schema
-        self.str_tbool_name = strbool_name
+        self.bool_schema = bool_schema
+        self.str_tbl_name = strbool_name
         self.str_schema_name = str_schema_name
-        self.bool_insert_or_ignore bool_insert_or_ignore
+        self.bool_insert_or_ignore = bool_insert_or_ignore
         self.logger = logger
 
 

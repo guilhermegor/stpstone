@@ -1,8 +1,9 @@
-from typing import Union, Dict, List, Optional
 from logging import Logger
-from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
+from typing import Dict, List, Optional, Union
+
 from stpstone.utils.connections.netops.proxies.abc import ABCSession
-from stpstone.utils.geography.ww import WWTimezones, WWGeography
+from stpstone.utils.geography.ww import WWGeography, WWTimezones
+from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 
 class ProxyNova(ABCSession):
@@ -26,24 +27,24 @@ class ProxyNova(ABCSession):
         logger: Optional[Logger] = None
     ) -> None:
         super().__init__(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
         self.fstr_url = "https://www.proxynova.com/proxy-server-list/country-{}/"
-        self.xpath_tr = '//*[@id="tbool_proxy_list"]/tbody/tr'
+        self.xpath_tr = '//*[@id="tbl_proxy_list"]/tbody/tr'
         self.url = self.fstr_url.format(str_country_code.lower())
         self.selenium_wd = SeleniumWD(
             url=self.url,

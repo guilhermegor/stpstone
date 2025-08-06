@@ -123,7 +123,7 @@ class SidraIBGE(ABCRequests):
         if source in ["sidra_modification_dates", "sidra_variables"]:
             return self.serialized_data(resp_req, source)
         try:
-            cls_selenium = SeleniumWD(resp_req.url, bl_headless=True, bl_incognito=True)
+            cls_selenium = SeleniumWD(resp_req.url, bool_headless=True, bool_incognito=True)
             web_driver = cls_selenium.get_web_driver
             return self.td_th_parser(cls_selenium, web_driver)
         finally:

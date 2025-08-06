@@ -1,11 +1,15 @@
-import time
-from typing import Union, Dict, List, Optional
 from logging import Logger
-from stpstone.utils.connections.netops.proxies._free.proxy_nova import ProxyNova
-from stpstone.utils.connections.netops.proxies._free.proxy_scrape import ProxyScrapeAll, ProxyScrapeCountry
-from stpstone.utils.connections.netops.proxies._free.proxy_webshare import ProxyWebShare
-from stpstone.utils.connections.netops.proxies._free.freeproxy_world import FreeProxyWorld
+import time
+from typing import Dict, List, Optional, Union
+
 from stpstone.utils.connections.netops.proxies._free.free_proxy_list_net import FreeProxyNet
+from stpstone.utils.connections.netops.proxies._free.freeproxy_world import FreeProxyWorld
+from stpstone.utils.connections.netops.proxies._free.proxy_nova import ProxyNova
+from stpstone.utils.connections.netops.proxies._free.proxy_scrape import (
+    ProxyScrapeAll,
+    ProxyScrapeCountry,
+)
+from stpstone.utils.connections.netops.proxies._free.proxy_webshare import ProxyWebShare
 from stpstone.utils.connections.netops.proxies._free.spysme import SpysMeCountries
 from stpstone.utils.connections.netops.proxies._free.spysone import SpysOneCountry
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -35,19 +39,19 @@ class YieldFreeProxy:
         timeout_session: Optional[float] = 1000.0,
         int_wait_load_seconds: Optional[int] = 10,
     ) -> None:
-        self.bool_new_proxy bool_new_proxy
+        self.bool_new_proxy = bool_new_proxy
         self.dict_proxies = dict_proxies
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
-        self.bool_alive bool_alive
+        self.bool_alive = bool_alive
         self.list_anonymity_value = list_anonymity_value
         self.list_protocol = list_protocol
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
-        self.bool_ssl bool_ssl
+        self.bool_ssl = bool_ssl
         self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
         self.float_max_timeout = float_max_timeout
-        self.bool_use_timer bool_use_timer
+        self.bool_use_timer = bool_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.logger = logger
         self.str_plan_id_webshare = str_plan_id_webshare
@@ -57,146 +61,146 @@ class YieldFreeProxy:
         self.create_logs = CreateLog()
 
         self.cls_spys_one_country = SpysOneCountry(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_free_proxy_net = FreeProxyNet(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_spysme_countries = SpysMeCountries(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_proxy_nova = ProxyNova(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_proxy_scrape_all = ProxyScrapeAll(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_proxy_scrape_country = ProxyScrapeCountry(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_proxy_webshare = ProxyWebShare(
             str_plan_id=str_plan_id_webshare,
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
         self.cls_freeproxy_world = FreeProxyWorld(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger,
             int_wait_load_seconds=int_wait_load_seconds

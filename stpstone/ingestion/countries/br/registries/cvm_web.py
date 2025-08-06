@@ -80,7 +80,7 @@ class CVMWeb_WS_Funds:
             bool_open_minimized
         )
         self.bool_parallel bool_parallel
-        self.bool_insert_or_ignore bool_insert_or_ignore
+        self.bool_insert_or_ignore = bool_insert_or_ignore
         self.cls_db = cls_db
         self.int_sleep = int_sleep
         self.int_ncpus = int_ncpus
@@ -205,7 +205,7 @@ class CVMWeb_WS_Funds:
         list_ser = list()
         # request html
         html_content = self.generic_req(str_method, self.str_host_ex_fund + str_app,
-                                        str_header_ref, bool_allow_redirectbool_allow_redirects)
+                                        str_header_ref, bool_allow_redirectbl_allow_redirects)
         # print(f'HTML CONTENT: \n{html_content}')
         # print('OPTION FUND: {}'.format(HtmlHandler().html_lxml_xpath(html_content, '//select[@id="PK_PARTIC"]/option[3]/text()')))
         # looping within available funds and filling serialized list
@@ -268,7 +268,7 @@ class CVMWeb_WS_Funds:
             self.cls_db.insert(
                 df_funds.to_dict(orient='records'),
                 str_table_nane,
-                bool_insert_or_ignore=selbool_insert_or_ignore
+                bool_insert_or_ignore=self.bool_insert_or_ignore
             )
         # returning dataframe
         return df_funds
@@ -294,7 +294,7 @@ class CVMWeb_WS_Funds:
                 self.str_host_post_fund + str_app.format(str_fund_code),
                 str_header_ref,
                 dict_data,
-                bool_allow_redirectbool_allow_redirects,
+                bool_allow_redirectbl_allow_redirects,
             ), \
             self.str_host_post_fund + str_app.format(str_fund_code)
 
@@ -330,7 +330,7 @@ class CVMWeb_WS_Funds:
             self.cls_db.insert(
                 list_avl_dts_fund,
                 str_table_nane,
-                bool_insert_or_ignore=selbool_insert_or_ignore
+                bool_insert_or_ignore=self.bool_insert_or_ignore
             )
         return list_dts
 
@@ -384,7 +384,7 @@ class CVMWeb_WS_Funds:
             #     self.str_host_post_fund + str_app.format(str_fund_code),
             #     str_header_ref,
             #     dict_data,
-            #     bool_allow_redirectbool_allow_redirects,
+            #     bool_allow_redirectbl_allow_redirects,
             # )
             resp_req = request(
                 method=str_method_fund_report_dt,
@@ -502,7 +502,7 @@ class CVMWeb_WS_Funds:
             self.cls_db.insert(
                 list_ser,
                 str_table_nane,
-                bool_insert_or_ignore=selbool_insert_or_ignore
+                bool_insert_or_ignore=self.bool_insert_or_ignore
             )
         # wait for the next iteration, if is user's will
         if self.int_sleep is not None:

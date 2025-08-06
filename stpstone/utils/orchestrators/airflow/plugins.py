@@ -1,7 +1,8 @@
 ### GENERIC PLUGING FOR AIRFLOW ###
 
 # pypi.org libs
-from typing import Dict, Any
+from typing import Any, Dict
+
 # project modules
 from stpstone.utils.cals.handling_dates import DatesBR
 
@@ -20,4 +21,4 @@ class AirflowPlugins:
         """
         ti = kwargs['ti']
         bool_workng_day = DatesBR().is_working_day(kwargs['ds'])
-        ti.xcom_push(key='bool_continue', valubool_workng_day)
+        ti.xcom_push(key='bool_continue', value=bool_workng_day)

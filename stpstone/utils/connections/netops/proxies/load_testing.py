@@ -1,7 +1,9 @@
-import time
-from typing import Dict, Any, Union, List, Optional
-from requests import Session
 from logging import Logger
+import time
+from typing import Any, Dict, List, Optional, Union
+
+from requests import Session
+
 from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
 
@@ -30,19 +32,19 @@ class ProxyLoadTester:
         timeout_session: Optional[float] = 1000.0,
         int_wait_load_seconds: Optional[int] = 10,
     ) -> None:
-        self.bool_new_proxy bool_new_proxy
+        self.bool_new_proxy = bool_new_proxy
         self.dict_proxies = dict_proxies
         self.int_retries_new_proxies_not_mapped = int_retries_new_proxies_not_mapped
         self.int_backoff_factor = int_backoff_factor
-        self.bool_alive bool_alive
+        self.bool_alive = bool_alive
         self.list_anonymity_value = list_anonymity_value
         self.list_protocol = list_protocol
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
-        self.bool_ssl bool_ssl
+        self.bool_ssl = bool_ssl
         self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
         self.float_max_timeout = float_max_timeout
-        self.bool_use_timer bool_use_timer
+        self.bool_use_timer = bool_use_timer
         self.list_status_forcelist = list_status_forcelist
         self.logger = logger
         self.str_plan_id_webshare = str_plan_id_webshare
@@ -54,19 +56,19 @@ class ProxyLoadTester:
         self.set_used_proxies = set()
 
         self.cls_yield_proxy = YieldFreeProxy(
-            bool_new_proxbool_new_proxy,
+            bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries_new_proxies_not_mapped,
             int_backoff_factor=int_backoff_factor,
-            bool_alivbool_alive,
+            bool_alive=bool_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssbool_ssl,
+            bool_ssl=bool_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timebool_use_timer,
+            bool_use_timer=bool_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger,
             str_plan_id_webshare=str_plan_id_webshare,
