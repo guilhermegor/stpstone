@@ -23,8 +23,6 @@ jobs:
     if: ${{ github.event_name == 'push' }}
     uses: ./.github/workflows/tests.yaml
     secrets: inherit
-    outputs:
-      ready_for_release: ${{ jobs.test.result == 'success' }}
 
   release:
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tests_passed == 'true') || (github.event_name == 'push' && needs.check_tests.outputs.ready_for_release == 'true') }}
@@ -33,7 +31,7 @@ jobs:
     steps:
       - name: Check Test Status
         run: echo "Tests passed, proceeding with release"
-  
+
   details:
     runs-on: ubuntu-24.04
     outputs:
@@ -56,11 +54,11 @@ jobs:
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Debug Outputs
-        if: env.RUNNER_DEBUG
+        if: ${{ env.RUNNER_DEBUG == '1' }}
         run: |
-          echo "Version is $NEW_VERSION"
-          echo "Suffix is $SUFFIX"
-          echo "Tag name is $TAG_NAME"
+          echo "Version is ${{ steps.release.outputs.new_version }}"
+          echo "Suffix is ${{ steps.release.outputs.suffix }}"
+          echo "Tag name is ${{ steps.release.outputs.tag_name }}"
 
   check_pypi:
     needs: details
@@ -122,7 +120,7 @@ jobs:
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          # temporary pyproject without windows platform-specific dependencies
+          # temporary pyproject without Windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           cat pyproject.original.toml | python -c '
           import sys, re
@@ -139,7 +137,7 @@ jobs:
             poetry lock --no-cache
           fi
 
-          # install dependencies, checking for dev and docs groups if they are in the .toml file
+          # install dependencies, excluding dev and docs groups if present
           without_groups=()
           if grep -q '\[tool.poetry.group.dev\]' pyproject.toml; then
             without_groups+=("dev")
@@ -176,6 +174,7 @@ jobs:
           path: dist/
 
   pypi_publish:
+    name: pypi
     needs: setup_and_build
     runs-on: ubuntu-24.04
     environment:
@@ -186,10 +185,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set Up Python ${{ matrix.python-version }}
+      - name: Set Up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12.8"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -205,12 +204,12 @@ jobs:
           path: |
             .venv
             poetry.lock
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          key: venv-${{ runner.os }}-3.12.8-${{ hashFiles('pyproject.toml') }}
 
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          # temporary pyproject without windows platform-specific dependencies
+          # Temporary pyproject without Windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           cat pyproject.original.toml | python -c '
           import sys, re
@@ -220,17 +219,17 @@ jobs:
           print(content)
           ' > pyproject.toml
 
-          # regenerate lock file, if needed
+          # Regenerate lock file, if needed
           if ! poetry check --lock; then
             echo "Lock file is outdated, regenerating..."
             rm -f poetry.lock
             poetry lock --no-cache
           fi
 
-          # install all dependencies including dev and docs
+          # Install all dependencies including dev and docs
           poetry install --no-interaction --no-root
 
-          # restore original pyproject.toml
+          # Restore original pyproject.toml
           mv pyproject.original.toml pyproject.toml
           poetry env activate
 
@@ -243,18 +242,14 @@ jobs:
       - name: Publish to PyPI
         run: |
           poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
-
-          yes | poetry publish --build
-
-          # fallback to twine
-          if [ $? -ne 0 ]; then
+          poetry publish --build || {
             echo "Poetry publish failed, falling back to twine"
             poetry run twine upload \
               --verbose \
               --username "__token__" \
               --password "${{ secrets.PYPI_TOKEN }}" \
               dist/*
-          fi
+          }
 
   github_release:
     name: Create GitHub Release

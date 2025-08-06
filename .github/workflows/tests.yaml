@@ -2,6 +2,10 @@ name: Run Tests
 
 on:
   workflow_call:
+    outputs:
+      ready_for_release:
+        description: "Whether all tests passed successfully"
+        value: ${{ jobs.test.result == 'success' }}
   workflow_dispatch:
   pull_request:
     branches:
@@ -20,7 +24,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9.22", "3.10.17", "3.11.12", "3.12.8"]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -49,7 +52,7 @@ jobs:
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          # temporary pyproject without windows platform-specific dependencies
+          # Temporary pyproject without Windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           cat pyproject.original.toml | python -c '
           import sys, re
@@ -59,7 +62,7 @@ jobs:
           print(content)
           ' > pyproject.toml
 
-          # regenerate lock file, if needed
+          # Regenerate lock file, if needed
           if ! poetry check --lock; then
             echo "Lock file is outdated, regenerating..."
             rm -f poetry.lock
@@ -69,19 +72,18 @@ jobs:
           echo "No groups to exclude, installing all dependencies"
           poetry install --no-interaction --no-root
 
-          # restore original pyproject.toml
+          # Restore original pyproject.toml
           mv pyproject.original.toml pyproject.toml
           poetry env activate
 
       - name: Run Spell Check (codespell)
         run: |
           poetry run codespell .
-          # exit with error if typos found (quiet-level=3 makes it silent)
           if [ $? -ne 0 ]; then
             echo "Typos found! Run 'codespell .' locally to see them."
             exit 1
           fi
-      
+
       - name: Run Docstring Type Consistency Check
         run: |
           poetry run pydocstyle --convention=numpy --select=D412,D417,DAR stpstone/ tests/
@@ -235,37 +237,25 @@ jobs:
 
           poetry run python check_consistency.py
 
-      
       - name: Run Ruff Linting
         run: |
-          poetry run ruff check stpone/ tests/ --config=ruff.toml
+          poetry run ruff check stpstone/ tests/ --config=ruff.toml
           if [ $? -ne 0 ]; then
-            echo "Ruff found issues! Run 'ruff check stpone/ tests/' locally to see details."
-            echo "To fix automatically, run: poetry run ruff check --fix stpone/ tests/"
+            echo "Ruff found issues! Run 'ruff check stpstone/ tests/' locally to see details."
+            echo "To fix automatically, run: poetry run ruff check --fix stpstone/ tests/"
             exit 1
           fi
 
       - name: Run Integration Tests
         run: poetry run pytest tests/integration/ -v
-    
+
       - name: Run Unit Tests With Coverage
         run: |
-            poetry run pytest --cov=stpstone tests/unit/ -v
-            poetry run coverage-badge -o coverage.svg -f
-      
+          poetry run pytest --cov=stpstone tests/unit/ -v
+          poetry run coverage-badge -o coverage.svg -f
+
       - name: Upload Badge
         uses: actions/upload-artifact@v4
         with:
-            name: coverage-badge-${{ matrix.python-version }}
-            path: coverage.svg
-
-
-  tests_passed:
-    if: ${{ github.ref_type == 'tag' }}
-    needs: test
-    runs-on: ubuntu-24.04
-    outputs:
-      ready_for_release: ${{ needs.test.result == 'success' }}
-    steps:
-      - name: Set Output
-        run: echo "ready_for_release=true" >> $GITHUB_OUTPUT
+          name: coverage-badge-${{ matrix.python-version }}
+          path: coverage.svg
