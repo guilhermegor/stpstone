@@ -6,6 +6,6 @@ cls_ = SGSBCB(
     dt_start=DatesBR().sub_working_days(DatesBR().curr_date(), 300),
     dt_end=DatesBR().sub_working_days(DatesBR().curr_date(), 1)
 )
-df_ = cls_.source("resource", bl_fetch=True)
+df_ = cls_.source("resource", bool_fetch=True)
 print(f"DF SGS BCB: \n{df_}")
 df_.info()

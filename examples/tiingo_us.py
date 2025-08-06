@@ -17,5 +17,5 @@ df_ = TiingoUS(
     cls_db=None,
     token=get_password('TIINGO', 'API_KEY'),
     list_slugs=['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META']
-).source('ohlcv_adjusted', bl_debug=False, bl_fetch=True)
+).source('ohlcv_adjusted', bool_debug=False, bool_fetch=True)
 print(f'DF TIINGO: \n{df_}')

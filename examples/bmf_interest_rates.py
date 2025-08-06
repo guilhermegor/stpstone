@@ -8,6 +8,6 @@ cls_ = BMFInterestRates(
     cls_db=None
 )
 
-df_ = cls_.source("rates", bl_fetch=True)
+df_ = cls_.source("rates", bool_fetch=True)
 print(f"DF BMF INTEREST RATES: \n{df_}")
 df_.info()

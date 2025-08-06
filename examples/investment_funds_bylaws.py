@@ -60,7 +60,7 @@ list_chunks = ListHandler().chunk_list(list_slugs, None, int_chunk)
 for i, list_ in enumerate(list_chunks):
     print(f"{DatesBR().current_timestamp_string()} - Processing chunk {i} of {len(list_chunks) - 1}")
     cls_ = InvestmentFundsBylawsBR(list_slugs=list_)
-    df_ = cls_.source("investment_funds_bylaws", bl_fetch=True)
+    df_ = cls_.source("investment_funds_bylaws", bool_fetch=True)
     print(f"DF TEMPORARY: \n{df_}")
     # clean all string columns
     for col in df_.select_dtypes(include=['object']):

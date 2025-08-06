@@ -120,6 +120,6 @@ class GlobalRates(ABCRequests):
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         bs_html = HtmlHandler().bs_parser(resp_req)
-        str_source = StrHandler().get_url_query(resp_req.url, bl_include_fragment=True)["source"]
+        str_source = StrHandler().get_url_query(resp_req.url, bool_include_fragment=True)["source"]
         bs_table = bs_html.find("table")
         return self.td_th_parser(bs_table, str_source)

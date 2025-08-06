@@ -8,7 +8,7 @@ cls_ = YahiiRatesBRMacro(
     cls_db=None
 )
 
-df_ = cls_.source("pmi_rf_rates", bl_fetch=True)
+df_ = cls_.source("pmi_rf_rates", bool_fetch=True)
 print(f"DF YAHII: \n{df_}")
 df_.info()
 df_.to_excel(
