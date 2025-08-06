@@ -8,6 +8,7 @@ import os
 import tarfile
 from typing import Optional, TypedDict
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -29,7 +30,7 @@ class ReturnFetchTgzFiles(TypedDict):
     extracted_files_names: list[str]
 
 
-class HandlingTGZFiles:
+class HandlingTGZFiles(metaclass=TypeChecker):
     """Class for handling TGZ file download and extraction operations."""
 
     def _validate_input_paths(
