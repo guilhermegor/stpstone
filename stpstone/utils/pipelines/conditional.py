@@ -4,7 +4,7 @@ This module provides a utility for applying functions to data conditionally base
 predicate evaluations. Useful for rule-based processing systems like fraud detection.
 """
 
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable
 
 from stpstone.transformations.validation.metaclass_type_checker import type_checker
 
@@ -12,7 +12,7 @@ from stpstone.transformations.validation.metaclass_type_checker import type_chec
 @type_checker
 def conditional_pipeline(
     data: Any, # noqa ANN401: typing.Any is not allowed
-    functions: List[Tuple[Callable[[Any], bool], Callable[[Any], Any]]]
+    functions: list[tuple[Callable[[Any], bool], Callable[[Any], Any]]]
 ) -> Any: # noqa ANN401: typing.Any is not allowed
     """Apply functions conditionally based on predicate evaluations.
 
@@ -20,8 +20,8 @@ def conditional_pipeline(
     ----------
     data : Any
         Initial input data to be processed
-    functions : List[Tuple[Callable[[Any], bool], Callable[[Any], Any]]]
-        List of (predicate, function) tuples where:
+    functions : list[tuple[Callable[[Any], bool], Callable[[Any], Any]]]
+        list of (predicate, function) tuples where:
         - predicate: Callable that returns bool when applied to data
         - function: Callable to apply if predicate returns True
 
@@ -34,6 +34,8 @@ def conditional_pipeline(
     ------
     ValueError
         If any of the pipeline elements are not callable
+    TypeError
+        If any of the conditions do not return bool
 
     Examples
     --------
@@ -55,7 +57,11 @@ def conditional_pipeline(
         if not callable(condition) or not callable(func):
             raise ValueError("All pipeline elements must be callable (condition, function) pairs")
         
-        if condition(data):
+        condition_result = condition(data)
+        if not isinstance(condition_result, bool):
+            raise TypeError(f"Condition must return bool, got {type(condition_result)}")
+        
+        if condition_result:
             data = func(data)
     
     return data
