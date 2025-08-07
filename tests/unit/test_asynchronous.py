@@ -384,10 +384,9 @@ class TestAsyncPipelineTypeValidation:
         -------
         None
         """
-        with pytest.raises(TypeError) as excinfo:
-            await asyncpipeline(5, "not a list")  # type: ignore
-        assert "list[Callable]" in str(excinfo.value)
-
+        with pytest.raises(TypeError, match="must be of type"):
+            await asyncpipeline(5, "not a list")
+    
     async def test_non_async_function(self) -> None:
         """Test pipeline with synchronous function.
 
