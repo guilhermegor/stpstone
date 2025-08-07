@@ -8,7 +8,10 @@ from typing import Any
 
 from yaml import YAMLError, safe_load
 
+from stpstone.transformations.validation.metaclass_type_checker import type_checker
 
+
+@type_checker
 def reading_yaml(
     file_path: str
 ) -> Any: # noqa ANN401: typing.Any is not allowed
