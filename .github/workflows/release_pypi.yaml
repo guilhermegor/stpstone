@@ -173,7 +173,7 @@ jobs:
           name: dist
           path: dist/
 
-  pypi_publish:
+  pypi:
     name: pypi
     needs: setup_and_build
     runs-on: ubuntu-24.04
