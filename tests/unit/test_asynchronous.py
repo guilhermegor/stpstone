@@ -1,6 +1,6 @@
 """Unit tests for asynchronous pipeline execution.
 
-Tests the asyncpipeline function with various input scenarios including:
+Tests the async_pipeline function with various input scenarios including:
 - Successful execution with multiple functions
 - Error handling during pipeline execution
 - Edge cases with empty or invalid inputs
@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
-from stpstone.utils.pipelines.asynchronous import asyncpipeline
+from stpstone.utils.pipelines.asynchronous import async_pipeline
 
 
 # --------------------------
@@ -148,7 +148,7 @@ class TestAsyncPipelineSuccess:
         -------
         None
         """
-        result = await asyncpipeline(5, sample_async_functions)
+        result = await async_pipeline(5, sample_async_functions)
         assert result == 15  # ((5 * 2) + 10) - 5
         assert isinstance(result, int)
 
@@ -171,7 +171,7 @@ class TestAsyncPipelineSuccess:
         -------
         None
         """
-        result = await asyncpipeline(5, [sample_async_functions[0]])
+        result = await async_pipeline(5, [sample_async_functions[0]])
         assert result == 10
 
     async def test_string_data(self) -> None:
@@ -218,7 +218,7 @@ class TestAsyncPipelineSuccess:
             await asyncio.sleep(0.01)
             return s + " world"
 
-        result = await asyncpipeline("test", [append_hello, append_world])
+        result = await async_pipeline("test", [append_hello, append_world])
         assert result == "test hello world"
 
 
@@ -237,7 +237,7 @@ class TestAsyncPipelineEdgeCases:
         -------
         None
         """
-        result = await asyncpipeline(5, [])
+        result = await async_pipeline(5, [])
         assert result == 5
 
     async def test_none_input(self, sample_async_functions: list[Callable[[int], int]]
@@ -258,7 +258,7 @@ class TestAsyncPipelineEdgeCases:
         -------
         None
         """
-        result = await asyncpipeline(None, sample_async_functions)
+        result = await async_pipeline(None, sample_async_functions)
         assert result is None
 
     async def test_large_input(self, sample_async_functions: list[Callable[[int], int]]
@@ -280,7 +280,7 @@ class TestAsyncPipelineEdgeCases:
         None
         """
         large_num = 10**18
-        result = await asyncpipeline(large_num, [sample_async_functions[0]])
+        result = await async_pipeline(large_num, [sample_async_functions[0]])
         assert result == large_num * 2
 
 
@@ -315,7 +315,7 @@ class TestAsyncPipelineErrorHandling:
             + sample_async_functions[1:]
         
         with patch("builtins.print") as mock_print:
-            result = await asyncpipeline(5, functions)
+            result = await async_pipeline(5, functions)
             
         assert result == 10  # only first function executed
         mock_print.assert_called_once()
@@ -343,7 +343,7 @@ class TestAsyncPipelineErrorHandling:
         None
         """
         with patch("builtins.print") as mock_print:
-            result = await asyncpipeline(5, [failing_async_function, failing_async_function])
+            result = await async_pipeline(5, [failing_async_function, failing_async_function])
             
         assert result == 5
         mock_print.assert_called_once()
@@ -370,7 +370,7 @@ class TestAsyncPipelineTypeValidation:
         None
         """
         with pytest.raises(TypeError, match="Expected async function, got synchronous function"):
-            await asyncpipeline(5, [lambda x: x, "not a function"])
+            await async_pipeline(5, [lambda x: x, "not a function"])
 
     async def test_non_list_functions(self) -> None:
         """Test pipeline with non-list functions parameter.
@@ -385,7 +385,7 @@ class TestAsyncPipelineTypeValidation:
         None
         """
         with pytest.raises(TypeError, match="must be of type"):
-            await asyncpipeline(5, "not a list")
+            await async_pipeline(5, "not a list")
     
     async def test_non_async_function(self) -> None:
         """Test pipeline with synchronous function.
@@ -415,7 +415,7 @@ class TestAsyncPipelineTypeValidation:
             return x + 1
 
         with pytest.raises(TypeError) as excinfo:
-            await asyncpipeline(5, [sync_func])  # type: ignore
+            await async_pipeline(5, [sync_func])  # type: ignore
         assert "async function" in str(excinfo.value)
 
 
@@ -469,7 +469,7 @@ class TestAsyncPipelineExamples:
             int
                 Final result
             """
-            return await asyncpipeline(5, [async_step_1, async_step_2])
+            return await async_pipeline(5, [async_step_1, async_step_2])
 
         result = await main()
         assert result == 20

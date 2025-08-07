@@ -12,7 +12,7 @@ from stpstone.transformations.validation.metaclass_type_checker import type_chec
 
 
 @type_checker
-async def asyncpipeline(
+async def async_pipeline(
     data: Any, # noqa ANN401: typing.Any is not allowed
     functions: list[Callable[[Any], Any]]
 ) -> Any: # noqa ANN401: typing.Any is not allowed
@@ -49,7 +49,7 @@ async def asyncpipeline(
     ...     await asyncio.sleep(1)
     ...     return data + 10
     >>> async def main():
-    ...     result = await asyncpipeline(5, [async_step_1, async_step_2])
+    ...     result = await async_pipeline(5, [async_step_1, async_step_2])
     ...     print(result)  # Output: 20
     >>> asyncio.run(main())
     20
