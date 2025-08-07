@@ -6,10 +6,10 @@ predicate evaluations. Useful for rule-based processing systems like fraud detec
 
 from typing import Any, Callable, List, Tuple
 
-from stpstone.transformations.validation.metaclass_type_checker import type_check
+from stpstone.transformations.validation.metaclass_type_checker import type_checker
 
 
-@type_check
+@type_checker
 def conditional_pipeline(
     data: Any, # noqa ANN401: typing.Any is not allowed
     functions: List[Tuple[Callable[[Any], bool], Callable[[Any], Any]]]

@@ -8,10 +8,10 @@ like API requests, web scraping, and database queries.
 import inspect
 from typing import Any, Callable
 
-from stpstone.transformations.validation.metaclass_type_checker import type_check
+from stpstone.transformations.validation.metaclass_type_checker import type_checker
 
 
-@type_check
+@type_checker
 async def asyncpipeline(
     data: Any, # noqa ANN401: typing.Any is not allowed
     functions: list[Callable[[Any], Any]]

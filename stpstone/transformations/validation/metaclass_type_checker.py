@@ -294,7 +294,7 @@ class AdvancedTypeChecker(type):
 
 
 # decorator version for individual methods
-def type_check(func: Callable[..., Any]) -> Callable[..., Any]:
+def type_checker(func: Callable[..., Any]) -> Callable[..., Any]:
     """Add type checking to individual methods."""
     return create_type_checked_method(func)
 
