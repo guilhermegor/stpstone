@@ -46,6 +46,7 @@ from psycopg.sql import Composable
 from pydantic_core import core_schema
 
 
+# * SQLComposable protocol, for agnostic databse typing
 @runtime_checkable
 class SQLComposable(Protocol):
     """Database-agnostic protocol for SQL composable objects."""
