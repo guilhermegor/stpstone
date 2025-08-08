@@ -1,4 +1,24 @@
-"""Metaclass for automatic type checking of methods in a class."""
+"""Metaclass for automatic type checking of methods in a class.
+
+This metaclass provides automatic type checking for methods in a class, 
+ensuring that the types of the arguments and return values match the specified 
+types. It also allows for configuration of the type checking behavior.
+
+Usage
+-----
+class MyClass(metaclass=TypeChecker):
+    def add_numbers(self, x: int, y: int) -> int:
+        return x + y
+
+my_instance = MyClass()
+my_instance.add_numbers(1, 2)  # This will raise a TypeError if the types don't match
+
+@type_checker
+def add_numbers(self, x: int, y: int) -> int:
+    return x + y
+
+add_numbers(1, 2)  # This will raise a TypeError if the types don't match
+"""
 
 from functools import wraps
 import inspect
@@ -31,7 +51,13 @@ class SQLComposable(Protocol):
     """Database-agnostic protocol for SQL composable objects."""
 
     def __str__(self) -> str: 
-        """Return a string representation of the SQL composable object."""
+        """Return a string representation of the SQL composable object.
+        
+        Returns
+        -------
+        str
+            String representation of the SQL composable object.
+        """
         ...
 
     @classmethod
@@ -40,7 +66,22 @@ class SQLComposable(Protocol):
         source_type: type[Any],
         _handler: Callable[[Any], core_schema.CoreSchema],
     ) -> core_schema.CoreSchema:
-        """Pydantic of SQL composable objects."""
+        """Pydantic of SQL composable objects.
+
+        Parameters
+        ----------
+        cls : type
+            Class of the SQL composable object.
+        source_type : type
+            Source type of the SQL composable object.
+        _handler : Callable[[Any], CoreSchema]
+            Handler function for the SQL composable object.
+        
+        Returns
+        -------
+        CoreSchema
+            Core schema for SQL composable objects.
+        """
         return core_schema.union_schema(
             [
                 core_schema.str_schema(),
@@ -51,7 +92,26 @@ class SQLComposable(Protocol):
 
 
 def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -> None:
-    """Validate that a value matches the expected type."""
+    """Validate that a value matches the expected type.
+    
+    Parameters
+    ----------
+    value : Any
+        The value to validate.
+    expected_type : type
+        The expected type of the value.
+    param_name : str
+        The name of the parameter being validated.
+
+    Returns
+    -------
+    None
+    
+    Raises
+    ------
+    TypeError
+        If the value does not match the expected type.
+    """
     # skip type checking for Mock objects during testing
     if isinstance(value, Mock):
         return
@@ -133,9 +193,34 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
 
 
 def create_type_checked_method(original_method: Callable[..., Any]) -> Callable[..., Any]:
-    """Create a type-checked wrapper for a method."""
+    """Create a type-checked wrapper for a method.
+    
+    Parameters
+    ----------
+    original_method : Callable[..., Any]
+        The original method to wrap.
+    
+    Returns
+    -------
+    Callable[..., Any]
+        The type-checked wrapper for the method.
+    """
     @wraps(original_method)
     def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+        """Type-checked wrapper for the original method.
+        
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments to the original method.
+        **kwargs : Any
+            Keyword arguments to the original method.
+        
+        Returns
+        -------
+        Any
+            The result of the original method.
+        """
         # get type hints for the method
         try:
             type_hints = get_type_hints(original_method)
@@ -178,13 +263,48 @@ def create_type_checked_method(original_method: Callable[..., Any]) -> Callable[
     return wrapper
 
 
+# * decorator version for individual methods / functions
+def type_checker(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Add type checking to individual methods.
+    
+    Parameters
+    ----------
+    func : Callable[..., Any]
+        The method to add type checking to.
+    
+    Returns
+    -------
+    Callable[..., Any]
+        The type-checked method.
+    """
+    return create_type_checked_method(func)
+
+
+# * metaclass version for entire classes
 class TypeChecker(type):
     """Metaclass that automatically adds runtime type checking to methods."""
     
     def __new__(
         cls: type["TypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
     ) -> "TypeChecker":
-        """Create a new class with type-checked methods."""
+        """Create a new class with type-checked methods.
+        
+        Parameters
+        ----------
+        cls : type[TypeChecker]
+            The metaclass.
+        name : str
+            The name of the class.
+        bases : tuple
+            The base classes of the class.
+        dict_ : dict[str, Any]
+            The class dictionary.
+        
+        Returns
+        -------
+        TypeChecker
+            The type-checked class.
+        """
         # types that should be ignored for type checking
         tup_types_ignore = (
             pd.DataFrame,
@@ -220,15 +340,30 @@ class TypeChecker(type):
         return super().__new__(cls, name, bases, dict_)
 
 
-# Enhanced version with additional features
 class AdvancedTypeChecker(type):
     """Advanced metaclass with more features for type checking."""
     
     def __new__(
         cls: type["AdvancedTypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
     ) -> "AdvancedTypeChecker":
-        """Create a new class with advanced type-checked methods."""
-        # store type checking configuration
+        """Create a new class with advanced type-checked methods.
+        
+        Parameters
+        ----------
+        cls : type[AdvancedTypeChecker]
+            The metaclass.
+        name : str
+            The name of the class.
+        bases : tuple
+            The base classes of the class.
+        dict_ : dict[str, Any]
+            The class dictionary.
+        
+        Returns
+        -------
+        AdvancedTypeChecker
+            The advanced type-checked class.
+        """
         type_check_config = dict_.get('_type_check_config', {})
         strict_mode = type_check_config.get('strict', True)
         check_return_types = type_check_config.get('check_returns', False)
@@ -238,7 +373,20 @@ class AdvancedTypeChecker(type):
             original_method: Callable[..., Any],
             method_name: str
         ) -> Callable[..., Any]:
-            """Create an advanced type-checked wrapper for a method."""
+            """Create an advanced type-checked wrapper for a method.
+            
+            Parameters
+            ----------
+            original_method : Callable[..., Any]
+                The original method.
+            method_name : str
+                The name of the method.
+            
+            Returns
+            -------
+            Callable[..., Any]
+                The advanced type-checked method.
+            """
             @wraps(original_method)
             def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
                 if method_name in excluded_methods:
@@ -309,13 +457,6 @@ class AdvancedTypeChecker(type):
 
         return super().__new__(cls, name, bases, dict_)
 
-
-# decorator version for individual methods
-def type_checker(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Add type checking to individual methods."""
-    return create_type_checked_method(func)
-
-
 # example usage with configuration
 class ConfigurableTypeChecker(type):
     """Metaclass that respects configuration for type checking behavior."""
@@ -323,8 +464,25 @@ class ConfigurableTypeChecker(type):
     def __new__(
         cls: type["ConfigurableTypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
     ) -> "ConfigurableTypeChecker":
-        """Create a new class with configurable type checking."""
-        # Configuration options
+        """Create a new class with configurable type checking.
+        
+        Parameters
+        ----------
+        cls : type[ConfigurableTypeChecker]
+            The metaclass.
+        name : str
+            The name of the class.
+        bases : tuple
+            The base classes of the class.
+        dict_ : dict[str, Any]
+            The class dictionary.
+        
+        Returns
+        -------
+        ConfigurableTypeChecker
+            The configurable type-checked class.
+        """
+        # configuration options
         config = dict_.get('__type_check_config__', {})
         enabled = config.get('enabled', True)
         strict = config.get('strict', True)
@@ -349,7 +507,7 @@ class ConfigurableTypeChecker(type):
                 if not should_check_method(method_name):
                     return original_method(*args, **kwargs)
                 
-                # Get type hints for the method
+                # get type hints for the method
                 try:
                     type_hints = get_type_hints(original_method)
                 except (NameError, AttributeError) as err:
@@ -358,7 +516,7 @@ class ConfigurableTypeChecker(type):
                         raise RuntimeError(msg) from err
                     return original_method(*args, **kwargs)
                 
-                # Get parameter names
+                # get parameter names
                 sig = inspect.signature(original_method)
                 param_names = list(sig.parameters.keys())
                 
@@ -371,7 +529,7 @@ class ConfigurableTypeChecker(type):
                             if strict:
                                 msg = f"In method {method_name}: {e}"
                                 raise TypeError(msg) from e
-                            # In non-strict mode, just issue a warning
+                            # in non-strict mode, just issue a warning
                             print(f"Warning in {method_name}: {e}")
                 
                 # validate keyword arguments
@@ -385,7 +543,7 @@ class ConfigurableTypeChecker(type):
                                 raise TypeError(msg) from e
                             print(f"Warning in {method_name}: {e}")
                 
-                # Call the original method
+                # call the original method
                 result = original_method(*args, **kwargs)
                 
                 return result
