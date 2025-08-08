@@ -89,6 +89,23 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
         raise TypeError(f"{param_name} must be one of types: {', '.join(type_names)}, "
                         + f"got {type(value).__name__}")
     
+    # handle generic types like List[Callable[...]]
+    elif origin is list:
+        if not isinstance(value, list):
+            raise TypeError(f"{param_name} must be of type list, "
+                            + f"got {type(value).__name__}")
+        element_type = get_args(expected_type)[0] if get_args(expected_type) else Any
+        for i, elem in enumerate(value):
+            if get_origin(element_type) is Callable:
+                if not callable(elem):
+                    raise TypeError(
+                        f"{param_name}[{i}] must be of type {element_type.__name__}, "
+                        f"got {type(elem).__name__}"
+                    )
+            else:
+                validate_type(elem, element_type, f"{param_name}[{i}]")
+        return
+    
     # handle generic types like List, dict, etc.
     elif origin is not None:
         if not isinstance(value, origin):
