@@ -259,9 +259,14 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
                         has_type_checker_import = True
                         break
     
-    if not has_type_checker_import:
-        print("ℹ️  No TypeChecker or type_checker import found in module")
-        return 0  # Not an error, just informational
+    # Check if this is a class file (contains class definitions)
+    has_classes = any(isinstance(n, ast.ClassDef) for n in ast.walk(tree))
+    
+    # For class files, TypeChecker is mandatory
+    if has_classes and not has_type_checker_import:
+        print(f"❌ Missing required TypeChecker import in {filepath}")
+        errors += 1
+        return errors
     
     # build a map of classes and their bases
     class_bases = {}
@@ -316,7 +321,7 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
                 
             # check if class or its bases have TypeChecker
             if not has_type_checker_metaclass(n):
-                print(f"⚠️  Class {n.name} does not use TypeChecker metaclass")
+                print(f"❌ Class {n.name} does not use TypeChecker metaclass")
                 errors += 1
         
         # check functions for type_checker decorator, but only if not in a class with TypeChecker
@@ -345,7 +350,7 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
                     break
             
             if not has_decorator and not n.name.startswith('_'):
-                print(f"⚠️  Function {n.name}() is not decorated with @type_checker")
+                print(f"❌ Function {n.name}() is not decorated with @type_checker")
                 errors += 1
     
     return errors
@@ -360,7 +365,8 @@ def check_file(filepath: str) -> int:
     errors += type_checker_errors
     
     if type_checker_errors > 0:
-        print("ℹ️  TypeChecker usage issues found. See warnings above.")
+        print("❌ TypeChecker usage issues found. See errors above.")
+        return errors
     
     # then check type/docstring consistency
     for node in ast.walk(tree):
@@ -372,7 +378,7 @@ def check_file(filepath: str) -> int:
                 
             docstring = ast.get_docstring(node)
             if not docstring:
-                print(f"⚠️  Missing docstring in {node.name}() at line {lineno}")
+                print(f"❌ Missing docstring in {node.name}() at line {lineno}")
                 errors += 1
                 continue
                 
@@ -401,7 +407,7 @@ def check_file(filepath: str) -> int:
                                 j += 1
                             break
                     if not found_return:
-                        print(f"⚠️  Return type documented but no type hint in {node.name}() at line {lineno}")
+                        print(f"❌ Return type documented but no type hint in {node.name}() at line {lineno}")
                         errors += 1
             
             # check parameters using improved NumPy parser
@@ -420,7 +426,7 @@ def check_file(filepath: str) -> int:
                             print(f"   Docstring: {doc_type}")
                             errors += 1
                     else:
-                        print(f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno}")
+                        print(f"❌ Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno}")
                         errors += 1
             
             # check Raises section
@@ -434,13 +440,13 @@ def check_file(filepath: str) -> int:
             # check for documented but not raised exceptions
             for exc in doc_exceptions:
                 if exc not in actual_exceptions:
-                    print(f"⚠️  Documented but not raised exception {exc} in {node.name}() at line {lineno}")
+                    print(f"❌ Documented but not raised exception {exc} in {node.name}() at line {lineno}")
                     errors += 1
             
             # check for raised but not documented exceptions
             for exc in actual_exceptions:
                 if exc not in doc_exceptions:
-                    print(f"⚠️  Raised but not documented exception {exc} in {node.name}() at line {lineno}")
+                    print(f"❌ Raised but not documented exception {exc} in {node.name}() at line {lineno}")
                     errors += 1
     
     return errors
@@ -457,8 +463,8 @@ EOF
     # print the output
     cat "$output_file"
     
-    # check for any warnings or errors
-    if grep -q -E "⚠️|❌" "$output_file"; then
+    # check for any errors
+    if grep -q "❌" "$output_file"; then
         print_status "error" "Type hint/docstring inconsistencies found in ${type}"
         rm "$temp_file" "$output_file"
         return 1
