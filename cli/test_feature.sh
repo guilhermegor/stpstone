@@ -8,6 +8,13 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
+declare -a EXCLUDE_PATTERNS=(
+    "tests/unit/*"
+    "tests/integration/*"
+    "tests/performance/*"
+    "stpstone/utils/parsers/mock_exclusion_example.py"
+)
+
 print_status() {
     local status="$1"
     local message="$2"
@@ -71,11 +78,24 @@ check_type_consistency() {
     local temp_file=$(mktemp)
     local output_file=$(mktemp)
     
-    cat << 'EOF' > "$temp_file"
+    # convert EXCLUDE_PATTERNS to a Python-compatible string
+    exclude_patterns=$(printf '%s\n' "${EXCLUDE_PATTERNS[@]}" | python -c "import sys; print([line.strip() for line in sys.stdin])")
+    
+    cat << EOF > "$temp_file"
 import ast
 import sys
 import re
-from typing import Any, List, Dict, Set
+import fnmatch
+from typing import Any, List, Dict, Set, TypedDict
+
+EXCLUDE_PATTERNS = $exclude_patterns
+
+def should_exclude(filepath: str) -> bool:
+    """Check if the file path matches any of the exclusion patterns."""
+    for pattern in EXCLUDE_PATTERNS:
+        if fnmatch.fnmatch(filepath, pattern):
+            return True
+    return False
 
 def compare_types(hint: Any, doc: str) -> bool:
     """Compare type hint with docstring type."""
@@ -85,11 +105,11 @@ def compare_types(hint: Any, doc: str) -> bool:
     hint_str = str(hint).replace("typing.", "").lower()
     doc = doc.lower().strip()
     
-    # Remove ", optional" from docstring type if present
+    # remove ", optional" from docstring type if present
     if ", optional" in doc:
         doc = doc.split(", optional")[0].strip()
     
-    # Normalize whitespace and remove line breaks
+    # normalize whitespace and remove line breaks
     hint_str = ' '.join(hint_str.split())
     doc = ' '.join(doc.split())
     
@@ -120,26 +140,26 @@ def parse_numpy_parameters(docstring: str) -> Dict[str, str]:
     for i, line in enumerate(lines):
         stripped = line.strip()
         
-        # Check for Parameters section
+        # check for Parameters section
         if re.match(r"^Parameters:?$", stripped, re.IGNORECASE):
             in_params = True
             continue
         
         if in_params:
-            # End if we hit another section
+            # end if we hit another section
             if re.match(r"^(Returns?|Yields?|Raises?|Notes?|Examples?|Attributes?|See Also|References?)(:)?$", stripped, re.IGNORECASE):
                 break
             
-            # Skip separator lines (dashes)
+            # skip separator lines (dashes)
             if set(stripped) <= {"-", " "}:
                 continue
             
-            # Empty line - continue to next parameter
+            # empty line - continue to next parameter
             if not stripped:
                 current_param = None
                 continue
                 
-            # Check if this is a parameter name line (not indented or starts with word : type pattern)
+            # check if this is a parameter name line (not indented or starts with word : type pattern)
             if not line.startswith(' ') and line.strip():
                 # Look for pattern "param_name : type"
                 if ' : ' in stripped:
@@ -176,17 +196,17 @@ def parse_raises_section(docstring: str) -> Dict[str, str]:
         if in_raises:
             if not stripped:
                 continue
-            # End parsing if next section begins (e.g., Parameters, Returns, Notes, etc.)
+            # end parsing if next section begins (e.g., Parameters, Returns, Notes, etc.)
             if re.match(r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References)(:)?$", stripped, re.IGNORECASE):
                 break
 
-            # Match formats like "ValueError: explanation"
+            # match formats like "ValueError: explanation"
             match = re.match(r"^([\w.]+)\s*:\s*(.*)", stripped)
             if match:
                 exc, desc = match.groups()
                 raises[exc.strip()] = desc.strip()
             else:
-                # Match formats like "ValueError" (without colon)
+                # match formats like "ValueError" (without colon)
                 match = re.match(r"^([\w.]+)$", stripped)
                 if match:
                     raises[match.group(1)] = ""
@@ -200,16 +220,16 @@ def get_actual_raises(node: ast.AST) -> Set[str]:
     for n in ast.walk(node):
         if isinstance(n, ast.Raise):
             if n.exc is not None:
-                # Handle direct exception names
+                # handle direct exception names
                 if isinstance(n.exc, ast.Name):
                     raises.add(n.exc.id)
-                # Handle exception calls like ValueError("message")
+                # handle exception calls like ValueError("message")
                 elif isinstance(n.exc, ast.Call) and isinstance(n.exc.func, ast.Name):
                     raises.add(n.exc.func.id)
-                # Handle attribute access like exceptions.ValueError
+                # handle attribute access like exceptions.ValueError
                 elif isinstance(n.exc, ast.Attribute):
                     raises.add(n.exc.attr)
-                # Handle cases where exception is called directly
+                # handle cases where exception is called directly
                 elif isinstance(n.exc, ast.Call) and hasattr(n.exc.func, 'id'):
                     raises.add(n.exc.func.id)
     
@@ -219,11 +239,130 @@ def normalize_exception_name(name: str) -> str:
     """Normalize exception names for comparison."""
     return name.split('.')[-1]  # Get just the exception name without module
 
+def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
+    """Check for TypeChecker metaclass and type_checker decorator usage."""
+    errors = 0
+    
+    # skip TypeChecker checks for excluded paths
+    if should_exclude(filepath):
+        print(f"ℹ️  Skipping TypeChecker checks for excluded path: {filepath}")
+        return 0
+    
+    # check for TypeChecker import
+    has_type_checker_import = False
+    tree = ast.parse(open(filepath).read(), filename=filepath)
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom):
+            if n.module == 'stpstone.transformations.validation.metaclass_type_checker':
+                for alias in n.names:
+                    if alias.name == 'TypeChecker' or alias.name == 'type_checker':
+                        has_type_checker_import = True
+                        break
+    
+    if not has_type_checker_import:
+        print("ℹ️  No TypeChecker or type_checker import found in module")
+        return 0  # Not an error, just informational
+    
+    # build a map of classes and their bases
+    class_bases = {}
+    class_nodes = {}
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ClassDef):
+            class_bases[n.name] = [ast.unparse(base) for base in n.bases]
+            class_nodes[n.name] = n
+
+    def has_type_checker_metaclass(class_node, visited=None):
+        """Recursively check if a class or its bases have TypeChecker metaclass."""
+        if visited is None:
+            visited = set()
+        
+        # avoid infinite recursion
+        if class_node.name in visited:
+            return False
+        visited.add(class_node.name)
+        
+        # check metaclass directly
+        for keyword in class_node.keywords:
+            if keyword.arg == 'metaclass':
+                if (isinstance(keyword.value, ast.Name) and keyword.value.id == 'TypeChecker') or \
+                   (isinstance(keyword.value, ast.Attribute) and keyword.value.attr == 'TypeChecker'):
+                    return True
+        
+        # check base classes
+        for base in class_node.bases:
+            base_name = ast.unparse(base)
+            # Find the base class node
+            if base_name in class_nodes:
+                base_node = class_nodes[base_name]
+                if has_type_checker_metaclass(base_node, visited):
+                    return True
+        
+        return False
+
+    for n in ast.walk(tree):  # Use tree instead of node to ensure we check all nodes
+        # check classes for TypeChecker metaclass
+        if isinstance(n, ast.ClassDef):
+            # skip TypedDict classes
+            is_typed_dict = False
+            for base in n.bases:
+                if isinstance(base, ast.Name) and base.id == 'TypedDict':
+                    is_typed_dict = True
+                    break
+                elif isinstance(base, ast.Attribute) and base.attr == 'TypedDict':
+                    is_typed_dict = True
+                    break
+            if is_typed_dict:
+                continue
+                
+            # check if class or its bases have TypeChecker
+            if not has_type_checker_metaclass(n):
+                print(f"⚠️  Class {n.name} does not use TypeChecker metaclass")
+                errors += 1
+        
+        # check functions for type_checker decorator, but only if not in a class with TypeChecker
+        elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            # find the parent class, if any
+            parent_class = None
+            for parent in ast.walk(tree):
+                if isinstance(parent, ast.ClassDef):
+                    # Check if the function is a direct child of the class body
+                    if any(child is n for child in parent.body):
+                        parent_class = parent
+                        break
+            
+            # if the function is in a class, check if the class or its bases have TypeChecker
+            if parent_class and has_type_checker_metaclass(parent_class):
+                continue  # Skip decorator check for methods in TypeChecker classes
+            
+            # check for type_checker decorator only for non-class methods or classes without TypeChecker
+            has_decorator = False
+            for decorator in n.decorator_list:
+                if isinstance(decorator, ast.Name) and decorator.id == 'type_checker':
+                    has_decorator = True
+                    break
+                elif isinstance(decorator, ast.Attribute) and decorator.attr == 'type_checker':
+                    has_decorator = True
+                    break
+            
+            if not has_decorator and not n.name.startswith('_'):
+                print(f"⚠️  Function {n.name}() is not decorated with @type_checker")
+                errors += 1
+    
+    return errors
+
 def check_file(filepath: str) -> int:
     errors = 0
     with open(filepath, 'r') as f:
         tree = ast.parse(f.read(), filename=filepath)
     
+    # first check type checker usage
+    type_checker_errors = check_type_checker_usage(tree, filepath)
+    errors += type_checker_errors
+    
+    if type_checker_errors > 0:
+        print("ℹ️  TypeChecker usage issues found. See warnings above.")
+    
+    # then check type/docstring consistency
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             lineno = node.lineno
@@ -371,11 +510,14 @@ main() {
     local test_path
     test_path=$(find_test_path "$module") || exit 1
 
+    # run checks for module
     run_codespell "$module_path" "module" || return 1
-    run_codespell "$test_path" "tests" || return 1
     check_type_consistency "$module_path" "module" || return 1
-    check_type_consistency "$test_path" "module" || return 1
     run_ruff "$module_path" "module" || return 1
+
+    # run checks for test file
+    run_codespell "$test_path" "tests" || return 1
+    check_type_consistency "$test_path" "tests" || return 1
     run_ruff "$test_path" "tests" || return 1
     run_pytest "$test_path" || return 1
 
