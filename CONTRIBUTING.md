@@ -40,6 +40,7 @@ We use the following standardized variable naming conventions:
 | `dt_start`        | Start date |
 | `dt_end`        | End date |
 | `int_n_smp`     | Number of samples |
+| `int_max_retries` | Maximum number of retries |
 
 ## Branching Strategy
 
