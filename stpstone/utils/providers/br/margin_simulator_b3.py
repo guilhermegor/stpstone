@@ -78,7 +78,7 @@ class MarginSimulatorB3(metaclass=TypeChecker):
     def total_deficit_surplus(
         self,
         value_liquidity_resource: np.int64 = 4_700_000_000,
-        timeout: Union[int, tuple[float, float]] = (200, 200)
+        timeout: Union[tuple[float, float], float, int] = (200, 200)
     ) -> list[dict[str, Union[str, int, float]]]:
         """Calculate total deficit/surplus using B3 Margin Simulator API.
 
@@ -86,7 +86,7 @@ class MarginSimulatorB3(metaclass=TypeChecker):
         ----------
         value_liquidity_resource : np.int64
             Liquidity resource value (default: 4,700,000,000)
-        timeout : Union[int, tuple[float, float]], optional
+        timeout : Union[tuple[float, float], float, int], optional
             Request timeout (default: (200, 200))
 
         Returns
