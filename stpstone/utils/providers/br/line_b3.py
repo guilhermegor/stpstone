@@ -12,6 +12,7 @@ References
 
 from datetime import date, datetime
 import time
+from time import sleep
 from typing import Any, Literal, Optional, Union
 
 import pandas as pd
@@ -133,16 +134,13 @@ class ConnectionApi(metaclass=TypeChecker):
         ValueError
             If maximum retries exceeded or request fails
         """
-        dict_headers = {
+        dict_headers: dict[str, str] = {
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded",
         }
-
         i: int = 0
-        int_status_code_iteration: int = 400
-        int_status_code_success: int = 200
 
-        while int_status_code_iteration != int_status_code_success and i <= int_max_retries:
+        while i <= int_max_retries:
             try:
                 resp_req = request(
                     method="GET",
@@ -151,17 +149,15 @@ class ConnectionApi(metaclass=TypeChecker):
                     verify=False,
                     timeout=timeout,
                 )
-                int_status_code_iteration = resp_req.status_code
+                if resp_req.status_code == 200:
+                    return resp_req.json()["header"]
+                i += 1
             except Exception:
                 i += 1
                 continue
-            i += 1
-
-        if i > int_max_retries:
-            raise ValueError("Maximum retry attempts exceeded")
-
-        resp_req.raise_for_status()
-        return resp_req.json()["header"]
+            sleep(1)
+        
+        raise ValueError("Maximum retry attempts exceeded")
 
     def access_token(
         self,
