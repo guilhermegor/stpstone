@@ -1,296 +1,558 @@
-import MetaTrader5 as mt5
-import time
-import pandas as pd
+"""MetaTrader5 trading platform interface.
+
+This module provides a Python interface for interacting with the MetaTrader5 trading platform.
+It includes functionality for symbol information retrieval, tick data fetching, and market depth 
+analysis.
+"""
+
 from datetime import datetime
+from logging import Logger
 from math import ceil
+import time
+from typing import Any, Optional
+
+import MetaTrader5 as mt5
+import pandas as pd
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class MT5():
+class MT5(metaclass=TypeChecker):
+    """Interface for MetaTrader5 trading platform operations."""
 
-    def package_info(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        print("MetaTrader5 package author: ", mt5.__author__)
-        print("MetaTrader5 package version: ", mt5.__version__)
+    def __init__(self, logger: Logger) -> None:
+        """Initialize MetaTrader5 interface.
+        
+        Parameters
+        ----------
+        logger : Logger
+            Logger object for logging messages
 
-    def initialize(self, path, login, server, password):
+        Returns
+        -------
+        None
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        self.logger = logger
+
+    def package_info(self) -> None:
+        """Print MetaTrader5 package information.
+
+        Prints the author and version of the MetaTrader5 package being used.
+
+        Returns
+        -------
+        None
         """
+        CreateLog().log_message(
+            self.logger, 
+            f"MetaTrader5 package author: {mt5.__author__}", "info"
+        )
+        CreateLog().log_message(
+            self.logger, 
+            f"MetaTrader5 package version: {mt5.__version__}", "info"
+        )
+
+    def _validate_credentials(
+        self, 
+        path: str, 
+        login: int, 
+        server: str, 
+        password: str
+    ) -> None:
+        """Validate MT5 connection credentials.
+
+        Parameters
+        ----------
+        path : str
+            Path to MetaTrader5 terminal executable
+        login : int
+            Account login number
+        server : str
+            Trading server name
+        password : str
+            Account password
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If any credential parameter is empty or invalid type
+        """
+        if not path:
+            raise ValueError("Path cannot be empty")
+        if not login:
+            raise ValueError("Login cannot be empty")
+        if not server:
+            raise ValueError("Server cannot be empty")
+        if not password:
+            raise ValueError("Password cannot be empty")
+
+    def initialize(
+        self, 
+        path: str, 
+        login: int, 
+        server: str, 
+        password: str
+    ) -> bool:
+        """Initialize connection to MetaTrader5 terminal.
+
+        Parameters
+        ----------
+        path : str
+            Path to MetaTrader5 terminal executable
+        login : int
+            Account login number
+        server : str
+            Trading server name
+        password : str
+            Account password
+
+        Returns
+        -------
+        bool
+            True if initialization succeeded, False otherwise
+        """
+        self._validate_credentials(path, login, server, password)
         if not mt5.initialize(path=path, login=login, server=server, password=password):
-            print("initialize() failed, error code =", mt5.last_error())
-            # shut down connection to the MetaTrader 5 terminal
+            CreateLog().log_message(
+                self.logger, 
+                f"initialize() failed, error code ={mt5.last_error()}", 
+                "warning"
+            )
             mt5.shutdown()
-            # quit()
+            return False
+        return True
 
-    def shutdown(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+    def shutdown(self) -> None:
+        """Shutdown connection to MetaTrader5 terminal.
+        
+        Returns
+        -------
+        None
         """
         mt5.shutdown()
 
-    def symbols_get(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+    def symbols_get(self) -> tuple:
+        """Get all available symbols from MetaTrader5.
+
+        Returns
+        -------
+        tuple
+            Tuple of all available symbols
         """
         return mt5.symbols_get()
 
-    def symbols_total(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+    def symbols_total(self) -> Optional[int]:
+        """Get total number of available symbols.
+
+        Returns
+        -------
+        Optional[int]
+            Total number of symbols if successful, None otherwise
         """
         symbols = mt5.symbols_total()
         if symbols > 0:
-            print("Total symbols =", symbols)
+            CreateLog().log_message(self.logger, "Total symbols ={symbols}", "info")
             return symbols
-        else:
-            print("Symbols not found")
-            return None
+        CreateLog().log_message(self.logger, "Symbols not found", "info")
+        return None
 
-    def get_symbols_info(self, market_data=True):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+    def get_symbols_info(self, market_data: bool = True) -> Optional[pd.DataFrame]:
+        """Get detailed information for all symbols.
+
+        Parameters
+        ----------
+        market_data : bool, optional
+            Whether to fetch market data (default: True)
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            DataFrame containing symbol information if successful, None otherwise
         """
         symbols = mt5.symbols_get()
-        dict_tickers = dict()
+        dict_tickers: dict[int, dict[str, Any]] = {}
+
         if market_data:
-            qtd_vezes = ceil(len(symbols) / 4900)
-            l = 0
-            for j in range(qtd_vezes):
+            multiplier = ceil(len(symbols) / 4900)
+            i = 0
+            for j in range(multiplier):
                 lim_inf = j * 4900
-                if j == qtd_vezes - 1:
-                    lim_sup = len(symbols)
-                else:
-                    lim_sup = (j + 1) * 4900
-                print('Limite inferior:', lim_inf)
-                print('Limite superior:', lim_sup)
+                lim_sup = len(symbols) if j == multiplier - 1 else (j + 1) * 4900
+                
+                CreateLog().log_message(self.logger, 'Lower bound: {lim_inf}', "info")
+                CreateLog().log_message(self.logger, 'Upper bound: {lim_sup}', "info")
+                
                 for symbol in symbols[lim_inf:lim_sup]:
                     mt5.symbol_select(symbol.name, True)
-                print('Aguardando')
+                
+                CreateLog().log_message(self.logger, 'Loading', "info")
                 time.sleep(10)
+                
                 for symbol in symbols[lim_inf:lim_sup]:
                     ticker_info = mt5.symbol_info(symbol.name)
-                    if ticker_info != None:
-                        dict_tickers[l] = ticker_info._asdict()
-                        l += 1
+                    if ticker_info is not None:
+                        dict_tickers[i] = ticker_info._asdict()
+                        i += 1
+                
                 for symbol in symbols[lim_inf:lim_sup]:
                     mt5.symbol_select(symbol.name, False)
         else:
-            l = 0
-            for symbol in symbols:
-                dict_tickers[l] = symbol._asdict()
-                l += 1
-        df = pd.DataFrame(dict_tickers).T
-        df.loc[:, 'paths'] = df.path.str.split('\\')
-        df.loc[:, 'CLASSE1'] = df.apply(lambda row: row['paths'][0], axis=1)
+            for i, symbol in enumerate(symbols):
+                dict_tickers[i] = symbol._asdict()
 
-        def tipo2(row):
-            if len(row.paths) == 2:
-                return 'BMF'
-            else:
-                return row.paths[1]
+        df_ = pd.DataFrame(dict_tickers).T
+        if df_.empty:
+            CreateLog().log_message(self.logger, "Symbols not found", "critical")
+            return None
 
-        def tipo3(row):
-            if len(row.paths) == 2:
-                return row.paths[1]
-            else:
-                return row.paths[2]
-        df.loc[:, 'CLASSE2'] = df.apply(tipo2, axis=1)
-        df.loc[:, 'CLASSE3'] = df.apply(tipo3, axis=1)
+        df_.loc[:, 'paths'] = df_.path.str.split('\\')
+        df_.loc[:, 'CLASSE1'] = df_.apply(lambda row: row['paths'][0], axis=1)
 
-        def exp_time(row):
+        @type_checker
+        def type_2(row: pd.Series) -> str:
+            """Return the second element of the paths column.
+            
+            Parameters
+            ----------
+            row : pd.Series
+                Row of the DataFrame
+            
+            Returns
+            -------
+            str
+                Second element of the paths column
+            """
+            return 'BMF' if len(row.paths) == 2 else row.paths[1]
+
+        @type_checker
+        def type_3(row: pd.Series) -> str:
+            """Return the third element of the paths column.
+            
+            Parameters
+            ----------
+            row : pd.Series
+                Row of the DataFrame
+            
+            Returns
+            -------
+            str
+                Third element of the paths column
+            """
+            return row.paths[1] if len(row.paths) == 2 else row.paths[2]
+
+        df_.loc[:, 'CLASSE2'] = df_.apply(type_2, axis=1)
+        df_.loc[:, 'CLASSE3'] = df_.apply(type_3, axis=1)
+
+        @type_checker
+        def exp_time(row: pd.Series) -> datetime:
+            """Return expiration time in datetime format.
+            
+            Parameters
+            ----------
+            row : pd.Series
+                Row of the DataFrame
+            
+            Returns
+            -------
+            datetime
+                Expiration time in datetime format
+            """
             try:
-                result = pd.to_datetime(row.expiration_time, unit='s')
-            except:
-                result = pd.to_datetime(row.expiration_time, unit='ms')
-            return result
-        df.loc[:, 'expiration_time'] = df.apply(exp_time, axis=1)
-        df.loc[:, 'time'] = pd.to_datetime(df['time'], unit='s')
-        # symbols=mt5.symbols_get()
-        if df.shape[0] > 0:
-            print("Number of symbols =", df.shape[0])
-            return df
-        else:
-            print("Symbols not found")
-            return None
+                return pd.to_datetime(row.expiration_time, unit='s')
+            except ValueError:
+                return pd.to_datetime(row.expiration_time, unit='ms')
 
-    def get_all_info_of_symbols(self, symbols):
+        df_.loc[:, 'expiration_time'] = df_.apply(exp_time, axis=1)
+        df_.loc[:, 'time'] = pd.to_datetime(df_['time'], unit='s')
+
+        CreateLog().log_message(self.logger, f"Number of symbols = {df_.shape[0]}", "info")
+        return df_
+
+    def get_all_info_of_symbols(self, symbols: tuple) -> pd.DataFrame:
+        """Get information for specified symbols.
+
+        Parameters
+        ----------
+        symbols : tuple
+            Symbols to get information for
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing symbol information
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        dict_tickers = dict()
-        i = 0
-        for symbol in symbols:
+        dict_tickers: dict[int, dict[str, Any]] = {}
+        for i, symbol in enumerate(symbols):
             dict_tickers[i] = symbol._asdict()
-            i += 1
-        df = pd.DataFrame(dict_tickers).T
-        df.loc[:, 'paths'] = df.path.str.split('\\')
-        df.loc[:, 'CLASSE1'] = df.apply(lambda row: row['paths'][0], axis=1)
 
-        def tipo2(row):
-            if len(row.paths) == 2:
-                return 'BMF'
-            else:
-                return row.paths[1]
+        df_ = pd.DataFrame(dict_tickers).T
+        df_.loc[:, 'paths'] = df_.path.str.split('\\')
+        df_.loc[:, 'CLASSE1'] = df_.apply(lambda row: row['paths'][0], axis=1)
 
-        def tipo3(row):
-            if len(row.paths) == 2:
-                return row.paths[1]
-            else:
-                return row.paths[2]
-        df.loc[:, 'CLASSE2'] = df.apply(tipo2, axis=1)
-        df.loc[:, 'CLASSE3'] = df.apply(tipo3, axis=1)
-        df.loc[:, 'expiration_time'] = pd.to_datetime(
-            df['expiration_time'], unit='s')
-        df.loc[:, 'time'] = pd.to_datetime(df['time'], unit='s')
-        print('Total de tickers: {}'.format(df.shape[0]))
-        return df
+        @type_checker
+        def type_2(row: pd.Series) -> str:
+            """Return the second element of the paths column.
+            
+            If the length of the paths column is 2, otherwise return the first element of the 
+            paths column.
+            
+            Parameters
+            ----------
+            row : pd.Series
+                Row of the DataFrame.
+            
+            Returns
+            -------
+            str
+                The second element of the paths column if the length of the paths column is 2, 
+                otherwise the first element of the paths column.
+            """
+            return 'BMF' if len(row.paths) == 2 else row.paths[1]
 
-    def get_ticks_from(self, symbol, datetime_from, ticks_qty,
-                       type_ticks=mt5.COPY_TICKS_ALL, print_quantidade=False):
+        @type_checker
+        def type_3(row: pd.Series) -> str:
+            """Return the third element of the paths column.
+            
+            If the length of the paths column is 2, otherwise return the second element of the 
+            paths column.
+            
+            Parameters
+            ----------
+            row : pd.Series
+                Row of the DataFrame.
+            
+            Returns
+            -------
+            str
+                The third element of the paths column if the length of the paths column is 2, 
+                otherwise the second element of the paths column.
+            """
+            return row.paths[1] if len(row.paths) == 2 else row.paths[2]
+
+        df_.loc[:, 'CLASSE2'] = df_.apply(type_2, axis=1)
+        df_.loc[:, 'CLASSE3'] = df_.apply(type_3, axis=1)
+        df_.loc[:, 'expiration_time'] = pd.to_datetime(df_['expiration_time'], unit='s')
+        df_.loc[:, 'time'] = pd.to_datetime(df_['time'], unit='s')
+        
+        CreateLog().log_message(self.logger, f'Total de tickers: {df_.shape[0]}', "info")
+        return df_
+
+    def get_ticks_from(
+        self,
+        symbol: str,
+        dt_ref: datetime,
+        ticks_qty: int,
+        type_ticks: int = mt5.COPY_TICKS_ALL
+    ) -> Optional[pd.DataFrame]:
+        """Get tick data starting from specified datetime.
+
+        Parameters
+        ----------
+        symbol : str
+            Symbol to get ticks for
+        dt_ref : datetime
+            Starting datetime for ticks
+        ticks_qty : int
+            Number of ticks to retrieve
+        type_ticks : int, optional
+            Type of ticks to retrieve (default: mt5.COPY_TICKS_ALL)
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            DataFrame containing ticks if successful, None otherwise
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        if not isinstance(datetime_from, datetime):
-            print('datetime_from is not a datetime object')
-            return None
-        ticks = mt5.copy_ticks_from(
-            symbol, datetime_from, ticks_qty, type_ticks)
-        # a partir dos dados recebidos criamos o DataFrame
+        ticks = mt5.copy_ticks_from(symbol, dt_ref, ticks_qty, type_ticks)
         ticks_frame = pd.DataFrame(ticks)
-        if print_quantidade:
-            print("Ticks recebidos:", ticks_frame.shape[0])
+        
+        CreateLog().log_message(self.logger, f"Ticks recebidos: {ticks_frame.shape[0]}", "info")
+
         if not ticks_frame.empty:
-            # convertemos o tempo em segundos no formato datetime
             ticks_frame['time'] = pd.to_datetime(ticks_frame['time'], unit='s')
-            ticks_frame['time_msc'] = pd.to_datetime(
-                ticks_frame['time_msc'], unit='ms')
+            ticks_frame['time_msc'] = pd.to_datetime(ticks_frame['time_msc'], unit='ms')
+
         return ticks_frame
 
-    def get_ticks_range(self, symbol, datetime_from, datetime_to,
-                        type_ticks=mt5.COPY_TICKS_ALL, print_quantidade=False):
+    def get_ticks_range(
+        self,
+        symbol: str,
+        dt_ref: datetime,
+        datetime_to: datetime,
+        type_ticks: int = mt5.COPY_TICKS_ALL
+    ) -> Optional[pd.DataFrame]:
+        """Get tick data within specified datetime range.
+
+        Parameters
+        ----------
+        symbol : str
+            Symbol to get ticks for
+        dt_ref : datetime
+            Starting datetime for ticks
+        datetime_to : datetime
+            Ending datetime for ticks
+        type_ticks : int, optional
+            Type of ticks to retrieve (default: mt5.COPY_TICKS_ALL)
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            DataFrame containing ticks if successful, None otherwise
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        if not isinstance(datetime_from, datetime) or not isinstance(datetime_to, datetime):
-            print('datetime_from or datetime_to is not a datetime object')
-            return None
-        ticks = mt5.copy_ticks_range(
-            symbol, datetime_from, datetime_to, type_ticks)
-        # a partir dos dados recebidos criamos o DataFrame
+        ticks = mt5.copy_ticks_range(symbol, dt_ref, datetime_to, type_ticks)
         ticks_frame = pd.DataFrame(ticks)
-        if print_quantidade:
-            print("Ticks recebidos:", ticks_frame.shape[0])
+        
+        CreateLog().log_message(self.logger, f"Ticks recebidos: {ticks_frame.shape[0]}", "info")
+
         if not ticks_frame.empty:
-            # convertemos o tempo em segundos no formato datetime
             ticks_frame['time'] = pd.to_datetime(ticks_frame['time'], unit='s')
-            ticks_frame['time_msc'] = pd.to_datetime(
-                ticks_frame['time_msc'], unit='ms')
+            ticks_frame['time_msc'] = pd.to_datetime(ticks_frame['time_msc'], unit='ms')
+
         return ticks_frame
 
-    def get_last_tick(self, symbol):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+    def get_last_tick(self, symbol: str) -> Optional[Any]: # noqa ANN401: typing.Any is disallowed
+        """Get last tick for specified symbol.
+
+        Parameters
+        ----------
+        symbol : str
+            Symbol to get last tick for
+
+        Returns
+        -------
+        Optional[Any]
+            Last tick information if successful, None otherwise
         """
         last_tick = mt5.symbol_info_tick(symbol)
         if last_tick:
             return last_tick
-        else:
-            print("mt5.symbol_info_tick({}) failed, error code =".format(
-                symbol), mt5.last_error())
+        
+        CreateLog().log_message(
+            self.logger, 
+            f"mt5.symbol_info_tick({symbol}) failed, error code = {mt5.last_error()}", 
+            "error"
+        )
+        return None
+
+    def get_market_depth(self, ticker: str, n_times: int = 10) -> Optional[tuple]:
+        """Get market depth data for specified ticker.
+
+        Parameters
+        ----------
+        ticker : str
+            Ticker to get market depth for
+        n_times : int, optional
+            Number of times to fetch market depth (default: 10)
+
+        Returns
+        -------
+        Optional[tuple]
+            Market depth data if successful, None otherwise
+        """
+        if not mt5.market_book_add(ticker):
+            CreateLog().log_message(
+                self.logger, 
+                f"mt5.market_book_add({ticker}) failed, error code = {mt5.last_error()}", 
+                "info"
+            )
             return None
 
-    def get_market_depth(self, ticker, n_times=10):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        if mt5.market_book_add(ticker):
-            # get the market depth data 10 times in a loop
-            for i in range(n_times):
-                # get the market depth content (Depth of Market)
-                items = mt5.market_book_get(ticker)
-                # display the entire market depth 'as is' in a single string
-                print(items)
-                # now display each order separately for more clarity
-                if items:
-                    for it in items:
-                        # order content
-                        print(it._asdict())
-                # pause for 5 seconds before the next request of the market depth data
-                time.sleep(5)
-            # cancel the subscription to the market depth updates (Depth of Market)
-            mt5.market_book_release(ticker)
-        else:
-            print("mt5.market_book_add({}) failed, error code =".format(
-                ticker), mt5.last_error())
-        # shut down connection to the MetaTrader 5 terminal
+        items = None
+        for _ in range(n_times):
+            items = mt5.market_book_get(ticker)
+            CreateLog().log_message(self.logger, items, "info")
+            
+            if items:
+                for it in items:
+                    CreateLog().log_message(self.logger, it._asdict(), "info")
+            
+            time.sleep(5)
+
+        mt5.market_book_release(ticker)
         return items
 
-    def enable_display_marketwatch(self, ticker):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        selected = mt5.symbol_select(ticker, True)
-        if not selected:
-            print("Failed to select {}".format(ticker))
+    def enable_display_marketwatch(self, ticker: str) -> None:
+        """Enable display of specified ticker in market watch.
 
-    def get_symbol_info_tick(self, ticker):
+        Parameters
+        ----------
+        ticker : str
+            Ticker to display in market watch
+
+        Returns
+        -------
+        None
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        if not mt5.symbol_select(ticker, True):
+            CreateLog().log_message(self.logger, f"Failed to select {ticker}", "error")
+
+    def get_symbol_info_tick(self, ticker: str) -> Optional[dict[str, Any]]:
+        """Get tick information for specified symbol.
+
+        Parameters
+        ----------
+        ticker : str
+            Ticker to get information for
+
+        Returns
+        -------
+        Optional[dict[str, Any]]
+            Dictionary containing tick information if successful, None otherwise
         """
-        # display the last GBPUSD tick
         lasttick = mt5.symbol_info_tick(ticker)
-        print(lasttick)
-        # display tick field values in the form of a list
-        print("Show symbol_info_tick({})._asdict():".format(ticker))
-        symbol_info_tick_dict = mt5.symbol_info_tick(ticker)._asdict()
+        if not lasttick:
+            CreateLog().log_message(
+                self.logger, 
+                f"symbol_info_tick({ticker}) failed, error code = {mt5.last_error()}", 
+                "error"
+            )
+            return None
+
+        CreateLog().log_message(self.logger, f"lasttick = {lasttick}", "info")
+        CreateLog().log_message(self.logger, f"Show symbol_info_tick({ticker})._asdict():")
+        
+        symbol_info_tick_dict = lasttick._asdict()
         for prop in symbol_info_tick_dict:
-            print("  {}={}".format(prop, symbol_info_tick_dict[prop]))
+            CreateLog().log_message(self.logger, f"  {prop}={symbol_info_tick_dict[prop]}", "info")
+
         return symbol_info_tick_dict
 
-    def get_symbol_properties(self, ticker):
+    def get_symbol_properties(self, ticker: str) -> Optional[dict[str, Any]]:
+        """Get properties for specified symbol.
+
+        Parameters
+        ----------
+        ticker : str
+            Ticker to get properties for
+
+        Returns
+        -------
+        Optional[dict[str, Any]]
+            Dictionary containing symbol properties if successful, None otherwise
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # display EURJPY symbol properties
         symbol_info = mt5.symbol_info(ticker)
-        if symbol_info != None:
-            # display the terminal data 'as is'
-            print(symbol_info)
-            print("{}: spread = {} digits = {}".format(
-                ticker, symbol_info.spread))
-            # display symbol properties as a list
-            print("Show symbol_info({})._asdict():".format(ticker))
-            symbol_info_dict = mt5.symbol_info(ticker)._asdict()
-            for prop in symbol_info_dict:
-                print("  {}={}".format(prop, symbol_info_dict[prop]))
+        if symbol_info is None:
+            CreateLog().log_message(
+                self.logger, 
+                f"symbol_info({ticker}) failed, error code = {mt5.last_error()}", 
+                "error"
+            )
+            return None
+
+        CreateLog().log_message(self.logger, symbol_info, "info")
+        CreateLog().log_message(
+            self.logger, 
+            f"{ticker}: spread = {symbol_info.spread} digits = {symbol_info.digits}", 
+            "info"
+        )
+        CreateLog().log_message(self.logger, f"Show symbol_info({ticker})._asdict():", "info")
+
+        symbol_info_dict = symbol_info._asdict()
+        for prop in symbol_info_dict:
+            CreateLog().log_message(self.logger, f"  {prop}={symbol_info_dict[prop]}", "info")
+
         return symbol_info_dict

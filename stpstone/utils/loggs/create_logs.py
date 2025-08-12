@@ -73,6 +73,8 @@ class CreateLog(metaclass=TypeChecker):
             'logging',
             'stpstone.transformations.validation'
         }
+        if not log_level:
+            raise ValueError("log_level cannot be empty")
         # walk up the call stack to find the first non-CreateLog frame
         while frame:
             frame = frame.f_back
