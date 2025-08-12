@@ -1,17 +1,16 @@
 """Unit tests for PlaywrightScraper class.
 
-Tests the web scraping functionality including browser initialization,
-navigation, element selection, and content extraction with various input scenarios.
+Tests cover initialization, timeout validation, browser launch and closure,
+navigation, element selection, attribute retrieval, page URL access, cookie handling,
+HTML export, error conditions, and edge cases following specified code and test standards.
 """
 
-from collections.abc import Generator
-from contextlib import suppress
 import os
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch
+from typing import Optional
+from unittest.mock import MagicMock, PropertyMock, patch
 
-from playwright.sync_api import Browser, BrowserContext, Page, Playwright
+from playwright.sync_api import Error as PlaywrightError
 import pytest
 
 from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
@@ -21,902 +20,873 @@ from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 # Fixtures
 # --------------------------
 @pytest.fixture
-def mock_playwright() -> Generator[MagicMock, None, None]:
-    """Fixture providing mocked Playwright instance.
+def scraper_default() -> PlaywrightScraper:
+    """Fixture for a default PlaywrightScraper instance.
 
-    Yields
-    ------
-    MagicMock
-        Mocked Playwright instance
-    """
-    with patch("playwright.sync_api.sync_playwright") as mock:
-        mock_playwright_instance = MagicMock(spec=Playwright)
-        mock_browser = MagicMock(spec=Browser)
-        mock_context = MagicMock(spec=BrowserContext)
-        mock_page = MagicMock(spec=Page)
-        
-        mock.return_value.__enter__.return_value = mock_playwright_instance
-        mock_playwright_instance.chromium.launch.return_value = mock_browser
-        mock_playwright_instance.chromium.launch_persistent_context.return_value = mock_context
-        mock_browser.new_context.return_value = mock_context
-        mock_context.new_page.return_value = mock_page
-        mock_context.pages = [mock_page]
-        
-        # Prevent premature stopping
-        mock_playwright_instance.stop.side_effect = None
-        mock_browser.close.side_effect = None
-        mock_context.close.side_effect = None
-        
-        yield mock_playwright_instance
-
-
-@pytest.fixture
-def scraper() -> Generator[Any, None, None]:
-    """Fixture providing PlaywrightScraper instance with default settings.
-
-    Yields
-    ------
+    Returns
+    -------
     PlaywrightScraper
-        Instance with headless=False for testing
+        Default PlaywrightScraper instance
     """
-    scraper = PlaywrightScraper(bool_headless=True)
-    yield scraper
-    scraper.close()
+    return PlaywrightScraper()
 
 
 @pytest.fixture
-def mock_browser(mock_playwright: MagicMock) -> MagicMock:
-    """Fixture providing mocked Browser instance.
+def scraper_with_logger() -> PlaywrightScraper:
+    """Fixture for PlaywrightScraper instance with a logger mock.
 
-    Parameters
-    ----------
-    mock_playwright : MagicMock
-        Mocked Playwright instance
+    Returns
+    -------
+    PlaywrightScraper
+        PlaywrightScraper instance with a logger mock
+    """
+    logger = MagicMock()
+    return PlaywrightScraper(logger=logger)
+
+
+@pytest.fixture
+def mock_page_with_element() -> MagicMock:
+    """Fixture returning a mock page with basic element behavior.
 
     Returns
     -------
     MagicMock
-        Mocked Browser instance
+        Mock page with basic element behavior
     """
-    mock_browser = MagicMock(spec=Browser)
-    mock_playwright.chromium.launch.return_value = mock_browser
-    return mock_browser
+    page = MagicMock()
+    element = MagicMock()
+    element.text_content.return_value = "Sample Text"
+    element.inner_html.return_value = "<div>Sample Text</div>"
+    element.bounding_box.return_value = {"x": 0, "y": 0, "width": 100, "height": 20}
+    page.locator.return_value.first = element
+    return page
 
 
 @pytest.fixture
-def mock_context(mock_browser: MagicMock) -> MagicMock:
-    """Fixture providing mocked BrowserContext instance.
-
-    Parameters
-    ----------
-    mock_browser : MagicMock
-        Mocked Browser instance
+def mock_page_no_element() -> MagicMock:
+    """Fixture returning a mock page that simulates no element found.
 
     Returns
     -------
     MagicMock
-        Mocked BrowserContext instance
+        Mock page that simulates no element found
     """
-    mock_context = MagicMock(spec=BrowserContext)
-    mock_browser.new_context.return_value = mock_context
-    return mock_context
+    page = MagicMock()
+    page.locator.return_value.first = None
+    return page
 
-
-@pytest.fixture
-def mock_page(mock_context: MagicMock) -> MagicMock:
-    """Fixture providing mocked Page instance.
-
-    Parameters
-    ----------
-    mock_context : MagicMock
-        Mocked BrowserContext instance
-
-    Returns
-    -------
-    MagicMock
-        Mocked Page instance
-    """
-    mock_page = MagicMock(spec=Page)
-    mock_context.new_page.return_value = mock_page
-    mock_context.pages = [mock_page]
-    mock_page.url = "about:blank"
-    
-    mock_locator = MagicMock()
-    mock_element = MagicMock()
-    mock_page.locator.return_value = mock_locator
-    mock_locator.first = mock_element
-    mock_locator.count.return_value = 1
-    mock_locator.all.return_value = []
-    mock_element.is_visible.return_value = True
-    mock_element.is_hidden.return_value = False
-    mock_element.text_content.return_value = "test content"
-    mock_element.inner_html.return_value = "<div>test</div>"
-    mock_element.bounding_box.return_value = {"x": 10, "y": 20}
-    mock_element.get_attribute.return_value = None
-    mock_page.wait_for_selector.return_value = mock_locator  # Return locator to avoid timeout
-    
-    return mock_page
 
 # --------------------------
 # Tests
 # --------------------------
-class TestInitialization:
-    """Tests for PlaywrightScraper initialization."""
-
-    def test_default_initialization(self) -> None:
-        """Test initialization with default parameters.
-
-        Verifies
-        --------
-        - Instance is created with default values
-        - Attributes are correctly set
-
-        Returns
-        -------
-        None
-        """
-        scraper = PlaywrightScraper()
-        assert scraper.bool_headless is True
-        assert scraper.int_default_timeout == 30000
-        assert scraper.viewport == {"width": 1920, "height": 1080}
-        assert "Mozilla/5.0" in scraper.user_agent
-        scraper.close()
-
-    def test_custom_initialization(self) -> None:
-        """Test initialization with custom parameters.
-
-        Verifies
-        --------
-        - Instance accepts and stores custom parameters
-        - Non-provided parameters use defaults
-
-        Returns
-        -------
-        None
-        """
-        scraper = PlaywrightScraper(
-            bool_headless=False,
-            user_agent="test-agent",
-            proxy="http://test:1234",
-            viewport={"width": 800, "height": 600},
-            int_default_timeout=10000,
-            bool_accept_cookies=False,
-            bool_incognito=True
-        )
-        assert scraper.bool_headless is False
-        assert scraper.user_agent == "test-agent"
-        assert scraper.proxy == "http://test:1234"
-        assert scraper.viewport == {"width": 800, "height": 600}
-        assert scraper.int_default_timeout == 10000
-        assert scraper.bool_accept_cookies is False
-        assert scraper.bool_incognito is True
-        scraper.close()
-
-
-class TestBrowserLaunch:
-    """Tests for browser launch and context management."""
-
-    @patch('playwright.sync_api.sync_playwright')
-    def test_normal_launch(
-        self,
-        mock_sync_playwright: MagicMock,
-    ) -> None:
-        """Test successful browser launch.
-
-        Verifies
-        --------
-        - Playwright is initialized correctly
-        - Browser is launched with expected parameters
-        - Context and page are created
-
-        Parameters
-        ----------
-        mock_sync_playwright : MagicMock
-            Mocked Playwright instance
-
-        Returns
-        -------
-        None
-        """
-        mock_playwright = MagicMock()
-        mock_browser = MagicMock()
-        mock_context = MagicMock()
-        mock_page = MagicMock()
-        
-        mock_sync_playwright.return_value.__enter__.return_value = mock_playwright
-        mock_playwright.chromium.launch.return_value = mock_browser
-        mock_browser.new_context.return_value = mock_context
-        mock_context.new_page.return_value = mock_page
-        
-        scraper = PlaywrightScraper(bool_headless=True)
-        with scraper.launch():
-            assert scraper.playwright is not None
-            assert scraper.browser is not None
-            assert scraper.context is not None
-            assert scraper.page is not None
-
-    def test_incognito_launch(
-        self,
-        mock_playwright: MagicMock,
-        mock_context: MagicMock
-    ) -> None:
-        """Test incognito mode browser launch.
-
-        Verifies
-        --------
-        - Persistent context is used when incognito=True
-        - Correct parameters are passed
-
-        Parameters
-        ----------
-        mock_playwright : MagicMock
-            Mocked Playwright instance
-        mock_context : MagicMock
-            Mocked BrowserContext instance
-
-        Returns
-        -------
-        None
-        """
-        scraper = PlaywrightScraper(bool_incognito=True, bool_headless=False)
-        
-        with scraper.launch():
-            pass
-
-        mock_playwright.chromium.launch_persistent_context.assert_called_once_with(
-            user_data_dir=None,
-            headless=False,
-            proxy=None,
-            viewport={"width": 1920, "height": 1080},
-            user_agent=scraper.user_agent
-        )
-        assert not mock_context.new_page.called
-
-    def test_launch_with_proxy(
-        self,
-        mock_playwright: MagicMock
-    ) -> None:
-        """Test browser launch with proxy configuration.
-
-        Verifies
-        --------
-        - Proxy settings are correctly passed to browser launch
-
-        Parameters
-        ----------
-        mock_playwright : MagicMock
-            Mocked Playwright instance
-
-        Returns
-        -------
-        None
-        """
-        scraper = PlaywrightScraper(proxy="http://proxy:8080", bool_headless=False)
-        
-        with scraper.launch():
-            pass
-
-        mock_playwright.chromium.launch.assert_called_once_with(
-            headless=False,
-            proxy={"server": "http://proxy:8080"}
-        )
-
-    def test_launch_failure(self, mock_playwright: MagicMock) -> None:
-        """Test browser launch failure handling.
-
-        Verifies
-        --------
-        - Exceptions during launch are properly caught and logged
-        - Resources are cleaned up on failure
-
-        Parameters
-        ----------
-        mock_playwright : MagicMock
-            Mocked Playwright instance
-
-        Returns
-        -------
-        None
-        """
-        scraper = PlaywrightScraper(bool_headless=False)
-        mock_playwright.chromium.launch.side_effect = Exception("Launch failed")
-
-        with suppress(RuntimeError):
-            scraper.launch()
-
-        assert scraper.browser is None
-        assert scraper.context is None
-        assert scraper.page is None
-
-
-class TestNavigation:
-    """Tests for page navigation functionality."""
-
-    def test_successful_navigation(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test successful page navigation.
-
-        Verifies
-        --------
-        - Page.goto is called with correct URL and timeout
-        - Returns True on success
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        with scraper.launch():
-            result = scraper.navigate("http://example.com")
-            assert result is True
-            mock_page.goto.assert_called_once_with(
-                "http://example.com",
-                timeout=30000
-            )
-
-    def test_navigation_with_custom_timeout(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test navigation with custom timeout.
-
-        Verifies
-        --------
-        - Custom timeout is properly passed to page.goto
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        with scraper.launch():
-            scraper.navigate("http://example.com", timeout=10000)
-            mock_page.goto.assert_called_once_with(
-                "http://example.com",
-                timeout=10000
-            )
-
-    def test_navigation_failure(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test navigation failure handling.
-
-        Verifies
-        --------
-        - Returns False on navigation failure
-        - Exception is logged
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_page.goto.side_effect = Exception("Navigation failed")
-        
-        with scraper.launch():
-            result = scraper.navigate("http://example.com")
-            assert result is False
-
-    def test_cookie_acceptance(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test cookie acceptance handling.
-
-        Verifies
-        --------
-        - Click is attempted on cookie acceptance button
-        - No exception raised if button not found
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        scraper.bool_accept_cookies = True
-        
-        with scraper.launch():
-            scraper.navigate("http://example.com")
-            mock_page.click.assert_called_once_with(
-                "text=Accept All",
-                timeout=3000
-            )
-
-
-class TestElementSelection:
-    """Tests for element selection and inspection methods."""
-
-    def test_selector_exists_visible(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test selector_exists with visible=True.
-
-        Verifies
-        --------
-        - Correct wait_for_selector call for visible element
-        - Returns True when element exists
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_locator = MagicMock()
-        mock_element = MagicMock()
-        mock_page.locator.return_value = mock_locator
-        mock_locator.first = mock_element
-        mock_element.is_visible.return_value = True
-        # Ensure wait_for_selector returns the same locator
-        mock_page.wait_for_selector.return_value = mock_locator
-
-        with scraper.launch():
-            result = scraper.selector_exists("//div", visible=True)
-            assert result is True
-            mock_page.wait_for_selector.assert_not_called()  # Not called when visible=True
-            mock_element.is_visible.assert_called_once()
-
-    def test_selector_exists_hidden(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test selector_exists with visible=False.
-
-        Verifies
-        --------
-        - Correct is_hidden check is performed
-        - Returns True when element is hidden
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_locator = MagicMock()
-        mock_element = MagicMock()
-        mock_page.locator.return_value = mock_locator
-        mock_locator.first = mock_element
-        mock_element.is_hidden.return_value = True
-        mock_page.wait_for_selector.return_value = mock_locator
-
-        with scraper.launch():
-            result = scraper.selector_exists("//div", visible=False)
-            assert result is True
-            mock_element.is_hidden.assert_called_once()
-
-    def test_selector_exists_with_timeout(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test selector_exists with timeout parameter.
-
-        Verifies
-        --------
-        - wait_for_selector is called with correct timeout
-        - Returns True when element appears within timeout
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_locator = MagicMock()
-        mock_element = MagicMock()
-        mock_page.locator.return_value = mock_locator
-        mock_locator.first = mock_element
-        mock_element.is_visible.return_value = True
-        mock_page.wait_for_selector.return_value = mock_locator
-
-        with scraper.launch():
-            result = scraper.selector_exists("//div", timeout=5000, visible=True)
-            assert result is True
-            mock_page.wait_for_selector.assert_called_once_with(
-                "//div",
-                state="visible",
-                timeout=5000
-            )
-
-    def test_get_element_success(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test successful get_element call.
-
-        Verifies
-        --------
-        - Returns dictionary with element properties
-        - Includes text, html and bounding box
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_element = MagicMock()
-        mock_element.text_content.return_value = "test content"
-        mock_element.inner_html.return_value = "<div>test</div>"
-        mock_element.bounding_box.return_value = {"x": 10, "y": 20}
-        mock_locator = MagicMock()
-        mock_locator.first = mock_element
-        mock_page.locator.return_value = mock_locator
-        mock_page.wait_for_selector.return_value = mock_locator
-
-        with scraper.launch():
-            result = scraper.get_element("//div")
-            assert result == {
-                "text": "test content",
-                "html": "<div>test</div>",
-                "bounding_box": {"x": 10, "y": 20}
-            }
-
-    def test_get_element_empty_text(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test get_element with empty text content.
-
-        Verifies
-        --------
-        - Returns None when element has no text content
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_element = MagicMock()
-        mock_element.text_content.return_value = "   "
-        mock_page.locator.return_value.first = mock_element
-        
-        with scraper.launch():
-            result = scraper.get_element("//div")
-            assert result is None
-
-    def test_get_elements_multiple(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test get_elements with multiple matches.
-
-        Verifies
-        --------
-        - Returns list of element dictionaries
-        - Skips elements with empty text
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-
-        Returns
-        -------
-        None
-        """
-        mock_element1 = MagicMock()
-        mock_element1.text_content.return_value = "content 1"
-        mock_element1.inner_html.return_value = "<div>1</div>"
-        mock_element1.bounding_box.return_value = {"x": 1, "y": 1}
-        
-        mock_element2 = MagicMock()
-        mock_element2.text_content.return_value = "   "
-        
-        mock_element3 = MagicMock()
-        mock_element3.text_content.return_value = "content 3"
-        mock_element3.inner_html.return_value = "<div>3</div>"
-        mock_element3.bounding_box.return_value = {"x": 3, "y": 3}
-        
-        mock_locator = MagicMock()
-        mock_locator.all.return_value = [mock_element1, mock_element2, mock_element3]
-        mock_page.locator.return_value = mock_locator
-        mock_page.wait_for_selector.return_value = mock_locator
-
-        with scraper.launch():
-            results = scraper.get_elements("//div")
-            assert len(results) == 2
-            assert results[0]["text"] == "content 1"
-            assert results[1]["text"] == "content 3"
+def test_validate_timeout_accepts_valid_and_none(scraper_default: PlaywrightScraper) -> None:
+    """Test _validate_timeout with valid timeouts and None.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
     
-    def test_get_element_attribute(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock
-    ) -> None:
-        """Test get_element_attrb method.
+    Returns
+    -------
+    None
+    """
+    scraper_default._validate_timeout(10)
+    scraper_default._validate_timeout(None)
 
-        Verifies
-        --------
-        - Returns attribute value when present
-        - Returns None on error
 
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
+def test_validate_timeout_rejects_negative(scraper_default: PlaywrightScraper) -> None:
+    """Test _validate_timeout raises ValueError on negative input.
 
-        Returns
-        -------
-        None
-        """
-        mock_element = MagicMock()
-        mock_element.get_attribute.return_value = "http://example.com"
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(ValueError, match="timeout must be a positive integer or None"):
+        scraper_default._validate_timeout(-1)
+
+
+def test_init_sets_defaults(scraper_default: PlaywrightScraper) -> None:
+    """Test that initialization sets defaults correctly.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    assert scraper_default.bool_headless is True
+    assert "Mozilla" in scraper_default.user_agent
+    assert isinstance(scraper_default.viewport, dict)
+    assert scraper_default.int_default_timeout == 10
+    assert scraper_default.bool_accept_cookies is True
+    assert scraper_default.bool_incognito is False
+    assert scraper_default.logger is None
+    assert scraper_default.playwright is None
+    assert scraper_default.browser is None
+    assert scraper_default.context is None
+    assert scraper_default.page is None
+
+
+def test_close_closes_resources(scraper_default: PlaywrightScraper) -> None:
+    """Test close method calls close/stop on context, browser, playwright if set.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    mock_context = MagicMock()
+    mock_browser = MagicMock()
+    mock_playwright = MagicMock()
+    scraper_default.context = mock_context
+    scraper_default.browser = mock_browser
+    scraper_default.playwright = mock_playwright
+    scraper_default.page = MagicMock()
+
+    scraper_default.close()
+
+    mock_context.close.assert_called_once()
+    mock_browser.close.assert_called_once()
+    mock_playwright.stop.assert_called_once()
+    assert scraper_default.context is None
+    assert scraper_default.browser is None
+    assert scraper_default.playwright is None
+    assert scraper_default.page is None
+
+
+def test_close_handles_exceptions_and_logs(scraper_with_logger: PlaywrightScraper) -> None:
+    """Test close method logs errors during resource cleanup.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    magic_obj = MagicMock()
+    magic_obj.close.side_effect = Exception("close error")
+    scraper_with_logger.context = magic_obj
+    scraper_with_logger.browser = magic_obj
+    scraper_with_logger.playwright = magic_obj
+    with patch("stpstone.utils.loggs.create_logs.CreateLog.log_message") as mock_log:
+        scraper_with_logger.close()
+        assert mock_log.call_count >= 1
+        assert "close error" in mock_log.call_args_list[0][0][1]
+
+
+def test_navigate_success_and_accept_cookies(scraper_default: PlaywrightScraper) -> None:
+    """Test navigate returns True on success and calls cookie handler if accept cookies enabled.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    mock_page = MagicMock()
+    scraper_default.page = mock_page
+    scraper_default.bool_accept_cookies = True
+
+    with patch.object(scraper_default, "_handle_cookie_popup") as mock_cookie:
+        result = scraper_default.navigate("http://example.com", timeout=5000)
+        assert result is True
+        mock_page.goto.assert_called_once_with("http://example.com", timeout=5000)
+        mock_cookie.assert_called_once()
+
+
+def test_navigate_failure_logs_and_returns_false(scraper_with_logger: PlaywrightScraper) -> None:
+    """Test navigate handles exceptions, logs error, and returns False.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    mock_page = MagicMock()
+    mock_page.goto.side_effect = PlaywrightError("fail")
+    scraper_with_logger.page = mock_page
+
+    result = scraper_with_logger.navigate("http://fail.com")
+    assert result is False
+    assert scraper_with_logger.logger.method_calls
+
+
+def test_get_current_url_returns_url(scraper_default: PlaywrightScraper) -> None:
+    """Test get_current_url returns URL when page is initialized.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    mock_page = MagicMock()
+    type(mock_page).url = PropertyMock(return_value="http://test.url")
+    scraper_default.page = mock_page
+
+    url = scraper_default.get_current_url()
+    assert url == "http://test.url"
+
+
+def test_get_current_url_raises_if_no_page(scraper_default: PlaywrightScraper) -> None:
+    """Test get_current_url raises RuntimeError if no page initialized.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = None
+    with pytest.raises(RuntimeError, match="Page not initialized"):
+        scraper_default.get_current_url()
+
+
+def test_get_current_url_logs_error_and_returns_none(
+    scraper_with_logger: PlaywrightScraper
+) -> None:
+    """Test get_current_url logs errors and returns None on exception.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    mock_page = MagicMock()
+    type(mock_page).url = PropertyMock(side_effect=Exception("bad"))
+    scraper_with_logger.page = mock_page
+
+    result = scraper_with_logger.get_current_url()
+    assert result is None
+    assert scraper_with_logger.logger.method_calls
+
+
+def test_handle_cookie_popup_logs_info_and_handles_errors(
+    scraper_with_logger: PlaywrightScraper
+) -> None:
+    """Test _handle_cookie_popup logs info when accepting cookies and logs error on failure.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    mock_page = MagicMock()
+    scraper_with_logger.page = mock_page
+    mock_page.click.return_value = True
+
+    # Success case
+    scraper_with_logger._handle_cookie_popup(timeout=10)
+    assert scraper_with_logger.logger.method_calls
+
+    # Error case
+    mock_page.click.side_effect = Exception("click fail")
+    scraper_with_logger._handle_cookie_popup(timeout=10)
+    assert scraper_with_logger.logger.method_calls
+
+
+@pytest.mark.parametrize("visible,expected_method", [
+    (True, "is_visible"),
+    (False, "is_hidden"),
+    (None, "wait_for_selector"),
+])
+def test_selector_exists_behavior(
+    scraper_default: PlaywrightScraper,
+    visible: Optional[bool],
+    expected_method: str
+) -> None:
+    """Test selector_exists returns True/False based on locator behavior and visibility parameter.
+    
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    visible : Optional[bool]
+        Visibility requirement (True=visible, False=hidden, None=either)
+    expected_method : str
+        Expected locator method to be called (is_visible, is_hidden, or wait_for_selector)
+    
+    Returns
+    -------
+    None
+    """
+    mock_element = MagicMock()
+    if expected_method == "wait_for_selector":
+        scraper_default.page = MagicMock()
+        scraper_default.page.wait_for_selector.return_value = mock_element
+        scraper_default.page.locator.return_value.first = mock_element
+        result = scraper_default.selector_exists("test_selector", visible=visible)
+        assert result is True
+        scraper_default.page.wait_for_selector.assert_called_once()
+    else:
         mock_locator = MagicMock()
-        mock_locator.first = mock_element
-        mock_page.locator.return_value = mock_locator
-        mock_page.wait_for_selector.return_value = mock_locator
-
-        with scraper.launch():
-            result = scraper.get_element_attrb("//a", "href")
-            assert result == "http://example.com"
-            mock_element.get_attribute.assert_called_once_with("href")
+        setattr(mock_locator.first, expected_method, MagicMock(return_value=True))
+        scraper_default.page = MagicMock()
+        scraper_default.page.locator.return_value = mock_locator
+        result = scraper_default.selector_exists("test_selector", visible=visible)
+        assert result is True
 
 
-class TestHTMLExport:
-    """Tests for HTML content export functionality."""
+def test_selector_exists_raises_if_no_page(scraper_default: PlaywrightScraper) -> None:
+    """Test selector_exists raises RuntimeError if page not initialized.
 
-    def test_export_html_success(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        tmp_path: Path
-    ) -> None:
-        """Test successful HTML export.
-
-        Verifies
-        --------
-        - File is created with correct content
-        - Returns correct file path
-        - Directory is created if not exists
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        tmp_path : Path
-            Temporary directory path
-
-        Returns
-        -------
-        None
-        """
-        export_dir = tmp_path / "exports"
-        test_content = "<html><body>Test</body></html>"
-        
-        with scraper.launch():
-            file_path = scraper.export_html(
-                content=test_content,
-                folder_path=str(export_dir),
-                filename="test_page",
-                bool_include_timestamp=False 
-            )
-            
-            assert file_path.startswith(str(export_dir / "test_page"))
-            assert file_path.endswith(".html")
-            assert os.path.exists(file_path)
-            with open(file_path, encoding="utf-8") as f:
-                assert f.read() == test_content
-
-    def test_export_html_auto_filename(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        mock_page: MagicMock,
-        tmp_path: Path
-    ) -> None:
-        """Test HTML export with automatic filename generation.
-
-        Verifies
-        --------
-        - Filename is generated from URL when not provided
-        - Special characters are replaced
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        mock_page : MagicMock
-            Mocked Page instance
-        tmp_path : Path
-            Temporary directory path
-
-        Returns
-        -------
-        None
-        """
-        export_dir = tmp_path / "exports"
-        mock_page.url = "https://example.com/path?param=value"
-        scraper.get_current_url = MagicMock(return_value="https://example.com/path?param=value")
-
-        with scraper.launch():
-            file_path = scraper.export_html(
-                content="<html></html>",
-                folder_path=str(export_dir)
-            )
-            
-            assert "example.com_path_param_value" in file_path
-            assert file_path.endswith(".html")
-            assert os.path.exists(file_path)
-
-    def test_export_html_with_timestamp(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        tmp_path: Path
-    ) -> None:
-        """Test HTML export with timestamp in filename.
-
-        Verifies
-        --------
-        - Timestamp is appended to filename when requested
-        - Format is correct (YYYYMMDD_HHMMSS)
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        tmp_path : Path
-            Temporary directory path
-
-        Returns
-        -------
-        None
-        """
-        export_dir = tmp_path / "exports"
-        
-        with scraper.launch():
-            file_path = scraper.export_html(
-                content="<html></html>",
-                folder_path=str(export_dir),
-                filename="test",
-                bool_include_timestamp=True
-            )
-            
-            assert "_202" in file_path  # Will match any timestamp starting with current year
-            assert file_path.endswith(".html")
-
-    def test_export_html_failure(
-        self,
-        scraper: Any, # noqa ANN401: typing.Any is disallowed
-        tmp_path: Path
-    ) -> None:
-        """Test HTML export failure handling.
-
-        Verifies
-        --------
-        - Exception is raised on file write failure
-        - Error is logged
-
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
-        tmp_path : Path
-            Temporary directory path
-
-        Returns
-        -------
-        None
-        """
-        export_dir = tmp_path / "readonly"
-        export_dir.mkdir(mode=0o444)  # Read-only directory
-        
-        with scraper.launch(), pytest.raises(RuntimeError, match="Failed to save HTML file"):
-            scraper.export_html(
-                content="<html></html>",
-                folder_path=str(export_dir)
-            )
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = None
+    with pytest.raises(RuntimeError, match="Page not initialized"):
+        scraper_default.selector_exists("selector")
 
 
-class TestValidation:
-    """Tests for validation methods."""
+def test_selector_exists_logs_and_returns_false_on_error(
+    scraper_with_logger: PlaywrightScraper
+) -> None:
+    """Test selector_exists logs warning and returns False on exceptions.
 
-    def test_validate_timeout_positive(
-        self, 
-        scraper: Any # noqa ANN401: typing.Any is disallowed
-    ) -> None:
-        """Test valid timeout values.
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    mock_locator = MagicMock()
+    mock_locator.first.is_visible.side_effect = Exception("fail")
+    scraper_with_logger.page = MagicMock()
+    scraper_with_logger.page.locator.return_value = mock_locator
+    result = scraper_with_logger.selector_exists("selector", visible=True)
+    assert result is False
+    assert scraper_with_logger.logger.method_calls
 
-        Verifies
-        --------
-        - No exception raised for positive timeout or None
 
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
+def test_get_element_returns_expected_data(
+    scraper_default: PlaywrightScraper,
+    mock_page_with_element: MagicMock
+) -> None:
+    """Test get_element returns text, html, and bounding box as expected.
 
-        Returns
-        -------
-        None
-        """
-        scraper._validate_timeout(1000)
-        scraper._validate_timeout(None)
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    mock_page_with_element : MagicMock
+        Mock page with basic element behavior
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = mock_page_with_element
+    result = scraper_default.get_element("selector")
+    assert result is not None
+    assert isinstance(result, dict)
+    assert "text" in result and "html" in result and "bounding_box" in result
 
-    def test_validate_timeout_negative(
-        self, 
-        scraper: Any # noqa ANN401: typing.Any is disallowed
-    ) -> None:
-        """Test invalid timeout values.
 
-        Verifies
-        --------
-        - ValueError raised for negative timeout
+def test_get_element_returns_none_when_text_empty(scraper_default: PlaywrightScraper) -> None:
+    """Test get_element returns None when element text is empty or whitespace.
 
-        Parameters
-        ----------
-        scraper : Any
-            PlaywrightScraper instance
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    mock_element = MagicMock()
+    mock_element.text_content.return_value = "   "
+    scraper_default.page = MagicMock()
+    scraper_default.page.locator.return_value.first = mock_element
 
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match="timeout must be a positive integer or None"):
-            scraper._validate_timeout(-1000)
+    result = scraper_default.get_element("selector")
+    assert result is None
+
+
+def test_get_element_returns_none_if_no_element(
+    scraper_default: PlaywrightScraper,
+    mock_page_no_element: MagicMock
+) -> None:
+    """Test get_element returns None if element is not found.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    mock_page_no_element : MagicMock
+        Mock page with no element found
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = mock_page_no_element
+    result = scraper_default.get_element("selector")
+    assert result is None
+
+
+def test_get_element_raises_if_no_page(scraper_default: PlaywrightScraper) -> None:
+    """Test get_element raises RuntimeError if page is not initialized.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = None
+    with pytest.raises(RuntimeError, match="Page not initialized"):
+        scraper_default.get_element("selector")
+
+
+def test_get_element_logs_and_returns_none_on_error(
+    scraper_with_logger: PlaywrightScraper,
+    mock_page_with_element: MagicMock
+) -> None:
+    """Test get_element logs error and returns None if there is an exception.
+    
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    mock_page_with_element : MagicMock
+        Mock page with basic element behavior
+    
+    Returns
+    -------
+    None
+    """
+    scraper_with_logger.page = mock_page_with_element
+    mock_page_with_element.page = MagicMock()
+    mock_page_with_element.page.wait_for_selector.side_effect = Exception("fail")
+
+    with patch.object(scraper_with_logger.page, "wait_for_selector",
+                     side_effect=Exception("fail")):
+        result = scraper_with_logger.get_element("selector")
+        assert result is None
+        assert scraper_with_logger.logger.method_calls
+
+
+def test_get_element_attrb_returns_attribute(scraper_default: PlaywrightScraper) -> None:
+    """Test get_element_attrb returns attribute value if element found and attribute exists.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    mock_element = MagicMock()
+    mock_element.get_attribute.return_value = "http://example.com"
+
+    scraper_default.page = MagicMock()
+    scraper_default.page.locator.return_value.first = mock_element
+
+    result = scraper_default.get_element_attrb("selector", attribute="href")
+    assert result == "http://example.com"
+
+
+def test_get_element_attrb_returns_none_if_element_or_attribute_missing(
+    scraper_default: PlaywrightScraper
+) -> None:
+    """Test get_element_attrb returns None if element not found or attribute missing.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = MagicMock()
+    scraper_default.page.locator.return_value.first = None
+    assert scraper_default.get_element_attrb("selector") is None
+
+    mock_element = MagicMock()
+    mock_element.get_attribute.return_value = None
+    scraper_default.page.locator.return_value.first = mock_element
+    assert scraper_default.get_element_attrb("selector") is None
+
+
+def test_get_element_attrb_raises_if_no_page(scraper_default: PlaywrightScraper) -> None:
+    """Test get_element_attrb raises RuntimeError if page is not initialized.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = None
+    with pytest.raises(RuntimeError, match="Page not initialized"):
+        scraper_default.get_element_attrb("selector")
+
+
+def test_get_element_attrb_logs_and_returns_none_on_error(
+    scraper_with_logger: PlaywrightScraper
+) -> None:
+    """Test get_element_attrb logs error and returns None on exception.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    mock_element = MagicMock()
+    mock_element.get_attribute.side_effect = Exception("fail")
+    scraper_with_logger.page = MagicMock()
+    scraper_with_logger.page.locator.return_value.first = mock_element
+
+    result = scraper_with_logger.get_element_attrb("selector")
+    assert result is None
+    assert scraper_with_logger.logger.method_calls
+
+
+def test_get_elements_returns_filtered_elements(scraper_default: PlaywrightScraper) -> None:
+    """Test get_elements returns list of elements with non-empty text.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    mock_element1 = MagicMock()
+    mock_element1.text_content.return_value = "Text1"
+    mock_element1.inner_html.return_value = "<div>Text1</div>"
+    mock_element1.bounding_box.return_value = {"x": 1, "y": 1, "width": 5, "height": 5}
+
+    mock_element2 = MagicMock()
+    mock_element2.text_content.return_value = " "
+    mock_element2.inner_html.return_value = "<div>Empty</div>"
+    mock_element2.bounding_box.return_value = {"x": 2, "y": 2, "width": 6, "height": 6}
+
+    scraper_default.page = MagicMock()
+    scraper_default.page.wait_for_selector.return_value = True
+    scraper_default.page.locator.return_value.all.return_value = [mock_element1, mock_element2]
+
+    results = scraper_default.get_elements("selector")
+    assert len(results) == 1
+    assert results[0]["text"] == "Text1"
+
+
+def test_get_elements_returns_empty_list_if_no_page(scraper_default: PlaywrightScraper) -> None:
+    """Test get_elements raises RuntimeError if page not initialized.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = None
+    with pytest.raises(RuntimeError, match="Page not initialized"):
+        scraper_default.get_elements("selector")
+
+
+def test_get_elements_logs_and_returns_empty_on_error(
+    scraper_with_logger: PlaywrightScraper
+) -> None:
+    """Test get_elements logs error and returns empty list if exception occurs.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    
+    Returns
+    -------
+    None
+    """
+    scraper_with_logger.page = MagicMock()
+    scraper_with_logger.page.wait_for_selector.side_effect = Exception("fail")
+
+    results = scraper_with_logger.get_elements("selector")
+    assert results == []
+    assert scraper_with_logger.logger.method_calls
+
+
+def test_get_list_data_returns_text_list(scraper_default: PlaywrightScraper) -> None:
+    """Test get_list_data returns list of texts from elements.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    return_elements = [{"text": "text1"}, {"text": "text2"}]
+    with patch.object(scraper_default, "get_elements", return_value=return_elements) \
+        as mock_get_elements:
+        results = scraper_default.get_list_data("selector")
+        assert results == ["text1", "text2"]
+        mock_get_elements.assert_called_once_with("selector", "xpath", None)
+
+
+def test_export_html_creates_file_and_returns_path(
+    scraper_default: PlaywrightScraper,
+    tmp_path: Path
+) -> None:
+    """Test export_html creates html file with correct name and path.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    tmp_path : Path
+        Temporary directory path
+    
+    Returns
+    -------
+    None
+    """
+    content = "<html></html>"
+    folder = tmp_path.as_posix()
+    returned_path = scraper_default.export_html(content,
+                                               folder_path=folder,
+                                               bool_include_timestamp=False,
+                                               filename="filetest")
+    assert Path(returned_path).exists()
+    assert returned_path.endswith(".html")
+    with open(returned_path, encoding="utf-8") as f:
+        assert f.read() == content
+
+
+def test_export_html_includes_timestamp(
+    scraper_default: PlaywrightScraper,
+    tmp_path: Path
+) -> None:
+    """Test export_html includes timestamp in filename when requested.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    tmp_path : Path
+        Temporary directory path
+    
+    Returns
+    -------
+    None
+    """
+    content = "<html></html>"
+    folder = tmp_path.as_posix()
+    returned_path = scraper_default.export_html(content,
+                                               folder_path=folder,
+                                               bool_include_timestamp=True,
+                                               filename="filetest")
+    assert Path(returned_path).exists()
+    assert returned_path.startswith(os.path.join(folder, "filetest_"))
+    assert returned_path.endswith(".html")
+
+
+def test_export_html_generates_filename_from_url(
+    scraper_default: PlaywrightScraper,
+    tmp_path: Path
+) -> None:
+    """Test export_html generates filename from current url if filename not given.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    tmp_path : Path
+        Temporary directory path
+    
+    Returns
+    -------
+    None
+    """
+    content = "<html></html>"
+    folder = tmp_path.as_posix()
+    mock_url = "http://example.com/page?query=1"
+    with patch.object(scraper_default, "get_current_url", return_value=mock_url):
+        returned_path = scraper_default.export_html(content,
+                                                   folder_path=folder,
+                                                   bool_include_timestamp=False,
+                                                   filename=None)
+        assert Path(returned_path).exists()
+        assert "example.com_page_query_1" in returned_path
+
+
+def test_export_html_raises_and_logs_on_failure(
+    scraper_with_logger: PlaywrightScraper,
+    tmp_path: Path
+) -> None:
+    """Test export_html raises RuntimeError and logs message if file writing fails.
+
+    Parameters
+    ----------
+    scraper_with_logger : PlaywrightScraper
+        PlaywrightScraper instance with logger
+    tmp_path : Path
+        Temporary directory path
+    
+    Returns
+    -------
+    None
+    """
+    content = "<html></html>"
+    folder = tmp_path.as_posix()
+
+    with patch("builtins.open", side_effect=OSError("fail open")):
+        with pytest.raises(RuntimeError, match="Failed to save HTML file: fail open"):
+            scraper_with_logger.export_html(content, folder_path=folder, filename="testfile")
+        assert scraper_with_logger.logger.method_calls
+
+
+def test_export_html_fallback_filename(
+    scraper_default: PlaywrightScraper,
+    tmp_path: Path
+) -> None:
+    """Test export_html uses 'scraped' as filename fallback if empty or invalid URL.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    tmp_path : Path
+        Temporary directory path
+    
+    Returns
+    -------
+    None
+    """
+    content = "<html></html>"
+    folder = tmp_path.as_posix()
+
+    # Simulate an empty URL after cleaning for filename fallback
+    with patch.object(scraper_default, "get_current_url", return_value=""):
+        returned_path = scraper_default.export_html(content,
+                                                   folder_path=folder,
+                                                   bool_include_timestamp=False,
+                                                   filename=None)
+        assert Path(returned_path).exists()
+        assert "scraped" in returned_path
+
+
+def test_export_html_appends_html_extension(
+    scraper_default: PlaywrightScraper,
+    tmp_path: Path
+) -> None:
+    """Test export_html adds .html if not present in given filename.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    tmp_path : Path
+        Temporary directory path
+    
+    Returns
+    -------
+    None
+    """
+    content = "<html></html>"
+    folder = tmp_path.as_posix()
+
+    file_name = "testfile.txt"
+    returned_path = scraper_default.export_html(content,
+                                               folder_path=folder,
+                                               bool_include_timestamp=False,
+                                               filename=file_name)
+    assert returned_path.endswith(".html")
+    assert Path(returned_path).exists()
+
+
+def test_runtime_error_on_methods_when_page_not_initialized(
+    scraper_default: PlaywrightScraper
+) -> None:
+    """Test that methods depending on page raise RuntimeError when page is None.
+
+    Parameters
+    ----------
+    scraper_default : PlaywrightScraper
+        Default PlaywrightScraper instance
+    
+    Returns
+    -------
+    None
+    """
+    scraper_default.page = None
+    with pytest.raises(RuntimeError):
+        scraper_default.selector_exists("selector")
+
+    with pytest.raises(RuntimeError):
+        scraper_default.get_element("selector")
+
+    with pytest.raises(RuntimeError):
+        scraper_default.get_element_attrb("selector")
+
+    with pytest.raises(RuntimeError):
+        scraper_default.get_elements("selector")

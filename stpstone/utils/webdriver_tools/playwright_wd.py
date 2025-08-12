@@ -5,7 +5,7 @@ automation,element selection, and content extraction. Includes robust error hand
 capabilities.
 """
 
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from datetime import datetime
 from logging import Logger
 import os
@@ -61,7 +61,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         user_agent: Optional[str] = None,
         proxy: Optional[str] = None,
         viewport: Optional[dict[str, int]] = None,
-        int_default_timeout: int = 30000,
+        int_default_timeout: int = 10,
         bool_accept_cookies: bool = True,
         bool_incognito: bool = False,
         logger: Optional[Logger] = None
@@ -79,7 +79,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         viewport : Optional[dict[str, int]]
             Browser viewport settings (default: {"width": 1920, "height": 1080})
         int_default_timeout : int
-            Default timeout in milliseconds (default: 30000)
+            Default timeout in milliseconds (default: 10)
         bool_accept_cookies : bool
             Attempt to accept cookies if popup appears (default: True)
         bool_incognito : bool
@@ -169,6 +169,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
             if hasattr(self, "playwright") and self.playwright:
                 self.playwright.stop()
                 self.playwright = None
+            self.page = None
         except Exception as err:
             CreateLog().log_message(
                 self.logger,
@@ -217,9 +218,10 @@ class PlaywrightScraper(metaclass=TypeChecker):
         RuntimeError
             If page is not initialized
         """
+        if not self.page:
+            raise RuntimeError("Page not initialized")
+        
         try:
-            if not self.page:
-                raise RuntimeError("Page not initialized")
             return self.page.url
         except Exception as err:
             CreateLog().log_message(
@@ -229,7 +231,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
             )
             return None
 
-    def _handle_cookie_popup(self, timeout: int = 3_000) -> None:
+    def _handle_cookie_popup(self, timeout: int = 10) -> None:
         """Attempt to accept cookies if popup appears.
 
         Parameters
@@ -237,11 +239,11 @@ class PlaywrightScraper(metaclass=TypeChecker):
         timeout : int
             Timeout for cookie acceptance attempt (default: 3000ms)
         """
-        with suppress(Exception) as err:
+        try:
             self.page.click("text=Accept All", timeout=timeout)
             CreateLog().log_message(self.logger, "Accepted cookies", "info")
-            if err:
-                CreateLog().log_message(self.logger, f"Error accepting cookies: {err}", "error")
+        except Exception as err:
+            CreateLog().log_message(self.logger, f"Error accepting cookies: {err}", "error")
 
     def selector_exists(
         self,
@@ -270,10 +272,10 @@ class PlaywrightScraper(metaclass=TypeChecker):
         RuntimeError
             If page is not initialized
         """
+        if not self.page:
+            raise RuntimeError("Page not initialized")
+        
         try:
-            if not self.page:
-                raise RuntimeError("Page not initialized")
-            
             self._validate_timeout(timeout)
             timeout = timeout or self.int_default_timeout
             
@@ -321,10 +323,10 @@ class PlaywrightScraper(metaclass=TypeChecker):
         RuntimeError
             If page is not initialized
         """
+        if self.page is None:
+            raise RuntimeError("Page not initialized")
+        
         try:
-            if not self.page:
-                raise RuntimeError("Page not initialized")
-            
             self._validate_timeout(timeout)
             timeout = timeout or self.int_default_timeout
             
@@ -382,10 +384,10 @@ class PlaywrightScraper(metaclass=TypeChecker):
         RuntimeError
             If page is not initialized
         """
+        if not self.page:
+            raise RuntimeError("Page not initialized")
+        
         try:
-            if not self.page:
-                raise RuntimeError("Page not initialized")
-            
             self._validate_timeout(timeout)
             timeout = timeout or self.int_default_timeout
             
@@ -427,10 +429,10 @@ class PlaywrightScraper(metaclass=TypeChecker):
         RuntimeError
             If page is not initialized
         """
+        if not self.page:
+            raise RuntimeError("Page not initialized")
+
         try:
-            if not self.page:
-                raise RuntimeError("Page not initialized")
-            
             self._validate_timeout(timeout)
             timeout = timeout or self.int_default_timeout
             
