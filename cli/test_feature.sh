@@ -49,6 +49,15 @@ find_test_path() {
     echo "$test_path"
 }
 
+install_playwright() {
+    print_status "info" "Checking playwright..."
+    if [ ! -d "$HOME/.cache/ms-playwright" ]; then
+        print_status "info" "Installing Playwright browsers..."
+        poetry run playwright install
+    fi
+    print_status "success" "Playwright installed"
+}
+
 run_codespell() {
     local path="$1"
     local type="$2"
@@ -515,6 +524,9 @@ main() {
     module_path=$(find_module_path "$module") || exit 1
     local test_path
     test_path=$(find_test_path "$module") || exit 1
+
+    # checking libs
+    install_playwright
 
     # run checks for module
     run_codespell "$module_path" "module" || return 1
