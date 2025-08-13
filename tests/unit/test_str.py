@@ -281,7 +281,7 @@ class TestStrHandler:
         assert fixed == "–"
 
     # --------------------------
-    # Test removing_accents
+    # Test remove_accents
     # --------------------------
     @pytest.mark.parametrize(
         "input_str,expected",
@@ -291,7 +291,7 @@ class TestStrHandler:
             ("über", "uber"),
         ],
     )
-    def test_removing_accents(
+    def test_remove_accents(
         self, 
         handler: Any, # noqa ANN01: typing.Any disallowed
         input_str: str, 
@@ -316,7 +316,7 @@ class TestStrHandler:
         -------
         None
         """
-        assert handler.removing_accents(input_str) == expected
+        assert handler.remove_accents(input_str) == expected
 
     # --------------------------
     # Test remove_diacritics

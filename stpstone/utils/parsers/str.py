@@ -208,7 +208,7 @@ class StrHandler(metaclass=TypeChecker):
         """
         return ftfy.fix_text(str_)
 
-    def removing_accents(self, str_: str) -> str:
+    def remove_accents(self, str_: str) -> str:
         """Remove accents from Latin alphabet characters.
 
         Parameters

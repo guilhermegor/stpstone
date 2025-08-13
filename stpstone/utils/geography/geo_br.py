@@ -4,12 +4,32 @@ This module provides methods to retrieve Brazilian states and zip code informati
 from public APIs, with options for accent handling and data formatting.
 """
 
-import ast
-from typing import Any, TypedDict
+from time import sleep
+from typing import TypedDict
 
-from requests import request
+import requests
+from requests.exceptions import HTTPError, Timeout
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.parsers.str import StrHandler
+
+
+class RegionResult(TypedDict):
+    """Typed dictionary for region information.
+    
+    Attributes
+    ----------
+    id : int
+        RegionResult ID
+    sigla : str
+        RegionResult abbreviation
+    nome : str
+        RegionResult name
+    """
+
+    id: int
+    sigla: str
+    nome: str
 
 
 class ReturnStates(TypedDict):
@@ -18,19 +38,19 @@ class ReturnStates(TypedDict):
     Attributes
     ----------
     id : int
-        State identifier code
+        State ID
     sigla : str
         State abbreviation
     nome : str
         State name
-    regiao : dict[str, Any]
-        Region information containing id, sigla and nome
+    regiao : RegionResult
+        RegionResult information
     """
-
+    
     id: int
     sigla: str
     nome: str
-    regiao: dict[str, Any]
+    regiao: RegionResult
 
 
 class ReturnZipCode(TypedDict):
@@ -38,24 +58,53 @@ class ReturnZipCode(TypedDict):
 
     Attributes
     ----------
+    cep : str
+        Zip code
     address_type : str
         Type of address
+    address_name : str
+        Name part of address
     address : str
         Full address
     state : str
         State abbreviation
+    district : str
+        District name
+    lat : str
+        Latitude
+    long : str
+        Longitude
+    city : str
+        City name
+    city_ibge : str
+        IBGE city code
+    ddd : str
+        Area code
     """
 
+    cep: str
     address_type: str
+    address_name: str
     address: str
     state: str
+    district: str
+    lat: str
+    long: str
+    city: str
+    city_ibge: str
+    ddd: str
 
 
-class BrazilGeo:
+class BrazilGeo(metaclass=TypeChecker):
     """Class for retrieving Brazilian geographical information."""
 
     def __init__(self) -> None:
-        """Initialize the BrazilGeo class."""
+        """Initialize the BrazilGeo class.
+        
+        Returns
+        -------
+        None
+        """
         self.cls_str_handler = StrHandler()
 
     def _validate_zip_codes(self, list_zip_codes: list[str]) -> None:
@@ -76,52 +125,39 @@ class BrazilGeo:
         if not list_zip_codes:
             raise ValueError("Zip code list cannot be empty")
         for zip_code in list_zip_codes:
-            if not isinstance(zip_code, str):
-                raise ValueError("All zip codes must be strings")
             if not zip_code.strip():
                 raise ValueError("Zip code cannot be empty")
 
-    def states(
-        self,
-        bol_accents: bool = True,
-    ) -> list[ReturnStates]:
+    def states(self) -> list[ReturnStates]:
         """Return Brazilian states information.
 
-        Parameters
-        ----------
-        bol_accents : bool, optional
-            Whether to include accents in state names (default: True)
-        
         Returns
         -------
         list[ReturnStates]
             list of dictionaries containing state information
 
+        Raises
+        ------
+        HTTPError
+            If there's an HTTP error from the API
+        Timeout
+            If the request times out
+
         References
         ----------
         .. [1] https://servicodados.ibge.gov.br/api/v1/localidades/estados
         """
-        url_localidades_brasil = "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
-        resp_req = request("GET", url_localidades_brasil)
-        
+        url = "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
         try:
-            dict_ = ast.literal_eval(
-                self.cls_str_handler.get_between(str(resp_req.text.encode("utf8")), "b'", "'")
-            )
-        except (ValueError, SyntaxError) as err:
-            raise ValueError("Failed to parse API response") from err
-        
-        for state_info in dict_:
-            state_info["nome"] = self.cls_str_handler.latin_characters(state_info["nome"])
-            if not bol_accents:
-                state_info["nome"] = self.cls_str_handler.removing_accents(state_info["nome"])
-        
-        return dict_
+            resp_req = requests.get(url, timeout=10)
+            resp_req.raise_for_status()
+            return resp_req.json()
+        except requests.exceptions.Timeout as e:
+            raise Timeout("Request timed out") from e
+        except requests.exceptions.HTTPError as e:
+            raise HTTPError(f"Server error: {e}") from e
 
-    def zip_code(
-        self,
-        list_zip_codes: list[str],
-    ) -> dict[str, ReturnZipCode]:
+    def zip_code(self, list_zip_codes: list[str]) -> dict[str, ReturnZipCode]:
         """Retrieve location information for zip codes.
 
         Parameters
@@ -134,28 +170,36 @@ class BrazilGeo:
         dict[str, ReturnZipCode]
             Dictionary mapping zip codes to their location information
 
-        Raises
-        ------
-        ValueError
-            If any request fails or resp_req parsing fails
+        References
+        ----------
+        .. [1] https://cep.awesomeapi.com.br
         """
         self._validate_zip_codes(list_zip_codes)
-        dict_ = {}
+        result = {}
 
         for zip_code in list_zip_codes:
             try:
-                resp_req = request(
-                    method="GET", 
-                    url=f"https://cep.awesomeapi.com.br/json/{zip_code}"
+                resp_req = requests.get(
+                    f"https://cep.awesomeapi.com.br/json/{zip_code}",
+                    timeout=10
                 )
                 resp_req.raise_for_status()
-                json_zip_codes = resp_req.json()
-                dict_[zip_code] = {
-                    "address_type": json_zip_codes["address_type"],
-                    "address": json_zip_codes["address"],
-                    "state": json_zip_codes["state"]
+                result[zip_code] = resp_req.json()
+                sleep(1)
+            except (HTTPError, Timeout):
+                result[zip_code] = {
+                    "cep": "ERROR",
+                    "address_type": "ERROR",
+                    "address_name": "ERROR",
+                    "address": "ERROR",
+                    "state": "ERROR",
+                    "district": "ERROR",
+                    "lat": "ERROR",
+                    "long": "ERROR",
+                    "city": "ERROR",
+                    "city_ibge": "ERROR",
+                    "ddd": "ERROR"
                 }
-            except Exception as err:
-                raise ValueError(f"Failed to process zip code {zip_code}") from err
+                continue
 
-        return dict_
+        return result
