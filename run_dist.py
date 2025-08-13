@@ -2,7 +2,7 @@ from stpstone.analytics.pricing.derivatives.european_options import EuropeanOpti
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.conversions.base_converter import BaseConverter
 from stpstone.utils.conversions.expression_converter import ExpressionConverter
-from stpstone.utils.geography.br import BrazilGeo
+from stpstone.utils.geography.geo_br import BrazilGeo
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.numbers import NumHandler
 

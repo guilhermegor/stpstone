@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 from requests import request
 
 from stpstone.utils.connections.netops.proxies.abc import ABCSession
-from stpstone.utils.geography.ww import WWGeography, WWTimezones
+from stpstone.utils.geography.geo_ww import WWGeography, WWTimezones
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD

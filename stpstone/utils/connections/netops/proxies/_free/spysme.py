@@ -6,7 +6,7 @@ from requests import request
 
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.netops.proxies.abc import ABCSession
-from stpstone.utils.geography.ww import WWGeography, WWTimezones
+from stpstone.utils.geography.geo_ww import WWGeography, WWTimezones
 
 
 class SpysMeCountries(ABCSession):
