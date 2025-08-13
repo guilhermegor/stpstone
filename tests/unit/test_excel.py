@@ -12,7 +12,7 @@ import pytest
 
 
 if platform.system() != "Windows":
-    pytest.skip("CMD tests require Windows", allow_module_level=True)
+    pytest.skip("Excel tests require Windows", allow_module_level=True)
 
 import importlib
 import sys

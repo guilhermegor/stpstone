@@ -10,7 +10,7 @@ import pytest
 
 
 if platform.system() != "Windows":
-    pytest.skip("CMD tests require Windows", allow_module_level=True)
+    pytest.skip("Onedrive tests require Windows", allow_module_level=True)
 
 from datetime import datetime
 from getpass import getuser
