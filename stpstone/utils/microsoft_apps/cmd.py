@@ -3,6 +3,11 @@
 This module provides a class for applying ANSI color codes to text in Windows CMD terminal.
 The colors can be used to highlight different types of messages (warnings, errors, etc.).
 """
+import platform
+
+
+if platform.system() != "Windows":
+    raise OSError("This module requires a Windows operating system to function properly.")
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
