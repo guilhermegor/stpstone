@@ -376,7 +376,7 @@ stpstone/
 ├── 📁 .vscode/               # VSCode configuration
 │   └── ⚙️ settings.json      # Editor preferences and extensions
 │
-├── 📁 cli/                   # Command Line Interface components
+├── 📁 bin/                   # Command Line Interface components
 │
 ├── 📁 data/                  # Data storage and management
 │

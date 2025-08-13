@@ -87,14 +87,14 @@ repos:
     hooks:
       - id: check-unix-filenames
         name: check unix/linux filename validity
-        entry: bash cli/check_unix_filenames.sh
+        entry: bash bin/check_unix_filenames.sh
         language: system
         types:
           - file
 
       - id: export-dependencies
         name: export dependencies
-        entry: bash cli/export_deps.sh
+        entry: bash bin/export_deps.sh
         language: system
         types:
           - file
@@ -135,7 +135,7 @@ repos:
       
       - id: check-urls
         name: check urls in docstrings
-        entry: bash cli/test_urls_docstrings.sh
+        entry: bash bin/test_urls_docstrings.sh
         language: system
         types:
           - file

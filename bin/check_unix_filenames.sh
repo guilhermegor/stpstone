@@ -1,5 +1,5 @@
 #!/bin/bash
-# cli/check_unix_filenames.sh
+# bin/check_unix_filenames.sh
 
 for f in "$@"; do
   # skip directories and .git files
