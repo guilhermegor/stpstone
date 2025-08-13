@@ -1,24 +1,59 @@
-### GENERIC PLUGING FOR AIRFLOW ###
+"""Airflow plugin utilities for date validation.
 
-# pypi.org libs
-from typing import Any, Dict
+This module provides a class for validating working days in Airflow DAGs using Brazilian date 
+handling.
+"""
 
-# project modules
+from typing import Any
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
-class AirflowPlugins:
+class AirflowPlugins(metaclass=TypeChecker):
+    """Class containing Airflow plugin utilities."""
 
-    def validate_working_day(self, **kwargs: Dict[str, Any]) -> None:
+    def _validate_ds(self, ds: str) -> None:
+        """Validate the ds parameter from Airflow context.
+
+        Parameters
+        ----------
+        ds : str
+            Date string to validate
+
+        Raises
+        ------
+        ValueError
+            If ds is empty or not a string
         """
-        Validates whether the provided date (`kwargs['ds']`) is a working day, otherwise stop the DAG.
+        if not ds:
+            raise ValueError("Date string (ds) cannot be empty")
 
-        Args:
-            kwargs (dict): Airflow context dictionary. Must include 'ds' key.
+    def validate_working_day(self, **kwargs: dict[str, Any]) -> None:
+        """Validate if the provided date is a working day.
 
-        Returns:
-            None
+        Parameters
+        ----------
+        kwargs : dict[str, Any]
+            Airflow context dictionary. Must include 'ds' key.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        KeyError
+            If 'ds' or 'ti' keys are missing from kwargs
+        ValueError
+            If date string is invalid
         """
-        ti = kwargs['ti']
-        bool_workng_day = DatesBR().is_working_day(kwargs['ds'])
-        ti.xcom_push(key='bool_continue', value=bool_workng_day)
+        try:
+            self._validate_ds(kwargs['ds'])
+            ti = kwargs['ti']
+            bool_working_day = DatesBR().is_working_day(kwargs['ds'])
+            ti.xcom_push(key='bool_continue', value=bool_working_day)
+        except KeyError as err:
+            raise KeyError(f"Missing required key in context: {str(err)}") from err
+        except Exception as err:
+            raise ValueError(f"Date validation failed: {str(err)}") from err
