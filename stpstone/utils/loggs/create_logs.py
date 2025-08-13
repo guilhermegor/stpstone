@@ -149,7 +149,8 @@ class CreateLog(metaclass=TypeChecker):
             if any(module_name.startswith(prefix) for prefix in set_skip_modules):
                 continue
             self_potential_cls = frame.f_locals.get("self")
-            if self_potential_cls is not None and not isinstance(self_potential_cls, CreateLog):
+            if self_potential_cls is not None \
+                and not isinstance(self_potential_cls, self.__class__):
                 class_name = self_potential_cls.__class__.__name__
                 method_name = frame.f_code.co_name
                 break
