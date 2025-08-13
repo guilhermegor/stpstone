@@ -211,17 +211,21 @@ class DFStandardization(metaclass=TypeChecker):
             The limited DataFrame.
         """
         if self.logger is not None:
-            CreateLog().info(
+            CreateLog().log_message(
                 self.logger,
                 f"list cols dataframe before filtering: {list(df_.columns)}",
+                "info"
             )
-            CreateLog().info(
-                self.logger, f"list cols to filter: {list(self.dict_dtypes.keys())}"
+            CreateLog().log_message(
+                self.logger, 
+                f"list cols to filter: {list(self.dict_dtypes.keys())}",
+                "info"
             )
-            CreateLog().info(
+            CreateLog().log_message(
                 self.logger,
                 "list of columns excluded: "
                 + f"{[x for x in list(df_.columns) if x not in list(self.dict_dtypes.keys())]}",
+                "info"
             )
         if self.bool_debug:
             print(f"list cols dataframe before filtering: {list(df_.columns)}")

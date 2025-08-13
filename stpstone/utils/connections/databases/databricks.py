@@ -56,22 +56,35 @@ class Databricks:
                 break
             except FunctionTimedOut:
                 if self.logger != None:
-                    CreateLog().warning(self.logger, 'Connection could not be established in '
-                                         + 'the DSN {}'.format(dsn))
+                    CreateLog().log_message(
+                        self.logger, 
+                        'Connection could not be established in the DSN {}'.format(dsn), 
+                        "warning"
+                    )
             except Exception as e:
                 if self.logger != None:
-                    CreateLog().warning(self.logger, 'Connection could not be established '
-                                         + 'in the DSN {}. Error: {}. '.format(dsn, e))
+                    CreateLog().log_message(
+                        self.logger, 
+                        'Connection could not be established in the DSN {}. Error: {}. '.format(
+                            dsn, e), 
+                        "warning"
+                    )
         # caso a conexão não tenha sido estabelecida retornar um erro
         if bool_conn == False:
             if self.logger != None:
-                CreateLog().warning(self.logger, 'Connection to Databricks could not be established '
-                                     + 'in any of the DSNs, please validate the stability of the service. List of DSNs '
-                                     + 'configured on the machine: {}'.format(self.list_dsns))
+                CreateLog().log_message(
+                    self.logger, 
+                    'Connection to Databricks could not be established '
+                    + 'in any of the DSNs, please validate the stability of the service. '
+                    + 'List of DSNs configured on the machine: {}'.format(self.list_dsns), 
+                    "warning"
+                )
                 if bool_kill_process_when_databricks_down == True:
-                    raise Exception(self.logger, 'Connection to Databricks could not be established '
-                                    + 'in any of the DSNs, please validate the stability of the service. List of DSNs '
-                                    + 'configured on the machine: {}'.format(self.list_dsns))
+                    raise ValueError(
+                        'Connection to Databricks could not be established '
+                        + 'in any of the DSNs, please validate the stability of the service. '
+                        + 'List of DSNs configured on the machine: {}'.format(self.list_dsns)
+                    )
             return str_error
         # return desired dataframe
         return df_databricks
@@ -95,8 +108,11 @@ class Databricks:
             if self.logger is None:
                 print('#{} Attempting connection with DSNs to Databricks'.format(i))
             else:
-                CreateLog().info(self.logger,
-                                  '#{} Attempting connection with DSNs to Databricks'.format(i))
+                CreateLog().log_message(
+                    self.logger, 
+                    '#{} Attempting connection with DSNs to Databricks'.format(i), 
+                    "info"
+                )
             #   looping iterator to next count
             i += 1
         # return dataframe or error message

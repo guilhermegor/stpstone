@@ -1,11 +1,13 @@
+from io import BufferedIOBase, BytesIO, RawIOBase
+from logging import Logger
 import os
-from io import BytesIO, RawIOBase, BufferedIOBase
-from typing import BinaryIO, Optional, Dict, Any, Union, IO, AnyStr
+from typing import IO, Any, AnyStr, BinaryIO, Dict, Optional, Union
+
 from minio import Minio
 from minio.error import S3Error
-from logging import Logger
-from stpstone.utils.loggs.create_logs import CreateLog
+
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class MinioClient:
@@ -28,13 +30,13 @@ class MinioClient:
 
     def _log_info(self, message: str):
         if self.logger is not None:
-            CreateLog().info(self.logger, message)
+            CreateLog().log_message(self.logger, message, "info")
         else:
             print(f"INFO: {message}")
 
     def _log_critical(self, message: str):
         if self.logger is not None:
-            CreateLog().critical(self.logger, message)
+            CreateLog().log_message(self.logger, message, "critical")
         else:
             print(f"CRITICAL: {message}")
 

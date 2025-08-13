@@ -103,22 +103,24 @@ class SQLiteDB(ABCDatabase):
                 self.cursor.execute(str_query, tuple(record.values()))
             self.conn.commit()
             if self.logger is not None:
-                CreateLog().info(
+                CreateLog().log_message(
                     self.logger,
                     f"Succesful commit in db {self.db_path} "
                     + f"/ table {str_table_name}.",
+                    "info"
                 )
         except Exception as e:
             self.conn.rollback()
             self.close
             if self.logger is not None:
-                CreateLog().error(
+                CreateLog().log_message(
                     self.logger,
                     "ERROR WHILE INSERTING DATA\n"
                     + f"DB_PATH: {self.db_path}\n"
                     + f"TABLE_NAME: {str_table_name}\n"
                     + f"JSON_DATA: {json_data}\n"
                     + f"ERROR_MESSAGE: {e}",
+                    "error"
                 )
             raise Exception(
                 "ERROR WHILE INSERTING DATA\n"

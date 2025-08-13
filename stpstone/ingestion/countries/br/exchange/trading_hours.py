@@ -246,10 +246,11 @@ class TradingHoursB3(ABCRequests):
             int_end_td = None
         else:
             if self.logger is not None:
-                CreateLog().warning(
+                CreateLog().log_message(
                     self.logger,
                     'No source found in url, for HTML webscraping, please revisit the code'
-                    + f' if it is an unexpected behaviour - URL: {resp_req.url}'
+                    + f' if it is an unexpected behaviour - URL: {resp_req.url}', 
+                    "warning"
                 )
             else:
                 print('No source found in url, for HTML webscraping, please revisit the code'

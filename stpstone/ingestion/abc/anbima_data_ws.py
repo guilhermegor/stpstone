@@ -30,7 +30,7 @@ class AnbimaDataUtils:
 
     def _log_info(self, message: str):
         if self.logger is not None:
-            CreateLog().info(self.logger, message)
+            CreateLog().log_message(self.logger, message, "info")
         else:
             print(f"INFO: {message}")
 

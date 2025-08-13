@@ -1,8 +1,11 @@
-import pandas as pd
-from pymongo import MongoClient
+from __future__ import annotations
+
 from logging import Logger
 from typing import Optional
-from __future__ import annotations
+
+import pandas as pd
+from pymongo import MongoClient
+
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -68,7 +71,11 @@ class MongoConn:
             self._collection.insert_many(data)
         except Exception as e:
             if self.logger is not None:
-                CreateLog().info(self.logger, f'ERROR {e}, MONGODB INJECTION ABORTED')
+                CreateLog().log_message(
+                    self.logger, 
+                    f'ERROR {e}, MONGODB INJECTION ABORTED', 
+                    "info"
+                )
 
     @property
     def close(self) -> None:

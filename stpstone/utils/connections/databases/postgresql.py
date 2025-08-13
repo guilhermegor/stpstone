@@ -50,7 +50,7 @@ class PostgreSQLDB(ABCDatabase):
         except Exception as e:
             error_msg = f"Error connecting to database: {str(e)}"
             if self.logger is not None:
-                CreateLog().error(self.logger, error_msg)
+                CreateLog().log_message(self.logger, error_msg, "error")
             else:
                 print(f"DATABASE CONNECTION ERROR: {error_msg}", file=sys.stderr)
             raise ConnectionError(error_msg) from e
@@ -119,22 +119,24 @@ class PostgreSQLDB(ABCDatabase):
             self.conn.commit()
 
             if self.logger is not None:
-                CreateLog().info(
+                CreateLog().log_message(
                     self.logger,
                     f"Successful commit in db {self.dict_db_config['dbname']} "
                     + f"/ table {str_table_name}.",
+                    "info"
                 )
         except Exception as e:
             self.conn.rollback()
             self.close()
             if self.logger is not None:
-                CreateLog().error(
+                CreateLog().log_message(
                     self.logger,
                     "ERROR WHILE INSERTING DATA\n"
                     + f"DB_CONFIG: {self.dict_db_config}\n"
                     + f"TABLE_NAME: {str_table_name}\n"
                     + f"JSON_DATA: {json_data}\n"
                     + f"ERROR_MESSAGE: {e}",
+                    "error"
                 )
             raise Exception(
                 "ERROR WHILE INSERTING DATA\n"

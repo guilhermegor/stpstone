@@ -197,8 +197,10 @@ class DealingPd(metaclass=TypeChecker):
 
         blame_xpt = DirFilesManagement().object_exists(path_xlsx)
         if not blame_xpt:
-            CreateLog().warning(
-                logger, f"File not saved to hard drive: {path_xlsx}"
+            CreateLog().log_message(
+                logger, 
+                f"File not saved to hard drive: {path_xlsx}", 
+                "warning"
             )
             raise Exception(f"File not saved to hard drive: {path_xlsx}")
 

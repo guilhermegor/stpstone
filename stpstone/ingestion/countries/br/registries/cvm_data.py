@@ -48,8 +48,11 @@ class CVMDATA:
         # validate the content of dataframe
         if (df_funds_register.empty == True) \
             and (self.logger is not None):
-            CreateLog().error(
-                self.logger, 'Error reading funds register within url: {}'.format(url))
+            CreateLog().log_message(
+                self.logger, 
+                'Error reading funds register within url: {}'.format(url), 
+                "error"
+            )
             raise Exception('Error reading funds register within url: {}'.format(url))
         elif df_funds_register.empty == True:
             raise Exception('Error reading funds register within url: {}'.format(url))

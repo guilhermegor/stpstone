@@ -203,12 +203,17 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         try:
             self.close()
             if exc_type is not None and self.logger is not None:
-                CreateLog().error(
+                CreateLog().log_message(
                     self.logger,
                     f"Context exited with exception: {exc_type.__name__}: {exc_val}",
+                    "error"
                 )
         except Exception as e:
             if self.logger is not None:
-                CreateLog().error(self.logger, f"Error closing connection: {str(e)}")
+                CreateLog().log_message(
+                    self.logger, 
+                    f"Error closing connection: {str(e)}", 
+                    "error"
+                )
             raise
         return None

@@ -1,13 +1,15 @@
 ### AWS S3 CLIENT ###
 
 # pypi.org libs
-import boto3
-import sys
-from botocore.exceptions import NoCredentialsError, ClientError, EndpointConnectionError
-from keyring import get_password
-from logging import Logger
 from io import BytesIO
-from typing import Optional, List, Dict, Any
+from logging import Logger
+import sys
+from typing import Any, Dict, List, Optional
+
+import boto3
+from botocore.exceptions import ClientError, EndpointConnectionError, NoCredentialsError
+from keyring import get_password
+
 # local libs
 from stpstone.utils.loggs.create_logs import CreateLog
 
@@ -65,7 +67,7 @@ class S3Client:
             message = f'An unexpected error occurred during {action or "an operation"}: {e}'
         # logging or printing, in case of debug mode
         if self.logger:
-            CreateLog().critical(self.logger, message)
+            CreateLog().log_message(self.logger, message, "critical")
         if self.bool_debug_mode:
             print(message)
 
