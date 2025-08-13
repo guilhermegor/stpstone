@@ -1,18 +1,26 @@
-### CLASS TO DEAL WITH MICROSOFT CMD TERMINAL ###
+"""Terminal color formatting utilities for Microsoft CMD.
 
-class BColors:
+This module provides a class for applying ANSI color codes to text in Windows CMD terminal.
+The colors can be used to highlight different types of messages (warnings, errors, etc.).
+"""
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
+
+class BColors(metaclass=TypeChecker):
+    """Class containing ANSI color codes for terminal text formatting.
+
+    References
+    ----------
+    .. [1] https://stackoverflow.com/questions/4406389/if-else-in-a-list-comprehension
     """
-    REFERENCES: https://stackoverflow.com/questions/4406389/if-else-in-a-list-comprehension
-    DOCSTRING:
-    INPUTS:
-    OUTPUTS
-    """
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+    HEADER: str = "\033[95m"
+    OKBLUE: str = "\033[94m"
+    OKCYAN: str = "\033[96m"
+    OKGREEN: str = "\033[92m"
+    WARNING: str = "\033[93m"
+    FAIL: str = "\033[91m"
+    ENDC: str = "\033[0m"
+    BOLD: str = "\033[1m"
+    UNDERLINE: str = "\033[4m"
