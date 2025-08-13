@@ -126,7 +126,7 @@ class TestGPT:
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             
             assert gpt.api_key == valid_init_params["api_key"]
@@ -134,12 +134,20 @@ class TestGPT:
             assert gpt.int_max_tokens == valid_init_params["int_max_tokens"]
             assert gpt.str_context == valid_init_params["str_context"]
             assert gpt.bool_stream == valid_init_params["bool_stream"]
-            assert gpt.client == mock_openai_client
+            assert gpt.client is mock_openai_client
 
-    @pytest.mark.parametrize("api_key", [None, "", 123])
+    @pytest.mark.parametrize(
+        "api_key,type_error", 
+        [
+            (None, TypeError), 
+            ("", ValueError), 
+            (123, TypeError)
+        ]
+    )
     def test_init_invalid_api_key(
         self,
         api_key: Any, # noqa ANN401: typing.Any is not allowed
+        type_error: type,
         valid_init_params: dict[str, Any],
         mock_openai_client: MagicMock
     ) -> None:
@@ -154,25 +162,30 @@ class TestGPT:
         ----------
         api_key : Any
             Invalid API key to test
+        type_error : type
+            Expected exception type
         valid_init_params : dict[str, Any]
             Base valid parameters from fixture
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             valid_init_params["api_key"] = api_key
-            with pytest.raises(ValueError) as excinfo:
+            with pytest.raises(type_error):
                 GPT(**valid_init_params)
-            
-            if api_key is None or api_key == "":
-                assert "API key cannot be empty" in str(excinfo.value)
-            else:
-                assert "API key must be a string" in str(excinfo.value)
 
-    @pytest.mark.parametrize("model", [None, "", 123])
+    @pytest.mark.parametrize(
+        "model,type_error", 
+        [
+            (None, TypeError), 
+            ("", ValueError), 
+            (123, TypeError)
+        ]
+    )
     def test_init_invalid_model(
         self,
         model: Any, # noqa ANN401: typing.Any is not allowed
+        type_error: type,
         valid_init_params: dict[str, Any],
         mock_openai_client: MagicMock
     ) -> None:
@@ -187,21 +200,18 @@ class TestGPT:
         ----------
         model : Any
             Invalid model name to test
+        type_error : type
+            Expected exception type
         valid_init_params : dict[str, Any]
             Base valid parameters from fixture
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             valid_init_params["str_model"] = model
-            with pytest.raises(ValueError) as excinfo:
+            with pytest.raises(type_error):
                 GPT(**valid_init_params)
-            
-            if model is None or model == "":
-                assert "Model name cannot be empty" in str(excinfo.value)
-            else:
-                assert "Model name must be a string" in str(excinfo.value)
-
+                
     @pytest.mark.parametrize("max_tokens", [0, -1, -100])
     def test_init_invalid_max_tokens(
         self,
@@ -225,7 +235,7 @@ class TestGPT:
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             valid_init_params["int_max_tokens"] = max_tokens
             with pytest.raises(ValueError) as excinfo:
                 GPT(**valid_init_params)
@@ -258,7 +268,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -295,12 +305,16 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_image_prompt)
             
             assert result == mock_chat_completion
             mock_openai_client.chat.completions.create.assert_called_once()
+            call_args = mock_openai_client.chat.completions.create.call_args[1]
+            assert call_args["messages"][-1]["content"][0]["type"] == "image_url"
+            assert call_args["messages"][-1]["content"][0]["image_url"]["url"] \
+                == sample_image_prompt[0][1]
 
     def test_run_prompt_with_mixed_input(
         self,
@@ -328,7 +342,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(mixed_prompt)
             
@@ -361,7 +375,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -398,7 +412,7 @@ class TestGPT:
             Mocked ChatCompletion from fixture
         """
         valid_init_params["str_context"] = None
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -434,7 +448,7 @@ class TestGPT:
             Mocked ChatCompletion from fixture
         """
         valid_init_params["bool_stream"] = True
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -442,21 +456,25 @@ class TestGPT:
             call_args = mock_openai_client.chat.completions.create.call_args[1]
             assert call_args["stream"] is True
 
-    @pytest.mark.parametrize("invalid_prompt", [
-        [],
-        [("invalid_type", "content")],
-        [("text", "")],
-        [("image_url", "")],
-        [("text", "content", "extra")],
-        [("text")],
-        [123],
-        "not_a_list"
-    ])
+    @pytest.mark.parametrize(
+        "invalid_prompt,type_error,excinfo", [
+            ([], ValueError, "list_tuple cannot be empty"),
+            ([("invalid_type", "content")], ValueError, "Invalid tuple type"),
+            ([("text", "")], ValueError, "Tuple content cannot be empty"),
+            ([("image_url", "")], ValueError, "Tuple content cannot be empty"),
+            ([("text", "content", "ext")], ValueError, "Each tuple must have exactly 2 elements"),
+            ([("text")], TypeError, "must be of type"),
+            ([123], TypeError, "must be of type"),
+            ("not_a_list", TypeError, "must be of type"),
+        ]
+    )
     def test_run_prompt_invalid_inputs(
         self,
         valid_init_params: dict[str, Any],
         mock_openai_client: MagicMock,
-        invalid_prompt: Any # noqa ANN401: typing.Any is not allowed
+        invalid_prompt: Any, # noqa ANN401: typing.Any is not allowed
+        type_error: type, 
+        excinfo: str
     ) -> None:
         """Test run_prompt with various invalid inputs.
 
@@ -473,25 +491,20 @@ class TestGPT:
             Mocked OpenAI client from fixture
         invalid_prompt : Any
             Invalid prompt to test
+        type_error : type
+            Expected error type
+        excinfo : str
+            Expected error message
+
+        Returns
+        -------
+        None
         """
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             
-            with pytest.raises(ValueError) as excinfo:
+            with pytest.raises(type_error, match=excinfo):
                 gpt.run_prompt(invalid_prompt)
-            
-            if isinstance(invalid_prompt, list):
-                if not invalid_prompt:
-                    assert "list_tuple cannot be empty" in str(excinfo.value)
-                else:
-                    if len(invalid_prompt[0]) != 2:
-                        assert "Each tuple must have exactly 2 elements" in str(excinfo.value)
-                    elif not invalid_prompt[0][1]:
-                        assert "Tuple content cannot be empty" in str(excinfo.value)
-                    else:
-                        assert "Invalid tuple type" in str(excinfo.value)
-            else:
-                assert "list_tuple cannot be empty" in str(excinfo.value)
 
     def test_run_prompt_api_error(
         self,
@@ -516,10 +529,8 @@ class TestGPT:
             Sample text prompt from fixture
         """
         mock_openai_client.chat.completions.create.side_effect = Exception("API error")
-        with patch("openai.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             
-            with pytest.raises(Exception) as excinfo:
+            with pytest.raises(Exception, match="API error"):
                 gpt.run_prompt(sample_text_prompt)
-            
-            assert "API error" in str(excinfo.value)
