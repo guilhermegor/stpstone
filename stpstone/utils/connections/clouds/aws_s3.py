@@ -7,12 +7,12 @@ handling for common S3 operations.
 
 from io import BytesIO
 from logging import Logger
-import sys
 from typing import Any, Optional, TypedDict
 
 import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError, NoCredentialsError
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -23,7 +23,7 @@ class ReturnDownloadFile(TypedDict):
     Metadata: dict[str, Any]
 
 
-class S3Client:
+class S3Client(metaclass=TypeChecker):
     """Client for AWS S3 operations with error handling and logging."""
 
     def __init__(
@@ -54,11 +54,6 @@ class S3Client:
             Logger instance for error logging (default: None)
         bool_debug_mode : bool
             Flag to enable debug mode printing (default: False)
-
-        Raises
-        ------
-        ValueError
-            If any required credential parameter is empty
         """
         self._envs = {
             "aws_access_key_id": aws_access_key_id,
