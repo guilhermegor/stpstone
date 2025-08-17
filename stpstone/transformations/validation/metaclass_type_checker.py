@@ -122,6 +122,11 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
         return
     
     origin = get_origin(expected_type)
+
+    # allow None or non-string types for specific parameters to be validated by 
+    #   _validate_email_params
+    if param_name in ('str_sender', 'subject', 'html_body', 'token') and expected_type is str:
+        return
     
     # handle Literal types
     if origin is Literal:
