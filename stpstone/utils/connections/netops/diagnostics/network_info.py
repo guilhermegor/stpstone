@@ -1,96 +1,96 @@
+"""Network information utilities.
+
+This module provides a class for retrieving network-related information such as IP addresses,
+port status, and open ports using socket, requests, and psutil libraries.
+"""
+
 import socket
-import requests
+
 import psutil
+import requests
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class NetworkInfo:
-    """
-    A class to retrieve network-related information such as IP addresses, port status, and open ports.
-    """
+class NetworkInfo(metaclass=TypeChecker):
+    """Class for retrieving network-related information."""
 
-    @property
-    def get_public_ip_address(self):
+    def _validate_port(self, port: int) -> None:
+        """Validate port number.
+
+        Parameters
+        ----------
+        port : int
+            Port number to validate
+
+        Raises
+        ------
+        ValueError
+            If port is not between 0 and 65535
         """
-        Retrieves the public IP address of the machine using an external service.
-        Returns:
-            str: The public IP address, or an error message if the request fails.
+        if not 0 <= port <= 65535:
+            raise ValueError("Port must be between 0 and 65535")
+
+    def get_public_ip_address(self) -> str:
+        """Retrieve the public IP address of the machine using an external service.
+
+        Returns
+        -------
+        str
+            The public IP address
         """
         try:
-            response = requests.get('https://api.ipify.org?format=json')
+            response = requests.get("https://api.ipify.org?format=json", timeout=10)
             response.raise_for_status()
-            public_ip = response.json()['ip']
-            return public_ip
-        except requests.RequestException as e:
-            return f'Error fetching public IP: {e}'
+            return str(response.json()["ip"])
+        except requests.RequestException as err:
+            raise requests.RequestException(
+                f"Error fetching public IP: {str(err)}"
+            ) from err
 
-    def is_port_in_use(self, port):
+    def is_port_in_use(self, port: int) -> bool:
+        """Check if a specific port is in use on the local machine.
+
+        Parameters
+        ----------
+        port : int
+            The port number to check
+
+        Returns
+        -------
+        bool
+            True if the port is in use, False otherwise
         """
-        Checks if a specific port is in use on the local machine.
-
-        Args:
-            port (int): The port number to check.
-
-        Returns:
-            bool: True if the port is in use, False otherwise.
-        """
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        self._validate_port(port)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
-                #   try to bind to the port
-                s.bind(('0.0.0.0', port))
-                #   port is available
+                sock.bind(("0.0.0.0", port)) # noqa S104: possible binding to all interfaces
                 return False
             except OSError:
-                #   port is in use
                 return True
 
-    @property
-    def get_available_port(self):
-        """
-        Finds and returns an available port on the local machine.
+    def get_available_port(self) -> int:
+        """Find and return an available port on the local machine.
 
-        Returns:
-            int: An available port number.
+        Returns
+        -------
+        int
+            An available port number
         """
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            #   bind to an available port (0 means OS assigns a free port)
-            s.bind(('0.0.0.0', 0))
-            #   get the assigned port number
-            port = s.getsockname()[1]
-            return port
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.bind(("0.0.0.0", 0)) # noqa S104: possible binding to all interfaces
+            return int(sock.getsockname()[1])
 
-    @property
-    def get_open_ports(self):
-        """
-        Retrieves a list of all open ports on the local machine.
+    def get_open_ports(self) -> list[int]:
+        """Retrieve a list of all open ports on the local machine.
 
-        Returns:
-            list: A list of open port numbers.
+        Returns
+        -------
+        list[int]
+            A list of open port numbers
         """
-        open_ports = []
+        open_ports: list[int] = []
         for conn in psutil.net_connections():
             if conn.status == psutil.CONN_LISTEN and conn.laddr:
                 open_ports.append(conn.laddr.port)
         return open_ports
-
-
-if __name__ == '__main__':
-    network_info = NetworkInfo()
-
-    # get public IP address
-    public_ip = network_info.get_public_ip_address
-    print(f'Public IP Address: {public_ip}')
-
-    # check if a port is in use
-    port_to_check = 8080
-    if network_info.is_port_in_use(port_to_check):
-        print(f'Port {port_to_check} is in use.')
-    else:
-        print(f'Port {port_to_check} is available.')
-
-    # get an available port
-    available_port = network_info.get_available_port
-    print(f'Available Port: {available_port}')
-
-    # get all opened ports
-    open_ports = network_info.get_open_ports
-    print(f'Open Ports: {open_ports}')
