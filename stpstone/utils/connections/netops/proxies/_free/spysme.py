@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Union
 from requests import request
 
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.abc import ABCSession
+from stpstone.utils.connections.netops.proxies.proxies_abc import ABCSession
 from stpstone.utils.geography.geo_ww import WWGeography, WWTimezones
 
 

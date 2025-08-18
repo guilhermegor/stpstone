@@ -1,7 +1,7 @@
 from logging import Logger
 from typing import Dict, List, Optional, Union
 
-from stpstone.utils.connections.netops.proxies.abc import ABCSession
+from stpstone.utils.connections.netops.proxies.proxies_abc import ABCSession
 from stpstone.utils.geography.geo_ww import WWGeography, WWTimezones
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 

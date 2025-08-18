@@ -10,7 +10,10 @@ from typing import Optional
 from requests import request
 
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.abc import ABCSession, ReturnAvailableProxies
+from stpstone.utils.connections.netops.proxies.proxies_abc import (
+    ABCSession,
+    ReturnAvailableProxies,
+)
 from stpstone.utils.geography.geo_ww import WWGeography, WWTimezones
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler

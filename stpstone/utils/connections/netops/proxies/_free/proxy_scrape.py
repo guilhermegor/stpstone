@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 
 from requests import request
 
-from stpstone.utils.connections.netops.proxies.abc import ABCSession
+from stpstone.utils.connections.netops.proxies.proxies_abc import ABCSession
 
 
 class ProxyScrapeAll(ABCSession):
