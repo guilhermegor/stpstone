@@ -131,7 +131,7 @@ class FreeProxyNet(ABCSession):
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bool_alive: bool = True,
-        list_anonymity_value: list[str] = ["anonymous", "elite"],
+        list_anonymity_value: list[str] = None,
         list_protocol: str = "http",
         str_continent_code: Optional[str] = None,
         str_country_code: Optional[str] = None,
@@ -139,7 +139,7 @@ class FreeProxyNet(ABCSession):
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
         bool_use_timer: bool = False,
-        list_status_forcelist: list[int] = [429, 500, 502, 503, 504],
+        list_status_forcelist: list[int] = None,
         logger: Optional[Logger] = None
     ) -> None:
         """Initialize FreeProxyNet instance.
@@ -230,7 +230,8 @@ class FreeProxyNet(ABCSession):
             "upgrade-insecure-requests": "1",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                           "(KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-            "Cookie": "_ga=GA1.1.2121373567.1743934016; _ga_F5HK5559Z2=GS1.1.1743937290.2.1.1743937312.0.0.0"
+            "Cookie": "_ga=GA1.1.2121373567.1743934016; _ga_F5HK5559Z2=GS1.1.1743937290.2.1." \
+                + "1743937312.0.0.0"
         }
 
         try:
