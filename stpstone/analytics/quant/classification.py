@@ -30,7 +30,7 @@ from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
-class ResultFetchSklearn(TypedDict):
+class ResultFetchSklearn(TypedDict, metaclass=TypeChecker):
     """TypedDict for sklearn fetch_openml results."""
 
     data: Union[NDArray[np.float64], csr_matrix, pd.DataFrame]
@@ -43,14 +43,14 @@ class ResultFetchSklearn(TypedDict):
     frame: pd.DataFrame
 
 
-class ResultOneHotVectorizer(TypedDict):
+class ResultOneHotVectorizer(TypedDict, metaclass=TypeChecker):
     """TypedDict for one-hot vectorizer results."""
 
     labels: list[str]
     array: NDArray[np.float64]
 
 
-class ResultClassification(TypedDict):
+class ResultClassification(TypedDict, metaclass=TypeChecker):
     """TypedDict for classification results."""
 
     model_fitted: BaseEstimator

@@ -25,7 +25,7 @@ from sklearn.model_selection import (
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ResultCrossValidation(TypedDict):
+class ResultCrossValidation(TypedDict, metaclass=TypeChecker):
     """TypedDict for cross-validation results."""
 
     scores: float
@@ -33,7 +33,7 @@ class ResultCrossValidation(TypedDict):
     std: float
 
 
-class ResultGridSearch(TypedDict):
+class ResultGridSearch(TypedDict, metaclass=TypeChecker):
     """TypedDict for grid-search results."""
 
     best_parameters: dict
@@ -46,7 +46,7 @@ class ResultGridSearch(TypedDict):
     rmse: float
 
 
-class ResultAccuracyPredictions(TypedDict):
+class ResultAccuracyPredictions(TypedDict, metaclass=TypeChecker):
     """TypedDict for accuracy and predictions results."""
 
     cross_validation_scores: float
@@ -58,7 +58,7 @@ class ResultAccuracyPredictions(TypedDict):
     roc_auc_score: float
 
 
-class ResultFittingPerformance(TypedDict):
+class ResultFittingPerformance(TypedDict, metaclass=TypeChecker):
     """TypedDict for fitting performance results."""
 
     accuracy: float

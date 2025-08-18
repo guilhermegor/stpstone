@@ -21,7 +21,7 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class ReturnDownloadAttch(TypedDict):
+class ReturnDownloadAttch(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for download_attch method return value.
 
     Parameters

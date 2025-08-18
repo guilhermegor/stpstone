@@ -18,7 +18,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class ReturnGetElement(TypedDict):
+class ReturnGetElement(TypedDict, metaclass=TypeChecker):
     """Return type for get_element method.
 
     Parameters

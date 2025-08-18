@@ -37,7 +37,7 @@ from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnReplaceNaNValues(TypedDict):
+class ReturnReplaceNaNValues(TypedDict, metaclass=TypeChecker):
     """Return type for replace_nan_values function."""
     
     model: BaseEstimator

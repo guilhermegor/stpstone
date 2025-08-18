@@ -14,7 +14,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.str import StrHandler
 
 
-class RegionResult(TypedDict):
+class RegionResult(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for region information.
     
     Attributes
@@ -32,7 +32,7 @@ class RegionResult(TypedDict):
     nome: str
 
 
-class ReturnStates(TypedDict):
+class ReturnStates(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for Brazilian states information.
 
     Attributes
@@ -53,7 +53,7 @@ class ReturnStates(TypedDict):
     regiao: RegionResult
 
 
-class ReturnZipCode(TypedDict):
+class ReturnZipCode(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for zip code information.
 
     Attributes

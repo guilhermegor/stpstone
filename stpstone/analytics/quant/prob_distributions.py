@@ -35,7 +35,7 @@ DEFAULT_PDF_CDF_RANGE = np.linspace(-2, 2, 100)
 DEFAULT_PPF_RANGE = np.linspace(0.01, 0.99, 100)
 
 
-class ResultProbDistribution(TypedDict):
+class ResultProbDistribution(TypedDict, metaclass=TypeChecker):
     """Typing for probability distribution results."""
 
     mean: float

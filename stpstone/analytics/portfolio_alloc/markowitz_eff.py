@@ -13,7 +13,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.lists import ListHandler
 
 
-class ResultMaxSharpe(TypedDict):
+class ResultMaxSharpe(TypedDict, metaclass=TypeChecker):
     """TypedDict for ResultMaxSharpe."""
     
     tickers: list[str]

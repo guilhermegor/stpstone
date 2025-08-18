@@ -12,14 +12,14 @@ from stpstone.analytics.quant.regression import NonLinearEquations
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ResultVommaPositiveOutsideInterval(TypedDict):
+class ResultVommaPositiveOutsideInterval(TypedDict, metaclass=TypeChecker):
     """TypedDict for VommaPositiveOutsideInterval results."""
 
     lower_boundary: float
     upper_boundary: float
 
 
-class ResultVegaGlobalMax(TypedDict):
+class ResultVegaGlobalMax(TypedDict, metaclass=TypeChecker):
     """TypedDict for VegaGlobalMax results."""
     
     t_max_global_vega: float

@@ -5,7 +5,7 @@ from typing import TypedDict
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ResultForwardPricing(TypedDict):
+class ResultForwardPricing(TypedDict, metaclass=TypeChecker):
     """Forward contract pricing results."""
     
     mtm: float

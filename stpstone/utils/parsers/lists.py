@@ -32,14 +32,14 @@ from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
-class ReturnGetLowerUpperBound(TypedDict):
+class ReturnGetLowerUpperBound(TypedDict, metaclass=TypeChecker):
     """Return type for get_lower_upper_bound method."""
 
     lower_bound: Number
     upper_bound: Number
 
 
-class ReturnGetLowerMidUpperBound(TypedDict):
+class ReturnGetLowerMidUpperBound(TypedDict, metaclass=TypeChecker):
     """Return type for get_lower_mid_upper_bound method."""
 
     lower_bound: Number

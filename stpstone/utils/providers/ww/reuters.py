@@ -13,7 +13,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.object import HandlingObjects
 
 
-class ReturnToken(TypedDict):
+class ReturnToken(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for token response.
 
     Parameters

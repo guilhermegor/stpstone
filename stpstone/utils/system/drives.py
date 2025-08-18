@@ -18,7 +18,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class ReturnClassifyDrives(TypedDict):
+class ReturnClassifyDrives(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for classify_drives return.
 
     Keys
@@ -33,7 +33,7 @@ class ReturnClassifyDrives(TypedDict):
     detachable: list[str]
 
 
-class ReturnGetDriveUsage(TypedDict):
+class ReturnGetDriveUsage(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for get_drive_usage return.
 
     Keys
@@ -50,7 +50,7 @@ class ReturnGetDriveUsage(TypedDict):
     used: int
     free: int
 
-class ReturnGetDriveInfo(TypedDict):
+class ReturnGetDriveInfo(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for get_drive_info return.
 
     Keys

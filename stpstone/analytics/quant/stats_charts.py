@@ -26,7 +26,7 @@ from stpstone.analytics.quant.regression import LogLinearRegressions
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnConfusionMtx2x2(TypedDict):
+class ReturnConfusionMtx2x2(TypedDict, metaclass=TypeChecker):
     """Return type for confusion_mtx_2x2 method.
 
     Parameters
@@ -35,7 +35,7 @@ class ReturnConfusionMtx2x2(TypedDict):
         2x2 confusion matrix
     """
 
-class ReturnEcdfChart(TypedDict):
+class ReturnEcdfChart(TypedDict, metaclass=TypeChecker):
     """Return type for ecdf_chart method.
 
     Parameters
@@ -46,7 +46,7 @@ class ReturnEcdfChart(TypedDict):
         Y-axis values for ECDF
     """
 
-class ReturnQqPlot(TypedDict):
+class ReturnQqPlot(TypedDict, metaclass=TypeChecker):
     """Return type for qq_plot method.
 
     Parameters

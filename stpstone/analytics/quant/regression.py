@@ -36,7 +36,7 @@ from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class LinearRegressionsResult(TypedDict):
+class LinearRegressionsResult(TypedDict, metaclass=TypeChecker):
     """TypedDict for LinearRegressions results."""
 
     model_fitted: BaseEstimator
@@ -49,7 +49,7 @@ class LinearRegressionsResult(TypedDict):
     features_importance: NotRequired[NDArray[np.float64]]
 
 
-class NonLinearRegressionsResult(TypedDict):
+class NonLinearRegressionsResult(TypedDict, metaclass=TypeChecker):
     """TypedDict for NonLinearRegressions results."""
 
     model_fitted: BaseEstimator
@@ -58,7 +58,7 @@ class NonLinearRegressionsResult(TypedDict):
     features_importance: NotRequired[NDArray[np.float64]]
 
 
-class LogLinearRegressionsResult(TypedDict):
+class LogLinearRegressionsResult(TypedDict, metaclass=TypeChecker):
     """TypedDict for LogLinearRegressions results."""
 
     model_fitted: LogisticRegression
@@ -73,7 +73,7 @@ class LogLinearRegressionsResult(TypedDict):
     log_likelihood: tuple[float, float]
 
 
-class NonLinearEquationsResult(TypedDict):
+class NonLinearEquationsResult(TypedDict, metaclass=TypeChecker):
     """TypedDict for NonLinearEquations results."""
     
     coefficients: NDArray[np.float64]

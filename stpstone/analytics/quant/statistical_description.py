@@ -11,7 +11,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnStatisticalDescription(TypedDict):
+class ReturnStatisticalDescription(TypedDict, metaclass=TypeChecker):
     """Type definition for statistical_description return value."""
 
     nobs: int
@@ -25,7 +25,7 @@ class ReturnStatisticalDescription(TypedDict):
     kurtosis: float
 
 
-class ReturnErrorMetrics(TypedDict):
+class ReturnErrorMetrics(TypedDict, metaclass=TypeChecker):
     """Type definition for error metric methods return value."""
     
     mean_squared_error: Optional[float]

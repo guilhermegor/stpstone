@@ -5,7 +5,7 @@ from typing import TypedDict
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ResultDupontAnalysis(TypedDict):
+class ResultDupontAnalysis(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for holding ROE decomposition results."""
 
     roe_3_step: float

@@ -9,7 +9,7 @@ from logging import Logger
 from random import shuffle
 import re
 import time
-from typing import Any, Optional, TypedDict, Union, tuple
+from typing import Any, Literal, Optional, TypedDict, Union
 
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -21,7 +21,7 @@ from stpstone.utils.loggs.create_logs import CreateLog, conditional_timeit
 from stpstone.utils.parsers.dicts import HandlingDicts
 
 
-class ReturnAvailableProxies(TypedDict):
+class ReturnAvailableProxies(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for proxy information.
 
     Attributes

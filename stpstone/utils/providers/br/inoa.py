@@ -16,7 +16,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.cals.handling_dates import DatesBR
 
 
-class ReturnGenericReq(TypedDict):
+class ReturnGenericReq(TypedDict, metaclass=TypeChecker):
     """Typed dictionary for generic request response.
 
     Attributes

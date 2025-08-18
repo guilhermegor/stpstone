@@ -38,7 +38,7 @@ TypeToCase = TypeVar(
                   "upper_first"]
 )
 
-class ReturnUUID(TypedDict):
+class ReturnUUID(TypedDict, metaclass=TypeChecker):
     """TypedDict for returning UUID information."""
 
     uuid: uuid.UUID
