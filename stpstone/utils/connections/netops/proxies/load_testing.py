@@ -13,7 +13,7 @@ class ProxyLoadTester:
     def __init__(
         self,
         bool_new_proxy: bool = True,
-        dict_proxies: Union[Dict[str, str], None] = None,
+        dict_proxies: Optional[Dict[str, str]] = None,
         int_retries_new_proxies_not_mapped: int = 10,
         int_backoff_factor: int = 1,
         bool_alive: bool = True,

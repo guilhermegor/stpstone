@@ -13,7 +13,7 @@ class ProxyTester:
         self.port = port
         self.list_status_forcelist: List[int] = [429, 500, 502, 503, 504]
 
-    def _configure_session(self, dict_proxy:Union[Dict[str, str], None]=None,
+    def _configure_session(self, dict_proxy:Optional[Dict[str, str]]=None,
                             int_retries:int=10, int_backoff_factor:int=1) -> Session:
             retry_strategy = Retry(
                 total=int_retries,
