@@ -29,7 +29,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bool_alive: bool = True,
-        list_anonymity_value: List[str] = ["anonymous", "elite"],
+        list_anonymity_value: Optional[List[str]] = None,
         list_protocol: Union[List[str]] = ["http", "https"],
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
@@ -37,7 +37,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
         bool_use_timer: bool = False,
-        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
+        list_status_forcelist: Optional[List[int]] = None,
         logger: Optional[Logger] = None
     ):
         self.bool_new_proxy = bool_new_proxy
@@ -45,7 +45,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.int_retries = int_retries
         self.int_backoff_factor = int_backoff_factor
         self.bool_alive = bool_alive
-        self.list_anonymity_value = list_anonymity_value
+        self.list_anonymity_value = list_anonymity_value or ["anonymous", "elite"]
         self.list_protocol = list_protocol if isinstance(list_protocol, list) else [list_protocol]
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
@@ -53,7 +53,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.float_min_ratio_times_alive_dead = float_min_ratio_times_alive_dead
         self.float_max_timeout = float_max_timeout
         self.bool_use_timer = bool_use_timer
-        self.list_status_forcelist = list_status_forcelist
+        self.list_status_forcelist = list_status_forcelist or [429, 500, 502, 503, 504]
         self.logger = logger
         self.create_log = CreateLog()
         """
@@ -147,7 +147,6 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         else:
             raise ValueError(f"Unknown time measure: {str_time_measure}")
 
-    @property
     @abstractmethod
     def _available_proxies(self):
         pass
@@ -166,11 +165,10 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         except (ProxyError, ConnectTimeout, SSLError, ConnectionError):
             return False
 
-    @property
     def get_proxy(self) -> Dict[str, str]:
         @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxy():
-            list_ser = self._filtered_proxies
+            list_ser = self._filtered_proxies()
             shuffle(list_ser)
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
@@ -181,12 +179,11 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             return None
         return retrieve_proxy()
 
-    @property
     def get_proxies(self) -> List[Dict[str, str]]:
         list_ = list()
         @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxy():
-            list_ser = self._filtered_proxies
+            list_ser = self._filtered_proxies()
             for dict_proxy in list_ser:
                 str_ip = dict_proxy["ip"]
                 int_port = dict_proxy["port"]
@@ -236,9 +233,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         else:
             return resp_req.json()
 
-    @property
     def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:
-        list_ser = self._available_proxies
+        list_ser = self._available_proxies()
         self.create_log.log_message(
             self.logger,
             f"Number of available proxies: {len(list_ser)}",
@@ -296,19 +292,17 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             session.proxies.update(dict_proxy)
         return session
 
-    @property
     def session(self):
-        proxy = self.get_proxy if self.bool_new_proxy == True else None
+        proxy = self.get_proxy() if self.bool_new_proxy == True else None
         dict_proxy = self.dict_proxies if self.dict_proxies is not None else (
             self._dict_proxy(proxy["ip"], proxy["port"])
             if proxy is not None else None
         )
         return self._configure_session(dict_proxy, self.int_retries, self.int_backoff_factor)
 
-    @property
     def configured_sessions(self):
         if self.bool_new_proxy == False: return None
-        list_ser = self.get_proxies
+        list_ser = self.get_proxies()
         if list_ser is None: return None
         list_sessions = list()
         for dict_proxy in list_ser:

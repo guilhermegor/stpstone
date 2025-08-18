@@ -214,14 +214,14 @@ class YieldFreeProxy:
     def _cache(self) -> List[Dict[str, str]]:
         list_ser = list()
         for list_ in [
-            self.cls_spys_one_country.configured_sessions,
-            self.cls_free_proxy_net.configured_sessions,
-            self.cls_spysme_countries.configured_sessions,
-            self.cls_freeproxy_world.configured_sessions,
-            self.cls_proxy_nova.configured_sessions,
-            self.cls_proxy_scrape_all.configured_sessions,
-            self.cls_proxy_scrape_country.configured_sessions,
-            self.cls_proxy_webshare.configured_sessions,
+            self.cls_spys_one_country.configured_sessions(),
+            self.cls_free_proxy_net.configured_sessions(),
+            self.cls_spysme_countries.configured_sessions(),
+            self.cls_freeproxy_world.configured_sessions(),
+            self.cls_proxy_nova.configured_sessions(),
+            self.cls_proxy_scrape_all.configured_sessions(),
+            self.cls_proxy_scrape_country.configured_sessions(),
+            self.cls_proxy_webshare.configured_sessions(),
         ]:
             if list_ is not None:
                 list_ser.extend(list_)

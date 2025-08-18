@@ -5,7 +5,7 @@ free-proxy-list.net, including proxy validation and metadata enrichment.
 """
 
 from logging import Logger
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from requests import request
 
@@ -91,7 +91,7 @@ class ReturnAvailableProxies(TypedDict):
     bool_alive: bool
     status: str
     alive_since: float
-    anonymity: str
+    anonymity: Literal["anonymous", "elite", "transparent"]
     average_timeout: float
     first_seen: float
     ip_data: str
@@ -200,23 +200,6 @@ class FreeProxyNet(ABCSession):
         self.html_parser = HtmlHandler()
         self.str_parser = StrHandler()
 
-    def _validate_proxy_anonymity(self, anonymity: str) -> None:
-        """Validate proxy anonymity level.
-
-        Parameters
-        ----------
-        anonymity : str
-            Anonymity level to validate
-
-        Raises
-        ------
-        ValueError
-            If anonymity level is invalid
-        """
-        valid_levels = {"anonymous", "elite", "transparent"}
-        if anonymity.lower() not in valid_levels:
-            raise ValueError(f"Invalid anonymity level: {anonymity}")
-
     def _available_proxies(self) -> list[ReturnAvailableProxies]:
         """Fetch and parse available proxies from free-proxy-list.net.
 
@@ -279,8 +262,6 @@ class FreeProxyNet(ABCSession):
                     str_anonymity = "anonymous"
                 else:
                     str_anonymity = "transparent"
-
-                self._validate_proxy_anonymity(str_anonymity)
 
                 str_protocol_code = self.html_parser.lxml_xpath(el_tr, './/td[@class="hx"]')\
                     [0].text

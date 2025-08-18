@@ -21,7 +21,7 @@ from stpstone.utils.connections.netops.proxies._free.spysone import SpysOneCount
 #     logger=None
 # )
 
-# print(cls_._available_proxies)
+# print(cls_._available_proxies())
 
 # cls_ = FreeProxyNet(
 #     bool_new_proxy=True,
@@ -41,7 +41,7 @@ from stpstone.utils.connections.netops.proxies._free.spysone import SpysOneCount
 #     logger=None
 # )
 
-# print(cls_._available_proxies)
+# print(cls_._available_proxies())
 
 cls_ = SpysOneCountry(
     bool_new_proxy=True,
@@ -61,4 +61,4 @@ cls_ = SpysOneCountry(
     logger=None
 )
 
-print(cls_._available_proxies)
+print(cls_._available_proxies())
