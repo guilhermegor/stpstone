@@ -1,178 +1,252 @@
+"""Proxy management classes for interacting with ProxyScrape API.
+
+This module provides classes for fetching and managing proxy information from
+ProxyScrape's free proxy API, supporting both global and country-specific proxy lists.
+"""
+
 from logging import Logger
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 from requests import request
 
-from stpstone.utils.connections.netops.proxies.proxies_abc import ABCSession
+from stpstone.utils.connections.netops.proxies.proxies_abc import (
+    ABCSession,
+    ReturnAvailableProxies,
+)
 
 
 class ProxyScrapeAll(ABCSession):
+    """Class for fetching all available proxies from ProxyScrape."""
 
     def __init__(
         self,
-        bool_new_proxy: bool = True,
-        dict_proxies: Union[Dict[str, str], None] = None,
+        bl_new_proxy: bool = True,
+        dict_proxies: Optional[dict[str, str]] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
-        bool_alive: bool = True,
-        list_anonymity_value: List[str] = ["anonymous", "elite"],
-        list_protocol: str = 'http',
-        str_continent_code: Union[str, None] = None,
-        str_country_code: Union[str, None] = None,
-        bool_ssl: Union[bool, None] = None,
+        bl_alive: bool = True,
+        list_anonymity_value: Optional[list[str]] = None,
+        list_protocol: str = "http",
+        str_continent_code: Optional[str] = None,
+        str_country_code: Optional[str] = None,
+        bl_ssl: Optional[bool] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
-        bool_use_timer: bool = False,
-        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
+        bl_use_timer: bool = False,
+        list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None
     ) -> None:
         super().__init__(
-            bool_new_proxy=bool_new_proxy,
+            bl_new_proxy=bl_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alive=bool_alive,
+            bl_alive=bl_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssl=bool_ssl,
+            bl_ssl=bl_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timer=bool_use_timer,
+            bl_use_timer=bl_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
-    @property
-    def _available_proxies(self) -> List[Dict[str, Union[str, float]]]:
-        resp_req = request(
-            "GET",
-            "https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=json",
-        )
-        resp_req.raise_for_status()
-        json_proxies = resp_req.json()
-        return [
-            {
-                "protocol": str(dict_["protocol"]).lower(),
-                "bool_alive": bool(dict_["alive"]),
-                "status": str(dict_["ip_data"]["status"]) if "ip_data" in dict_ else "",
-                "alive_since": float(dict_["alive_since"]),
-                "anonymity": str(dict_["anonymity"]).lower(),
-                "average_timeout": float(dict_["average_timeout"]),
-                "first_seen": float(dict_["first_seen"]),
-                "ip_data": str(dict_["ip_data"]["as"]) if "ip_data" in dict_ else "",
-                "ip_name": str(dict_["ip_data"]["asname"]) if "ip_data" in dict_ else "",
-                "timezone": str(dict_["ip_data"]["timezone"]) if "ip_data" in dict_ else "",
-                "continent": str(dict_["ip_data"]["continent"]) if "ip_data" in dict_ else "",
-                "continent_code": str(dict_["ip_data"]["continentCode"]) if "ip_data" in dict_ else "",
-                "country": str(dict_["ip_data"]["country"]) if "ip_data" in dict_ else "",
-                "country_code": str(dict_["ip_data"]["countryCode"]) if "ip_data" in dict_ else "",
-                "city": str(dict_["ip_data"]["city"]) if "ip_data" in dict_ else "",
-                "district": str(dict_["ip_data"]["district"]) if "ip_data" in dict_ else "",
-                "region_name": str(dict_["ip_data"]["regionName"]) if "ip_data" in dict_ else "",
-                "zip": str(dict_["ip_data"]["zip"]) if "ip_data" in dict_ else "",
-                "bool_hosting": bool(dict_["ip_data"]["hosting"]) if "ip_data" in dict_ else "",
-                "isp": str(dict_["ip_data"]["isp"]) if "ip_data" in dict_ else "",
-                "latitude": float(dict_["ip_data"]["lat"]) if "ip_data" in dict_ else "",
-                "longitude": float(dict_["ip_data"]["lon"]) if "ip_data" in dict_ else "",
-                "organization": str(dict_["ip_data"]["org"]) if "ip_data" in dict_ else "",
-                "proxy": str(dict_["proxy"]),
-                "ip": str(dict_["ip"]),
-                "port": int(dict_["port"]),
-                "bool_ssl": bool(dict_["ssl"]),
-                "timeout": float(dict_["timeout"]),
-                "times_alive": float(dict_["times_alive"]),
-                "times_dead": float(dict_["times_dead"]),
-                "ratio_times_alive_dead": float(dict_["times_alive"] / dict_["times_dead"])
-                    if "times_alive" in dict_ and "times_dead" in dict_ and dict_["times_dead"] != 0
-                    else 0,
-                "uptime": float(dict_["uptime"])
-            } for dict_ in json_proxies["proxies"]
-        ]
+    def _available_proxies(self) -> list[ReturnAvailableProxies]:
+        """Fetch and format all available proxies from ProxyScrape API.
+
+        Returns
+        -------
+        list[ReturnAvailableProxies]
+            List of proxy dictionaries with detailed information
+
+        Raises
+        ------
+        ValueError
+            If API request fails or returns invalid data
+        """
+        try:
+            resp_req = request(
+                "GET",
+                "https://api.proxyscrape.com/v4/free-proxy-list/get"
+                "?request=display_proxies&proxy_format=protocolipport&format=json",
+            )
+            resp_req.raise_for_status()
+            json_proxies = resp_req.json()
+
+            proxies = []
+            for dict_ in json_proxies["proxies"]:
+                proxy_data: ReturnAvailableProxies = {
+                    "protocol": str(dict_.get("protocol", "")).lower(),
+                    "bl_alive": bool(dict_.get("alive", False)),
+                    "status": str(dict_.get("ip_data", {}).get("status", "")),
+                    "alive_since": float(dict_.get("alive_since", 0)),
+                    "anonymity": str(dict_.get("anonymity", "")).lower(),
+                    "average_timeout": float(dict_.get("average_timeout", 0)),
+                    "first_seen": float(dict_.get("first_seen", 0)),
+                    "ip_data": str(dict_.get("ip_data", {}).get("as", "")),
+                    "ip_name": str(dict_.get("ip_data", {}).get("asname", "")),
+                    "timezone": str(dict_.get("ip_data", {}).get("timezone", "")),
+                    "continent": str(dict_.get("ip_data", {}).get("continent", "")),
+                    "continent_code": str(dict_.get("ip_data", {}).get("continentCode", "")),
+                    "country": str(dict_.get("ip_data", {}).get("country", "")),
+                    "country_code": str(dict_.get("ip_data", {}).get("countryCode", "")),
+                    "city": str(dict_.get("ip_data", {}).get("city", "")),
+                    "district": str(dict_.get("ip_data", {}).get("district", "")),
+                    "region_name": str(dict_.get("ip_data", {}).get("regionName", "")),
+                    "zip": str(dict_.get("ip_data", {}).get("zip", "")),
+                    "bl_hosting": bool(dict_.get("ip_data", {}).get("hosting", False)),
+                    "isp": str(dict_.get("ip_data", {}).get("isp", "")),
+                    "latitude": float(dict_.get("ip_data", {}).get("lat", 0)),
+                    "longitude": float(dict_.get("ip_data", {}).get("lon", 0)),
+                    "organization": str(dict_.get("ip_data", {}).get("org", "")),
+                    "proxy": str(dict_.get("proxy", "")),
+                    "ip": str(dict_.get("ip", "")),
+                    "port": int(dict_.get("port", 0)),
+                    "bl_ssl": bool(dict_.get("ssl", False)),
+                    "timeout": float(dict_.get("timeout", 0)),
+                    "times_alive": float(dict_.get("times_alive", 0)),
+                    "times_dead": float(dict_.get("times_dead", 0)),
+                    "uptime": float(dict_.get("uptime", 0))
+                }
+
+                times_alive = float(dict_.get("times_alive", 0))
+                times_dead = float(dict_.get("times_dead", 0))
+                proxy_data["ratio_times_alive_dead"] = (
+                    times_alive / times_dead if times_dead != 0 else 0
+                )
+
+                proxies.append(proxy_data)
+
+            return proxies
+        except Exception as err:
+            raise ValueError(f"Failed to fetch or process proxies: {str(err)}") from err
 
 
 class ProxyScrapeCountry(ABCSession):
+    """Class for fetching country-specific proxies from ProxyScrape."""
 
     def __init__(
         self,
-        bool_new_proxy: bool = True,
-        dict_proxies: Union[Dict[str, str], None] = None,
+        bl_new_proxy: bool = True,
+        dict_proxies: Optional[dict[str, str]] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
-        bool_alive: bool = True,
-        list_anonymity_value: List[str] = ["anonymous", "elite"],
-        list_protocol: str = 'http',
-        str_continent_code: Union[str, None] = None,
-        str_country_code: Union[str, None] = None,
-        bool_ssl: Union[bool, None] = None,
+        bl_alive: bool = True,
+        list_anonymity_value: Optional[list[str]] = None,
+        list_protocol: str = "http",
+        str_continent_code: Optional[str] = None,
+        str_country_code: Optional[str] = None,
+        bl_ssl: Optional[bool] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
-        bool_use_timer: bool = False,
-        list_status_forcelist: List[int] = [429, 500, 502, 503, 504],
+        bl_use_timer: bool = False,
+        list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None
     ) -> None:
         super().__init__(
-            bool_new_proxy=bool_new_proxy,
+            bl_new_proxy=bl_new_proxy,
             dict_proxies=dict_proxies,
             int_retries=int_retries,
             int_backoff_factor=int_backoff_factor,
-            bool_alive=bool_alive,
+            bl_alive=bl_alive,
             list_anonymity_value=list_anonymity_value,
             list_protocol=list_protocol,
             str_continent_code=str_continent_code,
             str_country_code=str_country_code,
-            bool_ssl=bool_ssl,
+            bl_ssl=bl_ssl,
             float_min_ratio_times_alive_dead=float_min_ratio_times_alive_dead,
             float_max_timeout=float_max_timeout,
-            bool_use_timer=bool_use_timer,
+            bl_use_timer=bl_use_timer,
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
 
-    @property
-    def _available_proxies(self) -> List[Dict[str, Union[str, float]]]:
-        resp_req = request(
-            "GET",
-            f"https://api.proxyscrape.com/v4/free-proxy-list/get?request=get_proxies&country={self.str_country_code.lower()}&skip=0&proxy_format=protocolipport&format=json&limit=1000",
-        )
-        resp_req.raise_for_status()
-        json_proxies = resp_req.json()
-        return [
-            {
-                "protocol": str(dict_["protocol"]).lower(),
-                "bool_alive": bool(dict_["alive"]),
-                "status": str(dict_["ip_data"]["status"]) if "ip_data" in dict_ else "",
-                "alive_since": float(dict_["alive_since"]),
-                "anonymity": str(dict_["anonymity"]).lower(),
-                "average_timeout": float(dict_["average_timeout"]),
-                "first_seen": float(dict_["first_seen"]),
-                "ip_data": str(dict_["ip_data"]["as"]) if "ip_data" in dict_ else "",
-                "ip_name": str(dict_["ip_data"]["asname"]) if "ip_data" in dict_ else "",
-                "timezone": str(dict_["ip_data"]["timezone"]) if "ip_data" in dict_ else "",
-                "continent": str(dict_["ip_data"]["continent"]) if "ip_data" in dict_ else "",
-                "continent_code": str(dict_["ip_data"]["continentCode"]) if "ip_data" in dict_ else "",
-                "country": str(dict_["ip_data"]["country"]) if "ip_data" in dict_ else "",
-                "country_code": str(dict_["ip_data"]["countryCode"]) if "ip_data" in dict_ else "",
-                "city": str(dict_["ip_data"]["city"]) if "ip_data" in dict_ else "",
-                "district": str(dict_["ip_data"]["district"]) if "ip_data" in dict_ else "",
-                "region_name": str(dict_["ip_data"]["regionName"]) if "ip_data" in dict_ else "",
-                "zip": str(dict_["ip_data"]["zip"]) if "ip_data" in dict_ else "",
-                "bool_hosting": bool(dict_["ip_data"]["hosting"]) if "ip_data" in dict_ else "",
-                "isp": str(dict_["ip_data"]["isp"]) if "ip_data" in dict_ else "",
-                "latitude": float(dict_["ip_data"]["lat"]) if "ip_data" in dict_ else "",
-                "longitude": float(dict_["ip_data"]["lon"]) if "ip_data" in dict_ else "",
-                "organization": str(dict_["ip_data"]["org"]) if "ip_data" in dict_ else "",
-                "proxy": str(dict_["proxy"]),
-                "ip": str(dict_["ip"]),
-                "port": int(dict_["port"]),
-                "bool_ssl": bool(dict_["ssl"]),
-                "timeout": float(dict_["timeout"]),
-                "times_alive": float(dict_["times_alive"]),
-                "times_dead": float(dict_["times_dead"]),
-                "ratio_times_alive_dead": float(dict_["times_alive"] / dict_["times_dead"])
-                    if "times_alive" in dict_ and "times_dead" in dict_ and dict_["times_dead"] != 0
-                    else 0,
-                "uptime": float(dict_["uptime"])
-            } for dict_ in json_proxies["proxies"]
-        ]
+    def _validate_country_code(self) -> None:
+        """Validate country code before making API request.
+
+        Raises
+        ------
+        ValueError
+            If country code is not set or invalid
+        """
+        if not self.str_country_code:
+            raise ValueError("Country code must be set")
+        if not isinstance(self.str_country_code, str):
+            raise ValueError("Country code must be a string")
+        if len(self.str_country_code) != 2:
+            raise ValueError("Country code must be 2 characters long")
+
+    def _available_proxies(self) -> list[ReturnAvailableProxies]:
+        """Fetch and format country-specific proxies from ProxyScrape API.
+
+        Returns
+        -------
+        list[ReturnAvailableProxies]
+            List of proxy dictionaries with detailed information
+
+        Raises
+        ------
+        ValueError
+            If API request fails or returns invalid data
+        """
+        self._validate_country_code()
+        try:
+            resp_req = request(
+                "GET",
+                f"https://api.proxyscrape.com/v4/free-proxy-list/get"
+                f"?request=get_proxies&country={self.str_country_code.lower()}"
+                f"&skip=0&proxy_format=protocolipport&format=json&limit=1000",
+            )
+            resp_req.raise_for_status()
+            json_proxies = resp_req.json()
+
+            proxies = []
+            for dict_ in json_proxies["proxies"]:
+                proxy_data: ReturnAvailableProxies = {
+                    "protocol": str(dict_.get("protocol", "")).lower(),
+                    "bl_alive": bool(dict_.get("alive", False)),
+                    "status": str(dict_.get("ip_data", {}).get("status", "")),
+                    "alive_since": float(dict_.get("alive_since", 0)),
+                    "anonymity": str(dict_.get("anonymity", "")).lower(),
+                    "average_timeout": float(dict_.get("average_timeout", 0)),
+                    "first_seen": float(dict_.get("first_seen", 0)),
+                    "ip_data": str(dict_.get("ip_data", {}).get("as", "")),
+                    "ip_name": str(dict_.get("ip_data", {}).get("asname", "")),
+                    "timezone": str(dict_.get("ip_data", {}).get("timezone", "")),
+                    "continent": str(dict_.get("ip_data", {}).get("continent", "")),
+                    "continent_code": str(dict_.get("ip_data", {}).get("continentCode", "")),
+                    "country": str(dict_.get("ip_data", {}).get("country", "")),
+                    "country_code": str(dict_.get("ip_data", {}).get("countryCode", "")),
+                    "city": str(dict_.get("ip_data", {}).get("city", "")),
+                    "district": str(dict_.get("ip_data", {}).get("district", "")),
+                    "region_name": str(dict_.get("ip_data", {}).get("regionName", "")),
+                    "zip": str(dict_.get("ip_data", {}).get("zip", "")),
+                    "bl_hosting": bool(dict_.get("ip_data", {}).get("hosting", False)),
+                    "isp": str(dict_.get("ip_data", {}).get("isp", "")),
+                    "latitude": float(dict_.get("ip_data", {}).get("lat", 0)),
+                    "longitude": float(dict_.get("ip_data", {}).get("lon", 0)),
+                    "organization": str(dict_.get("ip_data", {}).get("org", "")),
+                    "proxy": str(dict_.get("proxy", "")),
+                    "ip": str(dict_.get("ip", "")),
+                    "port": int(dict_.get("port", 0)),
+                    "bl_ssl": bool(dict_.get("ssl", False)),
+                    "timeout": float(dict_.get("timeout", 0)),
+                    "times_alive": float(dict_.get("times_alive", 0)),
+                    "times_dead": float(dict_.get("times_dead", 0)),
+                    "uptime": float(dict_.get("uptime", 0))
+                }
+
+                times_alive = float(dict_.get("times_alive", 0))
+                times_dead = float(dict_.get("times_dead", 0))
+                proxy_data["ratio_times_alive_dead"] = (
+                    times_alive / times_dead if times_dead != 0 else 0
+                )
+
+                proxies.append(proxy_data)
+
+            return proxies
+        except Exception as err:
+            raise ValueError(f"Failed to fetch or process proxies: {str(err)}") from err

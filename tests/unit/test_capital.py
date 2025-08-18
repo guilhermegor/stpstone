@@ -15,7 +15,7 @@ import pytest
 from stpstone.analytics.risk.capital import CR1Calculator
 
 
-class ReturnSummary(TypedDict, metaclass=TypeChecker):
+class ReturnSummary(TypedDict):
     """Dictionary containing CR1 calculation parameters and results.
 
     Parameters

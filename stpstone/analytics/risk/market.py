@@ -16,7 +16,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.arrays import Arrays
 
 
-class ReturnDescriptiveStats(TypedDict, metaclass=TypeChecker):
+class ReturnDescriptiveStats(TypedDict):
     """Return type for descriptive statistics.
 
     Parameters

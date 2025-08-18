@@ -28,7 +28,7 @@ from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler
 
 
-class ReturnGetFileMetadata(TypedDict, metaclass=TypeChecker):
+class ReturnGetFileMetadata(TypedDict):
     """Typed dictionary for file metadata return values.
 
     Attributes

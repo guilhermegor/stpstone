@@ -20,7 +20,7 @@ from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnDimensionalityReductionStandard(TypedDict, metaclass=TypeChecker):
+class ReturnDimensionalityReductionStandard(TypedDict):
     """Return type for dimensionality_reduction_standard method.
 
     Returns
@@ -34,7 +34,7 @@ class ReturnDimensionalityReductionStandard(TypedDict, metaclass=TypeChecker):
     score: float
 
 
-class ReturnPca(TypedDict, metaclass=TypeChecker):
+class ReturnPca(TypedDict):
     """Return type for pca method."""
 
     eigenvalues: NDArray[np.float64]

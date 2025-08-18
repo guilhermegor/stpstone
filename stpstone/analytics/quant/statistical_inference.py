@@ -22,13 +22,13 @@ from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class AnovaResults(TypedDict, metaclass=TypeChecker):
+class AnovaResults(TypedDict):
     """TypedDict for ANOVA results."""
 
     summary: str
 
 
-class LinearityResults(TypedDict, metaclass=TypeChecker):
+class LinearityResults(TypedDict):
     """TypedDict for linearity test results."""
 
     r_squared: dict[str, float]
@@ -36,7 +36,7 @@ class LinearityResults(TypedDict, metaclass=TypeChecker):
     bool_reject_h0: dict[str, bool]
 
 
-class VifResults(TypedDict, metaclass=TypeChecker):
+class VifResults(TypedDict):
     """TypedDict for VIF results."""
 
     vif_ivs: dict[str, float]
@@ -45,7 +45,7 @@ class VifResults(TypedDict, metaclass=TypeChecker):
     bool_reject_h0: dict[str, bool]
 
 
-class BreuschGodfreyResults(TypedDict, metaclass=TypeChecker):
+class BreuschGodfreyResults(TypedDict):
     """TypedDict for Breusch-Godfrey test results."""
 
     breush_godfrey_tup: tuple[float, float, int, dict[float, float]]
@@ -53,7 +53,7 @@ class BreuschGodfreyResults(TypedDict, metaclass=TypeChecker):
     bool_reject_h0: bool
 
 
-class DurbinWatsonResults(TypedDict, metaclass=TypeChecker):
+class DurbinWatsonResults(TypedDict):
     """TypedDict for Durbin-Watson test results."""
 
     test_value: float
@@ -61,7 +61,7 @@ class DurbinWatsonResults(TypedDict, metaclass=TypeChecker):
     bool_reject_h0: bool
 
 
-class BreuschPaganResults(TypedDict, metaclass=TypeChecker):
+class BreuschPaganResults(TypedDict):
     """TypedDict for Breusch-Pagan test results."""
 
     lagrange_multiplier: float
@@ -70,14 +70,14 @@ class BreuschPaganResults(TypedDict, metaclass=TypeChecker):
     bool_reject_h0: bool
 
 
-class CooksDistanceResults(TypedDict, metaclass=TypeChecker):
+class CooksDistanceResults(TypedDict):
     """TypedDict for Cook's distance results."""
 
     distance: NDArray[np.float64]
     p_value: NDArray[np.float64]
 
 
-class KolmogorovSmirnovResults(TypedDict, metaclass=TypeChecker):
+class KolmogorovSmirnovResults(TypedDict):
     """TypedDict for Kolmogorov-Smirnov test results."""
 
     dn: float
@@ -86,7 +86,7 @@ class KolmogorovSmirnovResults(TypedDict, metaclass=TypeChecker):
     reject_h0: bool
 
 
-class NormalityTestResults(TypedDict, metaclass=TypeChecker):
+class NormalityTestResults(TypedDict):
     """TypedDict for normality test results."""
 
     alpha: float
@@ -95,7 +95,7 @@ class NormalityTestResults(TypedDict, metaclass=TypeChecker):
     reject_h0: bool
 
 
-class CorrelationTestResults(TypedDict, metaclass=TypeChecker):
+class CorrelationTestResults(TypedDict):
     """TypedDict for correlation test results."""
 
     alpha: float
@@ -103,7 +103,7 @@ class CorrelationTestResults(TypedDict, metaclass=TypeChecker):
     reject_h0: bool
 
 
-class StationarityTestResults(TypedDict, metaclass=TypeChecker):
+class StationarityTestResults(TypedDict):
     """TypedDict for stationarity test results."""
 
     statistic: float
@@ -113,7 +113,7 @@ class StationarityTestResults(TypedDict, metaclass=TypeChecker):
     reject_h0: bool
 
 
-class PearsonChiSquaredResults(TypedDict, metaclass=TypeChecker):
+class PearsonChiSquaredResults(TypedDict):
     """TypedDict for Pearson's chi-squared test results."""
 
     chi_squard_statistic: float
@@ -125,7 +125,7 @@ class PearsonChiSquaredResults(TypedDict, metaclass=TypeChecker):
     reject_h0: bool
 
 
-class BenfordResults(TypedDict, metaclass=TypeChecker):
+class BenfordResults(TypedDict):
     """TypedDict for Benford's Law test results."""
     
     benford_expected_array: NDArray[np.float64]

@@ -12,7 +12,7 @@ from openai.types.chat import ChatCompletion
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnRunPrompt(TypedDict, metaclass=TypeChecker):
+class ReturnRunPrompt(TypedDict):
     """Typed dictionary for run_prompt method return type.
 
     Parameters

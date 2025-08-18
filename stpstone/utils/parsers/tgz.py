@@ -12,7 +12,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
-class ReturnFetchTgzFiles(TypedDict, metaclass=TypeChecker):
+class ReturnFetchTgzFiles(TypedDict):
     """Return type for fetch_tgz_files method.
 
     Attributes

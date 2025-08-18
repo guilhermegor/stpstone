@@ -10,7 +10,7 @@ from typing import TypedDict
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ResultInputs(TypedDict, metaclass=TypeChecker):
+class ResultInputs(TypedDict):
     """Inputs for the Beneish M-Score model."""
 
     float_dsr: float

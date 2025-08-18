@@ -12,7 +12,7 @@ import numpy as np
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnSummary(TypedDict, metaclass=TypeChecker):
+class ReturnSummary(TypedDict):
     """Dictionary containing CR1 calculation parameters and results.
 
     Parameters

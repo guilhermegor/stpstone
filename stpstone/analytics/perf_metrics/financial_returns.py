@@ -13,7 +13,7 @@ import pandas as pd
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ResultPricingStrategy(TypedDict, metaclass=TypeChecker):
+class ResultPricingStrategy(TypedDict):
     """A typed dictionary for holding strategy performance results."""
 
     mtm: float

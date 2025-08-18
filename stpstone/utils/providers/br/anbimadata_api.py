@@ -24,7 +24,7 @@ from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
-class ReturnAccessToken(TypedDict, metaclass=TypeChecker):
+class ReturnAccessToken(TypedDict):
     """Typed dictionary for access token response.
 
     Parameters

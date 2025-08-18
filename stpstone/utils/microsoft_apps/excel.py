@@ -44,7 +44,7 @@ TypeStyleXLObject = TypeVar("TypeVarStyle",
                       Literal["style_heading1", "style_heading2", "style_border_bottom", 
                               "style_grey_cell", "style_pale_yellow_cell", "style_italics"])
 
-class SaveAsReturn(TypedDict, metaclass=TypeChecker):
+class SaveAsReturn(TypedDict):
     """Return type for save_as_active_wb method.
 
     Returns
@@ -56,7 +56,7 @@ class SaveAsReturn(TypedDict, metaclass=TypeChecker):
     success: bool
 
 
-class OpenXlReturn(TypedDict, metaclass=TypeChecker):
+class OpenXlReturn(TypedDict):
     """Return type for open_xl method.
 
     Returns

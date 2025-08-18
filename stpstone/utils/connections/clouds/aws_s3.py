@@ -16,7 +16,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class ReturnDownloadFile(TypedDict, metaclass=TypeChecker):
+class ReturnDownloadFile(TypedDict):
     """Typed dictionary for download file return structure."""
 
     Body: BytesIO

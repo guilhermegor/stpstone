@@ -172,7 +172,7 @@ class CreateLog(metaclass=TypeChecker):
             print(f"{timestamp} {level} {{{class_name}}} [{method_name}] {message}")
 
 
-class ReturnTimeit(TypedDict, metaclass=TypeChecker):
+class ReturnTimeit(TypedDict):
     """Return type for timeit decorator.
 
     Parameters

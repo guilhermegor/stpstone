@@ -21,7 +21,7 @@ from stpstone.utils.loggs.create_logs import CreateLog, conditional_timeit
 from stpstone.utils.parsers.dicts import HandlingDicts
 
 
-class ReturnAvailableProxies(TypedDict, metaclass=TypeChecker):
+class ReturnAvailableProxies(TypedDict):
     """Typed dictionary for proxy information.
 
     Attributes

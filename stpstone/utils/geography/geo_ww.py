@@ -18,7 +18,7 @@ import pycountry_convert as pc
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
 
-class ReturnGetCountryDetails(TypedDict, metaclass=TypeChecker):
+class ReturnGetCountryDetails(TypedDict):
     """Typed dictionary for country details return value.
 
     Parameters
