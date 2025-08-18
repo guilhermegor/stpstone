@@ -1,7 +1,8 @@
 """Proxy management class for Spys.one proxy service.
 
 This module provides a class for fetching and managing proxy information from
-Spys.one's proxy list service, supporting country-specific proxy filtering."""
+Spys.one's proxy list service, supporting country-specific proxy filtering.
+"""
 
 from logging import Logger
 import re
