@@ -35,7 +35,7 @@ class FreeProxyWorld(ABCSession):
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
         bool_use_timer: bool = False,
-        list_status_forcelist: list[int] = None,
+        list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None,
         int_wait_load_seconds: int = 10,
     ) -> None:
