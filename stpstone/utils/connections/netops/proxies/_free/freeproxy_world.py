@@ -5,118 +5,16 @@ freeproxy.world using Selenium for web scraping and proxy validation.
 """
 
 from logging import Logger
-from typing import Literal, Optional, TypedDict
+from typing import Optional
 
 from selenium.common.exceptions import TimeoutException
 
-from stpstone.utils.connections.netops.proxies.proxies_abc import ABCSession
+from stpstone.utils.connections.netops.proxies.proxies_abc import (
+    ABCSession,
+    ReturnAvailableProxies,
+)
 from stpstone.utils.geography.geo_ww import WWGeography, WWTimezones
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
-
-
-class ReturnAvailableProxies(TypedDict):
-    """Typed dictionary for proxy information.
-
-    Attributes
-    ----------
-    protocol : str
-        Proxy protocol (http/https)
-    bool_alive : bool
-        Whether proxy is currently alive
-    status : str
-        Proxy status
-    alive_since : float
-        Unix timestamp when proxy was last alive
-    anonymity : str
-        Proxy anonymity level
-    average_timeout : float
-        Average response timeout
-    first_seen : float
-        Unix timestamp when proxy was first seen
-    ip_data : str
-        IP metadata
-    ip_name : str
-        IP hostname
-    timezone : str
-        Proxy timezone
-    continent : str
-        Proxy continent name
-    continent_code : str
-        Proxy continent code
-    country : str
-        Proxy country name
-    country_code : str
-        Proxy country code
-    city : str
-        Proxy city
-    district : str
-        Proxy district
-    region_name : str
-        Proxy region name
-    zip : str
-        Proxy postal code
-    bool_hosting : bool
-        Whether proxy is hosting
-    isp : str
-        Internet Service Provider
-    latitude : float
-        Proxy latitude
-    longitude : float
-        Proxy longitude
-    organization : str
-        Proxy organization
-    proxy : bool
-        Whether is a proxy
-    ip : str
-        Proxy IP address
-    port : str
-        Proxy port
-    bool_ssl : bool
-        Whether SSL is supported
-    timeout : float
-        Current timeout
-    times_alive : int
-        Number of times proxy was alive
-    times_dead : int
-        Number of times proxy was dead
-    ratio_times_alive_dead : float
-        Alive/dead ratio
-    uptime : float
-        Proxy uptime percentage
-    """
-
-    protocol: str
-    bool_alive: bool
-    status: str
-    alive_since: float
-    anonymity: Literal["transparent", "anonymous", "elite"]
-    average_timeout: float
-    first_seen: float
-    ip_data: str
-    ip_name: str
-    timezone: str
-    continent: str
-    continent_code: str
-    country: str
-    country_code: str
-    city: str
-    district: str
-    region_name: str
-    zip: str
-    bool_hosting: bool
-    isp: str
-    latitude: float
-    longitude: float
-    organization: str
-    proxy: bool
-    ip: str
-    port: str
-    bool_ssl: bool
-    timeout: float
-    times_alive: int
-    times_dead: int
-    ratio_times_alive_dead: float
-    uptime: float
 
 
 class FreeProxyWorld(ABCSession):
