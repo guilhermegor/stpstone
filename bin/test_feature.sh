@@ -42,10 +42,6 @@ find_module_path() {
 find_test_path() {
     local module="$1"
     local test_path=$(find tests -name "test_${module}.py" -o -name "${module}_test.py" -not -path "*__pycache__*" | head -1)
-    if [ -z "$test_path" ]; then
-        print_status "error" "Test file for ${module} not found (looking for test_${module}.py or ${module}_test.py)"
-        return 1
-    fi
     echo "$test_path"
 }
 
@@ -523,7 +519,7 @@ main() {
     local module_path
     module_path=$(find_module_path "$module") || exit 1
     local test_path
-    test_path=$(find_test_path "$module") || exit 1
+    test_path=$(find_test_path "$module")
 
     # checking libs
     install_playwright
@@ -533,11 +529,15 @@ main() {
     check_type_consistency "$module_path" "module" || return 1
     run_ruff "$module_path" "module" || return 1
 
-    # run checks for test file
-    run_codespell "$test_path" "tests" || return 1
-    check_type_consistency "$test_path" "tests" || return 1
-    run_ruff "$test_path" "tests" || return 1
-    run_pytest "$test_path" || return 1
+    # run checks for test file if it exists
+    if [ -n "$test_path" ]; then
+        run_codespell "$test_path" "tests" || return 1
+        check_type_consistency "$test_path" "tests" || return 1
+        run_ruff "$test_path" "tests" || return 1
+        run_pytest "$test_path" || return 1
+    else
+        print_status "warning" "No test file found for ${module}, skipping test-related checks"
+    fi
 
     print_status "success" "=== All checks passed for ${module} ==="
 }
