@@ -139,7 +139,7 @@ class FreeProxyWorld(ABCSession):
             )
 
             try:
-                web_driver = cls_selenium_wd.get_web_driver
+                web_driver = cls_selenium_wd.get_web_driver()
                 try:
                     cls_selenium_wd.wait_until_el_loaded(self.xpath_tr)
                 except TimeoutException as err:

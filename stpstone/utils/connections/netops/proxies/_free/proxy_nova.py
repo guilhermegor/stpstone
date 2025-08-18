@@ -92,7 +92,7 @@ class ProxyNova(ABCSession):
         self.xpath_tr = '//*[@id="tbl_proxy_list"]/tbody/tr'
         self.url = self.fstr_url.format(str_country_code.lower())
         self.selenium_wd = SeleniumWD(url=self.url, bool_headless=True)
-        self.driver = self.selenium_wd.get_web_driver
+        self.driver = self.selenium_wd.get_web_driver()
 
     def _available_proxies(self) -> list[ReturnAvailableProxies]:
         """Retrieve available proxies from ProxyNova.

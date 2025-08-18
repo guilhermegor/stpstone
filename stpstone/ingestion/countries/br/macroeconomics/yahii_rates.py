@@ -223,7 +223,7 @@ class YahiiRatesBRMacro(ABCRequests):
         try:
             source = self.get_query_params(resp_req.url, "source").lower()
             cls_selenium_wd = SeleniumWD(resp_req.url, bool_headless=True, bool_incognito=True)
-            web_driver = cls_selenium_wd.get_web_driver
+            web_driver = cls_selenium_wd.get_web_driver()
             list_th_td = self.list_web_elements(
                 cls_selenium_wd, web_driver, YAML_YAHII_RATES["pmi_rf_rates"]['xpaths']['list_th_td'])
             list_ser = self.td_th_parser(source, list_th_td)
