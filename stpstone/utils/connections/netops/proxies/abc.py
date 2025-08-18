@@ -1,10 +1,15 @@
+"""Abstract base class for proxy management.
+
+This module defines an abstract base class (ABC) for proxy management,
+providing a common interface for fetching and validating proxies."""
+
 from abc import ABC, ABCMeta, abstractmethod
 from datetime import datetime, timedelta
 from logging import Logger
 from random import shuffle
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, TypedDict, Union, tuple
 
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -16,6 +21,110 @@ from stpstone.utils.loggs.create_logs import CreateLog, conditional_timeit
 from stpstone.utils.parsers.dicts import HandlingDicts
 
 
+class ReturnAvailableProxies(TypedDict):
+    """Typed dictionary for proxy information.
+
+    Attributes
+    ----------
+    protocol : str
+        Proxy protocol (http/https)
+    bool_alive : bool
+        Whether proxy is currently alive
+    status : str
+        Proxy status
+    alive_since : float
+        Unix timestamp when proxy was last alive
+    anonymity : str
+        Proxy anonymity level
+    average_timeout : float
+        Average response timeout
+    first_seen : float
+        Unix timestamp when proxy was first seen
+    ip_data : str
+        IP metadata
+    ip_name : str
+        IP hostname
+    timezone : str
+        Proxy timezone
+    continent : str
+        Proxy continent name
+    continent_code : str
+        Proxy continent code
+    country : str
+        Proxy country name
+    country_code : str
+        Proxy country code
+    city : str
+        Proxy city
+    district : str
+        Proxy district
+    region_name : str
+        Proxy region name
+    zip : str
+        Proxy postal code
+    bool_hosting : bool
+        Whether proxy is hosting
+    isp : str
+        Internet Service Provider
+    latitude : float
+        Proxy latitude
+    longitude : float
+        Proxy longitude
+    organization : str
+        Proxy organization
+    proxy : bool
+        Whether is a proxy
+    ip : str
+        Proxy IP address
+    port : str
+        Proxy port
+    bool_ssl : bool
+        Whether SSL is supported
+    timeout : float
+        Current timeout
+    times_alive : int
+        Number of times proxy was alive
+    times_dead : int
+        Number of times proxy was dead
+    ratio_times_alive_dead : float
+        Alive/dead ratio
+    uptime : float
+        Proxy uptime percentage
+    """
+
+    protocol: str
+    bool_alive: bool
+    status: str
+    alive_since: float
+    anonymity: Literal["anonymous", "elite", "transparent"]
+    average_timeout: float
+    first_seen: float
+    ip_data: str
+    ip_name: str
+    timezone: str
+    continent: str
+    continent_code: str
+    country: str
+    country_code: str
+    city: str
+    district: str
+    region_name: str
+    zip: str
+    bool_hosting: bool
+    isp: str
+    latitude: float
+    longitude: float
+    organization: str
+    proxy: bool
+    ip: str
+    port: str
+    bool_ssl: bool
+    timeout: float
+    times_alive: int
+    times_dead: int
+    ratio_times_alive_dead: float
+    uptime: float
+
 class ABCMetaClass(TypeChecker, ABCMeta):
     pass
 
@@ -25,19 +134,19 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     def __init__(
         self,
         bool_new_proxy: bool = True,
-        dict_proxies: Union[Dict[str, str], None] = None,
+        dict_proxies: Union[dict[str, str], None] = None,
         int_retries: int = 10,
         int_backoff_factor: int = 1,
         bool_alive: bool = True,
-        list_anonymity_value: Optional[List[str]] = None,
-        list_protocol: Union[List[str]] = ["http", "https"],
+        list_anonymity_value: Optional[list[str]] = None,
+        list_protocol: Union[list[str]] = ["http", "https"],
         str_continent_code: Union[str, None] = None,
         str_country_code: Union[str, None] = None,
         bool_ssl: Union[bool, None] = None,
         float_min_ratio_times_alive_dead: Optional[float] = 0.02,
         float_max_timeout: Optional[float] = 600,
         bool_use_timer: bool = False,
-        list_status_forcelist: Optional[List[int]] = None,
+        list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None
     ):
         self.bool_new_proxy = bool_new_proxy
@@ -66,7 +175,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
     def _validate_proxy_structure(
         self,
-        list_proxies: List[Dict[str, Union[str, int, float, bool]]]
+        list_proxies: list[dict[str, Union[str, int, float, bool]]]
     ) -> None:
         for proxy in list_proxies:
             list_missing_keys = {
@@ -165,7 +274,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         except (ProxyError, ConnectTimeout, SSLError, ConnectionError):
             return False
 
-    def get_proxy(self) -> Dict[str, str]:
+    def get_proxy(self) -> dict[str, str]:
         @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxy():
             list_ser = self._filtered_proxies()
@@ -179,7 +288,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             return None
         return retrieve_proxy()
 
-    def get_proxies(self) -> List[Dict[str, str]]:
+    def get_proxies(self) -> list[dict[str, str]]:
         list_ = list()
         @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxy():
@@ -208,7 +317,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         return retrieve_proxy()
 
     def ip_infos(self, session:Session, bool_return_availability:bool=False,
-                 tup_timeout:Tuple[int, int]=(5,5)) -> Union[List[Dict[str, Any]], None]:
+                 tup_timeout:tuple[int, int]=(5,5)) -> Union[list[dict[str, Any]], None]:
         dict_payload = {}
         dict_headers = {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -233,7 +342,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         else:
             return resp_req.json()
 
-    def _filtered_proxies(self) -> List[Dict[str, Union[str, int]]]:
+    def _filtered_proxies(self) -> list[dict[str, Union[str, int]]]:
         list_ser = self._available_proxies()
         self.create_log.log_message(
             self.logger,
@@ -271,13 +380,13 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
                 )
         return list_ser
 
-    def _dict_proxy(self, str_ip:str, int_port:int) -> Dict[str, str]:
+    def _dict_proxy(self, str_ip:str, int_port:int) -> dict[str, str]:
         return {
             "http": "http://{}:{}".format(str_ip, str(int_port)),
             "https": "http://{}:{}".format(str_ip, str(int_port))
         }
 
-    def _configure_session(self, dict_proxy:Union[Dict[str, str], None]=None,
+    def _configure_session(self, dict_proxy:Union[dict[str, str], None]=None,
                           int_retries:int=10, int_backoff_factor:int=1) -> Session:
         retry_strategy = Retry(
             total=int_retries,
