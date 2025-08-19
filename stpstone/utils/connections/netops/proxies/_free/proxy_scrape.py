@@ -36,6 +36,41 @@ class ProxyScrapeAll(ABCSession):
         list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None
     ) -> None:
+        """Initialize ProxyScrapeAll instance.
+        
+        Parameters
+        ----------
+        bool_new_proxy : bool
+            Whether to fetch new proxies
+        dict_proxies : Optional[dict[str, str]]
+            Existing proxy dictionary
+        int_retries : int
+            Number of retry attempts
+        int_backoff_factor : int
+            Backoff factor for retries
+        bool_alive : bool
+            Whether to check proxy liveness
+        list_anonymity_value : Optional[list[str]]
+            List of anonymity values to filter by
+        list_protocol : str
+            Protocol to filter by
+        str_continent_code : Optional[str]
+            Continent code to filter by
+        str_country_code : Optional[str]
+            Country code to filter by
+        bool_ssl : Optional[bool]
+            Whether to filter by SSL support
+        float_min_ratio_times_alive_dead : Optional[float]
+            Minimum ratio of alive proxies to dead proxies
+        float_max_timeout : Optional[float]
+            Maximum timeout for proxy requests
+        bool_use_timer : bool
+            Whether to use a timer to check proxy liveness
+        list_status_forcelist : Optional[list[int]]
+            List of status codes to force
+        logger : Optional[Logger]
+            Logger object for logging
+        """
         super().__init__(
             bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
@@ -72,6 +107,7 @@ class ProxyScrapeAll(ABCSession):
                 "GET",
                 "https://api.proxyscrape.com/v4/free-proxy-list/get"
                 "?request=display_proxies&proxy_format=protocolipport&format=json",
+                timeout=self.float_max_timeout
             )
             resp_req.raise_for_status()
             json_proxies = resp_req.json()
@@ -146,6 +182,41 @@ class ProxyScrapeCountry(ABCSession):
         list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None
     ) -> None:
+        """Initialize ProxyScrapeCountry instance.
+
+        Parameters
+        ----------
+        bool_new_proxy : bool
+            Whether to fetch new proxies
+        dict_proxies : Optional[dict[str, str]]
+            Existing proxy dictionary
+        int_retries : int
+            Number of retry attempts
+        int_backoff_factor : int
+            Backoff factor for retries
+        bool_alive : bool
+            Whether to fetch only alive proxies
+        list_anonymity_value : Optional[list[str]]
+            List of anonymity values to filter by
+        list_protocol : str
+            List of protocols to filter by
+        str_continent_code : Optional[str]
+            Continent code to filter by
+        str_country_code : Optional[str]
+            Country code to filter by
+        bool_ssl : Optional[bool]
+            Whether to fetch only SSL proxies
+        float_min_ratio_times_alive_dead : Optional[float]
+            Minimum ratio of times alive to times dead
+        float_max_timeout : Optional[float]
+            Maximum timeout for proxies
+        bool_use_timer : bool
+            Whether to use timer
+        list_status_forcelist : Optional[list[int]]
+            List of status codes to forcelist
+        logger : Optional[Logger]
+            Logger object
+        """
         super().__init__(
             bool_new_proxy=bool_new_proxy,
             dict_proxies=dict_proxies,
@@ -170,7 +241,9 @@ class ProxyScrapeCountry(ABCSession):
         Raises
         ------
         ValueError
-            If country code is not set or invalid
+            If country code is not set
+            If country code is not a string
+            If country code is not 2 characters long
         """
         if not self.str_country_code:
             raise ValueError("Country code must be set")
@@ -199,6 +272,7 @@ class ProxyScrapeCountry(ABCSession):
                 f"https://api.proxyscrape.com/v4/free-proxy-list/get"
                 f"?request=get_proxies&country={self.str_country_code.lower()}"
                 f"&skip=0&proxy_format=protocolipport&format=json&limit=1000",
+                timeout=self.float_max_timeout
             )
             resp_req.raise_for_status()
             json_proxies = resp_req.json()
