@@ -25,7 +25,7 @@ print(f"Proxies available: {cls_session.session.proxies}")
 cls_ = AnbimaDataDebentures(
     session=cls_session.session,
     list_slugs=["AEAM22", "AALM11"],
-    str_user_agent=UserAgents().get_random_user_agent,
+    str_user_agent=UserAgents().get_random_user_agent(),
     int_wait_load_seconds=30,
     bool_headless=False,
     bool_incognito=True
