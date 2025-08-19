@@ -33,6 +33,7 @@ class PostgreSQLDB(ABCDatabase):
         port: int,
         str_schema: str = "public",
         logger: Optional[Logger] = None,
+        bool_singleton: bool = False,
     ) -> None:
         """Initialize PostgreSQL database connection.
         
@@ -52,6 +53,8 @@ class PostgreSQLDB(ABCDatabase):
             Database schema (default: "public")
         logger : Optional[Logger], optional
             Logger instance (default: None)
+        bool_singleton : bool, optional
+            Whether to use a singleton connection (default: False)
         
         Returns
         -------
@@ -69,6 +72,7 @@ class PostgreSQLDB(ABCDatabase):
         self.port = port
         self.str_schema = str_schema
         self.logger = logger
+        self.bool_singleton = bool_singleton
         self.dict_db_config = {
             "dbname": self.dbname,
             "user": self.user,
@@ -115,7 +119,10 @@ class PostgreSQLDB(ABCDatabase):
         if not self.str_schema:
             raise ValueError("Database schema cannot be empty")
 
-    def execute(self, str_query: Union[str, Composable]) -> None:
+    def execute(
+        self, 
+        str_query: Union[str, Composable]
+    ) -> None:
         """Execute a SQL query.
 
         Parameters
