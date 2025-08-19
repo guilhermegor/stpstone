@@ -4,10 +4,15 @@ This module tests the user agent string retrieval and management functionality,
 covering normal operations, edge cases, error conditions, and type validation.
 """
 
-from typing import Callable
-
 import pytest
 from pytest_mock import MockerFixture
+from requests.exceptions import (
+    ChunkedEncodingError,
+    ConnectTimeout,
+    HTTPError,
+    ReadTimeout,
+    RequestException,
+)
 
 from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
 
@@ -15,6 +20,22 @@ from stpstone.utils.connections.netops.scraping.user_agents import UserAgents
 # --------------------------
 # Fixtures
 # --------------------------
+@pytest.fixture(autouse=True)
+def mock_backoff_sleep(mocker: MockerFixture) -> None:
+    """Mock time.sleep in backoff to prevent delays during retries.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    mocker.patch("backoff._sync.time.sleep")
+
+
 @pytest.fixture(scope="function")
 def user_agents() -> UserAgents:
     """Fixture providing UserAgents instance.
@@ -110,43 +131,6 @@ def mock_random_randint(mocker: MockerFixture) -> object:
         Mock object for random.randint
     """
     return mocker.patch("random.randint", return_value=0)
-
-
-@pytest.fixture(scope="function")
-def mock_backoff(mocker: MockerFixture) -> object:
-    """Mock backoff.on_exception to prevent retries.
-
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    object
-        Mock object for backoff.on_exception
-    """
-    def no_backoff(func: Callable) -> Callable:
-        """Mock function to prevent retries.
-
-        Parameters
-        ----------
-        func : Callable
-            Function to wrap
-
-        Returns
-        -------
-        Callable
-            Original function without retry logic
-        """
-        print("Mocking backoff.on_exception")  # Debug print
-        return func
-
-    # Patch the specific module path used in UserAgents
-    return mocker.patch(
-        "stpstone.utils.connections.netops.scraping.user_agents.backoff.on_exception",
-        side_effect=no_backoff,
-    )
 
 
 # --------------------------
@@ -260,7 +244,6 @@ def test_fetch_user_agents_success(
     mock_requests_get: object,
     mock_html_fromstring: object,
     sample_user_agents: list[str],
-    mock_backoff: object,
 ) -> None:
     """Test successful fetching of user agents.
 
@@ -279,8 +262,6 @@ def test_fetch_user_agents_success(
         Mock for html.fromstring
     sample_user_agents : list[str]
         List of sample user agent strings
-    mock_backoff : object
-        Mock for backoff.on_exception
 
     Returns
     -------
@@ -308,7 +289,6 @@ def test_fetch_user_agents_empty_response(
     user_agents: UserAgents,
     mock_requests_get: object,
     mock_html_fromstring: object,
-    mock_backoff: object,
 ) -> None:
     """Test fetch_user_agents with empty response content.
 
@@ -324,8 +304,6 @@ def test_fetch_user_agents_empty_response(
         Mock for requests.get
     mock_html_fromstring : object
         Mock for html.fromstring
-    mock_backoff : object
-        Mock for backoff.on_exception
 
     Returns
     -------
@@ -341,6 +319,54 @@ def test_fetch_user_agents_empty_response(
         user_agents.fetch_user_agents()
 
 
+@pytest.mark.parametrize(
+    "exception, message",
+    [
+        (RequestException, "Request failed"),
+        (HTTPError, "HTTP error"),
+        (ConnectTimeout, "Connection timeout"),
+        (ReadTimeout, "Read timeout"),
+        (ChunkedEncodingError, "Chunked encoding error"),
+    ],
+    ids=["request_exception", "http_error", "connect_timeout", "read_timeout", "chunked_encoding"],
+)
+def test_fetch_user_agents_exceptions(
+    user_agents: UserAgents,
+    mock_requests_get: object,
+    exception: type,
+    message: str,
+) -> None:
+    """Test fetch_user_agents with various request exceptions.
+
+    Verifies
+    --------
+    That specified exceptions are raised immediately.
+
+    Parameters
+    ----------
+    user_agents : UserAgents
+        Instance of UserAgents class
+    mock_requests_get : object
+        Mock for requests.get
+    exception : type
+        The exception type to raise
+    message : str
+        The expected exception message
+
+    Returns
+    -------
+    None
+    """
+    mock_response = mock_requests_get.return_value
+    if exception == HTTPError:
+        mock_response.raise_for_status.side_effect = exception(message)
+    else:
+        mock_requests_get.side_effect = exception(message)
+
+    with pytest.raises(exception, match=message):
+        user_agents.fetch_user_agents()
+
+
 # --------------------------
 # Tests for get_random_user_agent
 # --------------------------
@@ -350,7 +376,6 @@ def test_get_random_user_agent_success(
     mock_html_fromstring: object,
     mock_random_randint: object,
     sample_user_agents: list[str],
-    mock_backoff: object,
 ) -> None:
     """Test get_random_user_agent with successful fetch.
 
@@ -370,8 +395,6 @@ def test_get_random_user_agent_success(
         Mock for random.randint
     sample_user_agents : list[str]
         List of sample user agent strings
-    mock_backoff : object
-        Mock for backoff.on_exception
 
     Returns
     -------
@@ -389,12 +412,42 @@ def test_get_random_user_agent_success(
     mock_random_randint.assert_called_once_with(0, 0)
 
 
+def test_get_random_user_agent_fallback(
+    user_agents: UserAgents,
+    mock_requests_get: object,
+    mock_random_choice: object,
+) -> None:
+    """Test get_random_user_agent fallback when fetch fails.
+
+    Verifies
+    --------
+    That a fallback user agent is returned when fetch_user_agents raises an exception.
+
+    Parameters
+    ----------
+    user_agents : UserAgents
+        Instance of UserAgents class
+    mock_requests_get : object
+        Mock for requests.get
+    mock_random_choice : object
+        Mock for random.choice
+
+    Returns
+    -------
+    None
+    """
+    mock_requests_get.side_effect = RequestException("Request failed")
+
+    result = user_agents.get_random_user_agent()
+    assert result == mock_random_choice.return_value
+    mock_random_choice.assert_called_once()
+
+
 def test_get_random_user_agent_empty_fetch(
     user_agents: UserAgents,
     mock_requests_get: object,
     mock_html_fromstring: object,
     mock_random_choice: object,
-    mock_backoff: object,
 ) -> None:
     """Test get_random_user_agent with empty fetch result.
 
@@ -412,8 +465,6 @@ def test_get_random_user_agent_empty_fetch(
         Mock for html.fromstring
     mock_random_choice : object
         Mock for random.choice
-    mock_backoff : object
-        Mock for backoff.on_exception
 
     Returns
     -------
@@ -437,7 +488,6 @@ def test_get_random_user_agent_type(
     mock_html_fromstring: object,
     mock_random_randint: object,
     sample_user_agents: list[str],
-    mock_backoff: object,
 ) -> None:
     """Test get_random_user_agent return type.
 
@@ -457,8 +507,6 @@ def test_get_random_user_agent_type(
         Mock for random.randint
     sample_user_agents : list[str]
         List of sample user agent strings
-    mock_backoff : object
-        Mock for backoff.on_exception
 
     Returns
     -------
@@ -481,7 +529,6 @@ def test_get_random_user_agent_non_empty(
     mock_html_fromstring: object,
     mock_random_randint: object,
     sample_user_agents: list[str],
-    mock_backoff: object,
 ) -> None:
     """Test get_random_user_agent returns non-empty string.
 
@@ -501,8 +548,6 @@ def test_get_random_user_agent_non_empty(
         Mock for random.randint
     sample_user_agents : list[str]
         List of sample user agent strings
-    mock_backoff : object
-        Mock for backoff.on_exception
 
     Returns
     -------
