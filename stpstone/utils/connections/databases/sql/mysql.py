@@ -209,8 +209,13 @@ class MySQLDatabase(ABCDatabase):
         self.cursor.execute(str_query)
         data = self.cursor.fetchall()
         
-        # Get column names from cursor description
-        columns = [desc[0] for desc in self.cursor.description] if self.cursor.description else []
+        if self.cursor.description:
+            columns = [desc[0] for desc in self.cursor.description]
+        else:
+            if data and len(data) > 0:
+                columns = [f"col_{i}" for i in range(len(data[0]))]
+            else:
+                columns = []
         df_ = pd.DataFrame(data, columns=columns)
 
         if dict_type_cols is not None:
