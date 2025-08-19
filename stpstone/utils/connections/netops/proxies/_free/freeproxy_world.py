@@ -53,7 +53,7 @@ class FreeProxyWorld(ABCSession):
             Backoff factor for retries
         bool_alive : bool
             Whether to check proxy liveness
-        list_anonymity_value : list[str]
+        list_anonymity_value : Optional[list[str]]
             Allowed anonymity levels
         list_protocol : str
             Preferred protocol
@@ -69,7 +69,7 @@ class FreeProxyWorld(ABCSession):
             Maximum timeout threshold
         bool_use_timer : bool
             Whether to use timing
-        list_status_forcelist : list[int]
+        list_status_forcelist : Optional[list[int]]
             HTTP status codes to retry
         logger : Optional[Logger]
             Logger instance
