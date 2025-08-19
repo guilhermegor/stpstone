@@ -17,13 +17,13 @@ export_deps:
 .PHONY: unit_tests integration_tests test_cov test_feat test_urls_docstrings
 
 unit_tests:
-	@poetry run pytest tests/unit/ -v
+	@poetry run pytest tests/unit/
 
 integration_tests:
-	@poetry run pytest tests/integration/ -v
+	@poetry run pytest tests/integration/
 
 test_cov:
-	@poetry run pytest --cov=stpstone tests/unit/ -v
+	@poetry run pytest --cov=stpstone tests/unit/
 	@poetry run coverage report -m
 
 test_feat:
