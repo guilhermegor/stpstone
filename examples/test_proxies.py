@@ -1,6 +1,6 @@
 import time
 
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
 
 

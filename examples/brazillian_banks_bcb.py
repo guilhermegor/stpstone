@@ -7,7 +7,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.realpath(__file__), "..", "..")))
 from stpstone.ingestion.countries.br.registries.brazillian_banks import BrazilianBanksBCB
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
 # session = YieldFreeProxy(

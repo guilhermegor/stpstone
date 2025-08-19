@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from stpstone._config.global_slots import YAML_BR_BCB_BRAZILLIAN_BANKS_REGISTRY
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
 class BrazilianBanksBCB(ABCRequests):

@@ -11,7 +11,7 @@ from yfinance import download
 # local libs
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
 class YFinanceWS(metaclass=TypeChecker):

@@ -9,7 +9,7 @@ from selenium.common.exceptions import NoSuchElementException, WebDriverExceptio
 from urllib3.exceptions import ReadTimeoutError
 
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
 

@@ -8,7 +8,7 @@ from keyring import get_password
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.crypto.coincap import CoinCap
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
 cls_session = YieldFreeProxy(bool_new_proxy=True)

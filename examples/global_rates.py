@@ -4,7 +4,7 @@ import os
 os.path.abspath(os.path.join(os.path.realpath(__file__), ".."))
 from stpstone.ingestion.countries.ww.macroeconomics.global_rates import GlobalRates
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
 # session = YieldFreeProxy(

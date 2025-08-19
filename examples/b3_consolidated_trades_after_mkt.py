@@ -6,7 +6,7 @@ from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt impo
     ConsolidatedTrdsAfterMktB3,
 )
 from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
 session = YieldFreeProxy(

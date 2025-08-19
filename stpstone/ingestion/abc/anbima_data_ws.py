@@ -8,7 +8,7 @@ from lxml import html
 from requests import Response, request
 from requests.exceptions import ChunkedEncodingError, ConnectionError, ConnectTimeout, ReadTimeout
 
-from stpstone.utils.connections.netops.proxies.managers.free import YieldFreeProxy
+from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.str import StrHandler
