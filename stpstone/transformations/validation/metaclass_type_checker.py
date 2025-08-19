@@ -31,6 +31,7 @@ from typing import (
     BinaryIO,
     Callable,
     Literal,
+    Optional,
     Protocol,
     Union,
     get_args,
@@ -46,12 +47,11 @@ from psycopg.sql import Composable
 from pydantic_core import core_schema
 
 
-# * SQLComposable protocol, for agnostic databse typing
 @runtime_checkable
 class SQLComposable(Protocol):
     """Database-agnostic protocol for SQL composable objects."""
 
-    def __str__(self) -> str: 
+    def __str__(self) -> str:
         """Return a string representation of the SQL composable object.
         
         Returns
@@ -64,32 +64,125 @@ class SQLComposable(Protocol):
     @classmethod
     def __get_pydantic_core_schema__(
         cls,
-        source_type: type[Any],
-        _handler: Callable[[Any], core_schema.CoreSchema],
+        _source_type: Any, # noqa ANN401: typing.Any is not allowed
+        _handler: Any, # noqa ANN401: typing.Any is not allowed
     ) -> core_schema.CoreSchema:
-        """Pydantic of SQL composable objects.
-
+        """Tell Pydantic how to handle this protocol.
+        
         Parameters
         ----------
         cls : type
             Class of the SQL composable object.
-        source_type : type
+        _source_type : Any
             Source type of the SQL composable object.
-        _handler : Callable[[Any], CoreSchema]
+        _handler : Any
             Handler function for the SQL composable object.
         
         Returns
         -------
-        CoreSchema
+        core_schema.CoreSchema
             Core schema for SQL composable objects.
         """
         return core_schema.union_schema(
-            [
-                core_schema.str_schema(),
-                core_schema.is_instance_schema(cls),
-                core_schema.is_instance_schema(Composable),
-            ]
+            [core_schema.str_schema(), core_schema.is_instance_schema(cls)]
         )
+
+
+@runtime_checkable
+class DbCursor(Protocol):
+    """Protocol defining a generic database cursor interface."""
+
+    def execute(
+        self, 
+        query: Union[str, SQLComposable], 
+        params: Optional[Any] = None # noqa ANN401: typing.Any is not allowed
+    ) -> Any: # noqa ANN401: typing.Any is not allowed
+        """Execute a SQL query.
+
+        Parameters
+        ----------
+        query : Union[str, SQLComposable]
+            SQL query to execute
+        params : Optional[Any]
+            Parameters to pass to the query, defaults to None
+
+        Returns
+        -------
+        Any
+            Result of the query
+        """
+        ...
+    
+    def fetchone(self) -> Any: # noqa ANN401: typing.Any is not allowed
+        """Fetch a single row from the query result.
+
+        Returns
+        -------
+        Any
+            Single row of the query result
+        """
+        ...
+
+    def fetchall(self) -> list[Any]: 
+        """Fetch all rows from the query result.
+
+        Returns
+        -------
+        list[Any]
+            List of all rows in the query result
+        """
+        ...
+        
+    def close(self) -> None: 
+        """Close the cursor.
+        
+        Returns
+        -------
+        None
+        """
+        ...
+
+
+@runtime_checkable
+class DbConnection(Protocol):
+    """Protocol defining a generic database connection interface."""
+
+    def cursor(self) -> DbCursor:
+        """Create a database cursor.
+
+        Returns
+        -------
+        DbCursor
+            Database cursor
+        """
+        ...
+    
+    def commit(self) -> None:
+        """Commit changes to the database.
+        
+        Returns
+        -------
+        None
+        """
+        ...
+    
+    def rollback(self) -> None:
+        """Rollback changes to the database.
+
+        Returns
+        -------
+        None
+        """
+        ...
+    
+    def close(self) -> None:
+        """Close the connection.
+        
+        Returns
+        -------
+        None
+        """
+        ...
 
 
 def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -> None:
