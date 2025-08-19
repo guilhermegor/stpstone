@@ -73,28 +73,6 @@ from requests import request
 class HandlingLXML:
     """Class for handling HTML data extraction using lxml."""
 
-    def _validate_url(self, url: str) -> None:
-        """Validate URL format and content.
-
-        Parameters
-        ----------
-        url : str
-            URL to validate
-
-        Raises
-        ------
-        ValueError
-            If URL is empty 
-            If URL is not a string
-            If URL does not start with http:// or https://
-        """
-        if not url:
-            raise ValueError("URL cannot be empty")
-        if not isinstance(url, str):
-            raise ValueError("URL must be a string")
-        if not (url.startswith("http://") or url.startswith("https://")):
-            raise ValueError("URL must start with http:// or https://")
-
     def fetch(self, url: str, method: Literal["get", "post"] = "get") -> html.ElementTree:
         """Fetch and parse HTML document for XPath selection.
 
@@ -127,6 +105,28 @@ class HandlingLXML:
             return html.fromstring(content)
         except Exception as err:
             raise ValueError(f"Failed to fetch or parse URL: {str(err)}") from err
+
+    def _validate_url(self, url: str) -> None:
+        """Validate URL format and content.
+
+        Parameters
+        ----------
+        url : str
+            URL to validate
+
+        Raises
+        ------
+        ValueError
+            If URL is empty 
+            If URL is not a string
+            If URL does not start with http:// or https://
+        """
+        if not url:
+            raise ValueError("URL cannot be empty")
+        if not isinstance(url, str):
+            raise ValueError("URL must be a string")
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise ValueError("URL must start with http:// or https://")
 ```
    - **0-1 Range Values**:
      - Probabilities
