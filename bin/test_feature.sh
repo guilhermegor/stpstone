@@ -282,7 +282,7 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
             class_nodes[n.name] = n
 
     def has_type_checker_metaclass(class_node, visited=None):
-        """Recursively check if a class or its bases have TypeChecker metaclass."""
+        """Recursively check if a class or its bases have TypeChecker metaclass or inherit TypeChecker."""
         if visited is None:
             visited = set()
         
@@ -295,12 +295,19 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
         for keyword in class_node.keywords:
             if keyword.arg == 'metaclass':
                 if (isinstance(keyword.value, ast.Name) and keyword.value.id == 'TypeChecker') or \
-                   (isinstance(keyword.value, ast.Attribute) and keyword.value.attr == 'TypeChecker'):
+                   (isinstance(keyword.value, ast.Attribute) and keyword.value.attr == 'TypeChecker') or \
+                   (isinstance(keyword.value, ast.Name) and keyword.value.id in class_nodes and \
+                    'TypeChecker' in class_bases.get(keyword.value.id, [])):
                     return True
         
         # check base classes
         for base in class_node.bases:
             base_name = ast.unparse(base)
+            # Check if base class inherits from TypeChecker
+            if base_name == 'TypeChecker' or \
+               (isinstance(base, ast.Name) and base.id == 'TypeChecker') or \
+               (isinstance(base, ast.Attribute) and base.attr == 'TypeChecker'):
+                return True
             # Find the base class node
             if base_name in class_nodes:
                 base_node = class_nodes[base_name]
@@ -309,7 +316,7 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
         
         return False
 
-    for n in ast.walk(tree):  # Use tree instead of node to ensure we check all nodes
+    for n in ast.walk(tree):
         # check classes for TypeChecker metaclass
         if isinstance(n, ast.ClassDef):
             # skip TypedDict classes
@@ -324,9 +331,9 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
             if is_typed_dict:
                 continue
                 
-            # check if class or its bases have TypeChecker
+            # check if class or its bases have TypeChecker or a class that inherits TypeChecker
             if not has_type_checker_metaclass(n):
-                print(f"❌ Class {n.name} does not use TypeChecker metaclass")
+                print(f"❌ Class {n.name} does not use TypeChecker metaclass or inherit from a TypeChecker-based class")
                 errors += 1
         
         # check functions for type_checker decorator, but only if not in a class with TypeChecker

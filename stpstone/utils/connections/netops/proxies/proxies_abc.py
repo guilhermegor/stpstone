@@ -4,7 +4,7 @@ This module defines an abstract base class (ABC) for proxy management,
 providing a common interface for fetching and validating proxies.
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from datetime import datetime, timedelta
 from logging import Logger
 from random import shuffle
@@ -127,7 +127,7 @@ class ReturnAvailableProxies(TypedDict):
     uptime: float
 
 
-class ABCMetaClass(TypeChecker, ABC):
+class ABCMetaClass(TypeChecker, ABCMeta):
     """Metaclass combining TypeChecker and ABC functionality."""
 
 
@@ -170,12 +170,12 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
     Notes
     -----
     Proxy levels:
-        - Transparent: target server knows your IP address and it knows that you are connecting via a
-          proxy server.
-        - Anonymous: target server does not know your IP address, but it knows that you're using a
-          proxy.
-        - Elite or High anonymity: target server does not know your IP address, or that the request is
-          relayed through a proxy server.
+        - Transparent: target server knows your IP address and it knows that you are connecting 
+          via a proxy server.
+        - Anonymous: target server does not know your IP address, but it knows that you're 
+          using a proxy.
+        - Elite or High anonymity: target server does not know your IP address, or that the 
+          request is relayed through a proxy server.
     """
 
     def __init__(
@@ -186,7 +186,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         int_backoff_factor: int = 1,
         bool_alive: bool = True,
         list_anonymity_value: Optional[list[str]] = None,
-        list_protocol: list[str] = ["http", "https"],
+        list_protocol: Optional[list[str]] = None,
         str_continent_code: Optional[str] = None,
         str_country_code: Optional[str] = None,
         bool_ssl: Optional[bool] = None,
@@ -196,6 +196,45 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         list_status_forcelist: Optional[list[int]] = None,
         logger: Optional[Logger] = None,
     ) -> None:
+        """Initialize ABCSession instance.
+        
+        Parameters
+        ----------
+        bool_new_proxy : bool
+            Whether to fetch a new proxy (default: True)
+        dict_proxies : Optional[dict[str, str]]
+            Dictionary of proxy settings (default: None)
+        int_retries : int
+            Number of retry attempts (default: 10)
+        int_backoff_factor : int
+            Backoff factor for retries (default: 1)
+        bool_alive : bool
+            Whether to filter for alive proxies (default: True)
+        list_anonymity_value : Optional[list[str]]
+            List of allowed anonymity levels (default: None)
+        list_protocol : Optional[list[str]]
+            List of allowed protocols (default: ["http", "https"])
+        str_continent_code : Optional[str]
+            Continent code filter (default: None)
+        str_country_code : Optional[str]
+            Country code filter (default: None)
+        bool_ssl : Optional[bool]
+            SSL support filter (default: None)
+        float_min_ratio_times_alive_dead : Optional[float]
+            Minimum alive/dead ratio (default: 0.02)
+        float_max_timeout : Optional[float]
+            Maximum timeout in seconds (default: 600)
+        bool_use_timer : bool
+            Whether to use timing decorator (default: False)
+        list_status_forcelist : Optional[list[int]]
+            HTTP status codes for retry (default: None)
+        logger : Optional[Logger]
+            Logger instance (default: None)
+
+        Results
+        -------
+        None
+        """
         self._validate_init_params(
             bool_new_proxy,
             dict_proxies,
@@ -219,7 +258,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         self.int_backoff_factor = int_backoff_factor
         self.bool_alive = bool_alive
         self.list_anonymity_value = list_anonymity_value or ["anonymous", "elite"]
-        self.list_protocol = list_protocol if isinstance(list_protocol, list) else [list_protocol]
+        self.list_protocol = list_protocol or ["http", "https"]
         self.str_continent_code = str_continent_code
         self.str_country_code = str_country_code
         self.bool_ssl = bool_ssl
@@ -275,7 +314,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
         Parameters
         ----------
-        list_proxies : list[dict[str, str | int | float | bool]]
+        list_proxies : list[dict[str, Union[str, int, float, bool]]]
             List of proxy dictionaries to validate
 
         Raises
@@ -487,9 +526,9 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             for dict_proxy in list_proxies:
                 str_ip = dict_proxy["ip"]
                 int_port = dict_proxy["port"]
-                if str_ip and int_port:
-                    if self._test_proxy(str_ip, int(int_port), bool_return_availability=True):
-                        return {"ip": str_ip, "port": str(int_port)}
+                if str_ip and int_port \
+                    and self._test_proxy(str_ip, int(int_port), bool_return_availability=True):
+                    return {"ip": str_ip, "port": str(int_port)}
             return None
         return retrieve_proxy()
 
@@ -504,6 +543,13 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         @type_checker
         @conditional_timeit(bool_use_timer=self.bool_use_timer)
         def retrieve_proxies() -> Optional[list[dict[str, str]]]:
+            """Retrieve a list of working proxies.
+            
+            Returns
+            -------
+            Optional[list[dict[str, str]]]
+                List of dictionaries with IP and port of working proxies, or None if none found
+            """
             list_result = []
             list_proxies = self._filtered_proxies()
             for dict_proxy in list_proxies:
@@ -551,6 +597,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
         Raises
         ------
+        TypeError
+            If timeout is not a tuple
         ValueError
             If timeout values are invalid
         """
@@ -560,7 +608,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             raise ValueError("timeout values must be positive integers")
         dict_payload: dict[str, str] = {}
         dict_headers = {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7", # noqa E501: line too long
             "accept-language": "en-US,en;q=0.9,pt;q=0.8,es;q=0.7",
             "cache-control": "max-age=0",
             "priority": "u=0, i",
@@ -572,7 +620,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
             "sec-fetch-site": "none",
             "sec-fetch-user": "?1",
             "upgrade-insecure-requests": "1",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" # noqa E501: line too long
         }
         try:
             resp_req = session.get("https://lumtest.com/myip.json", headers=dict_headers,
@@ -672,7 +720,7 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
 
         Parameters
         ----------
-        dict_proxy : dict[str, str] | None
+        dict_proxy : Optional[dict[str, str]]
             Proxy dictionary (default: None)
         int_retries : int
             Number of retry attempts (default: 10)
@@ -687,7 +735,8 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         Raises
         ------
         ValueError
-            If retry or backoff values are invalid
+            If int_retries is negative
+            If int_backoff_factor is negative
         """
         if int_retries < 0:
             raise ValueError("int_retries must be a non-negative integer")
