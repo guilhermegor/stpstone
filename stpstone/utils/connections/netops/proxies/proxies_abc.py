@@ -134,48 +134,8 @@ class ABCMetaClass(TypeChecker, ABCMeta):
 class ABCSession(ABC, metaclass=ABCMetaClass):
     """Abstract base class for proxy session management.
 
-    Parameters
-    ----------
-    bool_new_proxy : bool
-        Whether to fetch a new proxy (default: True)
-    dict_proxies : dict[str, str] | None
-        Dictionary of proxy settings (default: None)
-    int_retries : int
-        Number of retry attempts (default: 10)
-    int_backoff_factor : int
-        Backoff factor for retries (default: 1)
-    bool_alive : bool
-        Whether to filter for alive proxies (default: True)
-    list_anonymity_value : list[str] | None
-        List of allowed anonymity levels (default: None)
-    list_protocol : list[str]
-        List of allowed protocols (default: ["http", "https"])
-    str_continent_code : Optional[str]
-        Continent code filter (default: None)
-    str_country_code : Optional[str]
-        Country code filter (default: None)
-    bool_ssl : Optional[bool]
-        SSL support filter (default: None)
-    float_min_ratio_times_alive_dead : Optional[float]
-        Minimum alive/dead ratio (default: 0.02)
-    float_max_timeout : Optional[float]
-        Maximum timeout in seconds (default: 600)
-    bool_use_timer : bool
-        Whether to use timing decorator (default: False)
-    list_status_forcelist : Optional[list[int]]
-        HTTP status codes for retry (default: None)
-    logger : Optional[Logger]
-        Logger instance (default: None)
-
-    Notes
-    -----
-    Proxy levels:
-        - Transparent: target server knows your IP address and it knows that you are connecting 
-          via a proxy server.
-        - Anonymous: target server does not know your IP address, but it knows that you're 
-          using a proxy.
-        - Elite or High anonymity: target server does not know your IP address, or that the 
-          request is relayed through a proxy server.
+    This class provides a common interface for proxy session management,
+    including fetching and validating proxies.
     """
 
     def __init__(
@@ -234,6 +194,16 @@ class ABCSession(ABC, metaclass=ABCMetaClass):
         Results
         -------
         None
+
+        Notes
+        -----
+        Proxy levels:
+            - Transparent: target server knows your IP address and it knows that you are 
+              connecting via a proxy server.
+            - Anonymous: target server does not know your IP address, but it knows that you're 
+              using a proxy.
+            - Elite or High anonymity: target server does not know your IP address, or that the 
+              request is relayed through a proxy server.
         """
         self._validate_init_params(
             bool_new_proxy,
