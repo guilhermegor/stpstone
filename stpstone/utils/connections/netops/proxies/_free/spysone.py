@@ -56,7 +56,7 @@ class SpysOneCountry(ABCSession):
             Backoff factor for retries (default: 1)
         bool_alive : bool
             Flag to check proxy liveness (default: True)
-        list_anonymity_value : list[str]
+        list_anonymity_value : Optional[list[str]]
             Allowed anonymity levels (default: ["anonymous", "elite"])
         list_protocol : str
             Proxy protocol (default: "http")
@@ -72,7 +72,7 @@ class SpysOneCountry(ABCSession):
             Maximum timeout threshold (default: 600)
         bool_use_timer : bool
             Flag to use timer (default: False)
-        list_status_forcelist : list[int]
+        list_status_forcelist : Optional[list[int]]
             HTTP status codes to force retry (default: [429, 500, 502, 503, 504])
         logger : Optional[Logger]
             Logger instance (default: None)
@@ -114,7 +114,8 @@ class SpysOneCountry(ABCSession):
         Raises
         ------
         ValueError
-            If country code is not set or invalid
+            If country code is not set
+            If country code is not 2 characters
         """
         if not self.str_country_code:
             raise ValueError("Country code must be set")
@@ -128,11 +129,6 @@ class SpysOneCountry(ABCSession):
         -------
         list[ReturnAvailableProxies]
             List of proxy dictionaries with detailed information
-
-        Raises
-        ------
-        ValueError
-            If country code is invalid or proxy parsing fails
         """
         self._validate_country_code()
         proxies = []
@@ -193,11 +189,6 @@ class SpysOneCountry(ABCSession):
         -------
         ReturnAvailableProxies
             Dictionary with parsed proxy information
-
-        Raises
-        ------
-        ValueError
-            If required proxy data cannot be parsed
         """
         ip, port, protocol = self._parse_basic_proxy_info(row, cls_selenium_wd)
 
@@ -303,7 +294,7 @@ class SpysOneCountry(ABCSession):
         Raises
         ------
         ValueError
-            If IP:Port format is invalid
+            If IP or port cannot be parsed
         """
         ip_port = cls_selenium_wd.find_element(row, './td[1]').text.split(":")
         if len(ip_port) != 2 or not self.cls_num_handler.is_numeric(ip_port[1]):
@@ -353,7 +344,7 @@ class SpysOneCountry(ABCSession):
 
         Returns
         -------
-        tuple[float, str, int]
+        tuple[float, str, float]
             Tuple containing (timeout, uptime, ts_check_date)
         """
         latency_text = cls_selenium_wd.find_element(row, './td[6]').text
