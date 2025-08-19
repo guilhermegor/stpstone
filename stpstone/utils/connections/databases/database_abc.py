@@ -241,13 +241,13 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
             Singleton instance of the database class
         """
         if cls not in cls._instances:
-            # Temporarily set bool_singleton to False to avoid recursion
+            # temporarily set bool_singleton to False to avoid recursion
             singleton_kwargs = kwargs.copy()
             singleton_kwargs["bool_singleton"] = False
-            # Use super().__new__ to bypass the singleton check in __new__
+            # use super().__new__ to bypass the singleton check in __new__
             instance = super().__new__(cls)
             instance.__init__(*args, **singleton_kwargs)
-            # Restore the original bool_singleton value
+            # restore the original bool_singleton value
             instance.bool_singleton = kwargs.get("bool_singleton", False)
             cls._instances[cls] = instance
         return cls._instances[cls]
