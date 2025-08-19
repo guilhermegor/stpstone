@@ -1,5 +1,18 @@
 #!/bin/bash
 
+declare -a EXCLUDE_PATTERNS=(
+    "tests/unit/*"
+    "tests/integration/*"
+    "tests/performance/*"
+    "stpstone/utils/parsers/mock_exclusion_example.py"
+)
+
+# List of classes considered to have TypeChecker
+declare -a TYPECHECKER_CLASSES=(
+    "TypeChecker"
+    "ABCSession"
+)
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -7,13 +20,6 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
-
-declare -a EXCLUDE_PATTERNS=(
-    "tests/unit/*"
-    "tests/integration/*"
-    "tests/performance/*"
-    "stpstone/utils/parsers/mock_exclusion_example.py"
-)
 
 print_status() {
     local status="$1"
@@ -83,8 +89,9 @@ check_type_consistency() {
     local temp_file=$(mktemp)
     local output_file=$(mktemp)
     
-    # convert EXCLUDE_PATTERNS to a Python-compatible string
+    # convert arrays to Python-compatible strings
     exclude_patterns=$(printf '%s\n' "${EXCLUDE_PATTERNS[@]}" | python -c "import sys; print([line.strip() for line in sys.stdin])")
+    typechecker_classes=$(printf '%s\n' "${TYPECHECKER_CLASSES[@]}" | python -c "import sys; print([line.strip() for line in sys.stdin])")
     
     cat << EOF > "$temp_file"
 import ast
@@ -94,6 +101,7 @@ import fnmatch
 from typing import Any, List, Dict, Set, TypedDict
 
 EXCLUDE_PATTERNS = $exclude_patterns
+TYPECHECKER_CLASSES = $typechecker_classes
 
 def should_exclude(filepath: str) -> bool:
     """Check if the file path matches any of the exclusion patterns."""
@@ -253,25 +261,7 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
         print(f"ℹ️  Skipping TypeChecker checks for excluded path: {filepath}")
         return 0
     
-    # check for TypeChecker import
-    has_type_checker_import = False
     tree = ast.parse(open(filepath).read(), filename=filepath)
-    for n in ast.walk(tree):
-        if isinstance(n, ast.ImportFrom):
-            if n.module == 'stpstone.transformations.validation.metaclass_type_checker':
-                for alias in n.names:
-                    if alias.name == 'TypeChecker' or alias.name == 'type_checker':
-                        has_type_checker_import = True
-                        break
-    
-    # Check if this is a class file (contains class definitions)
-    has_classes = any(isinstance(n, ast.ClassDef) for n in ast.walk(tree))
-    
-    # For class files, TypeChecker is mandatory
-    if has_classes and not has_type_checker_import:
-        print(f"❌ Missing required TypeChecker import in {filepath}")
-        errors += 1
-        return errors
     
     # build a map of classes and their bases
     class_bases = {}
@@ -280,6 +270,39 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
         if isinstance(n, ast.ClassDef):
             class_bases[n.name] = [ast.unparse(base) for base in n.bases]
             class_nodes[n.name] = n
+
+    # check if classes inherit from TYPECHECKER_CLASSES
+    has_typechecker_inheritance = False
+    for class_name, bases in class_bases.items():
+        inherited_typechecker = any(
+            base in TYPECHECKER_CLASSES or
+            any(tc in base for tc in TYPECHECKER_CLASSES)
+            for base in bases
+        )
+        if inherited_typechecker:
+            print(f"ℹ️  Class {class_name} inherits from TypeChecker class: {', '.join(b for b in bases if b in TYPECHECKER_CLASSES or any(tc in b for tc in TYPECHECKER_CLASSES))}")
+            has_typechecker_inheritance = True
+        else:
+            print(f"ℹ️  Class {class_name} does not inherit from any TypeChecker classes")
+
+    # check for TypeChecker import
+    has_type_checker_import = False
+    for n in ast.walk(tree):
+        if isinstance(n, ast.ImportFrom):
+            if n.module == 'stpstone.transformations.validation.metaclass_type_checker':
+                for alias in n.names:
+                    if alias.name == 'TypeChecker' or alias.name == 'type_checker':
+                        has_type_checker_import = True
+                        break
+
+    # Check if this is a class file (contains class definitions)
+    has_classes = any(isinstance(n, ast.ClassDef) for n in ast.walk(tree))
+    
+    # For class files, either TypeChecker import or inheritance from TYPECHECKER_CLASSES is required
+    if has_classes and not (has_type_checker_import or has_typechecker_inheritance):
+        print(f"❌ Missing required TypeChecker import and no inheritance from TYPECHECKER_CLASSES in {filepath}")
+        errors += 1
+        return errors
 
     def has_type_checker_metaclass(class_node, visited=None):
         """Recursively check if a class or its bases have TypeChecker metaclass or inherit TypeChecker."""
@@ -303,8 +326,11 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
         # check base classes
         for base in class_node.bases:
             base_name = ast.unparse(base)
-            # Check if base class inherits from TypeChecker
-            if base_name == 'TypeChecker' or \
+            # Check if base class inherits from TypeChecker or TYPECHECKER_CLASSES
+            if base_name in TYPECHECKER_CLASSES or \
+               base_name == 'TypeChecker' or \
+               (isinstance(base, ast.Name) and base.id in TYPECHECKER_CLASSES) or \
+               (isinstance(base, ast.Attribute) and base.attr in TYPECHECKER_CLASSES) or \
                (isinstance(base, ast.Name) and base.id == 'TypeChecker') or \
                (isinstance(base, ast.Attribute) and base.attr == 'TypeChecker'):
                 return True
@@ -522,6 +548,7 @@ main() {
 
     local module="$1"
     print_status "info" "=== Testing module: ${module} ==="
+    print_status "config" "Classes considered to have TypeChecker: ${TYPECHECKER_CLASSES[*]}"
 
     local module_path
     module_path=$(find_module_path "$module") || exit 1
