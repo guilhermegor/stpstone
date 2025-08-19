@@ -11,6 +11,7 @@ declare -a EXCLUDE_PATTERNS=(
 declare -a TYPECHECKER_CLASSES=(
     "TypeChecker"
     "ABCSession"
+    "ABCDatabase"
 )
 
 RED='\033[0;31m'

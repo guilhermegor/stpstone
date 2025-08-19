@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pandas as pd
 
-from stpstone.utils.connections.databases.postgresql import PostgreSQLDB
+from stpstone.utils.connections.databases.sql.postgresql import PostgreSQLDB
 
 
 class TestPostgreSQLDB(unittest.TestCase):

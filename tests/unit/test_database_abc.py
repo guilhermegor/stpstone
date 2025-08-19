@@ -17,7 +17,7 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from stpstone.utils.connections.databases.database_abc import (
+from stpstone.utils.connections.databases.sql.database_abc import (
     ABCDatabase,
     DbConnection,
     DbCursor,
