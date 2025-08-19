@@ -56,7 +56,7 @@ class SpysMeCountries(ABCSession):
             Backoff factor for retries (default: 1)
         bool_alive : bool
             Flag to check proxy liveness (default: True)
-        list_anonymity_value : list[str]
+        list_anonymity_value : Optional[list[str]]
             Allowed anonymity levels (default: ["anonymous", "elite"])
         list_protocol : str
             Proxy protocol (default: "http")
@@ -72,7 +72,7 @@ class SpysMeCountries(ABCSession):
             Maximum timeout threshold (default: 600)
         bool_use_timer : bool
             Flag to use timer (default: False)
-        list_status_forcelist : list[int]
+        list_status_forcelist : Optional[list[int]]
             HTTP status codes to force retry (default: [429, 500, 502, 503, 504])
         logger : Optional[Logger]
             Logger instance (default: None)
