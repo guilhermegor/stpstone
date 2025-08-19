@@ -7,6 +7,8 @@ robust error handling and type safety throughout database interactions.
 
 from logging import Logger
 import os
+import platform
+import shutil
 import subprocess
 from typing import Any, Optional, Union
 
@@ -299,9 +301,17 @@ class PostgreSQLDB(ABCDatabase):
         ------
         ValueError
             If backup directory is empty
+        RuntimeError
+            If backup tool is not available
         """
         if not str_backup_dir:
             raise ValueError("Backup directory cannot be empty")
+
+        if not self.check_bkp_tool():
+            error_msg = "Backup tool is required for backups, but it is not available and " \
+            "could not be installed automatically"
+            CreateLog().log_message(self.logger, error_msg, "error")
+            raise RuntimeError(error_msg)
 
         try:
             os.makedirs(str_backup_dir, exist_ok=True)
@@ -330,3 +340,69 @@ class PostgreSQLDB(ABCDatabase):
             return f"Backup failed: {err}"
         except Exception as err:
             return f"An error occurred: {err}"
+        
+    def check_bkp_tool(self) -> bool:
+        """Check if backup tool is available.
+
+        Returns
+        -------
+        bool
+            True if backup tool is available, False otherwise
+        """
+        if shutil.which("pg_dump"):
+            return True
+
+        error_msg = "pg_dump not found. Attempting to install..."
+        if self.logger is not None:
+            CreateLog().log_message(self.logger, error_msg, "warning")
+
+        system = platform.system().lower()
+        try:
+            if system == "linux":
+                subprocess.run(["apt-get", "update"], check=True)  # noqa S603: check for execution of untrusted input
+                subprocess.run(
+                    ["apt-get", "install", "-y", "postgresql-client"], # noqa S607: starting a process with a partial executable path
+                    check=True  # noqa S603: check for execution of untrusted input
+                )
+            elif system == "darwin":
+                if shutil.which("brew"):
+                    subprocess.run(
+                        ["brew", "install", "postgresql"], # noqa S607: starting a process with a partial executable path
+                        check=True  # noqa S603: check for execution of untrusted input
+                    )
+                else:
+                    error_msg = (
+                        "Homebrew not found. Please install Homebrew and then "
+                        "run 'brew install postgresql' to install pg_dump."
+                    )
+                    CreateLog().log_message(self.logger, error_msg, "error")
+                    return False
+            elif system == "windows":
+                error_msg = (
+                    "pg_dump not found. Please install PostgreSQL from "
+                    "https://www.postgresql.org/download/windows/ and ensure "
+                    "pg_dump is in your system PATH."
+                )
+                CreateLog().log_message(self.logger, error_msg, "error")
+                return False
+            else:
+                error_msg = (
+                    f"Unsupported operating system: {system}. Please install "
+                    "pg_dump manually."
+                )
+                CreateLog().log_message(self.logger, error_msg, "error")
+                return False
+
+            if shutil.which("pg_dump"):
+                success_msg = "pg_dump successfully installed."
+                CreateLog().log_message(self.logger, success_msg, "info")
+                return True
+            else:
+                error_msg = "Failed to install pg_dump."
+                CreateLog().log_message(self.logger, error_msg, "error")
+                return False
+
+        except subprocess.CalledProcessError as err:
+            error_msg = f"Failed to install pg_dump: {err}"
+            CreateLog().log_message(self.logger, error_msg, "error")
+            return False

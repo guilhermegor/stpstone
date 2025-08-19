@@ -56,8 +56,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         logger: Optional[Logger] = None,
         bool_singleton: bool = False,
     ) -> None:
-        """
-        Initialize database connection.
+        """Initialize database connection.
         
         Concrete implementations MUST:
         1. Create self.conn (DbConnection)
@@ -300,8 +299,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         self, 
         str_query: Union[str, SQLComposable]
     ) -> None:
-        """
-        Execute a SQL query without returning results.
+        """Execute a SQL query without returning results.
 
         Parameters
         ----------
@@ -322,8 +320,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         list_cols_dt: Optional[list[str]] = None,
         str_fmt_dt: Optional[str] = None,
     ) -> pd.DataFrame:
-        """
-        Execute a query and return results as DataFrame.
+        """Execute a query and return results as DataFrame.
 
         Parameters
         ----------
@@ -350,8 +347,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         str_table_name: str,
         bool_insert_or_ignore: bool = False,
     ) -> None:
-        """
-        Insert data into a table.
+        """Insert data into a table.
 
         Parameters
         ----------
@@ -384,8 +380,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         str_backup_dir: str, 
         str_bkp_name: Optional[str] = None
     ) -> str:
-        """
-        Create database backup.
+        """Create database backup.
 
         Parameters
         ----------
@@ -398,6 +393,17 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         -------
         str
             Backup status message
+        """
+        pass
+
+    @abstractmethod
+    def check_bkp_tool(self) -> bool:
+        """Check if backup tool is available.
+
+        Returns
+        -------
+        bool
+            True if backup tool is available, False otherwise
         """
         pass
 
