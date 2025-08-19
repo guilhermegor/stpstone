@@ -43,33 +43,33 @@ class ProxyNova(ABCSession):
         bool_new_proxy : bool
             Whether to fetch new proxies
         dict_proxies : Optional[dict[str, str]]
-            Existing proxies dictionary
+            Existing proxy dictionary
         int_retries : int
             Number of retry attempts
         int_backoff_factor : int
             Backoff factor for retries
         bool_alive : bool
-            Whether to check proxy liveness
-        list_anonymity_value : list[str]
-            Allowed anonymity levels
-        list_protocol : Literal['http']
-            Proxy protocol
+            Whether to check proxy alive
+        list_anonymity_value : Optional[list[str]]
+            List of anonymity values to filter
+        list_protocol : str
+            Protocol to use
         str_continent_code : Optional[str]
-            Continent code filter
+            Continent code to filter
         str_country_code : Optional[str]
-            Country code filter
+            Country code to filter
         bool_ssl : Optional[bool]
-            SSL requirement
+            Whether to use SSL
         float_min_ratio_times_alive_dead : Optional[float]
-            Minimum alive/dead ratio
+            Minimum ratio of alive proxies to total proxies
         float_max_timeout : Optional[float]
-            Maximum timeout threshold
+            Maximum timeout for requests
         bool_use_timer : bool
-            Whether to use timing
-        list_status_forcelist : list[int]
-            HTTP status codes to retry
+            Whether to use timer
+        list_status_forcelist : Optional[list[int]]
+            List of status codes to forcelist
         logger : Optional[Logger]
-            Logger instance
+            Logger
         """
         super().__init__(
             bool_new_proxy=bool_new_proxy,
