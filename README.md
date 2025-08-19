@@ -6,8 +6,10 @@
 [![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff+https://github.com/codespell-project/codespell)
 [![Formatting: isort](https://img.shields.io/badge/formatting-isort-%231674b1)](https://pycqa.github.io/isort/)
 ![Test Coverage](./coverage.svg)
+[![Snyk Vulnerabilities](https://snyk.io/test/github/yourusername/stpstone/badge.svg)](https://snyk.io/test/github/yourusername/stpstone)
+[![Snyk License](https://snyk.io/advisor/python/stpstone/badge.svg)](https://snyk.io/advisor/python/stpstone)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)
+![PyPI Downloads](https://static.pepy.tech/badge/stpstone)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/stpstone)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
 
