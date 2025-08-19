@@ -1,6 +1,8 @@
-import redis
-from typing import Dict
 from __future__ import annotations
+
+from typing import Dict
+
+import stpstone.utils.connections.databases.nosql.redis as redis
 
 
 class RedisClient:
@@ -19,7 +21,7 @@ class RedisClient:
         """
         self.str_host = str_host
         self.int_port = int_port
-        self.bool_decode_resp bool_decode_resp
+        self.bool_decode_resp = bool_decode_resp
 
     def __new__(cls, *args, **kwargs) -> RedisClient:
         """

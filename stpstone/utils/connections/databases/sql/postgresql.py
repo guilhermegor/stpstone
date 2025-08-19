@@ -22,29 +22,7 @@ from stpstone.utils.parsers.json import JsonFiles
 
 
 class PostgreSQLDB(ABCDatabase):
-    """PostgreSQL database handler with connection management and operations.
-
-    Parameters
-    ----------
-    dbname : str
-        Database name
-    user : str
-        Database user
-    password : str
-        Database password
-    host : str
-        Database host
-    port : int
-        Database port
-    str_schema : str, optional
-        Database schema (default: "public")
-    logger : Optional[Logger], optional
-        Logger instance (default: None)
-        
-    Returns
-    -------
-    None
-    """
+    """PostgreSQL database handler with connection management and operations."""
 
     def __init__(
         self,
@@ -56,6 +34,34 @@ class PostgreSQLDB(ABCDatabase):
         str_schema: str = "public",
         logger: Optional[Logger] = None,
     ) -> None:
+        """Initialize PostgreSQL database connection.
+        
+        Parameters
+        ----------
+        dbname : str
+            Database name
+        user : str
+            Database user
+        password : str
+            Database password
+        host : str
+            Database host
+        port : int
+            Database port
+        str_schema : str, optional
+            Database schema (default: "public")
+        logger : Optional[Logger], optional
+            Logger instance (default: None)
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ConnectionError
+            If database connection fails
+        """
         self.dbname = dbname
         self.user = user
         self.password = password
@@ -311,7 +317,7 @@ class PostgreSQLDB(ABCDatabase):
                 backup_file,
                 self.dbname,
             ]
-            subprocess.run(command, check=True, env=env)
+            subprocess.run(command, check=True, env=env) # noqa S603: check for execution of untrusted input
             return f"Backup successful! File saved at: {backup_file}"
         except subprocess.CalledProcessError as err:
             return f"Backup failed: {err}"
