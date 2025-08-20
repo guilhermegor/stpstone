@@ -4,22 +4,16 @@ Tests MySQL database connection management, query execution, data operations,
 backup functionality, and error handling scenarios.
 """
 
-import json
 from logging import Logger
-import os
 from pathlib import Path
-import platform
-import shutil
 import subprocess
-from typing import Any, Optional
-from unittest.mock import MagicMock, Mock, patch
+from typing import Any
+from unittest.mock import MagicMock, patch
 
-from numpy.typing import NDArray
 import pandas as pd
 import pymysql
 import pytest
 from pytest_mock import MockerFixture
-from sqlalchemy import create_engine
 
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
@@ -107,7 +101,10 @@ def sample_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def mysql_database(valid_db_config: dict[str, Any], mock_logger: MagicMock) -> MySQLDatabase:
+def mysql_database(
+    valid_db_config: dict[str, Any], 
+    mock_logger: MagicMock
+) -> MySQLDatabase:
     """Fixture providing MySQLDatabase instance with mocked connection.
 
     Parameters
@@ -205,7 +202,7 @@ class TestMySQLDatabaseInit:
         mock_cursor = MagicMock()
         mock_connect.return_value.cursor.return_value = mock_cursor
 
-        db = MySQLDatabase(**valid_db_config)
+        MySQLDatabase(**valid_db_config)
         
         # Check that connect was called with the internal mapping
         expected_args = {
@@ -248,7 +245,10 @@ class TestMySQLDatabaseInit:
         -------
         None
         """
-        mock_connect = mocker.patch("pymysql.connect", side_effect=pymysql.Error("Connection failed"))
+        mocker.patch(
+            "pymysql.connect", 
+            side_effect=pymysql.Error("Connection failed")
+        )
         mocker.patch.object(CreateLog, "log_message")
         
         with pytest.raises(ConnectionError, match="Error connecting to database"):
@@ -309,9 +309,8 @@ class TestExecuteMethod:
         """
         test_query = 12345
         
-        mysql_database.execute(test_query)
-        
-        mysql_database.cursor.execute.assert_called_with(test_query)
+        with pytest.raises(TypeError, match="must be one of types"):
+            mysql_database.execute(test_query)
 
 
 # --------------------------
@@ -345,8 +344,9 @@ class TestReadSqlMethod:
         None
         """
         # Mock the create_engine at the module level where it's used
-        with patch("stpstone.utils.connections.databases.sql.mysql.create_engine") as mock_create_engine, \
-            patch("pandas.read_sql", return_value=sample_dataframe) as mock_read_sql:
+        module_path = "stpstone.utils.connections.databases.sql.mysql.create_engine"
+        with (patch(module_path) as mock_create_engine, 
+              patch("pandas.read_sql", return_value=sample_dataframe) as mock_read_sql):
             
             # Mock the engine connection
             mock_engine = MagicMock()
@@ -411,8 +411,8 @@ class TestReadSqlMethod:
         """
         test_timeout = 3600
         
-        with patch("stpstone.utils.connections.databases.sql.mysql.create_engine") \
-            as mock_create_engine, patch("pandas.read_sql"):
+        module_path = "stpstone.utils.connections.databases.sql.mysql.create_engine"
+        with patch(module_path) as mock_create_engine, patch("pandas.read_sql"):
             
             mysql_database.read_sql("SELECT 1", timeout=test_timeout)
             
@@ -443,11 +443,11 @@ class TestReadSqlMethod:
         -------
         None
         """
-        with patch("sqlalchemy.create_engine"), \
-             patch("pandas.read_sql", side_effect=Exception("SQL execution failed")):
+        with (patch("sqlalchemy.create_engine"), 
+              patch("pandas.read_sql", side_effect=Exception("SQL execution failed")),
+              pytest.raises(ValueError, match="Failed to read SQL query")):
             
-            with pytest.raises(ValueError, match="Failed to read SQL query"):
-                mysql_database.read_sql("SELECT * FROM non_existent_table")
+            mysql_database.read_sql("SELECT * FROM non_existent_table")
 
 
 # --------------------------
@@ -542,7 +542,7 @@ class TestReadMethod:
         type_mapping = {"int_col": int, "float_col": float}
         
         with patch("pandas.DataFrame.astype") as mock_astype:
-            result = mysql_database.read(
+            mysql_database.read(
                 "SELECT * FROM test_table",
                 dict_type_cols=type_mapping
             )
@@ -574,10 +574,15 @@ class TestReadMethod:
         mysql_database.cursor.fetchall.return_value = test_data
         mysql_database.cursor.description = [("date_col",)]
         
-        with patch.object(DatesBR, "__init__", return_value=None), \
-             patch.object(DatesBR, "str_date_to_datetime", return_value="2023-01-01 00:00:00") as mock_date_convert:
+        _ = "DatesBR.str_date_to_datetime"
+        with (patch.object(DatesBR, "__init__", return_value=None), 
+              patch.object(
+                  DatesBR, 
+                  "str_date_to_datetime", 
+                  return_value="2023-01-01 00:00:00"
+              ) as mock_date_convert):
             
-            result = mysql_database.read(
+            mysql_database.read(
                 "SELECT * FROM test_table",
                 list_cols_dt=["date_col"],
                 str_fmt_dt="%Y-%m-%d"
@@ -712,8 +717,8 @@ class TestInsertMethod:
         test_data = [{"col1": "val1", "col2": "val2"}]
         test_table = "test_table"
         
-        with patch.object(JsonFiles, "normalize_json_keys", return_value=test_data), \
-             patch.object(CreateLog, "log_message"):
+        with (patch.object(JsonFiles, "normalize_json_keys", return_value=test_data), 
+              patch.object(CreateLog, "log_message")):
             
             mysql_database.insert(test_data, test_table)
         
@@ -743,8 +748,8 @@ class TestInsertMethod:
         test_data = [{"col1": "val1"}]
         test_table = "test_table"
         
-        with patch.object(JsonFiles, "normalize_json_keys", return_value=test_data), \
-             patch.object(CreateLog, "log_message"):
+        with (patch.object(JsonFiles, "normalize_json_keys", return_value=test_data), 
+              patch.object(CreateLog, "log_message")):
             
             # Test INSERT IGNORE
             mysql_database.insert(test_data, test_table, bool_insert_or_ignore=True)
@@ -838,9 +843,9 @@ class TestInsertMethod:
         # Mock the close method as a MagicMock to avoid the AttributeError
         mysql_database.close = MagicMock()
         
-        with patch.object(JsonFiles, "normalize_json_keys", return_value=[{"col": "val"}]), \
-             patch.object(CreateLog, "log_message"), \
-             pytest.raises(Exception, match="Error while inserting data"):
+        with (patch.object(JsonFiles, "normalize_json_keys", return_value=[{"col": "val"}]), 
+              patch.object(CreateLog, "log_message"), 
+              pytest.raises(Exception, match="Error while inserting data")):
             
             mysql_database.insert([{"col": "val"}], "test_table")
         
@@ -965,7 +970,7 @@ class TestBackupMethod:
         None
         """
         mock_run = mocker.patch("subprocess.run")
-        mock_which = mocker.patch("shutil.which", return_value="/usr/bin/mysqldump")
+        mocker.patch("shutil.which", return_value="/usr/bin/mysqldump")
         backup_dir = tmp_path / "backups"
         
         result = mysql_database.backup(str(backup_dir))
@@ -1064,7 +1069,10 @@ class TestBackupMethod:
         # Mock that mysqldump is not found and installation fails
         mocker.patch("shutil.which", return_value=None)
         mocker.patch("platform.system", return_value="linux")
-        mocker.patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "apt-get"))
+        mocker.patch(
+            "subprocess.run", 
+            side_effect=subprocess.CalledProcessError(1, "apt-get")
+        )
         mocker.patch.object(CreateLog, "log_message")
         
         with pytest.raises(RuntimeError, match="Backup tool is required"):
@@ -1097,7 +1105,10 @@ class TestBackupMethod:
         None
         """
         mocker.patch("shutil.which", return_value="/usr/bin/mysqldump")
-        mocker.patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "cmd"))
+        mocker.patch(
+            "subprocess.run", 
+            side_effect=subprocess.CalledProcessError(1, "cmd")
+        )
         
         result = mysql_database.backup(str(tmp_path))
         
@@ -1204,7 +1215,8 @@ class TestCheckBkpToolMethod:
         None
         """
         # Mock sequence: mysqldump not found, brew found, mysqldump found after install
-        mocker.patch("shutil.which", side_effect=[None, "/usr/local/bin/brew", "/usr/bin/mysqldump"])
+        side_effects = [None, "/usr/local/bin/brew", "/usr/bin/mysqldump"]
+        mocker.patch("shutil.which", side_effect=side_effects)
         mocker.patch("platform.system", return_value="darwin")
         mocker.patch("subprocess.run")
         mocker.patch.object(CreateLog, "log_message")
@@ -1276,7 +1288,10 @@ class TestCheckBkpToolMethod:
         """
         mocker.patch("shutil.which", return_value=None)
         mocker.patch("platform.system", return_value="linux")
-        mocker.patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "apt-get"))
+        mocker.patch(
+            "subprocess.run", 
+            side_effect=subprocess.CalledProcessError(1, "apt-get")
+        )
         mocker.patch.object(CreateLog, "log_message")
         
         result = mysql_database.check_bkp_tool()
@@ -1461,8 +1476,8 @@ class TestMySQLDatabaseIntegration:
         
         # Simulate inserting data
         insert_data = [{"id": 2, "value": "new_value"}]
-        with patch.object(JsonFiles, "normalize_json_keys", return_value=insert_data), \
-             patch.object(CreateLog, "log_message"):
+        with (patch.object(JsonFiles, "normalize_json_keys", return_value=insert_data), 
+              patch.object(CreateLog, "log_message")):
             
             mysql_database.insert(insert_data, "test_table")
             
@@ -1496,9 +1511,9 @@ class TestMySQLDatabaseIntegration:
         mysql_database.cursor.executemany.side_effect = Exception("Database error")
         mysql_database.close = MagicMock()
         
-        with patch.object(JsonFiles, "normalize_json_keys", return_value=[{"col": "val"}]), \
-             patch.object(CreateLog, "log_message"), \
-             pytest.raises(Exception, match="Error while inserting data"):
+        with (patch.object(JsonFiles, "normalize_json_keys", return_value=[{"col": "val"}]), 
+              patch.object(CreateLog, "log_message"), 
+              pytest.raises(Exception, match="Error while inserting data")):
             
             mysql_database.insert([{"col": "val"}], "test_table")
         

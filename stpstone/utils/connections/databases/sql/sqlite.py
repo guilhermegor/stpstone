@@ -11,10 +11,11 @@ import platform
 import shutil
 import sqlite3
 import subprocess
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import pandas as pd
 
+from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -77,12 +78,15 @@ class SQLiteDB(ABCDatabase):
         if not isinstance(self.db_path, str):
             raise ValueError("Database path must be a string")
 
-    def execute(self, str_query: str) -> None:
+    def execute(
+        self, 
+        str_query: Union[str, SQLComposable]
+    ) -> None:
         """Execute a SQL query.
 
         Parameters
         ----------
-        str_query : str
+        str_query : Union[str, SQLComposable]
             SQL query to execute
 
         Returns
@@ -100,7 +104,7 @@ class SQLiteDB(ABCDatabase):
 
     def read(
         self,
-        str_query: str,
+        str_query: Union[str, SQLComposable],
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
         str_fmt_dt: Optional[str] = None,
@@ -109,7 +113,7 @@ class SQLiteDB(ABCDatabase):
 
         Parameters
         ----------
-        str_query : str
+        str_query : Union[str, SQLComposable]
             SQL query to execute
         dict_type_cols : Optional[dict[str, Any]], optional
             Dictionary for column type conversion (default: None)
@@ -193,26 +197,24 @@ class SQLiteDB(ABCDatabase):
             self.cursor.executemany(query, records)
             self.conn.commit()
 
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    f"Successful commit in db {self.db_path} "
-                    + f"/ table {str_table_name}.",
-                    "info"
-                )
+            CreateLog().log_message(
+                self.logger,
+                f"Successful commit in db {self.db_path} "
+                + f"/ table {str_table_name}.",
+                "info"
+            )
         except Exception as err:
             self.conn.rollback()
             self.close()
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    "Error while inserting data\n"
-                    + f"DB_PATH: {self.db_path}\n"
-                    + f"TABLE_NAME: {str_table_name}\n"
-                    + f"JSON_DATA: {json_data}\n"
-                    + f"ERROR_MESSAGE: {err}",
-                    "error"
-                )
+            CreateLog().log_message(
+                self.logger,
+                "Error while inserting data\n"
+                + f"DB_PATH: {self.db_path}\n"
+                + f"TABLE_NAME: {str_table_name}\n"
+                + f"JSON_DATA: {json_data}\n"
+                + f"ERROR_MESSAGE: {err}",
+                "error"
+            )
             raise Exception(
                 "Error while inserting data\n"
                 + f"DB_PATH: {self.db_path}\n"
@@ -291,8 +293,7 @@ class SQLiteDB(ABCDatabase):
             return True
 
         error_msg = "sqlite3 not found. Attempting to install..."
-        if self.logger is not None:
-            CreateLog().log_message(self.logger, error_msg, "warning")
+        CreateLog().log_message(self.logger, error_msg, "warning")
 
         system = platform.system().lower()
         try:

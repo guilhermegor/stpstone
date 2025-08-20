@@ -16,6 +16,7 @@ import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
 
+from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -119,12 +120,15 @@ class MySQLDatabase(ABCDatabase):
         if not self.str_schema:
             raise ValueError("Database schema cannot be empty")
 
-    def execute(self, str_query: Union[str, Any]) -> None:
+    def execute(
+        self, 
+        str_query: Union[str, SQLComposable]
+    ) -> None:
         """Execute a SQL query.
 
         Parameters
         ----------
-        str_query : Union[str, Any]
+        str_query : Union[str, SQLComposable]
             SQL query to execute
 
         Returns
@@ -135,14 +139,14 @@ class MySQLDatabase(ABCDatabase):
 
     def read_sql(
         self,
-        str_query: str,
+        str_query: Union[str, SQLComposable],
         timeout: int = 7200,
     ) -> pd.DataFrame:
         """Read data from MySQL database using SQLAlchemy engine.
 
         Parameters
         ----------
-        str_query : str
+        str_query : Union[str, SQLComposable]
             SQL query to execute
         timeout : int, optional
             Connection timeout in seconds (default: 7200)
@@ -212,10 +216,7 @@ class MySQLDatabase(ABCDatabase):
         if self.cursor.description:
             columns = [desc[0] for desc in self.cursor.description]
         else:
-            if data and len(data) > 0:
-                columns = [f"col_{i}" for i in range(len(data[0]))]
-            else:
-                columns = []
+            columns = [f"col_{i}" for i in range(len(data[0]))] if data and len(data) > 0 else []
         df_ = pd.DataFrame(data, columns=columns)
 
         if dict_type_cols is not None:
@@ -272,26 +273,24 @@ class MySQLDatabase(ABCDatabase):
             self.cursor.executemany(query, records)
             self.conn.commit()
 
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    f"Successful commit in db {self.dict_db_config['database']} "
-                    + f"/ table {str_table_name}.",
-                    "info"
-                )
+            CreateLog().log_message(
+                self.logger,
+                f"Successful commit in db {self.dict_db_config['database']} "
+                + f"/ table {str_table_name}.",
+                "info"
+            )
         except Exception as err:
             self.conn.rollback()
             self.close()
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    "Error while inserting data\n"
-                    + f"DB_CONFIG: {self.dict_db_config}\n"
-                    + f"TABLE_NAME: {str_table_name}\n"
-                    + f"JSON_DATA: {json_data}\n"
-                    + f"ERROR_MESSAGE: {err}",
-                    "error"
-                )
+            CreateLog().log_message(
+                self.logger,
+                "Error while inserting data\n"
+                + f"DB_CONFIG: {self.dict_db_config}\n"
+                + f"TABLE_NAME: {str_table_name}\n"
+                + f"JSON_DATA: {json_data}\n"
+                + f"ERROR_MESSAGE: {err}",
+                "error"
+            )
             raise Exception(
                 "Error while inserting data\n"
                 + f"DB_CONFIG: {self.dict_db_config}\n"
@@ -389,8 +388,7 @@ class MySQLDatabase(ABCDatabase):
             return True
 
         error_msg = "mysqldump not found. Attempting to install..."
-        if self.logger is not None:
-            CreateLog().log_message(self.logger, error_msg, "warning")
+        CreateLog().log_message(self.logger, error_msg, "warning")
 
         system = platform.system().lower()
         try:

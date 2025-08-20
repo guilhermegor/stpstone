@@ -140,7 +140,7 @@ class PostgreSQLDB(ABCDatabase):
 
     def read(
         self,
-        str_query: str,
+        str_query: Union[str, Composable],
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
         str_fmt_dt: Optional[str] = None,
@@ -149,7 +149,7 @@ class PostgreSQLDB(ABCDatabase):
 
         Parameters
         ----------
-        str_query : str
+        str_query : Union[str, Composable]
             SQL query to execute
         dict_type_cols : Optional[dict[str, Any]], optional
             Dictionary for column type conversion (default: None)
@@ -241,26 +241,24 @@ class PostgreSQLDB(ABCDatabase):
             self.cursor.executemany(query, records)
             self.conn.commit()
 
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    f"Successful commit in db {self.dict_db_config['dbname']} "
-                    + f"/ table {str_table_name}.",
-                    "info"
-                )
+            CreateLog().log_message(
+                self.logger,
+                f"Successful commit in db {self.dict_db_config['dbname']} "
+                + f"/ table {str_table_name}.",
+                "info"
+            )
         except Exception as err:
             self.conn.rollback()
             self.close()
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    "Error while inserting data\n"
-                    + f"DB_CONFIG: {self.dict_db_config}\n"
-                    + f"TABLE_NAME: {str_table_name}\n"
-                    + f"JSON_DATA: {json_data}\n"
-                    + f"ERROR_MESSAGE: {err}",
-                    "error"
-                )
+            CreateLog().log_message(
+                self.logger,
+                "Error while inserting data\n"
+                + f"DB_CONFIG: {self.dict_db_config}\n"
+                + f"TABLE_NAME: {str_table_name}\n"
+                + f"JSON_DATA: {json_data}\n"
+                + f"ERROR_MESSAGE: {err}",
+                "error"
+            )
             raise Exception(
                 "Error while inserting data\n"
                 + f"DB_CONFIG: {self.dict_db_config}\n"
@@ -353,8 +351,7 @@ class PostgreSQLDB(ABCDatabase):
             return True
 
         error_msg = "pg_dump not found. Attempting to install..."
-        if self.logger is not None:
-            CreateLog().log_message(self.logger, error_msg, "warning")
+        CreateLog().log_message(self.logger, error_msg, "warning")
 
         system = platform.system().lower()
         try:
