@@ -36,6 +36,186 @@ print_status() {
     esac
 }
 
+detect_os() {
+    case "$(uname -s)" in
+        Linux*)     echo "linux" ;;
+        Darwin*)    echo "macos" ;;
+        CYGWIN*|MINGW*|MSYS*) echo "windows" ;;
+        *)          echo "unknown" ;;
+    esac
+}
+
+check_command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+check_library_exists() {
+    local lib_name="$1"
+    case "$(detect_os)" in
+        "linux")
+            ldconfig -p | grep -q "$lib_name" 2>/dev/null || 
+            find /usr/lib* /lib* -name "*${lib_name}*" 2>/dev/null | head -1 | grep -q .
+            ;;
+        "macos")
+            find /usr/lib /usr/local/lib /opt/homebrew/lib -name "*${lib_name}*" 2>/dev/null | head -1 | grep -q .
+            ;;
+        "windows")
+            # On Windows, check for ODBC drivers in system directories
+            find /c/Windows/System32 /c/Windows/SysWOW64 -name "*odbc*" 2>/dev/null | head -1 | grep -q . ||
+            reg query "HKEY_LOCAL_MACHINE\SOFTWARE\ODBC\ODBCINST.INI" 2>/dev/null | grep -q "ODBC"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+install_odbc_linux() {
+    print_status "info" "Installing ODBC drivers for Linux..."
+    
+    # Check if we have sudo privileges
+    if ! sudo -n true 2>/dev/null; then
+        print_status "error" "sudo privileges required to install ODBC drivers"
+        return 1
+    fi
+    
+    # Detect distribution
+    if [ -f /etc/debian_version ]; then
+        # Debian/Ubuntu
+        print_status "info" "Detected Debian/Ubuntu system"
+        sudo apt update && sudo apt install -y unixodbc unixodbc-dev
+    elif [ -f /etc/redhat-release ] || [ -f /etc/centos-release ]; then
+        # RHEL/CentOS/Fedora
+        print_status "info" "Detected RHEL/CentOS/Fedora system"
+        if check_command_exists "dnf"; then
+            sudo dnf install -y unixODBC unixODBC-devel
+        elif check_command_exists "yum"; then
+            sudo yum install -y unixODBC unixODBC-devel
+        else
+            print_status "error" "Neither dnf nor yum found"
+            return 1
+        fi
+    elif [ -f /etc/arch-release ]; then
+        # Arch Linux
+        print_status "info" "Detected Arch Linux system"
+        sudo pacman -S --noconfirm unixodbc
+    else
+        print_status "warning" "Unknown Linux distribution, trying generic approach"
+        sudo apt update && sudo apt install -y unixodbc unixodbc-dev || {
+            print_status "error" "Failed to install ODBC drivers. Please install manually."
+            return 1
+        }
+    fi
+}
+
+install_odbc_macos() {
+    print_status "info" "Installing ODBC drivers for macOS..."
+    
+    if check_command_exists "brew"; then
+        brew install unixodbc
+    else
+        print_status "error" "Homebrew not found. Please install Homebrew first:"
+        print_status "info" "/bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        return 1
+    fi
+}
+
+install_odbc_windows() {
+    print_status "info" "Checking ODBC drivers for Windows..."
+    
+    # Windows typically has ODBC drivers pre-installed
+    if check_library_exists "odbc"; then
+        print_status "success" "ODBC drivers already available on Windows"
+        return 0
+    fi
+    
+    print_status "warning" "ODBC drivers not detected on Windows"
+    print_status "info" "Please install Microsoft ODBC drivers manually:"
+    print_status "info" "1. Download from: https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server"
+    print_status "info" "2. Or use winget: winget install Microsoft.SQLServerODBCDriver"
+    return 1
+}
+
+check_and_install_odbc() {
+    print_status "info" "Checking ODBC driver installation..."
+    
+    local os_type
+    os_type=$(detect_os)
+    print_status "debug" "Detected OS: ${os_type}"
+    
+    # Check if ODBC is already installed
+    local odbc_installed=false
+    
+    case "$os_type" in
+        "linux")
+            if check_library_exists "libodbc.so" || check_command_exists "odbcinst"; then
+                odbc_installed=true
+            fi
+            ;;
+        "macos")
+            if check_library_exists "libodbc" || check_command_exists "odbcinst"; then
+                odbc_installed=true
+            fi
+            ;;
+        "windows")
+            if check_library_exists "odbc"; then
+                odbc_installed=true
+            fi
+            ;;
+        *)
+            print_status "error" "Unsupported operating system: ${os_type}"
+            return 1
+            ;;
+    esac
+    
+    if $odbc_installed; then
+        print_status "success" "ODBC drivers already installed"
+        
+        # Additional verification by checking odbcinst command
+        if check_command_exists "odbcinst"; then
+            print_status "debug" "ODBC configuration:"
+            odbcinst -j 2>/dev/null || print_status "warning" "Could not retrieve ODBC configuration"
+        fi
+        
+        return 0
+    fi
+    
+    print_status "warning" "ODBC drivers not found, attempting installation..."
+    
+    case "$os_type" in
+        "linux")
+            install_odbc_linux
+            ;;
+        "macos")
+            install_odbc_macos
+            ;;
+        "windows")
+            install_odbc_windows
+            ;;
+        *)
+            print_status "error" "Cannot install ODBC drivers for unsupported OS: ${os_type}"
+            return 1
+            ;;
+    esac
+    
+    local install_result=$?
+    
+    if [ $install_result -eq 0 ]; then
+        print_status "success" "ODBC drivers installed successfully"
+        
+        # Verify installation
+        if check_command_exists "odbcinst"; then
+            print_status "info" "ODBC configuration after installation:"
+            odbcinst -j 2>/dev/null || print_status "warning" "Could not retrieve ODBC configuration"
+        fi
+    else
+        print_status "error" "Failed to install ODBC drivers"
+        return 1
+    fi
+    
+    return $install_result
+}
+
 find_module_path() {
     local module="$1"
     local module_path=$(find stpstone -name "${module}.py" -not -path "*__pycache__*" | head -1)
@@ -556,7 +736,12 @@ main() {
     local test_path
     test_path=$(find_test_path "$module")
 
-    # checking libs
+    # Check and install system dependencies
+    check_and_install_odbc || {
+        print_status "warning" "ODBC installation failed, but continuing with tests..."
+    }
+    
+    # Check Python dependencies
     install_playwright
 
     # run checks for module
