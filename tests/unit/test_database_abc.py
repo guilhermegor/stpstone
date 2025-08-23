@@ -175,6 +175,16 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
                 Backup status message
             """
             return "Backup completed"
+        
+        def check_bkp_tool(self) -> bool:
+            """Check if backup tool is available.
+            
+            Returns
+            -------
+            bool
+                True if backup tool is available, False otherwise
+            """
+            return True 
 
     return ConcreteDatabase
 
@@ -741,6 +751,6 @@ def test_reload_module() -> None:
     """
     import importlib
     # Fix: Use the correct module path
-    module_path = "stpstone.utils.connections.databases.database_abc"
+    module_path = "stpstone.utils.connections.databases.sql.database_abc"
     importlib.reload(sys.modules[module_path])
     assert hasattr(sys.modules[module_path], "ABCDatabase")
