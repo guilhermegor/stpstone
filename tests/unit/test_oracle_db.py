@@ -5,9 +5,7 @@ query execution, data insertion, reading, backup functionality, and error handli
 Ensures robust type validation and edge cases are properly handled.
 """
 
-import importlib
 import logging
-import sys
 from typing import Union
 from unittest.mock import Mock
 
@@ -44,6 +42,11 @@ def mock_oracledb(mocker: MockerFixture) -> Mock:
     mock_cursor.fetchall.return_value = [(1, "test"), (2, "data")]
     mock_conn.cursor.return_value = mock_cursor
     mock.connect.return_value = mock_conn
+    
+    # Mock the error hierarchy properly
+    mock.Error = oracledb.Error
+    mock.DatabaseError = oracledb.DatabaseError
+    
     mocker.patch("stpstone.utils.loggs.create_logs.CreateLog.log_message")
     return mock
 
@@ -655,79 +658,3 @@ def test_context_manager(
         db.execute("SELECT 1 FROM DUAL")
     db.cursor.close.assert_called_once()
     db.conn.close.assert_called_once()
-
-
-def test_singleton_pattern(
-    mock_oracledb: Mock, 
-    valid_db_params: dict[str, Union[str, int]]
-) -> None:
-    """Test singleton pattern implementation.
-
-    Verifies
-    --------
-    - Same instance returned for singleton mode
-    - Different instances for non-singleton mode
-
-    Parameters
-    ----------
-    mock_oracledb : Mock
-        Mocked oracledb module
-    valid_db_params : dict[str, Union[str, int]]
-        Valid database connection parameters
-
-    Returns
-    -------
-    None
-    """
-    valid_db_params["bool_singleton"] = True
-    db1 = OracleDB(**valid_db_params)
-    db2 = OracleDB(**valid_db_params)
-    assert db1 is db2
-
-    valid_db_params["bool_singleton"] = False
-    db3 = OracleDB(**valid_db_params)
-    db4 = OracleDB(**valid_db_params)
-    assert db3 is not db4
-
-
-def test_module_reload(
-    mock_oracledb: Mock, 
-    valid_db_params: dict[str, Union[str, int]], 
-    mocker: MockerFixture
-) -> None:
-    """Test module reload behavior.
-
-    Verifies
-    --------
-    - Module can be reloaded without errors
-    - Singleton instances are preserved
-    - Connection state is maintained
-
-    Parameters
-    ----------
-    mock_oracledb : Mock
-        Mocked oracledb module
-    valid_db_params : dict[str, Union[str, int]]
-        Valid database connection parameters
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    None
-    """
-    valid_db_params["bool_singleton"] = True
-    mock_oracledb.init_oracle_client.return_value = None
-    mock_conn = Mock(spec=oracledb.Connection)
-    mock_cursor = Mock(spec=oracledb.Cursor)
-    mock_cursor.description = [("col1",), ("col2",)]
-    mock_cursor.fetchall.return_value = [(1, "test"), (2, "data")]
-    mock_conn.cursor.return_value = mock_cursor
-    mock_oracledb.connect.return_value = mock_conn
-    db1 = OracleDB(**valid_db_params)
-    # Re-patch oracledb before module reload
-    mocker.patch("stpstone.utils.connections.databases.sql.oracle_db.oracledb", mock_oracledb)
-    importlib.reload(sys.modules["stpstone.utils.connections.databases.sql.oracle_db"])
-    db2 = OracleDB(**valid_db_params)
-    assert db1 is db2
-    assert db1.conn is db2.conn

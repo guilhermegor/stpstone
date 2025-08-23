@@ -81,7 +81,7 @@ class OracleDB(ABCDatabase):
             self.execute("SELECT 1 FROM DUAL")
             if self.str_schema:
                 self.execute(f"ALTER SESSION SET CURRENT_SCHEMA = {self.str_schema}")
-        except oracledb.DatabaseError as err:
+        except oracledb.Error as err:
             error_msg = f"Error connecting to Oracle database: {str(err)}"
             CreateLog().log_message(self.logger, error_msg, "error")
             raise ConnectionError(error_msg) from err
@@ -236,7 +236,7 @@ class OracleDB(ABCDatabase):
                 + f"/ table {str_table_name}.",
                 "info"
             )
-        except oracledb.DatabaseError as err:
+        except oracledb.Error as err:
             self.conn.rollback()
             self.close()
             error_msg = (
@@ -259,7 +259,7 @@ class OracleDB(ABCDatabase):
         try:
             self.cursor.close()
             self.conn.close()
-        except oracledb.DatabaseError as err:
+        except oracledb.Error as err:
             CreateLog().log_message(
                 self.logger,
                 f"Error closing connection: {str(err)}",
