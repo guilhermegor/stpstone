@@ -16,6 +16,7 @@ import oracledb
 from oracledb import Connection, Cursor
 import pandas as pd
 
+from stpstone.transformations.validation.metaclass_type_checker import Composable
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -80,7 +81,7 @@ class OracleDB(ABCDatabase):
             self.execute("SELECT 1 FROM DUAL")
             if self.str_schema:
                 self.execute(f"ALTER SESSION SET CURRENT_SCHEMA = {self.str_schema}")
-        except oracledb.Error as err:
+        except oracledb.DatabaseError as err:
             error_msg = f"Error connecting to Oracle database: {str(err)}"
             CreateLog().log_message(self.logger, error_msg, "error")
             raise ConnectionError(error_msg) from err
@@ -113,13 +114,13 @@ class OracleDB(ABCDatabase):
 
     def execute(
         self, 
-        str_query: Union[str, Any]
+        str_query: Union[str, Composable]
     ) -> None:
         """Execute a SQL query.
 
         Parameters
         ----------
-        str_query : Union[str, Any]
+        str_query : Union[str, Composable]
             SQL query to execute
 
         Returns
@@ -131,7 +132,7 @@ class OracleDB(ABCDatabase):
 
     def read(
         self,
-        str_query: Union[str, Any],
+        str_query: Union[str, Composable],
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
         str_fmt_dt: Optional[str] = None,
@@ -140,7 +141,7 @@ class OracleDB(ABCDatabase):
 
         Parameters
         ----------
-        str_query : Union[str, Any]
+        str_query : Union[str, Composable]
             SQL query to execute
         dict_type_cols : Optional[dict[str, Any]], optional
             Dictionary for column type conversion (default: None)
@@ -217,12 +218,12 @@ class OracleDB(ABCDatabase):
                 WHEN NOT MATCHED THEN
                 INSERT ({cols})
                 VALUES ({placeholders})
-            """
+            """ # noqa S608: possible SQL injection
         else:
             query = f"""
                 INSERT INTO {str_table_name} ({cols})
                 VALUES ({placeholders})
-            """
+            """ # noqa S608: possible SQL injection
 
         try:
             records = [tuple(record[col] for col in columns) for record in json_data]
@@ -235,25 +236,18 @@ class OracleDB(ABCDatabase):
                 + f"/ table {str_table_name}.",
                 "info"
             )
-        except oracledb.Error as err:
+        except oracledb.DatabaseError as err:
             self.conn.rollback()
             self.close()
-            CreateLog().log_message(
-                self.logger,
-                "Error while inserting data\n"
-                + f"DB_CONFIG: {self.dict_db_config}\n"
-                + f"TABLE_NAME: {str_table_name}\n"
-                + f"JSON_DATA: {json_data}\n"
-                + f"ERROR_MESSAGE: {err}",
-                "error"
-            )
-            raise ValueError(
+            error_msg = (
                 "Error while inserting data\n"
                 + f"DB_CONFIG: {self.dict_db_config}\n"
                 + f"TABLE_NAME: {str_table_name}\n"
                 + f"JSON_DATA: {json_data}\n"
                 + f"ERROR_MESSAGE: {err}"
-            ) from err
+            )
+            CreateLog().log_message(self.logger, error_msg, "error")
+            raise ValueError(error_msg) from err
 
     def close(self) -> None:
         """Close database connection.
@@ -265,7 +259,7 @@ class OracleDB(ABCDatabase):
         try:
             self.cursor.close()
             self.conn.close()
-        except oracledb.Error as err:
+        except oracledb.DatabaseError as err:
             CreateLog().log_message(
                 self.logger,
                 f"Error closing connection: {str(err)}",
@@ -291,6 +285,11 @@ class OracleDB(ABCDatabase):
         -------
         str
             Backup status message
+
+        Raises
+        ------
+        RuntimeError
+            If backup tool is not available
         """
         self._validate_backup_params(str_backup_dir)
 
@@ -309,11 +308,11 @@ class OracleDB(ABCDatabase):
             command = [
                 "expdp",
                 f"{self.user}/{self.password}@{self.host}:{self.port}/{self.dbname}",
-                f"DIRECTORY=DATA_PUMP_DIR",
+                "DIRECTORY=DATA_PUMP_DIR",
                 f"DUMPFILE={os.path.basename(backup_file)}",
                 f"LOGFILE={os.path.basename(backup_file)}.log",
             ]
-            subprocess.run(command, check=True, env=env)
+            subprocess.run(command, check=True, env=env) # noqa S603: possible subprocess injection
             return f"Backup successful! File saved at: {backup_file}"
         except subprocess.CalledProcessError as err:
             return f"Backup failed: {err}"

@@ -8,7 +8,7 @@ Ensures robust type validation and edge cases are properly handled.
 import importlib
 import logging
 import sys
-from typing import TypedDict, Union
+from typing import Union
 from unittest.mock import Mock
 
 import oracledb
@@ -18,16 +18,6 @@ from pytest_mock import MockerFixture
 
 from stpstone.utils.connections.databases.sql.oracle_db import OracleDB
 from stpstone.utils.loggs.create_logs import CreateLog
-
-
-class ReturnInit(TypedDict):
-    """Type hint for OracleDB initialization return."""
-    db: OracleDB
-
-
-class ReturnRead(TypedDict):
-    """Type hint for read method return."""
-    df: pd.DataFrame
 
 
 # --------------------------
@@ -50,12 +40,12 @@ def mock_oracledb(mocker: MockerFixture) -> Mock:
     mock = mocker.patch("stpstone.utils.connections.databases.sql.oracle_db.oracledb")
     mock_conn = Mock(spec=oracledb.Connection)
     mock_cursor = Mock(spec=oracledb.Cursor)
-    mock.description = [("col1",), ("col2",)]
-    mock.fetchall.return_value = [(1, "test"), (2, "data")]
+    mock_cursor.description = [("col1",), ("col2",)]
+    mock_cursor.fetchall.return_value = [(1, "test"), (2, "data")]
     mock_conn.cursor.return_value = mock_cursor
     mock.connect.return_value = mock_conn
+    mocker.patch("stpstone.utils.loggs.create_logs.CreateLog.log_message")
     return mock
-
 
 @pytest.fixture
 def valid_db_params() -> dict[str, Union[str, int]]:
@@ -200,13 +190,14 @@ def test_init_connection_error(
     -------
     None
     """
-    mock_oracledb.connect.side_effect = oracledb.Error("Connection failed")
+    mock_oracledb.DatabaseError = oracledb.DatabaseError
+    mock_oracledb.connect.side_effect = oracledb.DatabaseError("Connection failed")
     with pytest.raises(ConnectionError, match="Error connecting to Oracle database"):
         OracleDB(**valid_db_params, logger=logger)
-    assert CreateLog().log_message.called_with(
+    mock_log_message = CreateLog().log_message
+    mock_log_message.assert_called_with(
         logger, "Error connecting to Oracle database: Connection failed", "error"
     )
-
 
 def test_execute_valid_query(
     mock_oracledb: Mock, 
@@ -354,9 +345,15 @@ def test_read_invalid_date_params(
     """
     db = OracleDB(**valid_db_params)
     query = "SELECT * FROM test_table"
-    with pytest.raises(ValueError, match="Both list_cols_dt and str_fmt_dt must be provided or None"):
+    with pytest.raises(
+        ValueError, 
+        match="Both list_cols_dt and str_fmt_dt must be provided or None"
+    ):
         db.read(query, list_cols_dt=["col1"], str_fmt_dt=None)
-    with pytest.raises(ValueError, match="Both list_cols_dt and str_fmt_dt must be provided or None"):
+    with pytest.raises(
+        ValueError, 
+        match="Both list_cols_dt and str_fmt_dt must be provided or None"
+    ):
         db.read(query, list_cols_dt=None, str_fmt_dt="%Y-%m-%d")
 
 
@@ -415,7 +412,8 @@ def test_insert_empty_data(
     None
     """
     db = OracleDB(**valid_db_params)
-    db.insert([], "test_table")
+    with pytest.raises(ValueError, match="Insert data cannot be empty"):
+        db.insert([], "test_table")
     db.cursor.executemany.assert_not_called()
 
 
@@ -449,12 +447,19 @@ def test_insert_error(
     None
     """
     db = OracleDB(**valid_db_params, logger=logger)
-    db.cursor.executemany.side_effect = oracledb.Error("Insert failed")
-    with pytest.raises(Exception, match="Error while inserting data"):
+    mock_oracledb.DatabaseError = oracledb.DatabaseError
+    db.cursor.executemany.side_effect = oracledb.DatabaseError("Insert failed")
+    with pytest.raises(ValueError, match="Error while inserting data"):
         db.insert(sample_data, "test_table")
     db.conn.rollback.assert_called_once()
     db.conn.close.assert_called_once()
-
+    mock_log_message = CreateLog().log_message
+    mock_log_message.assert_called_with(
+        logger, 
+        f"Error while inserting data\nDB_CONFIG: {db.dict_db_config}\n"
+        + f"TABLE_NAME: test_table\nJSON_DATA: {sample_data}\nERROR_MESSAGE: Insert failed",
+        "error"
+    )
 
 def test_close(
     mock_oracledb: Mock, 
@@ -510,13 +515,14 @@ def test_close_error(
     None
     """
     db = OracleDB(**valid_db_params, logger=logger)
-    db.cursor.close.side_effect = oracledb.Error("Close failed")
-    with pytest.raises(oracledb.Error, match="Close failed"):
+    mock_oracledb.DatabaseError = oracledb.DatabaseError
+    db.cursor.close.side_effect = oracledb.DatabaseError("Close failed")
+    with pytest.raises(oracledb.DatabaseError, match="Close failed"):
         db.close()
-    assert CreateLog().log_message.called_with(
+    mock_log_message = CreateLog().log_message
+    mock_log_message.assert_called_with(
         logger, "Error closing connection: Close failed", "error"
     )
-
 
 def test_backup_valid(
     mock_oracledb: Mock, 
@@ -612,12 +618,14 @@ def test_check_bkp_tool_unavailable_darwin(
     """
     mocker.patch("shutil.which", return_value=None)
     mocker.patch("platform.system", return_value="darwin")
+    mock_log_message = mocker.patch("stpstone.utils.loggs.create_logs.CreateLog.log_message")
     db = OracleDB(**valid_db_params)
     assert not db.check_bkp_tool()
-    assert CreateLog().log_message.called_with(
-        db.logger, "Oracle Data Pump is not supported on macOS. Please install manually.", "error"
+    mock_log_message.assert_called_with(
+        db.logger, 
+        "Oracle Data Pump is not supported on macOS. Please install manually.", 
+        "error"
     )
-
 
 def test_context_manager(
     mock_oracledb: Mock, 
@@ -709,7 +717,16 @@ def test_module_reload(
     None
     """
     valid_db_params["bool_singleton"] = True
+    mock_oracledb.init_oracle_client.return_value = None
+    mock_conn = Mock(spec=oracledb.Connection)
+    mock_cursor = Mock(spec=oracledb.Cursor)
+    mock_cursor.description = [("col1",), ("col2",)]
+    mock_cursor.fetchall.return_value = [(1, "test"), (2, "data")]
+    mock_conn.cursor.return_value = mock_cursor
+    mock_oracledb.connect.return_value = mock_conn
     db1 = OracleDB(**valid_db_params)
+    # Re-patch oracledb before module reload
+    mocker.patch("stpstone.utils.connections.databases.sql.oracle_db.oracledb", mock_oracledb)
     importlib.reload(sys.modules["stpstone.utils.connections.databases.sql.oracle_db"])
     db2 = OracleDB(**valid_db_params)
     assert db1 is db2
