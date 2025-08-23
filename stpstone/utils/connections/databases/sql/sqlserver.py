@@ -249,7 +249,6 @@ class SqlServerDB(ABCDatabase):
         ------
         ValueError
             If table name is empty or json_data is empty
-        Exception
             If insertion fails
         """
         if not str_table_name:
@@ -287,7 +286,7 @@ class SqlServerDB(ABCDatabase):
                     + f"ERROR_MESSAGE: {err}",
                     "error",
                 )
-            raise Exception(
+            raise ValueError(
                 "Error while inserting data\n"
                 + f"DATABASE: {self.database}\n"
                 + f"TABLE_NAME: {str_table_name}\n"

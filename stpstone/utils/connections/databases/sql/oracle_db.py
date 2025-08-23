@@ -1,6 +1,6 @@
-"""MySQL database operations handler.
+"""Oracle database operations handler.
 
-This module provides a class for managing MySQL database connections and operations,
+This module provides a class for managing Oracle database connections and operations,
 including query execution, data insertion, reading, and backup functionality. It ensures
 robust error handling and type safety throughout database interactions.
 """
@@ -12,19 +12,18 @@ import shutil
 import subprocess
 from typing import Any, Optional, Union
 
+import oracledb
+from oracledb import Connection, Cursor
 import pandas as pd
-import pymysql
-from sqlalchemy import create_engine
 
-from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
 from stpstone.utils.cals.handling_dates import DatesBR
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
 
 
-class MySQLDatabase(ABCDatabase):
-    """MySQL database handler with connection management and operations."""
+class OracleDB(ABCDatabase):
+    """Oracle database handler with connection management and operations."""
 
     def __init__(
         self,
@@ -37,12 +36,12 @@ class MySQLDatabase(ABCDatabase):
         logger: Optional[Logger] = None,
         bool_singleton: bool = False,
     ) -> None:
-        """Initialize MySQL database connection.
-
+        """Initialize Oracle database connection.
+        
         Parameters
         ----------
         dbname : str
-            Database name
+            Database name or service name
         user : str
             Database user
         password : str
@@ -57,7 +56,7 @@ class MySQLDatabase(ABCDatabase):
             Logger instance (default: None)
         bool_singleton : bool, optional
             Whether to use a singleton connection (default: False)
-
+        
         Returns
         -------
         None
@@ -67,30 +66,22 @@ class MySQLDatabase(ABCDatabase):
         ConnectionError
             If database connection fails
         """
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
-        self.str_schema = str_schema
-        self.logger = logger
-        self.bool_singleton = bool_singleton
+        super().__init__(dbname, user, password, host, port, str_schema, logger, bool_singleton)
         self.dict_db_config = {
-            "host": self.host,
-            "port": self.port,
             "user": self.user,
             "password": self.password,
-            "database": self.dbname,
+            "dsn": f"{self.host}:{self.port}/{self.dbname}",
         }
         self._validate_db_config()
         try:
-            self.conn = pymysql.connect(**self.dict_db_config)
-            self.cursor = self.conn.cursor()
-            self.execute("SELECT 1")
-            if self.str_schema != "public":
-                self.execute(f"USE {self.str_schema}")
-        except Exception as err:
-            error_msg = f"Error connecting to database: {str(err)}"
+            oracledb.init_oracle_client()
+            self.conn: Connection = oracledb.connect(**self.dict_db_config)
+            self.cursor: Cursor = self.conn.cursor()
+            self.execute("SELECT 1 FROM DUAL")
+            if self.str_schema:
+                self.execute(f"ALTER SESSION SET CURRENT_SCHEMA = {self.str_schema}")
+        except oracledb.Error as err:
+            error_msg = f"Error connecting to Oracle database: {str(err)}"
             CreateLog().log_message(self.logger, error_msg, "error")
             raise ConnectionError(error_msg) from err
 
@@ -122,61 +113,25 @@ class MySQLDatabase(ABCDatabase):
 
     def execute(
         self, 
-        str_query: Union[str, SQLComposable]
+        str_query: Union[str, Any]
     ) -> None:
         """Execute a SQL query.
 
         Parameters
         ----------
-        str_query : Union[str, SQLComposable]
+        str_query : Union[str, Any]
             SQL query to execute
 
         Returns
         -------
         None
         """
+        self._validate_query(str_query)
         self.cursor.execute(str_query)
-
-    def read_sql(
-        self,
-        str_query: Union[str, SQLComposable],
-        timeout: int = 7200,
-    ) -> pd.DataFrame:
-        """Read data from MySQL database using SQLAlchemy engine.
-
-        Parameters
-        ----------
-        str_query : Union[str, SQLComposable]
-            SQL query to execute
-        timeout : int, optional
-            Connection timeout in seconds (default: 7200)
-
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing query results
-
-        Raises
-        ------
-        ValueError
-            If query is empty or execution fails
-        """
-        if not str_query:
-            raise ValueError("Query cannot be empty")
-
-        try:
-            conn_engine = create_engine(
-                f"mysql+pymysql://{self.user}:{self.password}@{self.host}:"
-                f"{self.port}/{self.dbname}",
-                connect_args={"connect_timeout": timeout}
-            )
-            return pd.read_sql(str_query, con=conn_engine)
-        except Exception as err:
-            raise ValueError(f"Failed to read SQL query: {str(err)}") from err
 
     def read(
         self,
-        str_query: str,
+        str_query: Union[str, Any],
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
         str_fmt_dt: Optional[str] = None,
@@ -185,7 +140,7 @@ class MySQLDatabase(ABCDatabase):
 
         Parameters
         ----------
-        str_query : str
+        str_query : Union[str, Any]
             SQL query to execute
         dict_type_cols : Optional[dict[str, Any]], optional
             Dictionary for column type conversion (default: None)
@@ -204,19 +159,14 @@ class MySQLDatabase(ABCDatabase):
         ValueError
             If query is empty or invalid parameters provided
         """
-        if not str_query:
-            raise ValueError("Query cannot be empty")
+        self._validate_query(str_query)
         if (list_cols_dt is not None and str_fmt_dt is None) \
             or (list_cols_dt is None and str_fmt_dt is not None):
             raise ValueError("Both list_cols_dt and str_fmt_dt must be provided or None")
 
         self.cursor.execute(str_query)
+        columns = [desc[0].lower() for desc in self.cursor.description]
         data = self.cursor.fetchall()
-        
-        if self.cursor.description:
-            columns = [desc[0] for desc in self.cursor.description]
-        else:
-            columns = [f"col_{i}" for i in range(len(data[0]))] if data and len(data) > 0 else []
         df_ = pd.DataFrame(data, columns=columns)
 
         if dict_type_cols is not None:
@@ -245,27 +195,34 @@ class MySQLDatabase(ABCDatabase):
         str_table_name : str
             Target table name
         bool_insert_or_ignore : bool, optional
-            Whether to use INSERT IGNORE (default: False)
+            Whether to use INSERT OR IGNORE (default: False)
 
         Raises
         ------
         ValueError
             If table name is empty or json_data is empty
-            If insertion fails
         """
-        if not str_table_name:
-            raise ValueError("Table name cannot be empty")
-        if not json_data:
-            return
+        self._validate_insert_data(json_data, str_table_name)
 
         json_data = JsonFiles().normalize_json_keys(json_data)
-        columns = list(json_data[0].keys())
+        columns = json_data[0].keys()
+        placeholders = ", ".join([":" + str(i + 1) for i in range(len(columns))])
+        cols = ", ".join(columns)
 
-        insert_type = "INSERT IGNORE INTO" if bool_insert_or_ignore else "INSERT INTO"
-        placeholders = ", ".join(["%s" for _ in columns])
-        column_names = ", ".join(columns)
-
-        query = f"{insert_type} {str_table_name} ({column_names}) VALUES ({placeholders})"
+        if bool_insert_or_ignore:
+            query = f"""
+                MERGE INTO {str_table_name} dest
+                USING (SELECT :1 {columns[0]} FROM DUAL) src
+                ON (dest.{columns[0]} = src.{columns[0]})
+                WHEN NOT MATCHED THEN
+                INSERT ({cols})
+                VALUES ({placeholders})
+            """
+        else:
+            query = f"""
+                INSERT INTO {str_table_name} ({cols})
+                VALUES ({placeholders})
+            """
 
         try:
             records = [tuple(record[col] for col in columns) for record in json_data]
@@ -274,11 +231,11 @@ class MySQLDatabase(ABCDatabase):
 
             CreateLog().log_message(
                 self.logger,
-                f"Successful commit in db {self.dict_db_config['database']} "
+                f"Successful commit in db {self.dict_db_config['dsn']} "
                 + f"/ table {str_table_name}.",
                 "info"
             )
-        except Exception as err:
+        except oracledb.Error as err:
             self.conn.rollback()
             self.close()
             CreateLog().log_message(
@@ -300,22 +257,28 @@ class MySQLDatabase(ABCDatabase):
 
     def close(self) -> None:
         """Close database connection.
-
+        
         Returns
         -------
         None
         """
-        if hasattr(self, "cursor") and self.cursor is not None:
+        try:
             self.cursor.close()
-        if hasattr(self, "conn") and self.conn is not None:
             self.conn.close()
+        except oracledb.Error as err:
+            CreateLog().log_message(
+                self.logger,
+                f"Error closing connection: {str(err)}",
+                "error"
+            )
+            raise
 
     def backup(
         self, 
         str_backup_dir: str, 
         str_bkp_name: Optional[str] = None
     ) -> str:
-        """Create database backup.
+        """Create database backup using Oracle Data Pump.
 
         Parameters
         ----------
@@ -328,47 +291,29 @@ class MySQLDatabase(ABCDatabase):
         -------
         str
             Backup status message
-
-        Raises
-        ------
-        ValueError
-            If backup directory is empty
-        RuntimeError
-            If backup tool is not available
         """
-        if not str_backup_dir:
-            raise ValueError("Backup directory cannot be empty")
+        self._validate_backup_params(str_backup_dir)
 
         if not self.check_bkp_tool():
-            error_msg = "Backup tool is required for backups, but it is not available and " \
-            "could not be installed automatically"
+            error_msg = "Oracle Data Pump (expdp) is required for backups, but it is not available"
             CreateLog().log_message(self.logger, error_msg, "error")
             raise RuntimeError(error_msg)
 
         try:
             os.makedirs(str_backup_dir, exist_ok=True)
-            
-            if str_bkp_name is None:
-                str_bkp_name = f"{self.dbname}_backup.sql"
-            
-            backup_file = os.path.join(str_backup_dir, str_bkp_name)
+            backup_file = os.path.join(str_backup_dir, str_bkp_name or f"{self.dbname}_backup.dmp")
             env = os.environ.copy()
-            env["MYSQL_PWD"] = self.password
+            env["ORACLE_SID"] = self.dbname
+            env["NLS_LANG"] = "AMERICAN_AMERICA.AL32UTF8"
 
             command = [
-                "mysqldump",
-                "-h",
-                self.host,
-                "-P",
-                str(self.port),
-                "-u",
-                self.user,
-                self.dbname,
+                "expdp",
+                f"{self.user}/{self.password}@{self.host}:{self.port}/{self.dbname}",
+                f"DIRECTORY=DATA_PUMP_DIR",
+                f"DUMPFILE={os.path.basename(backup_file)}",
+                f"LOGFILE={os.path.basename(backup_file)}.log",
             ]
-            
-            with open(backup_file, "w", encoding="utf-8") as f:
-                subprocess.run(command, stdout=f, check=True, env=env) # noqa S603: check for execution of untrusted input
-                
+            subprocess.run(command, check=True, env=env)
             return f"Backup successful! File saved at: {backup_file}"
         except subprocess.CalledProcessError as err:
             return f"Backup failed: {err}"
@@ -376,66 +321,44 @@ class MySQLDatabase(ABCDatabase):
             return f"An error occurred: {err}"
 
     def check_bkp_tool(self) -> bool:
-        """Check if backup tool is available.
+        """Check if Oracle Data Pump (expdp) is available.
 
         Returns
         -------
         bool
             True if backup tool is available, False otherwise
         """
-        if shutil.which("mysqldump"):
+        if shutil.which("expdp"):
             return True
 
-        error_msg = "mysqldump not found. Attempting to install..."
+        error_msg = "expdp not found. Attempting to locate Oracle client..."
         CreateLog().log_message(self.logger, error_msg, "warning")
 
         system = platform.system().lower()
         try:
             if system == "linux":
-                subprocess.run(["apt-get", "update"], check=True)  # noqa S603: check for execution of untrusted input
-                subprocess.run(
-                    ["apt-get", "install", "-y", "mysql-client"], # noqa S607: starting a process with a partial executable path
-                    check=True  # noqa S603: check for execution of untrusted input
-                )
-            elif system == "darwin":
-                if shutil.which("brew"):
-                    subprocess.run(
-                        ["brew", "install", "mysql-client"], # noqa S607: starting a process with a partial executable path
-                        check=True  # noqa S603: check for execution of untrusted input
-                    )
-                else:
-                    error_msg = (
-                        "Homebrew not found. Please install Homebrew and then "
-                        "run 'brew install mysql-client' to install mysqldump."
-                    )
-                    CreateLog().log_message(self.logger, error_msg, "error")
-                    return False
+                if os.path.exists("/u01/app/oracle/product"):
+                    os.environ["ORACLE_HOME"] = "/u01/app/oracle/product"
+                    os.environ["PATH"] = f"{os.environ['ORACLE_HOME']}/bin:{os.environ['PATH']}"
             elif system == "windows":
-                error_msg = (
-                    "mysqldump not found. Please install MySQL from "
-                    "https://dev.mysql.com/downloads/mysql/ and ensure "
-                    "mysqldump is in your system PATH."
-                )
-                CreateLog().log_message(self.logger, error_msg, "error")
-                return False
-            else:
-                error_msg = (
-                    f"Unsupported operating system: {system}. Please install "
-                    "mysqldump manually."
-                )
+                if os.path.exists("C:\\app\\oracle\\product"):
+                    os.environ["ORACLE_HOME"] = "C:\\app\\oracle\\product"
+                    os.environ["PATH"] = f"{os.environ['ORACLE_HOME']}\\bin;{os.environ['PATH']}"
+            elif system == "darwin":
+                error_msg = "Oracle Data Pump is not supported on macOS. Please install manually."
                 CreateLog().log_message(self.logger, error_msg, "error")
                 return False
 
-            if shutil.which("mysqldump"):
-                success_msg = "mysqldump successfully installed."
+            if shutil.which("expdp"):
+                success_msg = "expdp successfully located."
                 CreateLog().log_message(self.logger, success_msg, "info")
                 return True
             else:
-                error_msg = "Failed to install mysqldump."
+                error_msg = "Failed to locate expdp. Please ensure Oracle Client is installed."
                 CreateLog().log_message(self.logger, error_msg, "error")
                 return False
 
-        except subprocess.CalledProcessError as err:
-            error_msg = f"Failed to install mysqldump: {err}"
+        except Exception as err:
+            error_msg = f"Failed to locate expdp: {err}"
             CreateLog().log_message(self.logger, error_msg, "error")
             return False

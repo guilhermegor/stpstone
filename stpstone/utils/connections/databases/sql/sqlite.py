@@ -173,7 +173,6 @@ class SQLiteDB(ABCDatabase):
         ------
         ValueError
             If table name is empty or json_data is empty
-        Exception
             If insertion fails
         """
         if not str_table_name:
@@ -215,7 +214,7 @@ class SQLiteDB(ABCDatabase):
                 + f"ERROR_MESSAGE: {err}",
                 "error"
             )
-            raise Exception(
+            raise ValueError(
                 "Error while inserting data\n"
                 + f"DB_PATH: {self.db_path}\n"
                 + f"TABLE_NAME: {str_table_name}\n"
