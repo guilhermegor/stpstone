@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_IRSBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 
 
 class IRSBR(ABCRequests):
@@ -16,7 +16,7 @@ class IRSBR(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -25,7 +25,7 @@ class IRSBR(ABCRequests):
         super().__init__(
             dict_metadata=YAML_IRSBR,
             session=session,
-            dt_ref=dt_ref,
+            date_ref=date_ref,
             dict_headers={
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
                 "Accept-Language": "pt-BR,pt;q=0.9",
@@ -48,14 +48,14 @@ class IRSBR(ABCRequests):
             int_delay_seconds=int_delay_seconds,
         )
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
         self.int_delay_seconds = int_delay_seconds
-        self.year_dt_ref = DatesBR().year_number(self.dt_ref)
-        self.month_dt_ref = DatesBR().month_number(self.dt_ref, bl_month_mm=True)
+        self.year_date_ref = DatesBR().year_number(self.date_ref)
+        self.month_date_ref = DatesBR().month_number(self.date_ref, bl_month_mm=True)
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

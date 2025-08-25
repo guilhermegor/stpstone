@@ -20,7 +20,7 @@ import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.databases.sql.sqlite import SQLiteDB
 from stpstone.utils.parsers.json import JsonFiles
 

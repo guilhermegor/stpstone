@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.orchestrators.airflow_plugins import AirflowPlugins
 
 

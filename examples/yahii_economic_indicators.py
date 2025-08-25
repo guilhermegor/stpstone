@@ -1,10 +1,10 @@
 from stpstone.ingestion.countries.br.macroeconomics.yahii_rates import YahiiRatesBRMacro
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 
 
 cls_ = YahiiRatesBRMacro(
     session=None,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+    date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
     cls_db=None
 )
 

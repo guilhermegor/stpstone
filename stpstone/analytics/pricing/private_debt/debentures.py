@@ -81,38 +81,38 @@ class DebenturesPricer(metaclass=TypeChecker):
         tuple[date, date]
         """
         # simplified implementation
-        int_months_between = 12 // self.int_coupon_freq
+        int_months_to_add_between = 12 // self.int_coupon_freq
 
         # find most recent coupon date before settlement
         dt_last_coupon = date(dt_settlement.year, 1, 1)
         while dt_last_coupon <= dt_settlement:
             dt_last_coupon = dt_last_coupon.replace(
-                month=dt_last_coupon.month + int_months_between)
-        dt_last_coupon = dt_last_coupon.replace(month=dt_last_coupon.month - int_months_between)
+                month=dt_last_coupon.month + int_months_to_add_between)
+        dt_last_coupon = dt_last_coupon.replace(month=dt_last_coupon.month - int_months_to_add_between)
 
-        # next coupon is int_months_between after last coupon
-        dt_next_coupon = dt_last_coupon.replace(month=dt_last_coupon.month + int_months_between)
+        # next coupon is int_months_to_add_between after last coupon
+        dt_next_coupon = dt_last_coupon.replace(month=dt_last_coupon.month + int_months_to_add_between)
 
         return dt_last_coupon, dt_next_coupon
 
-    def _count_days_between(self, dt_start: date, dt_end: date) -> int:
+    def _count_days_between(self, date_start: date, date_end: date) -> int:
         """Calculate days between dates using 30/360 convention.
 
         Parameters
         ----------
-        dt_start : date
+        date_start : date
             The start date for the calculation.
-        dt_end : date
+        date_end : date
             The end date for the calculation.
 
         Returns
         -------
         int
         """
-        dt_d1 = min(dt_start.day, 30)
-        dt_d2 = min(dt_end.day, 30) if dt_d1 == 30 else dt_end.day
-        return (dt_end.year - dt_start.year) * 360 + \
-               (dt_end.month - dt_start.month) * 30 + \
+        dt_d1 = min(date_start.day, 30)
+        dt_d2 = min(date_end.day, 30) if dt_d1 == 30 else date_end.day
+        return (date_end.year - date_start.year) * 360 + \
+               (date_end.month - date_start.month) * 30 + \
                (dt_d2 - dt_d1)
 
     def _calculate_ytc_price(

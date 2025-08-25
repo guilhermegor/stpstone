@@ -4,7 +4,7 @@ import pandas as pd
 
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_FUNDS
 from stpstone.ingestion.countries.br.registries.anbima_data_funds import FundsDecrypt
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.parsers.lists import ListHandler
 
 

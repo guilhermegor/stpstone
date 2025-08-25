@@ -53,7 +53,7 @@ resource:
   #   - start with a commentary hash and separate params with &
   # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
   #   the app; example: application/name/#source=dummy_1&bool_debug=True
-  app: fred/series?series_id={{slug}}&file_type=json&api_key={{api_key}}&realtime_start={{dt_start}}&realtime_sup={{dt_end}}
+  app: fred/series?series_id={{slug}}&file_type=json&api_key={{api_key}}&realtime_start={{date_start}}&realtime_sup={{date_end}}
   bool_verify: False
   timeout: (12.0, 12.0)
   cookies:

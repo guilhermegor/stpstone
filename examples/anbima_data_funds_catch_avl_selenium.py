@@ -8,7 +8,7 @@ import pandas as pd
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from urllib3.exceptions import ReadTimeoutError
 
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 

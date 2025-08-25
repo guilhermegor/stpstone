@@ -10,10 +10,10 @@ class WorkCalendar:
     def __init__(self) -> None:
         self.calendar = UnitedStates()
 
-    def add_working_days(self, dt_bgn:datetime, int_num_days:int) -> datetime:
+    def add_working_days(self, dt_bgn:datetime, int_days_to_add:int) -> datetime:
         current_date = dt_bgn
         working_days_added = 0
-        while working_days_added < int_num_days:
+        while working_days_added < int_days_to_add:
             current_date += timedelta(days=1)
             if current_date.weekday() < 5 and not self.calendar.is_holiday(current_date):
                 working_days_added += 1
@@ -25,10 +25,10 @@ class WorkCalendar:
     def is_weekend(self, date:datetime) -> bool:
         return date.weekday() >= 5
 
-    def diff_working_days(self, dt_bgn:datetime, dt_end:datetime) -> int:
+    def diff_working_days(self, dt_bgn:datetime, date_end:datetime) -> int:
         current_date = dt_bgn
         working_days = 0
-        while current_date <= dt_end:
+        while current_date <= date_end:
             if current_date.weekday() < 5 and not self.calendar.is_holiday(current_date):
                 working_days += 1
             current_date += timedelta(days=1)
@@ -47,5 +47,5 @@ if __name__ == '__main__':
     check_date = datetime(2025, 1, 20)  # Martin Luther King Jr. Day (USA)
     print(f"Is {check_date} a holiday? {cls_usabzdays.is_holiday(check_date)}")
     # check if a specific date is a weekend
-    weekdt_end = datetime(2025, 1, 11)
-    print(f"Is {weekdt_end} a weekend? {cls_usabzdays.is_weekend(weekdt_end)}")
+    weekdate_end = datetime(2025, 1, 11)
+    print(f"Is {weekdate_end} a weekend? {cls_usabzdays.is_weekend(weekdate_end)}")

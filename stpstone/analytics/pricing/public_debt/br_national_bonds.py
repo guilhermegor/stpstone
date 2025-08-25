@@ -3,7 +3,7 @@
 from datetime import date
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.parsers.numbers import NumHandler
 
 
@@ -136,7 +136,7 @@ class BRSovereignPricer(metaclass=TypeChecker):
 
     def pr1(
         self, 
-        dt_ref: date, 
+        date_ref: date, 
         dt_ipca_last: date, 
         dt_ipca_next: date
     ) -> float:
@@ -144,7 +144,7 @@ class BRSovereignPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        dt_ref : date
+        date_ref : date
             Reference date
         dt_ipca_last : date
             Last available IPCA date
@@ -166,9 +166,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
         # validate date order
         if dt_ipca_next <= dt_ipca_last:
             raise ValueError("Next IPCA date must be after last IPCA date")
-        if dt_ref < dt_ipca_last:
+        if date_ref < dt_ipca_last:
             raise ValueError("Reference date must be on or after last IPCA date")
-        if dt_ref > dt_ipca_next:
+        if date_ref > dt_ipca_next:
             raise ValueError("Reference date must be on or before next IPCA date")
         
         # handle same dates
@@ -176,8 +176,8 @@ class BRSovereignPricer(metaclass=TypeChecker):
             return 0.0
         
         # adjust for business days
-        dt_ref = DatesBR().find_working_day(dt_ref, bool_next=False)
-        delta_ref = DatesBR().delta_calendar_days(dt_ref, dt_ipca_last)
+        date_ref = DatesBR().nearest_working_day(date_ref, bool_next=False)
+        delta_ref = DatesBR().delta_calendar_days(date_ref, dt_ipca_last)
         delta_total = DatesBR().delta_calendar_days(dt_ipca_next, dt_ipca_last)
         print(f"PR1: {delta_ref} / {delta_total} = {delta_ref / delta_total}")
         return delta_ref / delta_total

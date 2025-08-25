@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_BR_PTAX_BCB
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.html import HtmlHandler
 
@@ -20,8 +20,8 @@ class PTAXBCB(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 2),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 2),
+        date_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -36,15 +36,15 @@ class PTAXBCB(ABCRequests):
             token=token
         )
         self.session = session
-        self.dt_start = dt_start
-        self.dt_end = dt_end
+        self.date_start = date_start
+        self.date_end = date_end
         self.cls_db = cls_db
         self.logger = logger
         self.token = token
         self.bool_debug bool_debug
-        self.dt_end_yyyymmdd = self.dt_end.strftime('%Y%m%d')
-        self.dt_start_ddmmyyyy = self.dt_start.strftime('%d/%m/%Y')
-        self.dt_end_ddmmyyyy = self.dt_end.strftime('%d/%m/%Y')
+        self.date_end_yyyymmdd = self.date_end.strftime('%Y%m%d')
+        self.date_start_ddmmyyyy = self.date_start.strftime('%d/%m/%Y')
+        self.date_end_ddmmyyyy = self.date_end.strftime('%d/%m/%Y')
         self.df_ids = self.source('ids', bool_fetch=True)
         self.list_slugs = list_slugs if list_slugs is not None else \
             list(self.df_ids['CURRENCY_ID'].unique())

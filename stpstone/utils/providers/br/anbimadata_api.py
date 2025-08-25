@@ -17,7 +17,7 @@ from requests import exceptions, request
 
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_API
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.lists import ListHandler

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_WW_RATINGS_CORP_S_AND_P
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
@@ -21,7 +21,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
         self,
         bearer: str,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -31,7 +31,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
         super().__init__(
             dict_metadata=YAML_WW_RATINGS_CORP_S_AND_P,
             session=session,
-            dt_ref=dt_ref,
+            date_ref=date_ref,
             cls_db=cls_db,
             logger=logger,
             token=token,
@@ -39,7 +39,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
         )
         self.bearer = bearer
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.list_slugs = list_slugs
@@ -76,7 +76,7 @@ class RatingsCorpSPGlobalProduct:
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -84,7 +84,7 @@ class RatingsCorpSPGlobalProduct:
         pg_number: int = 1
     ) -> None:
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.token = token

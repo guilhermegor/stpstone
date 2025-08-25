@@ -10,7 +10,7 @@ from scipy.interpolate import CubicSpline
 
 from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 from stpstone.analytics.quant.linear_transformations import LinearAlgebra
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.parsers.lists import ListHandler
 
 
@@ -55,7 +55,7 @@ class NotionalFromPV:
         float_pmi_ipca_rt_hat: float, 
         dt_pmi_last: datetime, 
         dt_pmi_next: datetime, 
-        dt_ref: datetime,
+        date_ref: datetime,
         float_size: float = 0.00025
     ) -> float:
         """Brazilian DI x IPCA (DAP) Contract Pricing.
@@ -82,7 +82,7 @@ class NotionalFromPV:
             Date of the last PMI index release
         dt_pmi_next : datetime
             Date of the next scheduled PMI index release
-        dt_ref : datetime
+        date_ref : datetime
             Pricing reference date (valuation date)
         float_size : float, optional
             Contract size multiplier (default: 0.00025)
@@ -114,7 +114,7 @@ class NotionalFromPV:
         ...     float_pmi_ipca_rt_hat=0.04,
         ...     dt_pmi_last=datetime(2023, 5, 15),
         ...     dt_pmi_next=datetime(2023, 6, 15),
-        ...     dt_ref=datetime(2023, 5, 20)
+        ...     date_ref=datetime(2023, 5, 20)
         ... )
         12500.00
         """
@@ -124,9 +124,9 @@ class NotionalFromPV:
                 + "inferior than the last"
             )
         # working days from the last pmi release util the following
-        int_wddm = DatesBR().get_working_days_delta(dt_pmi_last, dt_pmi_next)
+        int_wddm = DatesBR().delta_working_days(dt_pmi_last, dt_pmi_next)
         # working days from the last pmi release until the reference date
-        int_wddt = DatesBR().get_working_days_delta(dt_pmi_last, dt_ref)
+        int_wddt = DatesBR().delta_working_days(dt_pmi_last, date_ref)
         # prt - pmi pro-rata tempore
         float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
             ** (int_wddt / int_wddm)
@@ -140,7 +140,7 @@ class NotionalFromRt:
     def di1(
         self, 
         float_nominal_rt: float, 
-        dt_xpt: datetime, 
+        date_xpt: datetime, 
         int_wd_bef: int, 
         float_fv: float = 100000.0, 
         int_wddy: int = 252, 
@@ -169,7 +169,7 @@ class NotionalFromRt:
         ----------
         float_nominal_rt : float
             Contracted nominal interest rate (annualized, in decimal form)
-        dt_xpt : datetime
+        date_xpt : datetime
             Contract expiration/settlement date
         int_wd_bef : int
             Number of working days prior to expiration for reference date calculation
@@ -200,16 +200,16 @@ class NotionalFromRt:
         >>> di1_pricing = DI1()
         >>> di1_pricing.di1(
         ...     float_nominal_rt=0.10,  # 10% annual
-        ...     dt_xpt=datetime(2023, 12, 1),
+        ...     date_xpt=datetime(2023, 12, 1),
         ...     int_wd_bef=2,
         ...     int_wddy=252
         ... )
         97590.23  # Present value for 10% DI1 contract
         """
         # reference date
-        dt_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
+        date_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
         # number of days to settlement of contract
-        int_wddt = DatesBR().get_working_days_delta(dt_ref, dt_xpt)
+        int_wddt = DatesBR().delta_working_days(date_ref, date_xpt)
         # real rate
         float_real_rate = FinancialMath().compound_r(
             float_nominal_rt, int_wddy, int_wd_cap)
@@ -225,7 +225,7 @@ class RtFromPV:
         float_pv_di: float, 
         float_fut_dol: float, 
         float_ptax_dm1: float, 
-        dt_xpt: datetime, 
+        date_xpt: datetime, 
         int_wd_bef: int, 
         int_cddy: int = 365, 
         float_fv_di: float = 100000.0
@@ -258,7 +258,7 @@ class RtFromPV:
             Future dollar value (contract nominal in USD)
         float_ptax_dm1 : float
             PTAX exchange rate from previous business day (BRL/USD)
-        dt_xpt : datetime
+        date_xpt : datetime
             Contract settlement/expiration date
         int_wd_bef : int
             Number of working days before settlement for reference date calculation
@@ -290,15 +290,15 @@ class RtFromPV:
         ...     float_pv_di=95000.0,
         ...     float_fut_dol=1.0,
         ...     float_ptax_dm1=5.20,
-        ...     dt_xpt=datetime(2023, 12, 1),
+        ...     date_xpt=datetime(2023, 12, 1),
         ...     int_wd_bef=2
         ... )
         0.0652  # 6.52% annualized real rate
         """
         # reference date
-        dt_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
+        date_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
         # number of days to settlement of contract
-        int_cddt = DatesBR().delta_calendar_days(dt_ref, dt_xpt)
+        int_cddt = DatesBR().delta_calendar_days(date_ref, date_xpt)
         # returning rate
         return (float_pv_di / float_fv_di) / (float_fut_dol / float_ptax_dm1) - 1.0 \
             * int_cddy / int_cddt

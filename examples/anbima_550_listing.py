@@ -1,11 +1,11 @@
 from stpstone.ingestion.countries.br.exchange.anbima_550_listing import Anbima550Listing
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 
 
 cls_ = Anbima550Listing(
     session=None,
     cls_db=None,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+    date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
 )
 
 df_ = cls_.source("550_listing", bool_fetch=True)

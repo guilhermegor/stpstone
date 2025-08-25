@@ -34,11 +34,12 @@ We use the following standardized variable naming conventions:
 | `float_size`    | Size of instrument contract |
 | `float_xcg`     | Exchange value for instrument pricing |
 | `float_qty`     | Quantity of instruments (positive for purchasing, negative for selling) |
-| `dt_ref`        | Reference date |
-| `dt_xpt`        | Maturity date |
-| `dt_rdm`        | Redemption date |
-| `dt_start`        | Start date |
-| `dt_end`        | End date |
+| `date_ref`        | Reference date |
+| `date_xpt`        | Maturity date |
+| `date_rdm`        | Redemption date |
+| `date_start`        | Start date |
+| `date_end`        | End date |
+| `date_current` | Current date, for iteration puroposes|
 | `int_n_smp`     | Number of samples |
 | `int_max_retries` | Maximum number of retries |
 

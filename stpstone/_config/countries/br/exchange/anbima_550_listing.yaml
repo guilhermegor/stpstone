@@ -47,7 +47,7 @@ metadata:
   #   - start with a commentary hash and separate params with &
   # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
   #   the app; example: application/name/#source=dummy_1&bool_debug=True
-  app: informacoes/res-550/arqs/{{dt_ref_yyyymmdd}}_550.tex
+  app: informacoes/res-550/arqs/{{date_ref_yyyymmdd}}_550.tex
   bool_verify: False
   timeout: (12.0, 12.0)
   cookies:

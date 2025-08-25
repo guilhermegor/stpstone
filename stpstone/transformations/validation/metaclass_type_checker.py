@@ -20,6 +20,7 @@ def add_numbers(self, x: int, y: int) -> int:
 add_numbers(1, 2)  # This will raise a TypeError if the types don't match
 """
 
+from abc import ABCMeta
 from functools import wraps
 import inspect
 from io import BufferedIOBase, BytesIO, RawIOBase
@@ -437,6 +438,12 @@ class TypeChecker(type):
             dict_["__init__"] = create_type_checked_method(original_init)
 
         return super().__new__(cls, name, bases, dict_)
+
+
+class ABCTypeCheckerMeta(ABCMeta, TypeChecker):
+    """Meta class for type checking abstract base classes."""
+
+    pass
 
 
 class AdvancedTypeChecker(type):

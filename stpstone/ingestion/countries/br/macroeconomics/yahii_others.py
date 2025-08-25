@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_YAHII_OHTERS
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -24,7 +24,7 @@ class YahiiOthersBR(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -33,7 +33,7 @@ class YahiiOthersBR(ABCRequests):
         super().__init__(
             dict_metadata=YAML_YAHII_OHTERS,
             session=session,
-            dt_ref=dt_ref,
+            date_ref=date_ref,
             cls_db=cls_db,
             logger=logger,
             token=token,
@@ -41,13 +41,13 @@ class YahiiOthersBR(ABCRequests):
             int_delay_seconds=int_delay_seconds,
         )
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.token = token
         self.list_slugs = list_slugs
         self.int_delay_seconds = int_delay_seconds
-        self.year_yy = self.dt_ref.strftime("%y")
+        self.year_yy = self.date_ref.strftime("%y")
 
     def td_th_parser(self, list_td: List[Any], list_headers: List[str], source: str) \
         -> pd.DataFrame:
@@ -70,7 +70,7 @@ class YahiiOthersBR(ABCRequests):
             df_ = pd.DataFrame(list_ser)
             df_ = df_[df_["DATA"] != "REVOGADA"]
             df_["DATA"] = [DatesBR().str_date_to_datetime(d, "DD.MM.YY") for d in df_["DATA"]]
-            df_ = df_[(df_["DATA"] >= DatesBR().build_date(2000, 1, 1)) & (df_["DATA"] <= self.dt_ref)]
+            df_ = df_[(df_["DATA"] >= DatesBR().build_date(2000, 1, 1)) & (df_["DATA"] <= self.date_ref)]
         elif source == "inss_contribution":
             list_td = [
                 x.replace("\r\n                 ", "").strip().replace("%", "")\

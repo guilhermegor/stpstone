@@ -15,7 +15,7 @@ from pyodbc import Connection
 import pytest
 
 from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.databases.sql.sqlserver import SqlServerDB
 from stpstone.utils.parsers.json import JsonFiles
 

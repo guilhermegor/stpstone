@@ -17,7 +17,10 @@ from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError, ConnectTimeout, ProxyError, SSLError
 from urllib3.util import Retry
 
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
+from stpstone.transformations.validation.metaclass_type_checker import (
+    ABCTypeCheckerMeta,
+    type_checker,
+)
 from stpstone.utils.loggs.create_logs import CreateLog, conditional_timeit
 from stpstone.utils.parsers.dicts import HandlingDicts
 
@@ -127,11 +130,7 @@ class ReturnAvailableProxies(TypedDict):
     uptime: float
 
 
-class ABCMetaClass(TypeChecker, ABCMeta):
-    """Metaclass combining TypeChecker and ABC functionality."""
-
-
-class ABCSession(ABC, metaclass=ABCMetaClass):
+class ABCSession(ABC, metaclass=ABCTypeCheckerMeta):
     """Abstract base class for proxy session management.
 
     This class provides a common interface for proxy session management,

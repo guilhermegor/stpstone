@@ -9,7 +9,7 @@ from logging import Logger
 from typing import Optional
 
 from stpstone.transformations.validation.metaclass_type_checker import type_checker
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -79,7 +79,7 @@ def initiate_logging(logger: Logger, path_log: Optional[str] = None) -> None:
 
     log_creator.log_message(
         logger,
-        f"Routine started at {DatesBR().curr_date_time()}",
+        f"Routine started at {DatesBR().curr_datetime()}",
         "info"
     )
     log_creator.log_message(

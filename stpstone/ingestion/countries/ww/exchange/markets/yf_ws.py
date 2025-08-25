@@ -10,7 +10,7 @@ from yfinance import download
 
 # local libs
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -19,21 +19,21 @@ class YFinanceWS(metaclass=TypeChecker):
     def __init__(
         self,
         list_tickers:List[str],
-        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 52).strftime('%Y-%m-%d'),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1).strftime('%Y-%m-%d'),
+        date_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 52).strftime('%Y-%m-%d'),
+        date_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1).strftime('%Y-%m-%d'),
         session:Optional[ProxyScrapeAll]=None
     ) -> None:
         self.list_tickers = list_tickers
         self.session = session
-        self.dt_start = dt_start
-        self.dt_end = dt_end
+        self.date_start = date_start
+        self.date_end = date_end
 
     @property
     def mktdata(self) -> pd.DataFrame:
         df_ = download(
             tickers=self.list_tickers,
-            start=self.dt_start.strftime('%Y-%m-%d'),
-            end=self.dt_end.strftime('%Y-%m-%d'),
+            start=self.date_start.strftime('%Y-%m-%d'),
+            end=self.date_end.strftime('%Y-%m-%d'),
             group_by='ticker',
             session=self.session
         )

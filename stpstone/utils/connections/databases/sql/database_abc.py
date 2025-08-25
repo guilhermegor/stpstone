@@ -12,18 +12,12 @@ from typing import Any, Literal, Optional, Union
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import (
+    ABCTypeCheckerMeta,
     DbConnection,
     DbCursor,
     SQLComposable,
-    TypeChecker,
 )
 from stpstone.utils.loggs.create_logs import CreateLog
-
-
-class ABCTypeCheckerMeta(ABCMeta, TypeChecker):
-    """Meta class for type checking abstract base classes."""
-
-    pass
 
 
 class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):

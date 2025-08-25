@@ -36,8 +36,8 @@ def valid_alpha_tools_params() -> dict[str, Any]:
         "str_passw": "test_pass",
         "str_host": "https://test.host/",
         "str_instance": "test_instance",
-        "dt_start": datetime(2023, 1, 1),
-        "dt_end": datetime(2023, 1, 31),
+        "date_start": datetime(2023, 1, 1),
+        "date_end": datetime(2023, 1, 31),
         "str_fmt_date_output": "YYYY-MM-DD",
     }
 
@@ -120,8 +120,8 @@ class TestInit:
         assert alpha.str_passw == "test_pass"
         assert alpha.str_host == "https://test.host/"
         assert alpha.str_instance == "test_instance"
-        assert alpha.dt_start == datetime(2023, 1, 1)
-        assert alpha.dt_end == datetime(2023, 1, 31)
+        assert alpha.date_start == datetime(2023, 1, 1)
+        assert alpha.date_end == datetime(2023, 1, 31)
         assert alpha.str_fmt_date_output == "YYYY-MM-DD"
 
     @pytest.mark.parametrize(
@@ -191,7 +191,7 @@ class TestInit:
         None
         """
         params = valid_alpha_tools_params.copy()
-        params["dt_start"], params["dt_end"] = params["dt_end"], params["dt_start"]
+        params["date_start"], params["date_end"] = params["date_end"], params["date_start"]
         with pytest.raises(ValueError, match="Start date cannot be after end date"):
             AlphaTools(**params)
 
@@ -217,7 +217,7 @@ class TestInit:
         None
         """
         params = valid_alpha_tools_params.copy()
-        params["dt_start"] = "2023-01-01"
+        params["date_start"] = "2023-01-01"
         with pytest.raises(TypeError, match="must be of type"):
             AlphaTools(**params)
 

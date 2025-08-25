@@ -13,7 +13,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from stpstone._config.global_slots import YAML_GEN
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.loggs.db_logs import DBLogs
 
 

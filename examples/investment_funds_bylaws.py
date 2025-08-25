@@ -6,7 +6,7 @@ from typing import List
 import pandas as pd
 
 from stpstone.ingestion.countries.br.bylaws.investment_funds import InvestmentFundsBylawsBR
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.lists import ListHandler
 

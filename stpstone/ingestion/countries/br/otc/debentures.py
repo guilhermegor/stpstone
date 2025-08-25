@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_DEBENTURES
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -23,25 +23,25 @@ class DebenturesComBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 10),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 10),
+        date_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None
     ) -> None:
         self.session = session
-        self.dt_start = dt_start
-        self.dt_end = dt_end
+        self.date_start = date_start
+        self.date_end = date_end
         self.cls_db = cls_db
         self.logger = logger
-        self.dt_ref = dt_end
-        self.dt_start_yyyymmdd = dt_start.strftime('%Y%m%d')
-        self.dt_end_yyyymmdd = dt_end.strftime('%Y%m%d')
-        self.dt_start_ddmmyyyy = dt_start.strftime('%d/%m/%Y')
-        self.dt_end_ddmmyyyy = dt_end.strftime('%d/%m/%Y')
+        self.date_ref = date_end
+        self.date_start_yyyymmdd = date_start.strftime('%Y%m%d')
+        self.date_end_yyyymmdd = date_end.strftime('%Y%m%d')
+        self.date_start_ddmmyyyy = date_start.strftime('%d/%m/%Y')
+        self.date_end_ddmmyyyy = date_end.strftime('%d/%m/%Y')
         super().__init__(
             dict_metadata=YAML_DEBENTURES,
             session=session,
-            dt_ref=dt_end,
+            date_ref=date_end,
             cls_db=cls_db,
             logger=logger
         )

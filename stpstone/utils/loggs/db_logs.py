@@ -13,7 +13,7 @@ import pandas as pd
 
 from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 
 
 class DBLogs(metaclass=TypeChecker):

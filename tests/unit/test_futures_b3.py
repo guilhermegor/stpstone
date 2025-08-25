@@ -13,7 +13,7 @@ from stpstone.analytics.pricing.derivatives.futures_b3 import (
     NotionalFromRt,
     RtFromPV,
 )
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.parsers.lists import ListHandler
 
 
@@ -129,7 +129,7 @@ def mock_dates_br_methods(mocker: MockerFixture, current_date: datetime) -> None
     """
     mocker.patch.object(DatesBR, "curr_date", return_value=current_date)
     mocker.patch.object(DatesBR, "sub_working_days", return_value=current_date)
-    mocker.patch.object(DatesBR, "get_working_days_delta", return_value=90)
+    mocker.patch.object(DatesBR, "delta_working_days", return_value=90)
     mocker.patch.object(DatesBR, "delta_calendar_days", return_value=90)
 
 
@@ -211,7 +211,7 @@ class TestNotionalFromPV:
             float_pmi_ipca_rt_hat=0.04,
             dt_pmi_last=current_date - timedelta(days=30),
             dt_pmi_next=current_date + timedelta(days=30),
-            dt_ref=current_date
+            date_ref=current_date
         )
         assert isinstance(result, float)
         assert result > 0
@@ -235,7 +235,7 @@ class TestNotionalFromPV:
                 float_pmi_ipca_rt_hat=0.04,
                 dt_pmi_last=current_date + timedelta(days=30),
                 dt_pmi_next=current_date,
-                dt_ref=current_date
+                date_ref=current_date
             )
 
     def test_dap_pricing_edge_zero_qty(self, notional_pv_instance: NotionalFromPV, 
@@ -256,7 +256,7 @@ class TestNotionalFromPV:
             float_pmi_ipca_rt_hat=0.04,
             dt_pmi_last=current_date - timedelta(days=30),
             dt_pmi_next=current_date + timedelta(days=30),
-            dt_ref=current_date
+            date_ref=current_date
         )
         assert result == 0.0
 
@@ -290,7 +290,7 @@ class TestNotionalFromRt:
         """
         result = notional_rt_instance.di1(
             float_nominal_rt=0.10,
-            dt_xpt=future_date,
+            date_xpt=future_date,
             int_wd_bef=2
         )
         assert isinstance(result, float)
@@ -314,7 +314,7 @@ class TestNotionalFromRt:
         """
         result = notional_rt_instance.di1(
             float_nominal_rt=0.0,
-            dt_xpt=future_date,
+            date_xpt=future_date,
             int_wd_bef=2
         )
         assert result == pytest.approx(90000.0)
@@ -333,7 +333,7 @@ class TestNotionalFromRt:
         with pytest.raises(TypeError):
             notional_rt_instance.di1(
                 float_nominal_rt="0.10",
-                dt_xpt=future_date,
+                date_xpt=future_date,
                 int_wd_bef=2
             )
 
@@ -366,7 +366,7 @@ class TestRtFromPV:
             float_pv_di=95000.0,
             float_fut_dol=1.0,
             float_ptax_dm1=5.20,
-            dt_xpt=future_date,
+            date_xpt=future_date,
             int_wd_bef=2
         )
         assert isinstance(result, float)
@@ -389,7 +389,7 @@ class TestRtFromPV:
             float_pv_di=100000.0,
             float_fut_dol=1.0,
             float_ptax_dm1=1.0,
-            dt_xpt=future_date,
+            date_xpt=future_date,
             int_wd_bef=2
         )
         assert result == pytest.approx(-3.055, abs=1e-3)
@@ -410,7 +410,7 @@ class TestRtFromPV:
                 float_pv_di="95000.0",
                 float_fut_dol=1.0,
                 float_ptax_dm1=5.20,
-                dt_xpt=future_date,
+                date_xpt=future_date,
                 int_wd_bef=2
             )
 

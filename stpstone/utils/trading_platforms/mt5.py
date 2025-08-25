@@ -345,7 +345,7 @@ class MT5(metaclass=TypeChecker):
     def get_ticks_from(
         self,
         symbol: str,
-        dt_ref: datetime,
+        date_ref: datetime,
         ticks_qty: int,
         type_ticks: int = mt5.COPY_TICKS_ALL
     ) -> Optional[pd.DataFrame]:
@@ -355,7 +355,7 @@ class MT5(metaclass=TypeChecker):
         ----------
         symbol : str
             Symbol to get ticks for
-        dt_ref : datetime
+        date_ref : datetime
             Starting datetime for ticks
         ticks_qty : int
             Number of ticks to retrieve
@@ -367,7 +367,7 @@ class MT5(metaclass=TypeChecker):
         Optional[pd.DataFrame]
             DataFrame containing ticks if successful, None otherwise
         """
-        ticks = mt5.copy_ticks_from(symbol, dt_ref, ticks_qty, type_ticks)
+        ticks = mt5.copy_ticks_from(symbol, date_ref, ticks_qty, type_ticks)
         ticks_frame = pd.DataFrame(ticks)
         
         CreateLog().log_message(self.logger, f"Ticks recebidos: {ticks_frame.shape[0]}", "info")
@@ -381,7 +381,7 @@ class MT5(metaclass=TypeChecker):
     def get_ticks_range(
         self,
         symbol: str,
-        dt_ref: datetime,
+        date_ref: datetime,
         datetime_to: datetime,
         type_ticks: int = mt5.COPY_TICKS_ALL
     ) -> Optional[pd.DataFrame]:
@@ -391,7 +391,7 @@ class MT5(metaclass=TypeChecker):
         ----------
         symbol : str
             Symbol to get ticks for
-        dt_ref : datetime
+        date_ref : datetime
             Starting datetime for ticks
         datetime_to : datetime
             Ending datetime for ticks
@@ -403,7 +403,7 @@ class MT5(metaclass=TypeChecker):
         Optional[pd.DataFrame]
             DataFrame containing ticks if successful, None otherwise
         """
-        ticks = mt5.copy_ticks_range(symbol, dt_ref, datetime_to, type_ticks)
+        ticks = mt5.copy_ticks_range(symbol, date_ref, datetime_to, type_ticks)
         ticks_frame = pd.DataFrame(ticks)
         
         CreateLog().log_message(self.logger, f"Ticks recebidos: {ticks_frame.shape[0]}", "info")

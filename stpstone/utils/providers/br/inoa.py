@@ -13,7 +13,7 @@ import pandas as pd
 from requests import exceptions, request
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 
 
 class ReturnGenericReq(TypedDict):
@@ -37,8 +37,8 @@ class AlphaTools(metaclass=TypeChecker):
         str_passw: str,
         str_host: str,
         str_instance: str,
-        dt_start: datetime,
-        dt_end: datetime,
+        date_start: datetime,
+        date_end: datetime,
         str_fmt_date_output: str = "YYYY-MM-DD",
     ) -> None:
         """Initialize AlphaTools API client.
@@ -53,22 +53,22 @@ class AlphaTools(metaclass=TypeChecker):
             Base host URL for API endpoints
         str_instance : str
             Instance identifier for data origin tracking
-        dt_start : datetime
+        date_start : datetime
             Start date for data queries
-        dt_end : datetime
+        date_end : datetime
             End date for data queries
         str_fmt_date_output : str, optional
             Format string for output dates (default: "YYYY-MM-DD")
         """
         self._validate_string_params(str_user, str_passw, str_host, str_instance)
-        self._validate_dates(dt_start, dt_end)
+        self._validate_dates(date_start, date_end)
 
         self.str_user = str_user
         self.str_passw = str_passw
         self.str_host = str_host
         self.str_instance = str_instance
-        self.dt_start = dt_start
-        self.dt_end = dt_end
+        self.date_start = date_start
+        self.date_end = date_end
         self.str_fmt_date_output = str_fmt_date_output
         self.cls_dates_br = DatesBR()
 
@@ -108,14 +108,14 @@ class AlphaTools(metaclass=TypeChecker):
             if not isinstance(value, str):
                 raise ValueError(f"{name} must be a string")
 
-    def _validate_dates(self, dt_start: datetime, dt_end: datetime) -> None:
+    def _validate_dates(self, date_start: datetime, date_end: datetime) -> None:
         """Validate date range parameters.
 
         Parameters
         ----------
-        dt_start : datetime
+        date_start : datetime
             Start date to validate
-        dt_end : datetime
+        date_end : datetime
             End date to validate
 
         Raises
@@ -124,9 +124,9 @@ class AlphaTools(metaclass=TypeChecker):
             If start date is after end date
             If dates are not datetime objects
         """
-        if not isinstance(dt_start, datetime) or not isinstance(dt_end, datetime):
+        if not isinstance(date_start, datetime) or not isinstance(date_end, datetime):
             raise ValueError("Dates must be datetime objects")
-        if dt_start > dt_end:
+        if date_start > date_end:
             raise ValueError("Start date cannot be after end date")
 
     @backoff.on_exception(
@@ -233,8 +233,8 @@ class AlphaTools(metaclass=TypeChecker):
 
         dict_params = {
             "fund_ids": list_ids,
-            "start_date": self.dt_start.strftime("%Y-%m-%d"),
-            "end_date": self.dt_end.strftime("%Y-%m-%d"),
+            "start_date": self.date_start.strftime("%Y-%m-%d"),
+            "end_date": self.date_end.strftime("%Y-%m-%d"),
         }
         try:
             json_req = self.generic_req(

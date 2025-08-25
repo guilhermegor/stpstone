@@ -39,7 +39,7 @@ ohlcv_adjusted:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   slugs:
-  app: daily/{{slug}}/prices?startDate={{dt_start_yyyymmdd}}&endDate={{dt_end_yyyymmdd}}&format=json&resampleFreq=daily
+  app: daily/{{slug}}/prices?startDate={{date_start_yyyymmdd}}&endDate={{date_end_yyyymmdd}}&format=json&resampleFreq=daily
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: camel

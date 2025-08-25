@@ -48,7 +48,7 @@ br_treasuries:
   #   - start with a commentary hash and separate params with &
   # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
   #   the app; example: application/name/#source=dummy_1&bool_debug=True
-  app: informacoes/merc-sec/arqs/ms{{dt_ref_yymmdd}}.txt#bool_separator_consistency_check=False
+  app: informacoes/merc-sec/arqs/ms{{date_ref_yymmdd}}.txt#bool_separator_consistency_check=False
   bool_verify: False
   timeout: (12.0, 12.0)
   cookies:
@@ -136,7 +136,7 @@ corporate_bonds:
   #   - start with a commentary hash and separate params with &
   # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
   #   the app; example: application/name/#source=dummy_1&bool_debug=True
-  app: informacoes/merc-sec-debentures/arqs/db{{dt_ref_yymmdd}}.txt#bool_separator_consistency_check=False
+  app: informacoes/merc-sec-debentures/arqs/db{{date_ref_yymmdd}}.txt#bool_separator_consistency_check=False
   bool_verify: False
   timeout: (12.0, 12.0)
   cookies:

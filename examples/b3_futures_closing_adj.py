@@ -3,7 +3,7 @@ import os
 
 os.path.abspath(os.path.join(os.path.realpath(__file__), ".."))
 from stpstone.ingestion.countries.br.exchange.futures_closing_adj import FuturesClosingAdjB3
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -16,7 +16,7 @@ session = YieldFreeProxy(
 print(session.proxies)
 
 cls_ = FuturesClosingAdjB3(
-    session=None, dt_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 3), cls_db=None
+    session=None, date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 3), cls_db=None
 )
 
 df_ = cls_.source("futures_closing_adj", bool_fetch=True)

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_US_TIINGO
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -18,18 +18,18 @@ class TiingoUS(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 52),
-        dt_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_start:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 52),
+        date_end:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
         list_slugs:Optional[List[str]]=None
     ) -> None:
         self.session = session
-        self.dt_start = dt_start
-        self.dt_end = dt_end
-        self.dt_start_yyyymmdd = dt_start.strftime('%Y-%m-%d')
-        self.dt_end_yyyymmdd = dt_end.strftime('%Y-%m-%d')
+        self.date_start = date_start
+        self.date_end = date_end
+        self.date_start_yyyymmdd = date_start.strftime('%Y-%m-%d')
+        self.date_end_yyyymmdd = date_end.strftime('%Y-%m-%d')
         self.cls_db = cls_db
         self.logger = logger
         self.token = token,

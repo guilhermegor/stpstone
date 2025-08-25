@@ -582,7 +582,7 @@ class TestTickDataRetrieval:
         
         result = mt5_instance.get_ticks_from(
             symbol="EURUSD",
-            dt_ref=datetime.now(),
+            date_ref=datetime.now(),
             ticks_qty=10
         )
         
@@ -621,7 +621,7 @@ class TestTickDataRetrieval:
         mocker.patch('MetaTrader5.mt5.copy_ticks_from', return_value=None)
         result = mt5_instance.get_ticks_from(
             symbol="EURUSD",
-            dt_ref=datetime.now(),
+            date_ref=datetime.now(),
             ticks_qty=10
         )
         
@@ -670,7 +670,7 @@ class TestTickDataRetrieval:
         
         result = mt5_instance.get_ticks_range(
             symbol="EURUSD",
-            dt_ref=datetime.now(),
+            date_ref=datetime.now(),
             datetime_to=datetime.now()
         )
         

@@ -445,7 +445,7 @@ class TestBRSovereignPricer:
     # PR1 Calculation tests
     # --------------------------------------------------
     @pytest.mark.parametrize(
-        "dt_ref,dt_ipca_last,dt_ipca_next,expected",
+        "date_ref,dt_ipca_last,dt_ipca_next,expected",
         [
             # Before 15th cases
             (date(2023, 6, 10), date(2023, 5, 15), date(2023, 6, 15), 0.806451613),
@@ -466,7 +466,7 @@ class TestBRSovereignPricer:
     def test_pr1_normal_cases(
         self,
         pricer: BRSovereignPricer,
-        dt_ref: date,
+        date_ref: date,
         dt_ipca_last: date,
         dt_ipca_next: date,
         expected: float,
@@ -477,7 +477,7 @@ class TestBRSovereignPricer:
         ----------
         pricer : BRSovereignPricer
             Instance of BRSovereignPricer class
-        dt_ref : date
+        date_ref : date
             Reference date
         dt_ipca_last : date
             Last available IPCA date
@@ -486,11 +486,11 @@ class TestBRSovereignPricer:
         expected : float
             Expected result
         """
-        result = pricer.pr1(dt_ref, dt_ipca_last, dt_ipca_next)
+        result = pricer.pr1(date_ref, dt_ipca_last, dt_ipca_next)
         assert result == pytest.approx(expected, abs=1e-4)
 
     @pytest.mark.parametrize(
-        "dt_ref,dt_ipca_last,dt_ipca_next",
+        "date_ref,dt_ipca_last,dt_ipca_next",
         [
             # Invalid date orders
             (date(2023, 6, 10), date(2023, 6, 15), date(2023, 5, 15)),  # Next before last
@@ -503,7 +503,7 @@ class TestBRSovereignPricer:
     def test_pr1_invalid_date_orders(
         self,
         pricer: BRSovereignPricer,
-        dt_ref: date,
+        date_ref: date,
         dt_ipca_last: date,
         dt_ipca_next: date,
     ) -> None:
@@ -513,7 +513,7 @@ class TestBRSovereignPricer:
         ----------
         pricer : BRSovereignPricer
             Instance of BRSovereignPricer class
-        dt_ref : date
+        date_ref : date
             Reference date
         dt_ipca_last : date
             Last available IPCA date
@@ -521,7 +521,7 @@ class TestBRSovereignPricer:
             Next available IPCA date
         """
         with pytest.raises(ValueError):
-            pricer.pr1(dt_ref, dt_ipca_last, dt_ipca_next)
+            pricer.pr1(date_ref, dt_ipca_last, dt_ipca_next)
 
     def test_pr1_weekend_adjustment(
         self,

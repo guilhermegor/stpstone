@@ -5,7 +5,7 @@ import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.br.exchange.bvmf_bov import BVMFBOV
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -19,7 +19,7 @@ from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager imp
 
 cls_ = BVMFBOV(
     session=None,
-    dt_ref=DatesBR().add_months(DatesBR().curr_date(), -1)
+    date_ref=DatesBR().add_months(DatesBR().curr_date(), -1)
 )
 df_ = cls_.source('volumes', bool_fetch=True)
 print(f'DF VOLUMES: \n{df_}')

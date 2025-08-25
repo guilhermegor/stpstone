@@ -6,7 +6,7 @@ credentials:
   payload:
   token:
     host: https://arquivos.b3.com.br/
-    app: api/download/requestname?fileName=TradeInformationConsolidatedAfterHoursFile&date={{dt_ref}}&recaptchaToken=
+    app: api/download/requestname?fileName=TradeInformationConsolidatedAfterHoursFile&date={{date_ref}}&recaptchaToken=
     get:
       req_method: GET
       bool_verify: False

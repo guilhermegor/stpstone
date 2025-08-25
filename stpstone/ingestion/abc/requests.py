@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 import urllib3
 
 from stpstone.transformations.standardization.standardizer_df import DFStandardization
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -672,7 +672,7 @@ class ABCRequests(HandleReqResponses):
         self,
         dict_metadata: Dict[str, Any],
         session: Optional[ReqSession] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -688,7 +688,7 @@ class ABCRequests(HandleReqResponses):
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.list_slugs = list_slugs
@@ -923,7 +923,7 @@ class ABCRequests(HandleReqResponses):
             logger=self.logger,
         )
         df_ = cls_df_stdz.pipeline(df_)
-        df_ = DBLogs().audit_log(df_, url, self.dt_ref, self.bool_ts_log_str)
+        df_ = DBLogs().audit_log(df_, url, self.date_ref, self.bool_ts_log_str)
         return df_
 
     def insert_table(

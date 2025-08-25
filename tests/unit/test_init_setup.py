@@ -68,7 +68,7 @@ def mock_dates_br(mocker: MockerFixture) -> object:
         Mocked DatesBR instance
     """
     mock = mocker.patch("stpstone.utils.loggs.init_setup.DatesBR")
-    mock.return_value.curr_date_time.return_value = "2025-08-13 11:43:11"
+    mock.return_value.curr_datetime.return_value = "2025-08-13 11:43:11"
     return mock
 
 

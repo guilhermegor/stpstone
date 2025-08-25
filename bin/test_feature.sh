@@ -7,11 +7,12 @@ declare -a EXCLUDE_PATTERNS=(
     "stpstone/utils/parsers/mock_exclusion_example.py"
 )
 
-# List of classes considered to have TypeChecker
+# list of classes considered to have TypeChecker
 declare -a TYPECHECKER_CLASSES=(
     "TypeChecker"
     "ABCSession"
     "ABCDatabase"
+    "ABCCalendar"
 )
 
 RED='\033[0;31m'

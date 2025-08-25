@@ -1,7 +1,7 @@
 ### CONFIGURATION TOOLS###
 
 credentials:
-  host: https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/{year_dt_ref}-{month_dt_ref}/
+  host: https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/{year_date_ref}-{month_date_ref}/
 
 logs:
   dtypes:

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_B3_CONSOLIDATED_TRDS_AFTER_MKT
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -18,7 +18,7 @@ class ConsolidatedTrdsAfterMktB3(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -27,14 +27,14 @@ class ConsolidatedTrdsAfterMktB3(ABCRequests):
         super().__init__(
             dict_metadata=YAML_B3_CONSOLIDATED_TRDS_AFTER_MKT,
             session=session,
-            dt_ref=dt_ref,
+            date_ref=date_ref,
             cls_db=cls_db,
             logger=logger,
             token=token,
             list_slugs=list_slugs
         )
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.list_slugs = list_slugs

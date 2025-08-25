@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_B3_SEARCH_BY_TRADING_SESSION
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.html import HtmlHandler
@@ -24,7 +24,7 @@ class SearchByTradingB3(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -33,21 +33,21 @@ class SearchByTradingB3(ABCRequests):
         super().__init__(
             dict_metadata=YAML_B3_SEARCH_BY_TRADING_SESSION,
             session=session,
-            dt_ref=dt_ref,
+            date_ref=date_ref,
             cls_db=cls_db,
             logger=logger,
             token=token,
             list_slugs=list_slugs
         )
         self.session = session
-        self.dt_ref = dt_ref
+        self.date_ref = date_ref
         self.cls_db = cls_db
         self.logger = logger
         self.token = token,
         self.list_slugs = list_slugs
-        self.dt_ref_yymmdd = self.dt_ref.strftime("%y%m%d")
-        self.dt_start_month = DatesBR().dates_inf_sup_month(self.dt_ref)[0]
-        self.dt_start_month_yymmdd = self.dt_start_month.strftime("%y%m%d")
+        self.date_ref_yymmdd = self.date_ref.strftime("%y%m%d")
+        self.date_start_month = DatesBR().month_openning_closing_dates(self.date_ref)[0]
+        self.date_start_month_yymmdd = self.date_start_month.strftime("%y%m%d")
 
     def instruments_register_raw(
         self,
@@ -148,7 +148,7 @@ class SearchByTradingB3(ABCRequests):
         """
         # url de exportação do arquivo de margens teóricas máximas b3
         url_mtm = "https://www.b3.com.br/pesquisapregao/download?filelist=MT{}.zip".format(
-            self.dt_ref.strftime("%y%m%d"))
+            self.date_ref.strftime("%y%m%d"))
         # carga para a memória margens teóricas máximas b3
         resp_req = request("GET", url_mtm)
         zipfile = DirFilesManagement().get_zip_from_web_in_memory(
@@ -384,7 +384,7 @@ class SearchByTradingB3(ABCRequests):
                                         for x in list_risk_curve_type_scenarios]
         # definindo url com cenários de risco - tipo de curva
         url_risk_curve_type_scenarios = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoCurva{}.zip".format(
-            self.dt_ref.strftime("%y%m%d"))
+            self.date_ref.strftime("%y%m%d"))
         resp_req = request("GET", url_risk_curve_type_scenarios)
         resp_req.raise_for_status()
         # baixando em memória zip com cenário de tipo curva da b3
@@ -454,7 +454,7 @@ class SearchByTradingB3(ABCRequests):
         try:
             # definindo url com cenários de risco - tipo de curva
             url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
-                self.dt_ref.strftime("%y%m%d"))
+                self.date_ref.strftime("%y%m%d"))
             resp_req = request("GET", url_cenarios_tipo_spot)
             resp_req.raise_for_status()
             # baixando em memória zip com cenário de tipo curva da b3
@@ -464,7 +464,7 @@ class SearchByTradingB3(ABCRequests):
             )
         except:
             url_cenarios_tipo_spot = "https://download.bmfbovespa.com.br/FTP/IPNv2/RISCO/CenariosTipoSpot{}.zip".format(
-                self.dt_ref.strftime("%y%m%d"))
+                self.date_ref.strftime("%y%m%d"))
             resp_req = request("GET", url_cenarios_tipo_spot)
             resp_req.raise_for_status()
             list_txts_tipos_spot_cenarios = DirFilesManagement().get_zip_from_web_in_memory(

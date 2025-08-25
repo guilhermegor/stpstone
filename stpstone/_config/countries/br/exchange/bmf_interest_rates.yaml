@@ -47,7 +47,7 @@ rates:
   #   - start with a commentary hash and separate params with &
   # for using source and bool_debug dummy variables, please pass #source=dummy_1&bool_debug=True within
   #   the app; example: application/name/#source=dummy_1&bool_debug=True
-  app: pages/portal/bmfbovespa/boletim1/TxRef1.asp?Data={{dt_ref_ddmmyyyy}}&Data1={{dt_ref_yyyymmdd}}&slcTaxa=TODOS
+  app: pages/portal/bmfbovespa/boletim1/TxRef1.asp?Data={{date_ref_ddmmyyyy}}&Data1={{date_ref_yyyymmdd}}&slcTaxa=TODOS
   bool_verify: False
   timeout: (12.0, 12.0)
   cookies:

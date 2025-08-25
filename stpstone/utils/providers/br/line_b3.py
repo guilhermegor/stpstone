@@ -932,8 +932,8 @@ class Professional(ConnectionApi):
     def professional_historic_position(
         self,
         professional_code: str,
-        dt_start: Union[datetime, date],
-        dt_end: Union[datetime, date],
+        date_start: Union[datetime, date],
+        date_end: Union[datetime, date],
         int_participant_perspective_type: int = 0,
         entity_type: int = 4,
     ) -> Union[list[dict[str, Any]], int]:
@@ -943,9 +943,9 @@ class Professional(ConnectionApi):
         ----------
         professional_code : str
             Professional identifier
-        dt_start : Union[datetime, date]
+        date_start : Union[datetime, date]
             Start date
-        dt_end : Union[datetime, date]
+        date_end : Union[datetime, date]
             End date
         int_participant_perspective_type : int, optional
             Participant perspective type, by default 0
@@ -967,8 +967,8 @@ class Professional(ConnectionApi):
             "ownerBrokerCode": int(self.broker_code),
             "ownerCategoryType": int(self.category_code),
             "partPerspecType": int_participant_perspective_type,
-            "registryDateEnd": dt_end.strftime("%Y-%m-%d"),
-            "registryDateStart": dt_start.strftime("%Y-%m-%d"),
+            "registryDateEnd": date_end.strftime("%Y-%m-%d"),
+            "registryDateStart": date_start.strftime("%Y-%m-%d"),
             "traderCode": professional_code,
         }
 
@@ -1161,8 +1161,8 @@ class SystemEventManagement(ConnectionApi):
 
     def report(
         self,
-        dt_start: Union[datetime, date],
-        dt_end: Union[datetime, date],
+        date_start: Union[datetime, date],
+        date_end: Union[datetime, date],
         str_start_time: str = "00:00",
         str_sup_time: str = "23:59",
         int_entity_type: int = 3,
@@ -1171,9 +1171,9 @@ class SystemEventManagement(ConnectionApi):
 
         Parameters
         ----------
-        dt_start : Union[datetime, date]
+        date_start : Union[datetime, date]
             Start date
-        dt_end : Union[datetime, date]
+        date_end : Union[datetime, date]
             End date
         str_start_time : str, optional
             Start time, by default "00:00"
@@ -1199,8 +1199,8 @@ class SystemEventManagement(ConnectionApi):
             "accountCode": "null",
             "startTime": str_start_time,
             "endTime": str_sup_time,
-            "startDate": dt_start.strftime("%d/%m/%Y"),
-            "endDate": dt_end.strftime("%d/%m/%Y"),
+            "startDate": date_start.strftime("%d/%m/%Y"),
+            "endDate": date_end.strftime("%d/%m/%Y"),
         }
         return self.app_request(
             method="POST",

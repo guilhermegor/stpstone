@@ -1,7 +1,7 @@
 from getpass import getuser
 
 from stpstone.ingestion.countries.br.registries.mais_retorno_instruments import MaisRetornoFunds
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 
 
 # ### --- AVAILABLE FUNDS --- ###

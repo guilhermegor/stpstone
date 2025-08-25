@@ -90,7 +90,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         self,
         float_position_value: Optional[float] = None,
         float_acquisition_basis: Optional[float] = None,
-        dt_ref: Optional[date] = None
+        date_ref: Optional[date] = None
     ) -> None:
         """Validate input types for tax calculation.
         
@@ -100,7 +100,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
             Position value to validate
         float_acquisition_basis : Optional[float]
             Acquisition basis to validate
-        dt_ref : Optional[date]
+        date_ref : Optional[date]
             Date to validate
             
         Raises
@@ -114,18 +114,18 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         if float_acquisition_basis is not None \
             and not isinstance(float_acquisition_basis, (float, int)):
             raise TypeError("Acquisition basis must be a float")
-        if dt_ref is not None and not isinstance(dt_ref, date):
+        if date_ref is not None and not isinstance(date_ref, date):
             raise TypeError("Date must be a date object")
         
     def is_tax_day(
         self, 
-        dt_ref: Optional[date] = None
+        date_ref: Optional[date] = None
     ) -> bool:
         """Check if a given date is a 'come-cotas' collection day.
         
         Parameters
         ----------
-        dt_ref : Optional[date]
+        date_ref : Optional[date]
             Date to check (defaults to current date)
             
         Returns
@@ -136,20 +136,20 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         if not self.fund_data["has_come_cotas"] or not self.fund_data["taxation_day"]:
             return False
 
-        # if dt_ref is falsy (None, 0, False, "", [], etc.), it uses date.today()
-        # only keeps dt_ref if it is truthy (e.g., a valid date, 1, True, "hello")
-        dt_ref = dt_ref or date.today()
+        # if date_ref is falsy (None, 0, False, "", [], etc.), it uses date.today()
+        # only keeps date_ref if it is truthy (e.g., a valid date, 1, True, "hello")
+        date_ref = date_ref or date.today()
         tax_days = self.fund_data["taxation_day"]
         
         # check both May and November tax days
-        return ((dt_ref.month == tax_days[0] and dt_ref.day == tax_days[1]) or
-                (len(tax_days) > 2 and dt_ref.month == tax_days[2] and dt_ref.day == tax_days[3]))
+        return ((date_ref.month == tax_days[0] and date_ref.day == tax_days[1]) or
+                (len(tax_days) > 2 and date_ref.month == tax_days[2] and date_ref.day == tax_days[3]))
     
     def calculate_tax(
         self,
         float_position_value: float,
         float_acquisition_basis: float,
-        dt_ref: Optional[date] = None
+        date_ref: Optional[date] = None
     ) -> float:
         """Calculate the 'come-cotas' tax amount.
         
@@ -159,7 +159,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
             Current value of the investment position
         float_acquisition_basis : float
             Original acquisition cost (for profit calculation)
-        dt_ref : Optional[date]
+        date_ref : Optional[date]
             Date for tax calculation (defaults to current date)
             
         Returns
@@ -178,7 +178,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         if float_position_value < float_acquisition_basis:
             raise ValueError("Position value cannot be less than acquisition cost")
             
-        if not self.is_tax_day(dt_ref):
+        if not self.is_tax_day(date_ref):
             return 0.0
             
         taxable_profit = float_position_value - float_acquisition_basis

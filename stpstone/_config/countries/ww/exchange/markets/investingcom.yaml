@@ -82,7 +82,7 @@ daily_ohlcv:
   #   - i (int): https://example.com/{{i}}
   #   - slug (str): https://example.com/{{slug}} - slugs in list format
   #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  app: 725910b675af9252224ca6069a1e73cc/1631836267/1/1/8/history?symbol={{ticker_id}}&resolution=D&from={{dt_start_unix_ts}}&to={{dt_end_unix_ts}}
+  app: 725910b675af9252224ca6069a1e73cc/1631836267/1/1/8/history?symbol={{ticker_id}}&resolution=D&from={{date_start_unix_ts}}&to={{date_end_unix_ts}}
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: lower_constant

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Dict, Session
 
 from stpstone._config.global_slots import YAML_B3_UP2DATA_VOLUMES_TRD
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.cals.cal_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -17,7 +17,7 @@ class ExchVolumesTrdBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        dt_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
         dict_headers:Optional[Dict[str, str]]=None,
         dict_payload:Optional[Dict[str, str]]=None,
         cls_db:Optional[Session]=None,
@@ -27,7 +27,7 @@ class ExchVolumesTrdBR(ABCRequests):
         super().__init__(
             dict_metadata=YAML_B3_UP2DATA_VOLUMES_TRD,
             session=session,
-            dt_ref=dt_ref,
+            date_ref=date_ref,
             dict_headers=dict_headers,
             dict_payload=dict_payload,
             cls_db=cls_db,

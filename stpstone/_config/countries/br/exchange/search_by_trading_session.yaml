@@ -108,7 +108,7 @@ up2data_b3:
   url_daily_trades: https://arquivos.b3.com.br/apinegocios/tickercsv/{}/
   bool_io_interpretin: False
   str_input_date_format: AAAA-MM-DD
-  col_dt_ref: DataReferencia
+  col_date_ref: DataReferencia
   col_instrument: CodigoInstrumento
   col_stock_update: AcaoAtualizacao
   col_pv: PrecoNegocio
@@ -148,7 +148,7 @@ standardized_instruments_groups:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=AI{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=AI{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -202,7 +202,7 @@ index_report:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=IR{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=IR{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -284,7 +284,7 @@ price_report:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=PR{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=PR{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -376,7 +376,7 @@ registration_indicator_instruments:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=II{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=II{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -465,7 +465,7 @@ fee_daily_unit_cost:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=DI{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=DI{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -531,7 +531,7 @@ fee_monthly_unit_cost:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=UN{{dt_start_month_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=UN{{date_start_month_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -595,7 +595,7 @@ primitive_risk_factors:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=FP{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=FP{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -662,7 +662,7 @@ risk_formulas:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=FR{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=FR{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -713,7 +713,7 @@ variable_fees_monthly_updt:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=VA{{dt_start_month_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=VA{{date_start_month_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -776,7 +776,7 @@ daily_liquidity_limit:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=LD{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=LD{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -837,7 +837,7 @@ daily_liquidity_limit_other_limits:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=LA{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=LA{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -894,7 +894,7 @@ tradable_security_list:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=SecurityList{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=SecurityList{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: pascal
@@ -1012,7 +1012,7 @@ mapping_otc_instrument_groups:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=MO{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=MO{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1079,7 +1079,7 @@ mapping_standardized_instrument_groups:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=MP{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=MP{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1146,7 +1146,7 @@ mtm_b3:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=MT{{dt_ref_yymmdd}}.zip#source=mtm_b3
+  app: pesquisapregao/download?filelist=MT{{date_ref_yymmdd}}.zip#source=mtm_b3
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1242,7 +1242,7 @@ option_theor_premiums:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=PE{{dt_ref_yymmdd}}.ex_
+  app: pesquisapregao/download?filelist=PE{{date_ref_yymmdd}}.ex_
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1306,7 +1306,7 @@ fx_markets_traded_rates:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=CT{{dt_ref_yymmdd}}.zip#file_extension=.fwf
+  app: pesquisapregao/download?filelist=CT{{date_ref_yymmdd}}.zip#file_extension=.fwf
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1417,7 +1417,7 @@ fx_market_volume_settled:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=CV{{dt_ref_yymmdd}}.zip#file_extension=.fwf
+  app: pesquisapregao/download?filelist=CV{{date_ref_yymmdd}}.zip#file_extension=.fwf
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1484,7 +1484,7 @@ list_isin_numbers_swaps:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=IS{{dt_ref_yymmdd}}.ex_
+  app: pesquisapregao/download?filelist=IS{{date_ref_yymmdd}}.ex_
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1546,7 +1546,7 @@ id_us_dollar_swap_mtm:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=MM{{dt_ref_yymmdd}}.ex_
+  app: pesquisapregao/download?filelist=MM{{date_ref_yymmdd}}.ex_
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1652,7 +1652,7 @@ swap_market_rates:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=TS{{dt_ref_yymmdd}}.ex_
+  app: pesquisapregao/download?filelist=TS{{date_ref_yymmdd}}.ex_
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1750,7 +1750,7 @@ brazillian_sovereign_bonds:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=PU{{dt_ref_yymmdd}}.ex_
+  app: pesquisapregao/download?filelist=PU{{date_ref_yymmdd}}.ex_
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
@@ -1814,7 +1814,7 @@ instrument_group_parameters:
   #   - int_pgs_join={{number}}
   #   - file_extension=.{{file_extension}}
   #   - start with a commentary hash and separate params with &
-  app: pesquisapregao/download?filelist=PG{{dt_ref_yymmdd}}.zip
+  app: pesquisapregao/download?filelist=PG{{date_ref_yymmdd}}.zip
   bool_verify: False
   timeout: (12.0, 12.0)
   cols_from_case: upper_constant
