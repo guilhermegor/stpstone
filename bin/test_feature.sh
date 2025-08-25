@@ -12,7 +12,7 @@ declare -a TYPECHECKER_CLASSES=(
     "TypeChecker"
     "ABCSession"
     "ABCDatabase"
-    "ABCCalendar"
+    "ABCCalendarOperations"
 )
 
 RED='\033[0;31m'
