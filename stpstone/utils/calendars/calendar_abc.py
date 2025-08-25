@@ -15,6 +15,7 @@ import businesstimedelta
 from dateutil.relativedelta import relativedelta
 
 from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
+from stpstone.utils.cache.persistent import PersistentCacheDecorator
 from stpstone.utils.cache.reset import auto_cache_reset_methods
 
 
@@ -28,6 +29,12 @@ TypeDatetimeDate = TypeVar("TypeDatetimeDate", Union[datetime, date])
 
 
 class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
+
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True
+    ) -> None:
+        self.bool_persist_cache = bool_persist_cache
 
     @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
@@ -43,6 +50,13 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         """Clear the cached holidays to reflect updates."""
         if hasattr(self, "_holidays_cache"):
             del self._holidays_cache
+        # __call__ implementation to persist cache, which will update the cache cleared
+        cache_decorator = PersistentCacheDecorator(
+            path_cache=f".stpstone_cache/{self.__class__.__name__.lower()}_holidays_cache.pkl",
+            cache_key="holidays", 
+            bool_persist_cache=self.bool_persist_cache
+        )
+        cache_decorator.clear_cache()
 
     def date_only(
         self, 
@@ -633,7 +647,9 @@ class ABCDateFormatter(ABCCalendarCore):
         return datetime.now(timezone.utc)
     
 
-@auto_cache_reset_methods(["holidays"], "cache_clear_method")
+@auto_cache_reset_methods([
+    "holidays", ["clear_holidays_cache"]
+])
 class ABCCalendarOperations(
     ABCTimezoneAware, 
     ABCRangeDatesDelta, 
