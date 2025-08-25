@@ -15,8 +15,8 @@ import businesstimedelta
 from dateutil.relativedelta import relativedelta
 
 from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
-from stpstone.utils.cache.persistent import PersistentCacheDecorator
-from stpstone.utils.cache.reset import auto_cache_reset_methods
+from stpstone.utils.cache.cache_persistent import PersistentCacheDecorator
+from stpstone.utils.cache.cache_reset import auto_cache_reset_methods
 
 
 TypeDateFormatInput = TypeVar(
