@@ -122,7 +122,7 @@ def test_validate_file_path_non_string(
     -------
     None
     """
-    with pytest.raises(TypeError, match="must be of type"):
+    with pytest.raises(TypeError, match="must be one of types"):
         pickle_files._validate_file_path(123)  # type: ignore
 
 

@@ -5,9 +5,10 @@ saving, and validating pickle files for security and integrity.
 """
 
 import os
+from pathlib import Path
 import pickle
 import pickletools
-from typing import Any
+from typing import Any, Union
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 
@@ -15,12 +16,12 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 class PickleFiles(metaclass=TypeChecker):
     """Class for handling pickle file operations."""
 
-    def _validate_file_path(self, file_path: str) -> None:
+    def _validate_file_path(self, file_path: Union[str, Path]) -> None:
         """Validate file path for pickle operations.
 
         Parameters
         ----------
-        file_path : str
+        file_path : Union[str, Path]
             Path to validate
 
         Raises
@@ -31,15 +32,15 @@ class PickleFiles(metaclass=TypeChecker):
         """
         if not file_path:
             raise ValueError("File path cannot be empty")
-        if not file_path.endswith(".pickle"):
+        if not (file_path.endswith(".pickle") or file_path.endswith(".pkl")):
             raise ValueError("File path must end with .pickle extension")
 
-    def is_safe_pickle(self, file_path: str) -> bool:
+    def is_safe_pickle(self, file_path: Union[str, Path]) -> bool:
         """Check if a pickle file contains only safe opcodes.
 
         Parameters
         ----------
-        file_path : str
+        file_path : Union[str, Path]
             Path to the pickle file to analyze
 
         Returns
@@ -96,7 +97,7 @@ class PickleFiles(metaclass=TypeChecker):
     def dump_message(
         self,
         message: dict[str, Any],
-        file_path: str,
+        file_path: Union[str, Path],
         pickle_protocol: int = pickle.HIGHEST_PROTOCOL,
         pickle_protocol_error: int = -1
     ) -> bool:
@@ -106,7 +107,7 @@ class PickleFiles(metaclass=TypeChecker):
         ----------
         message : dict[str, Any]
             Dictionary message to serialize
-        file_path : str
+        file_path : Union[str, Path]
             Complete file path with .pickle extension
         pickle_protocol : int
             Preferred pickle protocol (default: HIGHEST_PROTOCOL)
@@ -142,14 +143,14 @@ class PickleFiles(metaclass=TypeChecker):
 
     def load_message(
         self,
-        file_path: str,
+        file_path: Union[str, Path],
         bool_trusted_file: bool = False,
     ) -> Any: # noqa ANN401: typing.Any is not allowed
         """Load and deserialize a message from a pickle file.
 
         Parameters
         ----------
-        file_path : str
+        file_path : Union[str, Path]
             Complete file path with .pickle extension
         bool_trusted_file : bool
             Whether the pickle file is trusted (default: False)

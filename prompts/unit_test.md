@@ -79,6 +79,40 @@ def test_init_with_valid_inputs() -> None:
 - **Zero ruff violations**: Code must pass all ruff checks without warnings
 - **Fallback testing**: Include tests for fallback mechanisms and error recovery
 - **Reload logic**: Test module reloading scenarios when applicable
+- **Non Optional variables**: check if, for variables that haven not the Optional[...] type, a TypeError is raised, due to TypeChecker metaclass usage / type_checker decorator, with a text that matches with "must be of type"
+```python
+"""Example of unit test for empty variable, inappropriately declared."""
+
+import pytest
+
+def _validate_non_empty_string(data: str, param_name: str) -> None:
+    if type(data) is not str or data is None or len(data.strip()) == 0:
+        raise TypeError(f"{param_name} must be of type str")
+
+def _validate_non_zero_float(data: float, param_name: str) -> None:
+    if type(data) is not float or data is None or data == 0.0:
+        raise TypeError(f"{param_name} must be of type float")
+
+@pytest.mark.parametrize("data", [None, "", "  "])
+def test_validate_non_empty_string_invalid_data(data):
+    with pytest.raises(ValueError, match="must be of type"):
+        _validate_non_empty_string(data, "input_string")
+
+@pytest.mark.parametrize("param_name", ["input_string", "test_string", "data_string"])
+def test_validate_non_empty_string_invalid_param_name(param_name):
+    with pytest.raises(ValueError, match="must be of type"):
+        _validate_non_empty_string(None, param_name)
+
+@pytest.mark.parametrize("data", [None, 0.0])
+def test_validate_non_zero_float_invalid_data(data):
+    with pytest.raises(ValueError, match="must be of type"):
+        _validate_non_zero_float(data, "input_float")
+
+@pytest.mark.parametrize("param_name", ["input_float", "test_float", "data_float"])
+def test_validate_non_zero_float_invalid_param_name(param_name):
+    with pytest.raises(ValueError, match="must be of type"):
+        _validate_non_zero_float(None, param_name)
+```
 - **Variables sanity checks**: Tests for all variables validation checks within methods/functions, like values between 0 and 1, positive, negative, shapes of arrays and so on
 ```python
 """Example of unit tests for sanity checks.

@@ -26,6 +26,7 @@ import inspect
 from io import BufferedIOBase, BytesIO, RawIOBase
 from logging import Logger
 from numbers import Number
+from pathlib import Path
 from typing import (
     IO,
     Any,
@@ -216,6 +217,10 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
         return
     
     origin = get_origin(expected_type)
+
+    # allow pathlib.Path for parameters expecting str when they represent file paths
+    if expected_type is str and isinstance(value, Path) and param_name in ('file_path', 'path_cache'):
+        return
 
     # allow None or non-string types for specific parameters to be validated by 
     #   _validate_email_params
