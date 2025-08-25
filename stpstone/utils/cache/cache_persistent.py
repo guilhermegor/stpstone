@@ -10,7 +10,7 @@ from logging import Logger
 from pathlib import Path
 import pickle
 from threading import Lock
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -49,7 +49,7 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
 
     def __init__(
         self,
-        path_cache: str,
+        path_cache: Union[Path, str],
         cache_key: str,
         bool_persist_cache: bool = True,
         logger: Optional[Logger] = None,
@@ -73,6 +73,7 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
             If path_cache is empty or not a string
             If cache_key is empty or not a string
         """
+        self._validate_path_cache(path_cache)
         self._validate_cache_key(cache_key)
         self.path_cache = Path(path_cache).with_suffix(".pkl")
         self.cache_key = cache_key
@@ -96,6 +97,22 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
         """
         if not cache_key or cache_key.isspace():
             raise TypeError("cache_key must be a non-empty string")
+    
+    def _validate_path_cache(self, path_cache: Union[Path, str]) -> None:
+        """Validate the path to the cache file.
+
+        Parameters
+        ----------
+        path_cache : str
+            Path to the cache file to validate
+
+        Raises
+        ------
+        TypeError
+            If path_cache is empty or not a string
+        """
+        if not path_cache or not isinstance(path_cache, str):
+            raise TypeError("path_cache must be a non-empty string")
 
     def _load_cache(self) -> dict:
         """Load the cache from the file if it exists.
@@ -142,19 +159,21 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
         ValueError
             If cache cannot be saved due to pickle errors
         """
+        if not self.bool_persist_cache:
+            return False
         if not self.path_cache.parent.exists():
-            self.path_cache.parent.mkdir(parents=True)
-        if self.bool_persist_cache:
-            with self._lock:
-                try:
-                    return PickleFiles().dump_message(cache, self.path_cache)
-                except pickle.PickleError as err:
-                    CreateLog().log_message(
-                        self.logger,
-                        f"Warning: Failed to save cache to {self.path_cache}: {err}",
-                        "error",
-                    )
-                    raise ValueError(f"Failed to save cache to {self.path_cache}: {err}") from err
+            self.path_cache.parent.mkdir(parents=True, exist_ok=True)
+        with self._lock:
+            try:
+                success = PickleFiles().dump_message(cache, self.path_cache)
+                return success
+            except pickle.PickleError as err:
+                CreateLog().log_message(
+                    self.logger,
+                    f"Warning: Failed to save cache to {self.path_cache}: {err}",
+                    "error",
+                )
+                raise ValueError(f"Failed to save cache to {self.path_cache}: {err}") from err
 
     def clear_cache(self) -> None:
         """Clear the in-memory and file-based cache.
@@ -199,7 +218,7 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
             with self._lock:
                 if key in self.cache:
                     return self.cache[key]
-                result = method(args[0], *args[2:], **kwargs)
+                result = method(args[0], *args[1:], **kwargs)
                 self.cache[key] = result
                 if persist:
                     self._save_cache(self.cache)

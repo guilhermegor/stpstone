@@ -30,9 +30,10 @@ class PickleFiles(metaclass=TypeChecker):
             If file path is empty
             If file path does not end with .pickle
         """
-        if not file_path:
+        file_path_str = str(file_path)
+        if not file_path_str:
             raise ValueError("File path cannot be empty")
-        if not (file_path.endswith(".pickle") or file_path.endswith(".pkl")):
+        if not (file_path_str.endswith(".pickle") or file_path_str.endswith(".pkl")):
             raise ValueError("File path must end with .pickle extension")
 
     def is_safe_pickle(self, file_path: Union[str, Path]) -> bool:
@@ -182,7 +183,6 @@ class PickleFiles(metaclass=TypeChecker):
 
         try:
             with open(file_path, 'rb') as read_file:
-                # noqa S301: potentially unsafe when deserializing untrusted data, mitigated by is_safe_pickle method
-                return pickle.load(read_file)  # noqa S301
+                return pickle.load(read_file) # noqa S301: potentially unsafe when deserializing untrusted data, mitigated by is_safe_pickle method
         except Exception as err:
             raise ValueError(f"Failed to load pickle file: {str(err)}") from err
