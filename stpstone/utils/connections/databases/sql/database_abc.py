@@ -5,7 +5,7 @@ including connection management, query execution, and data insertion. It support
 both regular instances and singleton patterns for database connections.
 """
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from logging import Logger
 from typing import Any, Literal, Optional, Union
 
@@ -20,7 +20,7 @@ from stpstone.transformations.validation.metaclass_type_checker import (
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class ABCDatabase(ABCTypeCheckerMeta):
+class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
     """Abstract base class for database connections.
     
     Enforces:

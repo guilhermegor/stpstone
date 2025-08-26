@@ -455,19 +455,25 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
             class_bases[n.name] = [ast.unparse(base) for base in n.bases]
             class_nodes[n.name] = n
 
-    # check if classes inherit from TYPECHECKER_CLASSES
+    # check if classes inherit from TYPECHECKER_CLASSES or are in TYPECHECKER_CLASSES
     has_typechecker_inheritance = False
     for class_name, bases in class_bases.items():
-        inherited_typechecker = any(
-            base in TYPECHECKER_CLASSES or
-            any(tc in base for tc in TYPECHECKER_CLASSES)
-            for base in bases
-        )
-        if inherited_typechecker:
-            print(f"ℹ️  Class {class_name} inherits from TypeChecker class: {', '.join(b for b in bases if b in TYPECHECKER_CLASSES or any(tc in b for tc in TYPECHECKER_CLASSES))}")
+        # Check if the class itself is in TYPECHECKER_CLASSES
+        if class_name in TYPECHECKER_CLASSES:
+            print(f"ℹ️  Class {class_name} is a TypeChecker class")
             has_typechecker_inheritance = True
+        # Check if the class inherits from TYPECHECKER_CLASSES
         else:
-            print(f"ℹ️  Class {class_name} does not inherit from any TypeChecker classes")
+            inherited_typechecker = any(
+                base in TYPECHECKER_CLASSES or
+                any(tc in base for tc in TYPECHECKER_CLASSES)
+                for base in bases
+            )
+            if inherited_typechecker:
+                print(f"ℹ️  Class {class_name} inherits from TypeChecker class: {', '.join(b for b in bases if b in TYPECHECKER_CLASSES or any(tc in b for tc in TYPECHECKER_CLASSES))}")
+                has_typechecker_inheritance = True
+            else:
+                print(f"ℹ️  Class {class_name} does not inherit from any TypeChecker classes")
 
     # check for TypeChecker import
     has_type_checker_import = False
