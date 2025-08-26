@@ -13,7 +13,7 @@ from typing import Literal
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
@@ -276,9 +276,9 @@ class DealingPd(metaclass=TypeChecker):
                         ano = int(row[col_date].split(" ")[0].split("-")[0])
                         mes = int(row[col_date].split(" ")[0].split("-")[1])
                         dia = int(row[col_date].split(" ")[0].split("-")[2])
-                        df_.loc[index, col_date] = DatesBR().build_date(ano, mes, dia)
+                        df_.loc[index, col_date] = DatesBRAnbima().build_date(ano, mes, dia)
                     else:
-                        df_.loc[index, col_date] = DatesBR().excel_float_to_date(
+                        df_.loc[index, col_date] = DatesBRAnbima().excel_float_to_date(
                             int(row[col_date]))
         return df_
 

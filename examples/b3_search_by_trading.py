@@ -5,7 +5,7 @@ import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.br.exchange.search_by_trading_session import SearchByTradingB3
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -19,7 +19,7 @@ from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager imp
 
 cls_ = SearchByTradingB3(
     session=None,
-    date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+    date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
     cls_db=None
 )
 

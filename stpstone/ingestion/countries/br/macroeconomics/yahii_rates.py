@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_YAHII_RATES
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.html import HtmlHandler
@@ -27,7 +27,7 @@ class YahiiRatesBRMacro(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -120,7 +120,7 @@ class YahiiRatesBRMacro(ABCRequests):
             list_td_months = ListHandler().remove_duplicates(list_td_months)
         list_td_years = ListHandler().remove_duplicates(list_td_years)
         list_td_years = [x for x in list_td_years \
-                            if x <= DatesBR().year_number(DatesBR().curr_date()) + 1 \
+                            if x <= DatesBRAnbima().year_number(DatesBRAnbima().curr_date()) + 1 \
                             and x >= YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source][
                                 "int_year_min"]]
         list_td_months = [x for x in list_td_months if "ACUMULADONO" not in x]
@@ -130,7 +130,7 @@ class YahiiRatesBRMacro(ABCRequests):
         # print(f"list_td_values: {[(i, x) for i, x in enumerate(list_td_values)]}")
         # populating list_ser with year, month and values
         for i_y, int_year in enumerate(list_td_years):
-            if DatesBR().year_number(DatesBR().curr_date()) < int_year: break
+            if DatesBRAnbima().year_number(DatesBRAnbima().curr_date()) < int_year: break
             i_m = 0
             if ("int_year_min" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \
                 and ("int_cols_tbl" in YAML_YAHII_RATES["pmi_rf_rates"]["dict_fw_td_th"][source]) \

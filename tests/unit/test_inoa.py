@@ -44,14 +44,14 @@ def valid_alpha_tools_params() -> dict[str, Any]:
 
 @pytest.fixture
 def mock_dates_br() -> MagicMock:
-    """Fixture providing mocked DatesBR class.
+    """Fixture providing mocked DatesBRAnbima class.
 
     Returns
     -------
     MagicMock
-        Mocked DatesBR class
+        Mocked DatesBRAnbima class
     """
-    with patch("stpstone.utils.calendars.handling_dates.DatesBR") as mock:
+    with patch("stpstone.utils.calendars.handling_dates.DatesBRAnbima") as mock:
         mock_instance = mock.return_value
         mock_instance.str_date_to_datetime.return_value = datetime(2023, 1, 1)
         yield mock_instance
@@ -439,7 +439,7 @@ class TestQuotes:
         mock_response : MagicMock
             Mocked response object
         mock_dates_br : MagicMock
-            Mocked DatesBR instance
+            Mocked DatesBRAnbima instance
 
         Verifies
         --------
@@ -454,7 +454,7 @@ class TestQuotes:
         mock_response : MagicMock
             Mocked response object
         mock_dates_br : MagicMock
-            Mocked DatesBR instance
+            Mocked DatesBRAnbima instance
 
         Returns
         -------

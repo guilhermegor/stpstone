@@ -7,7 +7,7 @@ handling.
 from typing import Any
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 class AirflowPlugins(metaclass=TypeChecker):
@@ -51,7 +51,7 @@ class AirflowPlugins(metaclass=TypeChecker):
         try:
             self._validate_ds(kwargs['ds'])
             ti = kwargs['ti']
-            bool_working_day = DatesBR().is_working_day(kwargs['ds'])
+            bool_working_day = DatesBRAnbima().is_working_day(kwargs['ds'])
             ti.xcom_push(key='bool_continue', value=bool_working_day)
         except KeyError as err:
             raise KeyError(f"Missing required key in context: {str(err)}") from err

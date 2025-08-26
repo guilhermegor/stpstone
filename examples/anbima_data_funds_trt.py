@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_FUNDS
 from stpstone.ingestion.countries.br.registries.anbima_data_funds import FundsConsolidated
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.clouds.minio import MinioClient
 from stpstone.utils.parsers.folders import DirFilesManagement
 
@@ -25,13 +25,13 @@ df_ = cls_funds_cons.funds_infos_ts
 print(f"DF FUNDS CONSOLIDATED - ANBIMA DATA: n{df_}")
 path_orig_csv = "data/anbima-data-funds-trt_{}_{}_{}.csv".format(
     getuser(),
-    DatesBR().curr_date().strftime('%Y%m%d'),
-    DatesBR().curr_time().strftime('%H%M%S')
+    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+    DatesBRAnbima().curr_time().strftime('%H%M%S')
 )
 path_destination_csv = r"C:\Users\guiro\OneDrive\Workspace\BASES\anbima-data-funds-trt_{}_{}_{}.csv".format(
     getuser(),
-    DatesBR().curr_date().strftime('%Y%m%d'),
-    DatesBR().curr_time().strftime('%H%M%S')
+    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+    DatesBRAnbima().curr_time().strftime('%H%M%S')
 )
 df_.to_csv(
     path_orig_csv,

@@ -6,7 +6,7 @@ import sys
 # local libs
 sys.path.append(os.path.abspath(os.path.join(os.path.realpath(__file__), "..", "..")))
 from stpstone.ingestion.countries.br.registries.cvm import CVMRegistries
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.folders import DirFilesManagement
 
@@ -40,7 +40,7 @@ cls_ = CVMRegistries(session=None, cls_db=None)
 # df_.info()
 # df_.to_excel(
 #     rf'{DirFilesManagement().find_project_root()}\data\cvm-securities-consultants_'
-#     + rf'{DatesBR().curr_date().strftime('%Y%m%d')}_{DatesBR().curr_time().strftime('%H%M%S')}.xlsx',
+#     + rf'{DatesBRAnbima().curr_date().strftime('%Y%m%d')}_{DatesBRAnbima().curr_time().strftime('%H%M%S')}.xlsx',
 #     index=False
 # )
 

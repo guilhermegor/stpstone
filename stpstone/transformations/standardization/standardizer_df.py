@@ -14,7 +14,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
@@ -345,9 +345,9 @@ class DFStandardization(metaclass=TypeChecker):
                 str_fmt_dt = YAML_GEN["audit_log_cols"]["str_fmt_dt"]
             df_[col_] = [
                 (
-                    DatesBR().str_date_to_datetime(d, str_fmt_dt)
+                    DatesBRAnbima().str_date_to_datetime(d, str_fmt_dt)
                     if str_fmt_dt != "unix_ts"
-                    else DatesBR().unix_timestamp_to_date(d, str_tz=self.str_tz)
+                    else DatesBRAnbima().unix_timestamp_to_date(d, str_tz=self.str_tz)
                 )
                 for d in df_[col_]
             ]

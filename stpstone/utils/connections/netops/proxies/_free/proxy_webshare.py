@@ -9,7 +9,7 @@ from typing import Optional
 
 from requests import request
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.proxies_abc import (
     ABCSession,
     ReturnAvailableProxies,
@@ -98,7 +98,7 @@ class ProxyWebShare(ABCSession):
             "https://proxy.webshare.io/api/v2/proxy/list/"
             "?mode=direct&page=1&page_size=10&plan_id={}"
         )
-        self.dates_br = DatesBR()
+        self.dates_br = DatesBRAnbima()
         self.ww_timezones = WWTimezones()
         self.ww_geography = WWGeography()
 

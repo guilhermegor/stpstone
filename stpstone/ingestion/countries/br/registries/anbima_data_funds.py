@@ -9,7 +9,7 @@ from stpstone.ingestion.abc.anbima_data_ws import (
     AnbimaDataFetcher,
     AnbimaDataTrt,
 )
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.str import StrHandler
 

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_MAIS_RETORNO_FUNDS
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.colors import ColorIdentifier
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -24,7 +24,7 @@ class MaisRetornoFunds(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -321,7 +321,7 @@ class MaisRetornoFunds(ABCRequests):
                     if hex_pension_fund is not None else False,
                 "CNPJ": p_cnpj_fund.get("text", None),
                 "BENCHMARK": p_benchmark.get("text", None),
-                "FUND_INITIAL_DATE": DatesBR().str_date_to_datetime(
+                "FUND_INITIAL_DATE": DatesBRAnbima().str_date_to_datetime(
                     p_fund_initial_date.get("text", None), "DD/MM/YYYY"),
                 "FUND_TYPE": p_fund_type.get("text", None),
                 "ADMINISTRATOR": a_fund_administrator.get("text", None),

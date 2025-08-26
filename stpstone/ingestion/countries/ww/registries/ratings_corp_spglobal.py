@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_WW_RATINGS_CORP_S_AND_P
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
@@ -21,7 +21,7 @@ class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
         self,
         bearer: str,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -76,7 +76,7 @@ class RatingsCorpSPGlobalProduct:
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

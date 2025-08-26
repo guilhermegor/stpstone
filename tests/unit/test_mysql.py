@@ -15,7 +15,7 @@ import pymysql
 import pytest
 from pytest_mock import MockerFixture
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.connections.databases.sql.mysql import MySQLDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -58,14 +58,14 @@ def mock_logger() -> MagicMock:
 
 @pytest.fixture
 def mock_dates_br() -> MagicMock:
-    """Fixture providing a mock DatesBR instance.
+    """Fixture providing a mock DatesBRAnbima instance.
 
     Returns
     -------
     MagicMock
-        Mocked DatesBR instance
+        Mocked DatesBRAnbima instance
     """
-    mock_dates = MagicMock(spec=DatesBR)
+    mock_dates = MagicMock(spec=DatesBRAnbima)
     mock_dates.str_date_to_datetime.return_value = "2023-01-01 00:00:00"
     return mock_dates
 
@@ -558,7 +558,7 @@ class TestReadMethod:
 
         Verifies
         --------
-        - DatesBR.str_date_to_datetime is called for date columns
+        - DatesBRAnbima.str_date_to_datetime is called for date columns
         - Both list_cols_dt and str_fmt_dt must be provided together
 
         Parameters
@@ -574,10 +574,10 @@ class TestReadMethod:
         mysql_database.cursor.fetchall.return_value = test_data
         mysql_database.cursor.description = [("date_col",)]
         
-        _ = "DatesBR.str_date_to_datetime"
-        with (patch.object(DatesBR, "__init__", return_value=None), 
+        _ = "DatesBRAnbima.str_date_to_datetime"
+        with (patch.object(DatesBRAnbima, "__init__", return_value=None), 
               patch.object(
-                  DatesBR, 
+                  DatesBRAnbima, 
                   "str_date_to_datetime", 
                   return_value="2023-01-01 00:00:00"
               ) as mock_date_convert):

@@ -13,7 +13,7 @@ import pandas as pd
 
 from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 class DBLogs(metaclass=TypeChecker):
@@ -83,7 +83,7 @@ class DBLogs(metaclass=TypeChecker):
         
         df_[YAML_GEN["audit_log_cols"]["url"]] = url
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
-        log_ts = DatesBR().utc_log_ts()
+        log_ts = DatesBRAnbima().utc_log_ts()
         df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = (
             log_ts.strftime("%Y-%m-%d %H:%M:%S.%f%z") if ts_log_str else log_ts
         )

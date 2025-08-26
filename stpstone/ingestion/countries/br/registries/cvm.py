@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_BR_CVM_REGISTRIES
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -18,7 +18,7 @@ class CVMRegistries(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -40,8 +40,8 @@ class CVMRegistries(ABCRequests):
         self.token = token
         self.list_slugs = list_slugs
         self.month_ref = self.date_ref.strftime("%Y%m")
-        self.month_ref = DatesBR().add_months(self.date_ref, -1).strftime("%Y%m")
-        self.year_ref = DatesBR().year_number(self.date_ref)
+        self.month_ref = DatesBRAnbima().add_months(self.date_ref, -1).strftime("%Y%m")
+        self.year_ref = DatesBRAnbima().year_number(self.date_ref)
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

@@ -20,7 +20,7 @@ import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.databases.sql.sqlite import SQLiteDB
 from stpstone.utils.parsers.json import JsonFiles
 
@@ -454,7 +454,7 @@ def test_read_with_date_conversion(
     Verifies
     --------
     - Applies date conversions correctly
-    - Calls DatesBR.str_date_to_datetime for date columns
+    - Calls DatesBRAnbima.str_date_to_datetime for date columns
 
     Parameters
     ----------
@@ -467,7 +467,7 @@ def test_read_with_date_conversion(
     -------
     None
     """
-    mocker.patch.object(DatesBR, "str_date_to_datetime", return_value=pd.Timestamp("2023-01-01"))
+    mocker.patch.object(DatesBRAnbima, "str_date_to_datetime", return_value=pd.Timestamp("2023-01-01"))
     sqlite_db.execute("CREATE TABLE dates (id INTEGER, date TEXT)")
     sqlite_db.insert([{"id": 1, "date": "2023-01-01"}], "dates")
     df_ = sqlite_db.read("SELECT * FROM dates", list_cols_dt=["date"], str_fmt_dt="%Y-%m-%d")

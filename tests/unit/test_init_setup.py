@@ -55,7 +55,7 @@ def mock_create_log(mocker: MockerFixture) -> object:
 
 @pytest.fixture
 def mock_dates_br(mocker: MockerFixture) -> object:
-    """Fixture mocking DatesBR class methods.
+    """Fixture mocking DatesBRAnbima class methods.
 
     Parameters
     ----------
@@ -65,9 +65,9 @@ def mock_dates_br(mocker: MockerFixture) -> object:
     Returns
     -------
     object
-        Mocked DatesBR instance
+        Mocked DatesBRAnbima instance
     """
-    mock = mocker.patch("stpstone.utils.loggs.init_setup.DatesBR")
+    mock = mocker.patch("stpstone.utils.loggs.init_setup.DatesBRAnbima")
     mock.return_value.curr_datetime.return_value = "2025-08-13 11:43:11"
     return mock
 
@@ -167,7 +167,7 @@ def test_initiate_logging_no_path(
     mock_create_log : object
         Mocked CreateLog instance
     mock_dates_br : object
-        Mocked DatesBR instance
+        Mocked DatesBRAnbima instance
     mock_getuser : object
         Mocked getuser function
     mocker : MockerFixture
@@ -206,7 +206,7 @@ def test_initiate_logging_valid_path_success(
     mock_create_log : object
         Mocked CreateLog instance
     mock_dates_br : object
-        Mocked DatesBR instance
+        Mocked DatesBRAnbima instance
     mock_getuser : object
         Mocked getuser function
     mocker : MockerFixture
@@ -249,7 +249,7 @@ def test_initiate_logging_valid_path_failure(
     mock_create_log : object
         Mocked CreateLog instance
     mock_dates_br : object
-        Mocked DatesBR instance
+        Mocked DatesBRAnbima instance
     mock_getuser : object
         Mocked getuser function
     mocker : MockerFixture
@@ -374,7 +374,7 @@ def test_initiate_logging_special_characters_path(
     mock_create_log : object
         Mocked CreateLog instance
     mock_dates_br : object
-        Mocked DatesBR instance
+        Mocked DatesBRAnbima instance
     mock_getuser : object
         Mocked getuser function
     mocker : MockerFixture

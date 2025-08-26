@@ -13,7 +13,7 @@ import pandas as pd
 from requests import exceptions, request
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 class ReturnGenericReq(TypedDict):
@@ -70,7 +70,7 @@ class AlphaTools(metaclass=TypeChecker):
         self.date_start = date_start
         self.date_end = date_end
         self.str_fmt_date_output = str_fmt_date_output
-        self.cls_dates_br = DatesBR()
+        self.cls_dates_br = DatesBRAnbima()
 
     def _validate_string_params(
         self,

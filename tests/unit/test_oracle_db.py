@@ -314,7 +314,7 @@ def test_read_with_date_conversion(
     -------
     None
     """
-    mock_dates = mocker.patch("stpstone.utils.calendars.handling_dates.DatesBR.str_date_to_datetime")
+    mock_dates = mocker.patch("stpstone.utils.calendars.handling_dates.DatesBRAnbima.str_date_to_datetime")
     mock_dates.return_value = pd.Timestamp("2023-01-01")
     db = OracleDB(**valid_db_params)
     query = "SELECT * FROM test_table"

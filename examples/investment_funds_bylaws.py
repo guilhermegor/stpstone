@@ -6,7 +6,7 @@ from typing import List
 import pandas as pd
 
 from stpstone.ingestion.countries.br.bylaws.investment_funds import InvestmentFundsBylawsBR
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.lists import ListHandler
 
@@ -40,8 +40,8 @@ df_slugs_consulted.info()
 if df_slugs_consulted.empty == False: df_slugs_consulted.to_excel(
     "data/consolidated-consulted-investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
         getuser(),
-        DatesBR().curr_date().strftime('%Y%m%d'),
-        DatesBR().curr_time().strftime('%H%M%S')
+        DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+        DatesBRAnbima().curr_time().strftime('%H%M%S')
     ), index=False)
 
 df_ = pd.read_excel("data/input-funds-regex-bylaws.xlsx")
@@ -58,7 +58,7 @@ shuffle(list_slugs)
 list_chunks = ListHandler().chunk_list(list_slugs, None, int_chunk)
 
 for i, list_ in enumerate(list_chunks):
-    print(f"{DatesBR().current_timestamp_string()} - Processing chunk {i} of {len(list_chunks) - 1}")
+    print(f"{DatesBRAnbima().current_timestamp_string()} - Processing chunk {i} of {len(list_chunks) - 1}")
     cls_ = InvestmentFundsBylawsBR(list_slugs=list_)
     df_ = cls_.source("investment_funds_bylaws", bool_fetch=True)
     print(f"DF TEMPORARY: \n{df_}")
@@ -68,8 +68,8 @@ for i, list_ in enumerate(list_chunks):
     # save with openpyxl engine which is more tolerant
     output_path = "data/investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
         getuser(),
-        DatesBR().curr_date().strftime('%Y%m%d'),
-        DatesBR().curr_time().strftime('%H%M%S'))
+        DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+        DatesBRAnbima().curr_time().strftime('%H%M%S'))
     df_.to_excel(output_path, engine='openpyxl', index=False)
     list_ser.extend(df_.to_dict(orient="records"))
     sleep(60)
@@ -78,6 +78,6 @@ df_ = pd.DataFrame(list_ser)
 df_ = pd.concat([df_slugs_consulted, df_], ignore_index=True)
 df_.to_csv("data/consolidated-investment-funds-bylaws-infos_{}_{}_{}.csv".format(
     getuser(),
-    DatesBR().curr_date().strftime('%Y%m%d'),
-    DatesBR().curr_time().strftime('%H%M%S')
+    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+    DatesBRAnbima().curr_time().strftime('%H%M%S')
 ), index=False)

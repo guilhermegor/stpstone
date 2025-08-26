@@ -13,7 +13,7 @@ from stpstone.analytics.pricing.derivatives.futures_b3 import (
     NotionalFromRt,
     RtFromPV,
 )
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.lists import ListHandler
 
 
@@ -21,9 +21,9 @@ from stpstone.utils.parsers.lists import ListHandler
 # common Fixtures
 # --------------------------
 @pytest.fixture
-def dates_br_instance() -> DatesBR:
-    """Fixture providing a DatesBR instance."""
-    return DatesBR()
+def dates_br_instance() -> DatesBRAnbima:
+    """Fixture providing a DatesBRAnbima instance."""
+    return DatesBRAnbima()
 
 @pytest.fixture
 def current_date() -> datetime:
@@ -118,7 +118,7 @@ def mock_financial_math(mocker: MockerFixture) -> None:
 
 @pytest.fixture
 def mock_dates_br_methods(mocker: MockerFixture, current_date: datetime) -> None:
-    """Mock DatesBR methods.
+    """Mock DatesBRAnbima methods.
     
     Parameters
     ----------
@@ -127,10 +127,10 @@ def mock_dates_br_methods(mocker: MockerFixture, current_date: datetime) -> None
     current_date : datetime
         Current date
     """
-    mocker.patch.object(DatesBR, "curr_date", return_value=current_date)
-    mocker.patch.object(DatesBR, "sub_working_days", return_value=current_date)
-    mocker.patch.object(DatesBR, "delta_working_days", return_value=90)
-    mocker.patch.object(DatesBR, "delta_calendar_days", return_value=90)
+    mocker.patch.object(DatesBRAnbima, "curr_date", return_value=current_date)
+    mocker.patch.object(DatesBRAnbima, "sub_working_days", return_value=current_date)
+    mocker.patch.object(DatesBRAnbima, "delta_working_days", return_value=90)
+    mocker.patch.object(DatesBRAnbima, "delta_calendar_days", return_value=90)
 
 
 # --------------------------

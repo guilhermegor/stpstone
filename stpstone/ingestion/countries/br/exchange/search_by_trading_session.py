@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_B3_SEARCH_BY_TRADING_SESSION
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.html import HtmlHandler
@@ -24,7 +24,7 @@ class SearchByTradingB3(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -46,7 +46,7 @@ class SearchByTradingB3(ABCRequests):
         self.token = token,
         self.list_slugs = list_slugs
         self.date_ref_yymmdd = self.date_ref.strftime("%y%m%d")
-        self.date_start_month = DatesBR().month_openning_closing_dates(self.date_ref)[0]
+        self.date_start_month = DatesBRAnbima().month_openning_closing_dates(self.date_ref)[0]
         self.date_start_month_yymmdd = self.date_start_month.strftime("%y%m%d")
 
     def instruments_register_raw(
@@ -61,7 +61,7 @@ class SearchByTradingB3(ABCRequests):
         """
         # api consulta lotes padrão xp
         url_token = "https://arquivos.b3.com.br/api/download/requestname?fileName=InstrumentsConsolidated&date={}".format(
-            DatesBR().curr_date())
+            DatesBRAnbima().curr_date())
         url_lotes_padrao_b3 = "https://arquivos.b3.com.br/api/download/?token={}"
         # coletando token para consulta da API da B3
         token_api_b3 = \

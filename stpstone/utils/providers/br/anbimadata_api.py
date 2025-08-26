@@ -17,7 +17,7 @@ from requests import exceptions, request
 
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_API
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.lists import ListHandler
@@ -341,14 +341,14 @@ class AnbimaDataFunds(AnbimaDataGen):
         for col in list_date_cols:
             df_funds = df_funds[col].fillna(YAML_ANBIMA_DATA_API["str_dt_fill_na"])
             df_funds[col] = [
-                DatesBR().str_date_to_datetime(d, YAML_ANBIMA_DATA_API["str_dt_format"])
+                DatesBRAnbima().str_date_to_datetime(d, YAML_ANBIMA_DATA_API["str_dt_format"])
                 for d in df_funds[col]
             ]
 
         for col in list_ts_cols:
             df_funds = df_funds[col].fillna(YAML_ANBIMA_DATA_API["str_ts_fill_na"])
             df_funds[col] = [
-                DatesBR().timestamp_to_date(d, format=YAML_ANBIMA_DATA_API["str_dt_format"])
+                DatesBRAnbima().timestamp_to_date(d, format=YAML_ANBIMA_DATA_API["str_dt_format"])
                 for d in df_funds[col]
             ]
 
@@ -469,7 +469,7 @@ class AnbimaDataFunds(AnbimaDataGen):
             if StrHandler().match_string_like(col, "*data_*") and len(col) == 10:
                 df_ = df_[col].fillna(YAML_ANBIMA_DATA_API["str_dt_fill_na"])
                 df_[col] = [
-                    DatesBR().str_date_to_datetime(
+                    DatesBRAnbima().str_date_to_datetime(
                         d, YAML_ANBIMA_DATA_API["str_dt_format"]
                     )
                     for d in df_[col]
@@ -481,7 +481,7 @@ class AnbimaDataFunds(AnbimaDataGen):
             ):
                 df_ = df_[col].fillna(YAML_ANBIMA_DATA_API["str_ts_fill_na"])
                 df_[col] = [
-                    DatesBR().timestamp_to_date(
+                    DatesBRAnbima().timestamp_to_date(
                         d, format=YAML_ANBIMA_DATA_API["str_dt_format"]
                     )
                     for d in df_[col]

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_YAHII_OHTERS
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -24,7 +24,7 @@ class YahiiOthersBR(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -69,8 +69,8 @@ class YahiiOthersBR(ABCRequests):
             )
             df_ = pd.DataFrame(list_ser)
             df_ = df_[df_["DATA"] != "REVOGADA"]
-            df_["DATA"] = [DatesBR().str_date_to_datetime(d, "DD.MM.YY") for d in df_["DATA"]]
-            df_ = df_[(df_["DATA"] >= DatesBR().build_date(2000, 1, 1)) & (df_["DATA"] <= self.date_ref)]
+            df_["DATA"] = [DatesBRAnbima().str_date_to_datetime(d, "DD.MM.YY") for d in df_["DATA"]]
+            df_ = df_[(df_["DATA"] >= DatesBRAnbima().build_date(2000, 1, 1)) & (df_["DATA"] <= self.date_ref)]
         elif source == "inss_contribution":
             list_td = [
                 x.replace("\r\n                 ", "").strip().replace("%", "")\

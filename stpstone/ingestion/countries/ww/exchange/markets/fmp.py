@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_WW_FMP
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -18,7 +18,7 @@ class FMPWW(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,

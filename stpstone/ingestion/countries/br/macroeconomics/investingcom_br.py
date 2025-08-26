@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_INVESTINGCOM_BR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 class InvestingComBR(ABCRequests):
@@ -17,7 +17,7 @@ class InvestingComBR(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -43,7 +43,7 @@ class InvestingComBR(ABCRequests):
         int_convert_miliseconds_seconds = 1000
         json_ = [
             {
-                "DATETIME": DatesBR().unix_timestamp_to_datetime(
+                "DATETIME": DatesBRAnbima().unix_timestamp_to_datetime(
                     int(int(dict_['timestamp']) / int_convert_miliseconds_seconds)),
                 "ACTUAL_STATE": str(dict_['actual_state']),
                 "ACTUAL": float(dict_['actual']),

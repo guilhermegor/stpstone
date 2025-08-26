@@ -5,7 +5,7 @@ import os
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.markets.investingcom import InvestingCom
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 
@@ -19,8 +19,8 @@ print(session.proxies)
 
 cls_investingcom = InvestingCom(
     session=session,
-    date_start=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
-    date_end=DatesBR().sub_working_days(DatesBR().curr_date(), 0),
+    date_start=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 5),
+    date_end=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 0),
     str_ticker='PETR4'
 )
 df_ = cls_investingcom.source('daily_ohlcv', bool_fetch=True)

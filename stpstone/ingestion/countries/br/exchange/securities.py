@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_B3_UP2DATA_REGISTRIES
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
@@ -18,7 +18,7 @@ class ExchRegBR(ABCRequests):
 
     def __init__(
         self,
-        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         session: Optional[Session] = None,
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None

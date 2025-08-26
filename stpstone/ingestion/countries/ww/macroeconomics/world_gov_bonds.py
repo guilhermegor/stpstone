@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_WW_RATINGS_AGENCIES, YAML_WW_WORLD_GOV_BONDS
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.numbers import NumHandler
@@ -21,7 +21,7 @@ class WorldGovBonds(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

@@ -1,14 +1,14 @@
 import pandas as pd
 
 from stpstone.ingestion.countries.br.macroeconomics.yahii_others import YahiiOthersBR
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 pd.set_option("display.max_rows", None)
 
 cls_ = YahiiOthersBR(
     session=None,
-    date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 300),
+    date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 300),
     cls_db=None
 )
 

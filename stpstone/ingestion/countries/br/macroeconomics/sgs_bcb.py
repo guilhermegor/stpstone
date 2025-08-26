@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_SGS_BCB
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 class SGSBCB(ABCRequests):
@@ -17,9 +17,9 @@ class SGSBCB(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_start: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 60),
-        date_end: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_start: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 60),
+        date_end: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

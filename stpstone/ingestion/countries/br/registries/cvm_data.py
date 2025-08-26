@@ -6,7 +6,7 @@ from typing import Any, Dict
 import numpy as np
 import pandas as pd
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
@@ -119,7 +119,7 @@ class CVMDATA:
         })
         for col_dt in list_cols_dts:
             df_funds_register[col_dt] = [
-                DatesBR().str_date_to_datetime(d, self.str_format_dt_input)
+                DatesBRAnbima().str_date_to_datetime(d, self.str_format_dt_input)
                 for d in df_funds_register[col_dt]
             ]
         # return the dataframe
@@ -182,7 +182,7 @@ class CVMDATA:
         df_ = df_.astype(dict_cols_types)
         for col_dt in list_cols_dts:
             df_[col_dt] = [
-                DatesBR().str_date_to_datetime(d, self.str_format_dt_input)
+                DatesBRAnbima().str_date_to_datetime(d, self.str_format_dt_input)
                 for d in df_[col_dt]
             ]
         # return the dataframe

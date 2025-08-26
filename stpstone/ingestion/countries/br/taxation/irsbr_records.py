@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_IRSBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 class IRSBR(ABCRequests):
@@ -16,7 +16,7 @@ class IRSBR(ABCRequests):
         self,
         session: Optional[Session] = None,
         int_delay_seconds: int = 20,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,
@@ -54,8 +54,8 @@ class IRSBR(ABCRequests):
         self.token = token
         self.list_slugs = list_slugs
         self.int_delay_seconds = int_delay_seconds
-        self.year_date_ref = DatesBR().year_number(self.date_ref)
-        self.month_date_ref = DatesBR().month_number(self.date_ref, bl_month_mm=True)
+        self.year_date_ref = DatesBRAnbima().year_number(self.date_ref)
+        self.month_date_ref = DatesBRAnbima().month_number(self.date_ref, bl_month_mm=True)
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

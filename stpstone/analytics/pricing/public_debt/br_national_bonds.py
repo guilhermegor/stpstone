@@ -3,7 +3,7 @@
 from datetime import date
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.numbers import NumHandler
 
 
@@ -176,9 +176,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
             return 0.0
         
         # adjust for business days
-        date_ref = DatesBR().nearest_working_day(date_ref, bool_next=False)
-        delta_ref = DatesBR().delta_calendar_days(date_ref, dt_ipca_last)
-        delta_total = DatesBR().delta_calendar_days(dt_ipca_next, dt_ipca_last)
+        date_ref = DatesBRAnbima().nearest_working_day(date_ref, bool_next=False)
+        delta_ref = DatesBRAnbima().delta_calendar_days(date_ref, dt_ipca_last)
+        delta_total = DatesBRAnbima().delta_calendar_days(dt_ipca_next, dt_ipca_last)
         print(f"PR1: {delta_ref} / {delta_total} = {delta_ref / delta_total}")
         return delta_ref / delta_total
 

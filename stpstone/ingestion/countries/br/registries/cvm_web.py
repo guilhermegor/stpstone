@@ -12,7 +12,7 @@ from typing import Tuple, Optional
 from random import shuffle
 from stpstone.utils.parsers.html import HtmlHandler
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -321,7 +321,7 @@ class CVMWeb_WS_Funds:
         list_avl_dts_fund = [
             {
                 self.key_fund_code: str_fund_code,
-                self.key_ref_date: DatesBR().str_date_to_datetime(d, str_dt_fmt),
+                self.key_ref_date: DatesBRAnbima().str_date_to_datetime(d, str_dt_fmt),
                 self.key_fund_daily_infos_url: url_fund_daily_infos,
             } for d in list_dts
         ]
@@ -460,7 +460,7 @@ class CVMWeb_WS_Funds:
                 raise Exception(f'ERROR HTML XML XPATH - URL: {url_daily_report_fund}')
             dict_daily_infos[self.key_fund_code] = str_fund_code
             dict_daily_infos[self.key_fund_daily_infos_url] = url_daily_report_fund
-            dict_daily_infos[self.key_ref_date] = DatesBR().str_date_to_datetime(str_dt, str_fmt_date)
+            dict_daily_infos[self.key_ref_date] = DatesBRAnbima().str_date_to_datetime(str_dt, str_fmt_date)
             #   appending to exporting list
             dict_ = HandlingDicts().merge_n_dicts(dict_daily_infos, dict_g_shareholders)
             # print(f'DICT_DAILY_INFOS: {dict_}')
@@ -527,11 +527,11 @@ class CVMWeb_WS_Funds:
         # check date format
         for str_fund_code, list_dts in dict_dts_funds.items():
             for i, str_dt in enumerate(list_dts):
-                if DatesBR().check_date_datetime_format(str_dt) == True:
+                if DatesBRAnbima().check_date_datetime_format(str_dt) == True:
                     list_dts[i] = str_dt.strftime(str_dt_fmt_1)
                 elif (StrHandler().match_string_like(str_dt, '*-*') == True) \
                     and (isinstance(str_dt, str) == True):
-                    list_dts[i] = DatesBR().str_date_to_datetime(
+                    list_dts[i] = DatesBRAnbima().str_date_to_datetime(
                         str_dt, format=str_dt_fmt_1).strftime(str_strftime_format)
             dict_dts_funds[str_fund_code] = list_dts
         #   parallelized fetch, if is user's will

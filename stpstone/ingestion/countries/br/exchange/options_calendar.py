@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_B3_OPTIONS_CALENDAR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.html import HtmlHandler
@@ -20,7 +20,7 @@ class OptionsCalendarB3(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref:datetime=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref:datetime=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db:Optional[Session]=None,
         logger:Optional[Logger]=None,
         token:Optional[str]=None,
@@ -65,7 +65,7 @@ class OptionsCalendarB3(ABCRequests):
                             root, YAML_B3_OPTIONS_CALENDAR['settlement_dates']['xpaths'][
                                 'mes_ref'].format(i)
                         )[0].text,
-                        'Ano Referência': DatesBR().year_number(DatesBR().curr_date())
+                        'Ano Referência': DatesBRAnbima().year_number(DatesBRAnbima().curr_date())
                     }
                 )
                 list_ser.append(dict_)

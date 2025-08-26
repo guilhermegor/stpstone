@@ -513,7 +513,7 @@ class TestReadMethod:
         assert result["id"].dtype == "int64"
         assert result["name"].dtype == "string"
 
-    @patch("stpstone.utils.calendars.handling_dates.DatesBR")
+    @patch("stpstone.utils.calendars.handling_dates.DatesBRAnbima")
     @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
     def test_read_with_date_conversion(
         self,
@@ -528,7 +528,7 @@ class TestReadMethod:
 
         Verifies
         --------
-        - Date columns are converted using DatesBR utility
+        - Date columns are converted using DatesBRAnbima utility
         - Date format is passed correctly to conversion function
 
         Parameters
@@ -536,7 +536,7 @@ class TestReadMethod:
         mock_connect : Mock
             Mock psycopg.connect function
         mock_dates_br : Mock
-            Mock DatesBR class
+            Mock DatesBRAnbima class
         postgresql_db_config : dict[str, Any]
             Database configuration fixture
         mock_connection : MagicMock

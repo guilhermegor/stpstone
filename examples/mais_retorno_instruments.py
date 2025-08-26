@@ -1,7 +1,7 @@
 from getpass import getuser
 
 from stpstone.ingestion.countries.br.registries.mais_retorno_instruments import MaisRetornoFunds
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 # ### --- AVAILABLE FUNDS --- ###
@@ -14,8 +14,8 @@ from stpstone.utils.calendars.calendar_abc import DatesBR
 # print(f"DF MAIS RETORNO AVAILABLE FUNDS: \n{df_}")
 # df_.to_csv("data/mais-retorno-available-funds_{}_{}_{}.csv".format(
 #     getuser(),
-#     DatesBR().curr_date().strftime('%Y%m%d'),
-#     DatesBR().curr_time().strftime('%H%M%S')
+#     DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+#     DatesBRAnbima().curr_time().strftime('%H%M%S')
 # ), index=False)
 # df_.info()
 
@@ -39,8 +39,8 @@ from stpstone.utils.calendars.calendar_abc import DatesBR
 # print(f"DF MAIS RETORNO FUNDS: \n{df_}")
 # df_.to_csv("data/mais-retorno-fund-properties_{}_{}_{}.csv".format(
 #     getuser(),
-#     DatesBR().curr_date().strftime('%Y%m%d'),
-#     DatesBR().curr_time().strftime('%H%M%S')
+#     DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+#     DatesBRAnbima().curr_time().strftime('%H%M%S')
 # ), index=False)
 # df_.info()
 
@@ -57,8 +57,8 @@ from stpstone.utils.calendars.calendar_abc import DatesBR
 #     print(f"DF MAIS RETORNO AVAILABLE INSTRUMENTS - {instruments_class.upper()}: \n{df_}")
 #     df_.to_csv("data/mais-retorno-available-instruments_{}_{}_{}.csv".format(
 #         getuser(),
-#         DatesBR().curr_date().strftime('%Y%m%d'),
-#         DatesBR().curr_time().strftime('%H%M%S')
+#         DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+#         DatesBRAnbima().curr_time().strftime('%H%M%S')
 #     ), index=False)
 #     df_.info()
 
@@ -78,8 +78,8 @@ from stpstone.utils.calendars.calendar_abc import DatesBR
 #     print(f"DF MAIS RETORNO - INSTRUMENTS HISTORIC RENTABILITY - CLASS: {url_slug.upper()}: \n{df_}")
 #     df_.to_csv("data/mais-retorno-instruments-historic-rentability_{}_{}_{}.csv".format(
 #         getuser(),
-#         DatesBR().curr_date().strftime('%Y%m%d'),
-#         DatesBR().curr_time().strftime('%H%M%S')
+#         DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+#         DatesBRAnbima().curr_time().strftime('%H%M%S')
 #     ), index=False)
 #     df_.info()
 
@@ -98,8 +98,8 @@ from stpstone.utils.calendars.calendar_abc import DatesBR
 #     print(f"DF MAIS RETORNO - INSTRUMENTS STATS - CLASS: {url_slug.upper()}: \n{df_}")
 #     df_.to_csv("data/mais-retorno-instruments-stats_{}_{}_{}.csv".format(
 #         getuser(),
-#         DatesBR().curr_date().strftime('%Y%m%d'),
-#         DatesBR().curr_time().strftime('%H%M%S')
+#         DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+#         DatesBRAnbima().curr_time().strftime('%H%M%S')
 #     ))
 
 
@@ -117,6 +117,6 @@ for list_slugs, url_slug in [
     print(f"DF MAIS RETORNO - INSTRUMENTS CONSISTENCY - CLASS: {url_slug.upper()}: \n{df_}")
     df_.to_csv("data/mais-retorno-instruments-consistency_{}_{}_{}.csv".format(
         getuser(),
-        DatesBR().curr_date().strftime('%Y%m%d'),
-        DatesBR().curr_time().strftime('%H%M%S')
+        DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+        DatesBRAnbima().curr_time().strftime('%H%M%S')
     ))

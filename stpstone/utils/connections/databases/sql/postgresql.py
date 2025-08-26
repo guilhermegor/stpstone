@@ -17,7 +17,7 @@ from psycopg import Connection, Cursor, connect
 from psycopg.rows import dict_row
 from psycopg.sql import SQL, Composable, Identifier
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
@@ -184,7 +184,7 @@ class PostgreSQLDB(ABCDatabase):
         if list_cols_dt is not None and str_fmt_dt is not None:
             for col_ in list_cols_dt:
                 df_[col_] = [
-                    DatesBR().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]
+                    DatesBRAnbima().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]
                 ]
 
         return df_

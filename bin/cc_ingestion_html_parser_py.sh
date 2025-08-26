@@ -33,7 +33,7 @@ from logging import Logger
 from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_EXAMPLE
-from stpstone.utils.calendars.handling_dates import DatesBR
+from stpstone.utils.calendars.handling_dates import DatesBRAnbima
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
@@ -43,7 +43,7 @@ class ConcreteCreatorReq(ABCRequests):
     def __init__(
         self,
         session: Optional[Session] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

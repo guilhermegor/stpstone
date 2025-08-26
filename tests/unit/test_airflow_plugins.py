@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.orchestrators.airflow_plugins import AirflowPlugins
 
 
@@ -117,7 +117,7 @@ class TestValidateWorkingDay:
         --------
         - Method executes without exceptions
         - XCom value is pushed with correct key
-        - DatesBR.is_working_day is called once
+        - DatesBRAnbima.is_working_day is called once
 
         Parameters
         ----------
@@ -126,7 +126,7 @@ class TestValidateWorkingDay:
         valid_context : dict[str, Any]
             Valid Airflow context dictionary
         """
-        with patch.object(DatesBR, 'is_working_day', return_value=True) as mock_method:
+        with patch.object(DatesBRAnbima, 'is_working_day', return_value=True) as mock_method:
             airflow_plugins.validate_working_day(**valid_context)
             valid_context['ti'].xcom_push.assert_called_once_with(
                 key='bool_continue', 
@@ -241,7 +241,7 @@ class TestValidateWorkingDay:
         """
         test_context = valid_context.copy()
         test_context['ds'] = date_str
-        with patch.object(DatesBR, 'is_working_day', return_value=expected_result):
+        with patch.object(DatesBRAnbima, 'is_working_day', return_value=expected_result):
             airflow_plugins.validate_working_day(**test_context)
             test_context['ti'].xcom_push.assert_called_once_with(
                 key='bool_continue',

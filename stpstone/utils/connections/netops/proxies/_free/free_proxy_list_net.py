@@ -9,7 +9,7 @@ from typing import Optional
 
 from requests import request
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.proxies_abc import (
     ABCSession,
     ReturnAvailableProxies,
@@ -92,7 +92,7 @@ class FreeProxyNet(ABCSession):
             list_status_forcelist=list_status_forcelist,
             logger=logger
         )
-        self.dates_br = DatesBR()
+        self.dates_br = DatesBRAnbima()
         self.ww_timezones = WWTimezones()
         self.ww_geography = WWGeography()
         self.html_parser = HtmlHandler()

@@ -7,12 +7,12 @@ from keyring import get_password
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.us.exchange.alphavantage import AlphaVantageUS
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 df_ = AlphaVantageUS(
     session=None,
-    date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 5),
+    date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 5),
     cls_db=None,
     token=get_password('ALPHAVANTAGE', 'API_KEY'),
     list_slugs=['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA']

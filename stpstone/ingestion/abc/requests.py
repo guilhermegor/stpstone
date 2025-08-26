@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 import urllib3
 
 from stpstone.transformations.standardization.standardizer_df import DFStandardization
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -672,7 +672,7 @@ class ABCRequests(HandleReqResponses):
         self,
         dict_metadata: Dict[str, Any],
         session: Optional[ReqSession] = None,
-        date_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
         cls_db: Optional[Session] = None,
         logger: Optional[Logger] = None,
         token: Optional[str] = None,

@@ -1,10 +1,10 @@
 from stpstone.ingestion.countries.br.exchange.bmf_interest_rates import BMFInterestRates
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 cls_ = BMFInterestRates(
     session=None,
-    date_ref=DatesBR().sub_working_days(DatesBR().curr_date(), 1),
+    date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
     cls_db=None
 )
 

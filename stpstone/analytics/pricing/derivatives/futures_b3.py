@@ -10,7 +10,7 @@ from scipy.interpolate import CubicSpline
 
 from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 from stpstone.analytics.quant.linear_transformations import LinearAlgebra
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.parsers.lists import ListHandler
 
 
@@ -124,9 +124,9 @@ class NotionalFromPV:
                 + "inferior than the last"
             )
         # working days from the last pmi release util the following
-        int_wddm = DatesBR().delta_working_days(dt_pmi_last, dt_pmi_next)
+        int_wddm = DatesBRAnbima().delta_working_days(dt_pmi_last, dt_pmi_next)
         # working days from the last pmi release until the reference date
-        int_wddt = DatesBR().delta_working_days(dt_pmi_last, date_ref)
+        int_wddt = DatesBRAnbima().delta_working_days(dt_pmi_last, date_ref)
         # prt - pmi pro-rata tempore
         float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
             ** (int_wddt / int_wddm)
@@ -207,9 +207,9 @@ class NotionalFromRt:
         97590.23  # Present value for 10% DI1 contract
         """
         # reference date
-        date_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
+        date_ref = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), int_wd_bef)
         # number of days to settlement of contract
-        int_wddt = DatesBR().delta_working_days(date_ref, date_xpt)
+        int_wddt = DatesBRAnbima().delta_working_days(date_ref, date_xpt)
         # real rate
         float_real_rate = FinancialMath().compound_r(
             float_nominal_rt, int_wddy, int_wd_cap)
@@ -296,9 +296,9 @@ class RtFromPV:
         0.0652  # 6.52% annualized real rate
         """
         # reference date
-        date_ref = DatesBR().sub_working_days(DatesBR().curr_date(), int_wd_bef)
+        date_ref = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), int_wd_bef)
         # number of days to settlement of contract
-        int_cddt = DatesBR().delta_calendar_days(date_ref, date_xpt)
+        int_cddt = DatesBRAnbima().delta_calendar_days(date_ref, date_xpt)
         # returning rate
         return (float_pv_di / float_fv_di) / (float_fut_dol / float_ptax_dm1) - 1.0 \
             * int_cddy / int_cddt

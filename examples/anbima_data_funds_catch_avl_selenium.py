@@ -8,7 +8,7 @@ import pandas as pd
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from urllib3.exceptions import ReadTimeoutError
 
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 
@@ -40,7 +40,7 @@ else:
 # looping within anbima data pages
 for i in range(450, 506):
     url = url_anbima_data_funds.format(i)
-    print('{} - #{}/{} PG ANBIMA DATA FUNDS: {}'.format(DatesBR().current_timestamp_string(), i, 505, url))
+    print('{} - #{}/{} PG ANBIMA DATA FUNDS: {}'.format(DatesBRAnbima().current_timestamp_string(), i, 505, url))
     print('PROXY: {}'.format(str_proxy))
     cls_selenium = SeleniumWD(
         url=url,
@@ -98,8 +98,8 @@ for i in range(450, 506):
         "data/anbima-avl-funds-pg-{}_{}_{}_{}.csv".format(
             i,
             getuser(),
-            DatesBR().curr_date().strftime('%Y%m%d'),
-            DatesBR().curr_time().strftime('%H%M%S')
+            DatesBRAnbima().curr_date().strftime('%Y%m%d'),
+            DatesBRAnbima().curr_time().strftime('%H%M%S')
         ),
         index=False
     )

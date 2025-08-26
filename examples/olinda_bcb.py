@@ -1,10 +1,10 @@
 from stpstone.ingestion.countries.br.macroeconomics.olinda_bcb import OlindaBCB
-from stpstone.utils.calendars.calendar_abc import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
 cls_ = OlindaBCB(
-    date_start=DatesBR().sub_working_days(DatesBR().curr_date(), 10),
-    date_end=DatesBR().sub_working_days(DatesBR().curr_date(), 1)
+    date_start=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 10),
+    date_end=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1)
 )
 
 # df_ = cls_.source("currencies", bool_fetch=True)
