@@ -10,8 +10,10 @@ declare -a EXCLUDE_PATTERNS=(
 # list of classes considered to have TypeChecker
 declare -a TYPECHECKER_CLASSES=(
     "TypeChecker"
+    "ABCTypeCheckerMeta"
     "ABCSession"
     "ABCDatabase"
+    "ABCCalendarCore"
     "ABCCalendarOperations"
 )
 
@@ -491,32 +493,37 @@ def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
         if visited is None:
             visited = set()
         
-        # avoid infinite recursion
+        # Avoid infinite recursion
         if class_node.name in visited:
             return False
         visited.add(class_node.name)
         
-        # check metaclass directly
+        # Check metaclass directly
         for keyword in class_node.keywords:
             if keyword.arg == 'metaclass':
-                if (isinstance(keyword.value, ast.Name) and keyword.value.id == 'TypeChecker') or \
-                   (isinstance(keyword.value, ast.Attribute) and keyword.value.attr == 'TypeChecker') or \
-                   (isinstance(keyword.value, ast.Name) and keyword.value.id in class_nodes and \
-                    'TypeChecker' in class_bases.get(keyword.value.id, [])):
-                    return True
+                if isinstance(keyword.value, ast.Name):
+                    # Check if metaclass is in TYPECHECKER_CLASSES or is TypeChecker
+                    if keyword.value.id in TYPECHECKER_CLASSES or keyword.value.id == 'TypeChecker':
+                        return True
+                    # Check if metaclass is a class that inherits from TypeChecker
+                    if keyword.value.id in class_nodes and 'TypeChecker' in class_bases.get(keyword.value.id, []):
+                        return True
+                elif isinstance(keyword.value, ast.Attribute):
+                    # Check if metaclass attribute is in TYPECHECKER_CLASSES or is TypeChecker
+                    if keyword.value.attr in TYPECHECKER_CLASSES or keyword.value.attr == 'TypeChecker':
+                        return True
         
-        # check base classes
+        # Check base classes
         for base in class_node.bases:
             base_name = ast.unparse(base)
-            # Check if base class inherits from TypeChecker or TYPECHECKER_CLASSES
-            if base_name in TYPECHECKER_CLASSES or \
-               base_name == 'TypeChecker' or \
-               (isinstance(base, ast.Name) and base.id in TYPECHECKER_CLASSES) or \
-               (isinstance(base, ast.Attribute) and base.attr in TYPECHECKER_CLASSES) or \
-               (isinstance(base, ast.Name) and base.id == 'TypeChecker') or \
-               (isinstance(base, ast.Attribute) and base.attr == 'TypeChecker'):
+            # Check if base class is in TYPECHECKER_CLASSES or is TypeChecker
+            if base_name in TYPECHECKER_CLASSES or base_name == 'TypeChecker':
                 return True
-            # Find the base class node
+            if isinstance(base, ast.Name) and (base.id in TYPECHECKER_CLASSES or base.id == 'TypeChecker'):
+                return True
+            if isinstance(base, ast.Attribute) and (base.attr in TYPECHECKER_CLASSES or base.attr == 'TypeChecker'):
+                return True
+            # Recursively check base class
             if base_name in class_nodes:
                 base_node = class_nodes[base_name]
                 if has_type_checker_metaclass(base_node, visited):

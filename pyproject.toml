@@ -151,6 +151,7 @@ codespell = ">=2.2.5"
 pydocstyle = ">=6.0.0"
 tomli = ">=2.0.1"
 keyring = ">=25.6.0"
+freezegun = ">=1.5.0"
 
 [build-system]
 requires = ["poetry-core>=1.7.0"]

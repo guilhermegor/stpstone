@@ -20,7 +20,7 @@ def add_numbers(self, x: int, y: int) -> int:
 add_numbers(1, 2)  # This will raise a TypeError if the types don't match
 """
 
-from abc import ABCMeta
+from abc import ABC, ABCMeta
 from functools import wraps
 import inspect
 from io import BufferedIOBase, BytesIO, RawIOBase
