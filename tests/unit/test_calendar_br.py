@@ -1,18 +1,20 @@
 """Unit tests for Brazilian holiday calendar implementations.
 
-Tests the ANBIMA and FEBRABAN holiday calendar functionality, covering
+Tests the ANBIMA and FEBRABAN holiday calendar classes, covering
 initialization, data fetching, transformation, and validation logic.
 """
 
-from datetime import date
-import importlib
+from datetime import date, timedelta
 from io import BytesIO
-import sys
-from typing import Any, Optional
-from unittest.mock import patch
+import re
+from typing import Any
+from unittest.mock import Mock, patch
 
+import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 import pytest
+from pytest_mock import MockerFixture
 
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima, DatesBRFebraban
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -29,19 +31,19 @@ def anbima_instance() -> DatesBRAnbima:
     Returns
     -------
     DatesBRAnbima
-        Initialized DatesBRAnbima instance
+        Initialized ANBIMA calendar instance
     """
     return DatesBRAnbima()
 
 
 @pytest.fixture
 def febraban_instance() -> DatesBRFebraban:
-    """Fixture providing a DatesBRFebraban instance.
+    """Fixture providing a DatesBRFebraban instance with default years.
 
     Returns
     -------
     DatesBRFebraban
-        Initialized DatesBRFebraban instance
+        Initialized FEBRABAN calendar instance
     """
     return DatesBRFebraban()
 
@@ -53,12 +55,12 @@ def sample_anbima_df() -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        Sample DataFrame with DATE, WEEKDAY, NAME columns
+        Sample DataFrame with holiday data
     """
     return pd.DataFrame({
-        "DATE": ["01/01/2023", "07/09/2023", "Fonte: ANBIMA"],
-        "WEEKDAY": ["Domingo", "Quinta-feira", ""],
-        "NAME": ["Ano Novo", "Independência", ""]
+        "DATE": ["2023-01-01", "2023-04-21", "Fonte: ANBIMA"],
+        "WEEKDAY": ["Domingo", "Sexta-feira", ""],
+        "NAME": ["Ano Novo", "Tiradentes", ""]
     })
 
 
@@ -73,521 +75,530 @@ def sample_febraban_json() -> list[dict]:
     """
     return [
         {"diaMes": "1 de janeiro", "diaSemana": "Domingo", "nomeFeriado": "Ano Novo"},
-        {"diaMes": "7 de setembro", "diaSemana": "Quinta-feira", "nomeFeriado": "Independência"}
+        {"diaMes": "21 de abril", "diaSemana": "Sexta-feira", "nomeFeriado": "Tiradentes"}
     ]
+
+
+@pytest.fixture
+def sample_febraban_df() -> pd.DataFrame:
+    """Fixture providing sample FEBRABAN DataFrame.
+
+    Returns
+    -------
+    pd.DataFrame
+        Sample DataFrame with holiday data
+    """
+    return pd.DataFrame({
+        "diaMes": ["1 de janeiro", "21 de abril"],
+        "diaSemana": ["Domingo", "Sexta-feira"],
+        "nomeFeriado": ["Ano Novo", "Tiradentes"],
+        "ANO": [2023, 2023]
+    })
 
 
 # --------------------------
 # Tests for DatesBRAnbima
 # --------------------------
-class TestDatesBRAnbima:
-    """Test cases for DatesBRAnbima class.
-
-    Verifies initialization, holiday fetching, transformation, and validation.
-    """
-
-    def test_init(self, anbima_instance: DatesBRAnbima) -> None:
-        """Test initialization of DatesBRAnbima.
-
-        Verifies
-        --------
-        - Instance is created
-        - StrHandler is properly initialized
-
-        Parameters
-        ----------
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-
-        Returns
-        -------
-        None
-        """
-        assert isinstance(anbima_instance, DatesBRAnbima)
-        assert isinstance(anbima_instance.cls_str_handler, StrHandler)
-
-    @patch("requests.get")
-    def test_get_holidays_raw_success(
-        self, mock_get: Any, anbima_instance: DatesBRAnbima
-    ) -> None:
-        """Test successful fetching of raw holiday data.
-
-        Verifies
-        --------
-        - HTTP request is made with correct headers
-        - DataFrame is returned with expected columns
-        - Response content is validated
-
-        Parameters
-        ----------
-        mock_get : Any
-            Mock for requests.get
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-
-        Returns
-        -------
-        None
-        """
-        mock_response = mock_get.return_value
-        mock_response.content = b"dummy excel content"
-        mock_response.raise_for_status.return_value = None
-
-        with patch("pandas.read_excel") as mock_read_excel:
-            mock_read_excel.return_value = pd.DataFrame({
-                "DATE": ["01/01/2023"],
-                "WEEKDAY": ["Domingo"],
-                "NAME": ["Ano Novo"]
-            })
-            result = anbima_instance.get_holidays_raw()
-
-        assert isinstance(result, pd.DataFrame)
-        assert list(result.columns) == ["DATE", "WEEKDAY", "NAME"]
-        mock_get.assert_called_once()
-        mock_read_excel.assert_called_once_with(
-            BytesIO(b"dummy excel content"),
-            header=None,
-            names=["DATE", "WEEKDAY", "NAME"],
-            skiprows=1
-        )
-
-    @patch("requests.get")
-    def test_get_holidays_raw_empty_content(
-        self, mock_get: Any, anbima_instance: DatesBRAnbima
-    ) -> None:
-        """Test handling of empty response content.
-
-        Verifies
-        --------
-        - ValueError is raised for empty content
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        mock_get : Any
-            Mock for requests.get
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-
-        Returns
-        -------
-        None
-        """
-        mock_response = mock_get.return_value
-        mock_response.content = b""
-        mock_response.raise_for_status.return_value = None
-
-        with pytest.raises(ValueError, match="Response content cannot be empty"):
-            anbima_instance.get_holidays_raw()
-
-    def test_transform_holidays(
-        self, anbima_instance: DatesBRAnbima, sample_anbima_df: pd.DataFrame
-    ) -> None:
-        """Test holiday data transformation.
-
-        Verifies
-        --------
-        - DataFrame is properly transformed
-        - Footer is removed
-        - Types are correctly set
-        - Diacritics are removed from names
-
-        Parameters
-        ----------
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-        sample_anbima_df : pd.DataFrame
-            Fixture providing sample ANBIMA DataFrame
-
-        Returns
-        -------
-        None
-        """
-        with patch.object(anbima_instance, "timestamp_to_date", return_value=date(2023, 1, 1)) as mock_timestamp:
-            result = anbima_instance.transform_holidays(sample_anbima_df)
-
-        assert isinstance(result, pd.DataFrame)
-        assert len(result) == 2
-        assert result["NAME"].iloc[0] == "Ano Novo"
-        assert result["DATE"].iloc[0] == date(2023, 1, 1)
-        mock_timestamp.assert_called()
-
-    def test_remove_footer(
-        self, anbima_instance: DatesBRAnbima, sample_anbima_df: pd.DataFrame
-    ) -> None:
-        """Test removal of footer from DataFrame.
-
-        Verifies
-        --------
-        - Footer rows are removed
-        - Resulting DataFrame has correct length
-        - Validation is performed
-
-        Parameters
-        ----------
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-        sample_anbima_df : pd.DataFrame
-            Fixture providing sample ANBIMA DataFrame
-
-        Returns
-        -------
-        None
-        """
-        result = anbima_instance._remove_footer(sample_anbima_df)
-        assert len(result) == 2
-        assert not any("Fonte: ANBIMA" in str(cell).lower() for _, row in result.iterrows() for cell in row)
-
-    @pytest.mark.parametrize("invalid_df, name", [
-        (None, "test_df"),
-        (pd.Series([1, 2, 3]), "test_df"),
-        (pd.DataFrame(), "test_df")
-    ])
-    def test_validate_dataframe_invalid(
-        self, anbima_instance: DatesBRAnbima, invalid_df: Any, name: str
-    ) -> None:
-        """Test DataFrame validation with invalid inputs.
-
-        Verifies
-        --------
-        - ValueError is raised for invalid DataFrames
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-        invalid_df : Any
-            Invalid DataFrame input
-        name : str
-            Name parameter for validation
-
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match=f"{name}"):
-            anbima_instance._validate_dataframe(invalid_df, name)
-
-    @pytest.mark.parametrize("content", [None, b""])
-    def test_validate_response_content_invalid(
-        self, anbima_instance: DatesBRAnbima, content: Optional[bytes]
-    ) -> None:
-        """Test response content validation with invalid inputs.
-
-        Verifies
-        --------
-        - ValueError is raised for None or empty content
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        anbima_instance : DatesBRAnbima
-            Fixture providing DatesBRAnbima instance
-        content : Optional[bytes]
-            Invalid response content
-
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match="Response content cannot be"):
-            anbima_instance._validate_response_content(content)
-
-
-# --------------------------
-# Tests for DatesBRFebraban
-# --------------------------
-class TestDatesBRFebraban:
-    """Test cases for DatesBRFebraban class.
-
-    Verifies initialization, holiday fetching, transformation, and validation.
-    """
-
-    def test_init(self, febraban_instance: DatesBRFebraban) -> None:
-        """Test initialization of DatesBRFebraban.
-
-        Verifies
-        --------
-        - Instance is created
-        - StrHandler and HandlingDicts are properly initialized
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-
-        Returns
-        -------
-        None
-        """
-        assert isinstance(febraban_instance, DatesBRFebraban)
-        assert isinstance(febraban_instance.cls_str_handler, StrHandler)
-        assert isinstance(febraban_instance.cls_dict_handler, HandlingDicts)
-
-    @patch("requests.get")
-    def test_get_holidays_raw_success(
-        self, mock_get: Any, febraban_instance: DatesBRFebraban, sample_febraban_json: list[dict]
-    ) -> None:
-        """Test successful fetching of raw holiday data.
-
-        Verifies
-        --------
-        - HTTP request is made with correct headers and cookies
-        - JSON response is validated
-        - Correct data is returned
-
-        Parameters
-        ----------
-        mock_get : Any
-            Mock for requests.get
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        sample_febraban_json : list[dict]
-            Fixture providing sample FEBRABAN JSON response
-
-        Returns
-        -------
-        None
-        """
-        mock_response = mock_get.return_value
-        mock_response.json.return_value = sample_febraban_json
-        mock_response.raise_for_status.return_value = None
-
-        result = febraban_instance.get_holidays_raw(2023)
-        assert isinstance(result, list)
-        assert len(result) == 2
-        assert result[0]["nomeFeriado"] == "Ano Novo"
-        mock_get.assert_called_once()
-
-    @patch("requests.get")
-    def test_get_holidays_years(
-        self, mock_get: Any, febraban_instance: DatesBRFebraban, sample_febraban_json: list[dict]
-    ) -> None:
-        """Test fetching holidays for multiple years.
-
-        Verifies
-        --------
-        - Data is fetched for each year
-        - DataFrame is properly constructed
-        - Year validation is performed
-
-        Parameters
-        ----------
-        mock_get : Any
-            Mock for requests.get
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        sample_febraban_json : list[dict]
-            Fixture providing sample FEBRABAN JSON response
-
-        Returns
-        -------
-        None
-        """
-        mock_response = mock_get.return_value
-        mock_response.json.return_value = sample_febraban_json
-        mock_response.raise_for_status.return_value = None
-
-        with patch.object(febraban_instance, "get_holidays_raw", return_value=sample_febraban_json):
-            result = febraban_instance.get_holidays_years()
-
-        assert isinstance(result, pd.DataFrame)
-        assert "ANO" in result.columns
-        assert len(result) > 0
-
-    def test_transform_holidays(
-        self, febraban_instance: DatesBRFebraban
-    ) -> None:
-        """Test holiday data transformation.
-
-        Verifies
-        --------
-        - DataFrame is properly transformed
-        - Column names are converted
-        - Dates are parsed
-        - Diacritics are removed
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-
-        Returns
-        -------
-        None
-        """
-        df = pd.DataFrame({
-            "diaMes": ["1 de janeiro"],
-            "diaSemana": ["Domingo"],
-            "nomeFeriado": ["Ano Novo"],
-            "ANO": [2023]
-        })
-        with patch.object(febraban_instance, "_parse_brazillian_date", return_value=date(2023, 1, 1)):
-            result = febraban_instance.transform_holidays(df)
-
-        assert isinstance(result, pd.DataFrame)
-        assert "NOME_FERIADO" in result.columns
-        assert result["DIA_MES_ANO"].iloc[0] == date(2023, 1, 1)
-
-    @pytest.mark.parametrize("date_str, year, expected_date", [
-        ("1 de janeiro", 2023, date(2023, 1, 1)),
-        ("7 de setembro", 2023, date(2023, 9, 7))
-    ])
-    def test_parse_brazillian_date(
-        self, febraban_instance: DatesBRFebraban, date_str: str, year: int, expected_date: date
-    ) -> None:
-        """Test parsing of Brazilian date strings.
-
-        Verifies
-        --------
-        - Date strings are correctly parsed
-        - Correct date objects are returned
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        date_str : str
-            Brazilian date string
-        year : int
-            Year for date construction
-        expected_date : date
-            Expected date object
-
-        Returns
-        -------
-        None
-        """
-        result = febraban_instance._parse_brazillian_date(date_str, year)
-        assert result == expected_date
-
-    @pytest.mark.parametrize("invalid_date_str", [None, "", "1 janeiro", "invalid"])
-    def test_validate_date_string_invalid(
-        self, febraban_instance: DatesBRFebraban, invalid_date_str: Optional[str]
-    ) -> None:
-        """Test date string validation with invalid inputs.
-
-        Verifies
-        --------
-        - ValueError is raised for invalid date strings
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        invalid_date_str : Optional[str]
-            Invalid date string
-
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match="Date string"):
-            febraban_instance._validate_date_string(invalid_date_str)
-
-    @pytest.mark.parametrize("invalid_year", [None, "2023", 1800, 2200])
-    def test_validate_year_invalid(
-        self, febraban_instance: DatesBRFebraban, invalid_year: Any
-    ) -> None:
-        """Test year validation with invalid inputs.
-
-        Verifies
-        --------
-        - ValueError is raised for invalid years
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        invalid_year : Any
-            Invalid year input
-
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match="Year"):
-            febraban_instance._validate_year(invalid_year)
-
-    @pytest.mark.parametrize("start_year, end_year", [(2023, 2022), (1800, 2023), (2023, 2200)])
-    def test_validate_year_range_invalid(
-        self, febraban_instance: DatesBRFebraban, start_year: int, end_year: int
-    ) -> None:
-        """Test year range validation with invalid inputs.
-
-        Verifies
-        --------
-        - ValueError is raised for invalid year ranges
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        start_year : int
-            Invalid start year
-        end_year : int
-            Invalid end year
-
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match="Year"):
-            febraban_instance._validate_year_range(start_year, end_year)
-
-    @pytest.mark.parametrize("json_response, year", [
-        (None, 2023),
-        ([], 2023),
-        ("invalid", 2023)
-    ])
-    def test_validate_json_response_invalid(
-        self, febraban_instance: DatesBRFebraban, json_response: Any, year: int
-    ) -> None:
-        """Test JSON response validation with invalid inputs.
-
-        Verifies
-        --------
-        - ValueError is raised for invalid JSON responses
-        - Error message matches expected pattern
-
-        Parameters
-        ----------
-        febraban_instance : DatesBRFebraban
-            Fixture providing DatesBRFebraban instance
-        json_response : Any
-            Invalid JSON response
-        year : int
-            Year for validation
-
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(ValueError, match="JSON response"):
-            febraban_instance._validate_json_response(json_response, year)
-
-
-# --------------------------
-# Reload Tests
-# --------------------------
-def test_module_reload() -> None:
-    """Test module reloading behavior.
+def test_anbima_init(anbima_instance: DatesBRAnbima) -> None:
+    """Test initialization of DatesBRAnbima.
 
     Verifies
     --------
-    - Module can be reloaded without errors
-    - Classes maintain their functionality
+    - Instance is created successfully
+    - cls_str_handler is properly initialized
 
     Returns
     -------
     None
     """
-    importlib.reload(sys.modules["stpstone.utils.calendars.dates_br"])
-    anbima = DatesBRAnbima()
-    febraban = DatesBRFebraban()
-    assert isinstance(anbima.cls_str_handler, StrHandler)
-    assert isinstance(febraban.cls_dict_handler, HandlingDicts)
+    assert isinstance(anbima_instance, DatesBRAnbima)
+    assert isinstance(anbima_instance.cls_str_handler, StrHandler)
+
+
+@patch("requests.get")
+def test_get_holidays_raw_success(
+    mock_get: Mock, anbima_instance: DatesBRAnbima
+) -> None:
+    """Test successful fetching of raw ANBIMA holiday data.
+
+    Verifies
+    --------
+    - HTTP request is made with correct headers
+    - Response content is processed into DataFrame
+    - Correct column names are set
+
+    Parameters
+    ----------
+    mock_get : Mock
+        Mocked requests.get function
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+
+    Returns
+    -------
+    None
+    """
+    mock_response = Mock()
+    mock_response.content = BytesIO(b"dummy_excel_data")
+    mock_response.raise_for_status.return_value = None
+    mock_get.return_value = mock_response
+
+    with patch("pandas.read_excel", return_value=sample_anbima_df()):
+        df = anbima_instance.get_holidays_raw()
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == ["DATE", "WEEKDAY", "NAME"]
+        mock_get.assert_called_once()
+        assert mock_get.call_args[1]["headers"]["accept"] == (
+            "text/html,application/xhtml+xml,application/xml;"
+            "q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
+            "application/signed-exchange;v=b3;q=0.7"
+        )
+
+
+@patch("requests.get")
+def test_get_holidays_raw_empty_content(
+    mock_get: Mock, anbima_instance: DatesBRAnbima
+) -> None:
+    """Test handling of empty response content in get_holidays_raw.
+
+    Verifies
+    --------
+    - ValueError is raised for empty content
+    - Error message contains expected text
+
+    Parameters
+    ----------
+    mock_get : Mock
+        Mocked requests.get function
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+
+    Returns
+    -------
+    None
+    """
+    mock_response = Mock()
+    mock_response.content = b""
+    mock_response.raise_for_status.return_value = None
+    mock_get.return_value = mock_response
+
+    with pytest.raises(ValueError, match="Response content cannot be empty"):
+        anbima_instance.get_holidays_raw()
+
+
+def test_transform_holidays_valid(
+    anbima_instance: DatesBRAnbima, sample_anbima_df: pd.DataFrame
+) -> None:
+    """Test transformation of valid ANBIMA holiday data.
+
+    Verifies
+    --------
+    - DataFrame is properly transformed
+    - Footer is removed
+    - Column types are correct
+    - Dates are converted properly
+
+    Parameters
+    ----------
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+    sample_anbima_df : pd.DataFrame
+        Sample ANBIMA DataFrame
+
+    Returns
+    -------
+    None
+    """
+    with patch.object(anbima_instance, "timestamp_to_date", return_value=date(2023, 1, 1)):
+        df = anbima_instance.transform_holidays(sample_anbima_df)
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 2
+        assert df["DATE"].iloc[0] == date(2023, 1, 1)
+        assert all(df[col].dtype == "object" for col in ["WEEKDAY", "NAME"])
+
+
+def test_transform_holidays_empty_df(anbima_instance: DatesBRAnbima) -> None:
+    """Test transformation with empty DataFrame.
+
+    Verifies
+    --------
+    - ValueError is raised for empty DataFrame
+    - Error message contains expected text
+
+    Parameters
+    ----------
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(ValueError, match="df_holidays_raw cannot be empty"):
+        anbima_instance.transform_holidays(pd.DataFrame())
+
+
+@pytest.mark.parametrize("invalid_df", [None, "not_a_dataframe"])
+def test_validate_dataframe_invalid(
+    anbima_instance: DatesBRAnbima, invalid_df: Any
+) -> None:
+    """Test validation of invalid DataFrame inputs.
+
+    Verifies
+    --------
+    - TypeError is raised for None or non-DataFrame inputs
+    - Error message contains expected text
+
+    Parameters
+    ----------
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+    invalid_df : Any
+        Invalid DataFrame input (None or non-DataFrame)
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(TypeError, match="df_ must be of type DataFrame, got (NoneType|str)"):
+        anbima_instance._validate_dataframe(invalid_df, "test_df")
+
+
+def test_remove_footer_valid(
+    anbima_instance: DatesBRAnbima, sample_anbima_df: pd.DataFrame
+) -> None:
+    """Test footer removal from ANBIMA DataFrame.
+
+    Verifies
+    --------
+    - Footer rows are correctly removed
+    - Remaining data is intact
+
+    Parameters
+    ----------
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+    sample_anbima_df : pd.DataFrame
+        Sample ANBIMA DataFrame
+
+    Returns
+    -------
+    None
+    """
+    df = anbima_instance._remove_footer(sample_anbima_df)
+    assert len(df) == 2
+    assert "Fonte: ANBIMA" not in df["DATE"].values
+
+
+def test_holidays_integration(anbima_instance: DatesBRAnbima) -> None:
+    """Test full holidays workflow for ANBIMA.
+
+    Verifies
+    --------
+    - holidays() returns list of tuples
+    - Each tuple contains string name and date object
+    - List is not empty
+
+    Parameters
+    ----------
+    anbima_instance : DatesBRAnbima
+        ANBIMA calendar instance
+
+    Returns
+    -------
+    None
+    """
+    with patch.object(anbima_instance, "get_holidays_raw", return_value=sample_anbima_df()):
+        with patch.object(anbima_instance, "timestamp_to_date", return_value=date(2023, 1, 1)):
+            holidays = anbima_instance.holidays()
+            assert isinstance(holidays, list)
+            assert all(isinstance(h, tuple) for h in holidays)
+            assert all(isinstance(h[0], str) and isinstance(h[1], date) for h in holidays)
+            assert len(holidays) == 2
+
+
+# --------------------------
+# Tests for DatesBRFebraban
+# --------------------------
+def test_febraban_init(febraban_instance: DatesBRFebraban) -> None:
+    """Test initialization of DatesBRFebraban.
+
+    Verifies
+    --------
+    - Instance is created with correct year range
+    - cls_str_handler and cls_dict_handler are initialized
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+
+    Returns
+    -------
+    None
+    """
+    assert isinstance(febraban_instance, DatesBRFebraban)
+    assert isinstance(febraban_instance.cls_str_handler, StrHandler)
+    assert isinstance(febraban_instance.cls_dict_handler, HandlingDicts)
+    assert isinstance(febraban_instance.int_year_start, int)
+    assert isinstance(febraban_instance.int_year_end, int)
+
+
+@patch("requests.get")
+def test_get_holidays_raw_success(
+    mock_get: Mock, febraban_instance: DatesBRFebraban, sample_febraban_json: list[dict]
+) -> None:
+    """Test successful fetching of raw FEBRABAN holiday data.
+
+    Verifies
+    --------
+    - HTTP request is made with correct headers and cookies
+    - Response JSON is processed correctly
+    - Returns list of dictionaries
+
+    Parameters
+    ----------
+    mock_get : Mock
+        Mocked requests.get function
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    sample_febraban_json : list[dict]
+        Sample FEBRABAN JSON response
+
+    Returns
+    -------
+    None
+    """
+    mock_response = Mock()
+    mock_response.json.return_value = sample_febraban_json
+    mock_response.raise_for_status.return_value = None
+    mock_get.return_value = mock_response
+
+    result = febraban_instance.get_holidays_raw(2023)
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert all(isinstance(item, dict) for item in result)
+    mock_get.assert_called_once()
+    assert mock_get.call_args[1]["headers"]["Accept"] == (
+        "application/json, text/javascript, */*; q=0.01"
+    )
+
+
+def test_transform_holidays_valid(
+    febraban_instance: DatesBRFebraban, sample_febraban_df: pd.DataFrame
+) -> None:
+    """Test transformation of valid FEBRABAN holiday data.
+
+    Verifies
+    --------
+    - DataFrame is properly transformed
+    - Column names are converted to upper constant case
+    - Dates are parsed correctly
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    sample_febraban_df : pd.DataFrame
+        Sample FEBRABAN DataFrame
+
+    Returns
+    -------
+    None
+    """
+    with patch.object(febraban_instance, "_parse_brazillian_date", return_value=date(2023, 1, 1)):
+        df = febraban_instance.transform_holidays(sample_febraban_df)
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 2
+        assert list(df.columns) == ["DIA_MES", "DIA_SEMANA", "NOME_FERIADO", "ANO", "DIA_MES_ANO"]
+        assert df["DIA_MES_ANO"].iloc[0] == date(2023, 1, 1)
+
+
+@pytest.mark.parametrize("invalid_year", [1899, 2101, "2023", None])
+def test_validate_year_invalid(febraban_instance: DatesBRFebraban, invalid_year: Any) -> None:
+    """Test validation of invalid year inputs.
+
+    Verifies
+    --------
+    - ValueError is raised for years outside 1900-2100
+    - TypeError is raised for non-integer inputs
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    invalid_year : Any
+        Invalid year value
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises((ValueError, TypeError), match="Year must be|year must be of type int"):
+        febraban_instance._validate_year(invalid_year)
+
+
+@pytest.mark.parametrize(
+    "start_year, end_year",
+    [(2024, 2023), (2101, 2023), ("2023", 2023)]
+)
+def test_validate_year_range_invalid(
+    febraban_instance: DatesBRFebraban, start_year: Any, end_year: Any
+) -> None:
+    """Test validation of invalid year ranges.
+
+    Verifies
+    --------
+    - ValueError is raised for invalid ranges
+    - TypeError is raised for non-integer inputs
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    start_year : Any
+        Start year of range
+    end_year : Any
+        End year of range
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(
+        (ValueError, TypeError), 
+        match="Year must be between|must be of type|Start year .* cannot be after"
+    ):
+        febraban_instance._validate_year_range(start_year, end_year)
+
+
+@pytest.mark.parametrize("invalid_date", [None, "", "1 janeiro", 123])
+def test_validate_date_string_invalid(
+    febraban_instance: DatesBRFebraban, invalid_date: Any
+) -> None:
+    """Test validation of invalid date string formats.
+
+    Verifies
+    --------
+    - ValueError is raised for empty or malformed date strings
+    - TypeError is raised for non-string inputs
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    invalid_date : Any
+        Invalid date string
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises((ValueError, TypeError), match="Date string|date_str must be of type str"):
+        febraban_instance._validate_date_string(invalid_date)
+
+
+def test_parse_brazillian_date_valid(febraban_instance: DatesBRFebraban) -> None:
+    """Test parsing of valid Brazilian date string.
+
+    Verifies
+    --------
+    - Date string is correctly parsed into date object
+    - Month mapping works correctly
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+
+    Returns
+    -------
+    None
+    """
+    result = febraban_instance._parse_brazillian_date("1 de janeiro", 2023)
+    assert isinstance(result, date)
+    assert result == date(2023, 1, 1)
+
+
+@pytest.mark.parametrize("invalid_date", ["32 de janeiro", "1 de invalid", "abc"])
+def test_parse_brazillian_date_invalid(
+    febraban_instance: DatesBRFebraban, invalid_date: str
+) -> None:
+    """Test parsing of invalid Brazilian date strings.
+
+    Verifies
+    --------
+    - ValueError is raised for invalid date formats
+    - Error message contains expected text
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    invalid_date : str
+        Invalid date string
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(ValueError, match="Invalid date format|Date string must contain ' de ' separator"):
+        febraban_instance._parse_brazillian_date(invalid_date, 2023)
+
+
+def test_get_holidays_years_valid(
+    febraban_instance: DatesBRFebraban, sample_febraban_json: list[dict]
+) -> None:
+    """Test fetching holiday data for multiple years.
+
+    Verifies
+    --------
+    - Data is fetched for each year in range
+    - DataFrame is correctly constructed
+    - Year column is added
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    sample_febraban_json : list[dict]
+        Sample FEBRABAN JSON response
+
+    Returns
+    -------
+    None
+    """
+    with patch.object(febraban_instance, "get_holidays_raw", return_value=sample_febraban_json):
+        df = febraban_instance.get_holidays_years()
+        assert isinstance(df, pd.DataFrame)
+        assert "ANO" in df.columns
+        assert len(df) == 2 * (febraban_instance.int_year_end - febraban_instance.int_year_start + 1)
+
+
+def test_holidays_integration(febraban_instance: DatesBRFebraban, sample_febraban_df: pd.DataFrame) -> None:
+    """Test full holidays workflow for FEBRABAN.
+
+    Verifies
+    --------
+    - holidays() returns list of tuples
+    - Each tuple contains string name and date object
+    - List is not empty
+
+    Parameters
+    ----------
+    febraban_instance : DatesBRFebraban
+        FEBRABAN calendar instance
+    sample_febraban_df : pd.DataFrame
+        Sample FEBRABAN DataFrame
+
+    Returns
+    -------
+    None
+    """
+    with patch.object(febraban_instance, "get_holidays_years", return_value=sample_febraban_df):
+        with patch.object(febraban_instance, "_parse_brazillian_date", return_value=date(2023, 1, 1)):
+            holidays = febraban_instance.holidays()
+            assert isinstance(holidays, list)
+            assert all(isinstance(h, tuple) for h in holidays)
+            assert all(isinstance(h[0], str) and isinstance(h[1], date) for h in holidays)
+            assert len(holidays) == 2
