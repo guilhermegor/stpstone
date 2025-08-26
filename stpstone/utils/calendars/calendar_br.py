@@ -10,8 +10,8 @@ from io import BytesIO
 import pandas as pd
 import requests
 
-from stpstone.transformations.standardization.standardizer_df import DFStandardization
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
+from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -25,6 +25,10 @@ class DatesBRAnbima(ABCCalendarOperations):
     ----------
     .. [1] https://www.anbima.com.br/feriados/arqs/feriados_nacionais.xls
     """
+
+    def __init__(self) -> None:
+        """Initialize ANBIMA calendar handler with string utilities."""
+        self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:
         """Get list of Brazilian holidays from ANBIMA.
@@ -96,12 +100,20 @@ class DatesBRAnbima(ABCCalendarOperations):
             If DataFrame is empty after processing
         """
         self._validate_dataframe(df_, "df_holidays_raw")
-        cls_df_standardizer = DFStandardization(
-            dict_dtypes={"DATE": "date", "WEEKDAY": "str", "NAME": "str"},
-            str_fmt_dt="DD/MM/YYYY",
-        )
+
+        df_ = df_.astype({
+            "DATE": str,
+            "WEEKDAY": str,
+            "NAME": str
+        })
         df_ = self._remove_footer(df_)
-        df_ = cls_df_standardizer.pipeline(df_)
+        df_["DATE"] = [self.timestamp_to_date(d, substr_timestamp=" ") 
+                       for d in df_["DATE"].tolist()]
+        df_["NAME"] = [
+            self.cls_str_handler.remove_diacritics(self.cls_str_handler.latin_characters(x)) 
+            for x in df_["NAME"].tolist()
+        ]
+
         self._validate_dataframe(df_, "df_holidays_standardized")
         return df_
 
@@ -192,6 +204,7 @@ class DatesBRFebraban(ABCCalendarOperations):
     def __init__(self) -> None:
         """Initialize FEBRABAN calendar handler with string utilities."""
         self.cls_str_handler = StrHandler()
+        self.cls_dict_handler = HandlingDicts()
 
     def holidays(self) -> list[tuple[str, date]]:
         """Get list of Brazilian holidays from FEBRABAN.
@@ -227,7 +240,9 @@ class DatesBRFebraban(ABCCalendarOperations):
         self._validate_year_range(2001, current_year)
         list_holidays = []
         for int_year in range(2001, current_year + 1):
-            list_holidays.extend(self.get_holidays_raw(int_year))
+            list_ser = self.get_holidays_raw(int_year)
+            list_ser = self.cls_dict_handler.add_key_value_to_dicts(list_ser, "ANO", int_year)
+            list_holidays.extend(list_ser)
         return pd.DataFrame(list_holidays)
 
     def get_holidays_raw(self, int_year: int) -> list[dict]:
@@ -301,20 +316,30 @@ class DatesBRFebraban(ABCCalendarOperations):
             If DataFrame is empty or transformation fails
         """
         self._validate_dataframe(df_, "df_holidays_raw")
-        cls_df_standardizer = DFStandardization(
-            dict_dtypes={"diaMesAno": "date", "diaSemana": "str", "nomeFeriado": "str"},
-            cols_from_case="camel",
-            cols_to_case="upper_case",
-            str_fmt_dt=None,
-        )
+
+        df_ = df_.astype({
+            "diaMes": str,
+            "diaSemana": str,
+            "nomeFeriado": str, 
+            "ANO": int
+        })
         df_["diaMesAno"] = [
-            self._parse_brazillian_date(d, year=date.today().year) for d in df_["diaMes"].tolist()
+            self._parse_brazillian_date(row["diaMes"], int_year=row["ANO"]) 
+            for _, row in df_.iterrows()
         ]
-        df_ = cls_df_standardizer.pipeline(df_)
+        df_.columns = [
+            self.cls_str_handler.convert_case(x, "camel", "upper_constant") 
+            for x in df_.columns
+        ]
+        df_["NOME_FERIADO"] = [
+            self.cls_str_handler.remove_diacritics(self.cls_str_handler.latin_characters(x)) 
+               for x in df_["NOME_FERIADO"].tolist()
+        ]
+        
         self._validate_dataframe(df_, "df_holidays_standardized")
         return df_
 
-    def _parse_brazillian_date(self, date_str: str, year: int) -> date:
+    def _parse_brazillian_date(self, date_str: str, int_year: int) -> date:
         """Parse Brazilian date string into date object.
 
         Parameters
@@ -335,7 +360,7 @@ class DatesBRFebraban(ABCCalendarOperations):
             If date format is invalid or parsing fails
         """
         self._validate_date_string(date_str)
-        self._validate_year(year)
+        self._validate_year(int_year)
         dict_month_map = {
             "janeiro": 1,
             "fevereiro": 2,
@@ -352,14 +377,14 @@ class DatesBRFebraban(ABCCalendarOperations):
         }
 
         try:
-            list_parts_date = date_str.split(" ")
+            list_parts_date = [part for part in date_str.split(" ") if part]
             day = int(list_parts_date[0])
             month_name = list_parts_date[2].lower()
             month_name = self.cls_str_handler.remove_diacritics(
                 self.cls_str_handler.latin_characters(month_name)
             )
             month = dict_month_map[month_name]
-            return date(year=year, month=month, day=day)
+            return date(year=int_year, month=month, day=day)
         except (ValueError, KeyError, IndexError) as err:
             raise ValueError(f"Invalid date format: {date_str}") from err
 
