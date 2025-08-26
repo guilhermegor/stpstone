@@ -201,8 +201,26 @@ class DatesBRFebraban(ABCCalendarOperations):
     .. [1] https://feriadosbancarios.febraban.org.br/
     """
 
-    def __init__(self) -> None:
-        """Initialize FEBRABAN calendar handler with string utilities."""
+    def __init__(
+        self, 
+        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
+        int_year_end: int = (date.today() - timedelta(days=22)).year
+    ) -> None:
+        """Initialize FEBRABAN calendar handler with string utilities.
+        
+        Parameters
+        ----------
+        int_year_start : int, optional
+            Starting year for holiday data, by default (date.today() - timedelta(days=22)).year - 1
+        int_year_end : int, optional
+            Ending year for holiday data, by default (date.today() - timedelta(days=22)).year
+        
+        Returns
+        -------
+        None
+        """
+        self.int_year_start = int_year_start
+        self.int_year_end = int_year_end
         self.cls_str_handler = StrHandler()
         self.cls_dict_handler = HandlingDicts()
 
@@ -236,10 +254,9 @@ class DatesBRFebraban(ABCCalendarOperations):
         ValueError
             If year range is invalid or data fetching fails
         """
-        current_year = (date.today() - timedelta(days=22)).year
-        self._validate_year_range(2001, current_year)
+        self._validate_year_range(self.int_year_start, self.int_year_end)
         list_holidays = []
-        for int_year in range(2001, current_year + 1):
+        for int_year in range(self.int_year_start, self.int_year_end + 1):
             list_ser = self.get_holidays_raw(int_year)
             list_ser = self.cls_dict_handler.add_key_value_to_dicts(list_ser, "ANO", int_year)
             list_holidays.extend(list_ser)
