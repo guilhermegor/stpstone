@@ -83,35 +83,117 @@ def test_init_with_valid_inputs() -> None:
 ```python
 """Example of unit test for empty variable, inappropriately declared."""
 
+"""Example of unit tests for variable validation functions."""
+
+from typing import Optional
 import pytest
 
-def _validate_non_empty_string(data: str, param_name: str) -> None:
+
+def _validate_non_empty_string(data: Optional[str], param_name: str) -> None:
+    """Validate that the provided data is a non-empty string.
+
+    Parameters
+    ----------
+    data : Optional[str]
+        The input data to validate. Can be None or string.
+    param_name : str
+        The name of the parameter being validated.
+
+    Raises
+    ------
+    TypeError
+        If `data` is not a string, is None, or is empty/whitespace-only.
+    """
     if type(data) is not str or data is None or len(data.strip()) == 0:
         raise TypeError(f"{param_name} must be of type str")
 
-def _validate_non_zero_float(data: float, param_name: str) -> None:
+
+def _validate_non_zero_float(data: Optional[float], param_name: str) -> None:
+    """Validate that the provided data is a non-zero float.
+
+    Parameters
+    ----------
+    data : Optional[float]
+        The input data to validate. Can be None or float.
+    param_name : str
+        The name of the parameter being validated.
+
+    Raises
+    ------
+    TypeError
+        If `data` is not a float, is None, or equals zero.
+    """
     if type(data) is not float or data is None or data == 0.0:
         raise TypeError(f"{param_name} must be of type float")
 
+
 @pytest.mark.parametrize("data", [None, "", "  "])
-def test_validate_non_empty_string_invalid_data(data):
+def test_validate_non_empty_string_invalid_data(data: Optional[str]) -> None:
+    """Test that invalid string inputs raise an exception.
+
+    Parameters
+    ----------
+    data : Optional[str]
+        Invalid values such as None, empty, or whitespace-only strings.
+
+    Returns
+    -------
+    None
+    """
     with pytest.raises(ValueError, match="must be of type"):
         _validate_non_empty_string(data, "input_string")
 
+
 @pytest.mark.parametrize("param_name", ["input_string", "test_string", "data_string"])
-def test_validate_non_empty_string_invalid_param_name(param_name):
+def test_validate_non_empty_string_invalid_param_name(param_name: str) -> None:
+    """Test that invalid param_name handling raises an exception.
+
+    Parameters
+    ----------
+    param_name : str
+        Various parameter names tested against invalid input.
+
+    Returns
+    -------
+    None
+    """
     with pytest.raises(ValueError, match="must be of type"):
         _validate_non_empty_string(None, param_name)
 
+
 @pytest.mark.parametrize("data", [None, 0.0])
-def test_validate_non_zero_float_invalid_data(data):
+def test_validate_non_zero_float_invalid_data(data: Optional[float]) -> None:
+    """Test that invalid float inputs raise an exception.
+
+    Parameters
+    ----------
+    data : Optional[float]
+        Invalid values such as None or zero.
+
+    Returns
+    -------
+    None
+    """
     with pytest.raises(ValueError, match="must be of type"):
         _validate_non_zero_float(data, "input_float")
 
+
 @pytest.mark.parametrize("param_name", ["input_float", "test_float", "data_float"])
-def test_validate_non_zero_float_invalid_param_name(param_name):
+def test_validate_non_zero_float_invalid_param_name(param_name: str) -> None:
+    """Test that invalid float param_name handling raises an exception.
+
+    Parameters
+    ----------
+    param_name : str
+        Various parameter names tested against invalid float input.
+
+    Returns
+    -------
+    None
+    """
     with pytest.raises(ValueError, match="must be of type"):
         _validate_non_zero_float(None, param_name)
+
 ```
 - **Variables sanity checks**: Tests for all variables validation checks within methods/functions, like values between 0 and 1, positive, negative, shapes of arrays and so on
 ```python
