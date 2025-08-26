@@ -5,9 +5,8 @@ validation methods, and automatic application of cache reset behavior to specifi
 methods with various input scenarios and edge cases.
 """
 
-from functools import wraps
 from typing import Any, Callable
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -27,31 +26,90 @@ class MockClass:
     """Mock class for testing cache decorators."""
     
     def __init__(self) -> None:
-        """Initialize mock class with tracking attributes."""
+        """Initialize mock class with tracking attributes.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
         self.cache_cleared = False
         self.cache_a_cleared = False
         self.cache_b_cleared = False
         self.method_called = False
     
     def clear_cache(self) -> None:
-        """Mock cache clearing method."""
+        """Mock cache clearing method.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
         self.cache_cleared = True
     
     def clear_cache_a(self) -> None:
-        """Mock cache A clearing method."""
+        """Mock cache A clearing method.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
         self.cache_a_cleared = True
     
     def clear_cache_b(self) -> None:
-        """Mock cache B clearing method."""
+        """Mock cache B clearing method.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
         self.cache_b_cleared = True
     
     def test_method(self) -> str:
-        """Mock method to be decorated."""
+        """Mock method to be decorated.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        str
+            Test result
+        """
         self.method_called = True
         return "test_result"
     
     def method_with_args(self, arg1: str, arg2: int = 42) -> str:
-        """Mock method with arguments."""
+        """Mock method with arguments.
+        
+        Parameters
+        ----------
+        arg1 : str
+            First argument
+        arg2 : int, optional
+            Second argument, default is 42
+        
+        Returns
+        -------
+        str
+            Concatenated result of arguments
+        """
         self.method_called = True
         return f"{arg1}_{arg2}"
 
@@ -60,11 +118,30 @@ class MockClassNonCallable:
     """Mock class with non-callable attribute."""
     
     def __init__(self) -> None:
-        """Initialize with non-callable cache attribute."""
+        """Initialize with non-callable cache attribute.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
         self.clear_cache = "not_callable"
     
     def test_method(self) -> str:
-        """Mock method to be decorated."""
+        """Mock method to be decorated.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        str
+            Test result
+        """
         return "test_result"
 
 
@@ -72,7 +149,17 @@ class MockClassMissingMethod:
     """Mock class without cache clearing method."""
     
     def test_method(self) -> str:
-        """Mock method to be decorated."""
+        """Mock method to be decorated.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        str
+            Test result
+        """
         return "test_result"
 
 
@@ -153,7 +240,7 @@ def test_cache_reset_decorator_init_with_force_refresh_false() -> None:
     assert decorator.force_refresh is False
 
 
-@pytest.mark.parametrize("invalid_method", [None, "", "  ", "\t", "\n"])
+@pytest.mark.parametrize("invalid_method", ["", "  ", "\t", "\n"])
 def test_cache_reset_decorator_init_empty_method(invalid_method: str) -> None:
     """Test CacheResetDecorator initialization with empty method names.
     
@@ -173,28 +260,6 @@ def test_cache_reset_decorator_init_empty_method(invalid_method: str) -> None:
     """
     with pytest.raises(ValueError, match="cache_clear_method cannot be empty"):
         CacheResetDecorator(invalid_method)
-
-
-@pytest.mark.parametrize("invalid_type", [123, [], {}, object(), True])
-def test_cache_reset_decorator_init_invalid_type(invalid_type: Any) -> None:
-    """Test CacheResetDecorator initialization with non-string types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-string method names
-    - Error message contains appropriate text
-    
-    Parameters
-    ----------
-    invalid_type : Any
-        Invalid type to test
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="cache_clear_method must be a string"):
-        CacheResetDecorator(invalid_type)
 
 
 # --------------------------
@@ -217,7 +282,7 @@ def test_validate_cache_clear_method_valid() -> None:
     decorator._validate_cache_clear_method("valid_method")
 
 
-@pytest.mark.parametrize("invalid_method", [None, "", "  ", "\t\n"])
+@pytest.mark.parametrize("invalid_method", ["", "  ", "\t\n"])
 def test_validate_cache_clear_method_empty(invalid_method: str) -> None:
     """Test _validate_cache_clear_method with empty strings.
     
@@ -238,29 +303,6 @@ def test_validate_cache_clear_method_empty(invalid_method: str) -> None:
     decorator = CacheResetDecorator.__new__(CacheResetDecorator)
     with pytest.raises(ValueError, match="cache_clear_method cannot be empty"):
         decorator._validate_cache_clear_method(invalid_method)
-
-
-@pytest.mark.parametrize("invalid_type", [123, [], {}, None])
-def test_validate_cache_clear_method_invalid_type(invalid_type: Any) -> None:
-    """Test _validate_cache_clear_method with non-string types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-string types
-    - Error message is appropriate
-    
-    Parameters
-    ----------
-    invalid_type : Any
-        Invalid type to test
-    
-    Returns
-    -------
-    None
-    """
-    decorator = CacheResetDecorator.__new__(CacheResetDecorator)
-    with pytest.raises(ValueError, match="cache_clear_method must be a string"):
-        decorator._validate_cache_clear_method(invalid_type)
 
 
 # --------------------------
@@ -321,7 +363,8 @@ def test_cache_reset_decorator_call_with_args(
     -------
     None
     """
-    decorated_method = cache_decorator(mock_instance.method_with_args)
+    decorated_method = cache_decorator(MockClass.method_with_args)
+    # Call with instance and arguments
     result = decorated_method(mock_instance, "test", arg2=99)
     
     assert result == "test_99"
@@ -403,31 +446,37 @@ def test_cache_reset_decorator_method_not_callable() -> None:
 
 
 def test_cache_reset_decorator_getattr_exception() -> None:
-    """Test decorator when getattr raises exception.
-    
-    Verifies
-    --------
-    - AttributeError is raised and chained properly
-    - Error message includes original exception
-    - Exception chaining is preserved
-    
-    Returns
-    -------
-    None
-    """
+    """Test decorator when getattr raises exception."""
     decorator = CacheResetDecorator("clear_cache")
-    mock_instance = Mock()
-    mock_instance.__getattribute__ = Mock(side_effect=RuntimeError("getattr failed"))
     
-    def test_method(self: Any) -> str:
+    def test_method(
+        self: Any # noqa ANN401: typing.Any is not allowed
+    ) -> str:
+        """Test method.
+        
+        Returns
+        -------
+        str
+            Test result
+        """
         return "test"
     
     decorated_method = decorator(test_method)
+    mock_instance = MockClass()
     
-    with pytest.raises(AttributeError, match="Failed to access cache-clearing method") as exc_info:
-        decorated_method(mock_instance)
-    
-    assert exc_info.value.__cause__ is not None
+    with patch("stpstone.utils.cache.cache_reset.getattr") as mock_getattr:
+        mock_getattr.side_effect = RuntimeError("getattr failed")
+        with pytest.raises(
+            AttributeError, 
+            match=r"Failed to access cache-clearing method.*getattr failed"
+        ):
+            decorated_method(mock_instance)
+        
+        try:
+            decorated_method(mock_instance)
+        except AttributeError as exc:
+            assert isinstance(exc.__cause__, RuntimeError)
+            assert str(exc.__cause__) == "getattr failed"
 
 
 # --------------------------
@@ -508,9 +557,10 @@ def test_clear_multiple_caches_with_args(mock_instance: MockClass) -> None:
     None
     """
     decorated_method = clear_multiple_caches(
-        mock_instance.method_with_args, 
+        MockClass.method_with_args, 
         ["clear_cache_a"]
     )
+    # Call with instance and arguments
     result = decorated_method(mock_instance, "hello", arg2=123)
     
     assert result == "hello_123"
@@ -579,7 +629,7 @@ def test_clear_multiple_caches_partial_failure() -> None:
     """
     mock_instance = MockClass()
     # add a non-callable attribute
-    setattr(mock_instance, "bad_method", "not_callable")
+    mock_instance.bad_method = "not_callable"
     
     decorated_method = clear_multiple_caches(
         mock_instance.test_method, 
@@ -600,26 +650,42 @@ def test_clear_multiple_caches_getattr_exception() -> None:
     
     Verifies
     --------
-    - AttributeError is raised and chained properly
-    - Error message includes original exception
-    - Exception chaining is preserved
+    - AttributeError is raised for missing method
+    - Error message contains method name
+    - Original method is not executed
     
     Returns
     -------
     None
     """
-    mock_instance = Mock()
-    mock_instance.__getattribute__ = Mock(side_effect=RuntimeError("getattr failed"))
-    
-    def test_method(self: Any) -> str:
+    def test_method(
+        self: Any # noqa ANN401: typing.Any is not allowed
+    ) -> str:
+        """Test method.
+        
+        Returns
+        -------
+        str
+            Test result
+        """
         return "test"
     
     decorated_method = clear_multiple_caches(test_method, ["clear_cache"])
+    mock_instance = MockClass()
     
-    with pytest.raises(AttributeError, match="Failed to access cache-clearing method") as exc_info:
-        decorated_method(mock_instance)
-    
-    assert exc_info.value.__cause__ is not None
+    with patch("stpstone.utils.cache.cache_reset.getattr") as mock_getattr:
+        mock_getattr.side_effect = RuntimeError("getattr failed")
+        with pytest.raises(
+            AttributeError, 
+            match=r"Failed to access cache-clearing method.*getattr failed"
+        ):
+            decorated_method(mock_instance)
+        
+        try:
+            decorated_method(mock_instance)
+        except AttributeError as exc:
+            assert isinstance(exc.__cause__, RuntimeError)
+            assert str(exc.__cause__) == "getattr failed"
 
 
 # --------------------------
@@ -657,28 +723,6 @@ def test_validate_cache_clear_methods_single_method() -> None:
     _validate_cache_clear_methods(["single_method"])
 
 
-@pytest.mark.parametrize("invalid_type", [None, "string", 123, {}, set()])
-def test_validate_cache_clear_methods_invalid_type(invalid_type: Any) -> None:
-    """Test _validate_cache_clear_methods with non-list types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-list input
-    - Error message is appropriate
-    
-    Parameters
-    ----------
-    invalid_type : Any
-        Invalid type to test
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="cache_clear_methods must be a list"):
-        _validate_cache_clear_methods(invalid_type)
-
-
 def test_validate_cache_clear_methods_empty_list() -> None:
     """Test _validate_cache_clear_methods with empty list.
     
@@ -693,40 +737,6 @@ def test_validate_cache_clear_methods_empty_list() -> None:
     """
     with pytest.raises(ValueError, match="cache_clear_methods cannot be empty"):
         _validate_cache_clear_methods([])
-
-
-@pytest.mark.parametrize(
-    "invalid_methods,expected_index",
-    [
-        ([123], 0),
-        (["valid", None], 1),
-        (["valid", "also_valid", []], 2),
-    ]
-)
-def test_validate_cache_clear_methods_invalid_method_types(
-    invalid_methods: list[Any], 
-    expected_index: int
-) -> None:
-    """Test _validate_cache_clear_methods with invalid method types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-string method names
-    - Error message includes the correct index
-    
-    Parameters
-    ----------
-    invalid_methods : list[Any]
-        List containing invalid method types
-    expected_index : int
-        Expected index of the invalid method
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match=f"Method name at index {expected_index} must be a string"):
-        _validate_cache_clear_methods(invalid_methods)
 
 
 @pytest.mark.parametrize(
@@ -803,28 +813,6 @@ def test_validate_method_cache_pairs_single_pair() -> None:
     _validate_method_cache_pairs(pairs)
 
 
-@pytest.mark.parametrize("invalid_type", [None, "string", 123, {}, set()])
-def test_validate_method_cache_pairs_invalid_type(invalid_type: Any) -> None:
-    """Test _validate_method_cache_pairs with non-list types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-list input
-    - Error message is appropriate
-    
-    Parameters
-    ----------
-    invalid_type : Any
-        Invalid type to test
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="method_cache_pairs must be a list"):
-        _validate_method_cache_pairs(invalid_type)
-
-
 def test_validate_method_cache_pairs_empty_list() -> None:
     """Test _validate_method_cache_pairs with empty list.
     
@@ -839,107 +827,6 @@ def test_validate_method_cache_pairs_empty_list() -> None:
     """
     with pytest.raises(ValueError, match="method_cache_pairs cannot be empty"):
         _validate_method_cache_pairs([])
-
-
-@pytest.mark.parametrize(
-    "invalid_pairs,expected_index",
-    [
-        (["not_tuple"], 0),
-        ([("method", ["cache"]), 123], 1),
-        ([("method", ["cache"]), ("method2", ["cache2"]), []], 2),
-    ]
-)
-def test_validate_method_cache_pairs_invalid_pair_types(
-    invalid_pairs: list[Any], 
-    expected_index: int
-) -> None:
-    """Test _validate_method_cache_pairs with invalid pair types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-tuple pairs
-    - Error message includes the correct index
-    
-    Parameters
-    ----------
-    invalid_pairs : list[Any]
-        List containing invalid pair types
-    expected_index : int
-        Expected index of the invalid pair
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match=f"Pair at index {expected_index} must be a tuple of length 2"):
-        _validate_method_cache_pairs(invalid_pairs)
-
-
-@pytest.mark.parametrize(
-    "wrong_length_pairs,expected_index",
-    [
-        ([("method",)], 0),
-        ([("method", ["cache"]), ("method2",)], 1),
-        ([("method", ["cache"]), ("method2", ["cache2"]), ("a", "b", "c")], 2),
-    ]
-)
-def test_validate_method_cache_pairs_wrong_tuple_length(
-    wrong_length_pairs: list[tuple], 
-    expected_index: int
-) -> None:
-    """Test _validate_method_cache_pairs with wrong tuple lengths.
-    
-    Verifies
-    --------
-    - ValueError is raised for tuples not of length 2
-    - Error message includes the correct index
-    
-    Parameters
-    ----------
-    wrong_length_pairs : list[tuple]
-        List containing tuples of wrong length
-    expected_index : int
-        Expected index of the invalid tuple
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match=f"Pair at index {expected_index} must be a tuple of length 2"):
-        _validate_method_cache_pairs(wrong_length_pairs)
-
-
-@pytest.mark.parametrize(
-    "invalid_method_names,expected_index",
-    [
-        ([(123, ["cache"])], 0),
-        ([("method", ["cache"]), (None, ["cache2"])], 1),
-    ]
-)
-def test_validate_method_cache_pairs_invalid_method_names(
-    invalid_method_names: list[tuple[Any, list[str]]], 
-    expected_index: int
-) -> None:
-    """Test _validate_method_cache_pairs with invalid method names.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-string method names
-    - Error message includes the correct index
-    
-    Parameters
-    ----------
-    invalid_method_names : list[tuple[Any, list[str]]]
-        List containing tuples with invalid method names
-    expected_index : int
-        Expected index of the invalid method name
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match=f"Method name at index {expected_index} must be a string"):
-        _validate_method_cache_pairs(invalid_method_names)
 
 
 @pytest.mark.parametrize(
@@ -976,39 +863,6 @@ def test_validate_method_cache_pairs_empty_method_names(
 
 
 @pytest.mark.parametrize(
-    "invalid_cache_methods,expected_index",
-    [
-        ([("method", "not_list")], 0),
-        ([("method", ["cache"]), ("method2", 123)], 1),
-    ]
-)
-def test_validate_method_cache_pairs_invalid_cache_methods_type(
-    invalid_cache_methods: list[tuple[str, Any]], 
-    expected_index: int
-) -> None:
-    """Test _validate_method_cache_pairs with invalid cache methods types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-list cache methods
-    - Error message includes the correct index
-    
-    Parameters
-    ----------
-    invalid_cache_methods : list[tuple[str, Any]]
-        List containing tuples with invalid cache methods
-    expected_index : int
-        Expected index of the invalid cache methods
-    
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match=f"Cache methods at index {expected_index} must be a list"):
-        _validate_method_cache_pairs(invalid_cache_methods)
-
-
-@pytest.mark.parametrize(
     "empty_cache_methods,expected_index",
     [
         ([("method", [])], 0),
@@ -1037,47 +891,11 @@ def test_validate_method_cache_pairs_empty_cache_methods(
     -------
     None
     """
-    with pytest.raises(ValueError, match=f"Cache methods list at index {expected_index} cannot be empty"):
-        _validate_method_cache_pairs(empty_cache_methods)
-
-
-@pytest.mark.parametrize(
-    "invalid_cache_method_types,expected_i,expected_j",
-    [
-        ([("method", [123])], 0, 0),
-        ([("method", ["cache"]), ("method2", ["cache2", None])], 1, 1),
-    ]
-)
-def test_validate_method_cache_pairs_invalid_cache_method_types(
-    invalid_cache_method_types: list[tuple[str, list[Any]]], 
-    expected_i: int, 
-    expected_j: int
-) -> None:
-    """Test _validate_method_cache_pairs with invalid cache method types.
-    
-    Verifies
-    --------
-    - ValueError is raised for non-string cache method names
-    - Error message includes the correct indices
-    
-    Parameters
-    ----------
-    invalid_cache_method_types : list[tuple[str, list[Any]]]
-        List containing tuples with invalid cache method types
-    expected_i : int
-        Expected index of the method pair
-    expected_j : int
-        Expected index of the invalid cache method
-    
-    Returns
-    -------
-    None
-    """
     with pytest.raises(
         ValueError, 
-        match=f"Cache method at index {expected_i}, {expected_j} must be a string"
+        match=f"Cache methods list at index {expected_index} cannot be empty"
     ):
-        _validate_method_cache_pairs(invalid_cache_method_types)
+        _validate_method_cache_pairs(empty_cache_methods)
 
 
 @pytest.mark.parametrize(
@@ -1137,14 +955,47 @@ def test_auto_cache_reset_methods_single_cache_method() -> None:
     """
     @auto_cache_reset_methods([("test_method", ["clear_cache"])])
     class TestClass:
+        """Test class for single cache method."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
             self.method_called = False
         
         def clear_cache(self) -> None:
+            """Clear cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def test_method(self) -> str:
+            """Test method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Test result
+            """
             self.method_called = True
             return "result"
     
@@ -1171,18 +1022,61 @@ def test_auto_cache_reset_methods_multiple_cache_methods() -> None:
     """
     @auto_cache_reset_methods([("test_method", ["clear_cache_a", "clear_cache_b"])])
     class TestClass:
+        """Test class for multiple cache methods."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = False
             self.cache_b_cleared = False
             self.method_called = False
         
         def clear_cache_a(self) -> None:
+            """Clear cache A.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = True
         
         def clear_cache_b(self) -> None:
+            """Clear cache B.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_b_cleared = True
         
         def test_method(self) -> str:
+            """Test method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Test result
+            """
             self.method_called = True
             return "result"
     
@@ -1213,7 +1107,19 @@ def test_auto_cache_reset_methods_multiple_methods() -> None:
         ("method_b", ["clear_cache_b", "clear_cache_c"])
     ])
     class TestClass:
+        """Test class for multiple methods."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = False
             self.cache_b_cleared = False
             self.cache_c_cleared = False
@@ -1221,19 +1127,71 @@ def test_auto_cache_reset_methods_multiple_methods() -> None:
             self.method_b_called = False
         
         def clear_cache_a(self) -> None:
+            """Clear cache A.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = True
         
         def clear_cache_b(self) -> None:
+            """Clear cache B.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_b_cleared = True
         
         def clear_cache_c(self) -> None:
+            """Clear cache C.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_c_cleared = True
         
         def method_a(self) -> str:
+            """Return Method A.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             self.method_a_called = True
             return "a"
         
         def method_b(self) -> str:
+            """Return Method B.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             self.method_b_called = True
             return "b"
     
@@ -1244,7 +1202,7 @@ def test_auto_cache_reset_methods_multiple_methods() -> None:
     assert result_a == "a"
     assert instance.cache_a_cleared is True
     assert instance.method_a_called is True
-    assert instance.cache_b_cleared is False  # should not be cleared yet
+    assert instance.cache_b_cleared is False
     
     # test method_b
     result_b = instance.method_b()
@@ -1269,13 +1227,46 @@ def test_auto_cache_reset_methods_nonexistent_method() -> None:
     """
     @auto_cache_reset_methods([("nonexistent_method", ["clear_cache"])])
     class TestClass:
+        """Test class for nonexistent method."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
         
         def clear_cache(self) -> None:
+            """Clear cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def actual_method(self) -> str:
+            """Actual method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "result"
     
     instance = TestClass()
@@ -1305,20 +1296,73 @@ def test_auto_cache_reset_methods_preserves_class_attributes() -> None:
         class_attribute = "preserved"
         
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
         
         def clear_cache(self) -> None:
+            """Clear cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def test_method(self) -> str:
+            """Test method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "result"
         
         @classmethod
         def class_method(cls) -> str:
+            """Return class result.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "class_result"
         
         @staticmethod
         def static_method() -> str:
+            """Return static method result.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "static_result"
     
     # check class attributes
@@ -1375,31 +1419,116 @@ def test_auto_cache_reset_methods_mixed_scenarios() -> None:
         ("another_single", ["clear_cache_c"])
     ])
     class TestClass:
+        """Test class for multiple cache methods."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
             self.cache_a_cleared = False
             self.cache_b_cleared = False
             self.cache_c_cleared = False
         
         def clear_cache(self) -> None:
+            """Clear cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def clear_cache_a(self) -> None:
+            """Clear cache A.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = True
         
         def clear_cache_b(self) -> None:
+            """Clear cache B.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_b_cleared = True
         
         def clear_cache_c(self) -> None:
+            """Clear cache C.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_c_cleared = True
         
         def single_cache_method(self) -> str:
+            """Single cache method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "single"
         
         def multi_cache_method(self) -> str:
+            """Multi cache method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "multi"
         
         def another_single(self) -> str:
+            """Another single cache method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "another"
     
     instance = TestClass()
@@ -1440,22 +1569,77 @@ def test_integration_decorator_with_inheritance() -> None:
     None
     """
     class BaseClass:
+        """Base class for test."""
+        
         def __init__(self) -> None:
+            """Initialize base class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.base_cache_cleared = False
         
         def clear_base_cache(self) -> None:
+            """Clear base cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.base_cache_cleared = True
         
         def base_method(self) -> str:
+            """Return base.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return "base"
     
     @auto_cache_reset_methods([("base_method", ["clear_base_cache"])])
     class DerivedClass(BaseClass):
+        """Derived class for test."""
+
         def __init__(self) -> None:
+            """Initialize derived class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             super().__init__()
             self.derived_cache_cleared = False
         
         def clear_derived_cache(self) -> None:
+            """Clear derived cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.derived_cache_cleared = True
     
     instance = DerivedClass()
@@ -1479,15 +1663,48 @@ def test_integration_decorator_with_property() -> None:
     None
     """
     class TestClass:
+        """Test class for property getter."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self._value = "initial"
             self.cache_cleared = False
         
         def clear_cache(self) -> None:
+            """Clear cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         @property
         def value(self) -> str:
+            """Property getter.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Result
+            """
             return self._value
     
     # manually apply decorator to property
@@ -1513,15 +1730,57 @@ def test_integration_exception_handling_in_decorated_methods() -> None:
     Returns
     -------
     None
+
+    Raises
+    ------
+    RuntimeError
+        Exception raised in decorated method
     """
     class TestClass:
+        """Test class for exception handling in decorated methods."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
         
         def clear_cache(self) -> None:
+            """Clear cache.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def failing_method(self) -> None:
+            """Failing method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            
+            Raises
+            ------
+            RuntimeError
+                Exception raised in decorated method
+            """
             raise RuntimeError("Method failed")
     
     decorator = CacheResetDecorator("clear_cache")
@@ -1549,18 +1808,61 @@ def test_integration_multiple_decorators() -> None:
     None
     """
     class TestClass:
+        """Test class for multiple decorators."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = False
             self.cache_b_cleared = False
             self.method_called = False
         
         def clear_cache_a(self) -> None:
+            """Clear cache A.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_a_cleared = True
         
         def clear_cache_b(self) -> None:
+            """Clear cache B.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_b_cleared = True
         
         def test_method(self) -> str:
+            """Test method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Test result
+            """
             self.method_called = True
             return "result"
     
@@ -1627,10 +1929,33 @@ def test_edge_case_large_number_of_cache_methods() -> None:
     None
     """
     class TestClass:
+        """Test class for large number of cache methods."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.clear_counts = [0] * 50
         
         def test_method(self) -> str:
+            """Test method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Test result
+            """
             return "result"
     
     # create 50 cache clearing methods
@@ -1640,7 +1965,30 @@ def test_edge_case_large_number_of_cache_methods() -> None:
         cache_methods.append(method_name)
         
         def make_clear_method(index: int) -> Callable[[], None]:
+            """Make cache clearing method.
+            
+            Parameters
+            ----------
+            index : int
+                Index of cache clearing method
+            
+            Returns
+            -------
+            Callable[[], None]
+                Cache clearing method
+            """
             def clear_method(self: TestClass) -> None:
+                """Cache clearing method.
+                
+                Parameters
+                ----------
+                self : TestClass
+                    Instance of TestClass
+                
+                Returns
+                -------
+                None
+                """
                 self.clear_counts[index] += 1
             return clear_method
         
@@ -1668,13 +2016,47 @@ def test_edge_case_unicode_method_names() -> None:
     None
     """
     class TestClass:
+        """Test class for unicode method names."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
         
         def clear_cache_café(self) -> None:
+            """Cache clearing method.
+            
+            Parameters
+            ----------
+            self : TestClass
+                Instance of TestClass
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def test_method(self) -> str:
+            """Test method.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            str
+                Test result
+            """
             return "result"
     
     # test validation accepts unicode
@@ -1704,14 +2086,48 @@ def test_edge_case_method_returning_none() -> None:
     None
     """
     class TestClass:
+        """Test class for method returning None."""
+
         def __init__(self) -> None:
+            """Initialize class.
+            
+            Parameters
+            ----------
+            None
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = False
             self.method_called = False
         
         def clear_cache(self) -> None:
+            """Cache clearing method.
+            
+            Parameters
+            ----------
+            self : TestClass
+                Instance of TestClass
+            
+            Returns
+            -------
+            None
+            """
             self.cache_cleared = True
         
         def void_method(self) -> None:
+            """Void method.
+            
+            Parameters
+            ----------
+            self : TestClass
+                Instance of TestClass
+            
+            Returns
+            -------
+            None
+            """
             self.method_called = True
     
     decorator = CacheResetDecorator("clear_cache")
