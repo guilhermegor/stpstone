@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_IRSBR
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 class IRSBR(ABCRequests):

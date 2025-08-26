@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_FUNDS
 from stpstone.ingestion.countries.br.registries.anbima_data_funds import FundsConsolidated
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.connections.clouds.minio import MinioClient
 from stpstone.utils.parsers.folders import DirFilesManagement
 

@@ -9,7 +9,7 @@ from logging import Logger
 from typing import Optional
 
 from stpstone.transformations.validation.metaclass_type_checker import type_checker
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 
 

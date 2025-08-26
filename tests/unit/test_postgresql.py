@@ -513,7 +513,7 @@ class TestReadMethod:
         assert result["id"].dtype == "int64"
         assert result["name"].dtype == "string"
 
-    @patch("stpstone.utils.cals.handling_dates.DatesBR")
+    @patch("stpstone.utils.calendars.handling_dates.DatesBR")
     @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
     def test_read_with_date_conversion(
         self,

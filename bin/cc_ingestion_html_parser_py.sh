@@ -33,7 +33,7 @@ from logging import Logger
 from requests import Response
 from time import sleep
 from stpstone._config.global_slots import YAML_EXAMPLE
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.calendars.handling_dates import DatesBR
 from stpstone.ingestion.abc.requests import ABCRequests
 from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 

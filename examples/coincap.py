@@ -7,7 +7,7 @@ from keyring import get_password
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 from stpstone.ingestion.countries.ww.exchange.crypto.coincap import CoinCap
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 

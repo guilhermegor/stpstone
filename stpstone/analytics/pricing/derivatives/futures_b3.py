@@ -10,7 +10,7 @@ from scipy.interpolate import CubicSpline
 
 from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 from stpstone.analytics.quant.linear_transformations import LinearAlgebra
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.parsers.lists import ListHandler
 
 

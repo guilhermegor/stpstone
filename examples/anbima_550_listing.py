@@ -1,5 +1,5 @@
 from stpstone.ingestion.countries.br.exchange.anbima_550_listing import Anbima550Listing
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 cls_ = Anbima550Listing(

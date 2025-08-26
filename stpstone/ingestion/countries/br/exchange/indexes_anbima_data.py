@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_ANBIMA_DATA_INDEXES
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 class AnbimaDataIndexes(ABCRequests):

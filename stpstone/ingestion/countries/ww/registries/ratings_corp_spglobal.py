@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_WW_RATINGS_CORP_S_AND_P
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
 

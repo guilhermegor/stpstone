@@ -9,7 +9,7 @@ from typing import Optional
 
 from requests import request
 
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.proxies_abc import (
     ABCSession,
     ReturnAvailableProxies,

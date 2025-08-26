@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_B3_BVMF_BOV
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.html import HtmlHandler

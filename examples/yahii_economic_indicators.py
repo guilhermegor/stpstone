@@ -1,5 +1,5 @@
 from stpstone.ingestion.countries.br.macroeconomics.yahii_rates import YahiiRatesBRMacro
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 cls_ = YahiiRatesBRMacro(

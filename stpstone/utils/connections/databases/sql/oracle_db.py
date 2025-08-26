@@ -17,7 +17,7 @@ from oracledb import Connection, Cursor
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import Composable
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles

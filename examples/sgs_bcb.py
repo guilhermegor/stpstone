@@ -1,5 +1,5 @@
 from stpstone.ingestion.countries.br.macroeconomics.sgs_bcb import SGSBCB
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 cls_ = SGSBCB(

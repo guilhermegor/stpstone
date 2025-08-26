@@ -7,7 +7,7 @@ from requests import request
 
 # local libs
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 class MDInvestingDotCom:

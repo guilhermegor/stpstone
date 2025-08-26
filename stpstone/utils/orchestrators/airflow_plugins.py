@@ -7,7 +7,7 @@ handling.
 from typing import Any
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 class AirflowPlugins(metaclass=TypeChecker):

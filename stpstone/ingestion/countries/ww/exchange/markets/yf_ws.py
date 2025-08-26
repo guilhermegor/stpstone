@@ -10,7 +10,7 @@ from yfinance import download
 
 # local libs
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager import YieldFreeProxy
 
 

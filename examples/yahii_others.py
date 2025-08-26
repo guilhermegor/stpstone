@@ -1,7 +1,7 @@
 import pandas as pd
 
 from stpstone.ingestion.countries.br.macroeconomics.yahii_others import YahiiOthersBR
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 pd.set_option("display.max_rows", None)

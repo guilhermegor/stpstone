@@ -13,7 +13,7 @@ import pandas as pd
 from requests import exceptions, request
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 class ReturnGenericReq(TypedDict):

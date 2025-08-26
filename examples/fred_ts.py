@@ -1,7 +1,7 @@
 import dotenv
 
 from stpstone.ingestion.countries.us.macroeconomics.fred import FredUSMacro
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 
 
 fred_api_key = dotenv.get_key(".env", "FRED_KEY")

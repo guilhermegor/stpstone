@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from stpstone._config.global_slots import YAML_WW_RATINGS_AGENCIES, YAML_WW_WORLD_GOV_BONDS
 from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.cals.cal_abc import DatesBR
+from stpstone.utils.calendars.calendar_abc import DatesBR
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.numbers import NumHandler
