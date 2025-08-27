@@ -55,6 +55,11 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
     ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -213,8 +218,16 @@ class ABCDateManipulation(ABCCalendarCore):
     """Abstract class for date manipulation operations."""
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -569,8 +582,16 @@ class ABCTimezoneAware(ABCDateManipulation):
     """Abstract class for date manipulation with timezone support."""
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -801,8 +822,16 @@ class ABCRangeDatesDelta(ABCDateManipulation):
     """Abstract class for range dates and delta operations."""
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -1240,8 +1269,16 @@ class ABCCurrentDate(ABCCalendarCore):
     """Abstract class for getting current date and time."""
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -1333,8 +1370,16 @@ class ABCDateFormatter(ABCCalendarCore):
     """Abstract class for date formatting."""
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -1569,8 +1614,16 @@ class ABCCalendarOperations(
     """Abstract class for calendar operations."""
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
