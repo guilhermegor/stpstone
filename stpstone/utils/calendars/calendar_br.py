@@ -188,25 +188,18 @@ class DatesBRFebraban(ABCCalendarOperations):
     """
 
     def __init__(
-        self, 
-        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
-        int_year_end: int = (date.today() - timedelta(days=22)).year
+        self
     ) -> None:
         """Initialize FEBRABAN calendar handler with string utilities.
-        
+
         Parameters
         ----------
-        int_year_start : int, optional
-            Starting year for holiday data, by default (date.today() - timedelta(days=22)).year - 1
-        int_year_end : int, optional
-            Ending year for holiday data, by default (date.today() - timedelta(days=22)).year
+        None
         
         Returns
         -------
         None
         """
-        self.int_year_start = int_year_start
-        self.int_year_end = int_year_end
         self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:
@@ -221,17 +214,28 @@ class DatesBRFebraban(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["NOME_FERIADO"], row["DIA_MES_ANO"]) for _, row in df_.iterrows()]
 
-    def get_holidays_years(self) -> pd.DataFrame:
+    def get_holidays_years(
+        self, 
+        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
+        int_year_end: int = (date.today() - timedelta(days=22)).year
+    ) -> pd.DataFrame:
         """Fetch holiday data for multiple years from FEBRABAN.
+
+        Parameters
+        ----------
+        int_year_start : int, optional
+            Starting year, by default (date.today() - timedelta(days=22)).year - 1
+        int_year_end : int, optional
+            Ending year, by default (date.today() - timedelta(days=22)).year
 
         Returns
         -------
         pd.DataFrame
             Combined holiday data for multiple years
         """
-        self._validate_year_range(self.int_year_start, self.int_year_end)
+        self._validate_year_range(int_year_start, int_year_end)
         list_holidays = []
-        for int_year in range(self.int_year_start, self.int_year_end + 1):
+        for int_year in range(int_year_start, int_year_end + 1):
             raw_data = self.get_holidays_raw(int_year)
             df_ = pd.DataFrame(raw_data) if isinstance(raw_data, list) else raw_data
             df_["ANO"] = int_year

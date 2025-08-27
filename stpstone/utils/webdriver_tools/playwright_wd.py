@@ -231,7 +231,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
             )
             return None
 
-    def _handle_cookie_popup(self, timeout: int = 10) -> None:
+    def _handle_cookie_popup(self, timeout: Optional[int] = 30000) -> None:
         """Attempt to accept cookies if popup appears.
 
         Parameters
@@ -483,7 +483,9 @@ class PlaywrightScraper(metaclass=TypeChecker):
         list[str]
             List of text content from cells
         """
-        elements = self.get_elements(table_selector, selector_type, timeout)
+        if selector_type == "xpath" and not table_selector.startswith("xpath="):
+            table_selector = f"xpath={table_selector}"
+        elements = self.get_elements(table_selector, timeout)
         return [el["text"] for el in elements]
 
     def export_html(

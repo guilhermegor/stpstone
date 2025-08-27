@@ -4,7 +4,7 @@ Tests the ANBIMA and FEBRABAN holiday calendar classes, covering
 initialization, data fetching, transformation, and validation logic.
 """
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 from unittest.mock import Mock, patch
 
@@ -346,9 +346,6 @@ def test_febraban_init(febraban_instance: DatesBRFebraban) -> None:
     """
     assert isinstance(febraban_instance, DatesBRFebraban)
     assert isinstance(febraban_instance.cls_str_handler, StrHandler)
-    assert isinstance(febraban_instance.int_year_start, int)
-    assert isinstance(febraban_instance.int_year_end, int)
-
 
 @patch("requests.get")
 def test_febraban_get_holidays_raw_success(
@@ -587,12 +584,17 @@ def test_get_holidays_years_valid(
     """
     # Convert sample_febraban_json to DataFrame for mocking
     mock_df = pd.DataFrame(sample_febraban_json)
+    
+    # Define the year range for the test (default values from get_holidays_years)
+    int_year_start = (date.today() - timedelta(days=22)).year - 1
+    int_year_end = (date.today() - timedelta(days=22)).year
+    
     with patch.object(febraban_instance, "get_holidays_raw", return_value=mock_df):
-        df_ = febraban_instance.get_holidays_years()
+        df_ = febraban_instance.get_holidays_years(int_year_start, int_year_end)
         assert isinstance(df_, pd.DataFrame)
         assert "ANO" in df_.columns
-        assert len(df_) == 2 * (febraban_instance.int_year_end - 
-                                febraban_instance.int_year_start + 1)
+        # Expect 2 holidays per year (from sample_febraban_json) times the number of years
+        assert len(df_) == 2 * (int_year_end - int_year_start + 1)
         assert df_["diaMes"].iloc[0] == "1 de janeiro"
         assert df_["nomeFeriado"].iloc[0] == "Ano Novo"
 
