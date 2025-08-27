@@ -6,11 +6,13 @@ from ANBIMA and FEBRABAN sources using requests and pandas for data handling.
 
 from datetime import date, timedelta
 from io import BytesIO
+from logging import Logger
 from typing import Optional, Union
 
 import pandas as pd
 import requests
 
+from stpstone.utils.cache.cache_manager import CacheManager
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.parsers.str import StrHandler
 
@@ -29,25 +31,20 @@ class DatesBRAnbima(ABCCalendarOperations):
     def __init__(
         self, 
         bool_persist_cache: bool = True, 
-        bool_cache_holidays: bool = True,
-        path_cache_dir: Optional[str] = None
+        bool_reuse_cache: bool = True,
+        int_days_cache_expiration: int = 1,
+        int_cache_ttl_days: int = 30,
+        path_cache_dir: Optional[str] = None,
+        logger: Optional[Logger] = None
     ) -> None:
-        """Initialize ANBIMA calendar handler.
-        
-        Parameters
-        ----------
-        bool_persist_cache : bool, optional
-            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_cache_holidays : bool, optional
-            If True, caches holidays; if False, does not cache holidays (default: True)
-        path_cache_dir : Optional[str], optional
-            Path to the cache directory (default: None)
-        
-        Returns
-        -------
-        None
-        """
-        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
+        self.cls_cache_manager = CacheManager(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger
+        )
         self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:
@@ -62,7 +59,7 @@ class DatesBRAnbima(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
 
-    @ABCCalendarOperations.cache_holidays(cache_key="br_anbima_holidays_raw")
+    @CacheManager.cache_df(key="br_anbima_holidays_raw")
     def get_holidays_raw(
         self, 
         timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
@@ -210,26 +207,46 @@ class DatesBRFebraban(ABCCalendarOperations):
 
     def __init__(
         self, 
+        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
+        int_year_end: int = (date.today() - timedelta(days=22)).year, 
         bool_persist_cache: bool = True, 
-        bool_cache_holidays: bool = True,
-        path_cache_dir: Optional[str] = None
+        bool_reuse_cache: bool = True,
+        int_days_cache_expiration: int = 1,
+        int_cache_ttl_days: int = 30,
+        path_cache_dir: Optional[str] = None,
+        logger: Optional[Logger] = None
     ) -> None:
-        """Initialize FEBRABAN calendar handler.
+        """Initialize the DatesBRFebraban class.
         
         Parameters
         ----------
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_cache_holidays : bool, optional
-            If True, caches holidays; if False, does not cache holidays (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        int_days_cache_expiration : int, optional
+            Number of days after which the cache expires (default: 1)
+        int_cache_ttl_days : int, optional
+            Number of days after which the cache is considered expired (default: 30)
         path_cache_dir : Optional[str], optional
             Path to the cache directory (default: None)
+        logger : Optional[Logger], optional
+            The logger to use (default: None)
         
         Returns
         -------
         None
         """
-        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
+        self.int_year_start = int_year_start
+        self.int_year_end = int_year_end
+        self.cls_cache_manager = CacheManager(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger
+        )
         self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:
@@ -244,11 +261,8 @@ class DatesBRFebraban(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["NOME_FERIADO"], row["DIA_MES_ANO"]) for _, row in df_.iterrows()]
 
-    def get_holidays_years(
-        self, 
-        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
-        int_year_end: int = (date.today() - timedelta(days=22)).year
-    ) -> pd.DataFrame:
+    @CacheManager.cache_df(key="br_febraban_holidays_raw")
+    def get_holidays_years(self) -> pd.DataFrame:
         """Fetch holiday data for multiple years from FEBRABAN.
 
         Parameters
@@ -263,16 +277,15 @@ class DatesBRFebraban(ABCCalendarOperations):
         pd.DataFrame
             Combined holiday data for multiple years
         """
-        self._validate_year_range(int_year_start, int_year_end)
+        self._validate_year_range(self.int_year_start, self.int_year_end)
         list_holidays = []
-        for int_year in range(int_year_start, int_year_end + 1):
+        for int_year in range(self.int_year_start, self.int_year_end + 1):
             raw_data = self.get_holidays_raw(int_year)
             df_ = pd.DataFrame(raw_data) if isinstance(raw_data, list) else raw_data
             df_["ANO"] = int_year
             list_holidays.extend(df_.to_dict(orient="records"))
         return pd.DataFrame(list_holidays)
 
-    @ABCCalendarOperations.cache_holidays(cache_key="br_febraban_holidays_raw")
     def get_holidays_raw(
         self, 
         int_year: int, 

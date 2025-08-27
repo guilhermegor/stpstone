@@ -5,16 +5,10 @@ providing a common interface for fetching and validating holidays.
 """
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from datetime import date, datetime, time, timedelta, timezone
-from functools import wraps
 import locale
-from logging import Logger
-import os
-from pathlib import Path
-import pickle
 import platform
-from typing import Any, Literal, Optional, TypeVar, Union
+from typing import Literal, Optional, TypeVar, Union
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import businesstimedelta
@@ -22,7 +16,6 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
-from stpstone.utils.loggs.create_logs import CreateLog
 
 
 TypeDateFormatInput = TypeVar(
@@ -53,31 +46,6 @@ class ABCCalendar(ABC, metaclass=ABCTypeCheckerMeta):
         -------
         pd.DataFrame
             DataFrame containing raw holiday data
-
-        Notes
-        -----
-        Initialize the concrete class as follows:
-        def __init__(
-            self, 
-            bool_persist_cache: bool = True, 
-            bool_cache_holidays: bool = True,
-            path_cache_dir: Optional[str] = None
-        ) -> None:
-            super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
-
-        Example of Concrete holidays implementation (please use the decorator, in order to cache 
-        the holidays):
-        def holidays(self) -> list[tuple[str, date]]:
-            df_ = self.get_holidays_raw()
-            df_ = self.transform_holidays(df_)
-            return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
-
-        @ABCCalendarOperations.cache_holidays(cache_key="br_anbima_holidays_raw")
-        def get_holidays_raw(
-            self, 
-            timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-        ) -> pd.DataFrame:
-            pass
         """
         pass
 
@@ -95,30 +63,6 @@ class ABCCalendar(ABC, metaclass=ABCTypeCheckerMeta):
 
 class CalendarCore(ABCCalendar):
     """Abstract base class for calendar operations."""
-
-    def __init__(
-        self, 
-        bool_persist_cache: bool = True, 
-        path_cache_dir: Optional[str] = None,
-    ) -> None:
-        """Initialize the CalendarCore class.
-        
-        Parameters
-        ----------
-        bool_persist_cache : bool, optional
-            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        path_cache_dir : Optional[str], optional
-            Path to the cache directory (default: None)
-        
-        Returns
-        -------
-        None
-        """
-        self.bool_persist_cache = bool_persist_cache
-        self._cache = {}
-        self._path_cache_dir = self._get_cache_dir_path(path_cache_dir)
-        self._cache_expiry = timedelta(days=1)
-        self._cache_history_days = 30
 
     def get_holidays_raw(
         self,
@@ -147,172 +91,6 @@ class CalendarCore(ABCCalendar):
             An empty list.
         """
         return []
-
-    def _get_cache_dir_path(self, path_cache_dir: Optional[str]) -> str:
-        """Get the path to the cache directory.
-        
-        Parameters
-        ----------
-        path_cache_dir : str
-            Path to the cache directory
-        
-        Returns
-        -------
-        str
-            Path to the cache directory
-        """
-        if path_cache_dir:
-            path_cache_dir = Path(path_cache_dir)
-        else:
-            if platform.system() == "Windows":
-                path_cache_dir = Path(os.getenv("APPDATA")) / "stpstone_calendar_cache"
-            else:
-                path_cache_dir = Path.home() / ".cache" / "stpstone_calendar_cache"
-        path_cache_dir.mkdir(parents=True, exist_ok=True)
-        return path_cache_dir
-    
-    def _get_cache_file_path(self, key: str) -> Path:
-        """Get the path to the cache file for a given key.
-        
-        Parameters
-        ----------
-        key : str
-            Key for the cache file
-        
-        Returns
-        -------
-        Path
-            Path to the cache file
-        """
-        safe_key = "".join(c if c.isalnum() else "_" for c in key)
-        return self._path_cache_dir / f"{safe_key}.pkl"
-    
-    def _load_cache(self, key: str) -> Optional[pd.DataFrame]:
-        """Load a DataFrame from the cache file for a given key.
-        
-        Parameters
-        ----------
-        key : str
-            Key for the cache file
-        
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            DataFrame loaded from the cache file
-        """
-        if not self.bool_persist_cache:
-            return self._cache.get(key)
-        path_cache_file = self._get_cache_file_path(key)
-        if path_cache_file.exists():
-            try:
-                with open(path_cache_file, "rb") as f:
-                    cache_data = pickle.load(f)
-                timestamp, df_ = cache_data
-                if datetime.now() - timestamp < self._cache_expiry:
-                    if self._validate_cached_dataframe(df_):
-                        return df_
-                else:
-                    path_cache_file.unlink()
-            except (pickle.PickleError, EOFError, FileNotFoundError) as err:
-                path_cache_file.unlink(missing_ok=True)
-                raise ValueError (
-                    f"Warning: Failed to load cache from {path_cache_file}: {err}") from err
-                
-        return None
-    
-    def _save_cache(self, key: str, df_: pd.DataFrame) -> None:
-        """Save a DataFrame to the cache (in-memory and disk).
-        
-        Parameters
-        ----------
-        key : str
-            Key for the cache file
-        df_ : pd.DataFrame
-            DataFrame to save to the cache file
-
-        Returns
-        -------
-        None
-        """
-        if self._validate_cached_dataframe(df_):
-            self._cache[key] = df_
-            if self.bool_persist_cache:
-                path_cache_file = self._get_cache_file_path(key)
-                try:
-                    with open(path_cache_file, "wb") as f:
-                        pickle.dump((datetime.now(), df_), f)
-                except Exception as err:
-                    raise ValueError(
-                        f"Warning: Failed to save cache to {path_cache_file}: {err}") from err
-    
-    def _validate_cached_dataframe(self, df_: pd.DataFrame) -> bool:
-        """Validate a cached DataFrame.
-        
-        Parameters
-        ----------
-        df_ : pd.DataFrame
-            DataFrame to validate
-        
-        Returns
-        -------
-        bool
-            True if the DataFrame is valid, False otherwise
-        """
-        try:
-            if df_ is None or not isinstance(df_, pd.DataFrame) or df_.empty:
-                return False
-            if len(df_) < 1:
-                return False
-            return True
-        except Exception as err:
-            raise ValueError(f"Warning: cache validation failed. Error: {err}") from err
-    
-    def _clean_old_cache(self) -> None:
-        """Clean old cache files.
-        
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        ValueError
-            If there is an error cleaning the cache
-        """
-        if not self.bool_persist_cache:
-            return
-        now = datetime.now()
-        for cache_file in self._path_cache_dir.glob("*.pkl"):
-            try:
-                with open(cache_file, "rb") as f:
-                    timestamp, _ = pickle.load(f)
-                if now - timestamp > timedelta(days=self._cache_history_days):
-                    cache_file.unlink()
-            except (pickle.PickleError, EOFError, FileNotFoundError) as err:
-                cache_file.unlink(missing_ok=True)
-                raise ValueError(
-                    f"Warning: Failed to load cache from {cache_file}: {err}") from err
-
-    def clear_cache(self) -> None:
-        """Clear the in-memory and disk cache.
-        
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        ValueError
-            If there is an error clearing the cache
-        """
-        self._cache.clear()
-        if self.bool_persist_cache:
-            for cache_file in self._path_cache_dir.glob("*.pkl"):
-                try:
-                    cache_file.unlink()
-                except Exception as err:
-                    raise ValueError(
-                        f"Warning: Failed to clear cache file {cache_file}: {err}") from err
 
     @property
     def _holidays(self) -> set[date]:
@@ -1689,98 +1467,4 @@ class DateFormatter(DatesCurrent):
 class ABCCalendarOperations(DateFormatter):
     """Abstract class for calendar operations."""
 
-    def __init__(
-        self, 
-        bool_persist_cache: bool = True, 
-        bool_cache_holidays: bool = True,
-        path_cache_dir: Optional[str] = None, 
-        logger: Optional[Logger] = None
-    ) -> None:
-        """Initialize the ABCCalendarOperations class.
-        
-        Parameters
-        ----------
-        bool_persist_cache : bool, optional
-            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_cache_holidays : bool, optional
-            If True, caches holidays; if False, does not cache holidays (default: True)
-        path_cache_dir : Optional[str], optional
-            Path to the cache directory (default: None)
-        logger : Optional[Logger], optional
-            The logger to use (default: None)
-
-        Returns
-        -------
-        None
-        """
-        self.logger = logger
-        self.bool_cache_holidays = bool_cache_holidays
-        self.cls_create_log = CreateLog()
-        super().__init__(bool_persist_cache, path_cache_dir)
-
-    @staticmethod
-    def cache_holidays(cache_key: str) -> Callable:
-        """Cache decorator for concrete holidays methods.
-        
-        Parameters
-        ----------
-        cache_key : str
-            The cache key to use.
-        
-        Returns
-        -------
-        Callable
-            The cached holidays method.
-        """
-        def decorator(func: Callable) -> Callable:
-            """Wrap the method with caching functionality.
-            
-            Parameters
-            ----------
-            func : Callable
-                Method to be decorated.
-            
-            Returns
-            -------
-            Callable
-                Wrapped method with caching behavior.
-            """
-            @wraps(func)
-            def wrapper(
-                self,
-                *args: Any, # noqa ANN401: typing.Any is not allowed
-                **kwargs: Any # noqa ANN401: typing.Any is not allowed
-            ) -> pd.DataFrame:
-                """Wrap caching functionality.
-                
-                Parameters
-                ----------
-                *args : Any
-                    Variable-length argument list
-                **kwargs : Any
-                    Arbitrary keyword arguments
-                
-                Returns
-                -------
-                pd.DataFrame
-                    The result of the method call
-                """
-                df_cached = self._load_cache(key=cache_key)
-                if df_cached is not None and not df_cached.empty and self.bool_cache_holidays:
-                    self.cls_create_log.log_message(
-                        self.logger,
-                        f"Using cached holidays from {cache_key}. Path: {self._path_cache_dir}", 
-                        "info"
-                    )
-                    return df_cached
-                self.cls_create_log.log_message(
-                    self.logger,
-                    f"Fetching holidays from {cache_key}", 
-                    "info"
-                )
-                df_ = func(self, *args, **kwargs)
-                self._save_cache(key=cache_key, df_=df_)
-                self._save_cache(key=f"{cache_key}_{self.current_timestamp_string()}", df_=df_)
-                return df_
-            return wrapper
-        return decorator
+    pass

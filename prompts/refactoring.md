@@ -5,7 +5,10 @@
 - **Indentation**: 4 spaces (no tabs)
 - **Python version**: 3.9+ compatibility required
 - **Strings**: Double quotes for all strings and dictionaries
-- **Docstrings**: numpy style with 79 character line limits, Parameters/Returns/Raises/Notes/References sections
+- **Docstrings**: 
+  - Numpy style with 79 character line limits, Parameters/Returns/Raises/Notes/References sections
+  - First line of docstring must be in imperative mood
+  - First line must end with a period
 - **Type hints**: 
   - Mandatory for all function signatures and returns
   - Please preserve data types that I include in the variable names
