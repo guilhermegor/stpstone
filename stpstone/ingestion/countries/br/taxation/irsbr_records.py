@@ -55,7 +55,7 @@ class IRSBR(ABCRequests):
         self.list_slugs = list_slugs
         self.int_delay_seconds = int_delay_seconds
         self.year_date_ref = DatesBRAnbima().year_number(self.date_ref)
-        self.month_date_ref = DatesBRAnbima().month_number(self.date_ref, bl_month_mm=True)
+        self.month_date_ref = DatesBRAnbima().month_str(self.date_ref, bl_month_mm=True)
 
     def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
         return None

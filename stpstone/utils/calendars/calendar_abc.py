@@ -5,10 +5,16 @@ providing a common interface for fetching and validating holidays.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from datetime import date, datetime, time, timedelta, timezone
+from functools import wraps
 import locale
+from logging import Logger
+import os
+from pathlib import Path
+import pickle
 import platform
-from typing import Literal, Optional, TypeVar, Union
+from typing import Any, Literal, Optional, TypeVar, Union
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import businesstimedelta
@@ -16,8 +22,7 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
-from stpstone.utils.cache.cache_persistent import PersistentCacheDecorator
-from stpstone.utils.cache.cache_reset import auto_cache_reset_methods
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 TypeDateFormatInput = TypeVar(
@@ -29,25 +34,8 @@ TypeDateFormatInput = TypeVar(
 TypeDatetimeDate = TypeVar("TypeDatetimeDate", bound=Union[datetime, date])
 
 
-class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
+class ABCCalendar(ABC, metaclass=ABCTypeCheckerMeta):
     """Abstract base class for calendar operations."""
-
-    def __init__(
-        self, 
-        bool_persist_cache: bool = True
-    ) -> None:
-        """Initialize the ABCCalendarCore class.
-        
-        Parameters
-        ----------
-        bool_persist_cache : bool, optional
-            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        
-        Returns
-        -------
-        None
-        """
-        self.bool_persist_cache = bool_persist_cache
 
     @abstractmethod
     def get_holidays_raw(
@@ -65,6 +53,21 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         -------
         pd.DataFrame
             DataFrame containing raw holiday data
+
+        Notes
+        -----
+        Include cached dataframe in the beginning of the concrete method:
+        df_cached = self._load_cache(key="br_anbima_holidays")
+        if df_cached:
+            return df_cached
+
+        Initialize the module as follows:
+        def __init__(
+            self, 
+            bool_persist_cache: bool = True, 
+            path_cache_dir: Optional[str] = None
+        ) -> None:
+            super().__init__(bool_persist_cache, path_cache_dir)
         """
         pass
 
@@ -79,6 +82,209 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         """
         pass
 
+
+class CalendarCore(ABCCalendar):
+    """Abstract base class for calendar operations."""
+
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True, 
+        path_cache_dir: Optional[str] = None,
+    ) -> None:
+        """Initialize the CalendarCore class.
+        
+        Parameters
+        ----------
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
+        
+        Returns
+        -------
+        None
+        """
+        self.bool_persist_cache = bool_persist_cache
+        self._cache = {}
+        self._path_cache_dir = self._get_cache_dir_path(path_cache_dir)
+        self._cache_expiry = timedelta(days=1)
+        self._cache_history_days = 30
+
+    def get_holidays_raw(
+        self,
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
+        """Return an empty DataFrame as a default implementation.
+        
+        Returns
+        -------
+        pd.DataFrame
+            An empty DataFrame.
+        """
+        return pd.DataFrame(columns=["name", "date"])
+
+    def holidays(self) -> list[tuple[str, date]]:
+        """Return an empty list of holidays as a default implementation.
+        
+        Returns
+        -------
+        list[tuple[str, date]]
+            An empty list.
+        """
+        return []
+
+    def _get_cache_dir_path(self, path_cache_dir: Optional[str]) -> str:
+        """Get the path to the cache directory.
+        
+        Parameters
+        ----------
+        path_cache_dir : str
+            Path to the cache directory
+        
+        Returns
+        -------
+        str
+            Path to the cache directory
+        """
+        if path_cache_dir:
+            path_cache_dir = Path(path_cache_dir)
+        else:
+            if platform.system() == "Windows":
+                path_cache_dir = Path(os.getenv("APPDATA")) / "stpstone_calendar_cache"
+            else:
+                path_cache_dir = Path.home() / ".cache" / "stpstone_calendar_cache"
+        path_cache_dir.mkdir(parents=True, exist_ok=True)
+        return path_cache_dir
+    
+    def _get_cache_file_path(self, key: str) -> Path:
+        """Get the path to the cache file for a given key.
+        
+        Parameters
+        ----------
+        key : str
+            Key for the cache file
+        
+        Returns
+        -------
+        Path
+            Path to the cache file
+        """
+        safe_key = "".join(c if c.isalnum() else "_" for c in key)
+        return self._path_cache_dir / f"{safe_key}.pkl"
+    
+    def _load_cache(self, key: str) -> Optional[pd.DataFrame]:
+        """Load a DataFrame from the cache file for a given key.
+        
+        Parameters
+        ----------
+        key : str
+            Key for the cache file
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            DataFrame loaded from the cache file
+        """
+        if not self.bool_persist_cache:
+            return self._cache.get(key)
+        path_cache_file = self._get_cache_file_path(key)
+        if path_cache_file.exists():
+            try:
+                with open(path_cache_file, "rb") as f:
+                    cache_data = pickle.load(f)
+                timestamp, df_ = cache_data
+                if datetime.now() - timestamp < self._cache_expiry:
+                    if self._validate_cached_dataframe(df_):
+                        return df_
+                else:
+                    path_cache_file.unlink()
+            except (pickle.PickleError, EOFError, FileNotFoundError) as err:
+                path_cache_file.unlink(missing_ok=True)
+                raise ValueError (
+                    f"Warning: Failed to load cache from {path_cache_file}: {err}") from err
+                
+        return None
+    
+    def _save_cache(self, key: str, df_: pd.DataFrame) -> None:
+        """Save a DataFrame to the cache (in-memory and disk).
+        
+        Parameters
+        ----------
+        key : str
+            Key for the cache file
+        df_ : pd.DataFrame
+            DataFrame to save to the cache file
+        """
+        if self._validate_cached_dataframe(df_):
+            self._cache[key] = df_
+            if self.bool_persist_cache:
+                path_cache_file = self._get_cache_file_path(key)
+                try:
+                    with open(path_cache_file, "wb") as f:
+                        pickle.dump((datetime.now(), df_), f)
+                except Exception as err:
+                    raise ValueError(
+                        f"Warning: Failed to save cache to {path_cache_file}: {err}") from err
+    
+    def _validate_cached_dataframe(self, df_: pd.DataFrame) -> bool:
+        """Validate a cached DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            DataFrame to validate
+        
+        Returns
+        -------
+        bool
+            True if the DataFrame is valid, False otherwise
+        """
+        try:
+            if df_ is None or not isinstance(df_, pd.DataFrame) or df_.empty:
+                return False
+            if len(df_) < 1:
+                return False
+            return True
+        except Exception as err:
+            raise ValueError(f"Warning: cache validation failed. Error: {err}") from err
+    
+    def _clean_old_cache(self) -> None:
+        """Clean old cache files."""
+        if not self.bool_persist_cache:
+            return
+        now = datetime.now()
+        for cache_file in self._path_cache_dir.glob("*.pkl"):
+            try:
+                with open(cache_file, "rb") as f:
+                    timestamp, _ = pickle.load(f)
+                if now - timestamp > timedelta(days=self._cache_history_days):
+                    cache_file.unlink()
+            except (pickle.PickleError, EOFError, FileNotFoundError) as err:
+                cache_file.unlink(missing_ok=True)
+                raise ValueError(
+                    f"Warning: Failed to load cache from {cache_file}: {err}") from err
+
+    def clear_cache(self) -> None:
+        """Clear the in-memory and disk cache.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If there is an error clearing the cache
+        """
+        self._cache.clear()
+        if self.bool_persist_cache:
+            for cache_file in self._path_cache_dir.glob("*.pkl"):
+                try:
+                    cache_file.unlink()
+                except Exception as err:
+                    raise ValueError(
+                        f"Warning: Failed to clear cache file {cache_file}: {err}") from err
+
     @property
     def _holidays(self) -> set[date]:
         """Return a set of holiday dates.
@@ -91,23 +297,6 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         if not hasattr(self, "_holidays_cache"):
             self._holidays_cache = {tup_holiday[1] for tup_holiday in self.holidays()}
         return self._holidays_cache
-    
-    def clear_holidays_cache(self) -> None:
-        """Clear the cached holidays to reflect updates.
-        
-        Returns
-        -------
-        None
-        """
-        if hasattr(self, "_holidays_cache"):
-            del self._holidays_cache
-        # __call__ implementation to persist cache, which will update the cache cleared
-        cache_decorator = PersistentCacheDecorator(
-            path_cache=f".stpstone_cache/{self.__class__.__name__.lower()}_holidays_cache.pkl",
-            cache_key="holidays", 
-            bool_persist_cache=self.bool_persist_cache
-        )
-        cache_decorator.clear_cache()
 
     def date_only(
         self, 
@@ -214,38 +403,8 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
             if int(date_.strftime("%Y")) == int_year
         ]
 
-class ABCDateManipulation(ABCCalendarCore):
+class DateManipulation(CalendarCore):
     """Abstract class for date manipulation operations."""
-
-    @abstractmethod
-    def get_holidays_raw(
-        self, 
-        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-    ) -> pd.DataFrame:
-        """Return a DataFrame containing raw holiday data.
-
-        Parameters
-        ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
-            Timeout for HTTP request, by default (12.0, 21.0)
-        
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing raw holiday data
-        """
-        pass
-
-    @abstractmethod
-    def holidays(self) -> list[tuple[str, date]]:
-        """Holidays abstract method implementation.
-        
-        Returns
-        -------
-        list[tuple[str, date]]
-            List of tuples containing holiday names and dates
-        """
-        pass
 
     def add_working_days(
         self, 
@@ -578,38 +737,8 @@ class ABCDateManipulation(ABCCalendarCore):
         return (datetime(1899, 12, 30) + timedelta(days=int_excel_date)).date()
 
 
-class ABCTimezoneAware(ABCDateManipulation):
+class DateTimezoneAware(DateManipulation):
     """Abstract class for date manipulation with timezone support."""
-
-    @abstractmethod
-    def get_holidays_raw(
-        self, 
-        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-    ) -> pd.DataFrame:
-        """Return a DataFrame containing raw holiday data.
-
-        Parameters
-        ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
-            Timeout for HTTP request, by default (12.0, 21.0)
-        
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing raw holiday data
-        """
-        pass
-
-    @abstractmethod
-    def holidays(self) -> list[tuple[str, date]]:
-        """Holidays abstract method implementation.
-        
-        Returns
-        -------
-        list[tuple[str, date]]
-            List of tuples containing holiday names and dates
-        """
-        pass
 
     def str_date_to_datetime(
         self, 
@@ -818,38 +947,8 @@ class ABCTimezoneAware(ABCDateManipulation):
         return date_ref
 
 
-class ABCRangeDatesDelta(ABCDateManipulation):
+class DatesRangeDelta(DateTimezoneAware):
     """Abstract class for range dates and delta operations."""
-
-    @abstractmethod
-    def get_holidays_raw(
-        self, 
-        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-    ) -> pd.DataFrame:
-        """Return a DataFrame containing raw holiday data.
-
-        Parameters
-        ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
-            Timeout for HTTP request, by default (12.0, 21.0)
-        
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing raw holiday data
-        """
-        pass
-
-    @abstractmethod
-    def holidays(self) -> list[tuple[str, date]]:
-        """Holidays abstract method implementation.
-        
-        Returns
-        -------
-        list[tuple[str, date]]
-            List of tuples containing holiday names and dates
-        """
-        pass
 
     def working_days_range(
         self, 
@@ -1265,38 +1364,8 @@ class ABCRangeDatesDelta(ABCDateManipulation):
         return int(delta.hours)
 
 
-class ABCCurrentDate(ABCCalendarCore):
+class DatesCurrent(DatesRangeDelta):
     """Abstract class for getting current date and time."""
-
-    @abstractmethod
-    def get_holidays_raw(
-        self, 
-        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-    ) -> pd.DataFrame:
-        """Return a DataFrame containing raw holiday data.
-
-        Parameters
-        ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
-            Timeout for HTTP request, by default (12.0, 21.0)
-        
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing raw holiday data
-        """
-        pass
-
-    @abstractmethod
-    def holidays(self) -> list[tuple[str, date]]:
-        """Holidays abstract method implementation.
-        
-        Returns
-        -------
-        list[tuple[str, date]]
-            List of tuples containing holiday names and dates
-        """
-        pass
 
     def curr_date(self) -> date:
         """Return the current date.
@@ -1366,38 +1435,8 @@ class ABCCurrentDate(ABCCalendarCore):
         return self.curr_datetime(str_timezone=str_timezone).strftime(format_output)
     
 
-class ABCDateFormatter(ABCCalendarCore):
+class DateFormatter(DatesCurrent):
     """Abstract class for date formatting."""
-
-    @abstractmethod
-    def get_holidays_raw(
-        self, 
-        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-    ) -> pd.DataFrame:
-        """Return a DataFrame containing raw holiday data.
-
-        Parameters
-        ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
-            Timeout for HTTP request, by default (12.0, 21.0)
-        
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing raw holiday data
-        """
-        pass
-
-    @abstractmethod
-    def holidays(self) -> list[tuple[str, date]]:
-        """Holidays abstract method implementation.
-        
-        Returns
-        -------
-        list[tuple[str, date]]
-            List of tuples containing holiday names and dates
-        """
-        pass
 
     def get_platform_locale(
         self,
@@ -1474,6 +1513,22 @@ class ABCDateFormatter(ABCCalendarCore):
         """
         date_ = self.date_only(date_)
         return int(date_.strftime("%Y"))
+    
+    def month_str(self, date_: TypeDatetimeDate) -> str:
+        """Return the month name.
+        
+        Parameters
+        ----------
+        date_ : TypeDatetimeDate
+            The date to get the month name from.
+        
+        Returns
+        -------
+        str
+            The month name.
+        """
+        date_ = self.date_only(date_)
+        return date_.strftime("%B")
 
     def month_number(
         self, date_: TypeDatetimeDate, 
@@ -1602,43 +1657,99 @@ class ABCDateFormatter(ABCCalendarCore):
         return datetime.now(timezone.utc)
     
 
-@auto_cache_reset_methods([
-    ("holidays", ["clear_holidays_cache"])
-])
-class ABCCalendarOperations(
-    ABCTimezoneAware, 
-    ABCRangeDatesDelta, 
-    ABCCurrentDate, 
-    ABCDateFormatter
-):
+class ABCCalendarOperations(DateFormatter):
     """Abstract class for calendar operations."""
 
-    @abstractmethod
-    def get_holidays_raw(
+    def __init__(
         self, 
-        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
-    ) -> pd.DataFrame:
-        """Return a DataFrame containing raw holiday data.
-
+        bool_persist_cache: bool = True, 
+        bool_cache_holidays: bool = True,
+        path_cache_dir: Optional[str] = None, 
+        logger: Optional[Logger] = None
+    ) -> None:
+        """Initialize the ABCCalendarOperations class.
+        
         Parameters
         ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
-            Timeout for HTTP request, by default (12.0, 21.0)
-        
-        Returns
-        -------
-        pd.DataFrame
-            DataFrame containing raw holiday data
-        """
-        pass
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
+        logger : Optional[Logger], optional
+            The logger to use (default: None)
 
-    @abstractmethod
-    def holidays(self) -> list[tuple[str, date]]:
-        """Holidays abstract method implementation.
+        Returns
+        -------
+        None
+        """
+        self.logger = logger
+        self.bool_cache_holidays = bool_cache_holidays
+        self.cls_create_log = CreateLog()
+        super().__init__(bool_persist_cache, path_cache_dir)
+
+    @staticmethod
+    def cache_holidays(cache_key: str) -> Callable:
+        """Cache decorator for concrete holidays methods.
+        
+        Parameters
+        ----------
+        cache_key : str
+            The cache key to use.
         
         Returns
         -------
-        list[tuple[str, date]]
-            List of tuples containing holiday names and dates
+        Callable
+            The cached holidays method.
         """
-        pass
+        def decorator(func: Callable) -> Callable:
+            """Wrap the method with caching functionality.
+            
+            Parameters
+            ----------
+            func : Callable
+                Method to be decorated.
+            
+            Returns
+            -------
+            Callable
+                Wrapped method with caching behavior.
+            """
+            @wraps(func)
+            def wrapper(
+                self,
+                *args: Any, # noqa ANN401: typing.Any is not allowed
+                **kwargs: Any # noqa ANN401: typing.Any is not allowed
+            ) -> pd.DataFrame:
+                """Wrap caching functionality.
+                
+                Parameters
+                ----------
+                *args : Any
+                    Variable-length argument list
+                **kwargs : Any
+                    Arbitrary keyword arguments
+                
+                Returns
+                -------
+                pd.DataFrame
+                    The result of the method call
+                """
+                df_cached = self._load_cache(key=cache_key)
+                if df_cached is not None and not df_cached.empty and self.bool_cache_holidays:
+                    self.cls_create_log.log_message(
+                        self.logger,
+                        f"Using cached holidays from {cache_key}. Path: {self._path_cache_dir}", 
+                        "info"
+                    )
+                    return df_cached
+                self.cls_create_log.log_message(
+                    self.logger,
+                    f"Fetching holidays from {cache_key}", 
+                    "info"
+                )
+                df_ = func(self, *args, **kwargs)
+                self._save_cache(key=cache_key, df_=df_)
+                self._save_cache(key=f"{cache_key}_{self.current_timestamp_string()}", df_=df_)
+                return df_
+            return wrapper
+        return decorator

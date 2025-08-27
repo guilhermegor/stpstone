@@ -20,7 +20,12 @@ from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 class DatesUSANasdaq(ABCCalendarOperations):
     """NASDAQ holiday calendar data fetcher and processor."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True, 
+        bool_cache_holidays: bool = True,
+        path_cache_dir: Optional[str] = None
+    ) -> None:
         """Initialize Nasdaq calendar handler with HTML and dict utilities.
         
         Parameters
@@ -31,6 +36,7 @@ class DatesUSANasdaq(ABCCalendarOperations):
         -------
         None
         """
+        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
         self.cls_html_handler = HtmlHandler()
         self.cls_dict_handler = HandlingDicts()
 
@@ -46,6 +52,7 @@ class DatesUSANasdaq(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["DESCRIPTION"], row["DATE_WINS"]) for _, row in df_.iterrows()]
 
+    @ABCCalendarOperations.cache_holidays(cache_key="usa_nasdaq_holidays")
     def get_holidays_raw(self, timeout: Optional[int] = 10) -> pd.DataFrame:
         """Fetch raw NASDAQ holiday calendar data from website.
 
@@ -177,17 +184,28 @@ class DatesUSANasdaq(ABCCalendarOperations):
 class DatesUSAFederalHolidays(ABCCalendarOperations):
     """US Federal holiday calendar data fetcher and processor."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True, 
+        bool_cache_holidays: bool = True,
+        path_cache_dir: Optional[str] = None
+    ) -> None:
         """Initialize Federal holidays handler with HTML and dict utilities.
         
         Parameters
         ----------
-        None
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_cache_holidays : bool, optional
+            If True, caches holidays; if False, does not cache holidays (default: True)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
 
         Returns
         -------
         None
         """
+        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
         self.cls_html_handler = HtmlHandler()
         self.cls_dict_handler = HandlingDicts()
 
@@ -203,6 +221,7 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["NAME"], row["DATE_WINS"]) for _, row in df_.iterrows()]
 
+    @ABCCalendarOperations.cache_holidays(cache_key="usa_federal_holidays")
     def get_holidays_years(
         self, 
         int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
@@ -248,6 +267,10 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         RuntimeError
             If Playwright navigation or data extraction fails
         """
+        df_cached = self._load_cache(key="usa_federal_holidays")
+        if df_cached:
+            return df_cached
+        
         self._validate_year(int_year)
         url = f"https://www.federalholidays.net/usa/federal-holidays-{int_year}.html"
         scraper = PlaywrightScraper(bool_headless=True, int_default_timeout=timeout)

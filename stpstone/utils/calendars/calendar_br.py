@@ -6,7 +6,7 @@ from ANBIMA and FEBRABAN sources using requests and pandas for data handling.
 
 from datetime import date, timedelta
 from io import BytesIO
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 import requests
@@ -26,8 +26,28 @@ class DatesBRAnbima(ABCCalendarOperations):
     .. [1] https://www.anbima.com.br/feriados/arqs/feriados_nacionais.xls
     """
 
-    def __init__(self) -> None:
-        """Initialize ANBIMA calendar handler with string utilities."""
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True, 
+        bool_cache_holidays: bool = True,
+        path_cache_dir: Optional[str] = None
+    ) -> None:
+        """Initialize ANBIMA calendar handler.
+        
+        Parameters
+        ----------
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_cache_holidays : bool, optional
+            If True, caches holidays; if False, does not cache holidays (default: True)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
         self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:
@@ -42,6 +62,7 @@ class DatesBRAnbima(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
 
+    @ABCCalendarOperations.cache_holidays(cache_key="br_anbima_holidays_raw")
     def get_holidays_raw(
         self, 
         timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
@@ -188,18 +209,24 @@ class DatesBRFebraban(ABCCalendarOperations):
     """
 
     def __init__(
-        self
+        self, 
+        bool_persist_cache: bool = True, 
+        path_cache_dir: Optional[str] = None
     ) -> None:
-        """Initialize FEBRABAN calendar handler with string utilities.
-
+        """Initialize FEBRABAN calendar handler.
+        
         Parameters
         ----------
-        None
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
         
         Returns
         -------
         None
         """
+        super().__init__(bool_persist_cache, path_cache_dir)
         self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:
@@ -242,6 +269,7 @@ class DatesBRFebraban(ABCCalendarOperations):
             list_holidays.extend(df_.to_dict(orient="records"))
         return pd.DataFrame(list_holidays)
 
+    @ABCCalendarOperations.cache_holidays(cache_key="br_febraban_holidays_raw")
     def get_holidays_raw(
         self, 
         int_year: int, 
