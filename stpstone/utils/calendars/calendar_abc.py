@@ -50,7 +50,10 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         self.bool_persist_cache = bool_persist_cache
 
     @abstractmethod
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Return a DataFrame containing raw holiday data.
         
         Returns

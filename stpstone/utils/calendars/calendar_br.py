@@ -6,12 +6,12 @@ from ANBIMA and FEBRABAN sources using requests and pandas for data handling.
 
 from datetime import date, timedelta
 from io import BytesIO
+from typing import Union
 
 import pandas as pd
 import requests
 
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
-from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -37,40 +37,36 @@ class DatesBRAnbima(ABCCalendarOperations):
         -------
         list[tuple[str, date]]
             List of holiday tuples containing (name, date)
-
-        Raises
-        ------
-        ValueError
-            If holiday data cannot be fetched or processed
         """
         df_ = self.get_holidays_raw()
         df_ = self.transform_holidays(df_)
         return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
 
-    def get_holidays_raw(self) -> pd.DataFrame:
+    def get_holidays_raw(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Fetch raw holiday data from ANBIMA Excel file.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
 
         Returns
         -------
         pd.DataFrame
             Raw holiday data with DATE, WEEKDAY, NAME columns
-
-        Raises
-        ------
-        requests.HTTPError
-            If HTTP request fails
-        ValueError
-            If response content is empty or invalid
         """
         url = "https://www.anbima.com.br/feriados/arqs/feriados_nacionais.xls"
 
         dict_headers = {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7", # noqa E501: line too long
             "accept-language": "en-US,en;q=0.9,pt;q=0.8,es;q=0.7",
-            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36", # noqa E501: line too long
         }
 
-        resp_req = requests.get(url, headers=dict_headers)
+        resp_req = requests.get(url, headers=dict_headers, timeout=timeout)
         resp_req.raise_for_status()
         self._validate_response_content(resp_req.content)
 
@@ -93,11 +89,6 @@ class DatesBRAnbima(ABCCalendarOperations):
         -------
         pd.DataFrame
             Standardized holiday data with proper types
-
-        Raises
-        ------
-        ValueError
-            If DataFrame is empty after processing
         """
         self._validate_dataframe(df_, "df_holidays_raw")
 
@@ -129,11 +120,6 @@ class DatesBRAnbima(ABCCalendarOperations):
         -------
         pd.DataFrame
             DataFrame with footer rows removed
-
-        Raises
-        ------
-        ValueError
-            If DataFrame is empty
         """
         self._validate_dataframe(df_, "df_to_remove_footer")
         footer_index = None
@@ -222,7 +208,6 @@ class DatesBRFebraban(ABCCalendarOperations):
         self.int_year_start = int_year_start
         self.int_year_end = int_year_end
         self.cls_str_handler = StrHandler()
-        self.cls_dict_handler = HandlingDicts()
 
     def holidays(self) -> list[tuple[str, date]]:
         """Get list of Brazilian holidays from FEBRABAN.
@@ -231,11 +216,6 @@ class DatesBRFebraban(ABCCalendarOperations):
         -------
         list[tuple[str, date]]
             List of holiday tuples containing (name, date)
-
-        Raises
-        ------
-        ValueError
-            If holiday data cannot be fetched or processed
         """
         df_ = self.get_holidays_years()
         df_ = self.transform_holidays(df_)
@@ -248,39 +228,34 @@ class DatesBRFebraban(ABCCalendarOperations):
         -------
         pd.DataFrame
             Combined holiday data for multiple years
-
-        Raises
-        ------
-        ValueError
-            If year range is invalid or data fetching fails
         """
         self._validate_year_range(self.int_year_start, self.int_year_end)
         list_holidays = []
         for int_year in range(self.int_year_start, self.int_year_end + 1):
-            list_ser = self.get_holidays_raw(int_year)
-            list_ser = self.cls_dict_handler.add_key_value_to_dicts(list_ser, "ANO", int_year)
-            list_holidays.extend(list_ser)
+            raw_data = self.get_holidays_raw(int_year)
+            df_ = pd.DataFrame(raw_data) if isinstance(raw_data, list) else raw_data
+            df_["ANO"] = int_year
+            list_holidays.extend(df_.to_dict(orient="records"))
         return pd.DataFrame(list_holidays)
 
-    def get_holidays_raw(self, int_year: int) -> list[dict]:
+    def get_holidays_raw(
+        self, 
+        int_year: int, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
         """Fetch raw holiday data from FEBRABAN API for specific year.
 
         Parameters
         ----------
         int_year : int
             Year to fetch holidays for
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
 
         Returns
         -------
-        list[dict]
-            Raw holiday data as list of dictionaries
-
-        Raises
-        ------
-        requests.HTTPError
-            If HTTP request fails
-        ValueError
-            If year is invalid or response is malformed
+        pd.DataFrame
+            Raw holiday data as a DataFrame
         """
         self._validate_year(int_year)
         url = f"https://feriadosbancarios.febraban.org.br/Home/ObterFeriadosFederais?ano={int_year}"
@@ -293,7 +268,7 @@ class DatesBRFebraban(ABCCalendarOperations):
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36", # noqa E501: line too long
             "X-Requested-With": "XMLHttpRequest",
             "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
             "sec-ch-ua-mobile": "?0",
@@ -308,11 +283,11 @@ class DatesBRFebraban(ABCCalendarOperations):
             "_ga_KJWKM4PZXY": "GS2.1.s1756238150$o1$g0$t1756238155$j55$l0$h0",
         }
 
-        resp_req = requests.get(url, headers=headers, cookies=cookies)
+        resp_req = requests.get(url, headers=headers, cookies=cookies, timeout=timeout)
         resp_req.raise_for_status()
         json_response = resp_req.json()
         self._validate_json_response(json_response, int_year)
-        return json_response
+        return pd.DataFrame(json_response)
 
     def transform_holidays(self, df_: pd.DataFrame) -> pd.DataFrame:
         """Transform raw holiday data into standardized format.
@@ -326,11 +301,6 @@ class DatesBRFebraban(ABCCalendarOperations):
         -------
         pd.DataFrame
             Standardized holiday data with proper types
-
-        Raises
-        ------
-        ValueError
-            If DataFrame is empty or transformation fails
         """
         self._validate_dataframe(df_, "df_holidays_raw")
 
@@ -363,7 +333,7 @@ class DatesBRFebraban(ABCCalendarOperations):
         ----------
         date_str : str
             Brazilian date string (e.g., "1 de janeiro")
-        year : int
+        int_year : int
             Year to use for date construction
 
         Returns
