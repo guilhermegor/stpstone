@@ -7,9 +7,8 @@ Tests the functionality of Nasdaq and Federal holiday calendar classes including
 - Edge cases and type validation
 """
 
-from datetime import date, timedelta
-from typing import Any, Dict, List, Tuple
-from unittest.mock import Mock, patch
+from datetime import date
+from unittest.mock import MagicMock, Mock, patch
 
 import pandas as pd
 import pytest
@@ -51,13 +50,13 @@ def federal_calendar() -> DatesUSAFederalHolidays:
 
 
 @pytest.fixture
-def sample_nasdaq_raw_data() -> List[Dict[str, str]]:
+def sample_nasdaq_raw_data() -> list[dict[str, str]]:
     """Fixture providing sample raw Nasdaq holiday data.
 
     Returns
     -------
-    List[Dict[str, str]]
-        List of dictionaries with DATE, DESCRIPTION, STATUS
+    list[dict[str, str]]
+        list of dictionaries with DATE, DESCRIPTION, STATUS
     """
     return [
         {"DATE": "January 1, 2023", "DESCRIPTION": "New Year's Day", "STATUS": "Open"},
@@ -66,13 +65,13 @@ def sample_nasdaq_raw_data() -> List[Dict[str, str]]:
 
 
 @pytest.fixture
-def sample_federal_raw_data() -> List[Dict[str, str]]:
+def sample_federal_raw_data() -> list[dict[str, str]]:
     """Fixture providing sample raw Federal holiday data.
 
     Returns
     -------
-    List[Dict[str, str]]
-        List of dictionaries with DATE, WEEKDAY, NAME, YEAR
+    list[dict[str, str]]
+        list of dictionaries with DATE, WEEKDAY, NAME, YEAR
     """
     return [
         {"DATE": "January 1", "WEEKDAY": "Sunday", "NAME": "New Year's Day", "YEAR": 2023},
@@ -123,9 +122,13 @@ def mock_playwright_scraper() -> Mock:
     mock_scraper = Mock()
     mock_scraper.navigate.return_value = True
     mock_scraper.get_list_data.return_value = ["January 1", "Sunday", "New Year's Day"]
-    # Add context manager support
-    mock_scraper.launch.return_value.__enter__.return_value = mock_scraper
-    mock_scraper.launch.return_value.__exit__.return_value = None
+    
+    # Configure context manager support
+    mock_context = MagicMock()  # Use MagicMock instead of Mock
+    mock_context.__enter__.return_value = mock_scraper
+    mock_context.__exit__.return_value = None
+    mock_scraper.launch.return_value = mock_context
+    
     return mock_scraper
 
 
@@ -199,7 +202,7 @@ class TestDatesUSANasdaq:
         result = nasdaq_calendar.get_holidays_raw(timeout=15)
 
         mock_get.assert_called_once_with(
-            "https://nasdaqtrader.com/trader.aspx?id=Calendar", timeout=15, verify=False
+            "https://nasdaqtrader.com/trader.aspx?id=Calendar", timeout=15
         )
         assert isinstance(result, pd.DataFrame)
         assert "DATE" in result.columns
@@ -235,7 +238,7 @@ class TestDatesUSANasdaq:
         assert "Failed to fetch NASDAQ holidays" in str(excinfo.value)
 
     def test_transform_holidays_success(
-        self, nasdaq_calendar: DatesUSANasdaq, sample_nasdaq_raw_data: List[Dict[str, str]]
+        self, nasdaq_calendar: DatesUSANasdaq, sample_nasdaq_raw_data: list[dict[str, str]]
     ) -> None:
         """Test successful holiday data transformation.
 
@@ -249,7 +252,7 @@ class TestDatesUSANasdaq:
         ----------
         nasdaq_calendar : DatesUSANasdaq
             Nasdaq calendar fixture
-        sample_nasdaq_raw_data : List[Dict[str, str]]
+        sample_nasdaq_raw_data : list[dict[str, str]]
             Sample raw data fixture
 
         Returns
@@ -347,13 +350,16 @@ class TestDatesUSANasdaq:
             "1 January 2023",
         ],
     )
-    def test_parse_dates_invalid(self, nasdaq_calendar: DatesUSANasdaq, invalid_date: str) -> None:
+    def test_parse_dates_invalid(
+        self, 
+        nasdaq_calendar: DatesUSANasdaq, 
+        invalid_date: str
+    ) -> None:
         """Test invalid date string parsing.
 
         Verifies
         --------
         - Invalid date strings raise ValueError
-        - Error messages are appropriate
 
         Parameters
         ----------
@@ -375,7 +381,7 @@ class TestDatesUSANasdaq:
         Verifies
         --------
         - Returns list of tuples with string and date
-        - List is not empty
+        - list is not empty
 
         Parameters
         ----------
@@ -494,7 +500,10 @@ class TestDatesUSAFederalHolidays:
         assert isinstance(federal_calendar.cls_html_handler, HtmlHandler)
         assert isinstance(federal_calendar.cls_dict_handler, HandlingDicts)
 
-    def test_get_holidays_years_valid_range(self, federal_calendar: DatesUSAFederalHolidays) -> None:
+    def test_get_holidays_years_valid_range(
+        self, 
+        federal_calendar: DatesUSAFederalHolidays
+    ) -> None:
         """Test valid year range handling.
 
         Verifies
@@ -513,7 +522,12 @@ class TestDatesUSAFederalHolidays:
         """
         with patch.object(federal_calendar, "get_holidays_raw") as mock_raw:
             mock_raw.return_value = pd.DataFrame(
-                {"DATE": ["January 1"], "WEEKDAY": ["Sunday"], "NAME": ["New Year"], "YEAR": [2023]}
+                {
+                    "DATE": ["January 1"], 
+                    "WEEKDAY": ["Sunday"], 
+                    "NAME": ["New Year"], 
+                    "YEAR": [2023]
+                }
             )
 
             result = federal_calendar.get_holidays_years(2023, 2024)
@@ -521,7 +535,10 @@ class TestDatesUSAFederalHolidays:
             assert isinstance(result, pd.DataFrame)
             assert mock_raw.call_count == 2
 
-    def test_get_holidays_years_invalid_range(self, federal_calendar: DatesUSAFederalHolidays) -> None:
+    def test_get_holidays_years_invalid_range(
+        self, 
+        federal_calendar: DatesUSAFederalHolidays
+    ) -> None:
         """Test invalid year range validation.
 
         Verifies
@@ -542,7 +559,11 @@ class TestDatesUSAFederalHolidays:
             federal_calendar.get_holidays_years(2024, 2023)
 
     @pytest.mark.parametrize("invalid_year", [0, -1, -2023])
-    def test_validate_year_negative(self, federal_calendar: DatesUSAFederalHolidays, invalid_year: int) -> None:
+    def test_validate_year_negative(
+        self, 
+        federal_calendar: DatesUSAFederalHolidays, 
+        invalid_year: int
+    ) -> None:
         """Test negative year validation.
 
         Verifies
@@ -630,18 +651,20 @@ class TestDatesUSAFederalHolidays:
         None
         """
         mock_playwright_scraper.navigate.return_value = False
-        mock_playwright_scraper.launch.return_value.__enter__.return_value = mock_playwright_scraper
+        mock_playwright_scraper.launch.return_value.__enter__.return_value = \
+            mock_playwright_scraper
         mock_playwright_scraper.launch.return_value.__exit__.return_value = None
 
         with patch(
             "stpstone.utils.calendars.calendar_usa.PlaywrightScraper",
             return_value=mock_playwright_scraper,
-        ):
-            with pytest.raises(RuntimeError, match="Failed to navigate to URL"):
-                federal_calendar.get_holidays_raw(2023)
+        ), pytest.raises(RuntimeError, match="Failed to navigate to URL"):
+            federal_calendar.get_holidays_raw(2023)
 
     def test_transform_holidays_success(
-        self, federal_calendar: DatesUSAFederalHolidays, sample_federal_raw_data: List[Dict[str, str]]
+        self, 
+        federal_calendar: DatesUSAFederalHolidays, 
+        sample_federal_raw_data: list[dict[str, str]]
     ) -> None:
         """Test successful Federal holiday data transformation.
 
@@ -655,7 +678,7 @@ class TestDatesUSAFederalHolidays:
         ----------
         federal_calendar : DatesUSAFederalHolidays
             Federal calendar fixture
-        sample_federal_raw_data : List[Dict[str, str]]
+        sample_federal_raw_data : list[dict[str, str]]
             Sample raw data fixture
 
         Returns
@@ -672,7 +695,10 @@ class TestDatesUSAFederalHolidays:
         assert result["NAME"].dtype == "object"
         assert result["YEAR"].dtype == "int64"
 
-    def test_transform_holidays_empty_dataframe(self, federal_calendar: DatesUSAFederalHolidays) -> None:
+    def test_transform_holidays_empty_dataframe(
+        self, 
+        federal_calendar: DatesUSAFederalHolidays
+    ) -> None:
         """Test transformation with empty DataFrame.
 
         Verifies
@@ -722,24 +748,25 @@ class TestDatesUSAFederalHolidays:
             assert result == expected
 
     @pytest.mark.parametrize(
-        "invalid_date",
+    "invalid_date",
         [
             "",
             "InvalidDate",
-            "January",
-            "1",
-            "1 January",
+            "January",  # Missing day
+            "1",  # Missing month
+            "January 1st",  # Invalid day format
+            "32 January",  # Invalid day number
         ],
     )
     def test_parse_dates_with_year_invalid(
         self, federal_calendar: DatesUSAFederalHolidays, invalid_date: str
     ) -> None:
-        """Test invalid date string parsing with year.
+        """Test invalid date string parsing with year parameter.
 
         Verifies
         --------
         - Invalid date strings raise ValueError
-        - Error messages are appropriate
+        - Various invalid formats are rejected
 
         Parameters
         ----------
@@ -761,7 +788,7 @@ class TestDatesUSAFederalHolidays:
         Verifies
         --------
         - Returns list of tuples with string and date
-        - List is not empty
+        - list is not empty
 
         Parameters
         ----------
@@ -838,7 +865,12 @@ class TestEdgeCases:
         """
         with patch.object(federal_calendar, "get_holidays_raw") as mock_raw:
             mock_raw.return_value = pd.DataFrame(
-                {"DATE": ["January 1"], "WEEKDAY": ["Sunday"], "NAME": ["New Year"], "YEAR": [2023]}
+                {
+                    "DATE": ["January 1"], 
+                    "WEEKDAY": ["Sunday"], 
+                    "NAME": ["New Year"], 
+                    "YEAR": [2023]
+                }
             )
 
             federal_calendar.get_holidays_years(year_start, year_end)

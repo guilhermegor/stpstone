@@ -9,6 +9,7 @@ from typing import Optional
 
 import pandas as pd
 import requests
+from requests.exceptions import RequestException
 
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.parsers.dicts import HandlingDicts
@@ -40,11 +41,6 @@ class DatesUSANasdaq(ABCCalendarOperations):
         -------
         list[tuple[str, date]]
             list of tuples containing holiday description and date
-
-        Raises
-        ------
-        ValueError
-            If raw holidays data cannot be fetched or transformed
         """
         df_ = self.get_holidays_raw()
         df_ = self.transform_holidays(df_)
@@ -65,14 +61,14 @@ class DatesUSANasdaq(ABCCalendarOperations):
 
         Raises
         ------
-        requests.exceptions.RequestException
+        RequestException
             If HTTP request fails or returns non-200 status
         ValueError
             If HTML parsing fails or data structure is invalid
         """
         url = "https://nasdaqtrader.com/trader.aspx?id=Calendar"
         try:
-            resp_req = requests.get(url, timeout=timeout, verify=False)
+            resp_req = requests.get(url, timeout=timeout)
             resp_req.raise_for_status()
             root_html = self.cls_html_handler.lxml_parser(resp_req)
             list_td = [
@@ -83,8 +79,8 @@ class DatesUSANasdaq(ABCCalendarOperations):
                 ["DATE", "DESCRIPTION", "STATUS"], list_td
             )
             return pd.DataFrame(list_ser)
-        except requests.exceptions.RequestException as err:
-            raise requests.exceptions.RequestException(
+        except RequestException as err:
+            raise RequestException(
                 f"Failed to fetch NASDAQ holidays: {str(err)}"
             ) from err
         except Exception as err:
@@ -102,11 +98,6 @@ class DatesUSANasdaq(ABCCalendarOperations):
         -------
         pd.DataFrame
             Transformed data with DATE_WINS as date objects
-
-        Raises
-        ------
-        ValueError
-            If input DataFrame is empty or missing required columns
         """
         self._validate_holidays_dataframe(df_)
         df_ = df_.astype({"DATE": str, "DESCRIPTION": str, "STATUS": str})
@@ -138,19 +129,11 @@ class DatesUSANasdaq(ABCCalendarOperations):
             "December": 12
         }
         list_parts_dt = [x.replace(",", "") for x in str_dt.split(" ") if x]
-        if list_parts_dt[0] in dict_mappings:
-            month = dict_mappings[list_parts_dt[0]]
-            day = int(list_parts_dt[1])
-            year = int(list_parts_dt[2])
-        else:
-            try:
-                day = int(list_parts_dt[0])
-                month = dict_mappings[list_parts_dt[1]]
-                year = int(list_parts_dt[2])
-            except (IndexError, KeyError, ValueError):
-                raise ValueError(f"Invalid date format: {str_dt}. Expected 'Month Day, Year' "
-                                 "or 'Day Month Year'")
-        
+        if list_parts_dt[0] not in dict_mappings:
+            raise ValueError(f"Invalid date format: {str_dt}. Expected 'Month Day, Year'")
+        month = dict_mappings[list_parts_dt[0]]
+        day = int(list_parts_dt[1])
+        year = int(list_parts_dt[2])
         return date(year, month, day)
 
     def _validate_holidays_dataframe(self, df_: pd.DataFrame) -> None:
@@ -215,11 +198,6 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         -------
         list[tuple[str, date]]
             list of tuples containing holiday name and date
-
-        Raises
-        ------
-        ValueError
-            If raw holidays data cannot be fetched or transformed
         """
         df_ = self.get_holidays_years()
         df_ = self.transform_holidays(df_)
@@ -243,11 +221,6 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         -------
         pd.DataFrame
             Combined holiday data for all specified years
-
-        Raises
-        ------
-        ValueError
-            If year range is invalid or data fetching fails
         """
         self._validate_year_range(int_year_start, int_year_end)
         list_ser = []
@@ -272,8 +245,6 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
 
         Raises
         ------
-        ValueError
-            If year is invalid or web scraping fails
         RuntimeError
             If Playwright navigation or data extraction fails
         """
@@ -310,11 +281,6 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         -------
         pd.DataFrame
             Transformed data with DATE_WINS as date objects
-
-        Raises
-        ------
-        ValueError
-            If input DataFrame is empty or missing required columns
         """
         self._validate_federal_holidays_dataframe(df_)
         df_ = df_.astype({"DATE": str, "WEEKDAY": str, "NAME": str, "YEAR": int})
@@ -358,9 +324,9 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
             try:
                 day = int(list_parts_dt[0])
                 month = dict_mappings[list_parts_dt[1]]
-            except (IndexError, KeyError, ValueError):
+            except (IndexError, KeyError, ValueError) as err:
                 raise ValueError(f"Invalid date format: {str_dt}. Expected 'Month Day' "
-                                 "or 'Day Month'")
+                                 f"or 'Day Month'. Error: {err}") from err
         
         return date(int_year, month, day)
 
