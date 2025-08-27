@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import businesstimedelta
 from dateutil.relativedelta import relativedelta
+import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
 from stpstone.utils.cache.cache_persistent import PersistentCacheDecorator
@@ -47,6 +48,17 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
         None
         """
         self.bool_persist_cache = bool_persist_cache
+
+    @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
 
     @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
@@ -196,6 +208,17 @@ class ABCCalendarCore(ABC, metaclass=ABCTypeCheckerMeta):
 
 class ABCDateManipulation(ABCCalendarCore):
     """Abstract class for date manipulation operations."""
+
+    @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
 
     @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
@@ -543,6 +566,17 @@ class ABCTimezoneAware(ABCDateManipulation):
     """Abstract class for date manipulation with timezone support."""
 
     @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
+
+    @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
         """Holidays abstract method implementation.
         
@@ -762,6 +796,17 @@ class ABCTimezoneAware(ABCDateManipulation):
 
 class ABCRangeDatesDelta(ABCDateManipulation):
     """Abstract class for range dates and delta operations."""
+
+    @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
 
     @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
@@ -1192,6 +1237,17 @@ class ABCCurrentDate(ABCCalendarCore):
     """Abstract class for getting current date and time."""
 
     @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
+
+    @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
         """Holidays abstract method implementation.
         
@@ -1272,6 +1328,17 @@ class ABCCurrentDate(ABCCalendarCore):
 
 class ABCDateFormatter(ABCCalendarCore):
     """Abstract class for date formatting."""
+
+    @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
 
     @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:
@@ -1497,6 +1564,17 @@ class ABCCalendarOperations(
     ABCDateFormatter
 ):
     """Abstract class for calendar operations."""
+
+    @abstractmethod
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        pass
 
     @abstractmethod
     def holidays(self) -> list[tuple[str, date]]:

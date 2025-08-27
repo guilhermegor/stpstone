@@ -15,6 +15,7 @@ from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from freezegun import freeze_time
+import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
@@ -31,6 +32,19 @@ from stpstone.utils.calendars.calendar_abc import (
 # --------------------------
 class MockCalendar(ABCCalendarOperations):
     """Mock implementation of ABCCalendarOperations for testing."""
+
+    def get_holidays_raw(self) -> pd.DataFrame:
+        """Return a DataFrame containing raw holiday data.
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        return pd.DataFrame([
+            {"holiday_name": "New Year's Day", "date": date(2025, 1, 1)},
+            {"holiday_name": "Christmas", "date": date(2025, 12, 25)}
+        ])
 
     def holidays(self) -> list[tuple[str, date]]:
         """Return a list of mock holidays.
