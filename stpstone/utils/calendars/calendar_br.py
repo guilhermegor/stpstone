@@ -211,6 +211,7 @@ class DatesBRFebraban(ABCCalendarOperations):
     def __init__(
         self, 
         bool_persist_cache: bool = True, 
+        bool_cache_holidays: bool = True,
         path_cache_dir: Optional[str] = None
     ) -> None:
         """Initialize FEBRABAN calendar handler.
@@ -219,6 +220,8 @@ class DatesBRFebraban(ABCCalendarOperations):
         ----------
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_cache_holidays : bool, optional
+            If True, caches holidays; if False, does not cache holidays (default: True)
         path_cache_dir : Optional[str], optional
             Path to the cache directory (default: None)
         
@@ -226,7 +229,7 @@ class DatesBRFebraban(ABCCalendarOperations):
         -------
         None
         """
-        super().__init__(bool_persist_cache, path_cache_dir)
+        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
         self.cls_str_handler = StrHandler()
 
     def holidays(self) -> list[tuple[str, date]]:

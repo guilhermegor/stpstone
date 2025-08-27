@@ -18,7 +18,12 @@ from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
 class DatesUSANasdaq(ABCCalendarOperations):
-    """NASDAQ holiday calendar data fetcher and processor."""
+    """NASDAQ holiday calendar data fetcher and processor.
+    
+    References
+    ----------
+    [1] https://nasdaqtrader.com/trader.aspx?id=Calendar
+    """
 
     def __init__(
         self, 
@@ -30,7 +35,12 @@ class DatesUSANasdaq(ABCCalendarOperations):
         
         Parameters
         ----------
-        None
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_cache_holidays : bool, optional
+            If True, caches holidays; if False, does not cache holidays (default: True)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
 
         Returns
         -------
@@ -182,10 +192,17 @@ class DatesUSANasdaq(ABCCalendarOperations):
 
 
 class DatesUSAFederalHolidays(ABCCalendarOperations):
-    """US Federal holiday calendar data fetcher and processor."""
+    """US Federal holiday calendar data fetcher and processor.
+    
+    References
+    ----------
+    [1] https://www.federalholidays.net/usa/federal-holidays-2025.html
+    """
 
     def __init__(
         self, 
+        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
+        int_year_end: int = (date.today() - timedelta(days=22)).year, 
         bool_persist_cache: bool = True, 
         bool_cache_holidays: bool = True,
         path_cache_dir: Optional[str] = None
@@ -194,6 +211,10 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         
         Parameters
         ----------
+        int_year_start : int, optional
+            Starting year for holidays (default: (date.today() - timedelta(days=22)).year - 1)
+        int_year_end : int, optional
+            Ending year for holidays (default: (date.today() - timedelta(days=22)).year)
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
         bool_cache_holidays : bool, optional
@@ -205,6 +226,8 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         -------
         None
         """
+        self.int_year_start = int_year_start
+        self.int_year_end = int_year_end
         super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
         self.cls_html_handler = HtmlHandler()
         self.cls_dict_handler = HandlingDicts()
@@ -222,11 +245,7 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         return [(row["NAME"], row["DATE_WINS"]) for _, row in df_.iterrows()]
 
     @ABCCalendarOperations.cache_holidays(cache_key="usa_federal_holidays")
-    def get_holidays_years(
-        self, 
-        int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
-        int_year_end: int = (date.today() - timedelta(days=22)).year
-    ) -> pd.DataFrame:
+    def get_holidays_years(self) -> pd.DataFrame:
         """Fetch Federal holidays for multiple years.
 
         Parameters
@@ -241,9 +260,9 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         pd.DataFrame
             Combined holiday data for all specified years
         """
-        self._validate_year_range(int_year_start, int_year_end)
+        self._validate_year_range(self.int_year_start, self.int_year_end)
         list_ser = []
-        for int_year in range(int_year_start, int_year_end + 1):
+        for int_year in range(self.int_year_start, self.int_year_end + 1):
             list_ser.extend(self.get_holidays_raw(int_year).to_dict(orient="records"))
         return pd.DataFrame(list_ser)
 

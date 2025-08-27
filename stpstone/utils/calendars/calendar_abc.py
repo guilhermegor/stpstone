@@ -56,18 +56,28 @@ class ABCCalendar(ABC, metaclass=ABCTypeCheckerMeta):
 
         Notes
         -----
-        Include cached dataframe in the beginning of the concrete method:
-        df_cached = self._load_cache(key="br_anbima_holidays")
-        if df_cached:
-            return df_cached
-
-        Initialize the module as follows:
+        Initialize the concrete class as follows:
         def __init__(
             self, 
             bool_persist_cache: bool = True, 
+            bool_cache_holidays: bool = True,
             path_cache_dir: Optional[str] = None
         ) -> None:
-            super().__init__(bool_persist_cache, path_cache_dir)
+            super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
+
+        Example of Concrete holidays implementation (please use the decorator, in order to cache 
+        the holidays):
+        def holidays(self) -> list[tuple[str, date]]:
+            df_ = self.get_holidays_raw()
+            df_ = self.transform_holidays(df_)
+            return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
+
+        @ABCCalendarOperations.cache_holidays(cache_key="br_anbima_holidays_raw")
+        def get_holidays_raw(
+            self, 
+            timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+        ) -> pd.DataFrame:
+            pass
         """
         pass
 
@@ -115,6 +125,11 @@ class CalendarCore(ABCCalendar):
         timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
     ) -> pd.DataFrame:
         """Return an empty DataFrame as a default implementation.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
         -------
@@ -214,6 +229,10 @@ class CalendarCore(ABCCalendar):
             Key for the cache file
         df_ : pd.DataFrame
             DataFrame to save to the cache file
+
+        Returns
+        -------
+        None
         """
         if self._validate_cached_dataframe(df_):
             self._cache[key] = df_
@@ -249,7 +268,17 @@ class CalendarCore(ABCCalendar):
             raise ValueError(f"Warning: cache validation failed. Error: {err}") from err
     
     def _clean_old_cache(self) -> None:
-        """Clean old cache files."""
+        """Clean old cache files.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If there is an error cleaning the cache
+        """
         if not self.bool_persist_cache:
             return
         now = datetime.now()
@@ -1673,6 +1702,8 @@ class ABCCalendarOperations(DateFormatter):
         ----------
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_cache_holidays : bool, optional
+            If True, caches holidays; if False, does not cache holidays (default: True)
         path_cache_dir : Optional[str], optional
             Path to the cache directory (default: None)
         logger : Optional[Logger], optional
