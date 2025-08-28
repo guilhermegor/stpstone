@@ -37,6 +37,27 @@ class DatesBRAnbima(ABCCalendarOperations):
         path_cache_dir: Optional[str] = None,
         logger: Optional[Logger] = None
     ) -> None:
+        """Initialize the DatesBRAnbima class.
+        
+        Parameters
+        ----------
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        int_days_cache_expiration : int, optional
+            Number of days after which the cache expires (default: 1)
+        int_cache_ttl_days : int, optional
+            Number of days after which the cache is considered expired (default: 30)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
+        logger : Optional[Logger], optional
+            The logger to use (default: None)
+        
+        Returns
+        -------
+        None
+        """
         self.cls_cache_manager = CacheManager(
             bool_persist_cache=bool_persist_cache,
             bool_reuse_cache=bool_reuse_cache,
@@ -220,6 +241,10 @@ class DatesBRFebraban(ABCCalendarOperations):
         
         Parameters
         ----------
+        int_year_start : int, optional
+            Starting year for holidays (default: (date.today() - timedelta(days=22)).year - 1)
+        int_year_end : int, optional
+            Ending year for holidays (default: (date.today() - timedelta(days=22)).year)
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
         bool_reuse_cache : bool, optional

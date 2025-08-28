@@ -20,14 +20,14 @@ from stpstone.utils.parsers.str import StrHandler
 # --------------------------
 @pytest.fixture
 def anbima_instance() -> DatesBRAnbima:
-    """Fixture providing a DatesBRAnbima instance.
+    """Fixture providing a DatesBRAnbima instance with caching disabled.
 
     Returns
     -------
     DatesBRAnbima
         Initialized ANBIMA calendar instance
     """
-    return DatesBRAnbima()
+    return DatesBRAnbima(bool_reuse_cache=False, bool_persist_cache=False)
 
 
 @pytest.fixture
@@ -347,6 +347,7 @@ def test_febraban_init(febraban_instance: DatesBRFebraban) -> None:
     assert isinstance(febraban_instance, DatesBRFebraban)
     assert isinstance(febraban_instance.cls_str_handler, StrHandler)
 
+
 @patch("requests.get")
 def test_febraban_get_holidays_raw_success(
     mock_get: Mock, febraban_instance: DatesBRFebraban, sample_febraban_json: list[dict]
@@ -589,8 +590,12 @@ def test_get_holidays_years_valid(
     int_year_start = (date.today() - timedelta(days=22)).year - 1
     int_year_end = (date.today() - timedelta(days=22)).year
     
+    # Set instance attributes to match the test's year range
+    febraban_instance.int_year_start = int_year_start
+    febraban_instance.int_year_end = int_year_end
+    
     with patch.object(febraban_instance, "get_holidays_raw", return_value=mock_df):
-        df_ = febraban_instance.get_holidays_years(int_year_start, int_year_end)
+        df_ = febraban_instance.get_holidays_years()  # Call without arguments
         assert isinstance(df_, pd.DataFrame)
         assert "ANO" in df_.columns
         # Expect 2 holidays per year (from sample_febraban_json) times the number of years
