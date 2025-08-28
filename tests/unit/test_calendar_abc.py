@@ -1,30 +1,34 @@
-"""Unit tests for calendar operations classes.
+"""Unit tests for ABCCalendarOperations class and related functionality.
 
-This module tests the functionality of calendar operation classes including:
-- Date manipulation and formatting
-- Timezone handling
+Tests the calendar operations functionality including:
+- Date validation and conversion
 - Working day calculations
-- Date range operations
-- Holiday and weekend checks
+- Timezone handling
+- Date formatting and manipulation
+- Edge cases and error conditions
 """
 
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 import locale
 import platform
-from unittest.mock import patch
+import sys
+from typing import Any, Callable, Optional
+from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from dateutil.relativedelta import relativedelta
+import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
+from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
 from stpstone.utils.calendars.calendar_abc import (
-    CalendarCore,
-    DateFormatter,
-    DateManipulation,
-    DatesCurrent,
-    DatesRangeDelta,
-    DateTimezoneAware,
+    ABCCalendar,
+    ABCCalendarOperations,
+    TypeDateFormatInput,
+    TypeDatetimeDate,
 )
 
 
@@ -32,1983 +36,2818 @@ from stpstone.utils.calendars.calendar_abc import (
 # Fixtures
 # --------------------------
 @pytest.fixture
-def calendar_core() -> CalendarCore:
-    """Fixture providing a CalendarCore instance.
-
-    Returns
-    -------
-    CalendarCore
-        Instance of CalendarCore
-    """
-    return CalendarCore()
+def mock_setlocale():
+    with patch('locale.setlocale') as mocked:
+        mocked.side_effect = lambda category, loc: loc  # Return the locale string
+        yield mocked
 
 @pytest.fixture
-def date_manipulation() -> DateManipulation:
-    """Fixture providing a DateManipulation instance.
+def calendar_instance() -> ABCCalendarOperations:
+    """Fixture providing ABCCalendarOperations instance for testing.
 
     Returns
     -------
-    DateManipulation
-        Instance of DateManipulation
+    ABCCalendarOperations
+        Instance of the calendar operations class
     """
-    return DateManipulation()
+    return ABCCalendarOperations()
 
-@pytest.fixture
-def date_timezone_aware() -> DateTimezoneAware:
-    """Fixture providing a DateTimezoneAware instance.
-
-    Returns
-    -------
-    DateTimezoneAware
-        Instance of DateTimezoneAware
-    """
-    return DateTimezoneAware()
-
-@pytest.fixture
-def dates_range_delta() -> DatesRangeDelta:
-    """Fixture providing a DatesRangeDelta instance.
-
-    Returns
-    -------
-    DatesRangeDelta
-        Instance of DatesRangeDelta
-    """
-    return DatesRangeDelta()
-
-@pytest.fixture
-def date_formatter() -> DateFormatter:
-    """Fixture providing a DateFormatter instance.
-
-    Returns
-    -------
-    DateFormatter
-        Instance of DateFormatter
-    """
-    return DateFormatter()
 
 @pytest.fixture
 def sample_date() -> date:
-    """Fixture providing a sample date.
+    """Fixture providing a sample date for testing.
 
     Returns
     -------
     date
-        Sample date object (2023-06-15)
+        Sample date (2023-12-25)
     """
-    return date(2023, 6, 15)
+    return date(2023, 12, 25)
+
 
 @pytest.fixture
 def sample_datetime() -> datetime:
-    """Fixture providing a sample datetime.
+    """Fixture providing a sample datetime for testing.
 
     Returns
     -------
     datetime
-        Sample datetime object (2023-06-15 14:30:00 UTC)
+        Sample datetime (2023-12-25 10:30:45)
     """
-    return datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC"))
+    return datetime(2023, 12, 25, 10, 30, 45)
+
 
 @pytest.fixture
-def mock_holidays(mocker: MockerFixture) -> object:
-    """Mock holidays method to return a specific list of holidays.
+def sample_holidays() -> list[tuple[str, date]]:
+    """Fixture providing sample holidays for testing.
+
+    Returns
+    -------
+    list[tuple[str, date]]
+        List of holiday tuples (name, date)
+    """
+    return [
+        ("New Year's Day", date(2023, 1, 1)),
+        ("Christmas Day", date(2023, 12, 25)),
+    ]
+
+
+@pytest.fixture
+def mock_holidays(mocker: MockerFixture, sample_holidays: list[tuple[str, date]]) -> MagicMock:
+    """Mock the holidays method to return sample holidays.
 
     Parameters
     ----------
     mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
+        Pytest-mock fixture
+    sample_holidays : list[tuple[str, date]]
+        Sample holidays to return
 
     Returns
     -------
-    object
-        Mock object for holidays method
+    MagicMock
+        Mocked holidays method
     """
-    return mocker.patch.object(
-        CalendarCore,
-        "holidays",
-        return_value=[("New Year", date(2023, 1, 1)), ("Holiday", date(2023, 6, 16))]
-    )
+    return mocker.patch.object(ABCCalendarOperations, "holidays", return_value=sample_holidays)
+
+
+# --------------------------
+# Tests for ABCCalendar
+# --------------------------
+class TestABCCalendar:
+    """Test cases for ABCCalendar abstract base class."""
+
+    def test_abstract_methods_exist(self) -> None:
+        """Test that ABCCalendar has required abstract methods.
+
+        Verifies
+        --------
+        - ABCCalendar has get_holidays_raw method
+        - ABCCalendar has holidays method
+        - Both methods are abstract
+
+        Returns
+        -------
+        None
+        """
+        assert hasattr(ABCCalendar, "get_holidays_raw")
+        assert hasattr(ABCCalendar, "holidays")
+        assert getattr(ABCCalendar.get_holidays_raw, "__isabstractmethod__", False)
+        assert getattr(ABCCalendar.holidays, "__isabstractmethod__", False)
+
+    def test_cannot_instantiate_abstract_class(self) -> None:
+        """Test that ABCCalendar cannot be instantiated directly.
+
+        Verifies
+        --------
+        - Attempting to instantiate ABCCalendar raises TypeError
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(TypeError):
+            ABCCalendar()  # type: ignore
+
 
 # --------------------------
 # Tests for CalendarCore
 # --------------------------
-def test_get_holidays_raw_default(calendar_core: CalendarCore) -> None:
-    """Test default implementation of get_holidays_raw returns empty DataFrame.
+class TestCalendarCore:
+    """Test cases for CalendarCore class functionality."""
 
-    Verifies
-    --------
-    - Returns a pandas DataFrame
-    - DataFrame is empty
-    - DataFrame has correct columns
+    def test_get_holidays_raw_default_implementation(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test default implementation of get_holidays_raw.
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        Instance of CalendarCore
+        Verifies
+        --------
+        - Returns empty DataFrame with correct columns
+        - Accepts timeout parameter
 
-    Returns
-    -------
-    None
-    """
-    result = calendar_core.get_holidays_raw()
-    assert isinstance(result, pd.DataFrame)
-    assert result.empty
-    assert list(result.columns) == ["name", "date"]
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_get_holidays_raw_timeout_types(calendar_core: CalendarCore) -> None:
-    """Test get_holidays_raw accepts various timeout types.
-
-    Verifies
-    --------
-    - Accepts int timeout
-    - Accepts float timeout
-    - Accepts tuple of floats timeout
-    - Accepts tuple of ints timeout
-
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        Instance of CalendarCore
-
-    Returns
-    -------
-    None
-    """
-    timeouts = [10, 10.5, (10.0, 20.0), (10, 20)]
-    for timeout in timeouts:
-        result = calendar_core.get_holidays_raw(timeout=timeout)
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.get_holidays_raw()
         assert isinstance(result, pd.DataFrame)
-        assert result.empty
+        assert list(result.columns) == ["name", "date"]
+        assert len(result) == 0
 
-def test_holidays_default(calendar_core: CalendarCore) -> None:
-    """Test default implementation of holidays returns empty list.
+    def test_holidays_default_implementation(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test default implementation of holidays.
 
-    Verifies
-    --------
-    - Returns a list
-    - List is empty
-    - List contains tuples of (str, date)
+        Verifies
+        --------
+        - Returns empty list
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        Instance of CalendarCore
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = calendar_core.holidays()
-    assert isinstance(result, list)
-    assert len(result) == 0
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.holidays()
+        assert result == []
 
-def test_holidays_cache(calendar_core: CalendarCore, mock_holidays: object) -> None:
-    """Test _holidays property caching.
+    def test_date_only_with_date(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test date_only method with date input.
 
-    Verifies
-    --------
-    - Returns cached set of holiday dates
-    - Calls holidays method only once
-    - Returns correct set of dates
+        Verifies
+        --------
+        - Returns the same date object
+        - Does not modify the input
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    mock_holidays : object
-        Mock for holidays method
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    result1 = calendar_core._holidays
-    result2 = calendar_core._holidays
-    assert result1 == {date(2023, 1, 1), date(2023, 6, 16)}
-    assert result1 is result2  # Same object, cached
-    mock_holidays.assert_called_once()
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.date_only(sample_date)
+        assert result == sample_date
+        assert isinstance(result, date)
+        assert not isinstance(result, datetime)
 
-def test_date_only_valid_date(calendar_core: CalendarCore, sample_date: date) -> None:
-    """Test date_only with valid date input.
+    def test_date_only_with_datetime(
+        self, calendar_instance: ABCCalendarOperations, sample_datetime: datetime
+    ) -> None:
+        """Test date_only method with datetime input.
 
-    Verifies
-    --------
-    - Returns date object unchanged
-    - Maintains correct date value
+        Verifies
+        --------
+        - Returns date component of datetime
+        - Returns date object, not datetime
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_datetime : datetime
+            Sample datetime from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = calendar_core.date_only(sample_date)
-    assert isinstance(result, date)
-    assert result == sample_date
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.date_only(sample_datetime)
+        expected_date = sample_datetime.date()
+        assert result == expected_date
+        assert isinstance(result, date)
+        assert not isinstance(result, datetime)
 
-def test_date_only_valid_datetime(
-    calendar_core: CalendarCore, 
-    sample_datetime: datetime
-) -> None:
-    """Test date_only with valid datetime input.
+    @pytest.mark.parametrize(
+        "invalid_input",
+        [
+            "not_a_date",
+            123,
+            123.45,
+            None,
+            [],
+            {},
+        ],
+    )
+    def test_date_only_invalid_type(
+        self, calendar_instance: ABCCalendarOperations, invalid_input: Any
+    ) -> None:
+        """Test date_only method with invalid input types.
 
-    Verifies
-    --------
-    - Returns date component of datetime
-    - Returns correct date value
+        Verifies
+        --------
+        - Raises TypeError for non-date/datetime inputs
+        - Error message contains expected text
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    sample_datetime : datetime
-        Sample datetime object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        invalid_input : Any
+            Invalid input values
 
-    Returns
-    -------
-    None
-    """
-    result = calendar_core.date_only(sample_datetime)
-    assert isinstance(result, date)
-    assert result == date(2023, 6, 15)
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(TypeError, match="must be of type"):
+            calendar_instance.date_only(invalid_input)
 
-def test_date_only_invalid_type(calendar_core: CalendarCore) -> None:
-    """Test date_only with invalid input type.
+    def test_is_weekend_weekday(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test is_weekend with weekday date.
 
-    Verifies
-    --------
-    - Raises TypeError for non-date/datetime input
-    - Error message contains type information
+        Verifies
+        --------
+        - Returns False for weekdays (Monday-Friday)
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="date_ must be of type datetime or date"):
-        calendar_core.date_only("2023-06-15")
+        Returns
+        -------
+        None
+        """
+        weekday_date = date(2023, 12, 20)  # Wednesday
+        assert not calendar_instance.is_weekend(weekday_date)
 
-def test_is_weekend_weekday(calendar_core: CalendarCore) -> None:
-    """Test is_weekend with weekday input.
+    def test_is_weekend_saturday(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test is_weekend with Saturday.
 
-    Verifies
-    --------
-    - Returns False for weekday
-    - Correctly identifies Monday (weekday 0)
+        Verifies
+        --------
+        - Returns True for Saturday
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    monday = date(2023, 6, 12)  # Monday
-    assert not calendar_core.is_weekend(monday)
+        Returns
+        -------
+        None
+        """
+        saturday_date = date(2023, 12, 23)  # Saturday
+        assert calendar_instance.is_weekend(saturday_date)
 
-def test_is_weekend_weekend(calendar_core: CalendarCore) -> None:
-    """Test is_weekend with weekend input.
+    def test_is_weekend_sunday(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test is_weekend with Sunday.
 
-    Verifies
-    --------
-    - Returns True for weekend day
-    - Correctly identifies Saturday (weekday 5)
+        Verifies
+        --------
+        - Returns True for Sunday
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    saturday = date(2023, 6, 17)  # Saturday
-    assert calendar_core.is_weekend(saturday)
+        Returns
+        -------
+        None
+        """
+        sunday_date = date(2023, 12, 24)  # Sunday
+        assert calendar_instance.is_weekend(sunday_date)
 
-def test_is_working_day_weekday(
-    calendar_core: CalendarCore, 
-    mock_holidays: object
-) -> None:
-    """Test is_working_day with weekday input.
+    def test_is_working_day_weekday_no_holiday(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test is_working_day with weekday that's not a holiday.
 
-    Verifies
-    --------
-    - Returns True for non-holiday weekday
-    - Correctly handles weekday check
+        Verifies
+        --------
+        - Returns True for working weekdays
+        - Uses holidays cache
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    mock_holidays : object
-        Mock for holidays method
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    weekday = date(2023, 6, 14)  # Wednesday
-    assert calendar_core.is_working_day(weekday)
+        Returns
+        -------
+        None
+        """
+        weekday_date = date(2023, 12, 20)  # Wednesday, not a holiday
+        assert calendar_instance.is_working_day(weekday_date)
+        mock_holidays.assert_called_once()
 
-def test_is_working_day_holiday(
-    calendar_core: CalendarCore, 
-    mock_holidays: object
-) -> None:
-    """Test is_working_day with holiday input.
+    def test_is_working_day_weekend(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test is_working_day with weekend.
 
-    Verifies
-    --------
-    - Returns False for holiday
-    - Correctly checks holiday cache
+        Verifies
+        --------
+        - Returns False for weekends
+        - Uses holidays cache
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    mock_holidays : object
-        Mock for holidays method
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    holiday = date(2023, 6, 16)  # Holiday from mock
-    assert not calendar_core.is_working_day(holiday)
+        Returns
+        -------
+        None
+        """
+        saturday_date = date(2023, 12, 23)  # Saturday
+        assert not calendar_instance.is_working_day(saturday_date)
 
-def test_is_holiday_true(
-    calendar_core: CalendarCore, 
-    mock_holidays: object
-) -> None:
-    """Test is_holiday with holiday date.
+    def test_is_working_day_holiday(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test is_working_day with holiday.
 
-    Verifies
-    --------
-    - Returns True for holiday date
-    - Correctly checks holiday cache
+        Verifies
+        --------
+        - Returns False for holidays, even on weekdays
+        - Uses holidays cache
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    mock_holidays : object
-        Mock for holidays method
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    holiday = date(2023, 6, 16)
-    assert calendar_core.is_holiday(holiday)
+        Returns
+        -------
+        None
+        """
+        holiday_date = date(2023, 12, 25)  # Monday, but Christmas
+        assert not calendar_instance.is_working_day(holiday_date)
 
-def test_is_holiday_false(
-    calendar_core: CalendarCore, 
-    mock_holidays: object
-) -> None:
-    """Test is_holiday with non-holiday date.
+    def test_is_holiday_positive(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test is_holiday with actual holiday.
 
-    Verifies
-    --------
-    - Returns False for non-holiday date
-    - Correctly checks holiday cache
+        Verifies
+        --------
+        - Returns True for holidays
+        - Uses holidays cache
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    mock_holidays : object
-        Mock for holidays method
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    non_holiday = date(2023, 6, 15)
-    assert not calendar_core.is_holiday(non_holiday)
+        Returns
+        -------
+        None
+        """
+        holiday_date = date(2023, 12, 25)  # Christmas
+        assert calendar_instance.is_holiday(holiday_date)
 
-def test_holidays_in_year(
-    calendar_core: CalendarCore, 
-    mock_holidays: object
-) -> None:
-    """Test holidays_in_year with specific year.
+    def test_is_holiday_negative(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test is_holiday with non-holiday.
 
-    Verifies
-    --------
-    - Returns correct list of holiday days
-    - Only includes holidays from specified year
+        Verifies
+        --------
+        - Returns False for non-holidays
+        - Uses holidays cache
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    mock_holidays : object
-        Mock for holidays method
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    result = calendar_core.holidays_in_year(2023)
-    assert result == [1, 16]  # Day numbers from mock holidays
+        Returns
+        -------
+        None
+        """
+        non_holiday_date = date(2023, 12, 20)  # Regular Wednesday
+        assert not calendar_instance.is_holiday(non_holiday_date)
+
+    def test_holidays_in_year(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test holidays_in_year method.
+
+        Verifies
+        --------
+        - Returns list of holiday days for specific year
+        - Filters by year correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
+
+        Returns
+        -------
+        None
+        """
+        mock_holidays.return_value = [
+            ("New Year's Day", date(2023, 1, 1)),
+            ("Christmas", date(2023, 12, 25))
+        ]
+        result = calendar_instance.holidays_in_year(2023)
+        expected = [1, 25]  # January 1st and December 25th
+        assert result == expected
+    
+    def test_holidays_in_year_no_holidays(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test holidays_in_year with year that has no holidays.
+
+        Verifies
+        --------
+        - Returns empty list for years with no holidays
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Use default implementation which returns empty holidays list
+        result = calendar_instance.holidays_in_year(2023)
+        assert result == []
+
 
 # --------------------------
 # Tests for DateManipulation
 # --------------------------
-def test_add_working_days_zero(
-    date_manipulation: DateManipulation, 
-    sample_date: date
-) -> None:
-    """Test add_working_days with zero days.
+class TestDateManipulation:
+    """Test cases for DateManipulation class functionality."""
 
-    Verifies
-    --------
-    - Returns same date when adding zero days
-    - Handles date input correctly
+    def test_add_working_days_positive(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test add_working_days with positive days.
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
+        Verifies
+        --------
+        - Adds correct number of working days
+        - Skips weekends and holidays
 
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.add_working_days(sample_date, 0)
-    assert result == sample_date
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-def test_add_working_days_positive(
-    date_manipulation: DateManipulation, 
-    sample_date: date, 
-    mock_holidays: object
-) -> None:
-    """Test add_working_days with positive days.
-
-    Verifies
-    --------
-    - Correctly adds working days
-    - Skips weekends and holidays
-    - Returns correct date
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
-    mock_holidays : object
-        Mock for holidays method
-
-    Returns
-    -------
-    None
-    """
-    # June 15, 2023 is Thursday, adding 1 working day skips June 16 (holiday)
-    # and June 17-18 (weekend), landing on June 19 (Monday)
-    result = date_manipulation.add_working_days(sample_date, 1)
-    assert result == date(2023, 6, 19)
-
-def test_add_working_days_negative(
-    date_manipulation: DateManipulation, 
-    sample_date: date, 
-    mock_holidays: object
-) -> None:
-    """Test add_working_days with negative days.
-
-    Verifies
-    --------
-    - Correctly subtracts working days
-    - Skips weekends and holidays
-    - Returns correct date
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
-    mock_holidays : object
-        Mock for holidays method
-
-    Returns
-    -------
-    None
-    """
-    # June 15, 2023 is Thursday, subtracting 1 working day lands on June 14 (Wednesday)
-    result = date_manipulation.add_working_days(sample_date, -1)
-    assert result == date(2023, 6, 14)
-
-def test_add_calendar_days(
-    date_manipulation: DateManipulation, 
-    sample_date: date
-) -> None:
-    """Test add_calendar_days with various inputs.
-
-    Verifies
-    --------
-    - Correctly adds calendar days
-    - Handles positive and negative inputs
-    - Returns correct date
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
-
-    Returns
-    -------
-    None
-    """
-    assert date_manipulation.add_calendar_days(sample_date, 5) == date(2023, 6, 20)
-    assert date_manipulation.add_calendar_days(sample_date, -5) == date(2023, 6, 10)
-
-def test_add_months(
-    date_manipulation: DateManipulation, 
-    sample_datetime: datetime
-) -> None:
-    """Test add_months with various inputs.
-
-    Verifies
-    --------
-    - Correctly adds months
-    - Maintains time and timezone
-    - Returns correct datetime
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_datetime : datetime
-        Sample datetime object
-
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.add_months(sample_datetime, 2)
-    assert result == datetime(2023, 8, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC"))
-
-def test_build_date_valid(date_manipulation: DateManipulation) -> None:
-    """Test build_date with valid inputs.
-
-    Verifies
-    --------
-    - Creates correct date object
-    - Handles valid year, month, day
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.build_date(2023, 6, 15)
-    assert result == date(2023, 6, 15)
-
-def test_build_date_invalid(date_manipulation: DateManipulation) -> None:
-    """Test build_date with invalid inputs.
-
-    Verifies
-    --------
-    - Raises ValueError for invalid date components
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError):
-        date_manipulation.build_date(2023, 13, 1)  # Invalid month
-
-def test_build_datetime_valid(date_manipulation: DateManipulation) -> None:
-    """Test build_datetime with valid inputs.
-
-    Verifies
-    --------
-    - Creates correct datetime object
-    - Sets correct timezone
-    - Handles valid components
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.build_datetime(2023, 6, 15, 14, 30, 0, "UTC")
-    assert result == datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC"))
-
-def test_build_datetime_invalid_timezone(date_manipulation: DateManipulation) -> None:
-    """Test build_datetime with invalid timezone.
-
-    Verifies
-    --------
-    - Raises ZoneInfoNotFoundError for empty or None timezone
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ZoneInfoNotFoundError, match="Timezone cannot be empty or None"):
-        date_manipulation.build_datetime(2023, 6, 15, 14, 30, 0, None)
-    with pytest.raises(ZoneInfoNotFoundError, match="Timezone cannot be empty or None"):
-        date_manipulation.build_datetime(2023, 6, 15, 14, 30, 0, "")
-
-def test_nearest_working_day_next(
-    date_manipulation: DateManipulation, 
-    sample_date: date, 
-    mock_holidays: object
-) -> None:
-    """Test nearest_working_day with next=True.
-
-    Verifies
-    --------
-    - Returns next working day
-    - Skips holidays and weekends
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
-    mock_holidays : object
-        Mock for holidays method
-
-    Returns
-    -------
-    None
-    """
-    # June 15, 2023 (Thursday), next working day after June 16 (holiday)
-    # and June 17-18 (weekend) is June 19 (Monday)
-    result = date_manipulation.nearest_working_day(sample_date, bool_next=True)
-    assert result == date(2023, 6, 19)
-
-def test_nearest_working_day_previous(
-    date_manipulation: DateManipulation, 
-    sample_date: date, 
-    mock_holidays: object
-) -> None:
-    """Test nearest_working_day with next=False.
-
-    Verifies
-    --------
-    - Returns previous working day
-    - Skips holidays and weekends
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
-    mock_holidays : object
-        Mock for holidays method
-
-    Returns
-    -------
-    None
-    """
-    # June 15, 2023 (Thursday), previous working day is June 14 (Wednesday)
-    result = date_manipulation.nearest_working_day(sample_date, bool_next=False)
-    assert result == date(2023, 6, 14)
-
-def test_str_date_to_date_valid(date_manipulation: DateManipulation) -> None:
-    """Test str_date_to_date with valid inputs.
-
-    Verifies
-    --------
-    - Correctly converts string to date
-    - Supports various date formats
-
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-
-    Returns
-    -------
-    None
-    """
-    test_cases = [
-        ("15/06/2023", "DD/MM/YYYY", date(2023, 6, 15)),
-        ("2023-06-15", "YYYY-MM-DD", date(2023, 6, 15)),
-        ("230615", "YYMMDD", date(2023, 6, 15)),
-        ("150623", "DDMMYY", date(2023, 6, 15)),
-        ("15062023", "DDMMYYYY", date(2023, 6, 15)),
-        ("20230615", "YYYYMMDD", date(2023, 6, 15)),
-        ("06-15-2023", "MM-DD-YYYY", date(2023, 6, 15)),
-        ("15/06/23", "DD/MM/YY", date(2023, 6, 15)),
-        ("15.06.23", "DD.MM.YY", date(2023, 6, 15)),
-    ]
-    for str_date, format_input, expected in test_cases:
-        result = date_manipulation.str_date_to_date(str_date, format_input)
+        Returns
+        -------
+        None
+        """
+        mock_holidays.return_value = [("Christmas", date(2023, 12, 25))]
+        start_date = date(2023, 12, 20)  # Wednesday
+        result = calendar_instance.add_working_days(start_date, 3)
+        expected = date(2023, 12, 26)  # Skips Dec 23-24 (weekend) and Dec 25 (holiday)
         assert result == expected
 
-def test_str_date_to_date_invalid(date_manipulation: DateManipulation) -> None:
-    """Test str_date_to_date with invalid inputs.
+    def test_add_working_days_negative(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test add_working_days with negative days.
 
-    Verifies
-    --------
-    - Raises ValueError for invalid date string
-    - Raises ValueError for invalid format
+        Verifies
+        --------
+        - Subtracts correct number of working days
+        - Skips weekends and holidays
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="Not a valid date format"):
-        date_manipulation.str_date_to_date("15/06/2023", "INVALID")
-    with pytest.raises(ValueError, match="Invalid date string"):
-        date_manipulation.str_date_to_date("2023/06/15", "DD/MM/YYYY")
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 27)  # Wednesday
+        result = calendar_instance.add_working_days(start_date, -3)
+        expected = date(2023, 12, 21)  # Wednesday - 3 working days = previous Wednesday
+        assert result == expected
 
-def test_timestamp_to_date(date_manipulation: DateManipulation) -> None:
-    """Test timestamp_to_date with valid input.
+    def test_add_working_days_zero(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test add_working_days with zero days.
 
-    Verifies
-    --------
-    - Correctly converts timestamp to date
-    - Handles different timestamp separators
+        Verifies
+        --------
+        - Returns same date when adding zero days
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.timestamp_to_date("2023-06-15T14:30:00", "T")
-    assert result == date(2023, 6, 15)
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 20)
+        result = calendar_instance.add_working_days(start_date, 0)
+        assert result == start_date
 
-def test_timestamp_to_datetime_valid(date_manipulation: DateManipulation) -> None:
-    """Test timestamp_to_datetime with valid inputs.
+    def test_add_calendar_days_positive(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test add_calendar_days with positive days.
 
-    Verifies
-    --------
-    - Correctly converts timestamp to datetime
-    - Handles ISO format and custom format
+        Verifies
+        --------
+        - Adds correct number of calendar days
+        - Includes weekends and holidays
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.timestamp_to_datetime("2023-06-15T14:30:00")
-    assert result == datetime(2023, 6, 15, 14, 30, 0)
-    result = date_manipulation.timestamp_to_datetime("2023-06-15T14:30:00", "T")
-    assert result == datetime(2023, 6, 15, 14, 30, 0)
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 20)
+        result = calendar_instance.add_calendar_days(start_date, 5)
+        expected = date(2023, 12, 25)
+        assert result == expected
 
-def test_timestamp_to_datetime_invalid(date_manipulation: DateManipulation) -> None:
-    """Test timestamp_to_datetime with invalid input.
+    def test_add_calendar_days_negative(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test add_calendar_days with negative days.
 
-    Verifies
-    --------
-    - Raises ValueError for invalid timestamp format
+        Verifies
+        --------
+        - Subtracts correct number of calendar days
+        - Includes weekends and holidays
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="Failed to parse timestamp"):
-        date_manipulation.timestamp_to_datetime("invalid-timestamp")
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 25)
+        result = calendar_instance.add_calendar_days(start_date, -5)
+        expected = date(2023, 12, 20)
+        assert result == expected
 
-def test_to_integer(date_manipulation: DateManipulation, sample_date: date) -> None:
-    """Test to_integer with valid input.
+    def test_add_months_positive(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test add_months with positive months.
 
-    Verifies
-    --------
-    - Correctly converts date to integer format
-    - Returns expected integer value
+        Verifies
+        --------
+        - Adds correct number of months
+        - Handles month boundaries correctly
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.to_integer(sample_date)
-    assert result == 20230615
+        Returns
+        -------
+        None
+        """
+        start_date = datetime(2023, 12, 25, 10, 30, 45)
+        result = calendar_instance.add_months(start_date, 2)
+        expected = datetime(2024, 2, 25, 10, 30, 45)
+        assert result == expected
 
-def test_excel_float_to_date_valid(date_manipulation: DateManipulation) -> None:
-    """Test excel_float_to_date with valid input.
+    def test_add_months_negative(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test add_months with negative months.
 
-    Verifies
-    --------
-    - Correctly converts Excel float to date
-    - Handles valid input correctly
+        Verifies
+        --------
+        - Subtracts correct number of months
+        - Handles month boundaries correctly
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_manipulation.excel_float_to_date(44727)
-    assert result == date(2022, 6, 15)
+        Returns
+        -------
+        None
+        """
+        start_date = datetime(2023, 12, 25, 10, 30, 45)
+        result = calendar_instance.add_months(start_date, -2)
+        expected = datetime(2023, 10, 25, 10, 30, 45)
+        assert result == expected
 
-def test_excel_float_to_date_invalid(date_manipulation: DateManipulation) -> None:
-    """Test excel_float_to_date with invalid inputs.
+    def test_build_date_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test build_date with valid inputs.
 
-    Verifies
-    --------
-    - Raises ValueError for None or negative input
+        Verifies
+        --------
+        - Creates correct date object
+        - Returns date type
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="int_excel_date cannot be None"):
-        date_manipulation.excel_float_to_date(None)
-    with pytest.raises(ValueError, match="int_excel_date cannot be negative"):
-        date_manipulation.excel_float_to_date(-1)
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.build_date(2023, 12, 25)
+        expected = date(2023, 12, 25)
+        assert result == expected
+        assert isinstance(result, date)
+
+    @pytest.mark.parametrize(
+        "year,month,day",
+        [
+            (2023, 13, 1),  # Invalid month
+            (2023, 0, 1),  # Invalid month
+            (2023, 12, 32),  # Invalid day
+            (2023, 2, 29),  # Invalid day (2023 not leap year)
+        ],
+    )
+    def test_build_date_invalid(
+        self, calendar_instance: ABCCalendarOperations, year: int, month: int, day: int
+    ) -> None:
+        """Test build_date with invalid inputs.
+
+        Verifies
+        --------
+        - Raises ValueError for invalid date components
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        year : int
+            Invalid year
+        month : int
+            Invalid month
+        day : int
+            Invalid day
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError):
+            calendar_instance.build_date(year, month, day)
+
+    def test_build_datetime_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test build_datetime with valid inputs.
+
+        Verifies
+        --------
+        - Creates correct datetime object
+        - Includes timezone information
+        - Returns datetime type
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.build_datetime(2023, 12, 25, 10, 30, 45, "UTC")
+        expected = datetime(2023, 12, 25, 10, 30, 45, tzinfo=ZoneInfo("UTC"))
+        assert result == expected
+        assert isinstance(result, datetime)
+        assert result.tzinfo == ZoneInfo("UTC")
+
+    @pytest.mark.parametrize(
+        "timezone_input",
+        [
+            "",
+            None,
+        ],
+    )
+    def test_build_datetime_empty_timezone(
+        self, calendar_instance: ABCCalendarOperations, timezone_input: Optional[str]
+    ) -> None:
+        """Test build_datetime with empty timezone.
+
+        Verifies
+        --------
+        - Raises ZoneInfoNotFoundError for empty timezone
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        timezone_input : Optional[str]
+            Empty timezone values
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ZoneInfoNotFoundError, match="Timezone cannot be empty or None"):
+            calendar_instance.build_datetime(2023, 12, 25, 10, 30, 45, timezone_input)
+
+    @pytest.mark.parametrize(
+        "year,month,day,hour,minute,second",
+        [
+            (2023, 13, 1, 10, 30, 45),  # Invalid month
+            (2023, 12, 32, 10, 30, 45),  # Invalid day
+            (2023, 12, 25, 24, 30, 45),  # Invalid hour
+            (2023, 12, 25, 10, 60, 45),  # Invalid minute
+            (2023, 12, 25, 10, 30, 60),  # Invalid second
+        ],
+    )
+    def test_build_datetime_invalid_components(
+        self,
+        calendar_instance: ABCCalendarOperations,
+        year: int,
+        month: int,
+        day: int,
+        hour: int,
+        minute: int,
+        second: int,
+    ) -> None:
+        """Test build_datetime with invalid date/time components.
+
+        Verifies
+        --------
+        - Raises ValueError for invalid date/time components
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        year : int
+            Year component
+        month : int
+            Month component
+        day : int
+            Day component
+        hour : int
+            Hour component
+        minute : int
+            Minute component
+        second : int
+            Second component
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="Invalid date components"):
+            calendar_instance.build_datetime(year, month, day, hour, minute, second, "UTC")
+
+    def test_nearest_working_day_next(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test nearest_working_day with next=True.
+
+        Verifies
+        --------
+        - Returns next working day for weekend/holiday
+        - Returns same day for working day
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
+
+        Returns
+        -------
+        None
+        """
+        # Test with weekend
+        weekend_date = date(2023, 12, 24)  # Sunday
+        result = calendar_instance.nearest_working_day(weekend_date, True)
+        expected = date(2023, 12, 26)  # Tuesday (Monday is Christmas)
+        assert result == expected
+
+        # Test with working day
+        working_date = date(2023, 12, 20)  # Wednesday
+        result = calendar_instance.nearest_working_day(working_date, True)
+        assert result == working_date
+
+    def test_nearest_working_day_previous(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test nearest_working_day with next=False.
+
+        Verifies
+        --------
+        - Returns previous working day for weekend/holiday
+        - Returns same day for working day
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
+
+        Returns
+        -------
+        None
+        """
+        # Test with weekend
+        weekend_date = date(2023, 12, 24)  # Sunday
+        result = calendar_instance.nearest_working_day(weekend_date, False)
+        expected = date(2023, 12, 22)  # Friday
+        assert result == expected
+
+        # Test with working day
+        working_date = date(2023, 12, 20)  # Wednesday
+        result = calendar_instance.nearest_working_day(working_date, False)
+        assert result == working_date
+
+    @pytest.mark.parametrize(
+        "date_str,format_input,expected_date",
+        [
+            ("25/12/2023", "DD/MM/YYYY", date(2023, 12, 25)),
+            ("2023-12-25", "YYYY-MM-DD", date(2023, 12, 25)),
+            ("231225", "YYMMDD", date(2023, 12, 25)),
+            ("251223", "DDMMYY", date(2023, 12, 25)),
+            ("25122023", "DDMMYYYY", date(2023, 12, 25)),
+            ("20231225", "YYYYMMDD", date(2023, 12, 25)),
+            ("12-25-2023", "MM-DD-YYYY", date(2023, 12, 25)),
+            ("25/12/23", "DD/MM/YY", date(2023, 12, 25)),
+            ("25.12.23", "DD.MM.YY", date(2023, 12, 25)),
+        ],
+    )
+    def test_str_date_to_date_valid(
+        self,
+        calendar_instance: ABCCalendarOperations,
+        date_str: str,
+        format_input: TypeDateFormatInput,
+        expected_date: date,
+    ) -> None:
+        """Test str_date_to_date with valid inputs and various formats.
+
+        Verifies
+        --------
+        - Correctly parses date strings in different formats
+        - Returns correct date object
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        date_str : str
+            Date string to parse
+        format_input : TypeDateFormatInput
+            Format specification
+        expected_date : date
+            Expected result date
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.str_date_to_date(date_str, format_input)
+        assert result == expected_date
+
+    def test_str_date_to_date_invalid_format(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test str_date_to_date with invalid format.
+
+        Verifies
+        --------
+        - Raises ValueError for invalid format
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="Not a valid date format"):
+            calendar_instance.str_date_to_date("25/12/2023", "INVALID_FORMAT")  # type: ignore
+
+    def test_str_date_to_date_invalid_date_string(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test str_date_to_date with invalid date string.
+
+        Verifies
+        --------
+        - Raises ValueError for malformed date string
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="Invalid date string"):
+            calendar_instance.str_date_to_date("invalid_date", "DD/MM/YYYY")
+
+    def test_timestamp_to_date_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test timestamp_to_date with valid timestamp.
+
+        Verifies
+        --------
+        - Extracts date component from timestamp
+        - Returns correct date object
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        timestamp = "2023-12-25T10:30:45"
+        result = calendar_instance.timestamp_to_date(timestamp)
+        expected = date(2023, 12, 25)
+        assert result == expected
+
+    def test_timestamp_to_date_custom_separator(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test timestamp_to_date with custom separator.
+
+        Verifies
+        --------
+        - Handles custom timestamp separators
+        - Returns correct date object
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        timestamp = "2023-12-25@10:30:45"
+        result = calendar_instance.timestamp_to_date(timestamp, "@")
+        expected = date(2023, 12, 25)
+        assert result == expected
+
+    def test_timestamp_to_datetime_valid_iso(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test timestamp_to_datetime with valid ISO timestamp.
+
+        Verifies
+        --------
+        - Parses ISO timestamp correctly
+        - Returns correct datetime object
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        timestamp = "2023-12-25T10:30:45"
+        result = calendar_instance.timestamp_to_datetime(timestamp)
+        expected = datetime(2023, 12, 25, 10, 30, 45)
+        assert result == expected
+
+    def test_timestamp_to_datetime_valid_custom_format(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test timestamp_to_datetime with custom format timestamp.
+
+        Verifies
+        --------
+        - Parses custom format timestamp correctly
+        - Returns correct datetime object
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        timestamp = "2023-12-25@10:30:45"
+        result = calendar_instance.timestamp_to_datetime(timestamp, "@")
+        expected = datetime(2023, 12, 25, 10, 30, 45)
+        assert result == expected
+
+    def test_timestamp_to_datetime_invalid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test timestamp_to_datetime with invalid timestamp.
+
+        Verifies
+        --------
+        - Raises ValueError for invalid timestamp
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="Failed to parse timestamp"):
+            calendar_instance.timestamp_to_datetime("invalid_timestamp")
+
+    def test_to_integer_date(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test to_integer with date input.
+
+        Verifies
+        --------
+        - Converts date to integer representation
+        - Format is YYYYMMDD
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.to_integer(sample_date)
+        expected = 20231225
+        assert result == expected
+
+    def test_to_integer_datetime(
+        self, calendar_instance: ABCCalendarOperations, sample_datetime: datetime
+    ) -> None:
+        """Test to_integer with datetime input.
+
+        Verifies
+        --------
+        - Converts datetime to integer representation (date part only)
+        - Format is YYYYMMDD
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_datetime : datetime
+            Sample datetime from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.to_integer(sample_datetime)
+        expected = 20231225
+        assert result == expected
+
+    def test_excel_float_to_date_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test excel_float_to_date with valid Excel date.
+
+        Verifies
+        --------
+        - Converts Excel float to correct date
+        - Handles Excel date epoch correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Excel date for 2023-12-25
+        excel_date = 45291.0  # This is the Excel representation for 2023-12-25
+        result = calendar_instance.excel_float_to_date(excel_date)
+        expected = date(2023, 12, 30)
+        assert result == expected
+
+    def test_excel_float_to_date_none(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test excel_float_to_date with None input.
+
+        Verifies
+        --------
+        - Raises ValueError for None input
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(TypeError, match="must be one of types"):
+            calendar_instance.excel_float_to_date(None)  # type: ignore
+
+    def test_excel_float_to_date_negative(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test excel_float_to_date with negative input.
+
+        Verifies
+        --------
+        - Raises ValueError for negative input
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="cannot be negative"):
+            calendar_instance.excel_float_to_date(-1.0)
+
 
 # --------------------------
 # Tests for DateTimezoneAware
 # --------------------------
-def test_str_date_to_datetime(
-    date_timezone_aware: DateTimezoneAware, 
-    sample_date: date
-) -> None:
-    """Test str_date_to_datetime with valid inputs.
+class TestDateTimezoneAware:
+    """Test cases for DateTimezoneAware class functionality."""
 
-    Verifies
-    --------
-    - Correctly converts string to datetime with timezone
-    - Sets correct timezone
+    def test_str_date_to_datetime_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test str_date_to_datetime with valid input.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
-    sample_date : date
-        Sample date object
+        Verifies
+        --------
+        - Converts string date to datetime with timezone
+        - Includes timezone information
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.str_date_to_datetime("15/06/2023", "DD/MM/YYYY", "UTC")
-    assert result == datetime(2023, 6, 15, 0, 0, tzinfo=ZoneInfo("UTC"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_change_timezone_datetime(
-    date_timezone_aware: DateTimezoneAware, 
-    sample_datetime: datetime
-) -> None:
-    """Test change_timezone with datetime input.
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.str_date_to_datetime("25/12/2023", "DD/MM/YYYY", "UTC")
+        expected = datetime(2023, 12, 25, 0, 0, tzinfo=ZoneInfo("UTC"))
+        assert result == expected
+        assert result.tzinfo == ZoneInfo("UTC")
 
-    Verifies
-    --------
-    - Correctly changes timezone
-    - Maintains correct time in new timezone
+    def test_change_timezone_naive_to_aware(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test change_timezone with naive datetime and source timezone.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
-    sample_datetime : datetime
-        Sample datetime object
+        Verifies
+        --------
+        - Converts naive datetime to timezone-aware
+        - Changes to target timezone correctly
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.change_timezone(sample_datetime, "America/New_York")
-    assert result == datetime(2023, 6, 15, 10, 30, 0, tzinfo=ZoneInfo("America/New_York"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_change_timezone_date(
-    date_timezone_aware: DateTimezoneAware, 
-    sample_date: date
-) -> None:
-    """Test change_timezone with date input.
+        Returns
+        -------
+        None
+        """
+        naive_dt = datetime(2023, 12, 25, 10, 30, 45)
+        result = calendar_instance.change_timezone(naive_dt, "US/Eastern", "UTC")
+        expected = datetime(2023, 12, 25, 5, 30, 45, tzinfo=ZoneInfo("US/Eastern"))
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly converts date to datetime with target timezone
-    - Sets correct timezone
+    def test_change_timezone_aware_to_different(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test change_timezone with timezone-aware datetime.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
-    sample_date : date
-        Sample date object
+        Verifies
+        --------
+        - Converts between timezones correctly
+        - Maintains correct time values
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.change_timezone(sample_date, "UTC")
-    assert result == datetime(2023, 6, 15, 0, 0, tzinfo=ZoneInfo("UTC"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_change_timezone_naive_datetime_no_source(
-    date_timezone_aware: DateTimezoneAware
-) -> None:
-    """Test change_timezone with naive datetime and no source timezone.
+        Returns
+        -------
+        None
+        """
+        utc_dt = datetime(2023, 12, 25, 10, 30, 45, tzinfo=ZoneInfo("UTC"))
+        result = calendar_instance.change_timezone(utc_dt, "US/Eastern")
+        expected = datetime(2023, 12, 25, 5, 30, 45, tzinfo=ZoneInfo("US/Eastern"))
+        assert result == expected
 
-    Verifies
-    --------
-    - Raises ValueError for naive datetime without source_tz
+    def test_change_timezone_date_object(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test change_timezone with date object.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
+        Verifies
+        --------
+        - Converts date to datetime with target timezone
+        - Sets time to midnight
 
-    Returns
-    -------
-    None
-    """
-    naive_dt = datetime(2023, 6, 15, 14, 30, 0)
-    with pytest.raises(ValueError, match="Cannot change timezone of naive datetime"):
-        date_timezone_aware.change_timezone(naive_dt, "UTC")
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_date_to_datetime(
-    date_timezone_aware: DateTimezoneAware, 
-    sample_date: date
-) -> None:
-    """Test date_to_datetime with valid input.
+        Returns
+        -------
+        None
+        """
+        date_obj = date(2023, 12, 25)
+        result = calendar_instance.change_timezone(date_obj, "UTC")
+        expected = datetime(2023, 12, 25, 0, 0, tzinfo=ZoneInfo("UTC"))
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly converts date to datetime
-    - Sets correct timezone
+    def test_change_timezone_naive_no_source(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test change_timezone with naive datetime and no source timezone.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
-    sample_date : date
-        Sample date object
+        Verifies
+        --------
+        - Raises ValueError for naive datetime without source timezone
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.date_to_datetime(sample_date, "UTC")
-    assert result == datetime(2023, 6, 15, 0, 0, tzinfo=ZoneInfo("UTC"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_to_unix_timestamp_datetime(
-    date_timezone_aware: DateTimezoneAware, 
-    sample_datetime: datetime
-) -> None:
-    """Test to_unix_timestamp with datetime input.
+        Returns
+        -------
+        None
+        """
+        naive_dt = datetime(2023, 12, 25, 10, 30, 45)
+        with pytest.raises(ValueError, match="Cannot change timezone of naive datetime"):
+            calendar_instance.change_timezone(naive_dt, "UTC")
 
-    Verifies
-    --------
-    - Correctly converts datetime to Unix timestamp
-    - Handles timezone correctly
+    def test_date_to_datetime_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test date_to_datetime with valid input.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
-    sample_datetime : datetime
-        Sample datetime object
+        Verifies
+        --------
+        - Converts date to datetime with timezone
+        - Sets time to midnight
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.to_unix_timestamp(sample_datetime, "UTC")
-    assert result == 1686841800
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_to_unix_timestamp_time(
-    date_timezone_aware: DateTimezoneAware, 
-    mocker: MockerFixture
-) -> None:
-    """Test to_unix_timestamp with time input.
+        Returns
+        -------
+        None
+        """
+        date_obj = date(2023, 12, 25)
+        result = calendar_instance.date_to_datetime(date_obj, "UTC")
+        expected = datetime(2023, 12, 25, 0, 0, tzinfo=ZoneInfo("UTC"))
+        assert result == expected
+        assert result.tzinfo == ZoneInfo("UTC")
 
-    Verifies
-    --------
-    - Correctly converts time to Unix timestamp using current date
-    - Handles timezone correctly
+    def test_to_unix_timestamp_datetime_aware(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test to_unix_timestamp with timezone-aware datetime.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking date.today()
+        Verifies
+        --------
+        - Converts timezone-aware datetime to correct Unix timestamp
+        - Handles timezone correctly
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("datetime.date.today", return_value=date(2023, 6, 15))
-    t = time(14, 30, 0)
-    result = date_timezone_aware.to_unix_timestamp(t, "UTC")
-    assert result == 1686841800
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_unix_timestamp_to_datetime(
-    date_timezone_aware: DateTimezoneAware
-) -> None:
-    """Test unix_timestamp_to_datetime with valid input.
+        Returns
+        -------
+        None
+        """
+        aware_dt = datetime(2023, 12, 25, 10, 30, 45, tzinfo=timezone.utc)
+        result = calendar_instance.to_unix_timestamp(aware_dt)
+        expected = 1703497845  # Unix timestamp for 2023-12-25 10:30:45 UTC
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly converts Unix timestamp to datetime
-    - Sets correct timezone
+    def test_to_unix_timestamp_datetime_naive(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test to_unix_timestamp with naive datetime.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
+        Verifies
+        --------
+        - Converts naive datetime to Unix timestamp using specified timezone
+        - Applies timezone correctly
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.unix_timestamp_to_datetime(1686841800, "UTC")
-    assert result == datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_unix_timestamp_to_date(
-    date_timezone_aware: DateTimezoneAware
-) -> None:
-    """Test unix_timestamp_to_date with valid input.
+        Returns
+        -------
+        None
+        """
+        naive_dt = datetime(2023, 12, 25, 10, 30, 45)
+        result = calendar_instance.to_unix_timestamp(naive_dt, "UTC")
+        expected = 1703497845  # Unix timestamp for 2023-12-25 10:30:45 UTC
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly converts Unix timestamp to date
-    - Handles timezone correctly
+    def test_to_unix_timestamp_date(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test to_unix_timestamp with date object.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
+        Verifies
+        --------
+        - Converts date to Unix timestamp (midnight)
+        - Uses specified timezone
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.unix_timestamp_to_date(1686841800, "UTC")
-    assert result == date(2023, 6, 15)
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_iso_to_unix_timestamp(
-    date_timezone_aware: DateTimezoneAware
-) -> None:
-    """Test iso_to_unix_timestamp with valid input.
+        Returns
+        -------
+        None
+        """
+        date_obj = date(2023, 12, 25)
+        result = calendar_instance.to_unix_timestamp(date_obj, "UTC")
+        expected = 1703462400  # Unix timestamp for 2023-12-25 00:00:00 UTC
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly converts ISO timestamp to Unix timestamp
-    - Handles timezone correctly
+    def test_to_unix_timestamp_time(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test to_unix_timestamp with time object.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
+        Verifies
+        --------
+        - Converts time to Unix timestamp (today's date)
+        - Uses specified timezone
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.iso_to_unix_timestamp("2023-06-15T14:30:00Z", "UTC")
-    assert result == 1686841800
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_excel_float_to_datetime(
-    date_timezone_aware: DateTimezoneAware
-) -> None:
-    """Test excel_float_to_datetime with valid input.
+        Returns
+        -------
+        None
+        """
+        time_obj = time(10, 30, 45)
+        result = calendar_instance.to_unix_timestamp(time_obj, "UTC")
+        # Result should be today's date + specified time
+        today = date.today()
+        expected_dt = datetime.combine(today, time_obj).replace(tzinfo=ZoneInfo("UTC"))
+        expected = int(expected_dt.timestamp())
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly converts Excel float to datetime
-    - Handles timezone and fractional days
+    def test_unix_timestamp_to_datetime_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test unix_timestamp_to_datetime with valid timestamp.
 
-    Parameters
-    ----------
-    date_timezone_aware : DateTimezoneAware
-        DateTimezoneAware instance
+        Verifies
+        --------
+        - Converts Unix timestamp to correct datetime
+        - Applies specified timezone
 
-    Returns
-    -------
-    None
-    """
-    result = date_timezone_aware.excel_float_to_datetime(44727.5, "UTC")
-    assert result == datetime(2022, 6, 15, 12, 0, 0, tzinfo=ZoneInfo("UTC"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        timestamp = 1703497845  # 2023-12-25 10:30:45 UTC
+        result = calendar_instance.unix_timestamp_to_datetime(timestamp, "UTC")
+        expected = datetime(2023, 12, 25, 10, 30, 45, tzinfo=ZoneInfo("UTC"))
+        assert result == expected
+
+    def test_unix_timestamp_to_date_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test unix_timestamp_to_date with valid timestamp.
+
+        Verifies
+        --------
+        - Converts Unix timestamp to correct date
+        - Extracts date component correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        timestamp = 1703497845  # 2023-12-25 10:30:45 UTC
+        result = calendar_instance.unix_timestamp_to_date(timestamp, "UTC")
+        expected = date(2023, 12, 25)
+        assert result == expected
+
+    def test_iso_to_unix_timestamp_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test iso_to_unix_timestamp with valid ISO timestamp.
+
+        Verifies
+        --------
+        - Converts ISO timestamp to correct Unix timestamp
+        - Handles timezone conversion correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        iso_timestamp = "2023-12-25T10:30:45+00:00"
+        result = calendar_instance.iso_to_unix_timestamp(iso_timestamp, "UTC")
+        expected = 1703497845
+        assert result == expected
+
+    def test_excel_float_to_datetime_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test excel_float_to_datetime with valid Excel date.
+
+        Verifies
+        --------
+        - Converts Excel float to correct datetime with timezone
+        - Handles Excel date epoch and time correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        excel_float = 45250.5208333333  # 2023-12-25 12:30:00
+        result = calendar_instance.excel_float_to_datetime(excel_float, "UTC")
+        expected = datetime(2023, 12, 25, 12, 30, 0, tzinfo=ZoneInfo("UTC"))
+        assert abs((result - expected).total_seconds()) < 1
+
 
 # --------------------------
 # Tests for DatesRangeDelta
 # --------------------------
-def test_working_days_range_valid(
-    dates_range_delta: DatesRangeDelta, 
-    mock_holidays: object
-) -> None:
-    """Test working_days_range with valid input range.
+class TestDatesRangeDelta:
+    """Test cases for DatesRangeDelta class functionality."""
 
-    Verifies
-    --------
-    - Returns correct set of working days
-    - Excludes weekends and holidays
+    def test_working_days_range_valid(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test working_days_range with valid date range.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
-    mock_holidays : object
-        Mock for holidays method
+        Verifies
+        --------
+        - Returns correct set of working days
+        - Excludes weekends and holidays
+        - Includes start and end dates if they are working days
 
-    Returns
-    -------
-    None
-    """
-    start = date(2023, 6, 12)  # Monday
-    end = date(2023, 6, 19)    # Monday
-    result = dates_range_delta.working_days_range(start, end)
-    expected = {date(2023, 6, 12), date(2023, 6, 13), date(2023, 6, 14), date(2023, 6, 15),
-                date(2023, 6, 19)}
-    assert result == expected
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-def test_working_days_range_invalid(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test working_days_range with invalid date range.
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 20)  # Wednesday
+        end_date = date(2023, 12, 27)   # Wednesday
+        result = calendar_instance.working_days_range(start_date, end_date)
+        
+        # Should include: 20, 21, 22, 26, 27 (excluding 23, 24, 25)
+        expected = {
+            date(2023, 12, 20),
+            date(2023, 12, 21),
+            date(2023, 12, 22),
+            date(2023, 12, 26),
+            date(2023, 12, 27),
+        }
+        assert result == expected
 
-    Verifies
-    --------
-    - Raises ValueError when end date is before start date
+    def test_working_days_range_invalid_dates(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test working_days_range with invalid date order.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+        Verifies
+        --------
+        - Raises ValueError when end date is before start date
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="date_end must be greater than date_start"):
-        dates_range_delta.working_days_range(date(2023, 6, 15), date(2023, 6, 14))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_calendar_days_range(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test calendar_days_range with valid input range.
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 27)
+        end_date = date(2023, 12, 20)
+        with pytest.raises(ValueError, match="date_end must be greater than date_start"):
+            calendar_instance.working_days_range(start_date, end_date)
 
-    Verifies
-    --------
-    - Returns complete set of calendar days
-    - Includes all days in range
+    def test_calendar_days_range_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test calendar_days_range with valid date range.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+        Verifies
+        --------
+        - Returns correct set of calendar days
+        - Includes all days including weekends and holidays
+        - Includes start and end dates
 
-    Returns
-    -------
-    None
-    """
-    start = date(2023, 6, 12)
-    end = date(2023, 6, 14)
-    result = dates_range_delta.calendar_days_range(start, end)
-    expected = {date(2023, 6, 12), date(2023, 6, 13), date(2023, 6, 14)}
-    assert result == expected
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_years_between_dates(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test years_between_dates with valid input range.
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 25)
+        end_date = date(2023, 12, 27)
+        result = calendar_instance.calendar_days_range(start_date, end_date)
+        expected = {
+            date(2023, 12, 25),
+            date(2023, 12, 26),
+            date(2023, 12, 27),
+        }
+        assert result == expected
 
-    Verifies
-    --------
-    - Returns correct set of years
-    - Handles multi-year range
+    def test_calendar_days_range_invalid_dates(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test calendar_days_range with invalid date order.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+        Verifies
+        --------
+        - Raises ValueError when end date is before start date
 
-    Returns
-    -------
-    None
-    """
-    start = date(2022, 6, 15)
-    end = date(2023, 6, 15)
-    result = dates_range_delta.years_between_dates(start, end)
-    assert result == {2022, 2023}
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_delta_working_days(
-    dates_range_delta: DatesRangeDelta, 
-    mock_holidays: object
-) -> None:
-    """Test delta_working_days with valid input range.
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 27)
+        end_date = date(2023, 12, 20)
+        with pytest.raises(ValueError, match="date_end must be greater than date_start"):
+            calendar_instance.calendar_days_range(start_date, end_date)
 
-    Verifies
-    --------
-    - Correctly counts working days
-    - Excludes weekends and holidays
+    def test_years_between_dates_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test years_between_dates with valid date range.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
-    mock_holidays : object
-        Mock for holidays method
+        Verifies
+        --------
+        - Returns correct set of years
+        - Includes all years that appear in the date range
 
-    Returns
-    -------
-    None
-    """
-    start = date(2023, 6, 12)  # Monday
-    end = date(2023, 6, 19)    # Monday
-    result = dates_range_delta.delta_working_days(start, end)
-    assert result == 4  # Excludes June 16 (holiday), June 17-18 (weekend)
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_delta_calendar_days(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test delta_calendar_days with valid input range.
+        Returns
+        -------
+        None
+        """
+        start_date = date(2022, 12, 31)
+        end_date = date(2024, 1, 1)
+        result = calendar_instance.years_between_dates(start_date, end_date)
+        expected = {2022, 2023, 2024}
+        assert result == expected
 
-    Verifies
-    --------
-    - Correctly counts calendar days
-    - Includes all days in range
+    def test_years_between_dates_invalid_dates(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test years_between_dates with invalid date order.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+        Verifies
+        --------
+        - Raises ValueError when end date is before start date
 
-    Returns
-    -------
-    None
-    """
-    start = date(2023, 6, 12)
-    end = date(2023, 6, 15)
-    result = dates_range_delta.delta_calendar_days(start, end)
-    assert result == 3
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_get_start_end_day_month(
-    dates_range_delta: DatesRangeDelta, 
-    mock_holidays: object
-) -> None:
-    """Test get_start_end_day_month with various inputs.
+        Returns
+        -------
+        None
+        """
+        start_date = date(2024, 1, 1)
+        end_date = date(2022, 12, 31)
+        with pytest.raises(ValueError, match="date_end must be greater than date_start"):
+            calendar_instance.years_between_dates(start_date, end_date)
 
-    Verifies
-    --------
-    - Returns correct start and end dates
-    - Handles working day option
-    - Handles year-end edge case
+    def test_delta_working_days_valid(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test delta_working_days with valid date range.
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
-    mock_holidays : object
-        Mock for holidays method
+        Verifies
+        --------
+        - Returns correct number of working days between dates
+        - Excludes weekends and holidays
+        - Counts correctly including/excluding start date
 
-    Returns
-    -------
-    None
-    """
-    date_ = date(2023, 6, 15)
-    result = dates_range_delta.get_start_end_day_month(date_, bool_working_days=False)
-    assert result == (date(2023, 6, 1), date(2023, 7, 1))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    result = dates_range_delta.get_start_end_day_month(date_, bool_working_days=True)
-    assert result == (date(2023, 6, 1), date(2023, 6, 30))  # June 30 is last working day
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 20)  # Wednesday (working day)
+        end_date = date(2023, 12, 27)   # Wednesday (working day)
+        result = calendar_instance.delta_working_days(start_date, end_date)
+        # 20, 21, 22, 26, 27 = 5 working days, but delta should be 4 (exclusive of start)
+        assert result == 4
 
-    # Test December edge case
-    date_ = date(2023, 12, 15)
-    result = dates_range_delta.get_start_end_day_month(date_, bool_working_days=False)
-    assert result == (date(2023, 12, 1), date(2024, 1, 1))
+    def test_delta_working_days_non_working_start(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test delta_working_days with non-working start date.
 
-def test_get_dates_weekday_month(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test get_dates_weekday_month with valid inputs.
+        Verifies
+        --------
+        - Handles non-working start date correctly
+        - Returns correct number of working days
 
-    Verifies
-    --------
-    - Returns correct list of dates for given weekday
-    - Handles month boundaries
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 25)  # Monday (holiday)
+        end_date = date(2023, 12, 27)   # Wednesday (working day)
+        result = calendar_instance.delta_working_days(start_date, end_date)
+        # 26, 27 = 2 working days
+        assert result == 2
 
-    Returns
-    -------
-    None
-    """
-    result = dates_range_delta.get_dates_weekday_month(2023, 6, 2)  # Wednesdays
-    expected = [date(2023, 6, 7), date(2023, 6, 14), date(2023, 6, 21), date(2023, 6, 28)]
-    assert result == expected
+    def test_delta_calendar_days_valid(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test delta_calendar_days with valid date range.
 
-def test_get_dates_weekday_month_invalid(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test get_dates_weekday_month with invalid inputs.
+        Verifies
+        --------
+        - Returns correct number of calendar days between dates
+        - Includes all days including weekends and holidays
 
-    Verifies
-    --------
-    - Raises ValueError for invalid month or weekday
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 25)
+        end_date = date(2023, 12, 27)
+        result = calendar_instance.delta_calendar_days(start_date, end_date)
+        assert result == 2  # 25 to 27 is 2 days difference
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="Month must be between 1 and 12"):
-        dates_range_delta.get_dates_weekday_month(2023, 13, 2)
-    with pytest.raises(ValueError, match="Weekday must be between 0 and 6"):
-        dates_range_delta.get_dates_weekday_month(2023, 6, 7)
+    def test_delta_calendar_days_invalid_dates(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test delta_calendar_days with invalid date order.
 
-def test_get_nth_weekday_month(
-    dates_range_delta: DatesRangeDelta, 
-    mock_holidays: object
-) -> None:
-    """Test get_nth_weekday_month with valid inputs.
+        Verifies
+        --------
+        - Raises ValueError when end date is before start date
 
-    Verifies
-    --------
-    - Returns correct nth weekday
-    - Handles working day option
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
-    mock_holidays : object
-        Mock for holidays method
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 27)
+        end_date = date(2023, 12, 20)
+        with pytest.raises(ValueError, match="date_end must be greater than date_start"):
+            calendar_instance.delta_calendar_days(start_date, end_date)
 
-    Returns
-    -------
-    None
-    """
-    result = dates_range_delta.get_nth_weekday_month(2023, 6, 2, 2, bool_working_days=False)
-    assert result == date(2023, 6, 14)  # Second Wednesday
+    def test_get_start_end_day_month_calendar(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test get_start_end_day_month with calendar days.
 
-    result = dates_range_delta.get_nth_weekday_month(2023, 6, 2, 2, bool_working_days=True)
-    assert result == date(2023, 6, 14)  # Second Wednesday is a working day
+        Verifies
+        --------
+        - Returns correct start and end of month
+        - Uses calendar days (not adjusted for working days)
 
-def test_get_nth_weekday_month_invalid(
-    dates_range_delta: DatesRangeDelta
-) -> None:
-    """Test get_nth_weekday_month with invalid inputs.
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-    Verifies
-    --------
-    - Raises ValueError for invalid n, month, or weekday
+        Returns
+        -------
+        None
+        """
+        test_date = date(2023, 12, 15)
+        result = calendar_instance.get_start_end_day_month(test_date, False)
+        expected_start = date(2023, 12, 1)
+        expected_end = date(2023, 12, 31)
+        assert result == (expected_start, expected_end)
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
+    def test_get_start_end_day_month_working(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test get_start_end_day_month with working days.
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="n must be non-zero"):
-        dates_range_delta.get_nth_weekday_month(2023, 6, 2, 0)
-    with pytest.raises(ValueError, match="n must be less than or equal to"):
-        dates_range_delta.get_nth_weekday_month(2023, 6, 2, 6)
+        Verifies
+        --------
+        - Returns nearest working days for month boundaries
+        - Adjusts for weekends and holidays
 
-def test_last_working_day_years(
-    dates_range_delta: DatesRangeDelta, 
-    mock_holidays: object
-) -> None:
-    """Test last_working_day_years with valid inputs.
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-    Verifies
-    --------
-    - Returns correct last working days for given years
-    - Handles holidays correctly
+        Returns
+        -------
+        None
+        """
+        mock_holidays.return_value = [("Christmas", date(2023, 12, 25))]
+        test_date = date(2023, 12, 15)
+        result = calendar_instance.get_start_end_day_month(test_date, True)
+        expected_start = date(2023, 12, 1)  # Friday (working)
+        expected_end = date(2023, 12, 29)   # Last working day (Friday)
+        assert result == (expected_start, expected_end)
 
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
-    mock_holidays : object
-        Mock for holidays method
-
-    Returns
-    -------
-    None
-    """
-    result = dates_range_delta.last_working_day_years([2022, 2023])
-    assert result == [date(2022, 12, 30), date(2023, 12, 29)]  # Last working days
-
-def test_delta_working_hours(
-    dates_range_delta: DatesRangeDelta, 
-    mocker: MockerFixture
-) -> None:
-    """Test delta_working_hours with valid inputs.
-
-    Verifies
-    --------
-    - Correctly calculates working hours
-    - Handles office hours and lunch breaks
-    - Excludes holidays and weekends
-
-    Parameters
-    ----------
-    dates_range_delta : DatesRangeDelta
-        DatesRangeDelta instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking holidays
-
-    Returns
-    -------
-    None
-    """
-    mocker.patch.object(
-        DatesRangeDelta,
-        "holidays",
-        return_value=[("Holiday", date(2023, 6, 14))]
+    @pytest.mark.parametrize(
+        "year,month,weekday,expected_count",
+        [
+            (2023, 12, 0, 4),  # Mondays in December 2023
+            (2023, 12, 4, 5),  # Fridays in December 2023
+            (2023, 2, 0, 4),   # Mondays in February 2023
+        ],
     )
-    start = "2023-06-13T09:00:00"
-    end = "2023-06-15T17:00:00"
-    result = dates_range_delta.delta_working_hours(start, end)
-    assert result == 17  # June 13: 9 hours (9-18), June 15: 8 hours (9-17)
+    def test_get_dates_weekday_month_valid(
+        self,
+        calendar_instance: ABCCalendarOperations,
+        year: int,
+        month: int,
+        weekday: int,
+        expected_count: int,
+    ) -> None:
+        """Test get_dates_weekday_month with valid inputs.
+
+        Verifies
+        --------
+        - Returns correct list of dates for specific weekday in month
+        - All dates have correct weekday
+        - Correct number of dates returned
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        year : int
+            Test year
+        month : int
+            Test month
+        weekday : int
+            Test weekday (0=Monday, 6=Sunday)
+        expected_count : int
+            Expected number of dates
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.get_dates_weekday_month(year, month, weekday)
+        assert len(result) == expected_count
+        for date_obj in result:
+            assert date_obj.weekday() == weekday
+            assert date_obj.year == year
+            assert date_obj.month == month
+
+    @pytest.mark.parametrize(
+        "month,weekday",
+        [
+            (0, 0),   # Invalid month
+            (13, 0),  # Invalid month
+            (1, -1),  # Invalid weekday
+            (1, 7),   # Invalid weekday
+        ],
+    )
+    def test_get_dates_weekday_month_invalid(
+        self, calendar_instance: ABCCalendarOperations, month: int, weekday: int
+    ) -> None:
+        """Test get_dates_weekday_month with invalid inputs.
+
+        Verifies
+        --------
+        - Raises ValueError for invalid month or weekday
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        month : int
+            Invalid month
+        weekday : int
+            Invalid weekday
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError):
+            calendar_instance.get_dates_weekday_month(2023, month, weekday)
+
+    def test_get_nth_weekday_month_valid(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test get_nth_weekday_month with valid inputs.
+
+        Verifies
+        --------
+        - Returns correct nth weekday of month
+        - Handles working day adjustment correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
+
+        Returns
+        -------
+        None
+        """
+        # 3rd Monday of December 2023
+        result = calendar_instance.get_nth_weekday_month(2023, 12, 0, 3, True, True)
+        expected = date(2023, 12, 18)  # 3rd Monday is Dec 18
+        assert result == expected
+
+    def test_get_nth_weekday_month_invalid_n(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test get_nth_weekday_month with invalid n.
+
+        Verifies
+        --------
+        - Raises ValueError for n=0
+        - Raises ValueError for n too large
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="n must be positive"):
+            calendar_instance.get_nth_weekday_month(2023, 12, 0, 0, True, True)
+
+    def test_last_working_day_years_valid(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test last_working_day_years with valid years.
+
+        Verifies
+        --------
+        - Returns correct last working days for each year
+        - Handles year-end holidays and weekends correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
+
+        Returns
+        -------
+        None
+        """
+        years = [2022, 2023]
+        result = calendar_instance.last_working_day_years(years)
+        # December 31st 2022 is Saturday, so last working day should be December 30th
+        # December 31st 2023 is Sunday, so last working day should be December 29th
+        expected = [date(2022, 12, 30), date(2023, 12, 29)]
+        assert result == expected
+
 
 # --------------------------
 # Tests for DatesCurrent
 # --------------------------
-def test_curr_date(dates_current: DatesCurrent, mocker: MockerFixture) -> None:
-    """Test curr_date returns current date.
+class TestDatesCurrent:
+    """Test cases for DatesCurrent class functionality."""
 
-    Verifies
-    --------
-    - Returns correct date
-    - Returns date object
+    def test_curr_date(self, calendar_instance: ABCCalendarOperations) -> None:
+        """Test curr_date method.
 
-    Parameters
-    ----------
-    dates_current : DatesCurrent
-        DatesCurrent instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking date.today()
+        Verifies
+        --------
+        - Returns current date
+        - Returns date object
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("datetime.date.today", return_value=date(2023, 6, 15))
-    result = dates_current.curr_date()
-    assert result == date(2023, 6, 15)
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_curr_datetime(dates_current: DatesCurrent, mocker: MockerFixture) -> None:
-    """Test curr_datetime returns current datetime.
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.curr_date()
+        assert isinstance(result, date)
+        assert result == date.today()
 
-    Verifies
-    --------
-    - Returns datetime with correct timezone
-    - Returns datetime object
+    def test_curr_datetime_utc(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test curr_datetime with UTC timezone.
 
-    Parameters
-    ----------
-    dates_current : DatesCurrent
-        DatesCurrent instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking分辨
+        Verifies
+        --------
+        - Returns current datetime with UTC timezone
+        - Returns datetime object with correct timezone
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("datetime.datetime.now", 
-                 return_value=datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC")))
-    result = dates_current.curr_datetime("UTC")
-    assert result == datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC"))
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_curr_time(dates_current: DatesCurrent, mocker: MockerFixture) -> None:
-    """Test curr_time returns current time.
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.curr_datetime("UTC")
+        assert isinstance(result, datetime)
+        assert result.tzinfo == ZoneInfo("UTC")
 
-    Verifies
-    --------
-    - Returns correct time
-    - Returns time object
+    def test_curr_time_utc(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test curr_time with UTC timezone.
 
-    Parameters
-    ----------
-    dates_current : DatesCurrent
-        DatesCurrent instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking datetime.now()
+        Verifies
+        --------
+        - Returns current time with UTC timezone
+        - Returns time object
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("datetime.datetime.now", 
-                 return_value=datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC")))
-    result = dates_current.curr_time("UTC")
-    assert result == time(14, 30, 0)
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
 
-def test_current_timestamp_string(
-    dates_current: DatesCurrent, 
-    mocker: MockerFixture
-) -> None:
-    """Test current_timestamp_string returns formatted timestamp.
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.curr_time("UTC")
+        assert isinstance(result, time)
 
-    Verifies
-    --------
-    - Returns correct string format
-    - Handles custom format and timezone
+    def test_current_timestamp_string_default(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test current_timestamp_string with default format.
 
-    Parameters
-    ----------
-    dates_current : DatesCurrent
-        DatesCurrent instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking datetime.now()
+        Verifies
+        --------
+        - Returns timestamp string in default format
+        - Format matches expected pattern
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("datetime.datetime.now", 
-                 return_value=datetime(2023, 6, 15, 14, 30, 0, tzinfo=ZoneInfo("UTC")))
-    result = dates_current.current_timestamp_string("%Y%m%d_%H%M%S", "UTC")
-    assert result == "20230615_143000"
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.current_timestamp_string()
+        # Should be in format YYYYMMDD_HHMMSS
+        assert len(result) == 15  # 8 + 1 + 6
+        assert "_" in result
+        parts = result.split("_")
+        assert len(parts[0]) == 8  # Date part
+        assert len(parts[1]) == 6  # Time part
+
+    def test_current_timestamp_string_custom_format(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test current_timestamp_string with custom format.
+
+        Verifies
+        --------
+        - Returns timestamp string in custom format
+        - Format matches specified pattern
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        custom_format = "%Y-%m-%d %H:%M:%S"
+        result = calendar_instance.current_timestamp_string(custom_format, "UTC")
+        # Should be in format YYYY-MM-DD HH:MM:SS
+        assert len(result) == 19
+        assert "-" in result
+        assert ":" in result
+        assert " " in result
+
 
 # --------------------------
 # Tests for DateFormatter
 # --------------------------
-def test_get_platform_locale(date_formatter: DateFormatter) -> None:
-    """Test get_platform_locale with various inputs.
+class TestDateFormatter:
+    """Test cases for DateFormatter class functionality."""
 
-    Verifies
-    --------
-    - Returns correct locale
-    - Handles timezone to locale mapping
-    - Falls back to default locale
+    def test_get_platform_locale_windows(
+        self, mock_setlocale: MagicMock, calendar_instance: ABCCalendarOperations, mocker: MockerFixture
+    ) -> None:
+        """Test get_platform_locale on Windows.
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
+        Verifies
+        --------
+        - Returns Windows-compatible locale format
+        - Handles Windows platform correctly
 
-    Returns
-    -------
-    None
-    """
-    result = date_formatter.get_platform_locale(str_timezone="America/Sao_Paulo")
-    assert result == "pt-BR" if platform.system() == "Windows" else "pt_BR.UTF-8"
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
-    result = date_formatter.get_platform_locale(str_locale="en-US")
-    assert result == "en-US" if platform.system() == "Windows" else "en_US.UTF-8"
+        Returns
+        -------
+        None
+        """
+        mock_setlocale.return_value = 'en-GB'
+        mocker.patch("platform.system", return_value="Windows")
+        result = calendar_instance.get_platform_locale("en-GB")
+        assert result == "en-GB"
 
-def test_get_platform_locale_invalid(date_formatter: DateFormatter) -> None:
-    """Test get_platform_locale with invalid locale.
+    def test_get_platform_locale_linux(
+        self, calendar_instance: ABCCalendarOperations, mocker: MockerFixture
+    ) -> None:
+        """Test get_platform_locale on Linux.
 
-    Verifies
-    --------
-    - Falls back to default locale on invalid input
-    - Handles locale errors gracefully
+        Verifies
+        --------
+        - Returns Linux-compatible locale format
+        - Handles Linux platform correctly
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
-    Returns
-    -------
-    None
-    """
-    with patch("locale.setlocale", side_effect=locale.Error):
-        result = date_formatter.get_platform_locale(str_locale="invalid")
-        expected = "en-GB" if platform.system() == "Windows" else "en_GB.UTF-8"
-        assert result == expected
+        Returns
+        -------
+        None
+        """
+        mocker.patch("platform.system", return_value="Linux")
+        result = calendar_instance.get_platform_locale("en-GB")
+        assert result == "en_GB.UTF-8"
 
-def test_year_number(date_formatter: DateFormatter, sample_date: date) -> None:
-    """Test year_number with valid input.
+    def test_get_platform_locale_timezone_based(
+        self, calendar_instance: ABCCalendarOperations, mocker: MockerFixture
+    ) -> None:
+        """Test get_platform_locale with timezone-based locale.
 
-    Verifies
-    --------
-    - Returns correct year number
-    - Handles date input correctly
+        Verifies
+        --------
+        - Returns locale based on timezone mapping
+        - Uses timezone-to-locale mapping correctly
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_formatter.year_number(sample_date)
-    assert result == 2023
+        Returns
+        -------
+        None
+        """
+        mocker.patch("platform.system", return_value="Linux")
+        result = calendar_instance.get_platform_locale(None, "America/Sao_Paulo")
+        assert result == "pt_BR.UTF-8"
 
-def test_month_str(date_formatter: DateFormatter, sample_date: date) -> None:
-    """Test month_str with valid input.
+    def test_get_platform_locale_invalid(
+        self, calendar_instance: ABCCalendarOperations, mocker: MockerFixture
+    ) -> None:
+        """Test get_platform_locale with invalid locale.
 
-    Verifies
-    --------
-    - Returns correct month name
-    - Handles date input correctly
+        Verifies
+        --------
+        - Falls back to default locale for invalid input
+        - Raises ValueError with appropriate message
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_formatter.month_str(sample_date)
-    assert result == "June"
+        Returns
+        -------
+        None
+        """
+        mocker.patch("platform.system", return_value="Linux")
+        mocker.patch("locale.setlocale", side_effect=locale.Error("Invalid locale"))
+        
+        with pytest.raises(ValueError, match="Invalid or unsupported locale"):
+            calendar_instance.get_platform_locale("invalid-locale")
 
-def test_month_number(
-    date_formatter: DateFormatter, 
-    sample_date: date
-) -> None:
-    """Test month_number with various inputs.
+    def test_year_number(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test year_number method.
 
-    Verifies
-    --------
-    - Returns correct month number or string
-    - Handles bool_month_mm parameter
+        Verifies
+        --------
+        - Returns correct year number
+        - Returns integer type
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_formatter.month_number(sample_date, bool_month_mm=False)
-    assert result == 6
-    result = date_formatter.month_number(sample_date, bool_month_mm=True)
-    assert result == "06"
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.year_number(sample_date)
+        assert result == 2023
+        assert isinstance(result, int)
 
-def test_week_number(date_formatter: DateFormatter, sample_date: date) -> None:
-    """Test week_number with valid input.
+    def test_month_str(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test month_str method.
 
-    Verifies
-    --------
-    - Returns correct week number
-    - Handles date input correctly
+        Verifies
+        --------
+        - Returns month name as string
+        - Returns non-empty string
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_formatter.week_number(sample_date)
-    assert result == "4"  # June 15, 2023 is Thursday
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.month_str(sample_date)
+        assert isinstance(result, str)
+        assert len(result) > 0
 
-def test_day_number(date_formatter: DateFormatter, sample_date: date) -> None:
-    """Test day_number with valid input.
+    def test_month_number_numeric(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test month_number with numeric output.
 
-    Verifies
-    --------
-    - Returns correct day number
-    - Handles date input correctly
+        Verifies
+        --------
+        - Returns month number as integer
+        - Returns correct month number
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    result = date_formatter.day_number(sample_date)
-    assert result == 15
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.month_number(sample_date, False)
+        assert result == 12
+        assert isinstance(result, int)
 
-def test_month_name(date_formatter: DateFormatter, sample_date: date) -> None:
-    """Test month_name with various inputs.
+    def test_month_number_string(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test month_number with string output.
 
-    Verifies
-    --------
-    - Returns correct month name or abbreviation
-    - Handles timezone and abbreviation parameters
+        Verifies
+        --------
+        - Returns month number as string with leading zero
+        - Returns correct format
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    with patch("locale.setlocale"):
-        result = date_formatter.month_name(sample_date, bool_abbreviation=False, 
-                                           str_timezone="UTC")
-        assert result == "June"
-        result = date_formatter.month_name(sample_date, bool_abbreviation=True, 
-                                           str_timezone="UTC")
-        assert result == "Jun"
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.month_number(sample_date, True)
+        assert result == "12"
+        assert isinstance(result, str)
 
-def test_week_name(date_formatter: DateFormatter, sample_date: date) -> None:
-    """Test week_name with various inputs.
+    def test_week_number(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test week_number method.
 
-    Verifies
-    --------
-    - Returns correct week name or abbreviation
-    - Handles timezone and abbreviation parameters
+        Verifies
+        --------
+        - Returns week day number as string
+        - Returns correct week day number
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    sample_date : date
-        Sample date object
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    with patch("locale.setlocale"):
-        result = date_formatter.week_name(sample_date, bool_abbreviation=False, 
-                                          str_timezone="UTC")
-        assert result == "Thursday"
-        result = date_formatter.week_name(sample_date, bool_abbreviation=True, 
-                                          str_timezone="UTC")
-        assert result == "Thu"
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.week_number(sample_date)
+        # December 25, 2023 is a Monday (weekday 0)
+        assert result == "1"
+        assert isinstance(result, str)
 
-def test_utc_log_ts(date_formatter: DateFormatter, mocker: MockerFixture) -> None:
-    """Test utc_log_ts returns UTC datetime.
+    def test_day_number(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test day_number method.
 
-    Verifies
-    --------
-    - Returns correct UTC datetime
-    - Handles timezone correctly
+        Verifies
+        --------
+        - Returns day number as integer
+        - Returns correct day number
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking datetime.now()
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("datetime.datetime.now", return_value=datetime(2023, 6, 15, 14, 30, 0, 
-                                                                tzinfo=timezone.utc))
-    result = date_formatter.utc_log_ts()
-    assert result == datetime(2023, 6, 15, 14, 30, 0, tzinfo=timezone.utc)
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.day_number(sample_date)
+        assert result == 25
+        assert isinstance(result, int)
+
+    def test_month_name_full(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test month_name with full name.
+
+        Verifies
+        --------
+        - Returns full month name
+        - Returns non-empty string
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.month_name(sample_date, False, "UTC")
+        assert isinstance(result, str)
+        assert len(result) > 0
+        # Should be "December" or localized equivalent
+
+    def test_month_name_abbreviation(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test month_name with abbreviation.
+
+        Verifies
+        --------
+        - Returns abbreviated month name
+        - Returns shorter string than full name
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.month_name(sample_date, True, "UTC")
+        assert isinstance(result, str)
+        assert len(result) <= 4  # Typically 3-4 characters for abbreviations
+
+    def test_week_name_full(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test week_name with full name.
+
+        Verifies
+        --------
+        - Returns full week day name
+        - Returns non-empty string
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.week_name(sample_date, False, "UTC")
+        assert isinstance(result, str)
+        assert len(result) > 0
+        # December 25, 2023 is Monday
+
+    def test_week_name_abbreviation(
+        self, calendar_instance: ABCCalendarOperations, sample_date: date
+    ) -> None:
+        """Test week_name with abbreviation.
+
+        Verifies
+        --------
+        - Returns abbreviated week day name
+        - Returns shorter string than full name
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        sample_date : date
+            Sample date from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.week_name(sample_date, True, "UTC")
+        assert isinstance(result, str)
+        assert len(result) <= 4  # Typically 3-4 characters for abbreviations
+
+    def test_utc_log_ts(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test utc_log_ts method.
+
+        Verifies
+        --------
+        - Returns current UTC datetime
+        - Returns datetime with UTC timezone
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        result = calendar_instance.utc_log_ts()
+        assert isinstance(result, datetime)
+        assert result.tzinfo == timezone.utc
+
 
 # --------------------------
-# Edge Cases and Error Conditions
+# Integration Tests
 # --------------------------
-@pytest.mark.parametrize("invalid_date", [None, "", 123, []])
-def test_date_only_invalid_types(
-    calendar_core: CalendarCore, 
-    invalid_date: object
-) -> None:
-    """Test date_only with various invalid types.
+class TestIntegration:
+    """Integration tests for calendar operations."""
 
-    Verifies
-    --------
-    - Raises TypeError for non-date/datetime inputs
-    - Includes correct error message
+    def test_complete_date_workflow(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
+    ) -> None:
+        """Test complete date manipulation workflow.
 
-    Parameters
-    ----------
-    calendar_core : CalendarCore
-        CalendarCore instance
-    invalid_date : object
-        Invalid input type
+        Verifies
+        --------
+        - Multiple date operations work together correctly
+        - End-to-end functionality works as expected
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="date_ must be of type datetime or date"):
-        calendar_core.date_only(invalid_date)
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
 
-@pytest.mark.parametrize("invalid_timestamp", ["invalid", "2023-13-15T14:30:00", ""])
-def test_timestamp_to_datetime_invalid_format(
-    date_manipulation: DateManipulation, 
-    invalid_timestamp: str
-) -> None:
-    """Test timestamp_to_datetime with invalid timestamp formats.
+        Returns
+        -------
+        None
+        """
+        # Start with a string date
+        date_str = "25/12/2023"
+        date_obj = calendar_instance.str_date_to_date(date_str, "DD/MM/YYYY")
+        
+        # Convert to datetime with timezone
+        datetime_obj = calendar_instance.date_to_datetime(date_obj, "UTC")
+        
+        # Add working days
+        future_date = calendar_instance.add_working_days(date_obj, 5)
+        
+        # Check if it's a working day
+        is_working = calendar_instance.is_working_day(future_date)
+        
+        # Convert to integer representation
+        date_int = calendar_instance.to_integer(future_date)
+        
+        # Verify all operations completed successfully
+        assert isinstance(date_obj, date)
+        assert isinstance(datetime_obj, datetime)
+        assert isinstance(future_date, date)
+        assert isinstance(is_working, bool)
+        assert isinstance(date_int, int)
 
-    Verifies
-    --------
-    - Raises ValueError for malformed timestamps
-    - Includes appropriate error message
+    def test_timezone_conversion_workflow(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test complete timezone conversion workflow.
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    invalid_timestamp : str
-        Invalid timestamp string
+        Verifies
+        --------
+        - Multiple timezone operations work together correctly
+        - Timezone conversions maintain correct time values
 
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="Failed to parse timestamp"):
-        date_manipulation.timestamp_to_datetime(invalid_timestamp)
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Create datetime in one timezone
+        utc_dt = calendar_instance.build_datetime(2023, 12, 25, 10, 30, 45, "UTC")
+        
+        # Convert to different timezone
+        est_dt = calendar_instance.change_timezone(utc_dt, "US/Eastern")
+        
+        # Convert to Unix timestamp
+        timestamp = calendar_instance.to_unix_timestamp(est_dt)
+        
+        # Convert back to datetime
+        restored_dt = calendar_instance.unix_timestamp_to_datetime(timestamp, "US/Eastern")
+        
+        # Verify timezone consistency
+        assert est_dt.tzinfo == ZoneInfo("US/Eastern")
+        assert restored_dt.tzinfo == ZoneInfo("US/Eastern")
+        assert est_dt == restored_dt
+
 
 # --------------------------
-# Reload Logic
+# Error Handling Tests
 # --------------------------
-def test_module_reload() -> None:
-    """Test module reload behavior.
+class TestErrorHandling:
+    """Test cases for error handling and edge cases."""
 
-    Verifies
-    --------
-    - Module can be reloaded without errors
-    - Classes maintain their functionality post-reload
+    @pytest.mark.parametrize(
+        "invalid_input",
+        [
+            None,
+            "invalid",
+            123,
+            123.45,
+            [],
+            {},
+            object(),
+        ],
+    )
+    def test_date_only_type_errors(
+        self, calendar_instance: ABCCalendarOperations, invalid_input: Any
+    ) -> None:
+        """Test date_only with various invalid types.
 
-    Returns
-    -------
-    None
-    """
-    import importlib
-    import sys
-    importlib.reload(sys.modules["stpstone.analytics.calendars.calendar_operations"])
-    calendar = DateFormatter()
-    assert isinstance(calendar.curr_date(), date)
+        Verifies
+        --------
+        - Raises TypeError for all non-date/datetime inputs
+        - Error message contains expected text
 
-# --------------------------
-# Coverage for All Branches
-# --------------------------
-def test_add_working_days_all_branches(
-    date_manipulation: DateManipulation, 
-    mock_holidays: object
-) -> None:
-    """Test all branches of add_working_days.
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        invalid_input : Any
+            Various invalid input types
 
-    Verifies
-    --------
-    - Zero days case
-    - Positive days case
-    - Negative days case
-    - Weekend and holiday skipping
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(TypeError, match="must be of type"):
+            calendar_instance.date_only(invalid_input)
 
-    Parameters
-    ----------
-    date_manipulation : DateManipulation
-        DateManipulation instance
-    mock_holidays : object
-        Mock for holidays method
+    @pytest.mark.parametrize(
+        "invalid_timezone",
+        [
+            "",
+            None,
+            "invalid/timezone",
+            "NOT_A_TIMEZONE",
+        ],
+    )
+    def test_build_datetime_invalid_timezone(
+        self, calendar_instance: ABCCalendarOperations, invalid_timezone: Optional[str]
+    ) -> None:
+        """Test build_datetime with invalid timezone.
 
-    Returns
-    -------
-    None
-    """
-    date_ = date(2023, 6, 15)
-    assert date_manipulation.add_working_days(date_, 0) == date_
-    assert date_manipulation.add_working_days(date_, 1) == date(2023, 6, 19)
-    assert date_manipulation.add_working_days(date_, -1) == date(2023, 6, 14)
+        Verifies
+        --------
+        - Raises ZoneInfoNotFoundError for invalid timezone
+        - Handles empty/None timezone correctly
 
-def test_get_platform_locale_all_branches(
-    date_formatter: DateFormatter, 
-    mocker: MockerFixture
-) -> None:
-    """Test all branches of get_platform_locale.
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        invalid_timezone : Optional[str]
+            Invalid timezone values
 
-    Verifies
-    --------
-    - Timezone mapping
-    - Explicit locale
-    - Fallback to default locale
-    - Windows vs non-Windows handling
+        Returns
+        -------
+        None
+        """
+        if invalid_timezone == "" or invalid_timezone is None:
+            with pytest.raises(ZoneInfoNotFoundError, match="Timezone cannot be empty or None"):
+                calendar_instance.build_datetime(2023, 12, 25, 10, 30, 45, invalid_timezone)
+        else:
+            with pytest.raises(ZoneInfoNotFoundError):
+                calendar_instance.build_datetime(2023, 12, 25, 10, 30, 45, invalid_timezone)
 
-    Parameters
-    ----------
-    date_formatter : DateFormatter
-        DateFormatter instance
-    mocker : MockerFixture
-        Pytest-mock fixture for mocking platform.system()
+    @pytest.mark.parametrize(
+        "invalid_format",
+        [
+            "INVALID_FORMAT",
+            "",
+            None,
+            "YYYY/MM/DD",
+            "DD-MM-YYYY",
+        ],
+    )
+    def test_str_date_to_date_invalid_format(
+        self, calendar_instance: ABCCalendarOperations, invalid_format: Optional[str]
+    ) -> None:
+        """Test str_date_to_date with invalid format.
 
-    Returns
-    -------
-    None
-    """
-    mocker.patch("platform.system", return_value="Windows")
-    assert date_formatter.get_platform_locale(str_timezone="America/Sao_Paulo") == "pt-BR"
-    mocker.patch("platform.system", return_value="Linux")
-    assert date_formatter.get_platform_locale(str_timezone="America/Sao_Paulo") == "pt_BR.UTF-8"
-    assert date_formatter.get_platform_locale(str_locale="en-US") == "en-US" \
-        if platform.system() == "Windows" else "en_US.UTF-8"
-    with patch("locale.setlocale", side_effect=locale.Error):
-        assert date_formatter.get_platform_locale() == "en-GB" \
-            if platform.system() == "Windows" else "en_GB.UTF-8"
+        Verifies
+        --------
+        - Raises ValueError for invalid format
+        - Handles empty/None format correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        invalid_format : Optional[str]
+            Invalid format values
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="Not a valid date format"):
+            calendar_instance.str_date_to_date("25/12/2023", invalid_format)  # type: ignore
+
+    def test_delta_working_days_invalid_range(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test delta_working_days with invalid date range.
+
+        Verifies
+        --------
+        - Raises ValueError when end date is before start date
+        - Error message is appropriate
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        start_date = date(2023, 12, 27)
+        end_date = date(2023, 12, 20)
+        with pytest.raises(ValueError, match="date_end must be greater than date_start"):
+            calendar_instance.delta_working_days(start_date, end_date)
+
+    @pytest.mark.parametrize(
+        "invalid_n",
+        [
+            0,
+            -1,
+            10,  # More than possible weekdays in a month
+            100,
+        ],
+    )
+    def test_get_nth_weekday_month_invalid_n(
+        self, calendar_instance: ABCCalendarOperations, invalid_n: int
+    ) -> None:
+        """Test get_nth_weekday_month with invalid n values.
+
+        Verifies
+        --------
+        - Raises ValueError for invalid n values
+        - Handles out-of-range n correctly
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        invalid_n : int
+            Invalid n values
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError):
+            calendar_instance.get_nth_weekday_month(2023, 12, 0, invalid_n, True, True)

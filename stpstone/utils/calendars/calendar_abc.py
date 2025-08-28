@@ -204,11 +204,12 @@ class CalendarCore(ABCCalendar):
         list[int]
             A list of holiday days in the given year.
         """
-        return [
-            int(date_.strftime("%d")) 
-            for date_ in self._holidays 
+        holidays = [
+            date_ for date_ in self._holidays
             if int(date_.strftime("%Y")) == int_year
         ]
+        return sorted([int(date_.strftime("%d")) for date_ in holidays])
+
 
 class DateManipulation(CalendarCore):
     """Abstract class for date manipulation operations."""
@@ -216,7 +217,7 @@ class DateManipulation(CalendarCore):
     def add_working_days(
         self, 
         date_: TypeDatetimeDate, 
-        int_days_to_add: int
+        int_days: int
     ) -> date:
         """Add the specified number of working days to the given date.
         
@@ -232,18 +233,15 @@ class DateManipulation(CalendarCore):
         date
             The resulting date after adding the specified number of working days.
         """
-        date_ = self.date_only(date_)
-        if int_days_to_add == 0:
-            return date_
-        int_step = 0
-        int_target_days = abs(int_days_to_add)
-        int_direction = 1 if int_days_to_add > 0 else -1
-        date_current = date_
-
-        while int_step < int_target_days:
-            date_current += timedelta(days=int_direction)
+        date_current = self.date_only(date_)
+        int_days_left = abs(int_days)
+        int_step = 1 if int_days >= 0 else -1
+        
+        while int_days_left > 0:
+            date_current += timedelta(days=int_step)
             if self.is_working_day(date_current):
-                int_step += 1
+                int_days_left -= 1
+        
         return date_current
 
     def add_calendar_days(
@@ -514,17 +512,18 @@ class DateManipulation(CalendarCore):
         int
             The integer representation of the date.
         """
+        date_ = self.date_only(date_)
         return 10000 * date_.year + 100 * date_.month + date_.day
 
     def excel_float_to_date(
         self, 
-        int_excel_date: int
+        numeric_excel_date: Union[int, float]
     ) -> date:
         """Convert an Excel float to a date object.
         
         Parameters
         ----------
-        int_excel_date : int
+        numeric_excel_date : Union[int, float]
             The Excel float to convert.
         
         Returns
@@ -535,13 +534,22 @@ class DateManipulation(CalendarCore):
         Raises
         ------
         ValueError
-            If int_excel_date is None or negative
+            If numeric_excel_date is None or negative
         """
-        if int_excel_date is None:
-            raise ValueError("int_excel_date cannot be None")
-        if int_excel_date < 0:
-            raise ValueError("int_excel_date cannot be negative")
-        return (datetime(1899, 12, 30) + timedelta(days=int_excel_date)).date()
+        if numeric_excel_date is None:
+            raise ValueError("numeric_excel_date cannot be None")
+        if numeric_excel_date < 0:
+            raise ValueError("numeric_excel_date cannot be negative")
+        
+        # Excel's epoch starts at January 1, 1900, but there's a bug where
+        # Excel treats 1900 as a leap year, so we use December 30, 1899 as base
+        base_date = date(1899, 12, 30)
+        
+        # Excel has a leap year bug for 1900, so dates >= 60 need adjustment
+        if numeric_excel_date >= 60:
+            numeric_excel_date -= 1
+        
+        return base_date + timedelta(days=int(numeric_excel_date))
 
 
 class DateTimezoneAware(DateManipulation):
@@ -653,8 +661,9 @@ class DateTimezoneAware(DateManipulation):
             date_ = date_.replace(tzinfo=ZoneInfo(str_timezone))
         elif isinstance(date_, date) and not isinstance(date_, datetime):
             date_ = self.date_to_datetime(date_, str_timezone=str_timezone)
-        if date_.tzinfo is None:
+        elif isinstance(date_, datetime) and date_.tzinfo is None:
             date_ = date_.replace(tzinfo=ZoneInfo(str_timezone))
+        
         return int(date_.timestamp())
 
     def unix_timestamp_to_datetime(
@@ -719,8 +728,9 @@ class DateTimezoneAware(DateManipulation):
             The unix timestamp corresponding to the input ISO timestamp.
         """
         date_ = datetime.fromisoformat(iso_timestamp)
-        date_ = date_.astimezone(tz=ZoneInfo(str_timezone))
-        return date_.timestamp()
+        if date_.tzinfo is None:
+            date_ = date_.replace(tzinfo=ZoneInfo(str_timezone))
+        return int(date_.timestamp())
     
     def excel_float_to_datetime(
         self, 
@@ -740,18 +750,31 @@ class DateTimezoneAware(DateManipulation):
         -------
         datetime
             The datetime object corresponding to the input Excel float date.
+
+        Raises
+        ------
+        ValueError
+            If float_date is negative
         """
-        date_ref = datetime(1899, 12, 30, tzinfo=ZoneInfo(str_timezone))
+        if float_date < 0:
+            raise ValueError("float_date cannot be negative")
+        
+        # excel's epoch starts at January 1, 1900, but we use December 30, 1899
+        # as the base due to Excel's leap year bug for 1900
+        base_date = datetime(1899, 12, 30, tzinfo=ZoneInfo(str_timezone))
+        
         int_days = int(float_date)
-        int_seconds_day = 86400
-
         float_fractional_days = float_date - int_days
-        int_days += 1 if int_days > 60 else 0
-        date_ref = date_ref + timedelta(days=int_days)
-        int_seconds = int(float_fractional_days * int_seconds_day)
-        date_ref = date_ref + timedelta(seconds=int_seconds)
-
-        return date_ref
+        
+        # excel has a leap year bug for 1900, so dates >= 60 need adjustment
+        if float_date >= 60:
+            int_days -= 1
+        
+        base_date = base_date + timedelta(days=int_days)
+        int_seconds = int(float_fractional_days * 86400)
+        base_date = base_date + timedelta(seconds=int_seconds)
+        
+        return base_date
 
 
 class DatesRangeDelta(DateTimezoneAware):
@@ -940,13 +963,14 @@ class DatesRangeDelta(DateTimezoneAware):
             Start and end date of the month of the given date.
         """
         date_ = self.date_only(date_)
-
+    
         date_start = date(date_.year, date_.month, 1)
         date_start = self.nearest_working_day(date_start, bool_next=True) \
             if bool_working_days else date_start
         
-        date_end = date(date_.year, date_.month + 1, 1) if date_.month < 12 \
-            else date(date_.year + 1, 1, 1)
+        next_month = date_.month + 1 if date_.month < 12 else 1
+        next_year = date_.year + 1 if date_.month == 12 else date_.year
+        date_end = date(next_year, next_month, 1) - timedelta(days=1)
         date_end = self.nearest_working_day(date_end, bool_next=False) \
             if bool_working_days else date_end
         
@@ -986,17 +1010,16 @@ class DatesRangeDelta(DateTimezoneAware):
             raise ValueError("Weekday must be between 0 (Monday) and 6 (Sunday)")
         
         list_ = []
-        date_start = date(year, month, 1)
-        date_end = date(year, month + 1, 1) if month < 12 else date(year + 1, 1, 1)
-        date_ = date_start
+        start_date = date(year, month, 1)
 
-        while date_.weekday() != weekday:
-            date_ += timedelta(days=1)
+        current_date = start_date
+        while current_date.weekday() != weekday:
+            current_date += timedelta(days=1)
+            
+        while current_date.month == month:
+            list_.append(current_date)
+            current_date += timedelta(days=7)
         
-        while date_ <= date_end:
-            list_.append(date_)
-            date_ += timedelta(days=7)
-
         return list_
 
     def get_nth_weekday_month(
@@ -1044,14 +1067,16 @@ class DatesRangeDelta(DateTimezoneAware):
             raise ValueError("Month must be between 1 and 12")
         if not 0 <= weekday <= 6:
             raise ValueError("Weekday must be between 0 (Monday) and 6 (Sunday)")
+        if n < 1:
+            raise ValueError("n must be positive")
         if n == 0:
             raise ValueError("n must be non-zero")
-
-        date_ref = self.get_dates_weekday_month(year, month, weekday)[n - 1]
-        int_len_dates_weekday_month = len(self.get_dates_weekday_month(year, month, weekday))
-        if n > int_len_dates_weekday_month:
-            raise ValueError(f"n must be less than or equal to {int_len_dates_weekday_month}")
-
+        
+        dates = self.get_dates_weekday_month(year, month, weekday)
+        if n > len(dates):
+            raise ValueError(f"n must be less than or equal to {len(dates)}")
+        
+        date_ref = dates[n - 1]
         return self.nearest_working_day(date_ref, bool_next=bool_next_working_day) \
             if bool_working_days else date_ref
 
