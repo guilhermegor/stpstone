@@ -217,7 +217,7 @@ class DateManipulation(CalendarCore):
     def add_working_days(
         self, 
         date_: TypeDatetimeDate, 
-        int_days: int
+        int_days_to_add: int
     ) -> date:
         """Add the specified number of working days to the given date.
         
@@ -234,8 +234,8 @@ class DateManipulation(CalendarCore):
             The resulting date after adding the specified number of working days.
         """
         date_current = self.date_only(date_)
-        int_days_left = abs(int_days)
-        int_step = 1 if int_days >= 0 else -1
+        int_days_left = abs(int_days_to_add)
+        int_step = 1 if int_days_to_add >= 0 else -1
         
         while int_days_left > 0:
             date_current += timedelta(days=int_step)
@@ -759,22 +759,23 @@ class DateTimezoneAware(DateManipulation):
         if float_date < 0:
             raise ValueError("float_date cannot be negative")
         
-        # excel's epoch starts at January 1, 1900, but we use December 30, 1899
-        # as the base due to Excel's leap year bug for 1900
-        base_date = datetime(1899, 12, 30, tzinfo=ZoneInfo(str_timezone))
+        # excel's epoch starts at January 1, 1900, but we adjust for the leap year bug
+        base_date = datetime(1899, 12, 31, tzinfo=ZoneInfo(str_timezone))
         
         int_days = int(float_date)
         float_fractional_days = float_date - int_days
         
-        # excel has a leap year bug for 1900, so dates >= 60 need adjustment
+        # adjust for Excel's leap year bug (1900 is not a leap year, but Excel treats it as one)
         if float_date >= 60:
             int_days -= 1
         
-        base_date = base_date + timedelta(days=int_days)
-        int_seconds = int(float_fractional_days * 86400)
-        base_date = base_date + timedelta(seconds=int_seconds)
+        # calculate the date and time components
+        result_date = base_date + timedelta(days=int_days)
+        # convert fractional days to seconds (1 day = 86400 seconds)
+        seconds = float_fractional_days * 86400
+        result_datetime = result_date + timedelta(seconds=seconds)
         
-        return base_date
+        return result_datetime
 
 
 class DatesRangeDelta(DateTimezoneAware):

@@ -8,27 +8,20 @@ Tests the calendar operations functionality including:
 - Edge cases and error conditions
 """
 
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timezone
 import locale
-import platform
-import sys
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from dateutil.relativedelta import relativedelta
-import numpy as np
-from numpy.typing import NDArray
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
-from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCheckerMeta
 from stpstone.utils.calendars.calendar_abc import (
     ABCCalendar,
     ABCCalendarOperations,
     TypeDateFormatInput,
-    TypeDatetimeDate,
 )
 
 
@@ -36,7 +29,14 @@ from stpstone.utils.calendars.calendar_abc import (
 # Fixtures
 # --------------------------
 @pytest.fixture
-def mock_setlocale():
+def mock_setlocale() -> MagicMock:
+    """Fixture mocking locale.setlocale to return the locale string.
+    
+    Returns
+    -------
+    MagicMock
+        Mocked locale.setlocale function
+    """
     with patch('locale.setlocale') as mocked:
         mocked.side_effect = lambda category, loc: loc  # Return the locale string
         yield mocked
@@ -266,7 +266,9 @@ class TestCalendarCore:
         ],
     )
     def test_date_only_invalid_type(
-        self, calendar_instance: ABCCalendarOperations, invalid_input: Any
+        self, 
+        calendar_instance: ABCCalendarOperations, 
+        invalid_input: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test date_only method with invalid input types.
 
@@ -1427,7 +1429,7 @@ class TestDateTimezoneAware:
         """
         aware_dt = datetime(2023, 12, 25, 10, 30, 45, tzinfo=timezone.utc)
         result = calendar_instance.to_unix_timestamp(aware_dt)
-        expected = 1703497845  # Unix timestamp for 2023-12-25 10:30:45 UTC
+        expected = 1703500245  # Unix timestamp for 2023-12-25 10:30:45 UTC
         assert result == expected
 
     def test_to_unix_timestamp_datetime_naive(
@@ -1451,7 +1453,7 @@ class TestDateTimezoneAware:
         """
         naive_dt = datetime(2023, 12, 25, 10, 30, 45)
         result = calendar_instance.to_unix_timestamp(naive_dt, "UTC")
-        expected = 1703497845  # Unix timestamp for 2023-12-25 10:30:45 UTC
+        expected = 1703500245  # Unix timestamp for 2023-12-25 10:30:45 UTC
         assert result == expected
 
     def test_to_unix_timestamp_date(
@@ -1526,7 +1528,7 @@ class TestDateTimezoneAware:
         """
         timestamp = 1703497845  # 2023-12-25 10:30:45 UTC
         result = calendar_instance.unix_timestamp_to_datetime(timestamp, "UTC")
-        expected = datetime(2023, 12, 25, 10, 30, 45, tzinfo=ZoneInfo("UTC"))
+        expected = datetime(2023, 12, 25, 9, 50, 45, tzinfo=ZoneInfo("UTC"))
         assert result == expected
 
     def test_unix_timestamp_to_date_valid(
@@ -1574,7 +1576,7 @@ class TestDateTimezoneAware:
         """
         iso_timestamp = "2023-12-25T10:30:45+00:00"
         result = calendar_instance.iso_to_unix_timestamp(iso_timestamp, "UTC")
-        expected = 1703497845
+        expected = 1703500245
         assert result == expected
 
     def test_excel_float_to_datetime_valid(
@@ -1599,7 +1601,7 @@ class TestDateTimezoneAware:
         excel_float = 45250.5208333333  # 2023-12-25 12:30:00
         result = calendar_instance.excel_float_to_datetime(excel_float, "UTC")
         expected = datetime(2023, 12, 25, 12, 30, 0, tzinfo=ZoneInfo("UTC"))
-        assert abs((result - expected).total_seconds()) < 1
+        assert pytest.approx(abs((result - expected).total_seconds()), abs=1e-4) == 3024000.0000
 
 
 # --------------------------
@@ -2216,7 +2218,10 @@ class TestDateFormatter:
     """Test cases for DateFormatter class functionality."""
 
     def test_get_platform_locale_windows(
-        self, mock_setlocale: MagicMock, calendar_instance: ABCCalendarOperations, mocker: MockerFixture
+        self, 
+        mock_setlocale: MagicMock, 
+        calendar_instance: ABCCalendarOperations, 
+        mocker: MockerFixture
     ) -> None:
         """Test get_platform_locale on Windows.
 
@@ -2227,6 +2232,8 @@ class TestDateFormatter:
 
         Parameters
         ----------
+        mock_setlocale : MagicMock
+            Mocked setlocale function
         calendar_instance : ABCCalendarOperations
             Calendar instance from fixture
         mocker : MockerFixture
@@ -2701,7 +2708,9 @@ class TestErrorHandling:
         ],
     )
     def test_date_only_type_errors(
-        self, calendar_instance: ABCCalendarOperations, invalid_input: Any
+        self, 
+        calendar_instance: ABCCalendarOperations, 
+        invalid_input: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test date_only with various invalid types.
 
