@@ -5,12 +5,14 @@ from Nasdaq and US Federal sources using web scraping techniques.
 """
 
 from datetime import date, timedelta
+from logging import Logger
 from typing import Optional
 
 import pandas as pd
 import requests
 from requests.exceptions import RequestException
 
+from stpstone.utils.cache.cache_manager import CacheManager
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.html import HtmlHandler
@@ -28,8 +30,11 @@ class DatesUSANasdaq(ABCCalendarOperations):
     def __init__(
         self, 
         bool_persist_cache: bool = True, 
-        bool_cache_holidays: bool = True,
-        path_cache_dir: Optional[str] = None
+        bool_reuse_cache: bool = True,
+        int_days_cache_expiration: int = 1,
+        int_cache_ttl_days: int = 30,
+        path_cache_dir: Optional[str] = None,
+        logger: Optional[Logger] = None
     ) -> None:
         """Initialize Nasdaq calendar handler with HTML and dict utilities.
         
@@ -37,16 +42,29 @@ class DatesUSANasdaq(ABCCalendarOperations):
         ----------
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_cache_holidays : bool, optional
-            If True, caches holidays; if False, does not cache holidays (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        int_days_cache_expiration : int, optional
+            Number of days after which the cache expires (default: 1)
+        int_cache_ttl_days : int, optional
+            Number of days after which the cache is considered expired (default: 30)
         path_cache_dir : Optional[str], optional
             Path to the cache directory (default: None)
+        logger : Optional[Logger], optional
+            Logger object for logging (default: None)
 
         Returns
         -------
         None
         """
-        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
+        self.cls_cache_manager = CacheManager(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger
+        )
         self.cls_html_handler = HtmlHandler()
         self.cls_dict_handler = HandlingDicts()
 
@@ -62,7 +80,7 @@ class DatesUSANasdaq(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["DESCRIPTION"], row["DATE_WINS"]) for _, row in df_.iterrows()]
 
-    @ABCCalendarOperations.cache_holidays(cache_key="usa_nasdaq_holidays")
+    @CacheManager.cache_df(key="usa_nasdaq_holidays")
     def get_holidays_raw(self, timeout: Optional[int] = 10) -> pd.DataFrame:
         """Fetch raw NASDAQ holiday calendar data from website.
 
@@ -204,8 +222,11 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         int_year_start: int = (date.today() - timedelta(days=22)).year - 1, 
         int_year_end: int = (date.today() - timedelta(days=22)).year, 
         bool_persist_cache: bool = True, 
-        bool_cache_holidays: bool = True,
-        path_cache_dir: Optional[str] = None
+        bool_reuse_cache: bool = True,
+        int_days_cache_expiration: int = 1,
+        int_cache_ttl_days: int = 30,
+        path_cache_dir: Optional[str] = None,
+        logger: Optional[Logger] = None
     ) -> None:
         """Initialize Federal holidays handler with HTML and dict utilities.
         
@@ -217,10 +238,16 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
             Ending year for holidays (default: (date.today() - timedelta(days=22)).year)
         bool_persist_cache : bool, optional
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_cache_holidays : bool, optional
-            If True, caches holidays; if False, does not cache holidays (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        int_days_cache_expiration : int, optional
+            Number of days after which the cache expires (default: 1)
+        int_cache_ttl_days : int, optional
+            Number of days after which the cache is considered expired (default: 30)
         path_cache_dir : Optional[str], optional
             Path to the cache directory (default: None)
+        logger : Optional[Logger], optional
+            Logger object for logging (default: None)
 
         Returns
         -------
@@ -228,7 +255,14 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         """
         self.int_year_start = int_year_start
         self.int_year_end = int_year_end
-        super().__init__(bool_persist_cache, bool_cache_holidays, path_cache_dir)
+        self.cls_cache_manager = CacheManager(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger
+        )
         self.cls_html_handler = HtmlHandler()
         self.cls_dict_handler = HandlingDicts()
 
@@ -244,7 +278,7 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         df_ = self.transform_holidays(df_)
         return [(row["NAME"], row["DATE_WINS"]) for _, row in df_.iterrows()]
 
-    @ABCCalendarOperations.cache_holidays(cache_key="usa_federal_holidays")
+    @CacheManager.cache_df(key="usa_federal_holidays")
     def get_holidays_years(self) -> pd.DataFrame:
         """Fetch Federal holidays for multiple years.
 
@@ -286,10 +320,6 @@ class DatesUSAFederalHolidays(ABCCalendarOperations):
         RuntimeError
             If Playwright navigation or data extraction fails
         """
-        df_cached = self._load_cache(key="usa_federal_holidays")
-        if df_cached:
-            return df_cached
-        
         self._validate_year(int_year)
         url = f"https://www.federalholidays.net/usa/federal-holidays-{int_year}.html"
         scraper = PlaywrightScraper(bool_headless=True, int_default_timeout=timeout)
