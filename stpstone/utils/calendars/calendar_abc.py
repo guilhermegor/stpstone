@@ -80,7 +80,7 @@ class CalendarCore(ABCCalendar):
         pd.DataFrame
             An empty DataFrame.
         """
-        return pd.DataFrame(columns=["name", "date"])
+        return NotImplementedError
 
     def holidays(self) -> list[tuple[str, date]]:
         """Return an empty list of holidays as a default implementation.
@@ -90,7 +90,7 @@ class CalendarCore(ABCCalendar):
         list[tuple[str, date]]
             An empty list.
         """
-        return []
+        return NotImplementedError
 
     @property
     def _holidays(self) -> set[date]:

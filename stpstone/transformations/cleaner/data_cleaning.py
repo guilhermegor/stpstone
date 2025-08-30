@@ -46,14 +46,14 @@ class ReturnReplaceNaNValues(TypedDict):
     array_after_adjustments: NDArray[np.float64]
 
 
-class ReturnConvertCartegories:
+class ReturnConvertCartegories(TypedDict):
     """Return type for convert_categories function."""
     
     array_data_categorized_numbers: NDArray[np.float64]
     array_data_categorized_strings: NDArray[np.str_]
 
 
-class ReturnFeatureScaling:
+class ReturnFeatureScaling(TypedDict):
     """Return type for feature_scaling function."""
     
     model: NDArray[np.float64]
@@ -63,7 +63,7 @@ class ReturnFeatureScaling:
     array_scaled_data: NDArray[np.float64]
 
 
-class ReturnRemoveNoiseFromData:
+class ReturnRemoveNoiseFromData(TypedDict):
     """Return type for remove_noise_from_data function."""
     
     data_test_original: NDArray[np.float64]
