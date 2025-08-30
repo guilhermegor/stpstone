@@ -1,3 +1,12 @@
+"""Module for standardizing DataFrames.
+
+This module provides a class for standardizing DataFrames, including:
+- Data type conversion and validation
+- Data cleaning and transformation
+- Machine learning-specific transformations
+- Edge cases, error conditions, and type validation
+"""
+
 from contextlib import suppress
 from logging import Logger
 from typing import Any, Literal, Optional
@@ -11,11 +20,11 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.calendars.calendar_abc import DateFormatter
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.lists import ListHandler
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler, TypeCaseFrom, TypeCaseTo
 from stpstone.utils.pipelines.generic import generic_pipeline
 
 
-pd.set_option('future.no_silent_downcasting', True)
+pd.set_option("future.no_silent_downcasting", True)
 
 class DFStandardization(metaclass=TypeChecker):
     """Class for standardizing DataFrames."""
@@ -23,8 +32,8 @@ class DFStandardization(metaclass=TypeChecker):
     def __init__(
         self,
         dict_dtypes: dict[str, Any],
-        cols_from_case: Optional[str] = None,
-        cols_to_case: Optional[str] = None,
+        cols_from_case: Optional[TypeCaseFrom] = None,
+        cols_to_case: Optional[TypeCaseTo] = None,
         list_cols_drop_dupl: list[str] = None,
         dict_fillna_strt: Optional[dict[str, str]] = None,
         str_fmt_dt: str = "YYYY-MM-DD",
@@ -37,26 +46,68 @@ class DFStandardization(metaclass=TypeChecker):
         bool_debug: bool = False,
         logger: Optional[Logger] = None,
     ) -> None:
+        """Initialize the DFStandardization class.
+        
+        Parameters
+        ----------
+        dict_dtypes : dict[str, Any]
+            Dictionary of column names and data types.
+        cols_from_case : Optional[TypeCaseFrom], optional
+            Case conversion for column names, by default None.
+        cols_to_case : Optional[TypeCaseTo], optional
+            Case conversion for column names, by default None.
+        list_cols_drop_dupl : list[str], optional
+            List of columns to drop duplicates, by default None.
+        dict_fillna_strt : Optional[dict[str, str]], optional
+            Dictionary of column names and fillna values, by default None.
+        str_fmt_dt : str, optional
+            Date format string, by default "YYYY-MM-DD".
+        type_error_action : str, optional
+            Action to take on type errors, by default "raise".
+        strategy_keep_when_dupl : str, optional
+            Strategy for keeping when duplicates, by default "first".
+        str_data_fillna : str, optional
+            Fillna value for non-date columns, by default "-99999".
+        str_dt_fillna : Optional[str], optional
+            Fillna value for date columns, by default None.
+        str_tz : str, optional
+            Time zone, by default "UTC".
+        encoding : str, optional
+            Encoding, by default "latin-1".
+        bool_debug : bool, optional
+            Debug mode, by default False.
+        logger : Optional[Logger], optional
+            Logger, by default None.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If dict_dtypes is empty
+        """
         if not dict_dtypes:
             raise ValueError("dict_dtypes cannot be empty")
         self.dict_dtypes = dict_dtypes
         self.cols_from_case = cols_from_case
         self.cols_to_case = cols_to_case
         self.list_cols_drop_dupl = list_cols_drop_dupl or []
-        self.dict_fillna_strt = dict_fillna_strt if dict_fillna_strt is not None else {}
+        self.dict_fillna_strt = dict_fillna_strt or {}
         self.str_fmt_dt = str_fmt_dt
         self.type_error_action = type_error_action
         self.strategy_keep_when_dupl = strategy_keep_when_dupl
         self.str_data_fillna = str_data_fillna
-        self.str_dt_fillna = str_dt_fillna if str_dt_fillna is not None else (
-            '2099-12-31' if self.str_fmt_dt == 'YYYY-MM-DD' else
-            '31/12/2099' if self.str_fmt_dt == 'DD/MM/YYYY' else
-            '31/12/99' if self.str_fmt_dt == 'DD/MM/YY' else
-            '31122099' if self.str_fmt_dt == 'DDMMYYYY' else
-            '311299' if self.str_fmt_dt == 'DDMMYY' else
-            '20991231' if self.str_fmt_dt == 'YYYYMMDD' else
-            4102358400 if self.str_fmt_dt == 'unix_ts' else
-            '31122099'
+        self.str_dt_fillna = str_dt_fillna if str_dt_fillna else (
+            "2099-12-31" if self.str_fmt_dt == "YYYY-MM-DD" else
+            "31/12/2099" if self.str_fmt_dt == "DD/MM/YYYY" else
+            "31/12/99" if self.str_fmt_dt == "DD/MM/YY" else
+            "31122099" if self.str_fmt_dt == "DDMMYYYY" else
+            "311299" if self.str_fmt_dt == "DDMMYY" else
+            "20991231" if self.str_fmt_dt == "YYYYMMDD" else
+            4102358400 if self.str_fmt_dt == "unix_ts" else
+            "31122099"
         )
         self.list_cols_dt = [key for key, value in dict_dtypes.items() if value == "date"]
         self.str_tz = str_tz
@@ -64,19 +115,63 @@ class DFStandardization(metaclass=TypeChecker):
         self.bool_debug = bool_debug
         self.logger = logger
         self.cls_dates = DateFormatter()
+        self.cls_create_log = CreateLog()
+        self.cls_list_handler = ListHandler()
 
     def check_if_empty(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Check if the DataFrame is empty.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to check.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame if it is not empty.
+        
+        Raises
+        ------
+        ValueError
+            If the DataFrame is empty.
+        """
         if df_.empty:
             raise ValueError("DataFrame is empty")
         return df_
 
     def clean_encoding_issues(self, df_: pd.DataFrame) -> pd.DataFrame:
-        """Clean encoding issues in the DataFrame."""
+        """Clean encoding issues in the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to clean.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The cleaned DataFrame.
+        """
         @type_checker
-        def clean_cell(x: Any) -> Any:
+        def clean_cell(
+            x: Any # noqa ANN401: typing.Any is not allowed
+        ) -> Any: # noqa ANN401: typing.Any is not allowed
+            """Clean encoding issues in a cell.
+            
+            Parameters
+            ----------
+            x : Any
+                The cell to clean.
+            
+            Returns
+            -------
+            Any
+                The cleaned cell.
+            """
             if isinstance(x, str):
                 x = StrHandler().remove_diacritics(x)
-                x = x.encode('ascii', errors='ignore').decode('ascii')
+                x = x.encode("ascii", errors="ignore").decode("ascii")
             return x
         df_ = df_.copy()
         for col in df_.select_dtypes(include=["object"]).columns:
@@ -84,10 +179,19 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def coluns_names_case(self, df_: pd.DataFrame) -> pd.DataFrame:
-        list_valid_cases = ["camel", "pascal", "snake", "kebab", 
-                            "upper_constant", "lower_constant", "upper_first"]
-        if self.cols_from_case and self.cols_to_case and \
-           self.cols_from_case in list_valid_cases and self.cols_to_case in list_valid_cases:
+        """Change the case of the columns names.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to change the case of the columns names.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with the columns names changed.
+        """
+        if self.cols_from_case and self.cols_to_case:
             list_cols = [
                 StrHandler().convert_case(
                     StrHandler().remove_diacritics(col_),
@@ -100,37 +204,81 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def limit_columns_to_dtypes(self, df_: pd.DataFrame) -> pd.DataFrame:
-        if self.logger is not None:
-            CreateLog().log_message(
+        """Limit the columns to the specified data types.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to limit the columns to.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with the columns limited to the specified data types.
+        """
+        if self.logger:
+            list_cols_excluded = [
+                x for x in list(df_.columns) 
+                if x not in list(self.dict_dtypes.keys())
+            ]
+            self.cls_create_log.log_message(
                 self.logger,
                 f"list cols dataframe before filtering: {list(df_.columns)}",
                 "info"
             )
-            CreateLog().log_message(
+            self.cls_create_log.log_message(
                 self.logger, 
                 f"list cols to filter: {list(self.dict_dtypes.keys())}",
                 "info"
             )
-            CreateLog().log_message(
+            self.cls_create_log.log_message(
                 self.logger,
-                f"list of columns excluded: {[x for x in list(df_.columns) if x not in list(self.dict_dtypes.keys())]}",
+                f"list of columns excluded: {list_cols_excluded}",
                 "info"
             )
         if self.bool_debug:
             print(f"list cols dataframe before filtering: {list(df_.columns)}")
             print(f"list cols to filter: {list(self.dict_dtypes.keys())}")
-            print(f"list of columns excluded: {[x for x in list(df_.columns) if x not in list(self.dict_dtypes.keys())]}")
+            print(f"list of columns excluded: {list_cols_excluded}")
         list_cols = list(self.dict_dtypes.keys())
         df_ = df_[list_cols]
         return df_
 
     def delete_empty_rows(self, df_: pd.DataFrame) -> pd.DataFrame:
-        """Delete empty rows from the DataFrame."""
+        """Delete empty rows from the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to delete empty rows from.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with empty rows deleted.
+        """
         list_mask = df_.apply(lambda row: row.isin([None, "", np.nan]).all(), axis=1)
         df_cleaned = df_[~list_mask]
         return df_cleaned
 
     def filler(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Fill missing values in the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to fill missing values in.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with missing values filled.
+
+        Raises
+        ------
+        ValueError
+            If the DataFrame is empty.
+        """
         df_ = df_.replace("", np.nan)
         list_cols = [col_ for col_ in list(df_.columns) if col_ not in self.list_cols_dt]
         if self.dict_fillna_strt:
@@ -149,6 +297,18 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def replace_num_delimiters(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Replace numeric delimiters in the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to replace numeric delimiters in.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with numeric delimiters replaced.
+        """
         list_cols_numerical = [
             k for k, v in self.dict_dtypes.items()
             if v in ["int64", "float64", "int32", "float32", int, float, "int", "float"]
@@ -161,6 +321,18 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def change_dtypes(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Change the data types of the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to change the data types of.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with the data types changed.
+        """
         df_ = df_.copy()
         dict_dtypes = {
             k: ("str" if v == "date" else v) for k, v in self.dict_dtypes.items()
@@ -172,21 +344,34 @@ class DFStandardization(metaclass=TypeChecker):
             else:
                 str_fmt_dt = YAML_GEN["audit_log_cols"]["str_fmt_dt"]
             df_[col_] = df_[col_].apply(
-                lambda x: (
-                    self.cls_dates.str_date_to_datetime(x, str_fmt_dt)
-                    if pd.notnull(x) and x != self.str_dt_fillna
+                lambda x, fmt=str_fmt_dt: (
+                    self.cls_dates.str_date_to_datetime(x, fmt)
+                    if pd.notna(x) and x != self.str_dt_fillna
                     else pd.Timestamp(self.str_dt_fillna)
                 )
             )
         list_cols_missing = [
             c for c in df_.columns
-            if c not in ListHandler().extend_lists(list(dict_dtypes.keys()), self.list_cols_dt)
+            if c not in self.cls_list_handler.extend_lists(list(dict_dtypes.keys()), 
+                                                        self.list_cols_dt)
         ]
         if list_cols_missing:
             df_[list_cols_missing] = df_[list_cols_missing].astype(str)
         return df_
 
     def strip_hidden_characters(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Strip hidden characters from the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to strip hidden characters from.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with hidden characters stripped.
+        """
         for col_ in [
             c for c in df_.select_dtypes(include=["object", "category"]).columns
             if c not in self.list_cols_dt
@@ -195,6 +380,18 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def strip_data(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Strip data from the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to strip data from.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with data stripped.
+        """
         list_cols = [
             col_ for col_ in df_.select_dtypes(["object"]).columns
             if col_ not in self.list_cols_dt
@@ -205,10 +402,34 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def remove_duplicated_cols(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Remove duplicated columns from the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to remove duplicated columns from.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with duplicated columns removed.
+        """
         df_ = df_.loc[:, ~df_.columns.duplicated(keep=self.strategy_keep_when_dupl)]
         return df_
 
     def data_remove_dupl(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Remove duplicated data from the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to remove duplicated data from.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with duplicated data removed.
+        """
         if self.list_cols_drop_dupl:
             df_ = df_.drop_duplicates(
                 subset=self.list_cols_drop_dupl, keep=self.strategy_keep_when_dupl
@@ -216,6 +437,18 @@ class DFStandardization(metaclass=TypeChecker):
         return df_
 
     def pipeline(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Pipeline for standardizing data.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to standardize.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The standardized DataFrame.
+        """
         steps = [
             self.check_if_empty,
             self.clean_encoding_issues,
@@ -237,10 +470,35 @@ class DFStandardization(metaclass=TypeChecker):
 class DFStandardizationML(DFStandardization):
     """Class for standardizing data for machine learning."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: dict[Any, Any]) -> None:
+        """Initialize the DFStandardizationML class.
+        
+        Parameters
+        ----------
+        **kwargs : Any
+            Keyword arguments to pass to the parent class.
+        """
         super().__init__(**kwargs)
 
-    def handle_outliers(self, df_: pd.DataFrame, method: Literal["iqr", "zscore"] = "iqr") -> pd.DataFrame:
+    def handle_outliers(
+        self, 
+        df_: pd.DataFrame, 
+        method: Literal["iqr", "zscore"] = "iqr"
+    ) -> pd.DataFrame:
+        """Handle outliers in the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to handle outliers in.
+        method : Literal['iqr', 'zscore'], optional
+            The method to use for handling outliers. Default is "iqr".
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with outliers handled.
+        """
         df_ = df_.copy()
         numeric_cols = df_.select_dtypes(include=["number"]).columns
         if not numeric_cols.empty:
@@ -257,7 +515,30 @@ class DFStandardizationML(DFStandardization):
                     df_[col_] = np.clip(df_[col_], lower_bound, upper_bound)
         return df_
 
-    def scale_numeric_data(self, df_: pd.DataFrame, method: Literal["minmax", "standard"] = "minmax") -> pd.DataFrame:
+    def scale_numeric_data(
+        self, 
+        df_: pd.DataFrame, 
+        method: Literal["minmax", "standard"] = "minmax"
+    ) -> pd.DataFrame:
+        """Scale numeric data in the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to scale numeric data in.
+        method : Literal['minmax', 'standard'], optional
+            The method to use for scaling numeric data. Default is "minmax".
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with numeric data scaled.
+
+        Raises
+        ------
+        ValueError
+            If the specified scaling method is invalid.
+        """
         numeric_cols = df_.select_dtypes(include=["number"]).columns
         if len(numeric_cols) == 0:
             return df_
@@ -277,11 +558,35 @@ class DFStandardizationML(DFStandardization):
         df_: pd.DataFrame,
         method_handle_outliers: str = "iqr",
         method_scale_numeric_data: str = "minmax",
-        cols_from_case: Optional[str] = None,
-        cols_to_case: Optional[str] = None,
+        cols_from_case: Optional[TypeCaseFrom] = None,
+        cols_to_case: Optional[TypeCaseTo] = None,
         list_cols_drop_dupl: list[str] = None,
         str_fmt_dt: str = "YYYY-MM-DD",
     ) -> pd.DataFrame:
+        """Pipeline for standardizing data for machine learning.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to standardize.
+        method_handle_outliers : str, optional
+            The method to use for handling outliers. Default is "iqr".
+        method_scale_numeric_data : str, optional
+            The method to use for scaling numeric data. Default is "minmax".
+        cols_from_case : Optional[TypeCaseFrom], optional
+            Case conversion for column names, by default None.
+        cols_to_case : Optional[TypeCaseTo], optional
+            Case conversion for column names, by default None.
+        list_cols_drop_dupl : list[str], optional
+            List of columns to drop duplicates, by default None.
+        str_fmt_dt : str, optional
+            Format for date columns, by default "YYYY-MM-DD".
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with outliers handled and numeric data scaled.
+        """
         self.cols_from_case = cols_from_case
         self.cols_to_case = cols_to_case
         self.list_cols_drop_dupl = list_cols_drop_dupl or []

@@ -32,8 +32,8 @@ TypeCaseFrom = TypeVar(
                   "upper_first", "default"]
 )
 
-TypeToCase = TypeVar(
-    "TypeToCase", 
+TypeCaseTo = TypeVar(
+    "TypeCaseTo", 
     bound=Literal["camel", "pascal", "snake", "kebab", "upper_constant", "lower_constant", 
                   "upper_first"]
 )
@@ -892,7 +892,7 @@ class StrHandler(metaclass=TypeChecker):
         self, 
         str_: str, 
         from_case: TypeCaseFrom, 
-        to_case: TypeToCase
+        to_case: TypeCaseTo
     ) -> str:
         """Convert string between different naming conventions.
 
@@ -912,7 +912,7 @@ class StrHandler(metaclass=TypeChecker):
             The string to convert
         from_case : TypeCaseFrom
             Current case of the string
-        to_case : TypeToCase
+        to_case : TypeCaseTo
             Desired case of the string
 
         Returns
