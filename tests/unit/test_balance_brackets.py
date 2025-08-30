@@ -90,7 +90,7 @@ def test_validate_expression_non_string(balance_brackets: BalanceBrackets) -> No
     -------
     None
     """
-    with pytest.raises(ValueError, match="Expression must be a string"):
+    with pytest.raises(TypeError, match="must be of type"):
         balance_brackets._validate_expression(123)
 
 
@@ -255,7 +255,7 @@ def test_is_balanced_non_string_raises_error(balance_brackets: BalanceBrackets) 
     -------
     None
     """
-    with pytest.raises(ValueError, match="Expression must be a string"):
+    with pytest.raises(TypeError, match="must be of type"):
         balance_brackets.is_balanced(123)
 
 
@@ -350,26 +350,25 @@ def test_is_balanced_stack_operations(
     -------
     None
     """
-    # Setup mock behavior for "()" - empty initially, not empty after push, empty after pop
-    mock_stack.is_empty = mocker.PropertyMock(side_effect=[False, True])  # not empty when checking closing bracket, empty at final check
     mock_stack.push.return_value = None
     mock_stack.pop.return_value = "("
-
-    # Mock the Stack class constructor to return our mock BEFORE creating BalanceBrackets
+    
+    # Criar o PropertyMock explicitamente
+    is_empty_mock = PropertyMock(side_effect=[False, True])
+    type(mock_stack).is_empty = is_empty_mock
+    
     mocker.patch(
         "stpstone.transformations.validation.balance_brackets.Stack",
-        return_value=mock_stack
+        return_value=mock_stack,
     )
-    
-    # Create BalanceBrackets instance AFTER patching
+
     balance_brackets = BalanceBrackets()
     result = balance_brackets.is_balanced("()")
 
     assert result is True
     mock_stack.push.assert_called_once_with("(")
     mock_stack.pop.assert_called_once()
-    # is_empty is called when encountering ')' and at the end
-    assert mock_stack.is_empty.call_count == 2
+    assert is_empty_mock.call_count == 2
 
 def test_is_balanced_stack_empty_on_closing(
     balance_brackets: BalanceBrackets, mock_stack: Stack, mocker: MockerFixture
@@ -393,26 +392,24 @@ def test_is_balanced_stack_empty_on_closing(
     -------
     None
     """
-    # Stack is always empty (simulates encountering ')' with empty stack)
-    mock_stack.is_empty = mocker.PropertyMock(return_value=True)
     mock_stack.push.return_value = None
-    mock_stack.pop.return_value = None  # Should not be called
+    mock_stack.pop.return_value = None
 
-    # Mock the Stack class constructor to return our mock BEFORE creating BalanceBrackets
+    is_empty_mock = PropertyMock(return_value=True)
+    type(mock_stack).is_empty = is_empty_mock
+
     mocker.patch(
         "stpstone.transformations.validation.balance_brackets.Stack",
-        return_value=mock_stack
+        return_value=mock_stack,
     )
-    
-    # Create BalanceBrackets instance AFTER patching
+
     balance_brackets = BalanceBrackets()
     result = balance_brackets.is_balanced(")")
 
     assert result is False
-    # is_empty should be called when encountering the closing bracket
-    mock_stack.is_empty.assert_called()
     mock_stack.push.assert_not_called()
     mock_stack.pop.assert_not_called()
+    is_empty_mock.assert_called_once()
 
 
 def test_is_balanced_stack_mismatch(
@@ -437,27 +434,24 @@ def test_is_balanced_stack_mismatch(
     -------
     None
     """
-    # is_empty: not empty when checking ')', doesn't matter after since method returns False
-    mock_stack.is_empty = mocker.PropertyMock(return_value=False)
     mock_stack.push.return_value = None
-    # When we encounter ')', we pop and get '[' which doesn't match ')'
     mock_stack.pop.return_value = "["
 
-    # Mock the Stack class constructor to return our mock BEFORE creating BalanceBrackets
+    is_empty_mock = PropertyMock(return_value=False)
+    type(mock_stack).is_empty = is_empty_mock
+
     mocker.patch(
         "stpstone.transformations.validation.balance_brackets.Stack",
-        return_value=mock_stack
+        return_value=mock_stack,
     )
-    
-    # Create BalanceBrackets instance AFTER patching
+
     balance_brackets = BalanceBrackets()
     result = balance_brackets.is_balanced("([)")
 
     assert result is False
     assert mock_stack.push.call_args_list == [call("("), call("[")]
     mock_stack.pop.assert_called_once()
-    # is_empty called when checking for closing bracket
-    mock_stack.is_empty.assert_called()
+    is_empty_mock.assert_called_once()
 
 
 # --------------------------
@@ -489,7 +483,7 @@ def test_module_reload(mocker: MockerFixture) -> None:
         return_value=mock_stack
     )
 
-    original_instance = BalanceBrackets()
+    _ = BalanceBrackets()
     importlib.reload(sys.modules["stpstone.transformations.validation.balance_brackets"])
     reloaded_instance = BalanceBrackets()
     assert reloaded_instance.is_balanced("()") is True

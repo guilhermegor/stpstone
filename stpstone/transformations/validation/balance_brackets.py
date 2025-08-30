@@ -4,10 +4,11 @@ This module provides a class for checking the balance of brackets in a given exp
 utilizing a stack data structure to ensure matching pairs of brackets.
 """
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.dsa.stacks.simple_stack import Stack
 
 
-class BalanceBrackets:
+class BalanceBrackets(metaclass=TypeChecker):
     """Check balance of brackets in expressions using a stack."""
 
     def _validate_expression(self, expression: str) -> None:
@@ -57,7 +58,7 @@ class BalanceBrackets:
         for char in expression:
             if char in open_brackets:
                 cls_stack.push(char)
-            elif char in bracket_map:
-                if cls_stack.is_empty or cls_stack.pop() != bracket_map[char]:
+            elif char in bracket_map \
+                and (cls_stack.is_empty or cls_stack.pop() != bracket_map[char]):
                     return False
         return cls_stack.is_empty
