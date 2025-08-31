@@ -5,6 +5,7 @@ declare -a EXCLUDE_PATTERNS=(
     "tests/integration/*"
     "tests/performance/*"
     "stpstone/utils/parsers/mock_exclusion_example.py"
+    "stpstone/transformations/validation/metaclass_type_checker.py"
 )
 
 # list of classes considered to have TypeChecker

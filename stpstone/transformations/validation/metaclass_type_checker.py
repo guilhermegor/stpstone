@@ -187,7 +187,11 @@ class DbConnection(Protocol):
         ...
 
 
-def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -> None:
+def validate_type(
+    value: Any, # noqa ANN401: typing.Any is not allowed
+    expected_type: type, 
+    param_name: str
+) -> None:
     """Validate that a value matches the expected type.
     
     Parameters
@@ -219,7 +223,8 @@ def validate_type(value: type[Any], expected_type: type[Any], param_name: str) -
     origin = get_origin(expected_type)
 
     # allow pathlib.Path for parameters expecting str when they represent file paths
-    if expected_type is str and isinstance(value, Path) and param_name in ('file_path', 'path_cache'):
+    if expected_type is str and isinstance(value, Path) \
+        and param_name in ('file_path', 'path_cache'):
         return
 
     # allow None or non-string types for specific parameters to be validated by 
@@ -311,7 +316,10 @@ def create_type_checked_method(original_method: Callable[..., Any]) -> Callable[
         The type-checked wrapper for the method.
     """
     @wraps(original_method)
-    def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+    def wrapper(
+        *args: Any, # noqa ANN401: typing.Any is not allowed
+        **kwargs: Any # noqa ANN401: typing.Any is not allowed
+    ) -> Any: # noqa ANN401: typing.Any is not allowed
         """Type-checked wrapper for the original method.
         
         Parameters
@@ -390,13 +398,16 @@ class TypeChecker(type):
     """Metaclass that automatically adds runtime type checking to methods."""
     
     def __new__(
-        cls: type["TypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
+        cls: "TypeChecker", 
+        name: str, 
+        bases: tuple, 
+        dict_: dict[str, Any]
     ) -> "TypeChecker":
         """Create a new class with type-checked methods.
         
         Parameters
         ----------
-        cls : type[TypeChecker]
+        cls : 'TypeChecker'
             The metaclass.
         name : str
             The name of the class.
@@ -407,7 +418,7 @@ class TypeChecker(type):
         
         Returns
         -------
-        TypeChecker
+        'TypeChecker'
             The type-checked class.
         """
         # types that should be ignored for type checking
@@ -455,13 +466,16 @@ class AdvancedTypeChecker(type):
     """Advanced metaclass with more features for type checking."""
     
     def __new__(
-        cls: type["AdvancedTypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
+        cls: "AdvancedTypeChecker", 
+        name: str, 
+        bases: tuple, 
+        dict_: dict[str, Any]
     ) -> "AdvancedTypeChecker":
         """Create a new class with advanced type-checked methods.
         
         Parameters
         ----------
-        cls : type[AdvancedTypeChecker]
+        cls : 'AdvancedTypeChecker'
             The metaclass.
         name : str
             The name of the class.
@@ -472,8 +486,15 @@ class AdvancedTypeChecker(type):
         
         Returns
         -------
-        AdvancedTypeChecker
+        'AdvancedTypeChecker'
             The advanced type-checked class.
+
+        Raises
+        ------
+        RuntimeError
+            If type hints cannot be obtained for a method.
+        TypeError
+            If type checking fails.
         """
         type_check_config = dict_.get('_type_check_config', {})
         strict_mode = type_check_config.get('strict', True)
@@ -497,9 +518,40 @@ class AdvancedTypeChecker(type):
             -------
             Callable[..., Any]
                 The advanced type-checked method.
+
+            Raises
+            ------
+            RuntimeError
+                If type hints cannot be obtained for the method.
+            TypeError
+                If type checking fails.
             """
             @wraps(original_method)
-            def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+            def wrapper(
+                *args: Any, # noqa ANN401: typing.Any is not allowed
+                **kwargs: Any # noqa ANN401: typing.Any is not allowed
+            ) -> Any: # noqa ANN401: typing.Any is not allowed
+                """Wrap the original method with advanced type checking.
+
+                Parameters
+                ----------
+                *args : Any
+                    Positional arguments.
+                **kwargs : Any
+                    Keyword arguments.
+
+                Returns
+                -------
+                Any
+                    The result of the method.
+
+                Raises
+                ------
+                RuntimeError
+                    If type hints cannot be obtained for the method.
+                TypeError
+                    If type checking fails.
+                """
                 if method_name in excluded_methods:
                     return original_method(*args, **kwargs)
                 
@@ -573,13 +625,16 @@ class ConfigurableTypeChecker(type):
     """Metaclass that respects configuration for type checking behavior."""
     
     def __new__(
-        cls: type["ConfigurableTypeChecker"], name: str, bases: tuple, dict_: dict[str, Any]
+        cls: "ConfigurableTypeChecker", 
+        name: str, 
+        bases: tuple, 
+        dict_: dict[str, Any]
     ) -> "ConfigurableTypeChecker":
         """Create a new class with configurable type checking.
         
         Parameters
         ----------
-        cls : type[ConfigurableTypeChecker]
+        cls : 'ConfigurableTypeChecker'
             The metaclass.
         name : str
             The name of the class.
@@ -590,8 +645,15 @@ class ConfigurableTypeChecker(type):
         
         Returns
         -------
-        ConfigurableTypeChecker
+        'ConfigurableTypeChecker'
             The configurable type-checked class.
+
+        Raises
+        ------
+        RuntimeError
+            If type hints cannot be obtained for a method.
+        TypeError
+            If type checking fails.
         """
         # configuration options
         config = dict_.get('__type_check_config__', {})
@@ -604,6 +666,18 @@ class ConfigurableTypeChecker(type):
             return super().__new__(cls, name, bases, dict_)
         
         def should_check_method(method_name: str) -> bool:
+            """Determine if a method should be type-checked.
+            
+            Parameters
+            ----------
+            method_name : str
+                The name of the method.
+            
+            Returns
+            -------
+            bool
+                True if the method should be type-checked, False otherwise.
+            """
             if method_name in exclude_methods:
                 return False
             return include_private or not method_name.startswith('_')
@@ -612,9 +686,53 @@ class ConfigurableTypeChecker(type):
             original_method: Callable[..., Any],
             method_name: str
         ) -> Callable[..., Any]:
-            """Create a configurable type-checked wrapper for a method."""
+            """Create a configurable type-checked wrapper for a method.
+            
+            Parameters
+            ----------
+            original_method : Callable[..., Any]
+                The original method to wrap.
+            method_name : str
+                The name of the method.
+            
+            Returns
+            -------
+            Callable[..., Any]
+                The type-checked wrapper for the method.
+
+            Raises
+            ------
+            RuntimeError
+                If type hints cannot be obtained for the method.
+            TypeError
+                If type checking fails.
+            """
             @wraps(original_method)
-            def wrapper(*args: type[Any], **kwargs: type[Any]) -> type[Any]:
+            def wrapper(
+                *args: Any, # noqa ANN401: typing.Any is not allowed
+                **kwargs: Any # noqa ANN401: typing.Any is not allowed
+            ) -> Any: # noqa ANN401: typing.Any is not allowed
+                """Wrap a method with configurable type checking.
+                
+                Parameters
+                ----------
+                *args : Any
+                    Positional arguments.
+                **kwargs : Any
+                    Keyword arguments.
+                
+                Returns
+                -------
+                Any
+                    The result of the method.
+
+                Raises
+                ------
+                RuntimeError
+                    If type hints cannot be obtained for the method.
+                TypeError
+                    If type checking fails.
+                """
                 if not should_check_method(method_name):
                     return original_method(*args, **kwargs)
                 
