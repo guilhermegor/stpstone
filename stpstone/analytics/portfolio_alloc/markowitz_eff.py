@@ -518,8 +518,8 @@ class MarkowitzEff(metaclass=TypeChecker):
         array_r = np.array(array_returns)
         float_rf = float(float_rf)
         # random weights for the current portfolio
-        array_weights = self.random_weights(array_r.shape[0], bool_constraints, bool_opt_possb_comb,
-                                            array_min_w, nth_try)
+        array_weights = self.random_weights(array_r.shape[0], bool_constraints, 
+                                            bool_opt_possb_comb, array_min_w, nth_try)
         # mean returns for assets
         array_returns = np.array(np.mean(array_r, axis=1))
         # portfolio standard deviation
