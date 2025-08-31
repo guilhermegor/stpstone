@@ -236,15 +236,38 @@ class ConfigurableHalfAdder(metaclass=AdvancedTypeChecker):
         self.b = b
 
     def get_sum(self) -> int:
-        """Get sum with return type checking."""
+        """Get sum with return type checking.
+        
+        Returns
+        -------
+        int
+            The sum output (0 or 1)
+        """
         return self.a ^ self.b
 
     def get_carry(self) -> int:
-        """Get carry with return type checking."""
+        """Get carry with return type checking.
+        
+        Returns
+        -------
+        int
+            The carry output (0 or 1)
+        """
         return self.a & self.b
     
-    def _private_method(self, x) -> int: # noqa: ANN001 - missing type annotation
-        """Excluded from type checking."""
+    def _private_method(self, x: int) -> int:
+        """Excluded from type checking.
+        
+        Parameters
+        ----------
+        x : int
+            Input value
+
+        Returns
+        -------
+        int
+            The input value
+        """
         return x
 
 
@@ -280,7 +303,7 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
         # only validate if both inputs are actually integers
         # this allows type checking to work with non-strict mode
         if isinstance(a, int) and isinstance(b, int) and (a not in (0, 1) or b not in (0, 1)):
-                raise ValueError("Inputs must be 0 or 1")
+            raise ValueError("Inputs must be 0 or 1")
 
     def add_numbers(self, x: int, y: int) -> int:
         """Add two numbers with type checking.

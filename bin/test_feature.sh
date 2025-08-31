@@ -11,6 +11,8 @@ declare -a EXCLUDE_PATTERNS=(
 # list of classes considered to have TypeChecker
 declare -a TYPECHECKER_CLASSES=(
     "TypeChecker"
+    "AdvancedTypeChecker"
+    "ConfigurableTypeChecker"
     "ABCTypeCheckerMeta"
     "ABCSession"
     "ABCDatabase"
