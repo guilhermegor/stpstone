@@ -4,7 +4,7 @@ Tests the ANBIMA and FEBRABAN holiday calendar classes, covering
 initialization, data fetching, transformation, and validation logic.
 """
 
-from datetime import date, timedelta
+from datetime import date
 from typing import Any, Union
 from unittest.mock import Mock, patch
 
@@ -684,50 +684,6 @@ def test_febraban_holidays_integration(
 # --------------------------
 # Tests for DatesBRB3
 # --------------------------
-# --------------------------
-# Tests for DatesBRB3
-# --------------------------
-
-@pytest.fixture
-def b3_instance() -> DatesBRB3:
-    """Fixture providing a DatesBRB3 instance with caching disabled.
-    
-    Returns
-    -------
-    DatesBRB3
-        Initialized B3 calendar instance
-    """
-    return DatesBRB3(bool_reuse_cache=False, bool_persist_cache=False)
-
-@pytest.fixture
-def b3_instance_with_christmas_eve() -> DatesBRB3:
-    """Fixture providing a DatesBRB3 instance with Christmas Eve enabled.
-    
-    Returns
-    -------
-    DatesBRB3
-        Initialized B3 calendar instance with Christmas Eve
-    """
-    return DatesBRB3(
-        bool_add_christmas_eve=True,
-        bool_reuse_cache=False, 
-        bool_persist_cache=False
-    )
-
-@pytest.fixture
-def sample_b3_anbima_df() -> pd.DataFrame:
-    """Fixture providing sample ANBIMA DataFrame for B3 testing.
-    
-    Returns
-    -------
-    pd.DataFrame
-        Sample DataFrame with holiday data for B3 testing
-    """
-    return pd.DataFrame({
-        "DATE": [date(2023, 1, 1), date(2023, 4, 21), date(2023, 12, 25)],
-        "WEEKDAY": ["Domingo", "Sexta-feira", "Segunda-feira"],
-        "NAME": ["Ano Novo", "Tiradentes", "Natal"]
-    })
 
 def test_b3_init_default(b3_instance: DatesBRB3) -> None:
     """Test initialization of DatesBRB3 with default parameters.
@@ -838,8 +794,10 @@ def test_get_anbima_holidays_integration(
     -------
     None
     """
-    with patch.object(b3_instance.cls_dates_br_anbima, "get_holidays_raw", return_value=sample_b3_anbima_df), \
-         patch.object(b3_instance.cls_dates_br_anbima, "transform_holidays", return_value=sample_b3_anbima_df):
+    with patch.object(b3_instance.cls_dates_br_anbima, 
+                      "get_holidays_raw", return_value=sample_b3_anbima_df), \
+         patch.object(b3_instance.cls_dates_br_anbima, 
+                      "transform_holidays", return_value=sample_b3_anbima_df):
         df_result = b3_instance.get_anbima_holidays()
         assert isinstance(df_result, pd.DataFrame)
         assert len(df_result) == 3
@@ -903,7 +861,8 @@ def test_holidays_to_add_with_christmas_eve(
     None
     """
     # Mock the required methods to avoid recursion
-    with patch.object(b3_instance_with_christmas_eve, "year_number", side_effect=lambda d: d.year), \
+    with patch.object(b3_instance_with_christmas_eve, 
+                      "year_number", side_effect=lambda d: d.year), \
          patch.object(b3_instance_with_christmas_eve, "date_only", side_effect=lambda d: d), \
          patch.object(b3_instance_with_christmas_eve, "is_weekend", return_value=False):
         
@@ -944,7 +903,8 @@ def test_add_holidays_b3_structure(
     -------
     None
     """
-    with patch.object(b3_instance, "holidays_to_add", return_value=[("Test Holiday", date(2023, 6, 15))]), \
+    with patch.object(b3_instance, "holidays_to_add", 
+                      return_value=[("Test Holiday", date(2023, 6, 15))]), \
          patch.object(b3_instance, "weekday_name", return_value="Quinta-feira"):
         
         df_result = b3_instance.add_holidays_b3(sample_b3_anbima_df)
@@ -1167,7 +1127,8 @@ def test_add_holidays_b3_sorting(
         assert dates == sorted(dates)
         
         # Check specific order
-        expected_dates = [date(2023, 1, 1), date(2023, 4, 21), date(2023, 6, 15), date(2023, 12, 25)]
+        expected_dates = \
+            [date(2023, 1, 1), date(2023, 4, 21), date(2023, 6, 15), date(2023, 12, 25)]
         assert dates == expected_dates
 
 def test_holidays_to_add_last_working_day_calculation(b3_instance: DatesBRB3) -> None:
@@ -1202,12 +1163,20 @@ def test_holidays_to_add_last_working_day_calculation(b3_instance: DatesBRB3) ->
         # Simulate December 31, 2023 being a Sunday (weekend)
         # and December 30, 2023 being a Saturday (weekend)
         # so December 29, 2023 should be the last working day
-        def weekend_side_effect(d):
-            if d == date(2023, 12, 31):  # Sunday
-                return True
-            elif d == date(2023, 12, 30):  # Saturday
-                return True
-            return False
+        def weekend_side_effect(d: date) -> bool:
+            """Weekend logic for December 31, 2023 and December 30, 2023.
+            
+            Parameters
+            ----------
+            d : date
+                The date to check
+            
+            Returns
+            -------
+            bool
+                True if the date is a weekend, False otherwise
+            """
+            return d == date(2023, 12, 31) or d == date(2023, 12, 30)
         
         mock_weekend.side_effect = weekend_side_effect
         
@@ -1280,7 +1249,19 @@ def test_holidays_to_add_edge_case_december_dates(b3_instance: DatesBRB3) -> Non
          patch.object(b3_instance, "is_weekend") as mock_weekend:
         
         # Christmas (Dec 25) is Monday, so let's say Dec 31 is Sunday
-        def weekend_side_effect(d):
+        def weekend_side_effect(d: date) -> bool:
+            """Weekend logic for December 31, 2023.
+            
+            Parameters
+            ----------
+            d : date
+                The date to check
+            
+            Returns
+            -------
+            bool
+                True if the date is a weekend, False otherwise
+            """
             return d.weekday() >= 5  # Saturday = 5, Sunday = 6
         
         mock_weekend.side_effect = weekend_side_effect

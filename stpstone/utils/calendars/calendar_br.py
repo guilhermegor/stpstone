@@ -14,7 +14,7 @@ import requests
 
 from stpstone.transformations.validation.metaclass_type_checker import type_checker
 from stpstone.utils.cache.cache_manager import CacheManager
-from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations, TypeDatetimeDate
+from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -571,6 +571,7 @@ class DatesBRFebraban(ABCCalendarOperations):
 
 
 class DatesBRB3(ABCCalendarOperations):
+    """B3 calendar class."""
 
     def __init__(
         self,  
