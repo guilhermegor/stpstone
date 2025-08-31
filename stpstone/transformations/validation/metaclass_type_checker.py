@@ -215,23 +215,27 @@ def validate_type(
     # skip type checking for Mock objects during testing
     if isinstance(value, Mock):
         return
-    
+
     # handle numpy integer types as equivalent to Python int
     if expected_type is int and hasattr(value, 'dtype') and value.dtype.kind in ('i', 'u'):
         return
-    
+
+    # allow int where float is expected
+    if expected_type is float and isinstance(value, (int, float)):
+        return
+
     origin = get_origin(expected_type)
 
     # allow pathlib.Path for parameters expecting str when they represent file paths
     if expected_type is str and isinstance(value, Path) \
-        and param_name in ('file_path', 'path_cache'):
+            and param_name in ('file_path', 'path_cache'):
         return
 
-    # allow None or non-string types for specific parameters to be validated by 
-    #   _validate_email_params
+    # allow None or non-string types for specific parameters to be validated by
+    # _validate_email_params
     if param_name in ('str_sender', 'subject', 'html_body', 'token') and expected_type is str:
         return
-    
+
     # handle Literal types
     if origin is Literal:
         args = get_args(expected_type)
@@ -258,7 +262,7 @@ def validate_type(
         type_names = [getattr(arg, '__name__', str(arg)) for arg in args]
         raise TypeError(f"{param_name} must be one of types: {', '.join(type_names)}, "
                         + f"got {type(value).__name__}")
-    
+
     # handle generic types like List[Callable[...]]
     elif origin is list:
         if not isinstance(value, list):
@@ -275,21 +279,21 @@ def validate_type(
             else:
                 validate_type(elem, element_type, f"{param_name}[{i}]")
         return
-    
+
     # handle generic types like List, dict, etc.
     elif origin is not None:
         if not isinstance(value, origin):
             raise TypeError(f"{param_name} must be of type {expected_type}, "
                             + f"got {type(value).__name__}")
         return
-    
+
     # handle regular types
     elif isinstance(expected_type, type):
         if not isinstance(value, expected_type):
             raise TypeError(f"{param_name} must be of type {expected_type.__name__}, "
                             + f"got {type(value).__name__}")
         return
-    
+
     # handle special cases or protocols
     else:
         # for protocols and other complex types, try isinstance
