@@ -18,7 +18,7 @@ from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.pipelines.mp_helper import mp_worker, mp_run_parallel
-from stpstone.transformations.validation.br_docs import DocumentsNumbersBR
+from stpstone.transformations.validation.docs_br import DocumentsNumbersBR
 
 
 class CVMWeb_WS_Funds:
@@ -262,7 +262,7 @@ class CVMWeb_WS_Funds:
         })
         # unmasking cnpj
         df_funds[self.key_fund_ein_unm] = DocumentsNumbersBR(
-            df_funds[self.key_fund_ein].tolist()).unmask_docs
+            df_funds[self.key_fund_ein].tolist()).unmask_docs()
         # loading in db, if is user's will
         if self.cls_db is not None:
             self.cls_db.insert(
