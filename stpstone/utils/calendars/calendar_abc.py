@@ -214,7 +214,13 @@ class CalendarCore(ABCCalendar):
 class DateManipulation(CalendarCore):
     """Abstract class for date manipulation operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the DateManipulation class.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__()
         self._added_holidays: list[tuple[str, date]] = []
 
@@ -264,7 +270,8 @@ class DateManipulation(CalendarCore):
         if hasattr(self, "_holidays_cache"):
             delattr(self, "_holidays_cache")
 
-        list_current_holidays = self.holidays() if self.holidays() != NotImplementedError else []
+        list_current_holidays = self.holidays() \
+            if self.holidays() is not NotImplementedError else []
         updated_holidays = list_current_holidays + list_new_holidays
         self._holidays_cache = {tup_holiday[1] for tup_holiday in updated_holidays}
 

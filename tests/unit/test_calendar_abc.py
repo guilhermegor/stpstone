@@ -622,7 +622,9 @@ class TestDateManipulation:
         ],
     )
     def test_add_holidays_invalid_types(
-        self, calendar_instance: ABCCalendarOperations, invalid_input: Any
+        self, 
+        calendar_instance: ABCCalendarOperations, 
+        invalid_input: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test add_holidays with invalid input types.
 
@@ -681,7 +683,10 @@ class TestDateManipulation:
         assert holidays.count(new_holidays[1]) == 2
 
     def test_add_holidays_with_existing(
-        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock, new_holidays: list[tuple[str, date]]
+        self, 
+        calendar_instance: ABCCalendarOperations, 
+        mock_holidays: MagicMock, 
+        new_holidays: list[tuple[str, date]]
     ) -> None:
         """Test add_holidays with existing holidays in cache.
 
@@ -705,14 +710,22 @@ class TestDateManipulation:
         None
         """
         # Mock existing holidays
-        existing_holidays = [("New Year's Day", date(2023, 1, 1)), ("Christmas", date(2023, 12, 25))]
+        existing_holidays = [
+            ("New Year's Day", date(2023, 1, 1)), 
+            ("Christmas", date(2023, 12, 25))
+        ]
         mock_holidays.return_value = existing_holidays
         
         # Add new holidays
         calendar_instance.add_holidays(new_holidays)
         
         # Verify combined holidays in cache
-        expected_dates = {date(2023, 1, 1), date(2023, 12, 25), date(2024, 1, 15), date(2024, 7, 4)}
+        expected_dates = {
+            date(2023, 1, 1), 
+            date(2023, 12, 25), 
+            date(2024, 1, 15), 
+            date(2024, 7, 4)
+        }
         assert calendar_instance._holidays == expected_dates
         
         # Verify all holidays are recognized
