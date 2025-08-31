@@ -2058,7 +2058,7 @@ class TestDatesRangeDelta:
     def test_last_working_day_years_valid(
         self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock
     ) -> None:
-        """Test last_working_day_years with valid years.
+        """Test get_last_working_day_years with valid years.
 
         Verifies
         --------
@@ -2077,7 +2077,7 @@ class TestDatesRangeDelta:
         None
         """
         years = [2022, 2023]
-        result = calendar_instance.last_working_day_years(years)
+        result = calendar_instance.get_last_working_day_years(years)
         # December 31st 2022 is Saturday, so last working day should be December 30th
         # December 31st 2023 is Sunday, so last working day should be December 29th
         expected = [date(2022, 12, 30), date(2023, 12, 29)]
@@ -2530,7 +2530,7 @@ class TestDateFormatter:
     def test_week_name_full(
         self, calendar_instance: ABCCalendarOperations, sample_date: date
     ) -> None:
-        """Test week_name with full name.
+        """Test weekday_name with full name.
 
         Verifies
         --------
@@ -2548,7 +2548,7 @@ class TestDateFormatter:
         -------
         None
         """
-        result = calendar_instance.week_name(sample_date, False, "UTC")
+        result = calendar_instance.weekday_name(sample_date, False, "UTC")
         assert isinstance(result, str)
         assert len(result) > 0
         # December 25, 2023 is Monday
@@ -2556,7 +2556,7 @@ class TestDateFormatter:
     def test_week_name_abbreviation(
         self, calendar_instance: ABCCalendarOperations, sample_date: date
     ) -> None:
-        """Test week_name with abbreviation.
+        """Test weekday_name with abbreviation.
 
         Verifies
         --------
@@ -2574,7 +2574,7 @@ class TestDateFormatter:
         -------
         None
         """
-        result = calendar_instance.week_name(sample_date, True, "UTC")
+        result = calendar_instance.weekday_name(sample_date, True, "UTC")
         assert isinstance(result, str)
         assert len(result) <= 4  # Typically 3-4 characters for abbreviations
 

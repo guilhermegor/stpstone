@@ -13,7 +13,7 @@ import pandas as pd
 import requests
 
 from stpstone.utils.cache.cache_manager import CacheManager
-from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
+from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations, TypeDatetimeDate
 from stpstone.utils.parsers.str import StrHandler
 
 
@@ -76,11 +76,29 @@ class DatesBRAnbima(ABCCalendarOperations):
         list[tuple[str, date]]
             List of holiday tuples containing (name, date)
         """
-        df_ = self.get_holidays_raw()
+        df_ = self.get_holidays_raw_cached()
         df_ = self.transform_holidays(df_)
         return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
 
     @CacheManager.cache_df(key="br_anbima_holidays_raw")
+    def get_holidays_raw_cached(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
+        """Fetch raw holiday data from ANBIMA Excel file and cache it.
+
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
+
+        Returns
+        -------
+        pd.DataFrame
+            Raw holiday data with DATE, WEEKDAY, NAME columns
+        """
+        return self.get_holidays_raw(timeout=timeout)
+    
     def get_holidays_raw(
         self, 
         timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
@@ -549,3 +567,215 @@ class DatesBRFebraban(ABCCalendarOperations):
             raise ValueError(f"JSON response for year {year} must be a list")
         if not json_response:
             raise ValueError(f"JSON response for year {year} cannot be empty")
+
+
+class DatesBRB3(ABCCalendarOperations):
+
+    def __init__(
+        self,  
+        bool_add_christmas_eve: bool = False,
+        bool_persist_cache: bool = True, 
+        bool_reuse_cache: bool = True,
+        int_days_cache_expiration: int = 1,
+        int_cache_ttl_days: int = 30,
+        path_cache_dir: Optional[str] = None,
+        logger: Optional[Logger] = None,
+    ) -> None:
+        """Initialize the DatesBRB3 class.
+        
+        Parameters
+        ----------
+        bool_add_christmas_eve : bool, optional
+            If True, adds Christmas Eve to the list of holidays (default: False)
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        int_days_cache_expiration : int, optional
+            Number of days after which the cache expires (default: 1)
+        int_cache_ttl_days : int, optional
+            Number of days after which the cache is considered expired (default: 30)
+        path_cache_dir : Optional[str], optional
+            Path to the cache directory (default: None)
+        logger : Optional[Logger], optional
+            Logger object for logging (default: None)
+
+        Returns
+        -------
+        None
+        """
+        self.bool_add_christmas_eve = bool_add_christmas_eve
+        self.cls_cache_manager = CacheManager(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger
+        )
+        self.cls_dates_br_anbima = DatesBRAnbima(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger
+        )
+        self.cls_str_handler = StrHandler()
+
+    def holidays(self) -> list[tuple[str, date]]:
+        """Return a list of tuples containing holiday names and dates.
+        
+        Returns
+        -------
+        list[tuple[str, date]]
+            List of tuples containing holiday names and dates
+        """
+        df_ = self.get_holidays_transformed()
+        return [(row["NAME"], row["DATE"]) for _, row in df_.iterrows()]
+    
+    @CacheManager.cache_df(key="br_b3_holidays_raw")
+    def get_holidays_transformed(
+        self,
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
+        """Fetch raw holiday data from ANBIMA Excel file, transform it and add B3 holidays.
+        
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        df_ = self.get_anbima_holidays(timeout=timeout)
+        return self.add_holidays_b3(df_)
+
+    def get_anbima_holidays(
+        self, 
+        timeout: Union[int, float, tuple[float, float], tuple[int, int]] = (12.0, 21.0)
+    ) -> pd.DataFrame:
+        """Fetch raw holiday data from ANBIMA Excel file and transform it.
+        
+        Parameters
+        ----------
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+            Timeout for HTTP request, by default (12.0, 21.0)
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data
+        """
+        df_ = self.cls_dates_br_anbima.get_holidays_raw(timeout=timeout)
+        return self.cls_dates_br_anbima.transform_holidays(df_)
+    
+    def add_holidays_b3(self, df_holidays_anbima: pd.DataFrame) -> pd.DataFrame:
+        """Add additional holidays to the DataFrame.
+        
+        Parameters
+        ----------
+        df_holidays_anbima : pd.DataFrame
+            DataFrame containing raw holiday data
+        
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing raw holiday data with additional holidays
+        """
+        df_holidays_to_add = pd.DataFrame(self.holidays_to_add(df_holidays_anbima), 
+                                          columns=["NAME", "DATE"])
+        df_holidays_to_add["WEEKDAY"] = [
+            self.weekday_name(date_, bool_abbreviation=False, str_timezone="America/Sao_Paulo")
+            for date_ in df_holidays_to_add["DATE"].tolist()
+        ]
+        df_holidays_to_add = df_holidays_to_add[["DATE", "WEEKDAY", "NAME"]]
+        return pd.concat([df_holidays_anbima, df_holidays_to_add], ignore_index=True)\
+            .reset_index(drop=True)
+    
+    def holidays_to_add(self, df_: pd.DataFrame) -> list[tuple[str, date]]:
+        """Add additional holidays to the DataFrame.
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            DataFrame containing raw holiday data
+        
+        Returns
+        -------
+        list[tuple[str, date]]
+            List of tuples containing holiday names and dates
+        """
+        list_: list[tuple[str, date]] = []
+        set_years = {self.year_number(date_) for date_ in df_["DATE"].tolist()}
+        for int_year in set_years:
+            list_.append(
+                ("Last Working Day of the Year", self.get_last_working_day_year(int_year))
+            )
+            if self.bool_add_christmas_eve:
+                list_.append(("Christmas Eve", self.get_christmas_eve(int_year)))
+        return list_
+
+    def get_last_working_day_year(self, int_year: int) -> date:
+        """Get last working day for a given year.
+
+        Parameters
+        ----------
+        int_year : int
+            Year for which to retrieve the last working day
+
+        Returns
+        -------
+        date
+            Last working day
+
+        Notes
+        -----
+        [1] Brazilian B3 exchange is closed on the last working day of the year
+        [2] Records of agribusiness securities operations are available with reduced hours, 
+            closing at 12PM
+        [3] Cetip UTVM segment system works until 1PM
+        """
+        return self.add_working_days(date(int_year + 1, 1, 1), -1)
+    
+    def get_christmas_eve(self, int_year: int) -> date:
+        """Get Christmas Eve for a given year.
+        
+        Parameters
+        ----------
+        int_year : int
+            Year for which to retrieve Christmas Eve.
+        
+        Returns
+        -------
+        date
+            Christmas Eve for the given year.
+        """
+        return date(int_year, 12, 24)
+
+    def weekday_name_locale_sensitive(
+        self, 
+        date_: TypeDatetimeDate, 
+        bool_abbreviation: bool = False, 
+        str_timezone: Optional[str] = "UTC"
+    ) -> str:
+        """Return the weekday name according to the platform locale.
+
+        Parameters
+        ----------
+        date_ : TypeDatetimeDate
+            The date to get the weekday name from.
+        bool_abbreviation : bool, optional
+            Whether to return the abbreviated weekday name, by default False
+        str_timezone : Optional[str], optional
+            The timezone to determine the locale, by default "UTC"
+
+        Returns
+        -------
+        str
+            The weekday name or its abbreviation in the specified locale.
+        """
+        return self.weekday_name(date_, bool_abbreviation, str_timezone, str_locale=None)

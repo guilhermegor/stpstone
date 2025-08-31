@@ -145,7 +145,7 @@ def test_anbima_get_holidays_raw_success(
     mock_get.return_value = mock_response
 
     with patch("pandas.read_excel", return_value=sample_anbima_df):
-        df_ = anbima_instance.get_holidays_raw()
+        df_ = anbima_instance.get_holidays_raw_cached()
         assert isinstance(df_, pd.DataFrame)
         assert list(df_.columns) == ["DATE", "WEEKDAY", "NAME"]
         mock_get.assert_called_once()
@@ -184,7 +184,7 @@ def test_get_holidays_raw_empty_content(
     mock_get.return_value = mock_response
 
     with pytest.raises(ValueError, match="Response content cannot be empty"):
-        anbima_instance.get_holidays_raw()
+        anbima_instance.get_holidays_raw_cached()
 
 
 def test_anbima_transform_holidays_valid(

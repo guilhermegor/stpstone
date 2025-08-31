@@ -214,6 +214,43 @@ class CalendarCore(ABCCalendar):
 class DateManipulation(CalendarCore):
     """Abstract class for date manipulation operations."""
 
+    def add_holidays(self, list_new_holidays: list[tuple[str, date]]) -> None:
+        """Add new holidays to the existing holiday cache.
+
+        Parameters
+        ----------
+        list_new_holidays : list[tuple[str, date]]
+            A list of tuples containing holiday names and dates to add.
+
+        Raises
+        ------
+        TypeError
+            If list_new_holidays is not a list of tuples or if any tuple does not contain
+            a string and a date object.
+        ValueError
+            If list_new_holidays is empty or contains invalid date objects.
+        """
+        if not isinstance(list_new_holidays, list):
+            raise TypeError("list_new_holidays must be a list")
+        if not list_new_holidays:
+            raise ValueError("list_new_holidays list cannot be empty")
+        
+        for holiday in list_new_holidays:
+            if not isinstance(holiday, tuple) or len(holiday) != 2:
+                raise TypeError("Each holiday must be a tuple of (str, date)")
+            name, date_ = holiday
+            if not isinstance(name, str):
+                raise TypeError(f"Holiday name must be a string, got {type(name).__name__}")
+            if not isinstance(date_, date) or isinstance(date_, datetime):
+                raise TypeError(f"Holiday date must be a date object, got {type(date_).__name__}")
+        
+        if not hasattr(self, "_holidays_cache"):
+            self._holidays_cache = set()
+        
+        list_current_holidays = self.holidays() if self.holidays() != NotImplementedError else []
+        updated_holidays = list_current_holidays + list_new_holidays
+        self._holidays_cache = {tup_holiday[1] for tup_holiday in updated_holidays}
+
     def add_working_days(
         self, 
         date_: TypeDatetimeDate, 
@@ -1081,7 +1118,7 @@ class DatesRangeDelta(DateTimezoneAware):
         return self.nearest_working_day(date_ref, bool_next=bool_next_working_day) \
             if bool_working_days else date_ref
 
-    def last_working_day_years(
+    def get_last_working_day_years(
         self, 
         list_years: list[int]
     ) -> list[date]:
@@ -1450,9 +1487,9 @@ class DateFormatter(DatesCurrent):
         date_ = self.date_only(date_)
         str_locale = self.get_platform_locale(str_timezone=str_timezone)
         locale.setlocale(locale.LC_TIME, str_locale)
-        return date_.strftime("%b" if bool_abbreviation else "%B")            
+        return date_.strftime("%b" if bool_abbreviation else "%B")
 
-    def week_name(
+    def weekday_name(
         self, 
         date_: TypeDatetimeDate, 
         bool_abbreviation: bool = False, 
