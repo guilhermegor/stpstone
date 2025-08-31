@@ -111,6 +111,21 @@ def mock_holidays(mocker: MockerFixture, sample_holidays: list[tuple[str, date]]
     return mocker.patch.object(ABCCalendarOperations, "holidays", return_value=sample_holidays)
 
 
+@pytest.fixture
+def new_holidays() -> list[tuple[str, date]]:
+    """Fixture providing new holidays for testing.
+
+    Returns
+    -------
+    list[tuple[str, date]]
+        List of new holiday tuples (name, date)
+    """
+    return [
+        ("Test Holiday 1", date(2024, 1, 15)),
+        ("Test Holiday 2", date(2024, 7, 4)),
+    ]
+
+
 # --------------------------
 # Tests for ABCCalendar
 # --------------------------
@@ -532,6 +547,245 @@ class TestCalendarCore:
 # --------------------------
 class TestDateManipulation:
     """Test cases for DateManipulation class functionality."""
+
+    def test_add_holidays_valid(
+        self, calendar_instance: ABCCalendarOperations, new_holidays: list[tuple[str, date]]
+    ) -> None:
+        """Test add_holidays with valid holiday list.
+
+        Verifies
+        --------
+        - Adds holidays correctly to the cache
+        - Updates holidays cache with new holidays
+        - is_holiday method recognizes new holidays
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        new_holidays : list[tuple[str, date]]
+            New holidays to add from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Add new holidays
+        calendar_instance.add_holidays(new_holidays)
+        
+        # Verify holidays are in the cache
+        assert calendar_instance._holidays == {date(2024, 1, 15), date(2024, 7, 4)}
+        
+        # Verify is_holiday recognizes new holidays
+        assert calendar_instance.is_holiday(date(2024, 1, 15))
+        assert calendar_instance.is_holiday(date(2024, 7, 4))
+        
+        # Verify holidays method returns updated list
+        holidays = calendar_instance.holidays()
+        assert new_holidays[0] in holidays
+        assert new_holidays[1] in holidays
+
+    def test_add_holidays_empty_list(
+        self, calendar_instance: ABCCalendarOperations
+    ) -> None:
+        """Test add_holidays with empty list.
+
+        Verifies
+        --------
+        - Raises ValueError for empty holiday list
+        - Error message is appropriate
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(ValueError, match="list_new_holidays list cannot be empty"):
+            calendar_instance.add_holidays([])
+
+    @pytest.mark.parametrize(
+        "invalid_input",
+        [
+            None,
+            "not_a_list",
+            123,
+            ["not_a_tuple"],
+            [(123, date(2024, 1, 15))],  # Invalid name type
+            [("Holiday", "2024-01-15")],  # Invalid date type
+            [("Holiday", datetime(2024, 1, 15, 10, 30))],  # Datetime instead of date
+            [("Holiday")],  # Tuple with wrong length
+            [("Holiday", date(2024, 1, 15), "extra")],  # Tuple with wrong length
+        ],
+    )
+    def test_add_holidays_invalid_types(
+        self, calendar_instance: ABCCalendarOperations, invalid_input: Any
+    ) -> None:
+        """Test add_holidays with invalid input types.
+
+        Verifies
+        --------
+        - Raises TypeError for invalid input types
+        - Error message contains expected text
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        invalid_input : Any
+            Invalid input values
+
+        Returns
+        -------
+        None
+        """
+        with pytest.raises(TypeError, match="must be of type|must be a"):
+            calendar_instance.add_holidays(invalid_input)
+
+    def test_add_holidays_duplicate(
+        self, calendar_instance: ABCCalendarOperations, new_holidays: list[tuple[str, date]]
+    ) -> None:
+        """Test add_holidays with duplicate holidays.
+
+        Verifies
+        --------
+        - Handles duplicate holidays correctly
+        - No duplicate dates in cache
+        - Holidays list contains all entries
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        new_holidays : list[tuple[str, date]]
+            New holidays to add from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Add holidays
+        calendar_instance.add_holidays(new_holidays)
+        # Add same holidays again
+        calendar_instance.add_holidays(new_holidays)
+        
+        # Verify cache has unique dates
+        assert calendar_instance._holidays == {date(2024, 1, 15), date(2024, 7, 4)}
+        
+        # Verify holidays list contains all entries (including duplicates)
+        holidays = calendar_instance.holidays()
+        assert holidays.count(new_holidays[0]) == 2
+        assert holidays.count(new_holidays[1]) == 2
+
+    def test_add_holidays_with_existing(
+        self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock, new_holidays: list[tuple[str, date]]
+    ) -> None:
+        """Test add_holidays with existing holidays in cache.
+
+        Verifies
+        --------
+        - Combines new holidays with existing holidays
+        - Updates cache correctly
+        - All holidays are recognized by is_holiday
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        mock_holidays : MagicMock
+            Mocked holidays method
+        new_holidays : list[tuple[str, date]]
+            New holidays to add from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Mock existing holidays
+        existing_holidays = [("New Year's Day", date(2023, 1, 1)), ("Christmas", date(2023, 12, 25))]
+        mock_holidays.return_value = existing_holidays
+        
+        # Add new holidays
+        calendar_instance.add_holidays(new_holidays)
+        
+        # Verify combined holidays in cache
+        expected_dates = {date(2023, 1, 1), date(2023, 12, 25), date(2024, 1, 15), date(2024, 7, 4)}
+        assert calendar_instance._holidays == expected_dates
+        
+        # Verify all holidays are recognized
+        for _, holiday_date in existing_holidays + new_holidays:
+            assert calendar_instance.is_holiday(holiday_date)
+
+    def test_add_holidays_affects_working_days(
+        self, calendar_instance: ABCCalendarOperations, new_holidays: list[tuple[str, date]]
+    ) -> None:
+        """Test that adding holidays affects working day calculations.
+
+        Verifies
+        --------
+        - Newly added holidays are considered in working day calculations
+        - is_working_day returns False for new holidays
+        - add_working_days skips new holidays
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        new_holidays : list[tuple[str, date]]
+            New holidays to add from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Add new holidays
+        calendar_instance.add_holidays(new_holidays)
+        
+        # Verify new holidays are not working days
+        assert not calendar_instance.is_working_day(date(2024, 1, 15))
+        assert not calendar_instance.is_working_day(date(2024, 7, 4))
+        
+        # Verify add_working_days skips new holidays
+        start_date = date(2024, 1, 12)  # Friday
+        result = calendar_instance.add_working_days(start_date, 2)
+        expected = date(2024, 1, 17)  # Skips Jan 15 (holiday)
+        assert result == expected
+
+    def test_add_holidays_empty_cache(
+        self, calendar_instance: ABCCalendarOperations, new_holidays: list[tuple[str, date]]
+    ) -> None:
+        """Test add_holidays when cache is not initialized.
+
+        Verifies
+        --------
+        - Initializes cache correctly
+        - Adds holidays to empty cache
+        - Cache contains only new holidays
+
+        Parameters
+        ----------
+        calendar_instance : ABCCalendarOperations
+            Calendar instance from fixture
+        new_holidays : list[tuple[str, date]]
+            New holidays to add from fixture
+
+        Returns
+        -------
+        None
+        """
+        # Ensure cache is not initialized
+        if hasattr(calendar_instance, "_holidays_cache"):
+            del calendar_instance._holidays_cache
+        
+        # Add holidays
+        calendar_instance.add_holidays(new_holidays)
+        
+        # Verify cache is initialized and contains holidays
+        assert hasattr(calendar_instance, "_holidays_cache")
+        assert calendar_instance._holidays == {date(2024, 1, 15), date(2024, 7, 4)}
 
     def test_add_working_days_positive(
         self, calendar_instance: ABCCalendarOperations, mock_holidays: MagicMock

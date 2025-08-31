@@ -80,7 +80,7 @@ class CalendarCore(ABCCalendar):
         pd.DataFrame
             An empty DataFrame.
         """
-        return NotImplementedError
+        return pd.DataFrame(columns=["name", "date"])
 
     def holidays(self) -> list[tuple[str, date]]:
         """Return an empty list of holidays as a default implementation.
@@ -90,7 +90,7 @@ class CalendarCore(ABCCalendar):
         list[tuple[str, date]]
             An empty list.
         """
-        return NotImplementedError
+        return []
 
     @property
     def _holidays(self) -> set[date]:
@@ -214,6 +214,21 @@ class CalendarCore(ABCCalendar):
 class DateManipulation(CalendarCore):
     """Abstract class for date manipulation operations."""
 
+    def __init__(self):
+        super().__init__()
+        self._added_holidays: list[tuple[str, date]] = []
+
+    def holidays(self) -> list[tuple[str, date]]:
+        """Return a list of tuples containing holiday names and dates.
+        
+        Returns
+        -------
+        list[tuple[str, date]]
+            List of tuples containing holiday names and dates
+        """
+        base_holidays = super().holidays()
+        return base_holidays + self._added_holidays
+
     def add_holidays(self, list_new_holidays: list[tuple[str, date]]) -> None:
         """Add new holidays to the existing holiday cache.
 
@@ -244,9 +259,11 @@ class DateManipulation(CalendarCore):
             if not isinstance(date_, date) or isinstance(date_, datetime):
                 raise TypeError(f"Holiday date must be a date object, got {type(date_).__name__}")
         
-        if not hasattr(self, "_holidays_cache"):
-            self._holidays_cache = set()
+        self._added_holidays.extend(list_new_holidays)
         
+        if hasattr(self, "_holidays_cache"):
+            delattr(self, "_holidays_cache")
+
         list_current_holidays = self.holidays() if self.holidays() != NotImplementedError else []
         updated_holidays = list_current_holidays + list_new_holidays
         self._holidays_cache = {tup_holiday[1] for tup_holiday in updated_holidays}
