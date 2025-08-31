@@ -12,6 +12,7 @@ from typing import Optional, Union
 import pandas as pd
 import requests
 
+from stpstone.transformations.validation.metaclass_type_checker import type_checker
 from stpstone.utils.cache.cache_manager import CacheManager
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations, TypeDatetimeDate
 from stpstone.utils.parsers.str import StrHandler
@@ -693,8 +694,9 @@ class DatesBRB3(ABCCalendarOperations):
             for date_ in df_holidays_to_add["DATE"].tolist()
         ]
         df_holidays_to_add = df_holidays_to_add[["DATE", "WEEKDAY", "NAME"]]
-        return pd.concat([df_holidays_anbima, df_holidays_to_add], ignore_index=True)\
+        df_ = pd.concat([df_holidays_anbima, df_holidays_to_add], ignore_index=True)\
             .reset_index(drop=True)
+        return df_.sort_values(by=["DATE"])
     
     def holidays_to_add(self, df_: pd.DataFrame) -> list[tuple[str, date]]:
         """Add additional holidays to the DataFrame.
@@ -710,36 +712,56 @@ class DatesBRB3(ABCCalendarOperations):
             List of tuples containing holiday names and dates
         """
         list_: list[tuple[str, date]] = []
+        set_anbima_holidays = {row["DATE"] for _, row in df_.iterrows()}
+        
+        @type_checker
+        def temp_is_working_day(date_current: date) -> bool:
+            """Temporary is working day function to avoid recursion.
+            
+            Parameters
+            ----------
+            date_current : date
+                The date to check.
+            
+            Returns
+            -------
+            bool
+                True if the date is a working day, False otherwise.
+            """
+            return not self.is_weekend(date_current) and date_current not in set_anbima_holidays
+        
+        @type_checker
+        def temp_add_working_days(date_: date, int_days_to_add: int) -> date:
+            """Temporary add working days function to avoid recursion.
+            
+            Parameters
+            ----------
+            date_ : date
+                The date to start from.
+            int_days_to_add : int
+                The number of working days to add.
+            
+            Returns
+            -------
+            date
+                The resulting date after adding the specified number of working days.
+            """
+            date_current = self.date_only(date_)
+            int_days_left = abs(int_days_to_add)
+            int_step = 1 if int_days_to_add >= 0 else -1
+            while int_days_left > 0:
+                date_current += timedelta(days=int_step)
+                if temp_is_working_day(date_current):
+                    int_days_left -= 1
+            return date_current
+        
         set_years = {self.year_number(date_) for date_ in df_["DATE"].tolist()}
         for int_year in set_years:
-            list_.append(
-                ("Last Working Day of the Year", self.get_last_working_day_year(int_year))
-            )
+            last_working_day = temp_add_working_days(date(int_year + 1, 1, 1), -1)
+            list_.append(("Último Dia Útil do Ano", last_working_day))
             if self.bool_add_christmas_eve:
-                list_.append(("Christmas Eve", self.get_christmas_eve(int_year)))
+                list_.append(("Véspera de Natal", self.get_christmas_eve(int_year)))
         return list_
-
-    def get_last_working_day_year(self, int_year: int) -> date:
-        """Get last working day for a given year.
-
-        Parameters
-        ----------
-        int_year : int
-            Year for which to retrieve the last working day
-
-        Returns
-        -------
-        date
-            Last working day
-
-        Notes
-        -----
-        [1] Brazilian B3 exchange is closed on the last working day of the year
-        [2] Records of agribusiness securities operations are available with reduced hours, 
-            closing at 12PM
-        [3] Cetip UTVM segment system works until 1PM
-        """
-        return self.add_working_days(date(int_year + 1, 1, 1), -1)
     
     def get_christmas_eve(self, int_year: int) -> date:
         """Get Christmas Eve for a given year.
@@ -755,27 +777,3 @@ class DatesBRB3(ABCCalendarOperations):
             Christmas Eve for the given year.
         """
         return date(int_year, 12, 24)
-
-    def weekday_name_locale_sensitive(
-        self, 
-        date_: TypeDatetimeDate, 
-        bool_abbreviation: bool = False, 
-        str_timezone: Optional[str] = "UTC"
-    ) -> str:
-        """Return the weekday name according to the platform locale.
-
-        Parameters
-        ----------
-        date_ : TypeDatetimeDate
-            The date to get the weekday name from.
-        bool_abbreviation : bool, optional
-            Whether to return the abbreviated weekday name, by default False
-        str_timezone : Optional[str], optional
-            The timezone to determine the locale, by default "UTC"
-
-        Returns
-        -------
-        str
-            The weekday name or its abbreviation in the specified locale.
-        """
-        return self.weekday_name(date_, bool_abbreviation, str_timezone, str_locale=None)
