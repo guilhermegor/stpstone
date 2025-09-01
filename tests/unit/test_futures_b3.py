@@ -1049,6 +1049,7 @@ def test_third_degree_polynomial_cubic_spline_docstring_example(tsir: "TSIR") ->
 # Examples of Delta Daily MTMs
 # --------------------------
 
+
 def test_abevo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for ABEVOU25 delta daily MTM calculation.
 
@@ -1066,6 +1067,7 @@ def test_abevo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.abevo(float_daily_settlement=12.35, float_qty=1.0)
     expected = 0.10
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_afs_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for AFSU25 delta daily MTM calculation.
@@ -1087,6 +1089,7 @@ def test_afs_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 154.0074
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_arb_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for ARBU25 delta daily MTM calculation.
 
@@ -1104,6 +1107,7 @@ def test_arb_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.arb(float_daily_settlement=4.0530, float_qty=1.0)
     expected = 4.05
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_ars_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for ARSU25 delta daily MTM calculation.
@@ -1125,6 +1129,7 @@ def test_ars_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 177.93868
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_aud_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for AUDU25 delta daily MTM calculation.
 
@@ -1142,6 +1147,7 @@ def test_aud_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.aud(float_daily_settlement=3_547.1410, float_qty=1.0)
     expected = 986.82
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_aus_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for AUSU25 delta daily MTM calculation.
@@ -1163,6 +1169,7 @@ def test_aus_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 53.21
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_b3sao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for B3SAOU25 delta daily MTM calculation.
 
@@ -1180,6 +1187,7 @@ def test_b3sao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.b3sao(float_daily_settlement=13.15, float_qty=1.0)
     expected = 0.06
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_bgi_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for BGIU25 delta daily MTM calculation.
@@ -1199,6 +1207,7 @@ def test_bgi_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 544.50
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_bhiao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for BHIAOU25 delta daily MTM calculation.
 
@@ -1216,6 +1225,7 @@ def test_bhiao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.bhiao(float_daily_settlement=3.42, float_qty=1.0)
     expected = 0.77
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_bit_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for BITU25 delta daily MTM calculation.
@@ -1235,6 +1245,7 @@ def test_bit_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 211.02
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_bpaci_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for BPACIU25 delta daily MTM calculation.
 
@@ -1252,6 +1263,7 @@ def test_bpaci_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.bpaci(float_daily_settlement=44.89, float_qty=1.0)
     expected = 0.34
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_bri_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for BRIV25 delta daily MTM calculation.
@@ -1271,6 +1283,7 @@ def test_bri_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 560.0
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_cad_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CADU25 delta daily MTM calculation.
 
@@ -1288,6 +1301,7 @@ def test_cad_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.cad(float_daily_settlement=3_953.7050, float_qty=1.0)
     expected = 1_056.42
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_can_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CANU25 delta daily MTM calculation.
@@ -1309,6 +1323,7 @@ def test_can_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 72.70
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_ccm_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CCMU25 delta daily MTM calculation.
 
@@ -1327,6 +1342,7 @@ def test_ccm_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 166.50
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_chf_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CHFU25 delta daily MTM calculation.
 
@@ -1344,6 +1360,7 @@ def test_chf_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.chf(float_daily_settlement=6_792.4540, float_qty=1.0)
     expected = 1_532.45
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
 
 def test_chl_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CHLU25 delta daily MTM calculation.
@@ -1365,6 +1382,7 @@ def test_chl_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 79.93
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_clp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CLPU25 delta daily MTM calculation.
 
@@ -1383,6 +1401,7 @@ def test_clp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     expected = 1008.07
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
+
 def test_cmigp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for CMIGPU25 delta daily MTM calculation.
 
@@ -1399,4 +1418,82 @@ def test_cmigp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     result = notional_from_pv.cmigp(float_daily_settlement=11.20, float_qty=1.0) \
         - notional_from_pv.cmigp(float_daily_settlement=11.22, float_qty=1.0)
     expected = 0.02
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_cnh_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for CNHU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for CNHU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.cnh(
+        float_daily_settlement=7_109.673, float_qty=1.0, float_xcg_cnybrl=0.7610) \
+        - notional_from_pv.cnh(
+            float_daily_settlement=7_107.286, float_qty=1.0, float_xcg_cnybrl=0.7610)
+    expected = 18.1650
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_cnl_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for CHLU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for CHLU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.cnl(float_daily_settlement=1_555.0, float_qty=1.0) \
+        - notional_from_pv.cnl(float_daily_settlement=1_489.23, float_qty=1.0)
+    expected = 6577.0
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_cny_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for CNYU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for CNYU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.cny(float_daily_settlement=7_637.1280, float_qty=1.0) \
+        - notional_from_pv.cny(float_daily_settlement=7_623.9200, float_qty=1.0)
+    expected = 462.28
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_cogno_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for COGNOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for COGNOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.cogno(float_daily_settlement=2.94, float_qty=1.0) \
+        - notional_from_pv.cogno(float_daily_settlement=2.95, float_qty=1.0)
+    expected = 0.01
     assert abs(result) == pytest.approx(expected, abs=1e-2)
