@@ -844,7 +844,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_xcg_usdbl: float, 
+        float_xcg_usdbrl: float, 
         float_xcg_parity_eurusd: float
     ) -> float:
         """DAX - Future contract of DAX Index in EUR (DAX).
@@ -855,7 +855,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in EUR
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_usdbl : float
+        float_xcg_usdbrl : float
             Exchange rate between USD and BRL (USD/BRL)
         float_xcg_parity_eurusd : float
             Exchange parity between EUR and USD (EUR/USD)
@@ -869,7 +869,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=5.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbl,
+            float_xcg_rt_1=float_xcg_usdbrl,
             float_xcg_rt_2=1.0,
             float_xcg_parity=float_xcg_parity_eurusd
         )
@@ -1068,6 +1068,40 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_qty=float_qty,
             float_xcg_rt_1=1.0,
             float_xcg_rt_2=1.0
+        )
+    
+    def est(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float, 
+        float_xcg_parity_eurusd: float
+    ) -> float:
+        """EST - Future contract of ESTR (Euro Short-Term Rate) in BRL (EST).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Cross currency rate (USD/BRL)
+        float_xcg_parity_eurusd : float
+            Cross currency parity (EUR/USD)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.20,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl,
+            float_xcg_rt_2=1.0,
+            float_xcg_parity=float_xcg_parity_eurusd
         )
 
 
