@@ -2425,3 +2425,195 @@ def test_nzd_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.nzd(float_daily_settlement=3_196.4610, float_qty=1.0)
     expected = 1_281.15
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_nzl_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for NZLU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for NZLU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.nzl(float_daily_settlement=590.20, float_qty=1.0, 
+                                  float_xcg_usdbrl=5.4241) \
+        - notional_from_pv.nzl(float_daily_settlement=588.90, float_qty=1.0, 
+                               float_xcg_usdbrl=5.4241)
+    expected = 70.51
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_oc1_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for OC1U25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for OC1U25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.oc1(float_daily_settlement=99_944.90, float_qty=1.0) \
+        - notional_from_pv.oc1(float_daily_settlement=99_944.87, float_qty=1.0)
+    expected = 0.03
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_pcaro_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for PCAROU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for PCAROU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.pcaro(float_daily_settlement=3.58, float_qty=1.0) \
+        - notional_from_pv.pcaro(float_daily_settlement=3.53, float_qty=1.0)
+    expected = 0.05
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_petrp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for PETRPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for PETRPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.petrp(float_daily_settlement=31.36, float_qty=1.0) \
+        - notional_from_pv.petrp(float_daily_settlement=31.20, float_qty=1.0)
+    expected = 0.16
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_prioo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for PRIOOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for PRIOOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.prioo(float_daily_settlement=38.18, float_qty=1.0) \
+        - notional_from_pv.prioo(float_daily_settlement=38.92, float_qty=1.0)
+    expected = 0.74
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_pssao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for PSSAOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for PSSAOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.pssao(float_daily_settlement=52.17, float_qty=1.0) \
+        - notional_from_pv.pssao(float_daily_settlement=53.26, float_qty=1.0)
+    expected = 1.09
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_radlo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for RADLOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for RADLOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.radlo(float_daily_settlement=17.68, float_qty=1.0) \
+        - notional_from_pv.radlo(float_daily_settlement=19.00, float_qty=1.0)
+    expected = 1.32
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_railo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for RAILOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for RAILOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.railo(float_daily_settlement=14.65, float_qty=1.0) \
+        - notional_from_pv.railo(float_daily_settlement=14.72, float_qty=1.0)
+    expected = 0.07
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_rdoro_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for RDOROU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for RDOROU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.rdoro(float_daily_settlement=39.68, float_qty=1.0) \
+        - notional_from_pv.rdoro(float_daily_settlement=39.39, float_qty=1.0)
+    expected = 0.29
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_rento_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for RENTOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for RENTOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.rento(float_daily_settlement=36.14, float_qty=1.0) \
+        - notional_from_pv.rento(float_daily_settlement=36.01, float_qty=1.0)
+    expected = 0.13
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
