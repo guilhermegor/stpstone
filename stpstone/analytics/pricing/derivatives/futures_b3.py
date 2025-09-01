@@ -2458,7 +2458,13 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_2=1.0
         )
 
-    def tie(self, float_daily_settlement: float, float_qty: float) -> float:
+    def tie(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float, 
+        float_xcg_parity_mxnusd: float
+    ) -> float:
         """TIE - Future contract of Fondeo a Un Día in BRL (TIE).
 
         Standardized future on the Mexican interest rate, defined by the compounding of the 
@@ -2479,7 +2485,30 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         """
         return self.generic_pricing(
             float_daily_settlement=float_daily_settlement,
-            float_size=10.0,
+            float_size=3.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_mxnusd,
+            float_xcg_rt_2=1.0
+        )
+    
+    def timso(self, float_daily_settlement: float, float_qty: float) -> float:
+        """TIMS - Future contract of TIMS3 in BRL (TIMSO).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
             float_qty=float_qty,
             float_xcg_rt_1=1.0,
             float_xcg_rt_2=1.0

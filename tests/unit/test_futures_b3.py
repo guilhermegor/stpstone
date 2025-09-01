@@ -2842,3 +2842,42 @@ def test_t10_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
                                float_xcg_usdbrl=5.4241)
     expected = 508.23 # 508.45
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_tie_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for TIEU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for TIEU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.tie(float_daily_settlement=99_597.193, float_qty=1.0, 
+                                  float_xcg_usdbrl=5.4241, float_xcg_parity_mxnusd=18.6505) \
+        - notional_from_pv.tie(float_daily_settlement=99_598.649, float_qty=1.0, 
+                               float_xcg_usdbrl=5.4241, float_xcg_parity_mxnusd=18.6505)
+    expected = 1.27 # 1.26
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+def test_timso_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for TIMSOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for TIMSOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.timso(float_daily_settlement=22.92, float_qty=1.0) \
+        - notional_from_pv.timso(float_daily_settlement=23.27, float_qty=1.0)
+    expected = 0.35
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
