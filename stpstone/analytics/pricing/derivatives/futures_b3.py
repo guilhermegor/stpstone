@@ -2,20 +2,52 @@
 """Pricing B3 Brazilian Exchange Future Contracts."""
 
 from datetime import datetime
+from logging import Logger
 import math
+from typing import Optional
 
 from nelson_siegel_svensson.calibrate import calibrate_ns_ols
 import numpy as np
 from scipy.interpolate import CubicSpline
 
-from stpstone.analytics.perf_metrics.financial_math import FinancialMath
 from stpstone.analytics.quant.linear_transformations import LinearAlgebra
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.calendars.calendar_br import DatesBRB3
 from stpstone.utils.parsers.lists import ListHandler
 
 
-class NotionalFromPV:
+class NotionalFromPV(metaclass=TypeChecker):
     """Notional value from present value."""
+
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True,
+        bool_reuse_cache: bool = True,
+        logger: Optional[Logger] = None
+    ) -> None:
+        """Initialize the NotionalFromPV class.
+        
+        Parameters
+        ----------
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        logger : Optional[Logger], optional
+            The logger to use (default: None)
+        
+        Returns
+        -------
+        None
+        """
+        self.bool_persist_cache = bool_persist_cache
+        self.bool_reuse_cache = bool_reuse_cache
+        self.logger = logger
+        self.cls_dates_br_b3 = DatesBRB3(
+            bool_persist_cache=self.bool_persist_cache,
+            bool_reuse_cache=self.bool_reuse_cache, 
+            logger=self.logger
+        )
 
     def generic_pricing(
         self, 
@@ -54,9 +86,8 @@ class NotionalFromPV:
         float_pmi_idx_mm1: float, 
         float_pmi_ipca_rt_hat: float, 
         dt_pmi_last: datetime, 
-        dt_pmi_next: datetime, 
         date_ref: datetime,
-        float_size: float = 0.00025
+        dt_pmi_next: datetime,
     ) -> float:
         """Brazilian DI x IPCA (DAP) Contract Pricing.
         
@@ -80,13 +111,10 @@ class NotionalFromPV:
             Expected IPCA inflation rate used in PMI calculations (%)
         dt_pmi_last : datetime
             Date of the last PMI index release
-        dt_pmi_next : datetime
-            Date of the next scheduled PMI index release
         date_ref : datetime
             Pricing reference date (valuation date)
-        float_size : float, optional
-            Contract size multiplier (default: 0.00025)
-            Represents the tick size/value multiplier for the contract
+        dt_pmi_next : datetime
+            Date of the next scheduled PMI index release
             
         Returns
         -------
@@ -118,33 +146,62 @@ class NotionalFromPV:
         ... )
         12500.00
         """
+        float_size: float = 0.00025
         if dt_pmi_last > dt_pmi_next: 
             raise ValueError(
                 "Please validate the input of date pmi last and following, the former should be " \
                 + "inferior than the last"
             )
+        
         # working days from the last pmi release util the following
-        int_wddm = DatesBRAnbima().delta_working_days(dt_pmi_last, dt_pmi_next)
+        int_wddm = self.cls_dates_br_b3.delta_working_days(dt_pmi_last, dt_pmi_next)
         # working days from the last pmi release until the reference date
-        int_wddt = DatesBRAnbima().delta_working_days(dt_pmi_last, date_ref)
+        int_wddt = self.cls_dates_br_b3.delta_working_days(dt_pmi_last, date_ref)
         # prt - pmi pro-rata tempore
         float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
             ** (int_wddt / int_wddm)
-        # returning notional pricing
+        
         return float_pv * float_qty * float_prt
 
 
-class NotionalFromRt:
+class NotionalFromRate(metaclass=TypeChecker):
     """Notional value from real rate."""
+
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True,
+        bool_reuse_cache: bool = True,
+        logger: Optional[Logger] = None
+    ) -> None:
+        """Initialize the NotionalFromRate class.
+        
+        Parameters
+        ----------
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        logger : Optional[Logger], optional
+            The logger to use (default: None)
+        
+        Returns
+        -------
+        None
+        """
+        self.bool_persist_cache = bool_persist_cache
+        self.bool_reuse_cache = bool_reuse_cache
+        self.logger = logger
+        self.cls_dates_br_b3 = DatesBRB3(
+            bool_persist_cache=self.bool_persist_cache,
+            bool_reuse_cache=self.bool_reuse_cache, 
+            logger=self.logger
+        )
 
     def di1(
         self, 
-        float_nominal_rt: float, 
+        float_nominal_rate: float, 
+        date_ref: datetime,
         date_xpt: datetime, 
-        int_wd_bef: int, 
-        float_fv: float = 100000.0, 
-        int_wddy: int = 252, 
-        int_wd_cap: int = 1
     ) -> float:
         """Brazilian 1-Day Interbank Deposit (DI1) Futures Contract Pricing.
         
@@ -167,18 +224,12 @@ class NotionalFromRt:
         
         Parameters
         ----------
-        float_nominal_rt : float
-            Contracted nominal interest rate (annualized, in decimal form)
+        float_nominal_rate : float
+            Nominal rate of the contract
+        date_ref : datetime
+            Pricing reference date
         date_xpt : datetime
-            Contract expiration/settlement date
-        int_wd_bef : int
-            Number of working days prior to expiration for reference date calculation
-        float_fv : float, optional
-            Notional value at expiration (default: 100000.0 BRL)
-        int_wddy : int, optional
-            Business days per year convention (default: 252 days)
-        int_wd_cap : int, optional
-            Compounding periods per year (default: 1 for simple compounding)
+            Expiration date of the contract
         
         Returns
         -------
@@ -199,36 +250,61 @@ class NotionalFromRt:
         -------
         >>> di1_pricing = DI1()
         >>> di1_pricing.di1(
-        ...     float_nominal_rt=0.10,  # 10% annual
+        ...     float_nominal_rate=0.10,  # 10% annual
         ...     date_xpt=datetime(2023, 12, 1),
         ...     int_wd_bef=2,
         ...     int_wddy=252
         ... )
         97590.23  # Present value for 10% DI1 contract
         """
-        # reference date
-        date_ref = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), int_wd_bef)
-        # number of days to settlement of contract
-        int_wddt = DatesBRAnbima().delta_working_days(date_ref, date_xpt)
-        # real rate
-        float_real_rate = FinancialMath().compound_r(
-            float_nominal_rt, int_wddy, int_wd_cap)
-        # returning notional - adjust by di over in case of swing trade
-        return abs(FinancialMath().pv(float_real_rate, int_wddt, 0, float_fv))
+        float_fv: float = 100_000.0
+        int_wddy: int = 252
+        int_wddt = self.cls_dates_br_b3.delta_working_days(date_ref, date_xpt)
+
+        float_real_rate = (1.0 + float_nominal_rate) ** (int_wddt / int_wddy) - 1.0
+        return float_fv / (1.0 + float_real_rate)
 
 
-class RtFromPV:
+class RtFromPV(metaclass=TypeChecker):
     """Real rate from present value."""
+
+    def __init__(
+        self, 
+        bool_persist_cache: bool = True,
+        bool_reuse_cache: bool = True,
+        logger: Optional[Logger] = None
+    ) -> None:
+        """Initialize the NotionalFromPV class.
+        
+        Parameters
+        ----------
+        bool_persist_cache : bool, optional
+            If True, saves cache to disk; if False, uses in-memory cache only (default: True)
+        bool_reuse_cache : bool, optional
+            If True, caches in-memory; if False, does not cache in-memory (default: True)
+        logger : Optional[Logger], optional
+            The logger to use (default: None)
+        
+        Returns
+        -------
+        None
+        """
+        self.bool_persist_cache = bool_persist_cache
+        self.bool_reuse_cache = bool_reuse_cache
+        self.logger = logger
+        self.cls_dates_br_b3 = DatesBRB3(
+            bool_persist_cache=self.bool_persist_cache,
+            bool_reuse_cache=self.bool_reuse_cache, 
+            logger=self.logger
+        )
 
     def ddi(
         self, 
         float_pv_di: float, 
         float_fut_dol: float, 
-        float_ptax_dm1: float, 
-        date_xpt: datetime, 
-        int_wd_bef: int, 
-        int_cddy: int = 365, 
-        float_fv_di: float = 100000.0
+        float_ptax_dm1: float,
+        date_ref: datetime, 
+        date_xpt: datetime
     ) -> float:
         """Brazilian Dollar Interest Rate (DDI) Futures Contract Pricing.
         
@@ -258,14 +334,10 @@ class RtFromPV:
             Future dollar value (contract nominal in USD)
         float_ptax_dm1 : float
             PTAX exchange rate from previous business day (BRL/USD)
+        date_ref : datetime
+            Contract reference date
         date_xpt : datetime
             Contract settlement/expiration date
-        int_wd_bef : int
-            Number of working days before settlement for reference date calculation
-        int_cddy : int, optional
-            Day count convention (default: 365 days/year)
-        float_fv_di : float, optional
-            Future value of DI contract (default: 100,000.0)
         
         Returns
         -------
@@ -295,17 +367,20 @@ class RtFromPV:
         ... )
         0.0652  # 6.52% annualized real rate
         """
-        # reference date
-        date_ref = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), int_wd_bef)
-        # number of days to settlement of contract
-        int_cddt = DatesBRAnbima().delta_calendar_days(date_ref, date_xpt)
-        # returning rate
-        return (float_pv_di / float_fv_di) / (float_fut_dol / float_ptax_dm1) - 1.0 \
+        int_cddy: int = 365
+        float_fv_di: float = 100_000.0
+        
+        int_cddt = self.cls_dates_br_b3.delta_calendar_days(date_ref, date_xpt)
+        return ((float_pv_di / float_fv_di) / (float_fut_dol / float_ptax_dm1) - 1.0) \
             * int_cddy / int_cddt
 
 
-class TSIR:
+class TSIR(metaclass=TypeChecker):
     """Term Structure of Interest Rates (TSIR)."""
+
+    def __init__(self) -> None:
+        """Initialize the TSIR class."""
+        self.cls_list_handler = ListHandler()
 
     def flat_forward(
         self, 
@@ -361,9 +436,9 @@ class TSIR:
         for curr_nper_wrkdays in range(list(dict_nper_rates.keys())[0],
                                        list(dict_nper_rates.keys())[-1] + 1):
             # forward rate - interpolation for two boundaries
-            nper_upper_bound = ListHandler().get_lower_upper_bound(
+            nper_upper_bound = self.cls_list_handler.get_lower_upper_bound(
                 list(dict_nper_rates.keys()), curr_nper_wrkdays)['upper_bound']
-            nper_lower_bound = ListHandler().get_lower_upper_bound(
+            nper_lower_bound = self.cls_list_handler.get_lower_upper_bound(
                 list(dict_nper_rates.keys()), curr_nper_wrkdays)['lower_bound']
             rate_upper_bound = dict_nper_rates[nper_upper_bound]
             rate_lower_bound = dict_nper_rates[nper_lower_bound]
@@ -602,7 +677,7 @@ class TSIR:
         for curr_nper_wrkdays in range(list(dict_nper_rates.keys())[0],
                                        list(dict_nper_rates.keys())[-1] + 1):
             # three-bounds-dictionary, nper-wise
-            dict_lower_mid_upper_bound_nper = ListHandler().get_lower_mid_upper_bound(
+            dict_lower_mid_upper_bound_nper = self.cls_list_handler.get_lower_mid_upper_bound(
                 list(dict_nper_rates.keys()), curr_nper_wrkdays)
             if len(dict_lower_mid_upper_bound_nper.keys()) == 4:
                 # working days for each bound and boolean of whether its the ending element of
