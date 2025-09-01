@@ -79,8 +79,11 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
 
         Notes
         -----
-        [1] For exchange rates, please refer to Quotes and Bulletins, from Brazillian Central Bank
+        [1] For exchange rates, please refer to Quotes and Bulletins, from Brazilian Central Bank
         [1.1] https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes
+        [1.2] Use the column "Rate" ("Taxa"), subcolumn "Offer" ("Venda") for the exchange rate
+        [2] For USD/BRL exchange rate, please refer to B3 referencial exchange rate
+        [2.1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/clearing-de-cambio/indicadores/taxas-de-cambio-referencial/
         """
         return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
     
@@ -243,6 +246,319 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_2=1.0
         )
 
+    def b3sao(self, float_daily_settlement: float, float_qty: float) -> float:
+        """B3SAO - Future contract of B3SA3.
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def bgi(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BGI - Future contract of Fat Cattle in BRL (BGI).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=330.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def bhiao(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BHI - Future contract of BHIA3 in BRL (BHI).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def bit(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BIT - Future contract of BitCoin in BRL (BIT).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.01,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def bpaci(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BPACI - Future contract of BPAC11 in BRL (BPACI).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def bri(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BRI - Future contract of Index Brazil 50 in BRL (BRI).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def cad(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CAD - Future contract of Canadian Dollar in BRL (CAD).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=60.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def can(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_cadbrl: float
+    ) -> float:
+        """CAN - Future contract of Canadian Dollar in USD (CAN).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_cadbrl : float
+            Exchange rate between CAD and BRL (CAD/BRL)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_cadbrl,
+            float_xcg_rt_2=1.0
+        )
+
+    def ccm(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CCM - Future contract of Corn in BRL (CCM).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=450.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+
+    def chf(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CHF - Future contract of Swiss Franc in BRL (CHF).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=50.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def chl(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_clpbrl: float
+    ) -> float:
+        """CHL - Future contract of Chilean Peso in USD (CHL).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_clpbrl : float
+            Exchange rate between Chilean Peso and BRL (CLP/BRL)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_clpbrl,
+            float_xcg_rt_2=1.0
+        )
+    
+    def clp(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CLP - Future contract of Chilean Peso in BRL (CLP).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=25.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def cmigp(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CMIGP - Future contract of CMIG4 in BRL (CMIGP).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
     def dap(
         self, 
         float_daily_settlement: float, 
