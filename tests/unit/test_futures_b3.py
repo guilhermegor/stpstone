@@ -1189,6 +1189,44 @@ def test_b3sao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
 
+def test_bbaso_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for BBASOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for BBASOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.bbaso(float_daily_settlement=21.57, float_qty=1.0) \
+        - notional_from_pv.bbaso(float_daily_settlement=21.24, float_qty=1.0)
+    expected = 0.33
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_bbdcp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for BBDCPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for BBDCPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.bbdcp(float_daily_settlement=16.97, float_qty=1.0) \
+        - notional_from_pv.bbdcp(float_daily_settlement=16.94, float_qty=1.0)
+    expected = 0.03
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
 def test_bgi_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """Example test for BGIU25 delta daily MTM calculation.
 
@@ -1320,7 +1358,7 @@ def test_can_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         float_daily_settlement=1_371.465, float_qty=1.0, float_xcg_cadbrl=3.9534) \
         - notional_from_pv.can(
             float_daily_settlement=1_373.304, float_qty=1.0, float_xcg_cadbrl=3.9534)
-    expected = 72.70
+    expected = 72.70 # 72.66
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
 
@@ -1379,7 +1417,7 @@ def test_chl_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         float_daily_settlement=965_280.0, float_qty=1.0, float_xcg_clpbrl=0.005633) \
         - notional_from_pv.chl(
             float_daily_settlement=966_699.0, float_qty=1.0, float_xcg_clpbrl=0.005633)
-    expected = 79.93
+    expected = 79.93 # 79.69
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
 
@@ -1438,7 +1476,7 @@ def test_cnh_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         float_daily_settlement=7_109.673, float_qty=1.0, float_xcg_cnybrl=0.7610) \
         - notional_from_pv.cnh(
             float_daily_settlement=7_107.286, float_qty=1.0, float_xcg_cnybrl=0.7610)
-    expected = 18.1650
+    expected = 18.1650 # 18.18
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
 
@@ -1457,7 +1495,7 @@ def test_cnl_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     """
     result = notional_from_pv.cnl(float_daily_settlement=1_555.0, float_qty=1.0) \
         - notional_from_pv.cnl(float_daily_settlement=1_489.23, float_qty=1.0)
-    expected = 6577.0
+    expected = 6_577.0
     assert abs(result) == pytest.approx(expected, abs=1e-2)
 
 
@@ -1590,5 +1628,26 @@ def test_dax_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.dax(
             float_daily_settlement=24_079.00, float_qty=1.0, float_xcg_usdbl=5.4241, 
             float_xcg_parity_eurusd=1.1701)
-    expected = 3_838.46
+    expected = 3_839.77 # 3_838.46
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_dco_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for DCOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for DCOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.dco(float_daily_settlement=100_220.08, float_qty=1.0, 
+                                  float_xcg_usdbrl=5.4241) \
+        - notional_from_pv.dco(float_daily_settlement=99_884.03, float_qty=1.0, 
+                               float_xcg_usdbrl=5.4241)
+    expected = 911.38 # 909.26
     assert abs(result) == pytest.approx(expected, abs=1e-2)

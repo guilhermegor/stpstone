@@ -275,6 +275,52 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_2=1.0
         )
     
+    def bbaso(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BBAS - Future contract of BBAS3.
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def bbdcp(self, float_daily_settlement: float, float_qty: float) -> float:
+        """BBDC - Future contract of BBDC4.
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
     def bgi(self, float_daily_settlement: float, float_qty: float) -> float:
         """BGI - Future contract of Fat Cattle in BRL (BGI).
         
@@ -826,6 +872,36 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_1=float_xcg_usdbl,
             float_xcg_rt_2=1.0,
             float_xcg_parity=float_xcg_parity_eurusd
+        )
+    
+    def dco(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float
+    ) -> float:
+        """DCO - Future contract of Exchange Coupon OC1 in BRL (DCO).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.5,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl,
+            float_xcg_rt_2=1.0
         )
 
 
