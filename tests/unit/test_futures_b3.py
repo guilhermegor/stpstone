@@ -1953,3 +1953,43 @@ def test_fro_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.fro(float_daily_settlement=5.34, float_qty=1.0)
     expected = 0.02
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_gbp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for GBPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for GBPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.gbp(float_daily_settlement=7_356.6240, float_qty=1.0) \
+        - notional_from_pv.gbp(float_daily_settlement=7_336.4290, float_qty=1.0)
+    expected = 706.82
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_gbr_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for GBRU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for GBRU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.gbr(float_daily_settlement=1_351.119, float_qty=1.0, 
+                                  float_xcg_usdbrl=5.4241) \
+        - notional_from_pv.gbr(float_daily_settlement=1_351.627, float_qty=1.0, 
+                               float_xcg_usdbrl=5.4241)
+    expected = 27.55
+    assert abs(result) == pytest.approx(expected, abs=1e-2)

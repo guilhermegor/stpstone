@@ -1304,6 +1304,57 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_1=1.0,
             float_xcg_rt_2=1.0
         )
+    
+    def gbp(self, float_daily_settlement: float, float_qty: float) -> float:
+        """GBP - Future contract of British Pound in BRL (GBP).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=35.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def gbr(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float
+    ) -> float:
+        """GBR - Future contract of British Pound in USD (GBR).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl,
+            float_xcg_rt_2=1.0
+        )
 
 
 class MTMFromRate(metaclass=TypeChecker):
