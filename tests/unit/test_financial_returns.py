@@ -323,7 +323,7 @@ def test_calc_returns_from_prices_single_price(
     -------
     None
     """
-    result = financial_returns.calc_returns_from_prices([100], "ln_return")
+    result = financial_returns.calc_returns_from_prices([100.0], "ln_return")
     assert result.size == 0
 
 
@@ -651,7 +651,7 @@ def test_return_type_annotations(financial_returns: FinancialReturns) -> None:
     result = financial_returns.discrete_return(100, 110)
     assert isinstance(result, float)
     
-    result = financial_returns.calc_returns_from_prices([100, 110], "ln_return")
+    result = financial_returns.calc_returns_from_prices([100.0, 110.0], "ln_return")
     assert isinstance(result, np.ndarray)
     
     df_ = pd.DataFrame({'date': ['2023-01-01', '2023-01-02'], 'price': [100, 110]})
