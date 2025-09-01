@@ -1234,6 +1234,76 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_1=1.0,
             float_xcg_rt_2=1.0
         )
+    
+    def frc(self, float_daily_settlement: float, float_qty: float) -> float:
+        """FRC - Future contract of FRA Exchange Coupon (FRC).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+
+        Notes
+        -----
+        [1] The FRA Exchange Coupon (FRC) contract is designed to hedge against fluctuations
+        in foreign exchange rates, specifically the USD/BRL pair. It allows investors to lock
+        in an exchange rate for a future date, providing protection against adverse currency
+        movements.
+        [2] FRA stands for Forward Rate Agreement, a financial contract that determines the rate of
+        interest or exchange rate to be paid or received on an obligation beginning at a future
+        start date.
+        [3] The contract is cash-settled, meaning that no physical delivery of currency occurs.
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.50,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def fro(self, float_daily_settlement: float, float_qty: float) -> float:
+        """FRC - Future contract of FRA Exchange Coupon in OC1 (FRC).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+
+        Notes
+        -----
+        [1] The FRA Exchange Coupon (FRC) contract is designed to hedge against fluctuations
+        in foreign exchange rates, specifically the USD/BRL pair. It allows investors to lock
+        in an exchange rate for a future date, providing protection against adverse currency
+        movements.
+        [2] FRA stands for Forward Rate Agreement, a financial contract that determines the rate of
+        interest or exchange rate to be paid or received on an obligation beginning at a future
+        start date.
+        [3] The contract is cash-settled, meaning that no physical delivery of currency occurs.
+        [4] OC1 refers to a specific type of exchange coupon contract that is settled based on the
+        performance of the USD/BRL exchange rate.
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.50,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
 
 
 class MTMFromRate(metaclass=TypeChecker):

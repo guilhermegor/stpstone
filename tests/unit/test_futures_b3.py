@@ -1890,7 +1890,66 @@ def test_eup_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     -------
     None
     """
+    result = notional_from_pv.eup(float_daily_settlement=1_171.178, float_qty=1.0, 
+                                  float_xcg_usdbrl=5.4241) \
+        - notional_from_pv.eup(float_daily_settlement=1_170.144, float_qty=1.0, 
+                               float_xcg_usdbrl=5.4241)
+    expected = 56.08
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_eur_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for EURU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for EURU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
     result = notional_from_pv.eur(float_daily_settlement=6_376.8720, float_qty=1.0) \
         - notional_from_pv.eur(float_daily_settlement=6_351.368, float_qty=1.0)
     expected = 1_275.20
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_frc_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for FRCX25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for FRCX25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.frc(float_daily_settlement=5.38, float_qty=1.0) \
+        - notional_from_pv.frc(float_daily_settlement=5.34, float_qty=1.0)
+    expected = 0.02
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_fro_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for FROX25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for FROX25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.fro(float_daily_settlement=5.38, float_qty=1.0) \
+        - notional_from_pv.fro(float_daily_settlement=5.34, float_qty=1.0)
+    expected = 0.02
     assert abs(result) == pytest.approx(expected, abs=1e-2)
