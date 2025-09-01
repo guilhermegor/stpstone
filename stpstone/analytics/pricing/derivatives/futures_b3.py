@@ -76,8 +76,172 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         -------
         float
             Market to market (MTM) value of the contract in BRL
+
+        Notes
+        -----
+        [1] For exchange rates, please refer to Quotes and Bulletins, from Brazillian Central Bank
+        [1.1] https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes
         """
         return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
+    
+    def abevo(self, float_daily_settlement: float, float_qty: float) -> float:
+        """ABEVO - Future contract of ABEV3.
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def afs(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_zarbrl: float,
+    ) -> float:
+        """AFS - Future contract of South African Rand in USD (AFS).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in ZARUSD
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_zarbrl : float
+            Rand (South African) to BRL exchange rate (ZAR/BRL)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_zarbrl,
+            float_xcg_rt_2=1.0
+        )
+    
+    def arb(self, float_daily_settlement: float, float_qty: float) -> float:
+        """ARB - Future contract of Argentine Peso in BRL (ARB).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=150.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def ars(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_arsbrl: float
+    ) -> float:
+        """ARS - Future contract of Argentine Peso in USD (ARS).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_arsbrl : float
+            Argentine Peso (ARS) to BRL exchange rate (ARS/BRL)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_arsbrl,
+            float_xcg_rt_2=1.0
+        )
+    
+    def aud(self, float_daily_settlement: float, float_qty: float) -> float:
+        """AUD - Future contract of Australian Dollar in BRL (AUD).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=60.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def aus(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float
+    ) -> float:
+        """AUS - Future contract of Australian Dollar in USD (AUD).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            American Dollar (USD) to BRL exchange rate (USD/BRL)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl,
+            float_xcg_rt_2=1.0
+        )
 
     def dap(
         self, 
@@ -164,7 +328,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         return float_daily_settlement * float_qty * float_prt
 
 
-class MTMFromDailySettlment(metaclass=TypeChecker):
+class MTMFromRate(metaclass=TypeChecker):
     """Notional value from real rate."""
 
     def __init__(
@@ -173,7 +337,7 @@ class MTMFromDailySettlment(metaclass=TypeChecker):
         bool_reuse_cache: bool = True,
         logger: Optional[Logger] = None
     ) -> None:
-        """Initialize the MTMFromDailySettlment class.
+        """Initialize the MTMFromRate class.
         
         Parameters
         ----------
