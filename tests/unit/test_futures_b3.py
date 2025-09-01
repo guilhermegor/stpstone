@@ -2210,3 +2210,43 @@ def test_itubp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
         - notional_from_pv.itubp(float_daily_settlement=38.69, float_qty=1.0)
     expected = 0.12
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_jap_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for JAPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for JAPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.jap(float_daily_settlement=146_742.169, float_qty=1.0, 
+                                  float_xcg_jpybrl=0.03693) \
+        - notional_from_pv.jap(float_daily_settlement=146_509.816, float_qty=1.0, 
+                               float_xcg_jpybrl=0.03693)
+    expected = 85.80 # 85.72
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_jpy_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for JPY delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for JPY
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.jpy(float_daily_settlement=3_710.4780, float_qty=1.0) \
+        - notional_from_pv.jpy(float_daily_settlement=3_704.7690, float_qty=1.0)
+    expected = 285.45
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
