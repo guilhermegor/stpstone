@@ -226,9 +226,10 @@ def validate_type(
     if expected_type is int and hasattr(value, 'dtype') and value.dtype.kind in ('i', 'u'):
         return
 
-    # allow int where float is expected
-    if expected_type is float and isinstance(value, (int, float)):
-        return
+    # Instead, only allow exact float types when float is expected
+    if expected_type is float and not isinstance(value, float):
+        raise TypeError(f"{param_name} must be of type {expected_type.__name__}, "
+                        + f"got {type(value).__name__}")
 
     origin = get_origin(expected_type)
 
