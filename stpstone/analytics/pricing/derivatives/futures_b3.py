@@ -1589,6 +1589,52 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_1=float_xcg_usdbrl,
             float_xcg_rt_2=1.0
         )
+    
+    def itsap(self, float_daily_settlement: float, float_qty: float) -> float:
+        """ITSA - Future contract of ITSA4 in BRL (ITSA).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+
+    def itubp(self, float_daily_settlement: float, float_qty: float) -> float:
+        """ITUB - Future contract of ITUB4 in BRL (ITUB).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
 
 
 class MTMFromRate(metaclass=TypeChecker):

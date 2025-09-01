@@ -2172,3 +2172,41 @@ def test_isp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
                                float_xcg_usdbrl=5.4241)
     expected = 12_678.83
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_itsap_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for ITSAPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for ITSAPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.itsap(float_daily_settlement=11.31, float_qty=1.0) \
+        - notional_from_pv.itsap(float_daily_settlement=11.28, float_qty=1.0)
+    expected = 0.03
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_itubp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for ITUBPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for ITUBPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.itubp(float_daily_settlement=38.81, float_qty=1.0) \
+        - notional_from_pv.itubp(float_daily_settlement=38.69, float_qty=1.0)
+    expected = 0.12
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
