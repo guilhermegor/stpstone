@@ -216,6 +216,12 @@ def validate_type(
     if isinstance(value, Mock):
         return
 
+    # explicitly reject boolean types when int or float is expected
+    # (since bool is a subclass of int in Python, we need to check this first)
+    if isinstance(value, bool) and expected_type in (int, float):
+        raise TypeError(f"{param_name} must be of type {expected_type.__name__}, "
+                        + f"got {type(value).__name__}")
+
     # handle numpy integer types as equivalent to Python int
     if expected_type is int and hasattr(value, 'dtype') and value.dtype.kind in ('i', 'u'):
         return
