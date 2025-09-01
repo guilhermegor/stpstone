@@ -2234,7 +2234,7 @@ def test_jap_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
 
 
 def test_jpy_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
-    """Example test for JPY delta daily MTM calculation.
+    """Example test for JPYU25 delta daily MTM calculation.
 
     Verifies
     --------
