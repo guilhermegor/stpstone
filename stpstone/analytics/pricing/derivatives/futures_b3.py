@@ -1356,6 +1356,131 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_2=1.0
         )
 
+    def ggbrp(self, float_daily_settlement: float, float_qty: float) -> float:
+        """GGBR - Future contract of GGBR4 in BRL (GGBRP).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+
+    def gld(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float
+    ) -> float:
+        """GLD - Future contract of Gold in USD (GLD).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl,
+            float_xcg_rt_2=1.0
+        )
+    
+    def hapvo(self, float_daily_settlement: float, float_qty: float) -> float:
+        """HAPV - Future contract of HAPV3 in BRL (HAPV).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def hsi(self, float_daily_settlement: float, float_qty: float,) -> float:
+        """HSI - Future contract of Hang Seng Index in HKD (HSI).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in HKD
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_hkdusd : float
+            Exchange parity between HKD and USD (HKD/USD)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.65,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0,
+            float_xcg_parity=1.0
+        )
+    
+    def hypeo(self, float_daily_settlement: float, float_qty: float) -> float:
+        """HYPE - Future contract of HYPE3 in BRL (HYPE).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+
 
 class MTMFromRate(metaclass=TypeChecker):
     """Notional value from real rate."""

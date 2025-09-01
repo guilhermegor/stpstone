@@ -1993,3 +1993,100 @@ def test_gbr_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
                                float_xcg_usdbrl=5.4241)
     expected = 27.55
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_ggbrp_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for GGBRPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for GGBRPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.ggbrp(float_daily_settlement=16.78, float_qty=1.0) \
+        - notional_from_pv.ggbrp(float_daily_settlement=16.93, float_qty=1.0)
+    expected = 0.15
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_gld_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for GLDU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for GLDU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.gld(float_daily_settlement=3_446.50, float_qty=1.0, 
+                                  float_xcg_usdbrl=5.4241) \
+        - notional_from_pv.gld(float_daily_settlement=3_425.00, float_qty=1.0, 
+                               float_xcg_usdbrl=5.4241)
+    expected = 116.61
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_hapvo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for HAPVOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for HAPVOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.hapvo(float_daily_settlement=42.06, float_qty=1.0) \
+        - notional_from_pv.hapvo(float_daily_settlement=41.26, float_qty=1.0)
+    expected = 0.80
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_hsi_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for HSIU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for HSIU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.hsi(float_daily_settlement=25_023.0, float_qty=1.0) \
+        - notional_from_pv.hsi(float_daily_settlement=24_906.0, float_qty=1.0)
+    expected = 76.05
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_hypeo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for HYPEOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for HYPEOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.hypeo(float_daily_settlement=24.60, float_qty=1.0) \
+        - notional_from_pv.hypeo(float_daily_settlement=24.51, float_qty=1.0)
+    expected = 0.09
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
