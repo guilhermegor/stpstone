@@ -1651,3 +1651,143 @@ def test_dco_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
                                float_xcg_usdbrl=5.4241)
     expected = 911.38 # 909.26
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_ddi_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for DDIU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for DDIU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.ddi(
+        float_daily_settlement=100_220.08,
+        float_qty=1.0,
+        float_xcg_usdbrl=5.4241,
+    ) - notional_from_pv.ddi(
+        float_daily_settlement=99_884.03,
+        float_qty=1.0,
+        float_xcg_usdbrl=5.4241,
+    )
+    expected = 911.38 # 909.26
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_di1_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for DI1U25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for DI1U25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.di1(float_daily_settlement=99_944.90, float_qty=1.0) \
+        - notional_from_pv.di1(float_daily_settlement=99_944.87, float_qty=1.0)
+    expected = 0.03
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_dol_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for DOLU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for DOLU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.dol(float_daily_settlement=5_426.40, float_qty=1.0) \
+        - notional_from_pv.dol(float_daily_settlement=5_408.2060, float_qty=1.0)
+    expected = 909.70
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_eleto_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for ELETOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for ELETOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.eleto(float_daily_settlement=45.39, float_qty=1.0) \
+        - notional_from_pv.eleto(float_daily_settlement=44.81, float_qty=1.0)
+    expected = 0.58
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_embro_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for EMBROU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for EMBROU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.embro(float_daily_settlement=76.82, float_qty=1.0) \
+        - notional_from_pv.embro(float_daily_settlement=76.87, float_qty=1.0)
+    expected = 0.05
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_enevo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for ENEVOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for ENEVOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.enevo(float_daily_settlement=15.24, float_qty=1.0) \
+        - notional_from_pv.enevo(float_daily_settlement=15.27, float_qty=1.0)
+    expected = 0.03
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_eqtlo_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for EQTLOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for EQTLOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.eqtlo(float_daily_settlement=36.87, float_qty=1.0) \
+        - notional_from_pv.eqtlo(float_daily_settlement=36.96, float_qty=1.0)
+    expected = 0.09
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
