@@ -1,7 +1,7 @@
 
 """Pricing B3 Brazilian Exchange Future Contracts."""
 
-from datetime import datetime
+from datetime import date
 from logging import Logger
 import math
 from typing import Optional
@@ -658,15 +658,61 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_2=1.0
         )
     
+    def csano(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CSAN - Future contract of CSAN3 in BRL (CSANO).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def csnao(self, float_daily_settlement: float, float_qty: float) -> float:
+        """CSNA - Future contract of CSNA3 in BRL (CSNAO).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
     def dap(
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_pmi_idx_mm1: float, 
+        float_pmi_ipca_mm1: float, 
         float_pmi_ipca_rt_hat: float, 
-        dt_pmi_last: datetime, 
-        date_ref: datetime,
-        dt_pmi_next: datetime,
+        date_pmi_last: date, 
+        date_ref: date,
+        date_pmi_next: date,
     ) -> float:
         """Brazilian DI x IPCA (DAP) Contract Pricing.
         
@@ -684,15 +730,15 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
-        float_pmi_idx_mm1 : float
-            Previous month's PMI (Purchasing Managers' Index) value
+        float_pmi_ipca_mm1 : float
+            Previous month's PMI (Purchasing Managers' Index) IPCA value
         float_pmi_ipca_rt_hat : float
             Expected IPCA inflation rate used in PMI calculations (%)
-        dt_pmi_last : datetime
+        date_pmi_last : date
             Date of the last PMI index release
-        date_ref : datetime
+        date_ref : date
             Pricing reference date (valuation date)
-        dt_pmi_next : datetime
+        date_pmi_next : date
             Date of the next scheduled PMI index release
             
         Returns
@@ -703,7 +749,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         Raises
         ------
         ValueError
-            If dt_pmi_last is greater than dt_pmi_next
+            If date_pmi_last is greater than date_pmi_next
             
         Notes
         -----
@@ -717,27 +763,27 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         >>> dap_pricing(
         ...     float_daily_settlement=1000000,
         ...     float_qty=50,
-        ...     float_pmi_idx_mm1=52.3,
+        ...     float_pmi_ipca_mm1=52.3,
         ...     float_pmi_ipca_rt_hat=0.04,
-        ...     dt_pmi_last=datetime(2023, 5, 15),
-        ...     dt_pmi_next=datetime(2023, 6, 15),
-        ...     date_ref=datetime(2023, 5, 20)
+        ...     date_pmi_last=date(2023, 5, 15),
+        ...     date_pmi_next=date(2023, 6, 15),
+        ...     date_ref=date(2023, 5, 20)
         ... )
         12500.00
         """
         float_size: float = 0.00025
-        if dt_pmi_last > dt_pmi_next: 
+        if date_pmi_last > date_pmi_next: 
             raise ValueError(
                 "Please validate the input of date pmi last and following, the former should be " \
                 + "inferior than the last"
             )
         
         # working days from the last pmi release util the following
-        int_wddm = self.cls_dates_br_b3.delta_working_days(dt_pmi_last, dt_pmi_next)
+        int_wddm = self.cls_dates_br_b3.delta_working_days(date_pmi_last, date_pmi_next)
         # working days from the last pmi release until the reference date
-        int_wddt = self.cls_dates_br_b3.delta_working_days(dt_pmi_last, date_ref)
+        int_wddt = self.cls_dates_br_b3.delta_working_days(date_pmi_last, date_ref)
         # prt - pmi pro-rata tempore
-        float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
+        float_prt = float_pmi_ipca_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
             ** (int_wddt / int_wddm)
         
         return float_daily_settlement * float_qty * float_prt
@@ -779,8 +825,8 @@ class MTMFromRate(metaclass=TypeChecker):
     def di1(
         self, 
         float_nominal_rate: float, 
-        date_ref: datetime,
-        date_xpt: datetime, 
+        date_ref: date,
+        date_xpt: date, 
     ) -> float:
         """Brazilian 1-Day Interbank Deposit (DI1) Futures Contract Pricing.
         
@@ -805,9 +851,9 @@ class MTMFromRate(metaclass=TypeChecker):
         ----------
         float_nominal_rate : float
             Nominal rate of the contract
-        date_ref : datetime
+        date_ref : date
             Pricing reference date
-        date_xpt : datetime
+        date_xpt : date
             Expiration date of the contract
         
         Returns
@@ -830,7 +876,7 @@ class MTMFromRate(metaclass=TypeChecker):
         >>> di1_pricing = DI1()
         >>> di1_pricing.di1(
         ...     float_nominal_rate=0.10,  # 10% annual
-        ...     date_xpt=datetime(2023, 12, 1),
+        ...     date_xpt=date(2023, 12, 1),
         ...     int_wd_bef=2,
         ...     int_wddy=252
         ... )
@@ -882,8 +928,8 @@ class RateFromMTM(metaclass=TypeChecker):
         float_mtm_di1: float, 
         float_mtm_dol: float, 
         float_ptax_dm1: float,
-        date_ref: datetime, 
-        date_xpt: datetime
+        date_ref: date, 
+        date_xpt: date
     ) -> float:
         """Brazilian Dollar Interest Rate (DDI) Futures Contract Pricing.
         
@@ -913,9 +959,9 @@ class RateFromMTM(metaclass=TypeChecker):
             Present value of DOL contract in BRL (Brazilian Reais) (MTM)
         float_ptax_dm1 : float
             PTAX exchange rate from previous business day (BRL/USD)
-        date_ref : datetime
+        date_ref : date
             Contract reference date
-        date_xpt : datetime
+        date_xpt : date
             Contract settlement/expiration date
         
         Returns
@@ -941,7 +987,7 @@ class RateFromMTM(metaclass=TypeChecker):
         ...     float_mtm_di1=95000.0,
         ...     float_mtm_dol=1.0,
         ...     float_ptax_dm1=5.20,
-        ...     date_xpt=datetime(2023, 12, 1),
+        ...     date_xpt=date(2023, 12, 1),
         ...     int_wd_bef=2
         ... )
         0.0652  # 6.52% annualized real rate

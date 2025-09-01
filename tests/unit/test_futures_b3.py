@@ -4,7 +4,7 @@ Tests the functionality of MTMFromDailySettlement, MTMFromDailySettlment, RateFr
 covering initialization, pricing calculations, edge cases, and type validation.
 """
 
-from datetime import datetime
+from datetime import date
 import importlib
 from logging import Logger
 import math
@@ -80,18 +80,18 @@ def tsir() -> "TSIR":
 
 
 @pytest.fixture
-def sample_dates() -> tuple[datetime, datetime, datetime]:
+def sample_dates() -> tuple[date, date, date]:
     """Fixture providing sample dates for testing.
 
     Returns
     -------
-    tuple[datetime, datetime, datetime]
+    tuple[date, date, date]
         Tuple containing last PMI date, reference date, and next PMI date
     """
     return (
-        datetime(2023, 5, 15),
-        datetime(2023, 5, 20),
-        datetime(2023, 6, 15)
+        date(2023, 5, 15),
+        date(2023, 5, 20),
+        date(2023, 6, 15)
     )
 
 
@@ -206,7 +206,7 @@ def test_generic_pricing_invalid_types(
 
 def test_dap_valid_inputs(
     notional_from_pv: "MTMFromDailySettlement", 
-    sample_dates: tuple[datetime, datetime, datetime],
+    sample_dates: tuple[date, date, date],
     mocker: MockerFixture
 ) -> None:
     """Test DAP pricing with valid inputs.
@@ -215,7 +215,7 @@ def test_dap_valid_inputs(
     ----------
     notional_from_pv : MTMFromDailySettlement
         Instance of MTMFromDailySettlement class
-    sample_dates : tuple[datetime, datetime, datetime]
+    sample_dates : tuple[date, date, date]
         Sample dates for last PMI, reference, and next PMI
     mocker : MockerFixture
         Pytest-mock fixture for mocking dependencies
@@ -230,17 +230,17 @@ def test_dap_valid_inputs(
     -------
     None
     """
-    dt_pmi_last, date_ref, dt_pmi_next = sample_dates
+    date_pmi_last, date_ref, date_pmi_next = sample_dates
     mocker.patch.object(DatesBRB3, "delta_working_days", return_value=21)
     
     result = notional_from_pv.dap(
         float_daily_settlement=1000000.0,
         float_qty=50.0,
-        float_pmi_idx_mm1=52.3,
+        float_pmi_ipca_mm1=52.3,
         float_pmi_ipca_rt_hat=0.04,
-        dt_pmi_last=dt_pmi_last,
+        date_pmi_last=date_pmi_last,
         date_ref=date_ref,
-        dt_pmi_next=dt_pmi_next
+        date_pmi_next=date_pmi_next
     )
     expected = 1000000.0 * 50.0 * 52.3 * 0.00025 * (1.0 + 0.04) ** (21 / 21)
     assert isinstance(result, float)
@@ -249,7 +249,7 @@ def test_dap_valid_inputs(
 
 def test_dap_invalid_dates(
     notional_from_pv: "MTMFromDailySettlement", 
-    sample_dates: tuple[datetime, datetime, datetime]
+    sample_dates: tuple[date, date, date]
 ) -> None:
     """Test DAP pricing with invalid date order.
 
@@ -257,39 +257,39 @@ def test_dap_invalid_dates(
     ----------
     notional_from_pv : MTMFromDailySettlement
         Instance of MTMFromDailySettlement class
-    sample_dates : tuple[datetime, datetime, datetime]
+    sample_dates : tuple[date, date, date]
         Sample dates for last PMI, reference, and next PMI
 
     Verifies
     --------
-    - ValueError is raised when dt_pmi_last > dt_pmi_next
+    - ValueError is raised when date_pmi_last > date_pmi_next
     - Error message matches expected pattern
 
     Returns
     -------
     None
     """
-    dt_pmi_last, date_ref, _ = sample_dates
+    date_pmi_last, date_ref, date_pmi_next = sample_dates
     with pytest.raises(ValueError, match="Please validate the input"):
         notional_from_pv.dap(
             float_daily_settlement=1000000.0,
             float_qty=50.0,
-            float_pmi_idx_mm1=52.3,
+            float_pmi_ipca_mm1=52.3,
             float_pmi_ipca_rt_hat=0.04,
-            dt_pmi_last=dt_pmi_next,
+            date_pmi_last=date_pmi_next,
             date_ref=date_ref,
-            dt_pmi_next=dt_pmi_last
+            date_pmi_next=date_pmi_last
         )
 
 
 @pytest.mark.parametrize("invalid_input", [
-    (None, 50.0, 52.3, 0.04, datetime(2023, 5, 15), datetime(2023, 5, 20), datetime(2023, 6, 15)),
-    (1000000.0, "invalid", 52.3, 0.04, datetime(2023, 5, 15), datetime(2023, 5, 20), datetime(2023, 6, 15)),
-    (1000000.0, 50.0, None, 0.04, datetime(2023, 5, 15), datetime(2023, 5, 20), datetime(2023, 6, 15)),
-    (1000000.0, 50.0, 52.3, "invalid", datetime(2023, 5, 15), datetime(2023, 5, 20), datetime(2023, 6, 15)),
-    (1000000.0, 50.0, 52.3, 0.04, None, datetime(2023, 5, 20), datetime(2023, 6, 15)),
-    (1000000.0, 50.0, 52.3, 0.04, datetime(2023, 5, 15), None, datetime(2023, 6, 15)),
-    (1000000.0, 50.0, 52.3, 0.04, datetime(2023, 5, 15), datetime(2023, 5, 20), None)
+    (None, 50.0, 52.3, 0.04, date(2023, 5, 15), date(2023, 5, 20), date(2023, 6, 15)),
+    (1000000.0, "invalid", 52.3, 0.04, date(2023, 5, 15), date(2023, 5, 20), date(2023, 6, 15)),
+    (1000000.0, 50.0, None, 0.04, date(2023, 5, 15), date(2023, 5, 20), date(2023, 6, 15)),
+    (1000000.0, 50.0, 52.3, "invalid", date(2023, 5, 15), date(2023, 5, 20), date(2023, 6, 15)),
+    (1000000.0, 50.0, 52.3, 0.04, None, date(2023, 5, 20), date(2023, 6, 15)),
+    (1000000.0, 50.0, 52.3, 0.04, date(2023, 5, 15), None, date(2023, 6, 15)),
+    (1000000.0, 50.0, 52.3, 0.04, date(2023, 5, 15), date(2023, 5, 20), None)
 ])
 def test_dap_invalid_types(
     notional_from_pv: "MTMFromDailySettlement", 
@@ -339,7 +339,7 @@ def test_notional_from_rate_init_valid(notional_from_rate: "MTMFromDailySettlmen
 
 def test_di1_valid_inputs(
     notional_from_rate: "MTMFromDailySettlment",
-    sample_dates: tuple[datetime, datetime, datetime],
+    sample_dates: tuple[date, date, date],
     mocker: MockerFixture
 ) -> None:
     """Test DI1 pricing with valid inputs.
@@ -348,7 +348,7 @@ def test_di1_valid_inputs(
     ----------
     notional_from_rate : MTMFromDailySettlment
         Instance of MTMFromDailySettlment class
-    sample_dates : tuple[datetime, datetime, datetime]
+    sample_dates : tuple[date, date, date]
         Sample dates for testing
     mocker : MockerFixture
         Pytest-mock fixture for mocking dependencies
@@ -377,9 +377,9 @@ def test_di1_valid_inputs(
 
 
 @pytest.mark.parametrize("invalid_input", [
-    (None, datetime(2023, 5, 20), datetime(2023, 12, 1)),
-    (0.10, None, datetime(2023, 12, 1)),
-    (0.10, datetime(2023, 5, 20), None)
+    (None, date(2023, 5, 20), date(2023, 12, 1)),
+    (0.10, None, date(2023, 12, 1)),
+    (0.10, date(2023, 5, 20), None)
 ])
 def test_di1_invalid_types(
     notional_from_rate: "MTMFromDailySettlment", 
@@ -429,7 +429,7 @@ def test_rt_from_pv_init_valid(rt_from_pv: "RateFromMTM") -> None:
 
 def test_ddi_valid_inputs(
     rt_from_pv: "RateFromMTM",
-    sample_dates: tuple[datetime, datetime, datetime],
+    sample_dates: tuple[date, date, date],
     mocker: MockerFixture
 ) -> None:
     """Test DDI pricing with valid inputs.
@@ -438,7 +438,7 @@ def test_ddi_valid_inputs(
     ----------
     rt_from_pv : RateFromMTM
         Instance of RateFromMTM class
-    sample_dates : tuple[datetime, datetime, datetime]
+    sample_dates : tuple[date, date, date]
         Sample dates for testing
     mocker : MockerFixture
         Pytest-mock fixture for mocking dependencies
@@ -469,11 +469,11 @@ def test_ddi_valid_inputs(
 
 
 @pytest.mark.parametrize("invalid_input", [
-    (None, 1.0, 5.20, datetime(2023, 5, 20), datetime(2023, 12, 1)),
-    (95000.0, None, 5.20, datetime(2023, 5, 20), datetime(2023, 12, 1)),
-    (95000.0, 1.0, None, datetime(2023, 5, 20), datetime(2023, 12, 1)),
-    (95000.0, 1.0, 5.20, None, datetime(2023, 12, 1)),
-    (95000.0, 1.0, 5.20, datetime(2023, 5, 20), None)
+    (None, 1.0, 5.20, date(2023, 5, 20), date(2023, 12, 1)),
+    (95000.0, None, 5.20, date(2023, 5, 20), date(2023, 12, 1)),
+    (95000.0, 1.0, None, date(2023, 5, 20), date(2023, 12, 1)),
+    (95000.0, 1.0, 5.20, None, date(2023, 12, 1)),
+    (95000.0, 1.0, 5.20, date(2023, 5, 20), None)
 ])
 def test_ddi_invalid_types(
     rt_from_pv: "RateFromMTM", 
@@ -860,14 +860,14 @@ def test_module_reload() -> None:
 # --------------------------
 # Edge Cases
 # --------------------------
-def test_dap_zero_values(notional_from_pv: "MTMFromDailySettlement", sample_dates: tuple[datetime, datetime, datetime]) -> None:
+def test_dap_zero_values(notional_from_pv: "MTMFromDailySettlement", sample_dates: tuple[date, date, date]) -> None:
     """Test DAP pricing with zero values.
 
     Parameters
     ----------
     notional_from_pv : MTMFromDailySettlement
         Instance of MTMFromDailySettlement class
-    sample_dates : tuple[datetime, datetime, datetime]
+    sample_dates : tuple[date, date, date]
         Sample dates for testing
 
     Verifies
@@ -879,15 +879,15 @@ def test_dap_zero_values(notional_from_pv: "MTMFromDailySettlement", sample_date
     -------
     None
     """
-    dt_pmi_last, date_ref, dt_pmi_next = sample_dates
+    date_pmi_last, date_ref, date_pmi_next = sample_dates
     result = notional_from_pv.dap(
         float_daily_settlement=0.0,
         float_qty=0.0,
-        float_pmi_idx_mm1=0.0,
+        float_pmi_ipca_mm1=0.0,
         float_pmi_ipca_rt_hat=0.0,
-        dt_pmi_last=dt_pmi_last,
+        date_pmi_last=date_pmi_last,
         date_ref=date_ref,
-        dt_pmi_next=dt_pmi_next
+        date_pmi_next=date_pmi_next
     )
     assert result == 0.0
 
@@ -946,11 +946,11 @@ def test_dap_docstring_example(
     result = notional_from_pv.dap(
         float_daily_settlement=1_000_000.0,
         float_qty=50.0,
-        float_pmi_idx_mm1=52.3,
+        float_pmi_ipca_mm1=52.3,
         float_pmi_ipca_rt_hat=0.04,
-        dt_pmi_last=datetime(2023, 5, 15),
-        date_ref=datetime(2023, 5, 20),
-        dt_pmi_next=datetime(2023, 6, 15)
+        date_pmi_last=date(2023, 5, 15),
+        date_ref=date(2023, 5, 20),
+        date_pmi_next=date(2023, 6, 15)
     )
     assert result == pytest.approx(12500.0, rel=1e-6)
 
@@ -981,8 +981,8 @@ def test_di1_docstring_example(
     
     result = notional_from_rate.di1(
         float_nominal_rate=0.10,
-        date_ref=datetime(2023, 5, 20),
-        date_xpt=datetime(2023, 12, 1)
+        date_ref=date(2023, 5, 20),
+        date_xpt=date(2023, 12, 1)
     )
     assert result == pytest.approx(97590.23, rel=1e-6)
 
@@ -1015,8 +1015,8 @@ def test_ddi_docstring_example(
         float_mtm_di1=95000.0,
         float_mtm_dol=1.0,
         float_ptax_dm1=5.20,
-        date_ref=datetime(2023, 5, 20),
-        date_xpt=datetime(2023, 12, 1)
+        date_ref=date(2023, 5, 20),
+        date_xpt=date(2023, 12, 1)
     )
     assert result == pytest.approx(0.0652, rel=1e-6)
 
@@ -1496,4 +1496,76 @@ def test_cogno_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     result = notional_from_pv.cogno(float_daily_settlement=2.94, float_qty=1.0) \
         - notional_from_pv.cogno(float_daily_settlement=2.95, float_qty=1.0)
     expected = 0.01
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_csano_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for CSANOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for CSANOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.csano(float_daily_settlement=5.90, float_qty=1.0) \
+        - notional_from_pv.csano(float_daily_settlement=5.77, float_qty=1.0)
+    expected = 0.13
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_csnao_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for CSNAOU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for CSNAOU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.csnao(float_daily_settlement=7.67, float_qty=1.0) \
+        - notional_from_pv.csnao(float_daily_settlement=7.80, float_qty=1.0)
+    expected = 0.13
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_dap_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for DAPU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for DAPU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.dap(
+        float_daily_settlement=99_327.95,
+        float_qty=1.0,
+        float_pmi_ipca_mm1=7331.98,
+        float_pmi_ipca_rt_hat=-0.0012,
+        date_pmi_last=date(2025, 8, 12),
+        date_ref=date(2025, 8, 29),
+        date_pmi_next=date(2025, 9, 10)
+    ) - notional_from_pv.dap(
+        float_daily_settlement=99_327.91,
+        float_qty=1.0,
+        float_pmi_ipca_mm1=7331.98,
+        float_pmi_ipca_rt_hat=-0.0012,
+        date_pmi_last=date(2025, 8, 12),
+        date_ref=date(2025, 8, 29),
+        date_pmi_next=date(2025, 9, 10)
+    )
+    expected = 0.07
     assert abs(result) == pytest.approx(expected, abs=1e-2)
