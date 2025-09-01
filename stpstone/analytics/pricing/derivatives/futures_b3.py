@@ -1686,6 +1686,229 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_xcg_rt_1=1.0,
             float_xcg_rt_2=1.0
         )
+    
+    def jse(self, float_daily_settlement: float, float_qty: float) -> float:
+        """JSE - Future contract of BVMF Index FTSE/JSE TOP 40 in BRL (JSE).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in JPY
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_jpyusd : float
+            Exchange parity between JPY and USD (JPY/USD)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=0.40,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0,
+            float_xcg_parity=1.0
+        )
+    
+    def klbni(self, float_daily_settlement: float, float_qty: float) -> float:
+        """KLBN - Future contract of KLBN11 in BRL (KLBNI).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def lreno(self, float_daily_settlement: float, float_qty: float) -> float:
+        """LREN - Future contract of LREN3 in BRL (LREN).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+
+    def mbr(self, float_daily_settlement: float, float_qty: float) -> float:
+        """MBR - Micro future contract of Ibovespa B3 BR+ in BRL (MBR).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def mex(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float, 
+        float_xcg_parity_mxnusd: float,
+    ) -> float:
+        """MEX - Future contract of Mexican Peso in USD (MEX).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=10.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_mxnusd,
+            float_xcg_rt_2=1.0,
+        )
+
+    def mgluo(self, float_daily_settlement: float, float_qty: float) -> float:
+        """MGLU - Future contract of MGLU3 in BRL (MGLUO).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def mxn(self, float_daily_settlement: float, float_qty: float) -> float:
+        """MXN - Future contract of Mexican Peso in BRL (MXN).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=75.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
+    
+    def nok(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbrl: float
+    ) -> float:
+        """NOK - Future contract of Norwegian Krone in USD (NOK).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in USD
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in USD
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=1.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbrl,
+            float_xcg_rt_2=1.0
+        )
+
+    def nzd(self, float_daily_settlement: float, float_qty: float) -> float:
+        """NZD - Future contract of New Zealand Dollar in BRL (NZD).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
+        float_qty : float
+            Number of contracts (quantity)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in BRL
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=75.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=1.0,
+            float_xcg_rt_2=1.0
+        )
 
 
 class MTMFromRate(metaclass=TypeChecker):
