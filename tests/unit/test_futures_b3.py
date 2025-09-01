@@ -1,6 +1,6 @@
 """Unit tests for Pricing B3 Brazilian Exchange Future Contracts.
 
-Tests the functionality of NotionalFromPV, NotionalFromRate, RtFromPV, and TSIR classes,
+Tests the functionality of MTMFromDailySettlement, MTMFromDailySettlment, RateFromMTM, and TSIR classes,
 covering initialization, pricing calculations, edge cases, and type validation.
 """
 
@@ -18,9 +18,9 @@ from pytest_mock import MockerFixture
 
 from stpstone.analytics.pricing.derivatives.futures_b3 import (
     TSIR,
-    NotionalFromPV,
-    NotionalFromRate,
-    RtFromPV,
+    MTMFromDailySettlement,
+    MTMFromDailySettlment,
+    RateFromMTM,
 )
 from stpstone.analytics.quant.linear_transformations import LinearAlgebra
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -32,39 +32,39 @@ from stpstone.utils.parsers.lists import ListHandler
 # Fixtures
 # --------------------------
 @pytest.fixture
-def notional_from_pv() -> "NotionalFromPV":
-    """Fixture providing NotionalFromPV instance with default parameters.
+def notional_from_pv() -> "MTMFromDailySettlement":
+    """Fixture providing MTMFromDailySettlement instance with default parameters.
 
     Returns
     -------
-    NotionalFromPV
+    MTMFromDailySettlement
         Instance initialized with default cache settings
     """
-    return NotionalFromPV()
+    return MTMFromDailySettlement()
 
 
 @pytest.fixture
-def notional_from_rate() -> "NotionalFromRate":
-    """Fixture providing NotionalFromRate instance with default parameters.
+def notional_from_rate() -> "MTMFromDailySettlment":
+    """Fixture providing MTMFromDailySettlment instance with default parameters.
 
     Returns
     -------
-    NotionalFromRate
+    MTMFromDailySettlment
         Instance initialized with default cache settings
     """
-    return NotionalFromRate()
+    return MTMFromDailySettlment()
 
 
 @pytest.fixture
-def rt_from_pv() -> "RtFromPV":
-    """Fixture providing RtFromPV instance with default parameters.
+def rt_from_pv() -> "RateFromMTM":
+    """Fixture providing RateFromMTM instance with default parameters.
 
     Returns
     -------
-    RtFromPV
+    RateFromMTM
         Instance initialized with default cache settings
     """
-    return RtFromPV()
+    return RateFromMTM()
 
 
 @pytest.fixture
@@ -108,10 +108,10 @@ def sample_nper_rates() -> dict[int, float]:
 
 
 # --------------------------
-# Tests for NotionalFromPV
+# Tests for MTMFromDailySettlement
 # --------------------------
-def test_notional_from_pv_init_valid(notional_from_pv: "NotionalFromPV") -> None:
-    """Test NotionalFromPV initialization with valid inputs.
+def test_notional_from_pv_init_valid(notional_from_pv: "MTMFromDailySettlement") -> None:
+    """Test MTMFromDailySettlement initialization with valid inputs.
 
     Verifies
     --------
@@ -128,7 +128,7 @@ def test_notional_from_pv_init_valid(notional_from_pv: "NotionalFromPV") -> None
 
 
 def test_notional_from_pv_init_invalid_types() -> None:
-    """Test NotionalFromPV initialization with invalid types.
+    """Test MTMFromDailySettlement initialization with invalid types.
 
     Verifies
     --------
@@ -140,14 +140,14 @@ def test_notional_from_pv_init_invalid_types() -> None:
     None
     """
     with pytest.raises(TypeError, match="must be of type"):
-        NotionalFromPV(bool_persist_cache="invalid", bool_reuse_cache=True)
+        MTMFromDailySettlement(bool_persist_cache="invalid", bool_reuse_cache=True)
     with pytest.raises(TypeError, match="must be of type"):
-        NotionalFromPV(bool_persist_cache=True, bool_reuse_cache=123)
+        MTMFromDailySettlement(bool_persist_cache=True, bool_reuse_cache=123)
     with pytest.raises(TypeError, match="must be one of types"):
-        NotionalFromPV(bool_persist_cache=True, bool_reuse_cache=True, logger="invalid")
+        MTMFromDailySettlement(bool_persist_cache=True, bool_reuse_cache=True, logger="invalid")
 
 
-def test_generic_pricing_valid_inputs(notional_from_pv: "NotionalFromPV") -> None:
+def test_generic_pricing_valid_inputs(notional_from_pv: "MTMFromDailySettlement") -> None:
     """Test generic_pricing with valid inputs.
 
     Verifies
@@ -161,7 +161,7 @@ def test_generic_pricing_valid_inputs(notional_from_pv: "NotionalFromPV") -> Non
     None
     """
     result = notional_from_pv.generic_pricing(
-        float_pv=1000000.0,
+        float_daily_settlement=1000000.0,
         float_size=0.00025,
         float_qty=50.0,
         float_xcg_rt_1=1.0,
@@ -179,15 +179,15 @@ def test_generic_pricing_valid_inputs(notional_from_pv: "NotionalFromPV") -> Non
     (1000000.0, 0.00025, 50.0, 1.0, None)
 ])
 def test_generic_pricing_invalid_types(
-    notional_from_pv: "NotionalFromPV", 
+    notional_from_pv: "MTMFromDailySettlement", 
     invalid_input: tuple
 ) -> None:
     """Test generic_pricing with invalid input types.
 
     Parameters
     ----------
-    notional_from_pv : NotionalFromPV
-        Instance of NotionalFromPV class
+    notional_from_pv : MTMFromDailySettlement
+        Instance of MTMFromDailySettlement class
     invalid_input : tuple
         Tuple of invalid input parameters
 
@@ -205,7 +205,7 @@ def test_generic_pricing_invalid_types(
 
 
 def test_dap_valid_inputs(
-    notional_from_pv: "NotionalFromPV", 
+    notional_from_pv: "MTMFromDailySettlement", 
     sample_dates: tuple[datetime, datetime, datetime],
     mocker: MockerFixture
 ) -> None:
@@ -213,8 +213,8 @@ def test_dap_valid_inputs(
 
     Parameters
     ----------
-    notional_from_pv : NotionalFromPV
-        Instance of NotionalFromPV class
+    notional_from_pv : MTMFromDailySettlement
+        Instance of MTMFromDailySettlement class
     sample_dates : tuple[datetime, datetime, datetime]
         Sample dates for last PMI, reference, and next PMI
     mocker : MockerFixture
@@ -234,7 +234,7 @@ def test_dap_valid_inputs(
     mocker.patch.object(DatesBRB3, "delta_working_days", return_value=21)
     
     result = notional_from_pv.dap(
-        float_pv=1000000.0,
+        float_daily_settlement=1000000.0,
         float_qty=50.0,
         float_pmi_idx_mm1=52.3,
         float_pmi_ipca_rt_hat=0.04,
@@ -248,15 +248,15 @@ def test_dap_valid_inputs(
 
 
 def test_dap_invalid_dates(
-    notional_from_pv: "NotionalFromPV", 
+    notional_from_pv: "MTMFromDailySettlement", 
     sample_dates: tuple[datetime, datetime, datetime]
 ) -> None:
     """Test DAP pricing with invalid date order.
 
     Parameters
     ----------
-    notional_from_pv : NotionalFromPV
-        Instance of NotionalFromPV class
+    notional_from_pv : MTMFromDailySettlement
+        Instance of MTMFromDailySettlement class
     sample_dates : tuple[datetime, datetime, datetime]
         Sample dates for last PMI, reference, and next PMI
 
@@ -272,7 +272,7 @@ def test_dap_invalid_dates(
     dt_pmi_last, date_ref, _ = sample_dates
     with pytest.raises(ValueError, match="Please validate the input"):
         notional_from_pv.dap(
-            float_pv=1000000.0,
+            float_daily_settlement=1000000.0,
             float_qty=50.0,
             float_pmi_idx_mm1=52.3,
             float_pmi_ipca_rt_hat=0.04,
@@ -292,15 +292,15 @@ def test_dap_invalid_dates(
     (1000000.0, 50.0, 52.3, 0.04, datetime(2023, 5, 15), datetime(2023, 5, 20), None)
 ])
 def test_dap_invalid_types(
-    notional_from_pv: "NotionalFromPV", 
+    notional_from_pv: "MTMFromDailySettlement", 
     invalid_input: tuple
 ) -> None:
     """Test DAP pricing with invalid input types.
 
     Parameters
     ----------
-    notional_from_pv : NotionalFromPV
-        Instance of NotionalFromPV class
+    notional_from_pv : MTMFromDailySettlement
+        Instance of MTMFromDailySettlement class
     invalid_input : tuple
         Tuple of invalid input parameters
 
@@ -318,10 +318,10 @@ def test_dap_invalid_types(
 
 
 # --------------------------
-# Tests for NotionalFromRate
+# Tests for MTMFromDailySettlment
 # --------------------------
-def test_notional_from_rate_init_valid(notional_from_rate: "NotionalFromRate") -> None:
-    """Test NotionalFromRate initialization with valid inputs.
+def test_notional_from_rate_init_valid(notional_from_rate: "MTMFromDailySettlment") -> None:
+    """Test MTMFromDailySettlment initialization with valid inputs.
 
     Verifies
     --------
@@ -338,7 +338,7 @@ def test_notional_from_rate_init_valid(notional_from_rate: "NotionalFromRate") -
 
 
 def test_di1_valid_inputs(
-    notional_from_rate: "NotionalFromRate",
+    notional_from_rate: "MTMFromDailySettlment",
     sample_dates: tuple[datetime, datetime, datetime],
     mocker: MockerFixture
 ) -> None:
@@ -346,8 +346,8 @@ def test_di1_valid_inputs(
 
     Parameters
     ----------
-    notional_from_rate : NotionalFromRate
-        Instance of NotionalFromRate class
+    notional_from_rate : MTMFromDailySettlment
+        Instance of MTMFromDailySettlment class
     sample_dates : tuple[datetime, datetime, datetime]
         Sample dates for testing
     mocker : MockerFixture
@@ -382,15 +382,15 @@ def test_di1_valid_inputs(
     (0.10, datetime(2023, 5, 20), None)
 ])
 def test_di1_invalid_types(
-    notional_from_rate: "NotionalFromRate", 
+    notional_from_rate: "MTMFromDailySettlment", 
     invalid_input: tuple
 ) -> None:
     """Test DI1 pricing with invalid input types.
 
     Parameters
     ----------
-    notional_from_rate : NotionalFromRate
-        Instance of NotionalFromRate class
+    notional_from_rate : MTMFromDailySettlment
+        Instance of MTMFromDailySettlment class
     invalid_input : tuple
         Tuple of invalid input parameters
 
@@ -408,10 +408,10 @@ def test_di1_invalid_types(
 
 
 # --------------------------
-# Tests for RtFromPV
+# Tests for RateFromMTM
 # --------------------------
-def test_rt_from_pv_init_valid(rt_from_pv: "RtFromPV") -> None:
-    """Test RtFromPV initialization with valid inputs.
+def test_rt_from_pv_init_valid(rt_from_pv: "RateFromMTM") -> None:
+    """Test RateFromMTM initialization with valid inputs.
 
     Verifies
     --------
@@ -428,7 +428,7 @@ def test_rt_from_pv_init_valid(rt_from_pv: "RtFromPV") -> None:
 
 
 def test_ddi_valid_inputs(
-    rt_from_pv: "RtFromPV",
+    rt_from_pv: "RateFromMTM",
     sample_dates: tuple[datetime, datetime, datetime],
     mocker: MockerFixture
 ) -> None:
@@ -436,8 +436,8 @@ def test_ddi_valid_inputs(
 
     Parameters
     ----------
-    rt_from_pv : RtFromPV
-        Instance of RtFromPV class
+    rt_from_pv : RateFromMTM
+        Instance of RateFromMTM class
     sample_dates : tuple[datetime, datetime, datetime]
         Sample dates for testing
     mocker : MockerFixture
@@ -457,8 +457,8 @@ def test_ddi_valid_inputs(
     mocker.patch.object(DatesBRB3, "delta_calendar_days", return_value=2)
     
     result = rt_from_pv.ddi(
-        float_pv_di=95000.0,
-        float_fut_dol=1.0,
+        float_mtm_di1=95000.0,
+        float_mtm_dol=1.0,
         float_ptax_dm1=5.20,
         date_ref=date_ref,
         date_xpt=date_xpt
@@ -476,15 +476,15 @@ def test_ddi_valid_inputs(
     (95000.0, 1.0, 5.20, datetime(2023, 5, 20), None)
 ])
 def test_ddi_invalid_types(
-    rt_from_pv: "RtFromPV", 
+    rt_from_pv: "RateFromMTM", 
     invalid_input: tuple
 ) -> None:
     """Test DDI pricing with invalid input types.
 
     Parameters
     ----------
-    rt_from_pv : RtFromPV
-        Instance of RtFromPV class
+    rt_from_pv : RateFromMTM
+        Instance of RateFromMTM class
     invalid_input : tuple
         Tuple of invalid input parameters
 
@@ -850,23 +850,23 @@ def test_module_reload() -> None:
     -------
     None
     """
-    original_notional = NotionalFromPV()
+    original_notional = MTMFromDailySettlement()
     importlib.reload(sys.modules["stpstone.analytics.quant.pricing_b3"])
-    reloaded_notional = NotionalFromPV()
-    assert isinstance(reloaded_notional, NotionalFromPV)
+    reloaded_notional = MTMFromDailySettlement()
+    assert isinstance(reloaded_notional, MTMFromDailySettlement)
     assert reloaded_notional.bool_persist_cache == original_notional.bool_persist_cache
 
 
 # --------------------------
 # Edge Cases
 # --------------------------
-def test_dap_zero_values(notional_from_pv: "NotionalFromPV", sample_dates: tuple[datetime, datetime, datetime]) -> None:
+def test_dap_zero_values(notional_from_pv: "MTMFromDailySettlement", sample_dates: tuple[datetime, datetime, datetime]) -> None:
     """Test DAP pricing with zero values.
 
     Parameters
     ----------
-    notional_from_pv : NotionalFromPV
-        Instance of NotionalFromPV class
+    notional_from_pv : MTMFromDailySettlement
+        Instance of MTMFromDailySettlement class
     sample_dates : tuple[datetime, datetime, datetime]
         Sample dates for testing
 
@@ -881,7 +881,7 @@ def test_dap_zero_values(notional_from_pv: "NotionalFromPV", sample_dates: tuple
     """
     dt_pmi_last, date_ref, dt_pmi_next = sample_dates
     result = notional_from_pv.dap(
-        float_pv=0.0,
+        float_daily_settlement=0.0,
         float_qty=0.0,
         float_pmi_idx_mm1=0.0,
         float_pmi_ipca_rt_hat=0.0,
@@ -920,15 +920,15 @@ def test_cubic_spline_edge_cases(tsir: "TSIR") -> None:
 # Example Tests from Docstrings
 # --------------------------
 def test_dap_docstring_example(
-    notional_from_pv: "NotionalFromPV",
+    notional_from_pv: "MTMFromDailySettlement",
     mocker: MockerFixture
 ) -> None:
     """Test DAP pricing using example from docstring.
 
     Parameters
     ----------
-    notional_from_pv : NotionalFromPV
-        Instance of NotionalFromPV class
+    notional_from_pv : MTMFromDailySettlement
+        Instance of MTMFromDailySettlement class
     mocker : MockerFixture
         Pytest-mock fixture for mocking dependencies
 
@@ -944,7 +944,7 @@ def test_dap_docstring_example(
     mocker.patch.object(DatesBRB3, "delta_working_days", return_value=21)
     
     result = notional_from_pv.dap(
-        float_pv=1_000_000.0,
+        float_daily_settlement=1_000_000.0,
         float_qty=50.0,
         float_pmi_idx_mm1=52.3,
         float_pmi_ipca_rt_hat=0.04,
@@ -956,15 +956,15 @@ def test_dap_docstring_example(
 
 
 def test_di1_docstring_example(
-    notional_from_rate: "NotionalFromRate",
+    notional_from_rate: "MTMFromDailySettlment",
     mocker: MockerFixture
 ) -> None:
     """Test DI1 pricing using example from docstring.
 
     Parameters
     ----------
-    notional_from_rate : NotionalFromRate
-        Instance of NotionalFromRate class
+    notional_from_rate : MTMFromDailySettlment
+        Instance of MTMFromDailySettlment class
     mocker : MockerFixture
         Pytest-mock fixture for mocking dependencies
 
@@ -988,15 +988,15 @@ def test_di1_docstring_example(
 
 
 def test_ddi_docstring_example(
-    rt_from_pv: "RtFromPV",
+    rt_from_pv: "RateFromMTM",
     mocker: MockerFixture
 ) -> None:
     """Test DDI pricing using example from docstring.
 
     Parameters
     ----------
-    rt_from_pv : RtFromPV
-        Instance of RtFromPV class
+    rt_from_pv : RateFromMTM
+        Instance of RateFromMTM class
     mocker : MockerFixture
         Pytest-mock fixture for mocking dependencies
 
@@ -1012,8 +1012,8 @@ def test_ddi_docstring_example(
     mocker.patch.object(DatesBRB3, "delta_calendar_days", return_value=2)
     
     result = rt_from_pv.ddi(
-        float_pv_di=95000.0,
-        float_fut_dol=1.0,
+        float_mtm_di1=95000.0,
+        float_mtm_dol=1.0,
         float_ptax_dm1=5.20,
         date_ref=datetime(2023, 5, 20),
         date_xpt=datetime(2023, 12, 1)

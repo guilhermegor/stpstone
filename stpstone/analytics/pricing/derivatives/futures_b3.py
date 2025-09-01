@@ -16,7 +16,7 @@ from stpstone.utils.calendars.calendar_br import DatesBRB3
 from stpstone.utils.parsers.lists import ListHandler
 
 
-class NotionalFromPV(metaclass=TypeChecker):
+class MTMFromDailySettlement(metaclass=TypeChecker):
     """Notional value from present value."""
 
     def __init__(
@@ -25,7 +25,7 @@ class NotionalFromPV(metaclass=TypeChecker):
         bool_reuse_cache: bool = True,
         logger: Optional[Logger] = None
     ) -> None:
-        """Initialize the NotionalFromPV class.
+        """Initialize the MTMFromDailySettlement class.
         
         Parameters
         ----------
@@ -51,18 +51,18 @@ class NotionalFromPV(metaclass=TypeChecker):
 
     def generic_pricing(
         self, 
-        float_pv: float, 
+        float_daily_settlement: float, 
         float_size: float, 
         float_qty: float, 
         float_xcg_rt_1: float, 
         float_xcg_rt_2: float = 1
     ) -> float:
-        """Calculate generic notional value of a future contract.
+        """Calculate generic mtm value of a future contract.
         
         Parameters
         ----------
-        float_pv : float
-            Present value
+        float_daily_settlement : float
+            Daily settlment value
         float_size : float
             Size of the contract
         float_qty : float
@@ -75,13 +75,13 @@ class NotionalFromPV(metaclass=TypeChecker):
         Returns
         -------
         float
-            Notional value
+            Market to market (MTM) value of the contract in BRL
         """
-        return float_pv * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
+        return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
 
     def dap(
         self, 
-        float_pv: float, 
+        float_daily_settlement: float, 
         float_qty: float, 
         float_pmi_idx_mm1: float, 
         float_pmi_ipca_rt_hat: float, 
@@ -101,8 +101,8 @@ class NotionalFromPV(metaclass=TypeChecker):
         
         Parameters
         ----------
-        float_pv : float
-            Present value of the contract in BRL
+        float_daily_settlement : float
+            Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
         float_pmi_idx_mm1 : float
@@ -136,7 +136,7 @@ class NotionalFromPV(metaclass=TypeChecker):
         Example
         -------
         >>> dap_pricing(
-        ...     float_pv=1000000,
+        ...     float_daily_settlement=1000000,
         ...     float_qty=50,
         ...     float_pmi_idx_mm1=52.3,
         ...     float_pmi_ipca_rt_hat=0.04,
@@ -161,10 +161,10 @@ class NotionalFromPV(metaclass=TypeChecker):
         float_prt = float_pmi_idx_mm1 * float_size * (1.0 + float_pmi_ipca_rt_hat) \
             ** (int_wddt / int_wddm)
         
-        return float_pv * float_qty * float_prt
+        return float_daily_settlement * float_qty * float_prt
 
 
-class NotionalFromRate(metaclass=TypeChecker):
+class MTMFromDailySettlment(metaclass=TypeChecker):
     """Notional value from real rate."""
 
     def __init__(
@@ -173,7 +173,7 @@ class NotionalFromRate(metaclass=TypeChecker):
         bool_reuse_cache: bool = True,
         logger: Optional[Logger] = None
     ) -> None:
-        """Initialize the NotionalFromRate class.
+        """Initialize the MTMFromDailySettlment class.
         
         Parameters
         ----------
@@ -234,7 +234,7 @@ class NotionalFromRate(metaclass=TypeChecker):
         Returns
         -------
         float
-            Present value (PU) of the contract in BRL
+            Mark to market (MTM) value of the DI1 contract in BRL
         
         Notes
         -----
@@ -265,7 +265,7 @@ class NotionalFromRate(metaclass=TypeChecker):
         return float_fv / (1.0 + float_real_rate)
 
 
-class RtFromPV(metaclass=TypeChecker):
+class RateFromMTM(metaclass=TypeChecker):
     """Real rate from present value."""
 
     def __init__(
@@ -274,7 +274,7 @@ class RtFromPV(metaclass=TypeChecker):
         bool_reuse_cache: bool = True,
         logger: Optional[Logger] = None
     ) -> None:
-        """Initialize the NotionalFromPV class.
+        """Initialize the RateFromMTM class.
         
         Parameters
         ----------
@@ -300,8 +300,8 @@ class RtFromPV(metaclass=TypeChecker):
 
     def ddi(
         self, 
-        float_pv_di: float, 
-        float_fut_dol: float, 
+        float_mtm_di1: float, 
+        float_mtm_dol: float, 
         float_ptax_dm1: float,
         date_ref: datetime, 
         date_xpt: datetime
@@ -328,10 +328,10 @@ class RtFromPV(metaclass=TypeChecker):
         
         Parameters
         ----------
-        float_pv_di : float
-            Present value of DI rate contract in BRL (Brazilian Reais)
-        float_fut_dol : float
-            Future dollar value (contract nominal in USD)
+        float_mtm_di1 : float
+            Present value of DI1 rate contract in BRL (Brazilian Reais) (MTM)
+        float_mtm_dol : float
+            Present value of DOL contract in BRL (Brazilian Reais) (MTM)
         float_ptax_dm1 : float
             PTAX exchange rate from previous business day (BRL/USD)
         date_ref : datetime
@@ -359,8 +359,8 @@ class RtFromPV(metaclass=TypeChecker):
         -------
         >>> ddi_pricing = DDI()
         >>> ddi_pricing.ddi(
-        ...     float_pv_di=95000.0,
-        ...     float_fut_dol=1.0,
+        ...     float_mtm_di1=95000.0,
+        ...     float_mtm_dol=1.0,
         ...     float_ptax_dm1=5.20,
         ...     date_xpt=datetime(2023, 12, 1),
         ...     int_wd_bef=2
@@ -371,7 +371,7 @@ class RtFromPV(metaclass=TypeChecker):
         float_fv_di: float = 100_000.0
         
         int_cddt = self.cls_dates_br_b3.delta_calendar_days(date_ref, date_xpt)
-        return ((float_pv_di / float_fv_di) / (float_fut_dol / float_ptax_dm1) - 1.0) \
+        return ((float_mtm_di1 / float_fv_di) / (float_mtm_dol / float_ptax_dm1) - 1.0) \
             * int_cddy / int_cddt
 
 
@@ -379,7 +379,12 @@ class TSIR(metaclass=TypeChecker):
     """Term Structure of Interest Rates (TSIR)."""
 
     def __init__(self) -> None:
-        """Initialize the TSIR class."""
+        """Initialize the TSIR class.
+        
+        Returns
+        -------
+        None
+        """
         self.cls_list_handler = ListHandler()
 
     def flat_forward(
