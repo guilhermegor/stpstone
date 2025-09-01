@@ -55,7 +55,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         float_size: float, 
         float_qty: float, 
         float_xcg_rt_1: float, 
-        float_xcg_rt_2: float = 1
+        float_xcg_rt_2: float = 1, 
+        float_xcg_parity: Optional[float] = None
     ) -> float:
         """Calculate generic mtm value of a future contract.
         
@@ -71,6 +72,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Cross currency rate
         float_xcg_rt_2 : float, optional
             Cross currency rate, by default 1
+        float_xcg_parity : Optional[float], optional
+            Cross currency parity, by default None
         
         Returns
         -------
@@ -85,6 +88,9 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         [2] For USD/BRL exchange rate, please refer to B3 referencial exchange rate
         [2.1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/clearing-de-cambio/indicadores/taxas-de-cambio-referencial/
         """
+        if float_xcg_parity:
+            return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 \
+                * float_xcg_parity
         return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
     
     def abevo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -787,6 +793,40 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             ** (int_wddt / int_wddm)
         
         return float_daily_settlement * float_qty * float_prt
+    
+    def dax(
+        self, 
+        float_daily_settlement: float, 
+        float_qty: float, 
+        float_xcg_usdbl: float, 
+        float_xcg_parity_eurusd: float
+    ) -> float:
+        """DAX - Future contract of DAX Index in EUR (DAX).
+        
+        Parameters
+        ----------
+        float_daily_settlement : float
+            Daily settlement value of the contract in EUR
+        float_qty : float
+            Number of contracts (quantity)
+        float_xcg_usdbl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_eurusd : float
+            Exchange parity between EUR and USD (EUR/USD)
+
+        Returns
+        -------
+        float
+            Market to market (MTM) value of the contract in EUR
+        """
+        return self.generic_pricing(
+            float_daily_settlement=float_daily_settlement,
+            float_size=5.0,
+            float_qty=float_qty,
+            float_xcg_rt_1=float_xcg_usdbl,
+            float_xcg_rt_2=1.0,
+            float_xcg_parity=float_xcg_parity_eurusd
+        )
 
 
 class MTMFromRate(metaclass=TypeChecker):

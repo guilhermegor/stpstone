@@ -1569,3 +1569,26 @@ def test_dap_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
     )
     expected = 0.07
     assert abs(result) == pytest.approx(expected, abs=1e-2)
+
+
+def test_dax_delta_mtm(notional_from_pv: MTMFromDailySettlement) -> None:
+    """Example test for DAXU25 delta daily MTM calculation.
+
+    Verifies
+    --------
+    - Correct calculation of delta daily MTM for DAXU25
+    - Matches expected output
+    - Reference date: 2025-08-29
+
+    Returns
+    -------
+    None
+    """
+    result = notional_from_pv.dax(
+        float_daily_settlement=23_958.00, float_qty=1.0, float_xcg_usdbl=5.4241, 
+        float_xcg_parity_eurusd=1.1701) \
+        - notional_from_pv.dax(
+            float_daily_settlement=24_079.00, float_qty=1.0, float_xcg_usdbl=5.4241, 
+            float_xcg_parity_eurusd=1.1701)
+    expected = 3_838.46
+    assert abs(result) == pytest.approx(expected, abs=1e-2)
