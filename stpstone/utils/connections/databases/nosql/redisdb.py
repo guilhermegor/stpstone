@@ -65,13 +65,15 @@ class RedisClient(metaclass=TypeChecker):
         bl_decode_resp : bool
             Whether to decode responses from bytes to strings
         """
-        self._validate_host(str_host)
-        self._validate_port(int_port)
-        self._validate_decode_resp(bl_decode_resp)
+        if not hasattr(self, '_initialized'):  # Check if instance is already initialized
+            self._validate_host(str_host)
+            self._validate_port(int_port)
+            self._validate_decode_resp(bl_decode_resp)
 
-        self.str_host = str_host
-        self.int_port = int_port
-        self.bl_decode_resp = bl_decode_resp
+            self.str_host = str_host
+            self.int_port = int_port
+            self.bl_decode_resp = bl_decode_resp
+            self._initialized = True
 
     def __new__(cls, *args, **kwargs) -> "RedisClient":
         """Create or retrieve the singleton instance of RedisClient.
