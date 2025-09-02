@@ -106,8 +106,12 @@ class TestValidationMethods:
         -------
         None
         """
-        with pytest.raises(ValueError, match="Redis host"):
-            RedisClient._validate_host(None, invalid_host)
+        if invalid_host in ["", "   "]:
+            with pytest.raises(ValueError, match="Redis host cannot be empty or whitespace-only"):
+                RedisClient._validate_host(None, invalid_host)
+        else:
+            with pytest.raises(TypeError, match="must be of type"):
+                RedisClient._validate_host(None, invalid_host)
 
     def test_validate_host_valid(self) -> None:
         """Test _validate_host with valid input.
@@ -142,8 +146,12 @@ class TestValidationMethods:
         -------
         None
         """
-        with pytest.raises(ValueError, match="Redis port"):
-            RedisClient._validate_port(None, invalid_port)
+        if isinstance(invalid_port, str) or invalid_port is None:
+            with pytest.raises(TypeError, match="must be of type"):
+                RedisClient._validate_port(None, invalid_port)
+        else:
+            with pytest.raises(ValueError, match="Redis port must be between 1 and"):
+                RedisClient._validate_port(None, invalid_port)
 
     @pytest.mark.parametrize("valid_port", [1, 6379, 8080, 65535])
     def test_validate_port_valid(self, valid_port: int) -> None:
@@ -182,7 +190,7 @@ class TestValidationMethods:
         -------
         None
         """
-        with pytest.raises(ValueError, match="decode_responses"):
+        with pytest.raises(TypeError, match="must be of type"):
             RedisClient._validate_decode_resp(None, invalid_decode_resp)
 
     @pytest.mark.parametrize("valid_decode_resp", [True, False])
@@ -448,8 +456,12 @@ class TestInitialization:
         None
         """
         RedisClient._instance = None
-        with pytest.raises(ValueError, match="Redis host"):
-            RedisClient(str_host=invalid_host, int_port=6379, bl_decode_resp=True)
+        if invalid_host in ["", "   "]:
+            with pytest.raises(ValueError, match="Redis host cannot be empty or whitespace-only"):
+                RedisClient(str_host=invalid_host, int_port=6379, bl_decode_resp=True)
+        else:
+            with pytest.raises(TypeError, match="must be of type"):
+                RedisClient(str_host=invalid_host, int_port=6379, bl_decode_resp=True)
 
     @pytest.mark.parametrize("invalid_port", [None, "6379", 0, 65536])
     def test_init_invalid_port_raises_error(self, invalid_port: Any) -> None:
@@ -470,8 +482,12 @@ class TestInitialization:
         None
         """
         RedisClient._instance = None
-        with pytest.raises(ValueError, match="Redis port"):
-            RedisClient(str_host="localhost", int_port=invalid_port, bl_decode_resp=True)
+        if isinstance(invalid_port, str) or invalid_port is None:
+            with pytest.raises(TypeError, match="must be of type"):
+                RedisClient(str_host="localhost", int_port=invalid_port, bl_decode_resp=True)
+        else:
+            with pytest.raises(ValueError, match="Redis port must be between 1 and"):
+                RedisClient(str_host="localhost", int_port=invalid_port, bl_decode_resp=True)
 
     @pytest.mark.parametrize("invalid_decode_resp", [None, "true", 1])
     def test_init_invalid_decode_resp_raises_error(self, invalid_decode_resp: Any) -> None:
@@ -492,7 +508,7 @@ class TestInitialization:
         None
         """
         RedisClient._instance = None
-        with pytest.raises(ValueError, match="decode_responses"):
+        with pytest.raises(TypeError, match="must be of type"):
             RedisClient(str_host="localhost", int_port=6379, bl_decode_resp=invalid_decode_resp)
 
 

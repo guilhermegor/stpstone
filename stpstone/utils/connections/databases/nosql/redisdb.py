@@ -8,6 +8,8 @@ from typing import TypedDict
 
 import redis
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
 
 class ReturnLoadConfig(TypedDict):
     """Configuration dictionary for Redis connection.
@@ -27,7 +29,7 @@ class ReturnLoadConfig(TypedDict):
     decode_responses: bool
 
 
-class RedisClient:
+class RedisClient(metaclass=TypeChecker):
     """Singleton Redis client for managing connections.
 
     This class implements the singleton pattern to ensure only one Redis
