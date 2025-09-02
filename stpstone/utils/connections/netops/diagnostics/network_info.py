@@ -38,6 +38,11 @@ class NetworkInfo(metaclass=TypeChecker):
         -------
         str
             The public IP address
+
+        Raises
+        ------
+        requests.RequestException
+            If there is an error fetching the public IP
         """
         try:
             response = requests.get("https://api.ipify.org?format=json", timeout=10)
