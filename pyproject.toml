@@ -131,6 +131,7 @@ defusedxml = ">=0.7.1"
 pytest-asyncio = ">=1.1.0"
 MetaTrader5 = { version = ">=5.0.5120", platform = "win32" }
 oracledb = ">=3.0.0"
+pymongo = ">=4.14.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = ">=4.1.0"
