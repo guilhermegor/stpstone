@@ -158,8 +158,12 @@ def test_validate_host_invalid(
     None
     """
     default_params["str_host"] = host
-    with pytest.raises(TypeError, match="must be of type"):
-        MongoConn(**default_params)
+    if host == "":
+        with pytest.raises(ValueError, match="Host cannot be empty"):
+            MongoConn(**default_params)
+    else:
+        with pytest.raises(TypeError, match="must be of type"):
+            MongoConn(**default_params)
 
 @pytest.mark.parametrize("port", [None, "123", 0, 65536, -1, 1.5])
 def test_validate_port_invalid(
@@ -180,8 +184,12 @@ def test_validate_port_invalid(
     None
     """
     default_params["int_port"] = port
-    with pytest.raises(TypeError, match="must be of type"):
-        MongoConn(**default_params)
+    if port in (0, 65536, -1):
+        with pytest.raises(ValueError, match="Port must be between 1 and 65535"):
+            MongoConn(**default_params)
+    else:
+        with pytest.raises(TypeError, match="must be of type"):
+            MongoConn(**default_params)
 
 @pytest.mark.parametrize("dbname", [None, "", 123, [], {}])
 def test_validate_dbname_invalid(
@@ -202,8 +210,12 @@ def test_validate_dbname_invalid(
     None
     """
     default_params["str_dbname"] = dbname
-    with pytest.raises(TypeError, match="must be of type"):
-        MongoConn(**default_params)
+    if dbname == "":
+        with pytest.raises(ValueError, match="Database name cannot be empty"):
+            MongoConn(**default_params)
+    else:
+        with pytest.raises(TypeError, match="must be of type"):
+            MongoConn(**default_params)
 
 @pytest.mark.parametrize("collection", [None, "", 123, [], {}])
 def test_validate_collection_invalid(
@@ -224,8 +236,12 @@ def test_validate_collection_invalid(
     None
     """
     default_params["str_collection"] = collection
-    with pytest.raises(TypeError, match="must be of type"):
-        MongoConn(**default_params)
+    if collection == "":
+        with pytest.raises(ValueError, match="Collection name cannot be empty"):
+            MongoConn(**default_params)
+    else:
+        with pytest.raises(TypeError, match="must be of type"):
+            MongoConn(**default_params)
 
 def test_save_df_valid(
     mongo_conn: MongoConn, 
