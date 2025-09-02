@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 from stpstone.analytics.quant.fit_assessment import FitPerformance
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.analytics.quant.regression import LogLinearRegressions
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
 class ReturnConfusionMtx2x2(TypedDict):
@@ -687,6 +687,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         """
         identity, = axes.plot([], [], *line_args, **line_kwargs)
 
+        @type_checker
         def callback(axes: plt.Axes) -> None:
             """Update the line when the plot limits change.
             
