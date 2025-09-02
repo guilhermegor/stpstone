@@ -8,7 +8,7 @@ Tests the Redis connection management functionality including:
 """
 
 from typing import Any
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 import redis
@@ -90,7 +90,10 @@ class TestValidationMethods:
     """Test cases for RedisClient validation methods."""
 
     @pytest.mark.parametrize("invalid_host", [None, "", "   ", 123, []])
-    def test_validate_host_invalid(self, invalid_host: Any) -> None:
+    def test_validate_host_invalid(
+        self, 
+        invalid_host: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test _validate_host with invalid inputs.
 
         Verifies
@@ -130,7 +133,10 @@ class TestValidationMethods:
         RedisClient._validate_host(None, "192.168.1.1")
 
     @pytest.mark.parametrize("invalid_port", [None, "6379", 0, 65536, -1, 70000])
-    def test_validate_port_invalid(self, invalid_port: Any) -> None:
+    def test_validate_port_invalid(
+        self, 
+        invalid_port: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test _validate_port with invalid inputs.
 
         Verifies
@@ -174,7 +180,10 @@ class TestValidationMethods:
         RedisClient._validate_port(None, valid_port)
 
     @pytest.mark.parametrize("invalid_decode_resp", [None, "true", 1, 0, "False"])
-    def test_validate_decode_resp_invalid(self, invalid_decode_resp: Any) -> None:
+    def test_validate_decode_resp_invalid(
+        self, 
+        invalid_decode_resp: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test _validate_decode_resp with invalid inputs.
 
         Verifies
@@ -269,7 +278,11 @@ class TestConnectionMethods:
     """Test cases for RedisClient connection methods."""
 
     @patch("stpstone.utils.connections.databases.nosql.redisdb.redis.StrictRedis")
-    def test_connect_success(self, mock_strict_redis: Mock, default_config: ReturnLoadConfig) -> None:
+    def test_connect_success(
+        self, 
+        mock_strict_redis: Mock, 
+        default_config: ReturnLoadConfig
+    ) -> None:
         """Test _connect method with successful connection.
 
         Verifies
@@ -438,7 +451,10 @@ class TestInitialization:
         assert client.bl_decode_resp is False
 
     @pytest.mark.parametrize("invalid_host", [None, "", 123])
-    def test_init_invalid_host_raises_error(self, invalid_host: Any) -> None:
+    def test_init_invalid_host_raises_error(
+        self, 
+        invalid_host: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test initialization with invalid host raises error.
 
         Verifies
@@ -464,7 +480,10 @@ class TestInitialization:
                 RedisClient(str_host=invalid_host, int_port=6379, bl_decode_resp=True)
 
     @pytest.mark.parametrize("invalid_port", [None, "6379", 0, 65536])
-    def test_init_invalid_port_raises_error(self, invalid_port: Any) -> None:
+    def test_init_invalid_port_raises_error(
+        self, 
+        invalid_port: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test initialization with invalid port raises error.
 
         Verifies
@@ -490,7 +509,10 @@ class TestInitialization:
                 RedisClient(str_host="localhost", int_port=invalid_port, bl_decode_resp=True)
 
     @pytest.mark.parametrize("invalid_decode_resp", [None, "true", 1])
-    def test_init_invalid_decode_resp_raises_error(self, invalid_decode_resp: Any) -> None:
+    def test_init_invalid_decode_resp_raises_error(
+        self, 
+        invalid_decode_resp: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test initialization with invalid decode_resp raises error.
 
         Verifies
@@ -518,7 +540,11 @@ class TestInitialization:
 class TestGetMethod:
     """Test cases for RedisClient get method."""
 
-    def test_get_returns_redis_client(self, redis_client_instance: RedisClient, mock_redis_client: Mock) -> None:
+    def test_get_returns_redis_client(
+        self, 
+        redis_client_instance: RedisClient, 
+        mock_redis_client: Mock
+    ) -> None:
         """Test that get method returns Redis client instance.
 
         Verifies
@@ -557,16 +583,20 @@ class TestGetMethod:
         -------
         None
         """
-        # Clear instance and ensure no client exists
+        # Clear instance first
         RedisClient._instance = None
         
-        # Create a minimal instance without calling _connect
-        instance = RedisClient.__new__(RedisClient)
-        RedisClient._instance = instance
-        # Don't set _redis_client to simulate initialization failure
-
-        with pytest.raises(RuntimeError, match="Redis client not initialized"):
-            RedisClient.get()
+        # Create a proper instance first
+        with patch("stpstone.utils.connections.databases.nosql.redisdb.RedisClient._connect") \
+            as mock_connect:
+            mock_connect.return_value = Mock()
+            client = RedisClient()
+            
+            # Now manually set _redis_client to None to simulate the error condition
+            client._redis_client = None
+            
+            with pytest.raises(RuntimeError, match="Redis client not initialized"):
+                RedisClient.get()
 
     def test_get_with_none_client_raises_error(self, redis_client_instance: RedisClient) -> None:
         """Test get method raises error when client is None.
@@ -665,10 +695,15 @@ class TestErrorConditions:
 
         RedisClient._instance = None
 
-        with pytest.raises(RuntimeError, match="Failed to create Redis client instance") as exc_info:
+        with pytest.raises(RuntimeError, match="Failed to create Redis client instance") \
+            as exc_info:
             RedisClient("localhost", 6379, True)  # Provide all required arguments
 
-        assert exc_info.value.__cause__ is original_error
+        # The original error gets wrapped in RedisError by _connect method,
+        # then that RedisError gets chained to RuntimeError
+        assert isinstance(exc_info.value.__cause__, redis.RedisError)
+        assert "Failed to connect to Redis at localhost:6379" in str(exc_info.value.__cause__)
+        assert exc_info.value.__cause__.__cause__ is original_error
 
 # --------------------------
 # Tests for Edge Cases

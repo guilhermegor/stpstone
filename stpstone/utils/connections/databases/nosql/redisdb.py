@@ -4,11 +4,12 @@ This module provides a singleton class for managing Redis client connections
 using the redis-py library with configurable connection parameters.
 """
 
-from typing import TypedDict
+from typing import Any, TypedDict
 
 import redis
+from redis import RedisError
 
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
 class ReturnLoadConfig(TypedDict):
@@ -53,7 +54,12 @@ class RedisClient(metaclass=TypeChecker):
 
     _instance = None
 
-    def __init__(self, str_host: str = "localhost", int_port: int = 6379, bl_decode_resp: bool = True) -> None:
+    def __init__(
+        self, 
+        str_host: str = "localhost", 
+        int_port: int = 6379, 
+        bl_decode_resp: bool = True
+    ) -> None:
         """Store the connection configuration.
 
         Parameters
@@ -75,12 +81,24 @@ class RedisClient(metaclass=TypeChecker):
             self.bl_decode_resp = bl_decode_resp
             self._initialized = True
 
-    def __new__(cls, *args, **kwargs) -> "RedisClient":
+    @type_checker
+    def __new__(
+        cls, 
+        *args: Any, # noqa ANN401: typing.Any is not allowed
+        **kwargs: Any # noqa ANN401: typing.Any is not allowed
+    ) -> "RedisClient":
         """Create or retrieve the singleton instance of RedisClient.
+
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments for initialization
+        **kwargs : Any
+            Keyword arguments for initialization
 
         Returns
         -------
-        RedisClient
+        'RedisClient'
             Singleton instance of RedisClient class
 
         Raises
@@ -90,11 +108,14 @@ class RedisClient(metaclass=TypeChecker):
         """
         if not cls._instance:
             try:
-                cls._instance = super(RedisClient, cls).__new__(cls)
+                cls._instance = super().__new__(cls)
                 # Initialize with provided arguments or defaults
-                host = kwargs.get('str_host', 'localhost') if kwargs else (args[0] if len(args) > 0 else 'localhost')
-                port = kwargs.get('int_port', 6379) if kwargs else (args[1] if len(args) > 1 else 6379)
-                decode_resp = kwargs.get('bl_decode_resp', True) if kwargs else (args[2] if len(args) > 2 else True)
+                host = kwargs.get('str_host', 'localhost') \
+                    if kwargs else (args[0] if len(args) > 0 else 'localhost')
+                port = kwargs.get('int_port', 6379) \
+                    if kwargs else (args[1] if len(args) > 1 else 6379)
+                decode_resp = kwargs.get('bl_decode_resp', True) \
+                    if kwargs else (args[2] if len(args) > 2 else True)
                 
                 cls._instance._redis_client = cls._connect(host, port, decode_resp)
                 # Store the actual configuration used
@@ -201,14 +222,14 @@ class RedisClient(metaclass=TypeChecker):
 
         Raises
         ------
-        redis.RedisError
+        RedisError
             If connection to Redis server fails
         """
         config = cls._load_config(str_host, int_port, bl_decode_resp)
         try:
             return redis.StrictRedis(**config)
         except Exception as err:
-            raise redis.RedisError(f"Failed to connect to Redis at {str_host}:{int_port}") from err
+            raise RedisError(f"Failed to connect to Redis at {str_host}:{int_port}") from err
 
     @classmethod
     def get(cls) -> redis.StrictRedis:
