@@ -18,7 +18,7 @@ from psycopg.errors import OperationalError
 from psycopg.sql import Composable
 import pytest
 
-from stpstone.utils.connections.databases.sql.postgresql import PostgreSQLDB
+from stpstone.utils.connections.databases.sql.postgresql_db import PostgreSQLDB
 
 
 # --------------------------
@@ -117,7 +117,7 @@ def sample_query_result() -> list[dict[str, Any]]:
 class TestPostgreSQLDBConnection:
     """Test cases for PostgreSQLDB connection initialization and validation."""
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_init_with_valid_config(
         self,
         mock_connect: Mock,
@@ -250,7 +250,7 @@ class TestPostgreSQLDBConnection:
                 str_schema=""
             )
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_init_connection_failure(
         self, 
         mock_connect: Mock, 
@@ -290,7 +290,7 @@ class TestPostgreSQLDBConnection:
 class TestExecuteMethod:
     """Test cases for execute method."""
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_execute_with_string_query(
         self,
         mock_connect: Mock,
@@ -324,7 +324,7 @@ class TestExecuteMethod:
         
         mock_cursor.execute.assert_called_with(query)
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_execute_with_composable_query(
         self,
         mock_connect: Mock,
@@ -365,7 +365,7 @@ class TestExecuteMethod:
 class TestReadMethod:
     """Test cases for read method."""
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_read_with_empty_query(
         self,
         mock_connect: Mock,
@@ -394,7 +394,7 @@ class TestReadMethod:
         with pytest.raises(ValueError, match="Query cannot be empty"):
             db.read("")
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_read_with_partial_date_params(
         self,
         mock_connect: Mock,
@@ -431,7 +431,7 @@ class TestReadMethod:
             ValueError, match="Both list_cols_dt and str_fmt_dt must be provided or None"):
             db.read("SELECT * FROM users", list_cols_dt=["created_at"])
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_read_basic_query(
         self,
         mock_connect: Mock,
@@ -472,7 +472,7 @@ class TestReadMethod:
         assert len(result) == 2
         assert list(result.columns) == ["id", "name", "created_at"]
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_read_with_type_conversion(
         self,
         mock_connect: Mock,
@@ -514,7 +514,7 @@ class TestReadMethod:
         assert result["name"].dtype == "string"
 
     @patch("stpstone.utils.calendars.calendar_br.ABCCalendarOperations")
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_read_with_date_conversion(
         self,
         mock_connect: Mock,
@@ -565,7 +565,7 @@ class TestReadMethod:
 class TestInsertMethod:
     """Test cases for insert method."""
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_insert_with_empty_table_name(
         self,
         mock_connect: Mock,
@@ -601,7 +601,7 @@ class TestInsertMethod:
         with pytest.raises(ValueError, match="Table name cannot be empty"):
             db.insert(sample_json_data, "")
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_insert_with_empty_data(
         self,
         mock_connect: Mock,
@@ -637,8 +637,8 @@ class TestInsertMethod:
         mock_cursor.executemany.assert_not_called()
         mock_connection.commit.assert_not_called()
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.JsonFiles")
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.JsonFiles")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_insert_success(
         self,
         mock_connect: Mock,
@@ -683,8 +683,8 @@ class TestInsertMethod:
         mock_cursor.executemany.assert_called_once()
         mock_connection.commit.assert_called_once()
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.JsonFiles")
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.JsonFiles")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_insert_with_insert_or_ignore(
         self,
         mock_connect: Mock,
@@ -727,8 +727,8 @@ class TestInsertMethod:
         mock_cursor.executemany.assert_called_once()
         mock_connection.commit.assert_called_once()
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.JsonFiles")
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.JsonFiles")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_insert_failure_rollback(
         self,
         mock_connect: Mock,
@@ -782,7 +782,7 @@ class TestInsertMethod:
 class TestBackupMethod:
     """Test cases for backup method."""
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_backup_with_empty_directory(
         self,
         mock_connect: Mock,
@@ -813,7 +813,7 @@ class TestBackupMethod:
 
     @patch("os.makedirs")
     @patch("subprocess.run")
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_backup_success(
         self,
         mock_connect: Mock,
@@ -854,7 +854,7 @@ class TestBackupMethod:
 
     @patch("os.makedirs")
     @patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "pg_dump"))
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_backup_process_error(
         self,
         mock_connect: Mock,
@@ -892,7 +892,7 @@ class TestBackupMethod:
 
     @patch("os.makedirs")
     @patch("subprocess.run", side_effect=Exception("Unexpected error"))
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_backup_general_error(
         self,
         mock_connect: Mock,
@@ -935,7 +935,7 @@ class TestBackupMethod:
 class TestCloseMethod:
     """Test cases for close method."""
 
-    @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
+    @patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
     def test_close_connection(
         self,
         mock_connect: Mock,
