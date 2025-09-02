@@ -16,7 +16,7 @@ import pytest
 
 from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
-from stpstone.utils.connections.databases.sql.sqlserver import SqlServerDB
+from stpstone.utils.connections.databases.sql.sqlserver_db import SqlServerDB
 from stpstone.utils.parsers.json import JsonFiles
 
 
@@ -129,7 +129,8 @@ class TestSqlServerDBInit:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect") as mock_connect:
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
+            as mock_connect:
             mock_conn = Mock()
             mock_cursor = Mock()
             mock_connect.return_value = mock_conn
@@ -321,7 +322,8 @@ class TestSqlServerDBInit:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect") as mock_connect:
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
+            as mock_connect:
             mock_connect.side_effect = Exception("Connection failed")
             with pytest.raises(ConnectionError) as excinfo:
                 SqlServerDB(**valid_db_config)
@@ -353,7 +355,8 @@ class TestCreateConnection:
         """
         valid_db_config["driver_sql"] = "{SQL Server}"
         
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect") as mock_connect:
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
+            as mock_connect:
             mock_conn = Mock()
             mock_cursor = Mock()
             mock_connect.return_value = mock_conn
@@ -392,7 +395,8 @@ class TestCreateConnection:
         -------
         None
         """        
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect") as mock_connect:
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
+            as mock_connect:
             mock_conn = Mock()
             mock_cursor = Mock()
             mock_connect.return_value = mock_conn
@@ -435,7 +439,8 @@ class TestCreateConnection:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect") as mock_connect:
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
+            as mock_connect:
             mock_conn = Mock()
             mock_cursor = Mock()
             mock_connect.return_value = mock_conn
@@ -479,7 +484,7 @@ class TestExecute:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             test_query = "SELECT * FROM test_table"
@@ -513,7 +518,7 @@ class TestExecute:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             
@@ -544,7 +549,7 @@ class TestExecute:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             mock_sql_composable = Mock(spec=SQLComposable)
@@ -588,7 +593,7 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result) as mock_read_sql:
             db = SqlServerDB(**valid_db_config)
@@ -625,7 +630,7 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result):
             
@@ -667,10 +672,10 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver.ABCCalendarOperations", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.ABCCalendarOperations", 
                   return_value=mock_dates_br):
                     db = SqlServerDB(**valid_db_config)
                     date_cols = ["date_col"]
@@ -706,7 +711,7 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             
@@ -737,7 +742,7 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             
@@ -789,9 +794,9 @@ class TestInsert:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver.JsonFiles", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
                   return_value=mock_json_files), \
             patch("pandas.DataFrame.to_sql") as mock_to_sql:
                 db = SqlServerDB(**valid_db_config)
@@ -831,7 +836,7 @@ class TestInsert:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                    return_value=mock_connection), \
              patch("pandas.DataFrame.to_sql") as mock_to_sql:
             db = SqlServerDB(**valid_db_config)
@@ -866,7 +871,7 @@ class TestInsert:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -902,9 +907,9 @@ class TestInsert:
         None
         """
         with patch(
-                "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+                "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                 return_value=mock_connection), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver.JsonFiles", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
                 return_value=mock_json_files), \
             patch("pandas.read_sql") as mock_read_sql, \
             patch("pandas.DataFrame.to_sql") as mock_to_sql:
@@ -954,9 +959,9 @@ class TestInsert:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
                 return_value=mock_connection), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver.JsonFiles", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
                 return_value=mock_json_files), \
             patch("pandas.DataFrame.to_sql", side_effect=Exception("Insert failed")):
                 db = SqlServerDB(**valid_db_config)
@@ -999,7 +1004,7 @@ class TestClose:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -1037,7 +1042,7 @@ class TestBackupMethods:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -1070,7 +1075,7 @@ class TestBackupMethods:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -1108,7 +1113,7 @@ class TestABCDatabaseCompliance:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -1157,10 +1162,10 @@ class TestErrorLogging:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect"
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect"
         ) as mock_connect,\
             patch(
-                "stpstone.utils.connections.databases.sql.sqlserver.CreateLog"
+                "stpstone.utils.connections.databases.sql.sqlserver_db.CreateLog"
             ) as mock_create_log:
                 mock_log_instance = MagicMock()
                 mock_create_log.return_value = mock_log_instance
@@ -1208,15 +1213,15 @@ class TestErrorLogging:
         valid_db_config["logger"] = mock_logger
         
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
             return_value=mock_connection
         ), \
             patch(
-                "stpstone.utils.connections.databases.sql.sqlserver.JsonFiles", 
+                "stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
                 return_value=mock_json_files
             ), \
             patch(
-                "stpstone.utils.connections.databases.sql.sqlserver.CreateLog"
+                "stpstone.utils.connections.databases.sql.sqlserver_db.CreateLog"
             ) as mock_create_log, \
             patch("pandas.DataFrame.to_sql", side_effect=Exception("Insert failed")):
                 mock_log_instance = MagicMock()

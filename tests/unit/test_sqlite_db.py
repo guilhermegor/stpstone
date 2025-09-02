@@ -21,7 +21,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
-from stpstone.utils.connections.databases.sql.sqlite import SQLiteDB
+from stpstone.utils.connections.databases.sql.sqlite_db import SQLiteDB
 from stpstone.utils.parsers.json import JsonFiles
 
 
@@ -356,6 +356,11 @@ def test_execute_operational_error(
     Returns
     -------
     None
+
+    Raises
+    ------
+    sqlite3.OperationalError
+        If query is "SELECT 1"
     """
     mock_cursor = Mock()
     def execute_side_effect(query: str) -> None:
@@ -369,6 +374,11 @@ def test_execute_operational_error(
         Returns
         -------
         None
+
+        Raises
+        ------
+        sqlite3.OperationalError
+            If query is "SELECT 1"
         """
         if query == "SELECT 1":
             return None
@@ -939,7 +949,7 @@ def test_reload_module(
     """
     import importlib
     db = SQLiteDB(temp_db_path)
-    importlib.reload(sys.modules["stpstone.utils.connections.databases.sql.sqlite"])
+    importlib.reload(sys.modules["stpstone.utils.connections.databases.sql.sqlite_db"])
     new_db = SQLiteDB(temp_db_path)
     assert new_db.db_path == temp_db_path
     new_db.close()
