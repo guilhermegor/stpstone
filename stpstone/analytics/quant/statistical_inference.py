@@ -19,7 +19,7 @@ from statsmodels.stats.stattools import durbin_watson
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.analytics.quant.statistical_description import StatisticalDescription
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
 class AnovaResults(TypedDict):
@@ -132,6 +132,7 @@ class BenfordResults(TypedDict):
     real_numbers_observed_array: NDArray[np.float64]
 
 
+@type_checker
 def validate_array(
     array: NDArray[np.float64], 
     name: str, 
@@ -165,6 +166,7 @@ def validate_array(
         raise ValueError(f"{name} contains NaN or infinite values")
 
 
+@type_checker
 def validate_scalar(
     value: float, 
     name: str, 

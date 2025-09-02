@@ -78,7 +78,7 @@ def test_validate_array_not_numpy(stat_dist_ht: StatisticalDistributionsHT) -> N
     --------
     That passing a list instead of numpy array raises TypeError with correct message.
     """
-    with pytest.raises(TypeError, match="array_data must be a numpy array, got"):
+    with pytest.raises(TypeError, match="must be of type"):
         validate_array([1, 2, 3], "array_data")
 
 
@@ -161,7 +161,7 @@ def test_validate_scalar_not_float(stat_dist_ht: StatisticalDistributionsHT) -> 
     --------
     That passing a non-float value raises TypeError with correct message.
     """
-    with pytest.raises(TypeError, match="alpha must be a float"):
+    with pytest.raises(TypeError, match="must be of type"):
         validate_scalar("0.05", "alpha")
 
 
