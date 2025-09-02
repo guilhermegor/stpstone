@@ -161,7 +161,7 @@ class LiquidityRatios(metaclass=TypeChecker):
         return cash_equivalents / current_liabilities
 
 
-class SolvencyRatios:
+class SolvencyRatios(metaclass=TypeChecker):
     """Calculate solvency ratios to assess a company's long-term financial stability.
 
     References

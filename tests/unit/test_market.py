@@ -238,7 +238,7 @@ class TestRiskStats:
         -------
         None
         """
-        with pytest.raises(ValueError, match="Return array is empty"):
+        with pytest.raises(ValueError, match="Input array cannot be empty"):
             RiskStats(np.array([]))
 
     def test_init_with_nan_values(self) -> None:
