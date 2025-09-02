@@ -15,7 +15,7 @@ from pyodbc import Connection
 import pytest
 
 from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.connections.databases.sql.sqlserver import SqlServerDB
 from stpstone.utils.parsers.json import JsonFiles
 
@@ -63,14 +63,14 @@ def mock_connection() -> Mock:
 
 @pytest.fixture
 def mock_dates_br() -> Mock:
-    """Fixture providing mocked DatesBRAnbima class.
+    """Fixture providing mocked ABCCalendarOperations class.
 
     Returns
     -------
     Mock
-        Mocked DatesBRAnbima instance
+        Mocked ABCCalendarOperations instance
     """
-    mock_dates = Mock(spec=DatesBRAnbima)
+    mock_dates = Mock(spec=ABCCalendarOperations)
     mock_dates.str_date_to_datetime.return_value = "2023-01-01"
     return mock_dates
 
@@ -649,7 +649,7 @@ class TestRead:
 
         Verifies
         --------
-        - Date columns are converted using DatesBRAnbima
+        - Date columns are converted using ABCCalendarOperations
         - Both list_cols_dt and str_fmt_dt are required
 
         Parameters
@@ -661,7 +661,7 @@ class TestRead:
         sample_query_result : pd.DataFrame
             Sample query result from fixture
         mock_dates_br : Mock
-            Mocked DatesBRAnbima instance
+            Mocked ABCCalendarOperations instance
 
         Returns
         -------
@@ -670,7 +670,7 @@ class TestRead:
         with patch("stpstone.utils.connections.databases.sql.sqlserver.connect", 
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver.DatesBRAnbima", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver.ABCCalendarOperations", 
                   return_value=mock_dates_br):
                     db = SqlServerDB(**valid_db_config)
                     date_cols = ["date_col"]
