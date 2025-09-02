@@ -7,15 +7,16 @@ using pymongo for database interactions and pandas for data handling.
 from __future__ import annotations
 
 from logging import Logger
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 from pymongo import MongoClient
 
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class MongoConn:
+class MongoConn(metaclass=TypeChecker):
     """Singleton class for MongoDB connection management.
 
     This class implements the singleton pattern to ensure only one MongoDB connection
@@ -35,19 +36,25 @@ class MongoConn:
         Logger instance for logging operations
     """
 
-    _instance: Optional[MongoConn] = None
+    _instance: Optional[MongoConn] = None # noqa UP045: use X | None for type annotations
     _initialized: bool = False
 
-    def __new__(cls: type[MongoConn], *args, **kwargs) -> MongoConn:
+    def __new__(
+        cls: type[MongoConn], 
+        *args: Any, # noqa ANN401: typing.Any is not allowed
+        **kwargs: Any # noqa ANN401: typing.Any is not allowed
+    ) -> MongoConn:
         """Create singleton instance of MongoConn.
 
         Ensures that only one instance of the class is created (singleton pattern).
 
         Parameters
         ----------
-        *args
+        cls : type[MongoConn]
+            Class object
+        *args: Any
             Variable length argument list
-        **kwargs
+        **kwargs: Any
             Arbitrary keyword arguments
 
         Returns
@@ -65,7 +72,7 @@ class MongoConn:
         int_port: int = 27017,
         str_dbname: str = "test",
         str_collection: str = "data",
-        logger: Optional[Logger] = None
+        logger: Optional[Logger] = None # noqa UP045: use X | None for type annotations
     ) -> None:
         """Initialize MongoDB connection parameters.
         
@@ -203,8 +210,6 @@ class MongoConn:
 
         Raises
         ------
-        ValueError
-            If input is not a pandas DataFrame
         RuntimeError
             If data insertion fails
         """
@@ -217,7 +222,7 @@ class MongoConn:
             if self.logger is not None:
                 CreateLog().log_message(
                     self.logger,
-                    f"ERROR {err}, MONGODB INJECTION ABORTED",
+                    f"Error: {err}; mongoDB injestion aborted",
                     "info"
                 )
             raise RuntimeError(f"Failed to insert data into MongoDB: {str(err)}") from err
@@ -260,9 +265,9 @@ class MongoConn:
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[BaseException]
+        exc_type: Optional[type[BaseException]], # noqa UP045: use X | None for type annotations
+        exc_val: Optional[BaseException], # noqa UP045: use X | None for type annotations
+        exc_tb: Optional[BaseException] # noqa UP045: use X | None for type annotations
     ) -> None:
         """Close connection when exiting context.
 

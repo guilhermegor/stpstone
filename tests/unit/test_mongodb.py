@@ -4,15 +4,10 @@ Tests the MongoConn singleton class for MongoDB connection management and data o
 covering initialization, data saving, connection handling, and edge cases.
 """
 
-import importlib
-import sys
-from typing import Optional, Union
+from typing import Any, Union
 
-import numpy as np
 import pandas as pd
 from pymongo import MongoClient
-from pymongo.collection import Collection
-from pymongo.database import Database
 import pytest
 from pytest_mock import MockerFixture
 
@@ -24,12 +19,12 @@ from stpstone.utils.loggs.create_logs import CreateLog
 # Fixtures
 # --------------------------
 @pytest.fixture
-def default_params() -> dict[str, Optional[Union[int, str]]]:
+def default_params() -> dict[str, Union[int, str, None]]:
     """Provide default parameters for MongoConn initialization.
 
     Returns
     -------
-    dict[str, Optional[Union[int, str]]]
+    dict[str, Union[int, str, None]]
         Dictionary with default parameters: host, port, dbname, collection, logger
     """
     return {
@@ -71,12 +66,12 @@ def mock_mongo_client(mocker: MockerFixture) -> MongoClient:
     return mocker.patch("pymongo.MongoClient")
 
 @pytest.fixture
-def mongo_conn(default_params: dict[str, Optional[Union[int, str]]]) -> MongoConn:
+def mongo_conn(default_params: dict[str, Union[int, str, None]]) -> MongoConn:
     """Provide MongoConn instance with default parameters.
 
     Parameters
     ----------
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -91,7 +86,7 @@ def mongo_conn(default_params: dict[str, Optional[Union[int, str]]]) -> MongoCon
 # --------------------------
 # Tests
 # --------------------------
-def test_singleton_pattern(default_params: dict[str, Optional[Union[int, str]]]) -> None:
+def test_singleton_pattern(default_params: dict[str, Union[int, str, None]]) -> None:
     """Test singleton pattern implementation.
 
     Verifies
@@ -102,7 +97,7 @@ def test_singleton_pattern(default_params: dict[str, Optional[Union[int, str]]])
 
     Parameters
     ----------
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -115,7 +110,7 @@ def test_singleton_pattern(default_params: dict[str, Optional[Union[int, str]]])
     assert instance2.str_host == default_params["str_host"]
     assert instance2.int_port == default_params["int_port"]
 
-def test_init_valid_inputs(default_params: dict[str, Optional[Union[int, str]]]) -> None:
+def test_init_valid_inputs(default_params: dict[str, Union[int, str, None]]) -> None:
     """Test initialization with valid inputs.
 
     Verifies
@@ -126,7 +121,7 @@ def test_init_valid_inputs(default_params: dict[str, Optional[Union[int, str]]])
 
     Parameters
     ----------
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -145,14 +140,17 @@ def test_init_valid_inputs(default_params: dict[str, Optional[Union[int, str]]])
     assert isinstance(conn.str_collection, str)
 
 @pytest.mark.parametrize("host", [None, "", 123, [], {}])
-def test_validate_host_invalid(host: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
+def test_validate_host_invalid(
+    host: Any, # noqa ANN401: typing.Any is not allowed
+    default_params: dict[str, Union[int, str, None]]
+) -> None:
     """Test host validation with invalid inputs.
 
     Parameters
     ----------
-    host : any
+    host : Any
         Invalid host values to test
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -160,18 +158,21 @@ def test_validate_host_invalid(host: any, default_params: dict[str, Optional[Uni
     None
     """
     default_params["str_host"] = host
-    with pytest.raises(ValueError, match="Host must be a string|Host cannot be empty"):
+    with pytest.raises(TypeError, match="must be of type"):
         MongoConn(**default_params)
 
 @pytest.mark.parametrize("port", [None, "123", 0, 65536, -1, 1.5])
-def test_validate_port_invalid(port: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
+def test_validate_port_invalid(
+    port: Any, # noqa ANN401: typing.Any is not allowed
+    default_params: dict[str, Union[int, str, None]]
+) -> None:
     """Test port validation with invalid inputs.
 
     Parameters
     ----------
-    port : any
+    port : Any
         Invalid port values to test
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -179,18 +180,21 @@ def test_validate_port_invalid(port: any, default_params: dict[str, Optional[Uni
     None
     """
     default_params["int_port"] = port
-    with pytest.raises(ValueError, match="Port must be an integer|Port must be between 1 and 65535"):
+    with pytest.raises(TypeError, match="must be of type"):
         MongoConn(**default_params)
 
 @pytest.mark.parametrize("dbname", [None, "", 123, [], {}])
-def test_validate_dbname_invalid(dbname: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
+def test_validate_dbname_invalid(
+    dbname: Any, # noqa ANN401: typing.Any is not allowed
+    default_params: dict[str, Union[int, str, None]]
+) -> None:
     """Test database name validation with invalid inputs.
 
     Parameters
     ----------
-    dbname : any
+    dbname : Any
         Invalid database name values to test
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -198,18 +202,21 @@ def test_validate_dbname_invalid(dbname: any, default_params: dict[str, Optional
     None
     """
     default_params["str_dbname"] = dbname
-    with pytest.raises(ValueError, match="Database name must be a string|Database name cannot be empty"):
+    with pytest.raises(TypeError, match="must be of type"):
         MongoConn(**default_params)
 
 @pytest.mark.parametrize("collection", [None, "", 123, [], {}])
-def test_validate_collection_invalid(collection: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
+def test_validate_collection_invalid(
+    collection: Any, # noqa ANN401: typing.Any is not allowed
+    default_params: dict[str, Union[int, str, None]]
+) -> None:
     """Test collection name validation with invalid inputs.
 
     Parameters
     ----------
-    collection : any
+    collection : Any
         Invalid collection name values to test
-    default_params : dict[str, Optional[Union[int, str]]]
+    default_params : dict[str, Union[int, str, None]]
         Default parameters for MongoConn initialization
 
     Returns
@@ -217,10 +224,13 @@ def test_validate_collection_invalid(collection: any, default_params: dict[str, 
     None
     """
     default_params["str_collection"] = collection
-    with pytest.raises(ValueError, match="Collection name must be a string|Collection name cannot be empty"):
+    with pytest.raises(TypeError, match="must be of type"):
         MongoConn(**default_params)
 
-def test_save_df_valid(mongo_conn: MongoConn, sample_dataframe: pd.DataFrame, mocker: MockerFixture) -> None:
+def test_save_df_valid(
+    mongo_conn: MongoConn, 
+    sample_dataframe: pd.DataFrame, mocker: MockerFixture
+) -> None:
     """Test saving valid DataFrame to MongoDB.
 
     Parameters
@@ -240,24 +250,28 @@ def test_save_df_valid(mongo_conn: MongoConn, sample_dataframe: pd.DataFrame, mo
     mongo_conn._collection = mock_collection
     mongo_conn.save_df(sample_dataframe)
     mock_collection.insert_many.assert_called_once()
-    assert mock_collection.insert_many.call_args[0][0] == sample_dataframe.to_dict(orient="records")
+    assert mock_collection.insert_many.call_args[0][0] \
+        == sample_dataframe.to_dict(orient="records")
 
 @pytest.mark.parametrize("invalid_df", [None, [], {}, "string", 123])
-def test_save_df_invalid_type(mongo_conn: MongoConn, invalid_df: any) -> None:
+def test_save_df_invalid_type(
+    mongo_conn: MongoConn, 
+    invalid_df: Any # noqa ANN401: typing.Any is not allowed
+) -> None:
     """Test saving invalid DataFrame types.
 
     Parameters
     ----------
     mongo_conn : MongoConn
         Initialized MongoConn instance
-    invalid_df : any
+    invalid_df : Any
         Invalid DataFrame inputs to test
 
     Returns
     -------
     None
     """
-    with pytest.raises(ValueError, match="The provided data is not a pandas DataFrame"):
+    with pytest.raises(TypeError, match="must be of type"):
         mongo_conn.save_df(invalid_df)
 
 def test_save_df_empty(mongo_conn: MongoConn) -> None:
@@ -276,7 +290,11 @@ def test_save_df_empty(mongo_conn: MongoConn) -> None:
     with pytest.raises(ValueError, match="DataFrame cannot be empty"):
         mongo_conn.save_df(empty_df)
 
-def test_save_df_insertion_failure(mongo_conn: MongoConn, sample_dataframe: pd.DataFrame, mocker: MockerFixture) -> None:
+def test_save_df_insertion_failure(
+    mongo_conn: MongoConn, 
+    sample_dataframe: pd.DataFrame, 
+    mocker: MockerFixture
+) -> None:
     """Test DataFrame insertion failure handling.
 
     Parameters
@@ -357,12 +375,16 @@ def test_context_manager_exception(mongo_conn: MongoConn, mocker: MockerFixture)
     Returns
     -------
     None
+
+    Raises
+    ------
+    ValueError
+        Expected exception
     """
     mock_client = mocker.MagicMock()
     mongo_conn._client = mock_client
-    with pytest.raises(ValueError):
-        with mongo_conn:
-            raise ValueError("Test error")
+    with pytest.raises(ValueError), mongo_conn:
+        raise ValueError("Test error")
     mock_client.close.assert_called_once()
 
 def test_reset_instance() -> None:
@@ -395,9 +417,9 @@ def test_save_df_special_characters(mongo_conn: MongoConn, mocker: MockerFixture
     -------
     None
     """
-    df = pd.DataFrame({"name": ["😊Alice", "Bob🚀", "Charlie🌟"]})
+    df_ = pd.DataFrame({"name": ["😊Alice", "Bob🚀", "Charlie🌟"]})
     mock_collection = mocker.MagicMock()
     mongo_conn._collection = mock_collection
-    mongo_conn.save_df(df)
+    mongo_conn.save_df(df_)
     mock_collection.insert_many.assert_called_once()
-    assert mock_collection.insert_many.call_args[0][0] == df.to_dict(orient="records")
+    assert mock_collection.insert_many.call_args[0][0] == df_.to_dict(orient="records")
