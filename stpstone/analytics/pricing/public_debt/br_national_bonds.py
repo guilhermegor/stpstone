@@ -17,6 +17,15 @@ class BRSovereignPricer(metaclass=TypeChecker):
     [3] https://www.tesourodireto.com.br/data/files/18/A1/2B/35/855FB610FAC28EB6018E28A8/Modulo%203_TesouroDireto%20_2017_.pdf
     """
 
+    def __init__(self) -> None:
+        """Initialize class attributes.
+        
+        Returns
+        -------
+        None
+        """
+        self.cls_dates_br_anbima = DatesBRAnbima()
+
     def ltn(
         self, 
         float_ytm: float, 
@@ -176,10 +185,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
             return 0.0
         
         # adjust for business days
-        date_ref = DatesBRAnbima().nearest_working_day(date_ref, bool_next=False)
-        delta_ref = DatesBRAnbima().delta_calendar_days(date_ref, dt_ipca_last)
-        delta_total = DatesBRAnbima().delta_calendar_days(dt_ipca_next, dt_ipca_last)
-        print(f"PR1: {delta_ref} / {delta_total} = {delta_ref / delta_total}")
+        date_ref = self.cls_dates_br_anbima.nearest_working_day(date_ref, bool_next=False)
+        delta_ref = self.cls_dates_br_anbima.delta_calendar_days(dt_ipca_last, date_ref)
+        delta_total = self.cls_dates_br_anbima.delta_calendar_days(dt_ipca_last, dt_ipca_next)
         return delta_ref / delta_total
 
     def vna_ntnb_hat(

@@ -88,10 +88,12 @@ class DebenturesPricer(metaclass=TypeChecker):
         while dt_last_coupon <= dt_settlement:
             dt_last_coupon = dt_last_coupon.replace(
                 month=dt_last_coupon.month + int_months_to_add_between)
-        dt_last_coupon = dt_last_coupon.replace(month=dt_last_coupon.month - int_months_to_add_between)
+        dt_last_coupon = dt_last_coupon\
+            .replace(month=dt_last_coupon.month - int_months_to_add_between)
 
         # next coupon is int_months_to_add_between after last coupon
-        dt_next_coupon = dt_last_coupon.replace(month=dt_last_coupon.month + int_months_to_add_between)
+        dt_next_coupon = dt_last_coupon\
+            .replace(month=dt_last_coupon.month + int_months_to_add_between)
 
         return dt_last_coupon, dt_next_coupon
 
