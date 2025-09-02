@@ -17,7 +17,7 @@ from oracledb import Connection, Cursor
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import Composable
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
@@ -85,6 +85,7 @@ class OracleDB(ABCDatabase):
             error_msg = f"Error connecting to Oracle database: {str(err)}"
             CreateLog().log_message(self.logger, error_msg, "error")
             raise ConnectionError(error_msg) from err
+        self.cls_calendar_operations = ABCCalendarOperations()
 
     def _validate_db_config(self) -> None:
         """Validate database configuration parameters.
@@ -176,7 +177,8 @@ class OracleDB(ABCDatabase):
         if list_cols_dt is not None and str_fmt_dt is not None:
             for col_ in list_cols_dt:
                 df_[col_] = [
-                    DatesBRAnbima().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]
+                    self.cls_calendar_operations.str_date_to_datetime(d, str_fmt_dt) 
+                    for d in df_[col_]
                 ]
 
         return df_
