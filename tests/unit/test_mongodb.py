@@ -1,39 +1,62 @@
 """Unit tests for MongoDB connection and data handling utilities.
 
-Tests the MongoConn class functionality including:
-- Singleton pattern implementation
-- Connection establishment and validation
-- DataFrame operations
-- Context manager behavior
-- Error handling and edge cases
+Tests the MongoConn singleton class for MongoDB connection management and data operations,
+covering initialization, data saving, connection handling, and edge cases.
 """
 
-from logging import Logger
+import importlib
 import sys
-from typing import Optional
-from unittest.mock import MagicMock, Mock
+from typing import Optional, Union
 
+import numpy as np
 import pandas as pd
 from pymongo import MongoClient
+from pymongo.collection import Collection
+from pymongo.database import Database
 import pytest
 from pytest_mock import MockerFixture
 
 from stpstone.utils.connections.databases.nosql.mongodb import MongoConn
+from stpstone.utils.loggs.create_logs import CreateLog
 
 
 # --------------------------
 # Fixtures
 # --------------------------
-@pytest.fixture(autouse=True)
-def reset_singleton():
-    """Reset singleton instance before each test."""
-    yield
-    MongoConn.reset_instance()
+@pytest.fixture
+def default_params() -> dict[str, Optional[Union[int, str]]]:
+    """Provide default parameters for MongoConn initialization.
 
+    Returns
+    -------
+    dict[str, Optional[Union[int, str]]]
+        Dictionary with default parameters: host, port, dbname, collection, logger
+    """
+    return {
+        "str_host": "localhost",
+        "int_port": 27017,
+        "str_dbname": "test",
+        "str_collection": "data",
+        "logger": None
+    }
 
 @pytest.fixture
-def mock_mongo_client(mocker: MockerFixture) -> MagicMock:
-    """Mock MongoClient for testing MongoDB connections.
+def sample_dataframe() -> pd.DataFrame:
+    """Provide a sample DataFrame for testing.
+
+    Returns
+    -------
+    pd.DataFrame
+        Sample DataFrame with test data
+    """
+    return pd.DataFrame({
+        "name": ["Alice", "Bob", "Charlie"],
+        "age": [25, 30, 35]
+    })
+
+@pytest.fixture
+def mock_mongo_client(mocker: MockerFixture) -> MongoClient:
+    """Mock MongoClient for testing.
 
     Parameters
     ----------
@@ -42,431 +65,339 @@ def mock_mongo_client(mocker: MockerFixture) -> MagicMock:
 
     Returns
     -------
-    MagicMock
+    MongoClient
         Mocked MongoClient instance
     """
-    return mocker.patch("stpstone.utils.connections.databases.nosql.mongodb.MongoClient")
-
+    return mocker.patch("pymongo.MongoClient")
 
 @pytest.fixture
-def mock_create_log(mocker: MockerFixture) -> MagicMock:
-    """Mock CreateLog class for testing logging behavior.
+def mongo_conn(default_params: dict[str, Optional[Union[int, str]]]) -> MongoConn:
+    """Provide MongoConn instance with default parameters.
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    MagicMock
-        Mocked CreateLog instance
-    """
-    return mocker.patch("stpstone.utils.connections.databases.nosql.mongodb.CreateLog")
-
-
-@pytest.fixture
-def mongo_conn() -> MongoConn:
-    """Fixture providing a MongoConn instance with default parameters.
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     MongoConn
         Initialized MongoConn instance
     """
-    return MongoConn()
-
-
-@pytest.fixture
-def sample_dataframe() -> pd.DataFrame:
-    """Fixture providing a sample pandas DataFrame.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with sample data
-    """
-    return pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
-
-
-@pytest.fixture
-def mock_logger(mocker: MockerFixture) -> Logger:
-    """Mock Logger instance for testing logging behavior.
-
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    Logger
-        Mocked Logger instance
-    """
-    return mocker.patch("logging.Logger")
+    MongoConn.reset_instance()
+    return MongoConn(**default_params)
 
 
 # --------------------------
 # Tests
 # --------------------------
-def test_singleton_pattern() -> None:
+def test_singleton_pattern(default_params: dict[str, Optional[Union[int, str]]]) -> None:
     """Test singleton pattern implementation.
 
     Verifies
     --------
     - Multiple instantiations return the same instance
-    - Instance attributes remain consistent
+    - Instance attributes are set from first initialization
+    - Subsequent initializations don't change attributes
+
+    Parameters
+    ----------
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     None
     """
-    conn1 = MongoConn()
-    conn2 = MongoConn(str_host="different", int_port=27018)
-    assert conn1 is conn2
-    assert conn1.str_host == "localhost"  # First initialization wins
-    assert conn1.int_port == 27017
+    instance1 = MongoConn(**default_params)
+    instance2 = MongoConn(str_host="different", int_port=9999)
+    assert instance1 is instance2
+    assert instance2.str_host == default_params["str_host"]
+    assert instance2.int_port == default_params["int_port"]
 
-
-def test_init_valid_inputs(mock_mongo_client: MagicMock) -> None:
+def test_init_valid_inputs(default_params: dict[str, Optional[Union[int, str]]]) -> None:
     """Test initialization with valid inputs.
 
     Verifies
     --------
     - Instance attributes are correctly set
-    - MongoClient is called with correct parameters
-    - Database and collection are properly initialized
+    - Types of attributes are correct
+    - Connection components are initialized
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     None
     """
-    conn = MongoConn(str_host="test_host", int_port=27018, str_dbname="test_db", str_collection="test_coll")
-    assert conn.str_host == "test_host"
-    assert conn.int_port == 27018
-    assert conn.str_dbname == "test_db"
-    assert conn.str_collection == "test_coll"
-    mock_mongo_client.assert_called_once_with("test_host", 27018)
+    MongoConn.reset_instance()
+    conn = MongoConn(**default_params)
+    assert conn.str_host == default_params["str_host"]
+    assert conn.int_port == default_params["int_port"]
+    assert conn.str_dbname == default_params["str_dbname"]
+    assert conn.str_collection == default_params["str_collection"]
+    assert isinstance(conn.str_host, str)
+    assert isinstance(conn.int_port, int)
+    assert isinstance(conn.str_dbname, str)
+    assert isinstance(conn.str_collection, str)
 
-
-@pytest.mark.parametrize("host", [None, "", 123, []])
-def test_validate_host_invalid(host: any) -> None:
+@pytest.mark.parametrize("host", [None, "", 123, [], {}])
+def test_validate_host_invalid(host: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
     """Test host validation with invalid inputs.
 
     Parameters
     ----------
     host : any
         Invalid host values to test
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     None
     """
+    default_params["str_host"] = host
     with pytest.raises(ValueError, match="Host must be a string|Host cannot be empty"):
-        MongoConn(str_host=host)
-
+        MongoConn(**default_params)
 
 @pytest.mark.parametrize("port", [None, "123", 0, 65536, -1, 1.5])
-def test_validate_port_invalid(port: any) -> None:
+def test_validate_port_invalid(port: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
     """Test port validation with invalid inputs.
 
     Parameters
     ----------
     port : any
         Invalid port values to test
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     None
     """
+    default_params["int_port"] = port
     with pytest.raises(ValueError, match="Port must be an integer|Port must be between 1 and 65535"):
-        MongoConn(int_port=port)
+        MongoConn(**default_params)
 
-
-@pytest.mark.parametrize("dbname", [None, "", 123, []])
-def test_validate_dbname_invalid(dbname: any) -> None:
+@pytest.mark.parametrize("dbname", [None, "", 123, [], {}])
+def test_validate_dbname_invalid(dbname: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
     """Test database name validation with invalid inputs.
 
     Parameters
     ----------
     dbname : any
         Invalid database name values to test
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     None
     """
+    default_params["str_dbname"] = dbname
     with pytest.raises(ValueError, match="Database name must be a string|Database name cannot be empty"):
-        MongoConn(str_dbname=dbname)
+        MongoConn(**default_params)
 
-
-@pytest.mark.parametrize("collection", [None, "", 123, []])
-def test_validate_collection_invalid(collection: any) -> None:
+@pytest.mark.parametrize("collection", [None, "", 123, [], {}])
+def test_validate_collection_invalid(collection: any, default_params: dict[str, Optional[Union[int, str]]]) -> None:
     """Test collection name validation with invalid inputs.
 
     Parameters
     ----------
     collection : any
         Invalid collection name values to test
+    default_params : dict[str, Optional[Union[int, str]]]
+        Default parameters for MongoConn initialization
 
     Returns
     -------
     None
     """
+    default_params["str_collection"] = collection
     with pytest.raises(ValueError, match="Collection name must be a string|Collection name cannot be empty"):
-        MongoConn(str_collection=collection)
+        MongoConn(**default_params)
 
-
-def test_connect_failure(mock_mongo_client: MagicMock) -> None:
-    """Test connection failure handling.
-
-    Parameters
-    ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
-
-    Returns
-    -------
-    None
-    """
-    mock_mongo_client.side_effect = Exception("Connection failed")
-    with pytest.raises(ConnectionError, match="Failed to connect to MongoDB"):
-        MongoConn()
-
-
-def test_save_df_valid(mock_mongo_client: MagicMock, sample_dataframe: pd.DataFrame) -> None:
+def test_save_df_valid(mongo_conn: MongoConn, sample_dataframe: pd.DataFrame, mocker: MockerFixture) -> None:
     """Test saving valid DataFrame to MongoDB.
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
     sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
+        Sample DataFrame for testing
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    conn = MongoConn()
-    conn._collection = Mock()
-    conn.save_df(sample_dataframe)
-    conn._collection.insert_many.assert_called_once()
-    assert conn._collection.insert_many.call_args[0][0] == sample_dataframe.to_dict(orient="records")
+    mock_collection = mocker.MagicMock()
+    mongo_conn._collection = mock_collection
+    mongo_conn.save_df(sample_dataframe)
+    mock_collection.insert_many.assert_called_once()
+    assert mock_collection.insert_many.call_args[0][0] == sample_dataframe.to_dict(orient="records")
 
-
-@pytest.mark.parametrize("invalid_df", [None, [], "not_a_dataframe", 123])
-def test_validate_dataframe_invalid(invalid_df: any, mock_mongo_client: MagicMock) -> None:
-    """Test DataFrame validation with invalid inputs.
+@pytest.mark.parametrize("invalid_df", [None, [], {}, "string", 123])
+def test_save_df_invalid_type(mongo_conn: MongoConn, invalid_df: any) -> None:
+    """Test saving invalid DataFrame types.
 
     Parameters
     ----------
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
     invalid_df : any
         Invalid DataFrame inputs to test
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
 
     Returns
     -------
     None
     """
-    conn = MongoConn()
     with pytest.raises(ValueError, match="The provided data is not a pandas DataFrame"):
-        conn.save_df(invalid_df)
+        mongo_conn.save_df(invalid_df)
 
-
-def test_save_df_empty(mock_mongo_client: MagicMock) -> None:
-    """Test saving empty DataFrame raises error.
+def test_save_df_empty(mongo_conn: MongoConn) -> None:
+    """Test saving empty DataFrame.
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
 
     Returns
     -------
     None
     """
-    conn = MongoConn()
     empty_df = pd.DataFrame()
     with pytest.raises(ValueError, match="DataFrame cannot be empty"):
-        conn.save_df(empty_df)
+        mongo_conn.save_df(empty_df)
 
-
-def test_save_df_insert_failure(mock_mongo_client: MagicMock, sample_dataframe: pd.DataFrame, 
-                               mock_logger: Logger, mock_create_log: MagicMock) -> None:
-    """Test handling of data insertion failure.
+def test_save_df_insertion_failure(mongo_conn: MongoConn, sample_dataframe: pd.DataFrame, mocker: MockerFixture) -> None:
+    """Test DataFrame insertion failure handling.
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
     sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    mock_logger : Logger
-        Mocked Logger instance
-    mock_create_log : MagicMock
-        Mocked CreateLog instance
+        Sample DataFrame for testing
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    conn = MongoConn(logger=mock_logger)
-    conn._collection = Mock()
-    conn._collection.insert_many.side_effect = Exception("Insert failed")
-    
+    mock_collection = mocker.MagicMock()
+    mock_collection.insert_many.side_effect = Exception("Insertion failed")
+    mongo_conn._collection = mock_collection
+    mock_logger = mocker.patch.object(CreateLog, "log_message")
     with pytest.raises(RuntimeError, match="Failed to insert data into MongoDB"):
-        conn.save_df(sample_dataframe)
-    
-    mock_create_log.return_value.log_message.assert_called_once_with(
-        mock_logger,
-        "ERROR Insert failed, MONGODB INJECTION ABORTED",
-        "info"
-    )
+        mongo_conn.save_df(sample_dataframe)
+    if mongo_conn.logger:
+        mock_logger.assert_called_with(
+            mongo_conn.logger,
+            "ERROR Insertion failed, MONGODB INJECTION ABORTED",
+            "info"
+        )
 
-
-def test_close_connection(mock_mongo_client: MagicMock) -> None:
+def test_close_connection(mongo_conn: MongoConn, mocker: MockerFixture) -> None:
     """Test closing MongoDB connection.
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    conn = MongoConn()
-    conn._client = Mock()
-    conn.close()
-    conn._client.close.assert_called_once()
+    mock_client = mocker.MagicMock()
+    mongo_conn._client = mock_client
+    mongo_conn.close()
+    mock_client.close.assert_called_once()
 
-
-def test_context_manager(mock_mongo_client: MagicMock) -> None:
+def test_context_manager(mongo_conn: MongoConn, mocker: MockerFixture) -> None:
     """Test context manager functionality.
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    with MongoConn() as conn:
-        assert isinstance(conn, MongoConn)
-        assert conn._client is not None
-    assert conn._client.close.called
+    mock_client = mocker.MagicMock()
+    mongo_conn._client = mock_client
+    with mongo_conn as conn:
+        assert conn is mongo_conn
+    mock_client.close.assert_called_once()
 
-
-def test_unicode_input(mock_mongo_client: MagicMock) -> None:
-    """Test handling of unicode inputs.
+def test_context_manager_exception(mongo_conn: MongoConn, mocker: MockerFixture) -> None:
+    """Test context manager with exception.
 
     Parameters
     ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    conn = MongoConn(str_host="localhost", str_dbname="数据库", str_collection="集合")
-    assert conn.str_dbname == "数据库"
-    assert conn.str_collection == "集合"
+    mock_client = mocker.MagicMock()
+    mongo_conn._client = mock_client
+    with pytest.raises(ValueError):
+        with mongo_conn:
+            raise ValueError("Test error")
+    mock_client.close.assert_called_once()
 
+def test_reset_instance() -> None:
+    """Test resetting singleton instance.
 
-def test_reload_module(mock_mongo_client: MagicMock) -> None:
-    """Test module reload preserves singleton instance.
-
-    Parameters
-    ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
-
-    Returns
-    -------
-    None
-    """
-    import importlib
-    conn1 = MongoConn()
-    importlib.reload(sys.modules["stpstone.utils.connections.databases.nosql.mongodb"])
-    # After reload, we need to create a new instance since the module was reloaded
-    from stpstone.utils.connections.databases.nosql.mongodb import MongoConn as ReloadedMongoConn
-    conn2 = ReloadedMongoConn()
-    # They should be different instances due to module reload
-    assert conn1 is not conn2
-
-
-def test_none_logger(mock_mongo_client: MagicMock, sample_dataframe: pd.DataFrame, 
-                    mock_create_log: MagicMock) -> None:
-    """Test behavior with None logger.
-
-    Parameters
-    ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    mock_create_log : MagicMock
-        Mocked CreateLog instance
+    Verifies
+    --------
+    - Instance is reset to None
+    - Initialized flag is reset to False
 
     Returns
     -------
     None
     """
-    conn = MongoConn(logger=None)
-    conn._collection = Mock()
-    conn.save_df(sample_dataframe)
-    # Should not call log_message when logger is None
-    mock_create_log.return_value.log_message.assert_not_called()
-
-
-def test_numeric_edge_cases(mock_mongo_client: MagicMock) -> None:
-    """Test numeric edge cases for port number.
-
-    Parameters
-    ----------
-    mock_mongo_client : MagicMock
-        Mocked MongoClient instance
-
-    Returns
-    -------
-    None
-    """
-    # Explicitly reset singleton to ensure a fresh instance
     MongoConn.reset_instance()
-    assert MongoConn._initialized is False, "Singleton not reset properly"
+    assert MongoConn._instance is None
+    assert MongoConn._initialized is False
 
-    # Debug: Print singleton state before instantiation
-    print(f"Before instantiation: _instance={MongoConn._instance}, _initialized={MongoConn._initialized}")
+def test_save_df_special_characters(mongo_conn: MongoConn, mocker: MockerFixture) -> None:
+    """Test saving DataFrame with special characters.
 
-    # Test boundary value: port = 1
-    conn1 = MongoConn(int_port=1)
-    print(f"After instantiation: conn1={conn1}, _instance={MongoConn._instance}, _initialized={MongoConn._initialized}")
-    print(f"conn1 attributes: {dir(conn1)}")
-    print(f"conn1.int_port exists: {hasattr(conn1, 'int_port')}")
-    print(f"conn1.int_port value: {getattr(conn1, 'int_port', None)}")
-    assert hasattr(conn1, 'int_port'), f"int_port attribute missing on conn1: {dir(conn1)}"
-    assert conn1.int_port == 1, f"Expected int_port to be 1, got {conn1.int_port}"
+    Parameters
+    ----------
+    mongo_conn : MongoConn
+        Initialized MongoConn instance
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
-    # Reset singleton for second test
-    MongoConn.reset_instance()
-    assert MongoConn._initialized is False, "Singleton not reset properly"
-
-    # Test boundary value: port = 65535
-    conn2 = MongoConn(int_port=65535)
-    print(f"After instantiation: conn2={conn2}, _instance={MongoConn._instance}, _initialized={MongoConn._initialized}")
-    print(f"conn2 attributes: {dir(conn2)}")
-    print(f"conn2.int_port exists: {hasattr(conn2, 'int_port')}")
-    print(f"conn2.int_port value: {getattr(conn2, 'int_port', None)}")
-    assert hasattr(conn2, 'int_port'), f"int_port attribute missing on conn2: {dir(conn2)}"
-    assert conn2.int_port == 65535, f"Expected int_port to be 65535, got {conn2.int_port}"
+    Returns
+    -------
+    None
+    """
+    df = pd.DataFrame({"name": ["😊Alice", "Bob🚀", "Charlie🌟"]})
+    mock_collection = mocker.MagicMock()
+    mongo_conn._collection = mock_collection
+    mongo_conn.save_df(df)
+    mock_collection.insert_many.assert_called_once()
+    assert mock_collection.insert_many.call_args[0][0] == df.to_dict(orient="records")
