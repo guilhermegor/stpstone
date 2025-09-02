@@ -143,7 +143,8 @@ class ComeCotasCalculator(metaclass=TypeChecker):
         
         # check both May and November tax days
         return ((date_ref.month == tax_days[0] and date_ref.day == tax_days[1]) or
-                (len(tax_days) > 2 and date_ref.month == tax_days[2] and date_ref.day == tax_days[3]))
+                (len(tax_days) > 2 and date_ref.month == tax_days[2] 
+                 and date_ref.day == tax_days[3]))
     
     def calculate_tax(
         self,
