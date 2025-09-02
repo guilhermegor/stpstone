@@ -54,9 +54,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         float_daily_settlement: float, 
         float_size: float, 
         float_qty: float, 
-        float_xcg_rt_1: float, 
-        float_xcg_rt_2: float = 1, 
-        float_xcg_parity: Optional[float] = None
+        float_xcg_rate: float = 1.0,
     ) -> float:
         """Calculate generic mtm value of a future contract.
         
@@ -68,12 +66,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Size of the contract
         float_qty : float
             Quantity of contracts
-        float_xcg_rt_1 : float
+        float_xcg_rate : float
             Cross currency rate
-        float_xcg_rt_2 : float, optional
-            Cross currency rate, by default 1
-        float_xcg_parity : Optional[float], optional
-            Cross currency parity, by default None
         
         Returns
         -------
@@ -87,11 +81,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         [1.2] Use the column "Rate" ("Taxa"), subcolumn "Offer" ("Venda") for the exchange rate
         [2] For USD/BRL exchange rate, please refer to B3 referencial exchange rate
         [2.1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/clearing-de-cambio/indicadores/taxas-de-cambio-referencial/
+        [3] Daily settlements of future contractes are available at B3 website
+        [3.1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/derivativos/ajustes-do-pregao/
         """
-        if float_xcg_parity:
-            return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 \
-                * float_xcg_parity
-        return float_daily_settlement * float_size * float_qty * float_xcg_rt_1 / float_xcg_rt_2
+        return float_daily_settlement * float_size * float_qty * float_xcg_rate
     
     def abevo(self, float_daily_settlement: float, float_qty: float) -> float:
         """ABEVO - Future contract of ABEV3.
@@ -112,8 +105,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def afs(
@@ -142,8 +134,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_zarbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_zarbrl,
         )
     
     def arb(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -165,15 +156,15 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=150.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def ars(
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_xcg_arsbrl: float
+        float_xcg_usdbrl: float,
+        float_xcg_parity_usdars: float
     ) -> float:
         """ARS - Future contract of Argentine Peso in USD (ARS).
         
@@ -195,8 +186,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_arsbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl/float_xcg_parity_usdars,
         )
     
     def aud(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -218,8 +208,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=60.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def aus(
@@ -248,8 +237,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def b3sao(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -271,8 +259,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bbaso(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -294,8 +281,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bbdcp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -317,8 +303,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bgi(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -340,8 +325,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=330.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bhiao(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -363,8 +347,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bit(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -386,8 +369,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.01,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bpaci(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -409,8 +391,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def bri(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -432,8 +413,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def cad(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -455,15 +435,15 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=60.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def can(
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_xcg_cadbrl: float
+        float_xcg_usdbrl: float, 
+        float_xcg_usdcad: float
     ) -> float:
         """CAN - Future contract of Canadian Dollar in USD (CAN).
         
@@ -485,8 +465,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_cadbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl/float_xcg_usdcad,
         )
 
     def ccm(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -508,8 +487,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=450.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def chf(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -531,15 +509,15 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=50.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def chl(
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_xcg_clpbrl: float
+        float_xcg_usdbrl: float, 
+        float_xcg_usdclp: float,
     ) -> float:
         """CHL - Future contract of Chilean Peso in USD (CHL).
         
@@ -561,8 +539,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_clpbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl/float_xcg_usdclp,
         )
     
     def clp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -584,8 +561,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=25.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def cmigp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -607,8 +583,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def cnh(
@@ -637,8 +612,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_cnybrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_cnybrl,
         )
     
     def cnl(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -660,8 +634,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=100.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def cny(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -683,8 +656,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=35.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def cogno(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -706,8 +678,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def csano(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -729,8 +700,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def csnao(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -752,8 +722,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def dap(
@@ -869,9 +838,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=5.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0,
-            float_xcg_parity=float_xcg_parity_eurusd
+            float_xcg_rate=float_xcg_usdbrl * float_xcg_parity_eurusd,
         )
     
     def dco(
@@ -900,8 +867,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.5,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def ddi(
@@ -928,8 +894,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.5,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def di1(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -951,8 +916,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def dol(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -974,8 +938,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=50.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def eleto(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -997,8 +960,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def embro(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1020,8 +982,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def enevo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1043,8 +1004,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def eqtlo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1066,8 +1026,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def est(
@@ -1099,16 +1058,13 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.20,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0,
-            float_xcg_parity=float_xcg_parity_eurusd
+            float_xcg_rate=float_xcg_usdbrl * float_xcg_parity_eurusd,
         )
     
     def esx(self, 
         float_daily_settlement: float, 
-        float_qty: float, 
-        float_xcg_usdbrl: float, 
-        float_xcg_parity_eurusd: float
+        float_qty: float,
+        float_xcg_eurbrl: float
     ) -> float:
         """ESX - Future contract of Euro Stoxx 50 Index in EUR (ESX).
         
@@ -1118,6 +1074,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in EUR
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_eurbrl : float
+            Euro (EUR) to BRL exchange rate (EUR/BRL)
 
         Returns
         -------
@@ -1128,9 +1086,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0, 
-            float_xcg_parity=float_xcg_parity_eurusd
+            float_xcg_rate=float_xcg_eurbrl
         )
     
     def eth(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1152,8 +1108,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=30.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def etr(
@@ -1180,8 +1135,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.25,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def eup(
@@ -1208,8 +1162,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def eur(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1231,8 +1184,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=50.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def frc(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1265,8 +1217,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.50,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def fro(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1301,8 +1252,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.50,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def gbp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1324,8 +1274,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=35.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def gbr(
@@ -1352,8 +1301,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def ggbrp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1375,8 +1323,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def gld(
@@ -1403,8 +1350,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def hapvo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1426,8 +1372,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def hsi(self, float_daily_settlement: float, float_qty: float,) -> float:
@@ -1453,9 +1398,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.65,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0,
-            float_xcg_parity=1.0
+            float_xcg_rate=1.0,
         )
     
     def hypeo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1477,8 +1420,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def icf(
@@ -1507,8 +1449,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=100.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def imv(
@@ -1535,8 +1476,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_arsbrl,
-            float_xcg_rt_2=1.0,
+            float_xcg_rate=float_xcg_arsbrl,
         )
     
     def ind(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1558,8 +1498,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def isp(
@@ -1586,8 +1525,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=50.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def itsap(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1609,8 +1547,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def itubp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1632,15 +1569,15 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def jap(
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_xcg_jpybrl: float,
+        float_xcg_usbrl: float,
+        float_xcg_parity_usdjpy: float
     ) -> float:
         """JAP - Future contract of Japanese Yen in USD (JAP).
         
@@ -1660,8 +1597,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_jpybrl,
-            float_xcg_rt_2=1.0,
+            float_xcg_rate=float_xcg_usbrl / float_xcg_parity_usdjpy,
         )
 
     def jpy(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1683,8 +1619,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=50.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def jse(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1710,9 +1645,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.40,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0,
-            float_xcg_parity=1.0
+            float_xcg_rate=1.0,
         )
     
     def klbni(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1734,8 +1667,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def lreno(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1757,8 +1689,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def mbr(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1780,8 +1711,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def mex(
@@ -1809,8 +1739,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_mxnusd,
-            float_xcg_rt_2=1.0,
+            float_xcg_rate=float_xcg_usdbrl / float_xcg_parity_mxnusd,
         )
 
     def mgluo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1832,8 +1761,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def mxn(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1855,8 +1783,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=75.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def nok(
@@ -1883,8 +1810,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def nzd(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1906,8 +1832,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=75.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def nzl(
@@ -1934,8 +1859,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def oc1(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1961,8 +1885,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def pcaro(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -1984,8 +1907,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def petrp(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2007,8 +1929,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def prioo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2030,8 +1951,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def pssao(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2053,8 +1973,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def radlo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2076,8 +1995,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def railo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2099,8 +2017,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def rdoro(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2122,8 +2039,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def rento(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2145,8 +2061,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def rub(
@@ -2175,8 +2090,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_rubbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_rubbrl,
         )
 
     def sbspo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2198,16 +2112,14 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def sek(
         self, 
         float_daily_settlement: float, 
         float_qty: float, 
-        float_xcg_usdbrl: float, 
-        float_xcg_parity_sekusd: float
+        float_xcg_sekbrl: float,
     ) -> float:
         """SEK - Future contract of Swedish Krona in USD (SEK).
         
@@ -2229,8 +2141,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_sekusd,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_sekbrl,
         )
 
     def sfr(
@@ -2261,8 +2172,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.2,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def sjc(
@@ -2289,8 +2199,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=450.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def sml(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2312,8 +2221,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def sol(
@@ -2340,8 +2248,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=5.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def soy(
@@ -2368,8 +2275,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=34.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def suzbo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2391,8 +2297,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def swi(
@@ -2424,8 +2329,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_usdchf,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl / float_xcg_parity_usdchf,
         )
     
     def t10(
@@ -2454,8 +2358,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1_000.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
 
     def tie(
@@ -2487,8 +2390,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=3.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_mxnusd,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl / float_xcg_parity_mxnusd,
         )
     
     def timso(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2510,8 +2412,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def try_(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2533,8 +2434,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=75.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def tuq(
@@ -2564,8 +2464,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl / float_xcg_parity_usdtry,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl / float_xcg_parity_usdtry,
         )
 
     def usima(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2587,8 +2486,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def valeo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2610,8 +2508,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def vbbro(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2633,8 +2530,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
     def vivto(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2656,8 +2552,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def wdo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2679,8 +2574,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def wegeo(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2702,8 +2596,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=1.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def weu(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2725,8 +2618,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def win(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2748,8 +2640,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=0.2,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def wsp(
@@ -2776,8 +2667,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=2.50,
             float_qty=float_qty,
-            float_xcg_rt_1=float_xcg_usdbrl,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=float_xcg_usdbrl,
         )
     
     def xfi(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2799,8 +2689,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=10.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
     
     def zar(self, float_daily_settlement: float, float_qty: float) -> float:
@@ -2822,8 +2711,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             float_daily_settlement=float_daily_settlement,
             float_size=35.0,
             float_qty=float_qty,
-            float_xcg_rt_1=1.0,
-            float_xcg_rt_2=1.0
+            float_xcg_rate=1.0,
         )
 
 
