@@ -513,7 +513,7 @@ class TestReadMethod:
         assert result["id"].dtype == "int64"
         assert result["name"].dtype == "string"
 
-    @patch("stpstone.utils.calendars.handling_dates.DatesBRAnbima")
+    @patch("stpstone.utils.calendars.calendar_br.ABCCalendarOperations")
     @patch("stpstone.utils.connections.databases.sql.postgresql.connect")
     def test_read_with_date_conversion(
         self,
@@ -528,7 +528,7 @@ class TestReadMethod:
 
         Verifies
         --------
-        - Date columns are converted using DatesBRAnbima utility
+        - Date columns are converted using ABCCalendarOperations utility
         - Date format is passed correctly to conversion function
 
         Parameters
