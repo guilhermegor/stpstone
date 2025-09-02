@@ -206,7 +206,7 @@ class TestLinearInterpolation:
         -------
         None
         """
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError, match="must be one of types"):
             interpolation.linear_interpolation([1, 2, 3], [1, 2])
 
     def test_duplicate_x_values(self, interpolation: Interpolation, duplicate_x_data: tuple) \
@@ -327,8 +327,8 @@ class TestCubicSpline:
         -------
         None
         """
-        x = [0, 1, 2, 3]
-        y = [1, 0, -1, 1]  # y[0] == y[-1] for periodic condition
+        x = [0.0, 1.0, 2.0, 3.0]
+        y = [1.0, 0.0, -1.0, 1.0]  # y[0] == y[-1] for periodic condition
         result = interpolation.cubic_spline(x, y, bc_type="periodic")
         assert isinstance(result, CubicSpline)
         assert np.allclose(result(x), y)
