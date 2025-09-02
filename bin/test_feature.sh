@@ -401,13 +401,13 @@ def parse_raises_section(docstring: str) -> Dict[str, str]:
             if re.match(r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References)(:)?$", stripped, re.IGNORECASE):
                 break
 
-            # match formats like "ValueError: explanation"
+            # match formats like "ValueError: explanation" or "json.JSONDecodeError: explanation"
             match = re.match(r"^([\w.]+)\s*:\s*(.*)", stripped)
             if match:
                 exc, desc = match.groups()
                 raises[exc.strip()] = desc.strip()
             else:
-                # match formats like "ValueError" (without colon)
+                # match formats like "ValueError" or "json.JSONDecodeError" (without colon)
                 match = re.match(r"^([\w.]+)$", stripped)
                 if match:
                     raises[match.group(1)] = ""
@@ -415,7 +415,7 @@ def parse_raises_section(docstring: str) -> Dict[str, str]:
     return raises
 
 def get_actual_raises(node: ast.AST) -> Set[str]:
-    """Get all exceptions actually raised in the function."""
+    """Get all exceptions actually raised in the function, including module-qualified names."""
     raises = set()
     
     for n in ast.walk(node):
@@ -425,20 +425,47 @@ def get_actual_raises(node: ast.AST) -> Set[str]:
                 if isinstance(n.exc, ast.Name):
                     raises.add(n.exc.id)
                 # handle exception calls like ValueError("message")
-                elif isinstance(n.exc, ast.Call) and isinstance(n.exc.func, ast.Name):
-                    raises.add(n.exc.func.id)
+                elif isinstance(n.exc, ast.Call):
+                    if isinstance(n.exc.func, ast.Name):
+                        raises.add(n.exc.func.id)
+                    # handle attribute access like json.JSONDecodeError("message")
+                    elif isinstance(n.exc.func, ast.Attribute):
+                        # Get the full module.exception name
+                        if isinstance(n.exc.func.value, ast.Name):
+                            full_name = f"{n.exc.func.value.id}.{n.exc.func.attr}"
+                            raises.add(full_name)
+                            # Also add just the exception name for compatibility
+                            raises.add(n.exc.func.attr)
+                        else:
+                            raises.add(n.exc.func.attr)
                 # handle attribute access like exceptions.ValueError
                 elif isinstance(n.exc, ast.Attribute):
-                    raises.add(n.exc.attr)
-                # handle cases where exception is called directly
-                elif isinstance(n.exc, ast.Call) and hasattr(n.exc.func, 'id'):
-                    raises.add(n.exc.func.id)
+                    # Get the full module.exception name
+                    if isinstance(n.exc.value, ast.Name):
+                        full_name = f"{n.exc.value.id}.{n.exc.attr}"
+                        raises.add(full_name)
+                        # Also add just the exception name for compatibility
+                        raises.add(n.exc.attr)
+                    else:
+                        raises.add(n.exc.attr)
     
     return raises
 
 def normalize_exception_name(name: str) -> str:
     """Normalize exception names for comparison."""
     return name.split('.')[-1]  # Get just the exception name without module
+
+def normalize_exception_set(exceptions: Set[str]) -> Set[str]:
+    """Normalize a set of exception names, preserving both full and short names."""
+    normalized = set()
+    for exc in exceptions:
+        # Add both the full name and the short name
+        normalized.add(exc)
+        if '.' in exc:
+            normalized.add(exc.split('.')[-1])  # Add short name
+        # Also add normalized short name
+        normalized.add(normalize_exception_name(exc))
+    return normalized
 
 def check_type_checker_usage(node: ast.AST, filepath: str) -> int:
     """Check for TypeChecker metaclass and type_checker decorator usage."""
@@ -666,23 +693,25 @@ def check_file(filepath: str) -> int:
                         print(f"❌ Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno}")
                         errors += 1
             
-            # check Raises section
+            # check Raises section with improved exception handling
             doc_raises = parse_raises_section(docstring)
             actual_raises = get_actual_raises(node)
             
             # normalize all exception names for comparison
-            doc_exceptions = {normalize_exception_name(e) for e in doc_raises}
-            actual_exceptions = {normalize_exception_name(e) for e in actual_raises}
+            doc_exceptions = normalize_exception_set(set(doc_raises.keys()))
+            actual_exceptions = normalize_exception_set(actual_raises)
             
             # check for documented but not raised exceptions
-            for exc in doc_exceptions:
-                if exc not in actual_exceptions:
+            for exc in doc_raises.keys():
+                exc_variants = {exc, exc.split('.')[-1], normalize_exception_name(exc)}
+                if not any(variant in actual_exceptions for variant in exc_variants):
                     print(f"❌ Documented but not raised exception {exc} in {node.name}() at line {lineno}")
                     errors += 1
             
             # check for raised but not documented exceptions
-            for exc in actual_exceptions:
-                if exc not in doc_exceptions:
+            for exc in actual_raises:
+                exc_variants = {exc, exc.split('.')[-1], normalize_exception_name(exc)}
+                if not any(variant in doc_exceptions for variant in exc_variants):
                     print(f"❌ Raised but not documented exception {exc} in {node.name}() at line {lineno}")
                     errors += 1
     
