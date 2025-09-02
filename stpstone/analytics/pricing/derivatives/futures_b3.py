@@ -61,7 +61,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         Parameters
         ----------
         float_daily_settlement : float
-            Daily settlment value
+            Daily settlement value
         float_size : float
             Size of the contract
         float_qty : float
@@ -79,7 +79,7 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         [1] For exchange rates, please refer to Quotes and Bulletins, from Brazilian Central Bank
         [1.1] https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes
         [1.2] Use the column "Rate" ("Taxa"), subcolumn "Offer" ("Venda") for the exchange rate
-        [2] For USD/BRL exchange rate, please refer to B3 referencial exchange rate
+        [2] For USD/BRL exchange rate, please refer to B3 referential exchange rate
         [2.1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/consultas/clearing-de-cambio/indicadores/taxas-de-cambio-referencial/
         [3] Daily settlements of future contractes are available at B3 website
         [3.1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/derivativos/ajustes-do-pregao/
@@ -174,8 +174,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_arsbrl : float
-            Argentine Peso (ARS) to BRL exchange rate (ARS/BRL)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_usdars : float
+            Exchange parity between USD and ARS (USD/ARS)
 
         Returns
         -------
@@ -453,8 +455,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_cadbrl : float
-            Exchange rate between CAD and BRL (CAD/BRL)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_usdcad : float
+            Exchange rate between USD and CAD (USD/CAD)
 
         Returns
         -------
@@ -527,8 +531,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_clpbrl : float
-            Exchange rate between Chilean Peso and BRL (CLP/BRL)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_usdclp : float
+            Exchange rate between USD and Chilean Peso (USD/CLP)
 
         Returns
         -------
@@ -782,15 +788,15 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         Example
         -------
         >>> dap_pricing(
-        ...     float_daily_settlement=1000000,
-        ...     float_qty=50,
+        ...     float_daily_settlement=1_000_000.0,
+        ...     float_qty=50.0,
         ...     float_pmi_ipca_mm1=52.3,
         ...     float_pmi_ipca_rt_hat=0.04,
         ...     date_pmi_last=date(2023, 5, 15),
-        ...     date_pmi_next=date(2023, 6, 15),
-        ...     date_ref=date(2023, 5, 20)
+        ...     date_ref=date(2023, 5, 20),
+        ...     date_pmi_next=date(2023, 6, 15)
         ... )
-        12500.00
+        679900.0
         """
         float_size: float = 0.00025
         if date_pmi_last > date_pmi_next: 
@@ -884,6 +890,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1125,6 +1133,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1152,6 +1162,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1291,6 +1303,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1340,6 +1354,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1466,6 +1482,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_arsbrl : float
+            Exchange rate between ARS and BRL (ARS/BRL)
 
         Returns
         -------
@@ -1515,6 +1533,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1587,6 +1607,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_usdjpy : float
+            Exchange rate between USD and JPY (USD/JPY)
 
         Returns
         -------
@@ -1729,6 +1753,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_mxnusd : float
+            Exchange parity between MXN and USD (MXN/USD)
 
         Returns
         -------
@@ -1800,6 +1828,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -1849,6 +1879,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -2129,8 +2161,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_usdbrl : float
-            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_sekbrl : float
+            Exchange rate between SEK and BRL (SEK/BRL)
 
         Returns
         -------
@@ -2162,6 +2194,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -2189,6 +2223,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -2238,6 +2274,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -2265,6 +2303,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -2315,8 +2355,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_chfbrl : float
-            Cross currency rate from CHF to BRL
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
         float_xcg_parity_usdchf : float
             Exchange parity between USD and CHF (USD/CHF)
 
@@ -2380,6 +2420,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_mxnusd : float
+            Exchange parity between MXN and USD (MXN/USD)
 
         Returns
         -------
@@ -2452,8 +2496,10 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in USD
         float_qty : float
             Number of contracts (quantity)
-        float_xcg_trybrl : float
-            Cross currency rate from TRY to BRL
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
+        float_xcg_parity_usdtry : float
+            Exchange parity between USD and TRY (USD/TRY)
 
         Returns
         -------
@@ -2657,6 +2703,8 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
             Daily settlement value of the contract in BRL
         float_qty : float
             Number of contracts (quantity)
+        float_xcg_usdbrl : float
+            Exchange rate between USD and BRL (USD/BRL)
 
         Returns
         -------
@@ -3037,11 +3085,12 @@ class TSIR(metaclass=TypeChecker):
         Raises
         ------
         ValueError
-            If input has fewer than 3 points or if periods are not in ascending order
+            If input has fewer than 3 points
+            If periods are not in ascending order
+            If failing to construct the cubic spline
         TypeError
             If input types are invalid
-        Exception
-            For other interpolation errors
+            
         """
         # Input validation
         if len(dict_nper_rates) < 3:
@@ -3078,9 +3127,7 @@ class TSIR(metaclass=TypeChecker):
             return dict(zip(x_interp.astype(int), y_interp))
         
         except Exception as e:
-            raise Exception(
-                f"Failed to construct cubic spline: {str(e)}"
-            ) from e
+            raise ValueError(f"Failed to construct cubic spline: {str(e)}") from e
 
     def third_degree_polynomial_cubic_spline(
         self, 
