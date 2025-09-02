@@ -36,6 +36,7 @@ class MongoConn:
     """
 
     _instance: Optional[MongoConn] = None
+    _initialized: bool = False
 
     def __new__(cls: type[MongoConn], *args, **kwargs) -> MongoConn:
         """Create singleton instance of MongoConn.
@@ -56,9 +57,6 @@ class MongoConn:
         """
         if not cls._instance:
             cls._instance = super().__new__(cls)
-            cls._instance._client = None
-            cls._instance._db = None
-            cls._instance._collection = None
         return cls._instance
 
     def __init__(
@@ -70,7 +68,7 @@ class MongoConn:
         logger: Optional[Logger] = None
     ) -> None:
         """Initialize MongoDB connection parameters.
-
+        
         Parameters
         ----------
         str_host : str, optional
@@ -84,18 +82,27 @@ class MongoConn:
         logger : Optional[Logger], optional
             Logger instance for logging (default: None)
         """
-        if self._client is None:
-            self._validate_host(str_host)
-            self._validate_port(int_port)
-            self._validate_dbname(str_dbname)
-            self._validate_collection(str_collection)
-            
+        # Always validate inputs to ensure they are valid, even if not used
+        self._validate_host(str_host)
+        self._validate_port(int_port)
+        self._validate_dbname(str_dbname)
+        self._validate_collection(str_collection)
+        
+        # Only initialize if not already initialized (singleton pattern)
+        if not MongoConn._initialized:
+            # Set attributes from the FIRST initialization (singleton pattern)
             self.str_host = str_host
             self.int_port = int_port
             self.str_dbname = str_dbname
             self.str_collection = str_collection
             self.logger = logger
+            
+            # Initialize connection components
+            self._client = None
+            self._db = None
+            self._collection = None
             self._connect()
+            MongoConn._initialized = True
 
     def _validate_host(self, str_host: str) -> None:
         """Validate MongoDB host address.
@@ -110,10 +117,10 @@ class MongoConn:
         ValueError
             If host is empty or not a string
         """
-        if not str_host:
-            raise ValueError("Host cannot be empty")
         if not isinstance(str_host, str):
             raise ValueError("Host must be a string")
+        if not str_host:
+            raise ValueError("Host cannot be empty")
 
     def _validate_port(self, int_port: int) -> None:
         """Validate MongoDB port number.
@@ -146,10 +153,10 @@ class MongoConn:
         ValueError
             If database name is empty or not a string
         """
-        if not str_dbname:
-            raise ValueError("Database name cannot be empty")
         if not isinstance(str_dbname, str):
             raise ValueError("Database name must be a string")
+        if not str_dbname:
+            raise ValueError("Database name cannot be empty")
 
     def _validate_collection(self, str_collection: str) -> None:
         """Validate collection name.
@@ -164,10 +171,10 @@ class MongoConn:
         ValueError
             If collection name is empty or not a string
         """
-        if not str_collection:
-            raise ValueError("Collection name cannot be empty")
         if not isinstance(str_collection, str):
             raise ValueError("Collection name must be a string")
+        if not str_collection:
+            raise ValueError("Collection name cannot be empty")
 
     def _connect(self) -> None:
         """Establish connection to MongoDB server.
@@ -269,3 +276,9 @@ class MongoConn:
             Traceback if any
         """
         self.close()
+
+    @classmethod
+    def reset_instance(cls) -> None:
+        """Reset singleton instance for testing purposes."""
+        cls._instance = None
+        cls._initialized = False
