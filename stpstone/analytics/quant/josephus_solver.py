@@ -80,7 +80,7 @@ class JosephusSolver(metaclass=TypeChecker):
         for item in self.list_:
             cls_queue.enqueue(item)
         
-        while cls_queue.size() > 1:
+        while cls_queue.size > 1:
             for _ in range(self.step_interval - 1):
                 cls_queue.enqueue(cls_queue.dequeue())
             cls_queue.dequeue()

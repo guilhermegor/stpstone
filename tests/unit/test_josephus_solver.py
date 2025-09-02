@@ -240,7 +240,7 @@ class TestQueueIntegration:
         mock_queue.enqueue.side_effect = enqueue_side_effect
 
         # patch the Queue class to return our mock
-        mocker.patch("stpstone.dsa.queues.simple_queue.Queue", return_value=mock_queue)
+        mocker.patch("stpstone.utils.dsa.queues.simple_queue.Queue", return_value=mock_queue)
 
         solver = JosephusSolver([1, 2], 2)
         result = solver.solve()
