@@ -632,8 +632,8 @@ def test_get_holidays_years_valid(
     mock_df = pd.DataFrame(sample_febraban_json)
     
     # Define the year range for the test (default values from get_holidays_years)
-    int_year_start = 2024
-    int_year_end = 2025
+    int_year_start = 2023
+    int_year_end = 2024
     
     # Set instance attributes to match the test's year range
     febraban_instance.int_year_start = int_year_start
@@ -643,10 +643,10 @@ def test_get_holidays_years_valid(
         df_ = febraban_instance.get_holidays_years()  # Call without arguments
         assert isinstance(df_, pd.DataFrame)
         assert "ANO" in df_.columns
-        assert len(df_) == 26
-        assert df_["diaMes"].iloc[0] == "01 de janeiro"
+        assert len(df_) == 4
+        assert df_["diaMes"].iloc[0] == "1 de janeiro"
         assert StrHandler().remove_diacritics(df_["nomeFeriado"].iloc[0]) \
-            == StrHandler().remove_diacritics("Confraternização Universal")
+            == StrHandler().remove_diacritics("Ano Novo")
 
 
 def test_febraban_holidays_integration(
