@@ -311,7 +311,7 @@ def test_taylor_init_invalid_function() -> None:
     Verifies that:
     - Non-callable function raises TypeError with correct message
     """
-    with pytest.raises(TypeError, match="function must be callable"):
+    with pytest.raises(TypeError, match="must be of type"):
         TaylorSeries("not a function", order=3)
 
 

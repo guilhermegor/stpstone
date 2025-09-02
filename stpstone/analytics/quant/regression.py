@@ -33,7 +33,7 @@ from sklearn.tree import DecisionTreeRegressor
 from typing_extensions import NotRequired
 
 from stpstone.transformations.cleaner.eda import ExploratoryDataAnalysis
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
 class LinearRegressionsResult(TypedDict):
@@ -269,6 +269,7 @@ class LinearRegressions(metaclass=TypeChecker):
             array_x = np.c_[np.ones(array_x.shape[0]), array_x]
 
         if method == "implemented":
+            @type_checker
             def learning_schedule(t: int) -> float:
                 """Learning schedule.
                 

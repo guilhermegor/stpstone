@@ -81,7 +81,7 @@ class Fibonacci(metaclass=TypeChecker):
         return [self.fibonacci_of_n(i) for i in range(n)]
 
 
-class TaylorSeries:
+class TaylorSeries(metaclass=TypeChecker):
     """A class to compute Taylor series approximations for a given function."""
 
     def __init__(
