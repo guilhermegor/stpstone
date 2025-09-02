@@ -101,7 +101,7 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
             str_query: str,
             dict_type_cols: Optional[dict[str, Any]] = None,
             list_cols_dt: Optional[list[str]] = None,
-            str_fmt_dt: Optional[str] = None,
+            str_fmt_dt: Optional[TypeDateFormatInput] = None,
         ) -> pd.DataFrame:
             """Execute a query and return results as DataFrame.
             
@@ -113,7 +113,7 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
                 Column type mapping, defaults to None
             list_cols_dt : Optional[list[str]], optional
                 Date columns to parse, defaults to None
-            str_fmt_dt : Optional[str], optional
+            str_fmt_dt : Optional[TypeDateFormatInput], optional
                 Date format string, defaults to None
 
             Returns

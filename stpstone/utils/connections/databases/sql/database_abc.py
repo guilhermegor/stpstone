@@ -17,6 +17,7 @@ from stpstone.transformations.validation.metaclass_type_checker import (
     DbCursor,
     SQLComposable,
 )
+from stpstone.utils.calendars.calendar_abc import TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
@@ -312,7 +313,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         str_query: str,
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
-        str_fmt_dt: Optional[str] = None,
+        str_fmt_dt: Optional[TypeDateFormatInput] = None,
     ) -> pd.DataFrame:
         """Execute a query and return results as DataFrame.
 
@@ -324,7 +325,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
             Column type mapping, defaults to None
         list_cols_dt : Optional[list[str]], optional
             Date columns to parse, defaults to None
-        str_fmt_dt : Optional[str], optional
+        str_fmt_dt : Optional[TypeDateFormatInput], optional
             Date format string, defaults to None
 
         Returns

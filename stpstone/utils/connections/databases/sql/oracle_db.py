@@ -18,7 +18,7 @@ import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import Composable
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
-from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
+from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase, TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
 
@@ -136,7 +136,7 @@ class OracleDB(ABCDatabase):
         str_query: Union[str, Composable],
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
-        str_fmt_dt: Optional[str] = None,
+        str_fmt_dt: Optional[TypeDateFormatInput] = None,
     ) -> pd.DataFrame:
         """Read data from database into DataFrame.
 
@@ -148,7 +148,7 @@ class OracleDB(ABCDatabase):
             Dictionary for column type conversion (default: None)
         list_cols_dt : Optional[list[str]], optional
             List of date columns to convert (default: None)
-        str_fmt_dt : Optional[str], optional
+        str_fmt_dt : Optional[TypeDateFormatInput], optional
             Date format string (default: None)
 
         Returns

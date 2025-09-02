@@ -12,8 +12,8 @@ import pandas as pd
 from pyodbc import Connection, connect
 
 from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
-from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
+from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
+from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase, TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
 
@@ -85,6 +85,7 @@ class SqlServerDB(ABCDatabase):
             error_msg = f"Error connecting to database: {str(err)}"
             CreateLog().log_message(self.logger, error_msg, "error")
             raise ConnectionError(error_msg) from err
+        self.cls_calendar_operations = ABCCalendarOperations()
 
     def _validate_db_config(self) -> None:
         """Validate database configuration parameters.
@@ -183,7 +184,7 @@ class SqlServerDB(ABCDatabase):
         str_query: Union[str, SQLComposable],
         dict_type_cols: Optional[dict[str, Any]] = None,
         list_cols_dt: Optional[list[str]] = None,
-        str_fmt_dt: Optional[str] = None,
+        str_fmt_dt: Optional[TypeDateFormatInput] = None,
     ) -> pd.DataFrame:
         """Read data from database into DataFrame.
 
@@ -195,7 +196,7 @@ class SqlServerDB(ABCDatabase):
             Dictionary for column type conversion (default: None)
         list_cols_dt : Optional[list[str]], optional
             List of date columns to convert (default: None)
-        str_fmt_dt : Optional[str], optional
+        str_fmt_dt : Optional[TypeDateFormatInput], optional
             Date format string (default: None)
 
         Returns
@@ -223,7 +224,8 @@ class SqlServerDB(ABCDatabase):
         if list_cols_dt is not None and str_fmt_dt is not None:
             for col_ in list_cols_dt:
                 df_[col_] = [
-                    DatesBRAnbima().str_date_to_datetime(d, str_fmt_dt) for d in df_[col_]
+                    self.cls_calendar_operations.str_date_to_datetime(d, str_fmt_dt) 
+                    for d in df_[col_]
                 ]
 
         return df_
