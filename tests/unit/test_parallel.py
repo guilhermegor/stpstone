@@ -230,7 +230,7 @@ def test_type_validation_non_callable() -> None:
     -------
     None
     """
-    with pytest.raises(RuntimeError, match="Error during parallel pipeline execution"):
+    with pytest.raises(TypeError, match="must be of type"):
         parallel_pipeline(5, [lambda x: x, "not a function", lambda x: x])
 
 
