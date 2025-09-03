@@ -31,13 +31,6 @@ def get_package_version() -> str:
     -------
     str
         The version string from pyproject.toml
-    
-    Raises
-    ------
-    FileNotFoundError
-        If pyproject.toml cannot be found
-    KeyError
-        If the version field is missing
     """
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
     
@@ -62,7 +55,18 @@ def expected_version() -> str:
 
 @pytest.fixture
 def mock_version_not_found(mocker: MockerFixture) -> type[Any]:
-    """Mock importlib.metadata.version to raise PackageNotFoundError."""
+    """Mock importlib.metadata.version to raise PackageNotFoundError.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    
+    Returns
+    -------
+    type[Any]
+        Mocked version function
+    """
     return mocker.patch(
         "importlib.metadata.version", 
         side_effect=PackageNotFoundError
@@ -71,7 +75,20 @@ def mock_version_not_found(mocker: MockerFixture) -> type[Any]:
 
 @pytest.fixture
 def mock_metadata_success(mocker: MockerFixture, expected_version: str) -> type[Any]:
-    """Mock importlib.metadata.metadata to return valid version."""
+    """Mock importlib.metadata.metadata to return valid version.
+    
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    expected_version : str
+        The expected version string to return
+    
+    Returns
+    -------
+    type[Any]
+        Mocked metadata function
+    """
     return mocker.patch(
         "importlib.metadata.metadata",
         return_value={"version": expected_version}
@@ -80,7 +97,18 @@ def mock_metadata_success(mocker: MockerFixture, expected_version: str) -> type[
 
 @pytest.fixture
 def mock_metadata_not_found(mocker: MockerFixture) -> type[Any]:
-    """Mock importlib.metadata.metadata to raise PackageNotFoundError."""
+    """Mock importlib.metadata.metadata to raise PackageNotFoundError.
+    
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    
+    Returns
+    -------
+    type[Any]
+        Mocked metadata function
+    """
     return mocker.patch(
         "importlib.metadata.metadata",
         side_effect=PackageNotFoundError
@@ -89,7 +117,18 @@ def mock_metadata_not_found(mocker: MockerFixture) -> type[Any]:
 
 @pytest.fixture
 def mock_metadata_import_error(mocker: MockerFixture) -> type[Any]:
-    """Mock importlib.metadata.metadata to raise ImportError."""
+    """Mock importlib.metadata.metadata to raise ImportError.
+    
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    
+    Returns
+    -------
+    type[Any]
+        Mocked metadata function
+    """
     return mocker.patch(
         "importlib.metadata.metadata",
         side_effect=ImportError
@@ -100,14 +139,24 @@ def mock_metadata_import_error(mocker: MockerFixture) -> type[Any]:
 # Tests
 # --------------------------
 def test_version_exists() -> None:
-    """Test that __version__ exists and is a string."""
+    """Test that __version__ exists and is a string.
+    
+    Returns
+    -------
+    None
+    """
     assert hasattr(stpstone, "__version__")
     assert isinstance(stpstone.__version__, str)
     assert len(stpstone.__version__) > 0
 
 
 def test_path_extension() -> None:
-    """Test that __path__ is properly extended."""
+    """Test that __path__ is properly extended.
+    
+    Returns
+    -------
+    None
+    """
     assert hasattr(stpstone, "__path__")
     assert isinstance(stpstone.__path__, list)
     assert len(stpstone.__path__) > 0
@@ -118,7 +167,21 @@ def test_version_fallback_metadata(
     mock_metadata_success: type[Any],
     expected_version: str,
 ) -> None:
-    """Test version fallback to metadata when package not found."""
+    """Test version fallback to metadata when package not found.
+    
+    Parameters
+    ----------
+    mock_version_not_found : type[Any]
+        Mocked version function
+    mock_metadata_success : type[Any]
+        Mocked metadata function
+    expected_version : str
+        The expected version string to return
+    
+    Returns
+    -------
+    None
+    """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
     mock_metadata_success.assert_called_once_with("stpstone")
@@ -129,7 +192,21 @@ def test_version_fallback_hardcoded(
     mock_metadata_not_found: type[Any],
     expected_version: str,
 ) -> None:
-    """Test fallback to pyproject.toml when metadata is unavailable."""
+    """Test fallback to pyproject.toml when metadata is unavailable.
+    
+    Parameters
+    ----------
+    mock_version_not_found : type[Any]
+        Mocked version function
+    mock_metadata_not_found : type[Any]
+        Mocked metadata function
+    expected_version : str
+        The expected version string to return
+    
+    Returns
+    -------
+    None
+    """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
     mock_metadata_not_found.assert_called_once_with("stpstone")
@@ -140,7 +217,21 @@ def test_version_fallback_import_error(
     mock_metadata_import_error: type[Any],
     expected_version: str,
 ) -> None:
-    """Test fallback when importlib.metadata is not available."""
+    """Test fallback when importlib.metadata is not available.
+    
+    Parameters
+    ----------
+    mock_version_not_found : type[Any]
+        Mocked version function
+    mock_metadata_import_error : type[Any]
+        Mocked metadata function
+    expected_version : str
+        The expected version string to return
+    
+    Returns
+    -------
+    None
+    """
     importlib.reload(sys.modules["stpstone"])
     assert stpstone.__version__ == expected_version
     mock_metadata_import_error.assert_called_once_with("stpstone")
