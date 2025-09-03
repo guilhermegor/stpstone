@@ -17,7 +17,7 @@ from pytest_mock import MockerFixture
 
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase
-from stpstone.utils.connections.databases.sql.mysql import MySQLDatabase
+from stpstone.utils.connections.databases.sql.mysql_db import MySQLDatabase
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.json import JsonFiles
 
@@ -344,7 +344,7 @@ class TestReadSqlMethod:
         None
         """
         # Mock the create_engine at the module level where it's used
-        module_path = "stpstone.utils.connections.databases.sql.mysql.create_engine"
+        module_path = "stpstone.utils.connections.databases.sql.mysql_db.create_engine"
         with (patch(module_path) as mock_create_engine, 
               patch("pandas.read_sql", return_value=sample_dataframe) as mock_read_sql):
             
@@ -411,7 +411,7 @@ class TestReadSqlMethod:
         """
         test_timeout = 3600
         
-        module_path = "stpstone.utils.connections.databases.sql.mysql.create_engine"
+        module_path = "stpstone.utils.connections.databases.sql.mysql_db.create_engine"
         with patch(module_path) as mock_create_engine, patch("pandas.read_sql"):
             
             mysql_database.read_sql("SELECT 1", timeout=test_timeout)
