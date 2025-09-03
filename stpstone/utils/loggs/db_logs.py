@@ -7,7 +7,7 @@ robust validation and type safety for all operations.
 
 from datetime import datetime
 import socket
-from typing import Literal
+from typing import Literal, Optional
 
 import pandas as pd
 
@@ -56,7 +56,7 @@ class DBLogs(metaclass=TypeChecker):
     def audit_log(
         self,
         df_: pd.DataFrame,
-        url: str,
+        url: Optional[str],
         dt_db_ref: datetime,
         bool_format_log_as_str: bool = True,
     ) -> pd.DataFrame:
@@ -81,7 +81,8 @@ class DBLogs(metaclass=TypeChecker):
         self._validate_dataframe(df_)
         self._validate_string(url, "url")
         
-        df_[YAML_GEN["audit_log_cols"]["url"]] = url
+        if url:
+            df_[YAML_GEN["audit_log_cols"]["url"]] = url
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
         log_ts = DatesBRAnbima().utc_log_ts()
         df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = (

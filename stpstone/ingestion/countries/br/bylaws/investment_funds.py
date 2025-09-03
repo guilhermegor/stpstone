@@ -15,6 +15,7 @@ import requests
 from requests import Session
 
 from stpstone.ingestion.abc.ingestion_abc import ABCIngestionOperations
+from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -45,6 +46,7 @@ class InvestmentFunds(ABCIngestionOperations):
         self.int_pages_join = int_pages_join
         self.cls_db = cls_db
         self.cls_dir_files_management = DirFilesManagement()
+        self.cls_dates_current = DatesCurrent()
 
     def get_response(self) -> list[requests.Response]:
         """Return a list of response objects.
@@ -54,9 +56,10 @@ class InvestmentFunds(ABCIngestionOperations):
         list[requests.Response]
             A list of response objects.
         """
+        fstr_url = r"https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/{}"
         list_resp_req = list()
         for app in self.list_apps:
-            resp_req = requests.get(f"https://web.cvm.gov.br/{app}")
+            resp_req = requests.get(fstr_url.format(app))
             resp_req.raise_for_status()
             list_resp_req.append(resp_req)
         return list_resp_req
@@ -85,7 +88,8 @@ class InvestmentFunds(ABCIngestionOperations):
                 ), 
                 int_pages_join=self.int_pages_join
             )
-            list_ser = df_.to_dict(orient="records")
+            df_["URL"] = resp_req.url
+            list_ser.extend(df_.to_dict(orient="records"))
 
         return pd.DataFrame(list_ser)
     
@@ -102,7 +106,16 @@ class InvestmentFunds(ABCIngestionOperations):
         """
         list_resp_req = self.get_response()
         df_ = self.transform_response(list_resp_req)
-        df_ = self.standardize_dataframe(df_)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.cls_dates_current.curr_date(),
+            dict_dtypes={
+                "EVENT": str, 
+                "MATCH_PATTERN": str, 
+                "PATTERN_REGEX": str, 
+                "URL": str
+            }
+        )
         if self.cls_db:
             self.insert_table_db(
                 cls_db=self.cls_db, 

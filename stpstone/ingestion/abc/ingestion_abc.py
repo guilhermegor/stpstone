@@ -95,12 +95,14 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
 class CoreIngestion(metaclass=TypeChecker):
     """Abstract base class for ingestion operations."""
 
-    def __init__(
+    def __init__(self) -> None:
+        self.cls_db_logs = DBLogs()
+    
+    def standardize_dataframe(
         self, 
-        url: str,
+        df_: pd.DataFrame,  
         date_ref: date,
         dict_dtypes: dict[str, Union[str, int, float, date, datetime]], 
-        bool_format_log_as_str: bool = True,
         cols_from_case: Optional[TypeCaseFrom] = None,
         cols_to_case: Optional[TypeCaseTo] = None, 
         list_cols_drop_dupl: Optional[list[str]] = None, 
@@ -111,19 +113,23 @@ class CoreIngestion(metaclass=TypeChecker):
         str_data_fillna: str = "-99999",
         str_dt_fillna: Optional[str] = None,
         logger: Optional[Logger] = None,
-    ) -> None:
-        """Initialize the CoreIngestion class.
+        url: Optional[str] = None,
+        bool_format_log_as_str: bool = True,
+    ) -> pd.DataFrame:
+        """Standardize the DataFrame.
         
         Parameters
         ----------
-        url : str
-            URL of the data source.
+        df_ : pd.DataFrame
+            The DataFrame to standardize.
+        url : Optional[str]
+            The URL of the file.
         date_ref : date
-            Reference date for logging.
+            The date of reference.
         dict_dtypes : dict[str, Union[str, int, float, date, datetime]]
-            Dictionary of column names and data types.
+            The dictionary of data types.
         bool_format_log_as_str : bool, optional
-            Boolean flag for timestamp logging, by default True.
+            Whether to format the log as a string, by default True.
         cols_from_case : Optional[TypeCaseFrom], optional
             Case conversion for column names, by default None.
         cols_to_case : Optional[TypeCaseTo], optional
@@ -131,28 +137,26 @@ class CoreIngestion(metaclass=TypeChecker):
         list_cols_drop_dupl : Optional[list[str]], optional
             List of columns to drop duplicates, by default None.
         dict_fillna_strt : TypeFillnaStrategy, optional
-            Dictionary of column names and fillna values, by default None.
+            Dictionary of fillna strategies, by default None.
         str_fmt_dt : TypeDateFormatInput, optional
-            Date format string, by default "YYYY-MM-DD".
+            Format for date columns, by default "YYYY-MM-DD".
         type_error_action : TypeErrorActionAsTypeDataFrame, optional
-            Type error action, by default "raise".
+            Action to take when a type error occurs, by default "raise".
         strategy_keep_when_dupl : TypeKeepDuplicatedDataFrame, optional
-            Strategy for keeping when duplicates, by default "first".
+            Strategy to keep when duplicates occur, by default "first".
         str_data_fillna : str, optional
-            Data fillna value, by default "-99999".
+            Value to fill missing data, by default "-99999".
         str_dt_fillna : Optional[str], optional
-            Date fillna value, by default None.
+            Value to fill missing dates, by default None.
         logger : Optional[Logger], optional
             Logger object, by default None.
 
         Returns
         -------
-        None
+        pd.DataFrame
+            The standardized DataFrame.
         """
-        self.url = url
-        self.date_ref = date_ref
-        self.bool_format_log_as_str = bool_format_log_as_str
-        self.cls_df_standardization = DFStandardization(
+        cls_df_standardization = DFStandardization(
             dict_dtypes=dict_dtypes,
             cols_from_case=cols_from_case,
             cols_to_case=cols_to_case,
@@ -165,27 +169,12 @@ class CoreIngestion(metaclass=TypeChecker):
             str_dt_fillna=str_dt_fillna,
             logger=logger,
         )
-        self.cls_db_logs = DBLogs()
-    
-    def standardize_dataframe(self, df_: pd.DataFrame) -> pd.DataFrame:
-        """Standardize the DataFrame.
-        
-        Parameters
-        ----------
-        df_ : pd.DataFrame
-            The DataFrame to standardize.
-        
-        Returns
-        -------
-        pd.DataFrame
-            The standardized DataFrame.
-        """
-        df_ = self.cls_df_standardization.pipeline(df_)
+        df_ = cls_df_standardization.pipeline(df_)
         df_ = self.cls_db_logs.audit_log(
             df_, 
-            self.url, 
-            self.date_ref, 
-            self.bool_format_log_as_str
+            url, 
+            date_ref, 
+            bool_format_log_as_str
         )
         return df_
 
@@ -215,8 +204,6 @@ class CoreIngestion(metaclass=TypeChecker):
             str_table_name=str_table_name,
             bool_insert_or_ignore = bool_insert_or_ignore,
         )
-
-    def 
 
 
 class ContentAggregator(metaclass=TypeChecker):
