@@ -462,7 +462,7 @@ def test_federal_get_holidays_raw_navigation_failure(mocker: MockerFixture) -> N
     )
     mocker.patch("stpstone.utils.cache.cache_manager.CacheManager.cache_df", lambda x: x)
     instance = DatesUSAFederalHolidays(bool_reuse_cache=False)
-    with pytest.raises(RuntimeError, match="Failed to navigate to URL"):
+    with pytest.raises(RuntimeError, match="Failed to fetch Federal holidays"):
         instance.get_holidays_raw(2025)
 
 

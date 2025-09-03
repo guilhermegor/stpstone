@@ -240,12 +240,76 @@ find_test_path() {
 }
 
 install_playwright() {
-    print_status "info" "Checking playwright..."
-    if [ ! -d "$HOME/.cache/ms-playwright" ]; then
-        print_status "info" "Installing Playwright browsers..."
-        poetry run playwright install
+    print_status "info" "Checking Playwright installation..."
+
+    # Check if Playwright Python package is installed
+    if ! poetry run python -c "import playwright" 2>/dev/null; then
+        print_status "warning" "Playwright Python package not found, installing..."
+        poetry run pip install playwright || {
+            print_status "error" "Failed to install Playwright Python package"
+            return 1
+        }
     fi
-    print_status "success" "Playwright installed"
+
+    # Log Playwright version for debugging
+    local playwright_version
+    playwright_version=$(poetry run python -c "import playwright; print(playwright.__version__)" 2>/dev/null)
+    print_status "debug" "Playwright Python package version: $playwright_version"
+
+    # Define Playwright cache directory
+    local playwright_cache="$HOME/.cache/ms-playwright"
+
+    # Check permissions on cache directory
+    if [ -d "$playwright_cache" ]; then
+        if [ ! -w "$playwright_cache" ]; then
+            print_status "error" "No write permissions for Playwright cache directory: $playwright_cache"
+            print_status "info" "Attempting to fix permissions..."
+            chmod -R u+rw "$playwright_cache" || {
+                print_status "error" "Failed to fix permissions on $playwright_cache"
+                return 1
+            }
+            print_status "success" "Permissions fixed for $playwright_cache"
+        fi
+    else
+        print_status "info" "Creating Playwright cache directory: $playwright_cache"
+        mkdir -p "$playwright_cache" || {
+            print_status "error" "Failed to create Playwright cache directory: $playwright_cache"
+            return 1
+        }
+    fi
+
+    # Check for Chromium browser executable specific to the Playwright version
+    local browser_installed=false
+    local chromium_path
+    # Assume the versioned directory follows the pattern chromium-<version> or chromium_headless_shell-<version>
+    chromium_path=$(find "$playwright_cache" -type d -name "chromium-*" -o -name "chromium_headless_shell-*" | head -1)
+    if [ -n "$chromium_path" ] && [ -f "$chromium_path/chrome-linux/headless_shell" ]; then
+        print_status "debug" "Found Chromium executable at: $chromium_path/chrome-linux/headless_shell"
+        browser_installed=true
+    fi
+
+    # If no valid Chromium browser is found, clean up and reinstall
+    if ! $browser_installed; then
+        print_status "warning" "Playwright Chromium browser not found or incomplete, cleaning up and reinstalling..."
+        rm -rf "$playwright_cache/chromium"* || {
+            print_status "error" "Failed to clean up Playwright cache directory: $playwright_cache"
+            return 1
+        }
+        print_status "info" "Installing Playwright browsers..."
+        poetry run playwright install chromium --with-deps || {
+            print_status "error" "Failed to install Playwright Chromium browser"
+            return 1
+        }
+    fi
+
+    # Verify installation by checking for Chromium executable again
+    chromium_path=$(find "$playwright_cache" -type d -name "chromium-*" -o -name "chromium_headless_shell-*" | head -1)
+    if [ -n "$chromium_path" ] && [ -f "$chromium_path/chrome-linux/headless_shell" ]; then
+        print_status "success" "Playwright installed and Chromium browser verified at: $chromium_path"
+    else
+        print_status "error" "Playwright Chromium browser installation verification failed"
+        return 1
+    fi
 }
 
 run_codespell() {

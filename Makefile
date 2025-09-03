@@ -14,7 +14,7 @@ export_deps:
 # -------------------
 # TESTING
 # -------------------
-.PHONY: unit_tests integration_tests test_cov test_feat test_urls_docstrings
+.PHONY: unit_tests integration_tests test_cov test_feat test_urls_docstrings fix_playwright
 
 unit_tests:
 	@poetry run pytest tests/unit/
@@ -31,6 +31,9 @@ test_feat:
 
 test_urls_docstrings:
 	@bash bin/test_urls_docstrings.sh
+
+fix_playwright:
+	@bash bin/fix_playwright.sh
 
 
 # -------------------
@@ -165,6 +168,7 @@ help:
 	@echo "  test_cov             - Run tests with coverage report"
 	@echo "  test_feat MODULE=... - Test specific feature module"
 	@echo "  test_urls_docstrings - Test URL docstrings"
+	@echo "  fix_playwright       - Fix Playwright installation"
 	@echo ""
 	@echo "Git Operations:"
 	@echo "  precommit_update            - Update pre-commit hooks"
