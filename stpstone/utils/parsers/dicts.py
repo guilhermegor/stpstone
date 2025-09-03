@@ -17,7 +17,7 @@ from operator import itemgetter
 import re
 from typing import Any, Callable, Literal, Optional, TypeVar, Union
 
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
 TypeFilter = TypeVar("TypeFilter", bound=Literal["equal", "not_equal", "less_than", 
@@ -177,6 +177,7 @@ class HandlingDicts(metaclass=TypeChecker):
             for col in columns
         ]
         
+        @type_checker
         def comparer(left: dict, right: dict) -> int:
             """Compare two dictionaries based on multiple keys.
             
@@ -568,6 +569,7 @@ class HandlingDicts(metaclass=TypeChecker):
         """
         placeholder_pattern = re.compile(r"\{\{\s*(\w+)\s*\}\}")
         
+        @type_checker
         def replace_value(
             value: Any # noqa ANN401: typing.Any is not allowed
         ) -> Any: # noqa ANN401: typing.Any is not allowed
