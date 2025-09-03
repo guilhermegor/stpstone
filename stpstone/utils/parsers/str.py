@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 import ftfy
 from unidecode import unidecode
 
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
 TypeCaseFrom = TypeVar(
@@ -736,6 +736,8 @@ class StrHandler(metaclass=TypeChecker):
         callable
             A function that applies the same case pattern to matched text
         """
+
+        @type_checker
         def replace(m: re.Match) -> str:
             """Replace matched text with original case.
             
@@ -780,6 +782,7 @@ class StrHandler(metaclass=TypeChecker):
         if not str_replaced:
             return str_
 
+        @type_checker
         def matchcase(match: re.Match) -> str:
             """Replace matched text with original case.
             
