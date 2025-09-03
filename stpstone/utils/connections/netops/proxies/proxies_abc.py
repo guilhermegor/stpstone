@@ -4,7 +4,7 @@ This module defines an abstract base class (ABC) for proxy management,
 providing a common interface for fetching and validating proxies.
 """
 
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from logging import Logger
 from random import shuffle
