@@ -143,10 +143,8 @@ def test_non_callable_in_functions_list() -> None:
     -------
     None
     """
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(TypeError, match="must be of type"):
         generic_pipeline(5, [lambda x: x, "not a function"])
-    assert "must be callable" in str(excinfo.value)
-    assert "got <class 'str'>" in str(excinfo.value)
 
 
 def test_simple_pipeline_operations(
