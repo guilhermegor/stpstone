@@ -51,7 +51,7 @@ def mock_dates_br() -> MagicMock:
     MagicMock
         Mocked DatesBRAnbima class
     """
-    with patch("stpstone.utils.calendars.handling_dates.DatesBRAnbima") as mock:
+    with patch("stpstone.utils.calendars.calendar_abc.ABCCalendarOperations") as mock:
         mock_instance = mock.return_value
         mock_instance.str_date_to_datetime.return_value = datetime(2023, 1, 1)
         yield mock_instance
