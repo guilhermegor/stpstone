@@ -690,7 +690,7 @@ def test_get_list_data_returns_text_list(scraper_default: PlaywrightScraper) -> 
         as mock_get_elements:
         results = scraper_default.get_list_data("selector")
         assert results == ["text1", "text2"]
-        mock_get_elements.assert_called_once_with("selector", "xpath", None)
+        mock_get_elements.assert_called_once_with("xpath=selector", None)
 
 
 def test_export_html_creates_file_and_returns_path(

@@ -231,12 +231,12 @@ class PlaywrightScraper(metaclass=TypeChecker):
             )
             return None
 
-    def _handle_cookie_popup(self, timeout: Optional[int] = 30000) -> None:
+    def _handle_cookie_popup(self, timeout: Optional[int] = 30_000) -> None:
         """Attempt to accept cookies if popup appears.
 
         Parameters
         ----------
-        timeout : int
+        timeout : Optional[int]
             Timeout for cookie acceptance attempt (default: 3000ms)
         """
         try:
