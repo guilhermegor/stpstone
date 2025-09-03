@@ -6,10 +6,14 @@ providing a common interface for fetching and transforming data.
 
 from abc import abstractmethod
 from datetime import date, datetime
+from io import BytesIO
 from logging import Logger
+import re
 from typing import Optional, Union
 
+import fitz
 import pandas as pd
+import pdfplumber
 from playwright.sync_api import Page as PlaywrightPage
 from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
@@ -26,12 +30,28 @@ from stpstone.transformations.validation.metaclass_type_checker import (
 )
 from stpstone.utils.calendars.calendar_abc import TypeDateFormatInput
 from stpstone.utils.loggs.db_logs import DBLogs
-from stpstone.utils.parsers.str import TypeCaseFrom, TypeCaseTo
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler, TypeCaseFrom, TypeCaseTo
 
 
 class ABCIngestion(metaclass=ABCTypeCheckerMeta):
     """Abstract base class for ingestion operations."""
     
+    @abstractmethod
+    def __init__(self, cls_db: Optional[Session] = None) -> None:
+        """Initialize the ABCIngestion class.
+        
+        Parameters
+        ----------
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        self.cls_db = cls_db
+
     @abstractmethod
     def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
         """Return a response object.
@@ -196,8 +216,181 @@ class CoreIngestion(metaclass=TypeChecker):
             bool_insert_or_ignore = bool_insert_or_ignore,
         )
 
+    def 
 
-class ABCIngestionOperations(ABCIngestion, CoreIngestion):
+
+class ContentAggregator(metaclass=TypeChecker):
+    """Content aggregator mixin class."""
+
+    def __init__(self) -> None:
+        self.cls_handling_dicts = HandlingDicts()
+        self.cls_str_handler = StrHandler()
+
+    def paginate_text_blocks(
+        self, 
+        stream_file: fitz.Document, 
+        int_pages_join: int
+    ) -> list[str]:
+        """Paginate text blocks.
+        
+        Parameters
+        ----------
+        stream_file : fitz.Document
+            The document to paginate.
+        int_pages_join : int
+            The number of pages to join.
+        
+        Returns
+        -------
+        list[str]
+            A list of paginated text blocks.
+        """
+        str_ = ""
+        list_blocks_pages: list = [str]
+
+        for i in range(0, len(stream_file)):
+            str_ += "\n" + stream_file[i].get_text("text")
+            if i % int_pages_join == 0 or i == len(stream_file) - 1:
+                str_page = self.cls_str_handler.remove_diacritics_nfkd(
+                    str_page, bool_lower_case=True)
+                list_blocks_pages.append(str_)
+                str_ = ""
+
+        return list_blocks_pages
+
+
+class ContentParser(ContentAggregator):
+    """Content parser class."""
+    
+    def pdf_docx_tables_response(self, bytes_file: BytesIO) -> pd.DataFrame:
+        """Parse a PDF/DOCX file using tabula.
+        
+        Parameters
+        ----------
+        bytes_file : BytesIO
+            The file to parse.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The parsed data.
+        """
+        list_ser = list()
+        with pdfplumber.open(bytes_file) as doc:
+            for page in doc.pages:
+                list_ = page.extract_tables()
+                list_ser.extend(
+                    self.cls_handling_dicts.pair_keys_with_values(list_[0][0], list_[0][1:]))
+        return pd.DataFrame(list_ser)
+    
+    def pdf_docx_regex(
+        self, 
+        bytes_file: BytesIO, 
+        str_file_extension: str, 
+        int_pages_join: int, 
+        dict_regex_patterns: dict[str, dict[str, str]]
+    ) -> pd.DataFrame:
+        """Parse a PDF/DOCX file using regular expressions.
+        
+        Parameters
+        ----------
+        bytes_file : BytesIO
+            The file to parse.
+        str_file_extension : str
+            The file extension.
+        int_pages_join : int
+            The number of pages to join.
+        dict_regex_patterns : dict[str, dict[str, str]]
+            The regular expressions to match.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The parsed data.
+        """
+        list_blocks_pages = self.paginate_text_blocks(
+            stream_file=fitz.open(
+                stream=bytes_file,
+                filetype=str_file_extension,
+            ), 
+            int_pages_join=int_pages_join
+        )
+        list_matches = self._regex_patterns_match(
+            list_blocks_pages=list_blocks_pages,
+            dict_regex_patterns=dict_regex_patterns
+        )
+
+        df_ = pd.DataFrame(list_matches)
+        df_ = df_\
+            .drop_duplicates()\
+            .sort_values(by=["EVENT", "MATCH_PATTERN"], ascending=[True, True])\
+            .drop_duplicates(subset=["EVENT"], keep="first")
+
+        return pd.DataFrame(list_matches)
+
+    def _regex_patterns_match(
+        self,
+        list_blocks_pages: list[str],
+        dict_regex_patterns: dict[str, dict[str, str]], 
+    ) -> list[dict[str, str]]:
+        """Match regular expressions.
+        
+        Parameters
+        ----------
+        list_blocks_pages : list[str]
+            The text blocks to match.
+        dict_regex_patterns : dict[str, dict[str, str]]
+            The regular expressions to match.
+        
+        Returns
+        -------
+        list[dict[str, str]]
+            The matches.
+        """
+        dict_count_matches: dict[str, int] = {}
+        list_matches: list[dict[str, str]] = []
+
+        for str_page in list_blocks_pages:
+            if len(dict_count_matches) > 0 \
+                and all(count > 0 for count in dict_count_matches.values()): 
+                break
+
+            for str_event, dict_l1 in dict_regex_patterns.items():
+                for str_condition, regex_pattern in dict_l1.items():
+                    if str_event not in dict_count_matches:
+                        dict_count_matches[str_event] = 0
+                    if dict_count_matches[str_event] > 0:
+                        break
+                    regex_pattern = self.cls_str_handler.remove_diacritics_nfkd(
+                        regex_pattern, 
+                        bool_lower_case=False
+                    )
+                    regex_match = re.search(regex_pattern, str_page)
+                    if regex_match and regex_match.group(0) and len(regex_match.group(0)) > 0:
+                        dict_count_matches[str_event] += 1
+                        dict_ = {
+                            "EVENT": str_event.upper(), 
+                            "MATCH_PATTERN": str_condition.upper(),
+                            "PATTERN_REGEX": regex_pattern,
+                        }
+                        for i in range(0, len(regex_match.groups()) + 1):
+                            regex_group = regex_match.group(i).replace('\n', ' ')
+                            regex_group = re.sub(r"\s+", " ", regex_group).strip()
+                            dict_[f"REGEX_GROUP_{i}"] = regex_group.upper()
+                        list_matches.append(dict_)
+                
+                # fallback for blocks of page without any match
+                if dict_count_matches[str_event] == 0:
+                    list_matches.append({
+                        "EVENT": str_event.upper(), 
+                        "MATCH_PATTERN": "ZZNN/A",
+                        "PATTERN_REGEX": "ZZN/A",
+                    })
+
+        return list_matches
+
+
+class ABCIngestionOperations(ABCIngestion, CoreIngestion, ContentParser):
     """Abstract base class for ingestion operations."""
     
     pass
