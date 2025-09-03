@@ -26,7 +26,7 @@ from typing import Any, Optional, TypedDict
 import numpy as np
 from numpy.typing import NDArray
 
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.parsers.str import StrHandler
@@ -561,6 +561,7 @@ class ListHandler(metaclass=TypeChecker):
         ----------
         .. [1] https://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python
         """
+        @type_checker
         def convert(text: str) -> Any: # noqa ANN401: typing.Any is not allowed 
             """Convert text to integer if numeric, else return as is.
             
@@ -576,6 +577,7 @@ class ListHandler(metaclass=TypeChecker):
             """
             return int(text) if text.isdigit() else text
             
+        @type_checker
         def alphanum_key(
             key: str
         ) -> list[Any]: # noqa ANN401: typing.Any is not allowed 
