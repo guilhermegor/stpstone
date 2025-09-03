@@ -725,9 +725,9 @@ def test_normalize_json_keys_invalid(
         json_handler.normalize_json_keys([])
 
     # test with list containing non-dict items
-    with pytest.raises(TypeError, match="All list items must be dictionaries"):
+    with pytest.raises(TypeError, match="must be of type"):
         json_handler.normalize_json_keys([1, 2, 3])  # type: ignore
 
     # test with list containing mixed types
-    with pytest.raises(TypeError, match="All list items must be dictionaries"):
+    with pytest.raises(TypeError, match="must be of type"):
         json_handler.normalize_json_keys([{"valid": "dict"}, "invalid", 123])  # type: ignore
