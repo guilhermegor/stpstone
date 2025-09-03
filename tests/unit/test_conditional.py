@@ -356,7 +356,7 @@ class TestErrorConditions:
         -------
         None
         """
-        with pytest.raises(ValueError, match="All pipeline elements must be callable"):
+        with pytest.raises(TypeError, match="must be of type"):
             conditional_pipeline(5, [["not a tuple", lambda x: x]])  # type: ignore
 
 
