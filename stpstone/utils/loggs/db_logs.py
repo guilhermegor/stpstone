@@ -58,7 +58,7 @@ class DBLogs(metaclass=TypeChecker):
         df_: pd.DataFrame,
         url: str,
         dt_db_ref: datetime,
-        ts_log_str: bool = True,
+        bool_format_log_as_str: bool = True,
     ) -> pd.DataFrame:
         """Add audit columns to the DataFrame for logging.
 
@@ -70,7 +70,7 @@ class DBLogs(metaclass=TypeChecker):
             URL to insert into the DataFrame
         dt_db_ref : datetime
             Timestamp of the database reference
-        ts_log_str : bool, optional
+        bool_format_log_as_str : bool, optional
             Whether to format timestamp as string (default: True)
 
         Returns
@@ -85,7 +85,7 @@ class DBLogs(metaclass=TypeChecker):
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
         log_ts = DatesBRAnbima().utc_log_ts()
         df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = (
-            log_ts.strftime("%Y-%m-%d %H:%M:%S.%f%z") if ts_log_str else log_ts
+            log_ts.strftime("%Y-%m-%d %H:%M:%S.%f%z") if bool_format_log_as_str else log_ts
         )
         return df_
 

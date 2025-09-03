@@ -259,7 +259,7 @@ def test_audit_log_valid(
     None
     """
     url = "https://example.com"
-    result = db_logs.audit_log(sample_df, url, sample_datetime, ts_log_str=True)
+    result = db_logs.audit_log(sample_df, url, sample_datetime, bool_format_log_as_str=True)
     assert YAML_GEN["audit_log_cols"]["url"] in result.columns
     assert result[YAML_GEN["audit_log_cols"]["url"]].iloc[0] == url
     assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_datetime
@@ -294,7 +294,7 @@ def test_audit_log_datetime(
     None
     """
     url = "https://example.com"
-    result = db_logs.audit_log(sample_df, url, sample_datetime, ts_log_str=False)
+    result = db_logs.audit_log(sample_df, url, sample_datetime, bool_format_log_as_str=False)
     assert YAML_GEN["audit_log_cols"]["url"] in result.columns
     assert result[YAML_GEN["audit_log_cols"]["url"]].iloc[0] == url
     assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_datetime

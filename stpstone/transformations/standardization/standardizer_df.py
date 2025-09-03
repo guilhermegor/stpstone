@@ -9,7 +9,7 @@ This module provides a class for standardizing DataFrames, including:
 
 from contextlib import suppress
 from logging import Logger
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
-from stpstone.utils.calendars.calendar_abc import DateFormatter
+from stpstone.utils.calendars.calendar_abc import DateFormatter, TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler, TypeCaseFrom, TypeCaseTo
@@ -25,6 +25,20 @@ from stpstone.utils.pipelines.generic import generic_pipeline
 
 
 pd.set_option("future.no_silent_downcasting", True)
+
+TypeFillnaStrategy = TypeVar(
+    "TypeFillnaStrategy", 
+    bound=Optional[dict[str, Literal["bfill", "ffill"]]]
+)
+TypeErrorActionAsTypeDataFrame = TypeVar(
+    "TypeErrorActionAsTypeDataFrame",
+    bound=Literal["raise", "ignore", "coerce"]
+)
+TypeKeepDuplicatedDataFrame = TypeVar(
+    "TypeKeepDuplicatedDataFrame",
+    bound=Literal["first", "last", False]
+)
+
 
 class DFStandardization(metaclass=TypeChecker):
     """Class for standardizing DataFrames."""
@@ -35,15 +49,12 @@ class DFStandardization(metaclass=TypeChecker):
         cols_from_case: Optional[TypeCaseFrom] = None,
         cols_to_case: Optional[TypeCaseTo] = None,
         list_cols_drop_dupl: list[str] = None,
-        dict_fillna_strt: Optional[dict[str, str]] = None,
-        str_fmt_dt: str = "YYYY-MM-DD",
-        type_error_action: str = "raise",
-        strategy_keep_when_dupl: str = "first",
+        dict_fillna_strt: TypeFillnaStrategy = None,
+        str_fmt_dt: TypeDateFormatInput = "YYYY-MM-DD",
+        type_error_action: TypeErrorActionAsTypeDataFrame = "raise",
+        strategy_keep_when_dupl: TypeKeepDuplicatedDataFrame = "first",
         str_data_fillna: str = "-99999",
         str_dt_fillna: Optional[str] = None,
-        str_tz: str = "UTC",
-        encoding: str = "latin-1",
-        bool_debug: bool = False,
         logger: Optional[Logger] = None,
     ) -> None:
         """Initialize the DFStandardization class.
@@ -58,24 +69,18 @@ class DFStandardization(metaclass=TypeChecker):
             Case conversion for column names, by default None.
         list_cols_drop_dupl : list[str], optional
             List of columns to drop duplicates, by default None.
-        dict_fillna_strt : Optional[dict[str, str]], optional
+        dict_fillna_strt : TypeFillnaStrategy, optional
             Dictionary of column names and fillna values, by default None.
-        str_fmt_dt : str, optional
+        str_fmt_dt : TypeDateFormatInput, optional
             Date format string, by default "YYYY-MM-DD".
-        type_error_action : str, optional
+        type_error_action : TypeErrorActionAsTypeDataFrame, optional
             Action to take on type errors, by default "raise".
-        strategy_keep_when_dupl : str, optional
+        strategy_keep_when_dupl : TypeKeepDuplicatedDataFrame, optional
             Strategy for keeping when duplicates, by default "first".
         str_data_fillna : str, optional
             Fillna value for non-date columns, by default "-99999".
         str_dt_fillna : Optional[str], optional
             Fillna value for date columns, by default None.
-        str_tz : str, optional
-            Time zone, by default "UTC".
-        encoding : str, optional
-            Encoding, by default "latin-1".
-        bool_debug : bool, optional
-            Debug mode, by default False.
         logger : Optional[Logger], optional
             Logger, by default None.
 
@@ -110,9 +115,6 @@ class DFStandardization(metaclass=TypeChecker):
             "31122099"
         )
         self.list_cols_dt = [key for key, value in dict_dtypes.items() if value == "date"]
-        self.str_tz = str_tz
-        self.encoding = encoding
-        self.bool_debug = bool_debug
         self.logger = logger
         self.cls_dates = DateFormatter()
         self.cls_create_log = CreateLog()
@@ -236,10 +238,21 @@ class DFStandardization(metaclass=TypeChecker):
                 f"list of columns excluded: {list_cols_excluded}",
                 "info"
             )
-        if self.bool_debug:
-            print(f"list cols dataframe before filtering: {list(df_.columns)}")
-            print(f"list cols to filter: {list(self.dict_dtypes.keys())}")
-            print(f"list of columns excluded: {list_cols_excluded}")
+            self.cls_create_log.log_message(
+                self.logger,
+                f"list cols dataframe before filtering: {list(df_.columns)}",
+                "info"
+            )
+            self.cls_create_log.log_message(
+                self.logger,
+                f"list cols to filter: {list(self.dict_dtypes.keys())}", 
+                "info"
+            )
+            self.cls_create_log.log_message(
+                self.logger,
+                f"list of columns excluded: {list_cols_excluded}", 
+                "info"
+            )
         list_cols = list(self.dict_dtypes.keys())
         df_ = df_[list_cols]
         return df_

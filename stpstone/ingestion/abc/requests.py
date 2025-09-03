@@ -684,7 +684,7 @@ class ABCRequests(HandleReqResponses):
         int_delay_seconds: int = 10,
         bool_headless: bool = False,
         bool_incognito: bool = False,
-        bool_ts_log_str: bool = True
+        bool_format_log_as_str: bool = True
     ) -> None:
         self.dict_metadata = dict_metadata
         self.session = session
@@ -699,7 +699,7 @@ class ABCRequests(HandleReqResponses):
         self.int_delay_seconds = int_delay_seconds
         self.bool_headless = bool_headless
         self.bool_incognito = bool_incognito
-        self.bool_ts_log_str = bool_ts_log_str
+        self.bool_format_log_as_str = bool_format_log_as_str
         self.list_options_wd = None \
             if self.dict_metadata["credentials"].get("web_driver", None) is None \
             else self.dict_metadata["credentials"]["web_driver"]["options"]
@@ -923,7 +923,7 @@ class ABCRequests(HandleReqResponses):
             logger=self.logger,
         )
         df_ = cls_df_stdz.pipeline(df_)
-        df_ = DBLogs().audit_log(df_, url, self.date_ref, self.bool_ts_log_str)
+        df_ = DBLogs().audit_log(df_, url, self.date_ref, self.bool_format_log_as_str)
         return df_
 
     def insert_table(

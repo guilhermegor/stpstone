@@ -141,9 +141,6 @@ def test_init_valid_input(valid_dict_dtypes: dict[str, Any]) -> None:
         strategy_keep_when_dupl="first",
         str_data_fillna="-99999",
         str_dt_fillna="2099-12-31",
-        str_tz="UTC",
-        encoding="latin-1",
-        bool_debug=True,
     )
     assert instance.dict_dtypes == valid_dict_dtypes
     assert instance.cols_from_case == "snake"
