@@ -13,7 +13,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from stpstone._config.global_slots import YAML_GEN
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.loggs.db_logs import DBLogs
 
 
@@ -66,7 +66,7 @@ def sample_datetime() -> datetime:
 
 @pytest.fixture
 def mock_dates_br(mocker: MockerFixture) -> Any: # noqa ANN401: typing.Any not allowed
-    """Fixture mocking DatesBRAnbima.utc_log_ts method.
+    """Fixture mocking ABCCalendarOperations.utc_log_ts method.
 
     Parameters
     ----------
@@ -76,9 +76,10 @@ def mock_dates_br(mocker: MockerFixture) -> Any: # noqa ANN401: typing.Any not a
     Returns
     -------
     Any
-        Mock object for DatesBRAnbima.utc_log_ts
+        Mock object for ABCCalendarOperations.utc_log_ts
     """
-    return mocker.patch.object(DatesBRAnbima, "utc_log_ts", return_value=datetime(2025, 8, 13, 10, 42))
+    return mocker.patch.object(ABCCalendarOperations, "utc_log_ts", 
+                               return_value=datetime(2025, 8, 13, 10, 42))
 
 @pytest.fixture
 def mock_hostname(mocker: MockerFixture) -> Any: # noqa ANN401: typing.Any not allowed
@@ -251,7 +252,7 @@ def test_audit_log_valid(
     sample_datetime : datetime
         Sample datetime from fixture
     mock_dates_br : Any
-        Mocked DatesBRAnbima.utc_log_ts from fixture
+        Mocked ABCCalendarOperations.utc_log_ts from fixture
 
     Returns
     -------
@@ -286,7 +287,7 @@ def test_audit_log_datetime(
     sample_datetime : datetime
         Sample datetime from fixture
     mock_dates_br : Any
-        Mocked DatesBRAnbima.utc_log_ts from fixture
+        Mocked ABCCalendarOperations.utc_log_ts from fixture
 
     Returns
     -------
