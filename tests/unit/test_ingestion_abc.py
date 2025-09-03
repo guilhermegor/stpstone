@@ -10,8 +10,11 @@ from typing import Optional, Union
 from unittest.mock import Mock
 
 import pandas as pd
+from playwright.sync_api import Page as PlaywrightPage
 import pytest
 from pytest_mock import MockerFixture
+from requests import Response
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
 from stpstone.ingestion.abc.ingestion_abc import (
     ABCIngestion,
@@ -54,7 +57,7 @@ def sample_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def core_ingestion() -> "CoreIngestion":
+def core_ingestion() -> CoreIngestion:
     """Fixture providing a CoreIngestion instance with default parameters.
 
     Returns
@@ -105,7 +108,24 @@ def test_abc_ingestion_cannot_instantiate_without_implementing_methods() -> None
     """
     # Test missing get_response implementation
     class TestIngestionMissingGetResponse(ABCIngestion):
-        def transform_response(self, resp_req):
+        """Missing get_response implementation."""
+
+        def transform_response(
+            self, 
+            resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        ) -> pd.DataFrame:
+            """Missing transform_response implementation.
+            
+            Parameters
+            ----------
+            resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+                The response object.
+            
+            Returns
+            -------
+            pd.DataFrame
+                The transformed DataFrame.
+            """
             return pd.DataFrame()
 
     with pytest.raises(TypeError, match="Can't instantiate abstract class"):
@@ -113,7 +133,16 @@ def test_abc_ingestion_cannot_instantiate_without_implementing_methods() -> None
 
     # Test missing transform_response implementation  
     class TestIngestionMissingTransformResponse(ABCIngestion):
-        def get_response(self):
+        """Missing transform_response implementation."""
+
+        def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+            """Missing get_response implementation.
+            
+            Returns
+            -------
+            Union[Response, PlaywrightPage, SeleniumWebDriver]
+                The response object.
+            """
             return Mock()
 
     with pytest.raises(TypeError, match="Can't instantiate abstract class"):
@@ -128,10 +157,34 @@ def test_abc_ingestion_can_instantiate_with_all_methods() -> None:
     None
     """
     class TestIngestion(ABCIngestion):
-        def get_response(self):
+        """Test implementation of ABCIngestion."""
+
+        def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+            """Test get_response implementation.
+            
+            Returns
+            -------
+            Union[Response, PlaywrightPage, SeleniumWebDriver]
+                The response object.
+            """
             return Mock()
         
-        def transform_response(self, resp_req):
+        def transform_response(
+            self, 
+            resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        ) -> pd.DataFrame:
+            """Test transform_response implementation.
+            
+            Parameters
+            ----------
+            resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+                The response object.
+            
+            Returns
+            -------
+            pd.DataFrame
+                The transformed DataFrame.
+            """
             return pd.DataFrame()
 
     # Should not raise any exception
@@ -142,7 +195,7 @@ def test_abc_ingestion_can_instantiate_with_all_methods() -> None:
 # --------------------------
 # Tests for CoreIngestion
 # --------------------------
-def test_core_ingestion_init_valid_inputs(core_ingestion: "CoreIngestion") -> None:
+def test_core_ingestion_init_valid_inputs(core_ingestion: CoreIngestion) -> None:
     """Test initialization of CoreIngestion with valid inputs.
 
     Verifies
@@ -283,7 +336,7 @@ def test_core_ingestion_empty_dict_dtypes_raises_value_error() -> None:
 
 
 def test_standardize_dataframe(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     sample_dataframe: pd.DataFrame,
     mocker: MockerFixture
 ) -> None:
@@ -333,7 +386,7 @@ def test_standardize_dataframe(
 
 
 def test_standardize_dataframe_invalid_input(
-    core_ingestion: "CoreIngestion"
+    core_ingestion: CoreIngestion
 ) -> None:
     """Test standardize_dataframe with invalid input raises TypeError.
 
@@ -351,7 +404,7 @@ def test_standardize_dataframe_invalid_input(
 
 
 def test_insert_table_db(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     sample_dataframe: pd.DataFrame,
     mock_db_session: Mock,
 ) -> None:
@@ -396,7 +449,7 @@ def test_insert_table_db(
     "cls_db", [None, "not_a_session", 123, []]
 )
 def test_insert_table_db_invalid_session(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     sample_dataframe: pd.DataFrame,
     cls_db: Optional[Union[str, int, list]]
 ) -> None:
@@ -423,7 +476,7 @@ def test_insert_table_db_invalid_session(
     "str_table_name", [None, 123, []]
 )
 def test_insert_table_db_invalid_table_name(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     sample_dataframe: pd.DataFrame,
     mock_db_session: Mock,
     str_table_name: Optional[Union[str, int, list]]
@@ -450,7 +503,7 @@ def test_insert_table_db_invalid_table_name(
 
 
 def test_insert_table_db_empty_string_table_name_allowed(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     sample_dataframe: pd.DataFrame,
     mock_db_session: Mock,
 ) -> None:
@@ -477,7 +530,7 @@ def test_insert_table_db_empty_string_table_name_allowed(
 
 
 def test_insert_table_db_invalid_dataframe(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     mock_db_session: Mock
 ) -> None:
     """Test insert_table_db with invalid DataFrame raises TypeError.
@@ -513,10 +566,34 @@ def test_abc_ingestion_operations_inherits_correctly() -> None:
     None
     """
     class TestIngestionOperations(ABCIngestionOperations):
-        def get_response(self):
+        """Test class for ABCIngestionOperations."""
+
+        def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+            """Test get_response implementation.
+            
+            Returns
+            -------
+            Union[Response, PlaywrightPage, SeleniumWebDriver]
+                The response object.
+            """
             return Mock()
         
-        def transform_response(self, resp_req):
+        def transform_response(
+            self, 
+            resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        ) -> pd.DataFrame:
+            """Test transform_response implementation.
+            
+            Parameters
+            ----------
+            resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+                The response object.
+            
+            Returns
+            -------
+            pd.DataFrame
+                The transformed DataFrame.
+            """
             return pd.DataFrame()
 
     ingestion = TestIngestionOperations(
@@ -533,7 +610,7 @@ def test_abc_ingestion_operations_inherits_correctly() -> None:
 # Edge Cases and Error Conditions
 # --------------------------
 def test_core_ingestion_empty_dataframe(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     mocker: MockerFixture
 ) -> None:
     """Test standardize_dataframe with empty DataFrame.
@@ -574,7 +651,7 @@ def test_core_ingestion_empty_dataframe(
 
 
 def test_insert_table_db_empty_dataframe(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     mock_db_session: Mock,
 ) -> None:
     """Test insert_table_db with empty DataFrame.
@@ -724,7 +801,7 @@ def test_optional_parameters_type_validation() -> None:
 # Fallback Logic
 # --------------------------
 def test_standardize_dataframe_fallback(
-    core_ingestion: "CoreIngestion",
+    core_ingestion: CoreIngestion,
     sample_dataframe: pd.DataFrame,
     mocker: MockerFixture
 ) -> None:

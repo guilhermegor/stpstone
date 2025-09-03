@@ -40,6 +40,11 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented in a subclass.
         """
         raise NotImplementedError
     
@@ -58,6 +63,11 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         -------
         pd.DataFrame
             The transformed DataFrame.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented in a subclass.
         """
         raise NotImplementedError
 
