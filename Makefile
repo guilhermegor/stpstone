@@ -25,6 +25,7 @@ integration_tests:
 test_cov:
 	@poetry run pytest --cov=stpstone tests/unit/
 	@poetry run coverage report -m
+	@poetry run coverage-badge -o coverage.svg -f
 
 test_feat:
 	@bash bin/test_feature.sh $(MODULE)
