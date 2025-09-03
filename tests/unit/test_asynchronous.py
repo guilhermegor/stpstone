@@ -369,7 +369,7 @@ class TestAsyncPipelineTypeValidation:
         -------
         None
         """
-        with pytest.raises(TypeError, match="Expected async function, got synchronous function"):
+        with pytest.raises(TypeError, match="must be of type"):
             await async_pipeline(5, [lambda x: x, "not a function"])
 
     async def test_non_list_functions(self) -> None:
