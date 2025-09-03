@@ -235,14 +235,9 @@ class DirFilesManagement(metaclass=TypeChecker):
         -------
         tuple
             (timestamp, exists_flag)
-
-        Raises
-        ------
-        FileNotFoundError
-            If object doesn't exist
         """
         if not self.object_exists(object_path):
-            raise FileNotFoundError(f"Object not found: {object_path}")
+            return ("INTERNAL ERROR", False)
         timestamp = os.path.getmtime(object_path)
         return (datetime.fromtimestamp(timestamp) if bool_to_datetime else timestamp, True)
 
@@ -378,6 +373,12 @@ class DirFilesManagement(metaclass=TypeChecker):
         -------
         bool
             True if successful, False otherwise
+
+
+        Raises
+        ------
+        pycurl.error
+            If pycurl fails
         """
         if filepath and self.object_exists(filepath):
             self.removing_file(filepath)
@@ -1063,7 +1064,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         return False
 
 
-class FoldersTree:
+class FoldersTree(metaclass=TypeChecker):
     """Class for generating directory tree structures."""
 
     def __init__(
