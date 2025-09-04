@@ -794,9 +794,74 @@ def test_version_fallback_import_error(
 - **Exception coverage**: Test all exception handling paths
 - **Import coverage**: Test all import statements and fallbacks
 
-## Mocking Guidelines
+## Fast Test Execution Guidelines
 
-### When to Mock
+### Critical Performance Requirements
+
+#### Network Request Mocking
+- **NEVER make real HTTP requests in tests** - Always mock requests.get, requests.post, etc.
+- **Mock at module level** when requests are imported directly: `patch("module.requests.get")`
+- **Mock external API calls** to prevent IP bans and rate limiting
+- **Use fixtures for common responses** to avoid repetitive mocking
+
+```python
+# Example of proper request mocking
+@pytest.fixture
+def mock_requests_get(mocker: MockerFixture) -> object:
+    """Mock requests.get to prevent real HTTP calls."""
+    return mocker.patch("requests.get")
+
+@pytest.fixture
+def mock_response() -> Response:
+    """Mock Response object with sample content."""
+    response = MagicMock(spec=Response)
+    response.content = b"Sample content"
+    response.url = "https://example.com/test"
+    response.status_code = 200
+    response.raise_for_status = MagicMock()
+    return response
+```
+
+#### Retry/Backoff Mechanisms
+- **Always bypass retry decorators in tests** - They cause significant delays
+- **Mock backoff decorators**: `patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)`
+- **Mock time.sleep calls**: `patch("module.sleep")` or `patch("time.sleep")`
+- **Mock rate limiting**: Disable any built-in rate limiting for tests
+
+```python
+# Example of disabling backoff in tests
+def test_http_error_handling(instance, mock_requests_get):
+    """Test error handling without retry delays."""
+    mock_requests_get.side_effect = HTTPError("Request failed")
+    
+    # Mock backoff to bypass retry mechanism
+    with patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func):
+        with pytest.raises(HTTPError, match="Request failed"):
+            instance.method_with_backoff()
+```
+
+#### Time-Based Operations
+- **Mock all time operations**: `time.sleep`, `datetime.now()`, `time.time()`
+- **Use deterministic time values**: Fixed timestamps for consistent testing
+- **Mock async operations**: Use `pytest-asyncio` with mocked async functions
+
+```python
+# Example of time mocking
+@pytest.fixture
+def mock_sleep(mocker: MockerFixture) -> object:
+    """Mock sleep to eliminate delays."""
+    return mocker.patch("time.sleep")
+
+def test_with_time_operations(instance, mock_sleep):
+    """Test operations that normally include delays."""
+    result = instance.method_with_sleep()
+    mock_sleep.assert_called_with(10)  # Verify sleep was called
+    assert result is not None  # Test actual functionality
+```
+
+### Mocking Guidelines
+
+#### When to Mock
 - **External dependencies**: APIs, databases, file systems, network services
 - **System calls**: Time, random, environment variables, system info
 - **Resource-intensive operations**: Network calls, heavy computations, large file operations
@@ -804,6 +869,34 @@ def test_version_fallback_import_error(
 - **Error simulation**: To test error conditions that are hard to reproduce naturally
 - **Deterministic testing**: To ensure consistent, repeatable test results
 
+#### Fast Mocking Patterns
+```python
+# Mock entire modules for performance
+@pytest.fixture(autouse=True)
+def mock_expensive_imports(mocker: MockerFixture) -> None:
+    """Auto-mock expensive operations for all tests."""
+    mocker.patch("requests.get")
+    mocker.patch("time.sleep")
+    mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
+
+# Mock with realistic but fast responses
+@pytest.fixture
+def fast_mock_response() -> dict:
+    """Provide minimal but valid response data."""
+    return {"status": "success", "data": []}
+
+# Use parametrized tests for multiple scenarios
+@pytest.mark.parametrize("status_code,expected", [
+    (200, "success"),
+    (404, "not_found"),
+    (500, "server_error"),
+])
+def test_multiple_status_codes(instance, mock_requests, status_code, expected):
+    """Test multiple HTTP status codes efficiently."""
+    mock_requests.return_value.status_code = status_code
+    result = instance.handle_response()
+    assert result == expected
+```
 
 ## Assertion Guidelines
 
@@ -921,10 +1014,240 @@ def test_loop_edge_cases():
 - Mock time-dependent operations
 - Limit test data size for performance
 
+## Advanced Mocking Techniques
+
+### Patching Strategies
+```python
+# Patch at class level for multiple tests
+@pytest.fixture(autouse=True)
+def setup_mocks(mocker: MockerFixture) -> None:
+    """Setup common mocks for all tests in this class."""
+    mocker.patch("requests.get")
+    mocker.patch("time.sleep")
+    mocker.patch("module.expensive_function", return_value="fast_result")
+
+# Context-specific patching
+@pytest.mark.parametrize("side_effect", [
+    None,  # successful case
+    ConnectionError("Network error"),
+    TimeoutError("Request timeout"),
+])
+def test_network_resilience(instance, mocker, side_effect):
+    """Test network error handling with various failures."""
+    mock_get = mocker.patch("requests.get")
+    if side_effect:
+        mock_get.side_effect = side_effect
+        with pytest.raises(type(side_effect)):
+            instance.fetch_data()
+    else:
+        mock_get.return_value.json.return_value = {"data": "success"}
+        result = instance.fetch_data()
+        assert result == {"data": "success"}
+
+# Mock complex objects with spec
+@pytest.fixture
+def mock_database_session(mocker: MockerFixture) -> MagicMock:
+    """Create a properly specified database session mock."""
+    mock_session = MagicMock(spec=Session)
+    mock_session.query.return_value.filter.return_value.first.return_value = None
+    return mocker.patch("module.Session", return_value=mock_session)
+```
+
+### Fast Data Generation
+```python
+# Use minimal test data
+@pytest.fixture
+def minimal_test_data() -> dict:
+    """Provide the smallest valid data set for testing."""
+    return {
+        "required_field": "value",
+        "optional_list": [],
+        "count": 0
+    }
+
+# Generate data efficiently
+def generate_test_items(count: int = 3) -> list[dict]:
+    """Generate minimal test items for performance."""
+    return [{"id": i, "name": f"item_{i}"} for i in range(count)]
+
+# Use factory functions instead of complex fixtures
+def create_test_instance(**overrides) -> TestClass:
+    """Factory function for test instances with overrides."""
+    defaults = {"param1": "default", "param2": 0}
+    defaults.update(overrides)
+    return TestClass(**defaults)
+```
+
+### Error Simulation Without Delays
+```python
+# Fast error testing
+@pytest.mark.parametrize("error_class,error_message", [
+    (HTTPError, "404 Not Found"),
+    (ConnectionError, "Connection refused"),
+    (TimeoutError, "Request timeout"),
+])
+def test_error_handling_fast(instance, mocker, error_class, error_message):
+    """Test various error conditions without network delays."""
+    mock_request = mocker.patch("requests.get")
+    mock_request.side_effect = error_class(error_message)
+    
+    # Mock backoff to prevent retry delays
+    mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
+    
+    with pytest.raises(error_class, match=error_message):
+        instance.method_with_requests()
+
+# Fast timeout simulation
+def test_timeout_handling(instance, mocker):
+    """Test timeout handling without actual waiting."""
+    # Mock the timeout to occur immediately
+    mock_request = mocker.patch("requests.get")
+    mock_request.side_effect = TimeoutError("Simulated timeout")
+    
+    with pytest.raises(TimeoutError):
+        instance.method_with_timeout()
+    
+    # Verify timeout was handled correctly
+    mock_request.assert_called_once()
+```
+
+### Concurrent Operations Testing
+```python
+# Test async operations without actual delays
+@pytest.mark.asyncio
+async def test_async_operations(mocker):
+    """Test async functionality with mocked delays."""
+    # Mock asyncio.sleep to eliminate delays
+    mocker.patch("asyncio.sleep")
+    
+    # Mock async HTTP calls
+    mock_session = AsyncMock()
+    mock_session.get.return_value.__aenter__.return_value.json = AsyncMock(
+        return_value={"data": "test"}
+    )
+    
+    result = await async_function_under_test()
+    assert result["data"] == "test"
+
+# Test thread-safe operations
+def test_thread_safety(instance, mocker):
+    """Test thread safety without actual threading delays."""
+    import threading
+    from unittest.mock import call
+    
+    mock_method = mocker.patch.object(instance, "thread_safe_method")
+    threads = []
+    
+    # Create threads but don't add delays
+    for i in range(5):
+        thread = threading.Thread(target=instance.concurrent_operation, args=(i,))
+        threads.append(thread)
+        thread.start()
+    
+    # Wait for completion (should be fast with mocked operations)
+    for thread in threads:
+        thread.join(timeout=1)  # Fail fast if something hangs
+    
+    # Verify all calls were made
+    assert mock_method.call_count == 5
+```
+
+### Database and File System Mocking
+```python
+# Fast database testing
+@pytest.fixture
+def mock_database_operations(mocker: MockerFixture) -> dict:
+    """Mock all database operations for speed."""
+    mocks = {
+        "connect": mocker.patch("sqlalchemy.create_engine"),
+        "session": mocker.patch("sqlalchemy.orm.sessionmaker"),
+        "query": mocker.MagicMock(),
+    }
+    
+    # Setup realistic but fast responses
+    mocks["query"].filter.return_value.first.return_value = None
+    mocks["query"].filter.return_value.all.return_value = []
+    
+    return mocks
+
+# Fast file system testing
+@pytest.fixture
+def mock_filesystem(mocker: MockerFixture) -> dict:
+    """Mock file system operations."""
+    return {
+        "open": mocker.mock_open(read_data="test content"),
+        "exists": mocker.patch("pathlib.Path.exists", return_value=True),
+        "mkdir": mocker.patch("pathlib.Path.mkdir"),
+        "unlink": mocker.patch("pathlib.Path.unlink"),
+    }
+
+def test_file_operations(instance, mock_filesystem):
+    """Test file operations without actual I/O."""
+    with patch("builtins.open", mock_filesystem["open"]):
+        result = instance.read_config_file()
+        assert "test content" in result
+    
+    mock_filesystem["exists"].assert_called()
+```
+
+## Test Organization for Speed
+
+### Group Related Tests
+```python
+class TestFastNetworkOperations:
+    """Group network-related tests with shared mocking."""
+    
+    @pytest.fixture(autouse=True)
+    def setup_network_mocks(self, mocker: MockerFixture) -> None:
+        """Setup network mocks for all tests in this class."""
+        self.mock_get = mocker.patch("requests.get")
+        self.mock_post = mocker.patch("requests.post")
+        self.mock_sleep = mocker.patch("time.sleep")
+        
+        # Default successful response
+        self.mock_response = MagicMock()
+        self.mock_response.status_code = 200
+        self.mock_response.json.return_value = {"success": True}
+        self.mock_get.return_value = self.mock_response
+    
+    def test_get_request(self, instance):
+        """Test GET request handling."""
+        result = instance.fetch_data("test_url")
+        assert result["success"] is True
+        self.mock_get.assert_called_once_with("test_url")
+    
+    def test_post_request(self, instance):
+        """Test POST request handling."""
+        self.mock_post.return_value = self.mock_response
+        result = instance.send_data("test_url", {"key": "value"})
+        assert result["success"] is True
+        self.mock_post.assert_called_once()
+```
+
+### Optimize Fixture Scope
+```python
+# Use session-scoped fixtures for expensive setup
+@pytest.fixture(scope="session")
+def expensive_resource():
+    """Create expensive resource once per test session."""
+    # This runs once for all tests
+    return create_expensive_resource()
+
+# Use function-scoped mocks for isolation
+@pytest.fixture(scope="function")
+def isolated_mock(mocker: MockerFixture):
+    """Create fresh mock for each test function."""
+    return mocker.patch("module.function")
+
+# Use class-scoped fixtures for related test groups
+@pytest.fixture(scope="class")
+def shared_test_data():
+    """Share data across tests in the same class."""
+    return generate_large_test_dataset()
+```
 
 ### Feature to be Tested
 
 ```python
-
 <FILL_WITH_FEATURE_IMPLEMENTED>
 ```
