@@ -12,6 +12,15 @@ export_deps:
 
 
 # -------------------
+# DEV ENVIRONMENT
+# -------------------
+.PHONY: python_path
+
+python_path:
+	@export PYTHONPATH=$PYTHONPATH:~/github/stpstone
+
+
+# -------------------
 # TESTING
 # -------------------
 .PHONY: unit_tests integration_tests test_cov test_feat test_urls_docstrings fix_playwright
