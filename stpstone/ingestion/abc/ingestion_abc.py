@@ -53,8 +53,16 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         self.cls_db = cls_db
 
     @abstractmethod
-    def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+    def get_response(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
         """Return a response object.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
         
         Returns
         -------
@@ -96,6 +104,12 @@ class CoreIngestion(metaclass=TypeChecker):
     """Abstract base class for ingestion operations."""
 
     def __init__(self) -> None:
+        """Initialize the CoreIngestion class.
+        
+        Returns
+        -------
+        None
+        """
         self.cls_db_logs = DBLogs()
     
     def standardize_dataframe(
@@ -210,6 +224,12 @@ class ContentAggregator(metaclass=TypeChecker):
     """Content aggregator mixin class."""
 
     def __init__(self) -> None:
+        """Initialize the ContentAggregator class.
+        
+        Returns
+        -------
+        None
+        """
         self.cls_handling_dicts = HandlingDicts()
         self.cls_str_handler = StrHandler()
 

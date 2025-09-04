@@ -10,7 +10,7 @@ employer identification number (EIN/CNPJ), and other relevant details.
 from io import BytesIO
 from logging import Logger
 from time import sleep
-from typing import Optional
+from typing import Optional, Union
 
 import backoff
 import pandas as pd
@@ -29,6 +29,7 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class InvestmentFunds(ABCIngestionOperations):
+    """Class to fetch and process investment fund bylaws from brazilian SEC (CVM)."""
     
     def __init__(
         self, 
@@ -71,8 +72,16 @@ class InvestmentFunds(ABCIngestionOperations):
         requests.exceptions.HTTPError, 
         max_time=60
     )
-    def get_response(self) -> list[requests.Response]:
+    def get_response(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+    ) -> list[requests.Response]:
         """Return a list of response objects.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
         
         Returns
         -------
@@ -87,7 +96,7 @@ class InvestmentFunds(ABCIngestionOperations):
                 message=f"Requesting: {fstr_url.format(app)}",
                 log_level="info"
             )
-            resp_req = requests.get(fstr_url.format(app))
+            resp_req = requests.get(fstr_url.format(app), timeout=timeout)
             resp_req.raise_for_status()
             list_resp_req.append(resp_req)
             sleep(10)
