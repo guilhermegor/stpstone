@@ -50,7 +50,7 @@ class DBLogs(metaclass=TypeChecker):
         ValueError
             If string is empty
         """
-        if not value:
+        if not value or len(value) == 0:
             raise ValueError(f"{name} cannot be empty")
 
     def audit_log(
@@ -66,27 +66,33 @@ class DBLogs(metaclass=TypeChecker):
         ----------
         df_ : pd.DataFrame
             DataFrame to update
-        url : str
+        url : Optional[str]
             URL to insert into the DataFrame
         dt_db_ref : date
-            Timestamp of the database reference
+            Date of the database reference
         bool_format_log_as_str : bool, optional
             Whether to format timestamp as string (default: True)
 
         Returns
         -------
         pd.DataFrame
-            Dictionary containing the updated DataFrame
+            Updated DataFrame with audit columns
+
+        Raises
+        ------
+        ValueError
+            If url is empty
         """
         self._validate_dataframe(df_)
         
-        if url:
-            self._validate_string(url, "url")
-            df_[YAML_GEN["audit_log_cols"]["url"]] = url
+        if url is None or url == "":
+            raise ValueError("url cannot be empty")
+        self._validate_string(url, "url")
+        df_[YAML_GEN["audit_log_cols"]["url"]] = url
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
         log_ts = DatesBRAnbima().utc_log_ts()
         df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = (
-            log_ts.strftime("%Y-%m-%d %H:%M:%S.%f%z") if bool_format_log_as_str else log_ts
+            log_ts.strftime("%Y-%m-%d") if bool_format_log_as_str else log_ts
         )
         return df_
 
@@ -103,7 +109,7 @@ class DBLogs(metaclass=TypeChecker):
         Returns
         -------
         pd.DataFrame
-            Dictionary containing the updated DataFrame
+            Updated DataFrame with user information
         """
         self._validate_dataframe(df_)
         self._validate_string(user_id, "user_id")
@@ -122,7 +128,7 @@ class DBLogs(metaclass=TypeChecker):
         Returns
         -------
         pd.DataFrame
-            Dictionary containing the updated DataFrame
+            Updated DataFrame with host information
         """
         self._validate_dataframe(df_)
         
@@ -142,7 +148,7 @@ class DBLogs(metaclass=TypeChecker):
         Returns
         -------
         pd.DataFrame
-            Dictionary containing the updated DataFrame
+            Updated DataFrame with error information
         """
         self._validate_dataframe(df_)
         self._validate_string(error_msg, "error_msg")
@@ -165,12 +171,12 @@ class DBLogs(metaclass=TypeChecker):
         action_type : Literal['insert', 'update', 'delete']
             Type of action
         dt_action : date
-            Timestamp of the action
+            Date of the action
 
         Returns
         -------
         pd.DataFrame
-            Dictionary containing the updated DataFrame
+            Updated DataFrame with action logging information
         """
         self._validate_dataframe(df_)
         self._validate_string(action_type, "action_type")

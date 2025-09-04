@@ -5,7 +5,7 @@ verifying audit logging, user info, host info, error info, and data action loggi
 Tests cover normal operations, edge cases, error conditions, and type validation.
 """
 
-from datetime import datetime
+from datetime import date
 from typing import Any
 
 import pandas as pd
@@ -54,18 +54,20 @@ def empty_df() -> pd.DataFrame:
     return pd.DataFrame()
 
 @pytest.fixture
-def sample_datetime() -> datetime:
-    """Fixture providing a sample datetime.
+def sample_date() -> date:
+    """Fixture providing a sample date.
 
     Returns
     -------
-    datetime
-        Sample datetime object
+    date
+        Sample date object
     """
-    return datetime(2025, 8, 13, 10, 42)
+    return date(2025, 8, 13)
 
 @pytest.fixture
-def mock_dates_br(mocker: MockerFixture) -> Any: # noqa ANN401: typing.Any not allowed
+def mock_dates_br(
+    mocker: MockerFixture
+) -> Any: # noqa ANN401: typing.Any is not allowed
     """Fixture mocking ABCCalendarOperations.utc_log_ts method.
 
     Parameters
@@ -79,16 +81,18 @@ def mock_dates_br(mocker: MockerFixture) -> Any: # noqa ANN401: typing.Any not a
         Mock object for ABCCalendarOperations.utc_log_ts
     """
     return mocker.patch.object(ABCCalendarOperations, "utc_log_ts", 
-                               return_value=datetime(2025, 8, 13, 10, 42))
+                              return_value=date(2025, 8, 13))
 
 @pytest.fixture
-def mock_hostname(mocker: MockerFixture) -> Any: # noqa ANN401: typing.Any not allowed
+def mock_hostname(
+    mocker: MockerFixture
+) -> Any: # noqa ANN401: typing.Any is not allowed
     """Fixture mocking socket.gethostname method.
 
     Parameters
     ----------
     mocker : MockerFixture
-        Pytest-mock fixtureáculos
+        Pytest-mock fixture
 
     Returns
     -------
@@ -234,8 +238,8 @@ def test_validate_string_valid(db_logs: DBLogs) -> None:
 def test_audit_log_valid(
     db_logs: DBLogs,
     sample_df: pd.DataFrame,
-    sample_datetime: datetime,
-    mock_dates_br: Any, # noqa ANN401: typing.Any not allowed
+    sample_date: date,
+    mock_dates_br: Any, # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test audit_log with valid inputs and string timestamp.
 
@@ -249,8 +253,8 @@ def test_audit_log_valid(
         DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
     mock_dates_br : Any
         Mocked ABCCalendarOperations.utc_log_ts from fixture
 
@@ -259,24 +263,23 @@ def test_audit_log_valid(
     None
     """
     url = "https://example.com"
-    result = db_logs.audit_log(sample_df, url, sample_datetime, bool_format_log_as_str=True)
+    result = db_logs.audit_log(sample_df, url, sample_date, bool_format_log_as_str=True)
     assert YAML_GEN["audit_log_cols"]["url"] in result.columns
     assert result[YAML_GEN["audit_log_cols"]["url"]].iloc[0] == url
-    assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_datetime
-    assert result[YAML_GEN["audit_log_cols"]["log_timestamp"]].iloc[0] \
-        == "2025-08-13 10:42:00.000000"
+    assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_date
+    assert result[YAML_GEN["audit_log_cols"]["log_timestamp"]].iloc[0] == "2025-08-13"
 
 def test_audit_log_datetime(
     db_logs: DBLogs,
     sample_df: pd.DataFrame,
-    sample_datetime: datetime,
-    mock_dates_br: Any, # noqa ANN401: typing.Any not allowed
+    sample_date: date,
+    mock_dates_br: Any, # noqa ANN401: typing.Any is not allowed
 ) -> None:
-    """Test audit_log with valid inputs and datetime timestamp.
+    """Test audit_log with valid inputs and date timestamp.
 
     Verifies
     --------
-    That audit_log correctly adds URL, reference date, and datetime timestamp columns.
+    That audit_log correctly adds URL, reference date, and date timestamp columns.
 
     Parameters
     ----------
@@ -284,8 +287,8 @@ def test_audit_log_datetime(
         DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
     mock_dates_br : Any
         Mocked ABCCalendarOperations.utc_log_ts from fixture
 
@@ -294,13 +297,13 @@ def test_audit_log_datetime(
     None
     """
     url = "https://example.com"
-    result = db_logs.audit_log(sample_df, url, sample_datetime, bool_format_log_as_str=False)
+    result = db_logs.audit_log(sample_df, url, sample_date, bool_format_log_as_str=False)
     assert YAML_GEN["audit_log_cols"]["url"] in result.columns
     assert result[YAML_GEN["audit_log_cols"]["url"]].iloc[0] == url
-    assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_datetime
-    assert result[YAML_GEN["audit_log_cols"]["log_timestamp"]].iloc[0] == sample_datetime
+    assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_date
+    assert result[YAML_GEN["audit_log_cols"]["log_timestamp"]].iloc[0] == sample_date
 
-def test_audit_log_invalid_df(db_logs: DBLogs, sample_datetime: datetime) -> None:
+def test_audit_log_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
     """Test audit_log raises TypeError for invalid DataFrame input.
 
     Verifies
@@ -311,20 +314,20 @@ def test_audit_log_invalid_df(db_logs: DBLogs, sample_datetime: datetime) -> Non
     ----------
     db_logs : DBLogs
         DBLogs instance from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(TypeError, match="must be of type"):
-        db_logs.audit_log([1, 2, 3], "https://example.com", sample_datetime)
+        db_logs.audit_log([1, 2, 3], "https://example.com", sample_date)
 
 def test_audit_log_empty_df(
     db_logs: DBLogs, 
     empty_df: pd.DataFrame, 
-    sample_datetime: datetime
+    sample_date: date
 ) -> None:
     """Test audit_log raises ValueError for empty DataFrame.
 
@@ -338,20 +341,20 @@ def test_audit_log_empty_df(
         DBLogs instance from fixture
     empty_df : pd.DataFrame
         Empty DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(ValueError, match="DataFrame cannot be empty"):
-        db_logs.audit_log(empty_df, "https://example.com", sample_datetime)
+        db_logs.audit_log(empty_df, "https://example.com", sample_date)
 
 def test_audit_log_invalid_url(
     db_logs: DBLogs, 
     sample_df: pd.DataFrame, 
-    sample_datetime: datetime
+    sample_date: date
 ) -> None:
     """Test audit_log raises ValueError for empty URL.
 
@@ -365,22 +368,22 @@ def test_audit_log_invalid_url(
         DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(ValueError, match="url cannot be empty"):
-        db_logs.audit_log(sample_df, "", sample_datetime)
+        db_logs.audit_log(sample_df, "", sample_date)
 
-def test_audit_log_invalid_datetime(db_logs: DBLogs, sample_df: pd.DataFrame) -> None:
-    """Test audit_log raises TypeError for invalid datetime.
+def test_audit_log_invalid_date(db_logs: DBLogs, sample_df: pd.DataFrame) -> None:
+    """Test audit_log raises TypeError for invalid date.
 
     Verifies
     --------
-    That a non-datetime dt_db_ref raises TypeError.
+    That a non-date dt_db_ref raises TypeError.
 
     Parameters
     ----------
@@ -394,7 +397,7 @@ def test_audit_log_invalid_datetime(db_logs: DBLogs, sample_df: pd.DataFrame) ->
     None
     """
     with pytest.raises(TypeError, match="must be of type"):
-        db_logs.audit_log(sample_df, "https://example.com", "not a datetime")
+        db_logs.audit_log(sample_df, "https://example.com", "not a date")
 
 
 # --------------------------
@@ -410,7 +413,7 @@ def test_insert_user_info_valid(db_logs: DBLogs, sample_df: pd.DataFrame) -> Non
     Parameters
     ----------
     db_logs : DBLogs
-        DBLogs облачи
+        DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
 
@@ -512,7 +515,7 @@ def test_insert_user_info_invalid_user_id(db_logs: DBLogs, sample_df: pd.DataFra
 def test_insert_host_info_valid(
     db_logs: DBLogs, 
     sample_df: pd.DataFrame, 
-    mock_hostname: Any # noqa ANN401: typing.Any not allowed
+    mock_hostname: Any # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test insert_host_info with valid inputs.
 
@@ -693,7 +696,7 @@ def test_insert_error_info_invalid_error_msg(db_logs: DBLogs, sample_df: pd.Data
 def test_log_data_insert_valid(
     db_logs: DBLogs,
     sample_df: pd.DataFrame,
-    sample_datetime: datetime,
+    sample_date: date,
 ) -> None:
     """Test log_data_insert with valid inputs.
 
@@ -707,21 +710,21 @@ def test_log_data_insert_valid(
         DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     action_type = "insert"
-    result = db_logs.log_data_insert(sample_df, action_type, sample_datetime)
+    result = db_logs.log_data_insert(sample_df, action_type, sample_date)
     assert YAML_GEN["audit_log_cols"]["action_type"] in result.columns
     assert YAML_GEN["audit_log_cols"]["action_timestamp"] in result.columns
     assert result[YAML_GEN["audit_log_cols"]["action_type"]].iloc[0] == action_type
-    assert result[YAML_GEN["audit_log_cols"]["action_timestamp"]].iloc[0] == sample_datetime
+    assert result[YAML_GEN["audit_log_cols"]["action_timestamp"]].iloc[0] == sample_date
 
-def test_log_data_insert_invalid_df(db_logs: DBLogs, sample_datetime: datetime) -> None:
+def test_log_data_insert_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
     """Test log_data_insert raises TypeError for invalid DataFrame.
 
     Verifies
@@ -732,20 +735,20 @@ def test_log_data_insert_invalid_df(db_logs: DBLogs, sample_datetime: datetime) 
     ----------
     db_logs : DBLogs
         DBLogs instance from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(TypeError, match="must be of type"):
-        db_logs.log_data_insert([1, 2, 3], "insert", sample_datetime)
+        db_logs.log_data_insert([1, 2, 3], "insert", sample_date)
 
 def test_log_data_insert_empty_df(
     db_logs: DBLogs, 
     empty_df: pd.DataFrame, 
-    sample_datetime: datetime
+    sample_date: date
 ) -> None:
     """Test log_data_insert raises ValueError for empty DataFrame.
 
@@ -759,20 +762,20 @@ def test_log_data_insert_empty_df(
         DBLogs instance from fixture
     empty_df : pd.DataFrame
         Empty DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(ValueError, match="DataFrame cannot be empty"):
-        db_logs.log_data_insert(empty_df, "insert", sample_datetime)
+        db_logs.log_data_insert(empty_df, "insert", sample_date)
 
 def test_log_data_insert_invalid_action_type(
     db_logs: DBLogs, 
     sample_df: pd.DataFrame, 
-    sample_datetime: datetime
+    sample_date: date
 ) -> None:
     """Test log_data_insert raises ValueError for invalid action_type.
 
@@ -786,20 +789,20 @@ def test_log_data_insert_invalid_action_type(
         DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(TypeError, match="must be one of"):
-        db_logs.log_data_insert(sample_df, "invalid", sample_datetime)
+        db_logs.log_data_insert(sample_df, "invalid", sample_date)
 
 def test_log_data_insert_empty_action_type(
     db_logs: DBLogs, 
     sample_df: pd.DataFrame, 
-    sample_datetime: datetime
+    sample_date: date
 ) -> None:
     """Test log_data_insert raises ValueError for empty action_type.
 
@@ -813,22 +816,22 @@ def test_log_data_insert_empty_action_type(
         DBLogs instance from fixture
     sample_df : pd.DataFrame
         Sample DataFrame from fixture
-    sample_datetime : datetime
-        Sample datetime from fixture
+    sample_date : date
+        Sample date from fixture
 
     Returns
     -------
     None
     """
     with pytest.raises(TypeError, match="must be one of"):
-        db_logs.log_data_insert(sample_df, "", sample_datetime)
+        db_logs.log_data_insert(sample_df, "", sample_date)
 
-def test_log_data_insert_invalid_datetime(db_logs: DBLogs, sample_df: pd.DataFrame) -> None:
-    """Test log_data_insert raises TypeError for invalid datetime.
+def test_log_data_insert_invalid_date(db_logs: DBLogs, sample_df: pd.DataFrame) -> None:
+    """Test log_data_insert raises TypeError for invalid date.
 
     Verifies
     --------
-    That a non-datetime dt_action raises TypeError.
+    That a non-date dt_action raises TypeError.
 
     Parameters
     ----------
@@ -842,7 +845,7 @@ def test_log_data_insert_invalid_datetime(db_logs: DBLogs, sample_df: pd.DataFra
     None
     """
     with pytest.raises(TypeError, match="must be of type"):
-        db_logs.log_data_insert(sample_df, "insert", "not a datetime")
+        db_logs.log_data_insert(sample_df, "insert", "not a date")
 
 
 # --------------------------
