@@ -1,163 +1,61 @@
-### CONFIGURATION TOOLS ###
-
-credentials:
-  host: https://web.cvm.gov.br/
-  headers:
-  payload:
-  token:
-    host:
-    app:
-    get:
-      req_method: GET
-      bool_verify: False
-      timeout: (12.0, 12.0)
-    keys:
-      token: token
-  web_driver:
-
-metadata:
-
-
-### RESOURCES TO BE SCRAPED ###
-
-investment_funds_bylaws:
-  web_driver:
-    xpath_el_wait_until_loaded:
-  req_method: GET
-  # if host is not defined within credentials, use the source one
-  host:
-  headers:
-  payload:
-  # list of slugs (complementary descriptive text to access a web pages)
-  slugs:
-    - DOC_REGUL_8557_122868_2025_02.pdf
-    - DOC_REGUL_10882_125278_2025_03.pdf
-    - DOC_REGUL_10980_124649_2025_03.pdf
-    - DOC_REGUL_11520_124851_2025_03.pdf
-    - DOC_REGUL_13784_125081_2025_03.pdf
-    - DOC_REGUL_14532_121734_2025_02.pdf
-    - DOC_REGUL_15638_126987_2025_03.pdf
-    - DOC_REGUL_15640_125039_2025_03.pdf
-    - DOC_REGUL_16323_119980_2025_02.pdf
-    - DOC_REGUL_16333_125043_2025_03.pdf
-    - DOC_REGUL_16367_125082_2025_03.pdf
-    - DOC_REGUL_16476_120375_2025_02.pdf
-    - DOC_REGUL_16551_125463_2025_03.pdf
-    - DOC_REGUL_17124_121158_2025_02.pdf
-    - DOC_REGUL_17715_120602_2025_02.pdf
-    - DOC_REGUL_17805_120007_2025_02.pdf
-    - DOC_REGUL_17840_125261_2025_03.pdf
-    - DOC_REGUL_18235_125492_2025_03.pdf
-    - DOC_REGUL_19078_124930_2025_03.pdf
-    - DOC_REGUL_19130_126121_2025_03.pdf
-    - DOC_REGUL_19498_121914_2025_02.pdf
-    - DOC_REGUL_19667_122068_2025_02.pdf
-    - DOC_REGUL_20214_125080_2025_03.pdf
-    - DOC_REGUL_22448_120161_2025_02.pdf
-    - DOC_REGUL_23008_119976_2025_02.pdf
-    - DOC_REGUL_23639_121700_2025_02.pdf
-    - DOC_REGUL_24094_120932_2025_02.pdf
-  # use this argument only if {{chunk_slugs}} is passed to app
-  int_chunk_slugs:
-  # iteratively_get_data placeholders:
-  #   - i (int): https://example.com/{{i}}
-  #   - slug (str): https://example.com/{{slug}} - slugs in list format
-  #   - chunk_slugs (List[str]): https://example.com/{{chunk_slugs}}
-  # non-iteratively_get_data placeholders:
-  #   - {{replacer}}: https://example.com/{{replacer}}
-  #     note: the replacer can be any variable referenced within concrete product class
-  # expected comments to app, within url:
-  #   - feat=read_tables
-  #   - int_pgs_join={{number}}
-  #   - file_extension=.{{file_extension}}
-  #   - start with a commentary hash and separate params with &
-  app: app/fundosweb/fundos/regulamento/obter/por/arquivo/{{slug}}#int_pgs_join=3
-  bool_verify: False
-  timeout: (12.0, 12.0)
-  cookies:
-  cols_from_case: default
-  cols_to_case: upper_constant
-  list_cols_drop_dupl:
-  str_fmt_dt: YYYY-MM-DD
-  type_error_action: raise
-  strategy_keep_when_dupl: first
-  list_ignorable_exceptions:
-  schema: raw
-  table_name: br_investment_funds_bylaws
-  bool_insert_or_ignore: False
-  bool_schema: True
-  ignored_file_extensions:
-    - tmp
-    - log
-    - bak
-  fillna_strt:
-    COL_1: bfill
-    COL_2: ffill
-  dtypes:
-    EVENT: str
-    MATCH_PATTERN: str
-    PATTERN_REGEX: str
-    REGEX_GROUP_0: str
-    REGEX_GROUP_1: str
-  df_read_params:
-  regex_patterns:
-    nome_fundo:
-      xp_1: (?i)instrumento\s*particular\s*de\s*altera..o\s*do\s*regulamento\s*d[o|a]\s*([^*]+?)\s*cnpj
-      xp_2: (?i)ata\s*da\s*assembl[e|é]ia\s*geral\s*extraordin.ria\s*d[o|a]\s*([^*]+?)\s*cnpj
-      bradesco_1: (?i)instrumento\s*particular\s*de\s*adapta..o\s*d[a|e|o]\s*([^*]+?)[\,|\s*]cnpj
-      bnp_1: (?i)instrumento\s*particular\s*de\s*[^*]+?\s*d[a|e|o]\s*([^*]+?)[\,|\s*]cnpj
-      btg_1: (?i)ata\s*da\s*assembl.ia\s*geral\s*d[a|e|o][s|\s*]\s*cotist..\s*d[a|e|o]\s*([^*]+?)\s*cnpj
-      reag_1: (?i)regulamento\s*d[a|e|o]\s*([^*]+?)\s*cnpj
-      bny_1: (?i)assembleia\s*d[a|e|a][s|\s*]\s*cotist..\sd[a|e|o]([^*]+?)\s+cnpj
-      generico_1: (?i)artigo\s*\d{1,2}..\s*([^*]+?)\(.fundo.\)
-    cnpj:
-      xp_1: (?i)cnpj/mf\s*n\s*.\s*([^*]+?)\s+.{17}
-      xp_2: (?i)cnpj.mf.*sob\s*o\sn.\s([^*]+?)\s*..administradora
-      xp_3: (?i)cnpj\s*n.\s*([^*]+?)\s*..fundo
-      s3_1: (?i)cnpj.\s*([^*]+?)\s*vig.ncia
-      apex_1: (?i)regulamento\s*d[a|e|o][^*]+?cnpj\s*n.([^*]+?)\s*\d{1,2}\s*d[a|e|o]
-      bnp_1: (?i)cnpj\/mf\s*([^*]+?)\s*\(.fundo
-      singulare_1: (?i)regulamento\s*d[a|e|o][^*]+?cnpj\s*([^*]+?)\s*\d{1,2}\s*d[a|e|o]
-      singulare_2: (?i)regulamento\s*d[a|e|o][^*]+?cnpj.me\s*n.\s*([^*]+?)\s*\d{1,2}\s*d[a|e|o]
-    condominio:
-      xp_1: (?i)condom.nio:\s*([^*]+?)\s*prazo
-      xp_2: (?i)regime\s*(aberto|fechado)
-      s3_1: (?i)regime\s*condominial\s*([^*]+?)\s*\.
-      bradesco_1: (?i)classe\s*de*\s*cota[s|]\s*([^*]+?)\s+e\s*.nica
-      bradesco_2: (?i)tipo\s*de\s*condom.nio\s*([^*]+?)\.
-      bradesco_3: (?i)classe\s*([^*]+?)\s*com\sprazo
-      btg_1: (?i)tipo\s*de\s*condom.nio\s*([^*]+?)\.
-      btg_2: (?i)forma\s*de\s*condom.nio\s*([^*]+?)[\,|\s+]
-      singulare_1: (?i)fundo\s*.\s*constitu.do\s*sob\s*a\s*forma\s*de\s*condom.nio\s*([^*]+?)[\,|\s+]
-      itau_1: (?i)\s*fundo\s*.\s*constitu.do\s*como\s*condom.nio\s*([^*]+?)[\,|\s+]
-      generico_1: (?i)\s*classe\s*caracterizada\s*como\s*([^*]+?)[\,|\s*]
-      generico_2: (?i)constitu.do\s*sob\s*a\s*forma\s*de\s*condom.nio([^*]+?)[\,|\s+]
-    classe:
-      xp_1: (?i)classe:\s*([^*]+?)\s*a. pol.tica
-      xp_2: (?i)classes:\s*([^*]+?)\s*t.rmino
-      xp_3: (?i)(subclasse\s*[^*]+?);
-      btg_1: (?i)as\s*cotas\s*do\s*fundo\s*s.o\s*de\s*([^*]+?)\.
-    conversao_cota:
-      xp_1: (?i)convers..\s*da\s*cota:\s*([^*]+?)\s*pagamento
-      xp_2: (?i)convers.o\s*d.\s*cota[:|]\s*pagamento[:|][^*]+?(d\+\d{1})\s*d\+\d{1}\s*dia[s|]\s*.teis\s*
-      xp_3: (?i)(d\+\d{1}\s*dia\s*.til)\s*d\+\d{1}\s*dia[s|]\s*.teis\s*contado[s|]\s*ap.s\s*a\s*convers.o
-      xp_4: (?i)(convers.o\s*de\s*cota[s|]\s*[^*]+?);
-      xp_5: (?i)convers.o\s*da\s*cota[:|]\s*pagamento[:|]\s*[^*]+?(d\+\d{1}\s[^*]+?)\s*d\+[^.]+?\s*movimenta..o
-      s3_1: (?i)solicita..o\s*de\s*resgate\s*[^*]+?convers.o\s*([^*]+?)pagamento
-      btg_1: (?i)(convers.o\s*das\s*cotas\s*[^*]+?);
-      btg_2: (?i)convers.o:\s*([^*]+?)\s*[\.|\,|;]
-      btg_3: (?i)(convers.o\s*[^*]+?);
-      daycoval_1: (?i)(convers.o\s*[^*]+?)[\.|;]
-      singulare_1: (?i)(o\s*valor\s*l.quido[^*]+?);
-    pagamento:
-      xp_1: (?i)pagamento:\s*([^*]+?)\s*movimenta..o
-      xp_2: (?i)convers.o\s*d.\s*cota[:|]\s*pagamento[:|][^*]+?d\+\d{1}\s*(d\+\d{1}\s*dia[s|]\s*.teis\s*)
-      xp_3: (?i)d\+\d{1}\s*dia\s*.til\s*(d\+\d{1}\s*dia[s|]\s*.teis)\s*contado[s|]\s*ap.s\s*a\s*convers.o
-      xp_4: (?i)(entrega\sd.[s|]\s*recurso[^*]+?)[;|.]
-      xp_5: (?i)convers.o\s*da\s*cota[:|]\s*pagamento[:|]\s*[^*]+?d\+\d{1}\s[^*]+?\s*(d\+[^.]+?)\s*movimenta..o
-      xp_6: (?i)pagamento\s*([^*]+?)\s*taxa
-      btg_1: (?i)(pagamento\s*do\s*resgate[^*]+?);
-      btg_2: (?i)pagamento:\s*([^*]+?)\s*[\.|\,|;]
-      btg_3: (?i)(resgate\s*de\s*cota[s|]\s*ser.\s*pago\s*[^*]+?)[\,|\.|;]
-      daycoval_1: (?i)(pagamento\s*do\s*resgate\s*[^*]+?)[\.|;]
-      singulare_1: (?i)(a\s*solicita..o\s*de\s*resgate\s*dever.[^*]+?);
+regex_patterns:
+  nome_fundo:
+    xp_1: (?i)instrumento\s*particular\s*de\s*altera..o\s*do\s*regulamento\s*d[o|a]\s*([^*]+?)\s*cnpj
+    xp_2: (?i)ata\s*da\s*assembl[e|é]ia\s*geral\s*extraordin.ria\s*d[o|a]\s*([^*]+?)\s*cnpj
+    bradesco_1: (?i)instrumento\s*particular\s*de\s*adapta..o\s*d[a|e|o]\s*([^*]+?)[\,|\s*]cnpj
+    bnp_1: (?i)instrumento\s*particular\s*de\s*[^*]+?\s*d[a|e|o]\s*([^*]+?)[\,|\s*]cnpj
+    btg_1: (?i)ata\s*da\s*assembl.ia\s*geral\s*d[a|e|o][s|\s*]\s*cotist..\s*d[a|e|o]\s*([^*]+?)\s*cnpj
+    reag_1: (?i)regulamento\s*d[a|e|o]\s*([^*]+?)\s*cnpj
+    bny_1: (?i)assembleia\s*d[a|e|a][s|\s*]\s*cotist..\sd[a|e|o]([^*]+?)\s+cnpj
+    generico_1: (?i)artigo\s*\d{1,2}..\s*([^*]+?)\(.fundo.\)
+  cnpj:
+    xp_1: (?i)cnpj/mf\s*n\s*.\s*([^*]+?)\s+.{17}
+    xp_2: (?i)cnpj.mf.*sob\s*o\sn.\s([^*]+?)\s*..administradora
+    xp_3: (?i)cnpj\s*n.\s*([^*]+?)\s*..fundo
+    s3_1: (?i)cnpj.\s*([^*]+?)\s*vig.ncia
+    apex_1: (?i)regulamento\s*d[a|e|o][^*]+?cnpj\s*n.([^*]+?)\s*\d{1,2}\s*d[a|e|o]
+    bnp_1: (?i)cnpj\/mf\s*([^*]+?)\s*\(.fundo
+    singulare_1: (?i)regulamento\s*d[a|e|o][^*]+?cnpj\s*([^*]+?)\s*\d{1,2}\s*d[a|e|o]
+    singulare_2: (?i)regulamento\s*d[a|e|o][^*]+?cnpj.me\s*n.\s*([^*]+?)\s*\d{1,2}\s*d[a|e|o]
+  condominio:
+    xp_1: (?i)condom.nio:\s*([^*]+?)\s*prazo
+    xp_2: (?i)regime\s*(aberto|fechado)
+    s3_1: (?i)regime\s*condominial\s*([^*]+?)\s*\.
+    bradesco_1: (?i)classe\s*de*\s*cota[s|]\s*([^*]+?)\s+e\s*.nica
+    bradesco_2: (?i)tipo\s*de\s*condom.nio\s*([^*]+?)\.
+    bradesco_3: (?i)classe\s*([^*]+?)\s*com\sprazo
+    btg_1: (?i)tipo\s*de\s*condom.nio\s*([^*]+?)\.
+    btg_2: (?i)forma\s*de\s*condom.nio\s*([^*]+?)[\,|\s+]
+    singulare_1: (?i)fundo\s*.\s*constitu.do\s*sob\s*a\s*forma\s*de\s*condom.nio\s*([^*]+?)[\,|\s+]
+    itau_1: (?i)\s*fundo\s*.\s*constitu.do\s*como\s*condom.nio\s*([^*]+?)[\,|\s+]
+    generico_1: (?i)\s*classe\s*caracterizada\s*como\s*([^*]+?)[\,|\s*]
+    generico_2: (?i)constitu.do\s*sob\s*a\s*forma\s*de\s*condom.nio([^*]+?)[\,|\s+]
+  classe:
+    xp_1: (?i)classe:\s*([^*]+?)\s*a. pol.tica
+    xp_2: (?i)classes:\s*([^*]+?)\s*t.rmino
+    xp_3: (?i)(subclasse\s*[^*]+?);
+    btg_1: (?i)as\s*cotas\s*do\s*fundo\s*s.o\s*de\s*([^*]+?)\.
+  conversao_cota:
+    xp_1: (?i)convers..\s*da\s*cota:\s*([^*]+?)\s*pagamento
+    xp_2: (?i)convers.o\s*d.\s*cota[:|]\s*pagamento[:|][^*]+?(d\+\d{1})\s*d\+\d{1}\s*dia[s|]\s*.teis\s*
+    xp_3: (?i)(d\+\d{1}\s*dia\s*.til)\s*d\+\d{1}\s*dia[s|]\s*.teis\s*contado[s|]\s*ap.s\s*a\s*convers.o
+    xp_4: (?i)(convers.o\s*de\s*cota[s|]\s*[^*]+?);
+    xp_5: (?i)convers.o\s*da\s*cota[:|]\s*pagamento[:|]\s*[^*]+?(d\+\d{1}\s[^*]+?)\s*d\+[^.]+?\s*movimenta..o
+    s3_1: (?i)solicita..o\s*de\s*resgate\s*[^*]+?convers.o\s*([^*]+?)pagamento
+    btg_1: (?i)(convers.o\s*das\s*cotas\s*[^*]+?);
+    btg_2: (?i)convers.o:\s*([^*]+?)\s*[\.|\,|;]
+    btg_3: (?i)(convers.o\s*[^*]+?);
+    daycoval_1: (?i)(convers.o\s*[^*]+?)[\.|;]
+    singulare_1: (?i)(o\s*valor\s*l.quido[^*]+?);
+  pagamento:
+    xp_1: (?i)pagamento:\s*([^*]+?)\s*movimenta..o
+    xp_2: (?i)convers.o\s*d.\s*cota[:|]\s*pagamento[:|][^*]+?d\+\d{1}\s*(d\+\d{1}\s*dia[s|]\s*.teis\s*)
+    xp_3: (?i)d\+\d{1}\s*dia\s*.til\s*(d\+\d{1}\s*dia[s|]\s*.teis)\s*contado[s|]\s*ap.s\s*a\s*convers.o
+    xp_4: (?i)(entrega\sd.[s|]\s*recurso[^*]+?)[;|.]
+    xp_5: (?i)convers.o\s*da\s*cota[:|]\s*pagamento[:|]\s*[^*]+?d\+\d{1}\s[^*]+?\s*(d\+[^.]+?)\s*movimenta..o
+    xp_6: (?i)pagamento\s*([^*]+?)\s*taxa
+    btg_1: (?i)(pagamento\s*do\s*resgate[^*]+?);
+    btg_2: (?i)pagamento:\s*([^*]+?)\s*[\.|\,|;]
+    btg_3: (?i)(resgate\s*de\s*cota[s|]\s*ser.\s*pago\s*[^*]+?)[\,|\.|;]
+    daycoval_1: (?i)(pagamento\s*do\s*resgate\s*[^*]+?)[\.|;]
+    singulare_1: (?i)(a\s*solicita..o\s*de\s*resgate\s*dever.[^*]+?);

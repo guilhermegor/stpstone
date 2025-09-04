@@ -233,15 +233,18 @@ class ContentAggregator(metaclass=TypeChecker):
             A list of paginated text blocks.
         """
         str_ = ""
-        list_blocks_pages: list = [str]
+        list_blocks_pages: list[str] = []
 
         for i in range(0, len(stream_file)):
             str_ += "\n" + stream_file[i].get_text("text")
             if i % int_pages_join == 0 or i == len(stream_file) - 1:
-                str_page = self.cls_str_handler.remove_diacritics_nfkd(
-                    str_page, bool_lower_case=True)
+                str_ = self.cls_str_handler.remove_diacritics_nfkd(
+                    str_, bool_lower_case=True)
                 list_blocks_pages.append(str_)
                 str_ = ""
+
+        if not list_blocks_pages:
+            list_blocks_pages.append("")
 
         return list_blocks_pages
 

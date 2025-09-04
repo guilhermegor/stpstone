@@ -8,14 +8,23 @@ employer identification number (EIN/CNPJ), and other relevant details.
 """
 
 from io import BytesIO
+from logging import Logger
+from time import sleep
 from typing import Optional
 
+import backoff
 import pandas as pd
 import requests
 from requests import Session
 
-from stpstone.ingestion.abc.ingestion_abc import ABCIngestionOperations
+from stpstone._config.global_slots import YAML_INVESTMENT_FUNDS_BYLAWS
+from stpstone.ingestion.abc.ingestion_abc import (
+    ABCIngestionOperations,
+    ContentParser,
+    CoreIngestion,
+)
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
+from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -24,8 +33,9 @@ class InvestmentFunds(ABCIngestionOperations):
     def __init__(
         self, 
         list_apps: list[str], 
-        int_pages_join: Optional[int] = 3, 
-        cls_db: Optional[Session] = None
+        int_pages_join: Optional[int] = 3,  
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
     ) -> None:
         """Initialize the InvestmentFunds class.
         
@@ -35,6 +45,8 @@ class InvestmentFunds(ABCIngestionOperations):
             The list of apps.
         int_pages_join : Optional[int], optional
             The number of pages to join, by default 3.
+        logger : Optional[Logger], optional
+            The logger, by default None.
         cls_db : Optional[Session], optional
             The database session, by default None.
         
@@ -42,12 +54,23 @@ class InvestmentFunds(ABCIngestionOperations):
         -------
         None
         """
+        super().__init__(cls_db=cls_db)
+        CoreIngestion.__init__(self)
+        ContentParser.__init__(self)
+        
         self.list_apps = list_apps
         self.int_pages_join = int_pages_join
+        self.logger = logger
         self.cls_db = cls_db
         self.cls_dir_files_management = DirFilesManagement()
         self.cls_dates_current = DatesCurrent()
+        self.cls_create_log = CreateLog()
 
+    @backoff.on_exception(
+        backoff.expo, 
+        requests.exceptions.HTTPError, 
+        max_time=60
+    )
     def get_response(self) -> list[requests.Response]:
         """Return a list of response objects.
         
@@ -59,9 +82,15 @@ class InvestmentFunds(ABCIngestionOperations):
         fstr_url = r"https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/{}"
         list_resp_req = list()
         for app in self.list_apps:
+            self.cls_create_log.log_message(
+                logger=self.logger,
+                message=f"Requesting: {fstr_url.format(app)}",
+                log_level="info"
+            )
             resp_req = requests.get(fstr_url.format(app))
             resp_req.raise_for_status()
             list_resp_req.append(resp_req)
+            sleep(10)
         return list_resp_req
     
     def transform_response(self, list_resp_req: list[requests.Response]) -> pd.DataFrame:
@@ -81,12 +110,13 @@ class InvestmentFunds(ABCIngestionOperations):
 
         for resp_req in list_resp_req:
             bytes_file = BytesIO(resp_req.content)
-            df_ = self.pdf_docx_tables_response(
+            df_ = self.pdf_docx_regex(
                 bytes_file=bytes_file, 
                 str_file_extension=self.cls_dir_files_management.get_last_file_extension(
                     file_path=resp_req.url
                 ), 
-                int_pages_join=self.int_pages_join
+                int_pages_join=self.int_pages_join, 
+                dict_regex_patterns=YAML_INVESTMENT_FUNDS_BYLAWS["regex_patterns"]
             )
             df_["URL"] = resp_req.url
             list_ser.extend(df_.to_dict(orient="records"))

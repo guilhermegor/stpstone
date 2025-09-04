@@ -5,7 +5,7 @@ including URL, timestamp, user, host, error messages, and action logging. It ens
 robust validation and type safety for all operations.
 """
 
-from datetime import datetime
+from datetime import date
 import socket
 from typing import Literal, Optional
 
@@ -57,7 +57,7 @@ class DBLogs(metaclass=TypeChecker):
         self,
         df_: pd.DataFrame,
         url: Optional[str],
-        dt_db_ref: datetime,
+        dt_db_ref: date,
         bool_format_log_as_str: bool = True,
     ) -> pd.DataFrame:
         """Add audit columns to the DataFrame for logging.
@@ -68,7 +68,7 @@ class DBLogs(metaclass=TypeChecker):
             DataFrame to update
         url : str
             URL to insert into the DataFrame
-        dt_db_ref : datetime
+        dt_db_ref : date
             Timestamp of the database reference
         bool_format_log_as_str : bool, optional
             Whether to format timestamp as string (default: True)
@@ -79,9 +79,9 @@ class DBLogs(metaclass=TypeChecker):
             Dictionary containing the updated DataFrame
         """
         self._validate_dataframe(df_)
-        self._validate_string(url, "url")
         
         if url:
+            self._validate_string(url, "url")
             df_[YAML_GEN["audit_log_cols"]["url"]] = url
         df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
         log_ts = DatesBRAnbima().utc_log_ts()
@@ -154,7 +154,7 @@ class DBLogs(metaclass=TypeChecker):
         self, 
         df_: pd.DataFrame, 
         action_type: Literal["insert", "update", "delete"], 
-        dt_action: datetime
+        dt_action: date
     ) -> pd.DataFrame:
         """Insert logging information for data actions into the DataFrame.
 
@@ -164,7 +164,7 @@ class DBLogs(metaclass=TypeChecker):
             DataFrame to update
         action_type : Literal['insert', 'update', 'delete']
             Type of action
-        dt_action : datetime
+        dt_action : date
             Timestamp of the action
 
         Returns

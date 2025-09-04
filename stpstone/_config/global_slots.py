@@ -1,4 +1,5 @@
 import os
+
 from stpstone.utils.parsers.yaml import reading_yaml
 
 
@@ -9,6 +10,7 @@ root_path = os.path.dirname(os.path.realpath(__file__))
 YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
 
 # * bylaws
+#   BR
 YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(
     os.path.join(root_path, "countries/br/bylaws/investment_funds.yaml")
 )

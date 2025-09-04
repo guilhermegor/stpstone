@@ -1,83 +1,51 @@
-from getpass import getuser
-from random import shuffle
-from time import sleep
-from typing import List
+"""
+Investment funds bylaws from brazilian SEC (CVM).
 
-import pandas as pd
+The CVM (Comissão Valores Mobiliários) is the Brazilian Securities Exchange Commission, 
+which is responsible for regulating the securities market in Brazil.
 
-from stpstone.ingestion.countries.br.bylaws.investment_funds import InvestmentFundsBylawsBR
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
-from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.lists import ListHandler
+The CVM has a website where you can find information about investment funds, such as their name, 
+employer identification number (EIN/CNPJ), and other relevant details.
+"""
+
+from stpstone.ingestion.countries.br.bylaws.investment_funds import InvestmentFunds
 
 
-def clean_excel_text(text):
-    if not isinstance(text, str):
-        return text
-    # remove control characters and other problematic chars
-    return ''.join(char for char in text if 31 < ord(char) < 127 or char in '\t\n\r')
-
-def investment_funds_bkpd() -> List[str]:
-    list_ser = list()
-    list_files = DirFilesManagement().loop_files_w_rule(
-        "data", "investment-funds-bylaws-infos_*.xlsx", False, False
-    )
-    for file in list_files:
-        complete_path = rf"data/{file}"
-        reader = pd.read_excel(complete_path)
-        df_ = pd.DataFrame(reader)
-        if df_.empty == True: continue
-        list_ser.extend(df_.to_dict(orient="records"))
-    df_ = pd.DataFrame(list_ser)
-    return df_
-
-int_chunk = 50
-list_ser = list()
-
-df_slugs_consulted = investment_funds_bkpd()
-print(f"CONSULTED SLUGS: \n{df_slugs_consulted}")
-df_slugs_consulted.info()
-if df_slugs_consulted.empty == False: df_slugs_consulted.to_excel(
-    "data/consolidated-consulted-investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
-        getuser(),
-        DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-        DatesBRAnbima().curr_time().strftime('%H%M%S')
-    ), index=False)
-
-df_ = pd.read_excel("data/input-funds-regex-bylaws.xlsx")
-df_['SLUG_URL'] = df_['URL Regulamento'].str.replace(
-    'https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/',
-    ''
+cls_ = InvestmentFunds(
+    list_apps=[
+        "DOC_REGUL_8557_122868_2025_02.pdf",
+        "DOC_REGUL_10882_125278_2025_03.pdf",
+        "DOC_REGUL_10980_124649_2025_03.pdf",
+        "DOC_REGUL_11520_124851_2025_03.pdf",
+        # "DOC_REGUL_13784_125081_2025_03.pdf",
+        # "DOC_REGUL_14532_121734_2025_02.pdf",
+        # "DOC_REGUL_15638_126987_2025_03.pdf",
+        # "DOC_REGUL_15640_125039_2025_03.pdf",
+        # "DOC_REGUL_16323_119980_2025_02.pdf",
+        # "DOC_REGUL_16333_125043_2025_03.pdf",
+        # "DOC_REGUL_16367_125082_2025_03.pdf",
+        # "DOC_REGUL_16476_120375_2025_02.pdf",
+        # "DOC_REGUL_16551_125463_2025_03.pdf",
+        # "DOC_REGUL_17124_121158_2025_02.pdf",
+        # "DOC_REGUL_17715_120602_2025_02.pdf",
+        # "DOC_REGUL_17805_120007_2025_02.pdf",
+        # "DOC_REGUL_17840_125261_2025_03.pdf",
+        # "DOC_REGUL_18235_125492_2025_03.pdf",
+        # "DOC_REGUL_19078_124930_2025_03.pdf",
+        # "DOC_REGUL_19130_126121_2025_03.pdf",
+        # "DOC_REGUL_19498_121914_2025_02.pdf",
+        # "DOC_REGUL_19667_122068_2025_02.pdf",
+        # "DOC_REGUL_20214_125080_2025_03.pdf",
+        # "DOC_REGUL_22448_120161_2025_02.pdf",
+        # "DOC_REGUL_23008_119976_2025_02.pdf",
+        # "DOC_REGUL_23639_121700_2025_02.pdf",
+        # "DOC_REGUL_24094_120932_2025_02.pdf",
+    ], 
+    int_pages_join=3,
+    logger=None,
+    cls_db=None
 )
-list_slugs = df_['SLUG_URL'].tolist()
-print(f"Slugs before filtering: {len(list_slugs)}")
-if df_slugs_consulted.empty == False:
-    list_slugs = list(set(list_slugs) - set(df_slugs_consulted["SLUG_URL"].unique()))
-print(f"Slugs after filtering: {len(list_slugs)}")
-shuffle(list_slugs)
-list_chunks = ListHandler().chunk_list(list_slugs, None, int_chunk)
 
-for i, list_ in enumerate(list_chunks):
-    print(f"{DatesBRAnbima().current_timestamp_string()} - Processing chunk {i} of {len(list_chunks) - 1}")
-    cls_ = InvestmentFundsBylawsBR(list_slugs=list_)
-    df_ = cls_.source("investment_funds_bylaws", bool_fetch=True)
-    print(f"DF TEMPORARY: \n{df_}")
-    # clean all string columns
-    for col in df_.select_dtypes(include=['object']):
-        df_[col] = df_[col].apply(clean_excel_text)
-    # save with openpyxl engine which is more tolerant
-    output_path = "data/investment-funds-bylaws-infos_{}_{}_{}.xlsx".format(
-        getuser(),
-        DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-        DatesBRAnbima().curr_time().strftime('%H%M%S'))
-    df_.to_excel(output_path, engine='openpyxl', index=False)
-    list_ser.extend(df_.to_dict(orient="records"))
-    sleep(60)
-
-df_ = pd.DataFrame(list_ser)
-df_ = pd.concat([df_slugs_consulted, df_], ignore_index=True)
-df_.to_csv("data/consolidated-investment-funds-bylaws-infos_{}_{}_{}.csv".format(
-    getuser(),
-    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-    DatesBRAnbima().curr_time().strftime('%H%M%S')
-), index=False)
+df_ = cls_.run()
+print(f"DF INVESTMENT FUNDS BYLAWS: \n{df_}")
+df_.info()
