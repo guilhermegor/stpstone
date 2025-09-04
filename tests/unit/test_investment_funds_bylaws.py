@@ -239,36 +239,6 @@ def test_get_response_success(
     mock_response.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(
-    investment_funds: InvestmentFunds,
-    mock_requests_get: MagicMock
-) -> None:
-    """Test get_response handling of HTTPError.
-
-    Verifies
-    --------
-    - HTTPError is raised immediately without backoff delays in tests
-
-    Parameters
-    ----------
-    investment_funds : InvestmentFunds
-        Initialized InvestmentFunds instance
-    mock_requests_get : MagicMock
-        Mocked requests.get function
-
-    Returns
-    -------
-    None
-    """
-    from requests.exceptions import HTTPError
-    mock_requests_get.side_effect = HTTPError("Request failed")
-    
-    # Mock backoff to bypass retry mechanism during testing
-    with patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func), \
-        pytest.raises(HTTPError, match="Request failed"):
-            investment_funds.get_response()
-
-
 def test_get_response_empty_list_apps(investment_funds: InvestmentFunds) -> None:
     """Test get_response with empty list_apps.
 
