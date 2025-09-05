@@ -52,8 +52,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
     
     def __init__(
         self, 
-        list_apps: list[str], 
-        int_pages_join: Optional[int] = 3,  
+        date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
@@ -61,10 +60,8 @@ class IngestionConcreteClass(ABCIngestionOperations):
         
         Parameters
         ----------
-        list_apps : list[str]
-            The list of apps.
-        int_pages_join : Optional[int], optional
-            The number of pages to join, by default 3.
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -77,14 +74,15 @@ class IngestionConcreteClass(ABCIngestionOperations):
         super().__init__(cls_db=cls_db)
         CoreIngestion.__init__(self)
         ContentParser.__init__(self)
-        
-        self.list_apps = list_apps
-        self.int_pages_join = int_pages_join
+
         self.logger = logger
         self.cls_db = cls_db
         self.cls_dir_files_management = DirFilesManagement()
         self.cls_dates_current = DatesCurrent()
         self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
 
     @backoff.on_exception(
         backoff.expo, 
@@ -125,13 +123,25 @@ class IngestionConcreteClass(ABCIngestionOperations):
         pd.DataFrame
             The transformed DataFrame.
         """
-        pass
+        file = self.get_file(resp_req=resp_req)
+        return pd.read_csv(file, sep=";")
     
-    def run(self) -> Optional[pd.DataFrame]:
+    def run(
+        self, 
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "<COUNTRY_ORIGIN_NAME>"
+    ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
         If the database session is provided, the data is inserted into the database.
         Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "<COUNTRY_ORIGIN_NAME>"
 
         Returns
         -------
@@ -142,7 +152,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
         df_ = self.transform_response(resp_req)
         df_ = self.standardize_dataframe(
             df_=df_, 
-            date_ref=self.cls_dates_current.curr_date(),
+            date_ref=self.date_ref,
             dict_dtypes={
                 "COL_1": str,
                 "COL_2": str, 
@@ -152,8 +162,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
         if self.cls_db:
             self.insert_table_db(
                 cls_db=self.cls_db, 
-                str_table_name="<COUNTRY_ORIGIN_NAME>", 
-                df_=df_
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
             )
         else:
             return df_
