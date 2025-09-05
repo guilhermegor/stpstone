@@ -6,10 +6,10 @@ providing a common interface for fetching and transforming data.
 
 from abc import abstractmethod
 from datetime import date, datetime
-from io import BytesIO
+from io import BytesIO, StringIO
 from logging import Logger
 import re
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import fitz
 import pandas as pd
@@ -271,6 +271,21 @@ class ContentAggregator(metaclass=TypeChecker):
 
 class ContentParser(ContentAggregator):
     """Content parser class."""
+
+    def get_file(self, resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]) -> Any:
+        """Get the file from a response object.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        Any
+            The file.
+        """
+        return StringIO(resp_req.text)
     
     def pdf_docx_tables_response(self, bytes_file: BytesIO) -> pd.DataFrame:
         """Parse a PDF/DOCX file using tabula.

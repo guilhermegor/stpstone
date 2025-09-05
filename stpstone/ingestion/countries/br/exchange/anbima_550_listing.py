@@ -1,5 +1,6 @@
 """Implementation of ingestion instance."""
 
+from datetime import date
 from logging import Logger
 from typing import Optional, Union
 
@@ -16,17 +17,17 @@ from stpstone.ingestion.abc.ingestion_abc import (
     CoreIngestion,
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
-class IngestionConcreteClass(ABCIngestionOperations):
+class Anbima550Listing(ABCIngestionOperations):
     """Ingestion concrete class."""
     
     def __init__(
         self, 
-        list_apps: list[str], 
-        int_pages_join: Optional[int] = 3,  
+        date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
@@ -34,10 +35,8 @@ class IngestionConcreteClass(ABCIngestionOperations):
         
         Parameters
         ----------
-        list_apps : list[str]
-            The list of apps.
-        int_pages_join : Optional[int], optional
-            The number of pages to join, by default 3.
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -50,14 +49,18 @@ class IngestionConcreteClass(ABCIngestionOperations):
         super().__init__(cls_db=cls_db)
         CoreIngestion.__init__(self)
         ContentParser.__init__(self)
-        
-        self.list_apps = list_apps
-        self.int_pages_join = int_pages_join
+
         self.logger = logger
         self.cls_db = cls_db
         self.cls_dir_files_management = DirFilesManagement()
         self.cls_dates_current = DatesCurrent()
         self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        self.date_ref_yyyymmdd = self.date_ref.strftime("%Y%m%d")
+        self.url = \
+            f"https://www.anbima.com.br/informacoes/res-550/arqs/{self.date_ref_yyyymmdd}_550.tex"
 
     @backoff.on_exception(
         backoff.expo, 
@@ -65,7 +68,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
         max_time=60
     )
     def get_response(
-        self, 
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
     ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
         """Return a list of response objects.
@@ -80,7 +83,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
         list[requests.Response]
             A list of response objects.
         """
-        pass
+        resp_req = requests.get(self.url, timeout=timeout)
+        resp_req.raise_for_status()
+        return resp_req
     
     def transform_response(
         self, 
@@ -98,13 +103,29 @@ class IngestionConcreteClass(ABCIngestionOperations):
         pd.DataFrame
             The transformed DataFrame.
         """
-        pass
+        file = self.get_file(resp_req=resp_req)
+        return pd.read_csv(
+            file, sep="\s+", skiprows=2, skipfooter=4, engine="python", 
+            names=["TITULO", "VENCIMENTO", "PRECO_UNITARIO", "PRECO_RETORNO", "POSICAO_CUSTODIA"],
+            thousands=".", decimal=","
+        )
     
-    def run(self) -> Optional[pd.DataFrame]:
+    def run(
+        self, 
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_anbima_550_listing"
+    ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
         If the database session is provided, the data is inserted into the database.
         Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_anbima_550_listing"
 
         Returns
         -------
@@ -117,16 +138,21 @@ class IngestionConcreteClass(ABCIngestionOperations):
             df_=df_, 
             date_ref=self.cls_dates_current.curr_date(),
             dict_dtypes={
-                "COL_1": str,
-                "COL_2": str, 
-                "COL_3": str
-            }
+                "TITULO": int,
+                "VENCIMENTO": "date",
+                "PRECO_UNITARIO": float,
+                "PRECO_RETORNO": float,
+                "POSICAO_CUSTODIA": float,
+            }, 
+            str_fmt_dt="DD/MM/YYYY", 
+            url=self.url
         )
         if self.cls_db:
             self.insert_table_db(
                 cls_db=self.cls_db, 
-                str_table_name="<COUNTRY_ORIGIN_NAME>", 
-                df_=df_
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
             )
         else:
             return df_

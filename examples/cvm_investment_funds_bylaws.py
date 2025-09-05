@@ -1,5 +1,4 @@
-"""
-Investment funds bylaws from brazilian SEC (CVM).
+"""Investment funds bylaws from brazilian SEC (CVM).
 
 The CVM (Comissão Valores Mobiliários) is the Brazilian Securities Exchange Commission, 
 which is responsible for regulating the securities market in Brazil.

@@ -12,7 +12,6 @@ import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
-from stpstone._config.global_slots import YAML_GEN
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.loggs.db_logs import DBLogs
 
@@ -264,10 +263,10 @@ def test_audit_log_valid(
     """
     url = "https://example.com"
     result = db_logs.audit_log(sample_df, url, sample_date, bool_format_log_as_str=True)
-    assert YAML_GEN["audit_log_cols"]["url"] in result.columns
-    assert result[YAML_GEN["audit_log_cols"]["url"]].iloc[0] == url
-    assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_date
-    assert result[YAML_GEN["audit_log_cols"]["log_timestamp"]].iloc[0] == "2025-08-13"
+    assert "URL" in result.columns
+    assert result["URL"].iloc[0] == url
+    assert result["REF_DATE"].iloc[0] == sample_date
+    assert result["LOG_TIMESTAMP"].iloc[0] == "2025-08-13"
 
 def test_audit_log_datetime(
     db_logs: DBLogs,
@@ -298,10 +297,10 @@ def test_audit_log_datetime(
     """
     url = "https://example.com"
     result = db_logs.audit_log(sample_df, url, sample_date, bool_format_log_as_str=False)
-    assert YAML_GEN["audit_log_cols"]["url"] in result.columns
-    assert result[YAML_GEN["audit_log_cols"]["url"]].iloc[0] == url
-    assert result[YAML_GEN["audit_log_cols"]["ref_date"]].iloc[0] == sample_date
-    assert result[YAML_GEN["audit_log_cols"]["log_timestamp"]].iloc[0] == sample_date
+    assert "URL" in result.columns
+    assert result["URL"].iloc[0] == url
+    assert result["REF_DATE"].iloc[0] == sample_date
+    assert result["LOG_TIMESTAMP"].iloc[0] == sample_date
 
 def test_audit_log_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
     """Test audit_log raises TypeError for invalid DataFrame input.
@@ -423,8 +422,8 @@ def test_insert_user_info_valid(db_logs: DBLogs, sample_df: pd.DataFrame) -> Non
     """
     user_id = "test_user"
     result = db_logs.insert_user_info(sample_df, user_id)
-    assert YAML_GEN["audit_log_cols"]["user"] in result.columns
-    assert result[YAML_GEN["audit_log_cols"]["user"]].iloc[0] == user_id
+    assert "USER" in result.columns
+    assert result["USER"].iloc[0] == user_id
 
 def test_insert_user_info_invalid_df(db_logs: DBLogs) -> None:
     """Test insert_user_info raises TypeError for invalid DataFrame.
@@ -537,8 +536,8 @@ def test_insert_host_info_valid(
     None
     """
     result = db_logs.insert_host_info(sample_df)
-    assert YAML_GEN["audit_log_cols"]["host"] in result.columns
-    assert result[YAML_GEN["audit_log_cols"]["host"]].iloc[0] == "test_host"
+    assert "HOST" in result.columns
+    assert result["HOST"].iloc[0] == "test_host"
 
 def test_insert_host_info_invalid_df(db_logs: DBLogs) -> None:
     """Test insert_host_info raises TypeError for invalid DataFrame.
@@ -604,8 +603,8 @@ def test_insert_error_info_valid(db_logs: DBLogs, sample_df: pd.DataFrame) -> No
     """
     error_msg = "Test error"
     result = db_logs.insert_error_info(sample_df, error_msg)
-    assert YAML_GEN["audit_log_cols"]["error_msg"] in result.columns
-    assert result[YAML_GEN["audit_log_cols"]["error_msg"]].iloc[0] == error_msg
+    assert "ERROR_MSG" in result.columns
+    assert result["ERROR_MSG"].iloc[0] == error_msg
 
 def test_insert_error_info_invalid_df(db_logs: DBLogs) -> None:
     """Test insert_error_info raises TypeError for invalid DataFrame.
@@ -719,10 +718,10 @@ def test_log_data_insert_valid(
     """
     action_type = "insert"
     result = db_logs.log_data_insert(sample_df, action_type, sample_date)
-    assert YAML_GEN["audit_log_cols"]["action_type"] in result.columns
-    assert YAML_GEN["audit_log_cols"]["action_timestamp"] in result.columns
-    assert result[YAML_GEN["audit_log_cols"]["action_type"]].iloc[0] == action_type
-    assert result[YAML_GEN["audit_log_cols"]["action_timestamp"]].iloc[0] == sample_date
+    assert "ACTION_TYPE" in result.columns
+    assert "ACTION_TYPE" in result.columns
+    assert result["ACTION_TYPE"].iloc[0] == action_type
+    assert result["ACTION_TYPE"].iloc[0] == sample_date
 
 def test_log_data_insert_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
     """Test log_data_insert raises TypeError for invalid DataFrame.

@@ -15,7 +15,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 from stpstone.utils.calendars.calendar_abc import DateFormatter, TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -352,10 +351,10 @@ class DFStandardization(metaclass=TypeChecker):
         }
         df_ = df_.astype(dict_dtypes, errors=self.type_error_action)
         for col_ in self.list_cols_dt:
-            if col_ != YAML_GEN["audit_log_cols"]["ref_date"]:
+            if col_ != "REF_DATE":
                 str_fmt_dt = self.str_fmt_dt
             else:
-                str_fmt_dt = YAML_GEN["audit_log_cols"]["str_fmt_dt"]
+                str_fmt_dt = "YYYY-MM-DD"
             df_[col_] = df_[col_].apply(
                 lambda x, fmt=str_fmt_dt: (
                     self.cls_dates.str_date_to_datetime(x, fmt)

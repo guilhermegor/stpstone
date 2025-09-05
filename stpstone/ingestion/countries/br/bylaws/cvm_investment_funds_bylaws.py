@@ -132,11 +132,22 @@ class InvestmentFunds(ABCIngestionOperations):
 
         return pd.DataFrame(list_ser)
     
-    def run(self) -> Optional[pd.DataFrame]:
+    def run(
+        self,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_cvm_investment_funds_bylaws" 
+    ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
         If the database session is provided, the data is inserted into the database.
         Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_cvm_investment_funds_bylaws"
 
         Returns
         -------
@@ -158,7 +169,8 @@ class InvestmentFunds(ABCIngestionOperations):
         if self.cls_db:
             self.insert_table_db(
                 cls_db=self.cls_db, 
-                str_table_name="br_cvm_investment_funds_bylaws", 
+                str_table_name=str_table_name, 
+                bool_insert_or_ignore=bool_insert_or_ignore,
                 df_=df_
             )
         else:
