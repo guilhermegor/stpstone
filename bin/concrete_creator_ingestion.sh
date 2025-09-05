@@ -155,8 +155,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
             date_ref=self.date_ref,
             dict_dtypes={
                 "COL_1": str,
-                "COL_2": str, 
-                "COL_3": str
+                "COL_2": float, 
+                "COL_3": int, 
+                "COL_4": "date"
             }
         )
         if self.cls_db:
