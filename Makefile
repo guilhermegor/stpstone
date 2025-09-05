@@ -149,16 +149,10 @@ check_pypi:
 # -------------------
 # INGESTION CREATORS
 # -------------------
-.PHONY: ingestion_concrete_creator ingestion_concrete_creator_html_parser
+.PHONY: concrete_creator_ingestion
 
-ingestion_concrete_creator:
-	@bash bin/cc_ingestion_yaml.sh
-	@bash bin/cc_ingestion_py.sh
-
-ingestion_concrete_creator_html_parser:
-	@bash bin/cc_ingestion_yaml.sh
-	@bash bin/cc_ingestion_html_parser_py.sh
-
+concrete_creator_ingestion:
+	@bash bin/concrete_creator_ingestion.sh
 
 # -------------------
 # HELP
@@ -200,5 +194,4 @@ help:
 	@echo "  check_pypi           - Check PyPI package (interactive version selection)"
 	@echo ""
 	@echo "Ingestion Creators:"
-	@echo "  ingestion_concrete_creator          - Create ingestion concrete classes"
-	@echo "  ingestion_concrete_creator_html_parser - Create HTML parser ingestion classes"
+	@echo "  concrete_creator_ingestion - Create concrete creator ingestion files"
