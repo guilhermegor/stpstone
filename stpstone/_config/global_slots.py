@@ -12,7 +12,7 @@ YAML_GEN = reading_yaml(os.path.join(root_path, "generic.yaml"))
 # * bylaws
 #   BR
 YAML_INVESTMENT_FUNDS_BYLAWS = reading_yaml(
-    os.path.join(root_path, "countries/br/bylaws/investment_funds.yaml")
+    os.path.join(root_path, "countries/br/bylaws/cvm_investment_funds.yaml")
 )
 
 # * exchange

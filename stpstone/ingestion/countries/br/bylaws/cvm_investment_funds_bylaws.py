@@ -158,7 +158,7 @@ class InvestmentFunds(ABCIngestionOperations):
         if self.cls_db:
             self.insert_table_db(
                 cls_db=self.cls_db, 
-                str_table_name="investment_funds", 
+                str_table_name="br_cvm_investment_funds_bylaws", 
                 df_=df_
             )
         else:

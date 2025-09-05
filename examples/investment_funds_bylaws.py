@@ -8,7 +8,7 @@ The CVM has a website where you can find information about investment funds, suc
 employer identification number (EIN/CNPJ), and other relevant details.
 """
 
-from stpstone.ingestion.countries.br.bylaws.investment_funds_bylaws import InvestmentFunds
+from stpstone.ingestion.countries.br.bylaws.cvm_investment_funds_bylaws import InvestmentFunds
 
 
 cls_ = InvestmentFunds(

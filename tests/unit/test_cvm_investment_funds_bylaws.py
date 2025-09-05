@@ -18,7 +18,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response, Session
 
-from stpstone.ingestion.countries.br.bylaws.investment_funds_bylaws import InvestmentFunds
+from stpstone.ingestion.countries.br.bylaws.cvm_investment_funds_bylaws import InvestmentFunds
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -228,7 +228,7 @@ def test_get_response_success(
     None
     """
     mock_requests_get.return_value = mock_response
-    with patch("stpstone.ingestion.countries.br.bylaws.investment_funds_bylaws.sleep") \
+    with patch("stpstone.ingestion.countries.br.bylaws.cvm_investment_funds_bylaws.sleep") \
         as mock_sleep:
         result = investment_funds.get_response()
     assert isinstance(result, list)
@@ -421,7 +421,7 @@ def test_run_with_db(
     assert result is None
     investment_funds.insert_table_db.assert_called_once_with(
         cls_db=mock_db,
-        str_table_name="investment_funds",
+        str_table_name="br_cvm_investment_funds_bylaws",
         df_=sample_df
     )
 
