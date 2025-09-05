@@ -11,7 +11,6 @@ from typing import Literal, Optional
 
 import pandas as pd
 
-from stpstone._config.global_slots import YAML_GEN
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
@@ -35,12 +34,12 @@ class DBLogs(metaclass=TypeChecker):
         if df_.empty:
             raise ValueError("DataFrame cannot be empty")
 
-    def _validate_string(self, value: str, name: str) -> None:
+    def _validate_string(self, value: Optional[str], name: str) -> None:
         """Validate string input.
 
         Parameters
         ----------
-        value : str
+        value : Optional[str]
             String to validate
         name : str
             Name of the variable for error messages
@@ -84,14 +83,12 @@ class DBLogs(metaclass=TypeChecker):
             If url is empty
         """
         self._validate_dataframe(df_)
-        
-        if url is None or url == "":
-            raise ValueError("url cannot be empty")
-        self._validate_string(url, "url")
-        df_[YAML_GEN["audit_log_cols"]["url"]] = url
-        df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
+        if "URL" not in df_.columns:
+            self._validate_string(url, "url")
+            df_["URL"] = url
+        df_["REF_DATE"] = dt_db_ref
         log_ts = DatesBRAnbima().utc_log_ts()
-        df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = (
+        df_["LOG_TIMESTAMP"] = (
             log_ts.strftime("%Y-%m-%d") if bool_format_log_as_str else log_ts
         )
         return df_
@@ -114,7 +111,7 @@ class DBLogs(metaclass=TypeChecker):
         self._validate_dataframe(df_)
         self._validate_string(user_id, "user_id")
 
-        df_[YAML_GEN["audit_log_cols"]["user"]] = user_id
+        df_["USER"] = user_id
         return df_
 
     def insert_host_info(self, df_: pd.DataFrame) -> pd.DataFrame:
@@ -132,7 +129,7 @@ class DBLogs(metaclass=TypeChecker):
         """
         self._validate_dataframe(df_)
         
-        df_[YAML_GEN["audit_log_cols"]["host"]] = socket.gethostname()
+        df_["HOST"] = socket.gethostname()
         return df_
 
     def insert_error_info(self, df_: pd.DataFrame, error_msg: str) -> pd.DataFrame:
@@ -153,7 +150,7 @@ class DBLogs(metaclass=TypeChecker):
         self._validate_dataframe(df_)
         self._validate_string(error_msg, "error_msg")
         
-        df_[YAML_GEN["audit_log_cols"]["error_msg"]] = error_msg
+        df_["ERROR_MSG"] = error_msg
         return df_
 
     def log_data_insert(
@@ -181,6 +178,6 @@ class DBLogs(metaclass=TypeChecker):
         self._validate_dataframe(df_)
         self._validate_string(action_type, "action_type")
         
-        df_[YAML_GEN["audit_log_cols"]["action_type"]] = action_type
-        df_[YAML_GEN["audit_log_cols"]["action_timestamp"]] = dt_action
+        df_["ACTION_TYPE"] = action_type
+        df_["ACTION_TIMESTAMP"] = dt_action
         return df_
