@@ -79,11 +79,13 @@ class Anbima550Listing(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
-        list[requests.Response]
-            A list of response objects.
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
+            Response object.
         """
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
         resp_req.raise_for_status()
