@@ -14,8 +14,10 @@ from typing import Optional, Union
 
 import backoff
 import pandas as pd
+from playwright.sync_api import Page as PlaywrightPage
 import requests
-from requests import Session
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
 from stpstone._config.global_slots import YAML_INVESTMENT_FUNDS_BYLAWS
 from stpstone.ingestion.abc.ingestion_abc import (
@@ -105,7 +107,25 @@ class InvestmentFunds(ABCIngestionOperations):
             sleep(10)
         return list_resp_req
     
-    def transform_response(self, list_resp_req: list[requests.Response]) -> pd.DataFrame:
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> BytesIO:
+        """Parse the raw file content.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        BytesIO
+            The parsed content.
+        """
+        return BytesIO(resp_req.content)
+    
+    def transform_data(self, list_resp_req: list[requests.Response]) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
         Parameters
@@ -121,7 +141,7 @@ class InvestmentFunds(ABCIngestionOperations):
         list_ser = list()
 
         for resp_req in list_resp_req:
-            bytes_file = BytesIO(resp_req.content)
+            bytes_file = self.parse_raw_file(resp_req)
             df_ = self.pdf_docx_regex(
                 bytes_file=bytes_file, 
                 str_file_extension=self.cls_dir_files_management.get_last_file_extension(
@@ -164,7 +184,7 @@ class InvestmentFunds(ABCIngestionOperations):
             The transformed DataFrame.
         """
         list_resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        df_ = self.transform_response(list_resp_req)
+        df_ = self.transform_data(list_resp_req)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.cls_dates_current.curr_date(),

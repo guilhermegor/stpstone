@@ -40,7 +40,7 @@ class ReturnInit(TypedDict):
 
 
 class ReturnTransformResponse(TypedDict):
-    """Type definition for transform_response return value."""
+    """Type definition for transform_data return value."""
     
     EVENT: str
     MATCH_PATTERN: str
@@ -266,7 +266,7 @@ def test_transform_response_success(
     mock_response: Response,
     mocker: MockerFixture
 ) -> None:
-    """Test transform_response with valid response.
+    """Test transform_data with valid response.
 
     Verifies
     --------
@@ -304,7 +304,7 @@ def test_transform_response_success(
         "get_last_file_extension",
         return_value="pdf"
     )
-    result = investment_funds.transform_response([mock_response])
+    result = investment_funds.transform_data([mock_response])
     assert isinstance(result, pd.DataFrame)
     assert "URL" in result.columns
     assert result["URL"].iloc[0] == mock_response.url
@@ -315,7 +315,7 @@ def test_transform_response_success(
 def test_transform_response_empty_response(
     investment_funds: InvestmentFunds
 ) -> None:
-    """Test transform_response with empty response list.
+    """Test transform_data with empty response list.
 
     Verifies
     --------
@@ -331,7 +331,7 @@ def test_transform_response_empty_response(
     -------
     None
     """
-    result = investment_funds.transform_response([])
+    result = investment_funds.transform_data([])
     assert isinstance(result, pd.DataFrame)
     assert result.empty
 
@@ -347,7 +347,7 @@ def test_run_without_db(
     --------
     - Full pipeline executes correctly
     - Returns standardized DataFrame
-    - Calls get_response and transform_response
+    - Calls get_response and transform_data
     - Standardizes DataFrame with correct dtypes
 
     Parameters
@@ -370,7 +370,7 @@ def test_run_without_db(
         "URL": mock_response.url
     }])
     mocker.patch.object(investment_funds, "get_response", return_value=[mock_response])
-    mocker.patch.object(investment_funds, "transform_response", return_value=sample_df)
+    mocker.patch.object(investment_funds, "transform_data", return_value=sample_df)
     mocker.patch.object(investment_funds, "standardize_dataframe", return_value=sample_df)
     result = investment_funds.run()
     assert isinstance(result, pd.DataFrame)
@@ -390,7 +390,7 @@ def test_run_with_db(
     --------
     - Calls insert_table_db when cls_db is provided
     - Does not return DataFrame
-    - Calls get_response, transform_response, and standardize_dataframe
+    - Calls get_response, transform_data, and standardize_dataframe
 
     Parameters
     ----------
@@ -414,7 +414,7 @@ def test_run_with_db(
         "URL": mock_response.url
     }])
     mocker.patch.object(investment_funds, "get_response", return_value=[mock_response])
-    mocker.patch.object(investment_funds, "transform_response", return_value=sample_df)
+    mocker.patch.object(investment_funds, "transform_data", return_value=sample_df)
     mocker.patch.object(investment_funds, "standardize_dataframe", return_value=sample_df)
     mocker.patch.object(investment_funds, "insert_table_db")
     result = investment_funds.run()
@@ -435,7 +435,7 @@ def test_run_empty_list_apps(
     Verifies
     --------
     - Returns empty DataFrame
-    - Calls get_response and transform_response
+    - Calls get_response and transform_data
     - Standardizes empty DataFrame
 
     Parameters
@@ -451,7 +451,7 @@ def test_run_empty_list_apps(
     """
     investment_funds.list_apps = []
     mocker.patch.object(investment_funds, "get_response", return_value=[])
-    mocker.patch.object(investment_funds, "transform_response", return_value=pd.DataFrame())
+    mocker.patch.object(investment_funds, "transform_data", return_value=pd.DataFrame())
     mocker.patch.object(investment_funds, "standardize_dataframe", return_value=pd.DataFrame())
     result = investment_funds.run()
     assert isinstance(result, pd.DataFrame)

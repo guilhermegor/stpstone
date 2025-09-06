@@ -14,7 +14,7 @@ export_deps:
 # -------------------
 # DEV ENVIRONMENT
 # -------------------
-.PHONY: install update python_path run_script
+.PHONY: install update
 
 install:
 	@poetry install
@@ -23,17 +23,6 @@ install:
 update:
 	@poetry update
 	@echo "Poetry project updated"
-
-python_path:
-	@export PYTHONPATH=$$PYTHONPATH:$$(pwd)/stpstone
-	@echo "PYTHONPATH set to $$PYTHONPATH"
-
-run_script:
-	@if [ -z "$(SCRIPT)" ]; then \
-		echo "Error: Please specify a script to run. Example: make run_script SCRIPT=examples/cvm_investment_funds_bylaws.py"; \
-		exit 1; \
-	fi
-	@PYTHONPATH=$$PYTHONPATH:$$(pwd) poetry run python $(SCRIPT)
 
 
 # -------------------

@@ -1,6 +1,7 @@
 """Implementation of ingestion instance."""
 
 from datetime import date
+from io import StringIO
 from logging import Logger
 from typing import Optional, Union
 
@@ -88,23 +89,40 @@ class Anbima550Listing(ABCIngestionOperations):
         resp_req.raise_for_status()
         return resp_req
     
-    def transform_response(
+    def parse_raw_file(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+        """
+        return self.get_file(resp_req=resp_req)
+    
+    def transform_data(
+        self, 
+        file: StringIO
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
         Parameters
         ----------
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
+        file : StringIO
+            The parsed content.
         
         Returns
         -------
         pd.DataFrame
             The transformed DataFrame.
         """
-        file = self.get_file(resp_req=resp_req)
         return pd.read_csv(
             file, sep="\s+", skiprows=2, skipfooter=4, engine="python", 
             names=["TITULO", "VENCIMENTO", "PRECO_UNITARIO", "PRECO_RETORNO", "POSICAO_CUSTODIA"],
@@ -140,7 +158,8 @@ class Anbima550Listing(ABCIngestionOperations):
             The transformed DataFrame.
         """
         resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        df_ = self.transform_response(resp_req)
+        file = self.parse_raw_file(resp_req=resp_req)
+        df_ = self.transform_data(file)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.cls_dates_current.curr_date(),

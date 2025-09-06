@@ -100,7 +100,7 @@ def test_abc_ingestion_cannot_instantiate_without_implementing_methods() -> None
     Verifies
     --------
     - Cannot create instance without implementing get_response
-    - Cannot create instance without implementing transform_response
+    - Cannot create instance without implementing transform_data
 
     Returns
     -------
@@ -110,11 +110,11 @@ def test_abc_ingestion_cannot_instantiate_without_implementing_methods() -> None
     class TestIngestionMissingGetResponse(ABCIngestion):
         """Missing get_response implementation."""
 
-        def transform_response(
+        def transform_data(
             self, 
             resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
         ) -> pd.DataFrame:
-            """Missing transform_response implementation.
+            """Missing transform_data implementation.
             
             Parameters
             ----------
@@ -131,9 +131,9 @@ def test_abc_ingestion_cannot_instantiate_without_implementing_methods() -> None
     with pytest.raises(TypeError, match="Can't instantiate abstract class"):
         TestIngestionMissingGetResponse()
 
-    # Test missing transform_response implementation  
+    # Test missing transform_data implementation  
     class TestIngestionMissingTransformResponse(ABCIngestion):
-        """Missing transform_response implementation."""
+        """Missing transform_data implementation."""
 
         def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
             """Missing get_response implementation.
@@ -169,11 +169,11 @@ def test_abc_ingestion_can_instantiate_with_all_methods() -> None:
             """
             return Mock()
         
-        def transform_response(
+        def transform_data(
             self, 
             resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
         ) -> pd.DataFrame:
-            """Test transform_response implementation.
+            """Test transform_data implementation.
             
             Parameters
             ----------
@@ -578,11 +578,11 @@ def test_abc_ingestion_operations_inherits_correctly() -> None:
             """
             return Mock()
         
-        def transform_response(
+        def transform_data(
             self, 
             resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
         ) -> pd.DataFrame:
-            """Test transform_response implementation.
+            """Test transform_data implementation.
             
             Parameters
             ----------

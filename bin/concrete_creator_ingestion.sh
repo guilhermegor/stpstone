@@ -109,7 +109,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
         """
         pass
     
-    def transform_response(
+    def transform_data(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
     ) -> pd.DataFrame:
@@ -151,7 +151,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
             The transformed DataFrame.
         """
         resp_req = self.get_response()
-        df_ = self.transform_response(resp_req)
+        df_ = self.transform_data(resp_req)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.date_ref,

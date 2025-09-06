@@ -9,7 +9,7 @@ from datetime import date, datetime
 from io import BytesIO, StringIO
 from logging import Logger
 import re
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 import fitz
 import pandas as pd
@@ -77,8 +77,33 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         raise NotImplementedError
     
     @abstractmethod
-    def transform_response(
-        self, resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content.
+
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        str
+            The parsed content.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented in a subclass.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def transform_data(
+        self, 
+        file: StringIO
     ) -> pd.DataFrame:
         """Transform a response object into a DataFrame.
         
@@ -96,6 +121,36 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         ------
         NotImplementedError
             If the method is not implemented in a subclass.
+        """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def run(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True, 
+        bool_insert_or_ignore: bool = True, 
+        str_table_name: str = "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+    ) -> None:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default True
+        str_table_name : str, optional
+            The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+
+        Returns
+        -------
+        None
         """
         raise NotImplementedError
 
@@ -272,7 +327,7 @@ class ContentAggregator(metaclass=TypeChecker):
 class ContentParser(ContentAggregator):
     """Content parser class."""
 
-    def get_file(self, resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]) -> Any:
+    def get_file(self, resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]) -> StringIO:
         """Get the file from a response object.
         
         Parameters
@@ -282,7 +337,7 @@ class ContentParser(ContentAggregator):
         
         Returns
         -------
-        Any
+        str
             The file.
         """
         return StringIO(resp_req.text)
