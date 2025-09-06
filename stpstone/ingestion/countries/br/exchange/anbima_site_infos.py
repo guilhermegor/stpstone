@@ -84,7 +84,7 @@ class AnbimaExchangeInfosBRTreasuries(ABCIngestionOperations):
         
         Returns
         -------
-        list[requests.Response]
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
         """
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
@@ -94,7 +94,7 @@ class AnbimaExchangeInfosBRTreasuries(ABCIngestionOperations):
     def parse_raw_file(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-    ) -> str:
+    ) -> StringIO:
         """Parse the raw file content.
         
         Parameters
@@ -117,8 +117,8 @@ class AnbimaExchangeInfosBRTreasuries(ABCIngestionOperations):
         
         Parameters
         ----------
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
+        file : StringIO
+            The parsed content.
         
         Returns
         -------
@@ -273,7 +273,7 @@ class AnbimaExchangeInfosBRCorporateBonds(ABCIngestionOperations):
         
         Returns
         -------
-        list[requests.Response]
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
         """
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
@@ -401,8 +401,8 @@ class AnbimaExchangeInfosBRCorporateBonds(ABCIngestionOperations):
             return df_
         
 
-class AnbimaExchangeBRIMAP2PVs(ABCIngestionOperations):
-    """AnbimaExchangeBRIMAP2PVs class."""
+class AnbimaExchangeBRIMAP2MTMs(ABCIngestionOperations):
+    """AnbimaExchangeBRIMAP2MTMs class."""
     
     def __init__(
         self, 
@@ -461,7 +461,7 @@ class AnbimaExchangeBRIMAP2PVs(ABCIngestionOperations):
         
         Returns
         -------
-        list[requests.Response]
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
         """
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
@@ -476,7 +476,7 @@ class AnbimaExchangeBRIMAP2PVs(ABCIngestionOperations):
         
         Parameters
         ----------
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
         
         Returns
@@ -540,7 +540,7 @@ class AnbimaExchangeBRIMAP2PVs(ABCIngestionOperations):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_anbima_ima_p2_pvs"
+        str_table_name: str = "br_anbima_ima_p2_mtms"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -659,7 +659,7 @@ class AnbimaIMAP2TheoreticalPortfolio(ABCIngestionOperations):
         
         Returns
         -------
-        list[requests.Response]
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
         """
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
@@ -674,7 +674,7 @@ class AnbimaIMAP2TheoreticalPortfolio(ABCIngestionOperations):
         
         Parameters
         ----------
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
         
         Returns

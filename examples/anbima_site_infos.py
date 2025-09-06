@@ -1,7 +1,7 @@
 """Anbima site infos."""
 
 from stpstone.ingestion.countries.br.exchange.anbima_site_infos import (
-    AnbimaExchangeBRIMAP2PVs,
+    AnbimaExchangeBRIMAP2MTMs,
     AnbimaExchangeInfosBRCorporateBonds,
     AnbimaExchangeInfosBRTreasuries,
     AnbimaIMAP2TheoreticalPortfolio,
@@ -30,7 +30,7 @@ print(f"DF ANBIMA EXCHANGE INFOS BR CORPORATE BONDS: \n{df_}")
 df_.info()
 
 
-cls_ = AnbimaExchangeBRIMAP2PVs(
+cls_ = AnbimaExchangeBRIMAP2MTMs(
     date_ref=None,
     logger=None, 
     cls_db=None
