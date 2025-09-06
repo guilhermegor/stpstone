@@ -27,6 +27,7 @@ file_name=${file_name:-request_config}
 cat <<EOF > "$full_dir_path/$file_name.py"
 """Implementation of ingestion instance."""
 
+from datetime import date
 from logging import Logger
 from typing import Optional, Union
 
