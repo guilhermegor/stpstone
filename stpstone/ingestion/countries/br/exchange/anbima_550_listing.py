@@ -69,7 +69,8 @@ class Anbima550Listing(ABCIngestionOperations):
     )
     def get_response(
         self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
     ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
         """Return a list of response objects.
 
@@ -83,7 +84,7 @@ class Anbima550Listing(ABCIngestionOperations):
         list[requests.Response]
             A list of response objects.
         """
-        resp_req = requests.get(self.url, timeout=timeout)
+        resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
         resp_req.raise_for_status()
         return resp_req
     
@@ -111,7 +112,9 @@ class Anbima550Listing(ABCIngestionOperations):
         )
     
     def run(
-        self, 
+        self,
+        bool_verify: bool = True,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_anbima_550_listing"
     ) -> Optional[pd.DataFrame]:
@@ -122,6 +125,10 @@ class Anbima550Listing(ABCIngestionOperations):
 
         Parameters
         ----------
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
@@ -132,7 +139,7 @@ class Anbima550Listing(ABCIngestionOperations):
         Optional[pd.DataFrame]
             The transformed DataFrame.
         """
-        resp_req = self.get_response()
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
         df_ = self.transform_response(resp_req)
         df_ = self.standardize_dataframe(
             df_=df_, 

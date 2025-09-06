@@ -22,8 +22,8 @@ from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
-class IngestionConcreteClass(ABCIngestionOperations):
-    """Ingestion concrete class."""
+class AnbimaExchangeInfos(ABCIngestionOperations):
+    """AnbimaExchangeInfos class."""
     
     def __init__(
         self, 
@@ -58,6 +58,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
         self.cls_dates_br = DatesBRAnbima()
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        self.date_ref_yymmdd = self.date_ref.strftime("%y%m%d")
+        self.url = \
+            f"https://www.anbima.com.br/informacoes/merc-sec/arqs/ms{self.date_ref_yymmdd}.txt"
 
     @backoff.on_exception(
         backoff.expo, 
@@ -66,7 +69,8 @@ class IngestionConcreteClass(ABCIngestionOperations):
     )
     def get_response(
         self, 
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
     ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
         """Return a list of response objects.
 
@@ -74,13 +78,17 @@ class IngestionConcreteClass(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
         list[requests.Response]
             A list of response objects.
         """
-        pass
+        resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
+        resp_req.raise_for_status()
+        return resp_req
     
     def transform_response(
         self, 
@@ -99,10 +107,32 @@ class IngestionConcreteClass(ABCIngestionOperations):
             The transformed DataFrame.
         """
         file = self.get_file(resp_req=resp_req)
-        return pd.read_csv(file, sep=";")
+        return pd.read_csv(
+            file, sep="@", skiprows=3, engine="python", 
+            names=[
+                "TITULO",
+                "DATA_REFERENCIA",
+                "CODIGO_SELIC",
+                "DATA_BASE_EMISSAO",
+                "DATA_VENCIMENTO",
+                "TX_COMPRA",
+                "TX_VENDA",
+                "TX_INDICATIVAS",
+                "PU",
+                "DESVIO_PADRAO",
+                "INTERV_IND_INF_D0",
+                "INTERV_IND_SUP_D0",
+                "INTERV_IND_INF_DMA1",
+                "INTERV_IND_SUP_DMA1",
+                "CRITERIO"
+            ],
+            thousands=".", decimal=","
+        )
     
     def run(
-        self, 
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "<COUNTRY_ORIGIN_NAME>"
     ) -> Optional[pd.DataFrame]:
@@ -113,6 +143,10 @@ class IngestionConcreteClass(ABCIngestionOperations):
 
         Parameters
         ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
@@ -123,17 +157,30 @@ class IngestionConcreteClass(ABCIngestionOperations):
         Optional[pd.DataFrame]
             The transformed DataFrame.
         """
-        resp_req = self.get_response()
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
         df_ = self.transform_response(resp_req)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.date_ref,
             dict_dtypes={
-                "COL_1": str,
-                "COL_2": float, 
-                "COL_3": int, 
-                "COL_4": "date"
-            }
+                "TITULO": str,
+                "DATA_REFERENCIA": int,
+                "CODIGO_SELIC": int,
+                "DATA_BASE_EMISSAO": "date",
+                "DATA_VENCIMENTO": "date",
+                "TX_COMPRA": float,
+                "TX_VENDA": float,
+                "TX_INDICATIVAS": float,
+                "PU": float,
+                "DESVIO_PADRAO": float,
+                "INTERV_IND_INF_D0": float,
+                "INTERV_IND_SUP_D0": float,
+                "INTERV_IND_INF_DMA1": float,
+                "INTERV_IND_SUP_DMA1": float,
+                "CRITERIO": str
+            }, 
+            str_fmt_dt="YYYYMMDD",
+            url=self.url,
         )
         if self.cls_db:
             self.insert_table_db(

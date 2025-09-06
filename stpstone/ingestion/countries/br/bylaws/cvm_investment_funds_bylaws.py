@@ -74,7 +74,8 @@ class InvestmentFunds(ABCIngestionOperations):
     )
     def get_response(
         self, 
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
     ) -> list[requests.Response]:
         """Return a list of response objects.
 
@@ -82,6 +83,8 @@ class InvestmentFunds(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
         
         Returns
         -------
@@ -96,7 +99,7 @@ class InvestmentFunds(ABCIngestionOperations):
                 message=f"Requesting: {fstr_url.format(app)}",
                 log_level="info"
             )
-            resp_req = requests.get(fstr_url.format(app), timeout=timeout)
+            resp_req = requests.get(fstr_url.format(app), timeout=timeout, verify=bool_verify)
             resp_req.raise_for_status()
             list_resp_req.append(resp_req)
             sleep(10)
@@ -134,8 +137,10 @@ class InvestmentFunds(ABCIngestionOperations):
     
     def run(
         self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_cvm_investment_funds_bylaws" 
+        str_table_name: str = "br_cvm_investment_funds_bylaws",
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -144,6 +149,10 @@ class InvestmentFunds(ABCIngestionOperations):
 
         Parameters
         ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
@@ -154,7 +163,7 @@ class InvestmentFunds(ABCIngestionOperations):
         Optional[pd.DataFrame]
             The transformed DataFrame.
         """
-        list_resp_req = self.get_response()
+        list_resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
         df_ = self.transform_response(list_resp_req)
         df_ = self.standardize_dataframe(
             df_=df_, 
