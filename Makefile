@@ -14,10 +14,26 @@ export_deps:
 # -------------------
 # DEV ENVIRONMENT
 # -------------------
-.PHONY: python_path
+.PHONY: install update python_path run_script
+
+install:
+	@poetry install
+	@echo "Poetry project installed"
+
+update:
+	@poetry update
+	@echo "Poetry project updated"
 
 python_path:
-	@export PYTHONPATH=$PYTHONPATH:~/github/stpstone
+	@export PYTHONPATH=$$PYTHONPATH:$$(pwd)/stpstone
+	@echo "PYTHONPATH set to $$PYTHONPATH"
+
+run_script:
+	@if [ -z "$(SCRIPT)" ]; then \
+		echo "Error: Please specify a script to run. Example: make run_script SCRIPT=examples/cvm_investment_funds_bylaws.py"; \
+		exit 1; \
+	fi
+	@PYTHONPATH=$$PYTHONPATH:$$(pwd) poetry run python $(SCRIPT)
 
 
 # -------------------
@@ -167,7 +183,10 @@ help:
 	@echo "  export_deps          - Export project dependencies"
 	@echo ""
 	@echo "Dev Environment:"
+	@echo "  install              - Install virtual environment dependencies"
+	@echo "  update               - Update virtual environment dependencies"
 	@echo "  python_path          - Export Python path"
+	@echo "  run_script           - Run Python script in virtual environment"
 	@echo ""
 	@echo "Testing:"
 	@echo "  unit_tests           - Run unit tests"
