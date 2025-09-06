@@ -44,6 +44,7 @@ from stpstone.ingestion.abc.ingestion_abc import (
     CoreIngestion,
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 

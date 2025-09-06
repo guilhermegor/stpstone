@@ -1,88 +1,146 @@
-from datetime import datetime
+"""Implementation of ingestion instance."""
+
+from datetime import date
 from logging import Logger
-import re
-from time import sleep
-from typing import Any, List, Optional, Union
+from typing import Optional, Union
 
+import backoff
 import pandas as pd
-from requests import Response
-from sqlalchemy.orm import Session
+from playwright.sync_api import Page as PlaywrightPage
+import requests
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
-from stpstone._config.global_slots import YAML_ANBIMA_INFOS
-from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.ingestion.abc.ingestion_abc import (
+    ABCIngestionOperations,
+    ContentParser,
+    CoreIngestion,
+)
+from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.folders import DirFilesManagement
 
 
-class AnbimaInfos(ABCRequests):
-
+class IngestionConcreteClass(ABCIngestionOperations):
+    """Ingestion concrete class."""
+    
     def __init__(
-        self,
-        session: Optional[Session] = None,
-        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
-        cls_db: Optional[Session] = None,
+        self, 
+        date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
-        token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None
+        cls_db: Optional[Session] = None,
     ) -> None:
-        super().__init__(
-            dict_metadata=YAML_ANBIMA_INFOS,
-            session=session,
-            date_ref=date_ref,
-            cls_db=cls_db,
-            logger=logger,
-            token=token,
-            list_slugs=list_slugs
-        )
-        self.session = session
-        self.date_ref = date_ref
-        self.cls_db = cls_db
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(cls_db=cls_db)
+        CoreIngestion.__init__(self)
+        ContentParser.__init__(self)
+
         self.logger = logger
-        self.list_slugs = list_slugs
-        self.date_ref_yymmdd = date_ref.strftime('%y%m%d')
+        self.cls_db = cls_db
+        self.cls_dir_files_management = DirFilesManagement()
+        self.cls_dates_current = DatesCurrent()
+        self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
 
-    def list_rows_injection(self, resp_req: Response) -> Union[List[Any], List[Any]]:
-        list_rows_1 = []
-        list_rows_2 = []
-        raw_text = re.sub(r'--(?=\d)', '--@', resp_req.text)
-        raw_text = raw_text.replace(",", ".").replace("--", "-99999").replace("\r", "")
-        list_rows_raw = raw_text.split("\n")
-        for i, row in enumerate(list_rows_raw):
-            if row.startswith("0@") or row.startswith("1@TOTAIS") or row.startswith("2@COMPOSI") \
-                or row.startswith("1@Data de Refer") or row.startswith("2@Data de Refer") \
-                or len(row) <= 1:
-                continue
-            elif (row.startswith("1@")) \
-                and (not row.startswith("1@TOTAIS")) \
-                and (not row.startswith("1@Data de Refer")):
-                list_rows_1.append(row[2:])
-            elif (row.startswith("2@")) \
-                and (not row.startswith("2@COMPOSI")) \
-                and (not row.startswith("2@Data de Refer")):
-                list_rows_2.append(row[2:])
-            elif any(row.startswith(f"{n}@") for n in range(3, 10)):
-                raise ValueError(f"ROW #{i}: Unexpected row prefix found: {row}")
-            elif "@" not in row:
-                raise ValueError(f"ROW #{i}: Unexpected row format found: {row}")
-            else:
-                raise ValueError(f"ROW #{i}: Unexpected row format found: {row}")
-        return list_rows_1, list_rows_2
+    @backoff.on_exception(
+        backoff.expo, 
+        requests.exceptions.HTTPError, 
+        max_time=60
+    )
+    def get_response(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+        """Return a list of response objects.
 
-    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        if StrHandler().match_string_like(resp_req.url, '*#source=ima_p2_pvs*'):
-            source = "ima_p2_pvs"
-            int_idx_row = 1
-        elif StrHandler().match_string_like(resp_req.url, '*#source=ima_p2_th_portf*'):
-            source = "ima_p2_th_portf"
-            int_idx_row = 2
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        
+        Returns
+        -------
+        list[requests.Response]
+            A list of response objects.
+        """
+        pass
+    
+    def transform_response(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> pd.DataFrame:
+        """Transform a list of response objects into a DataFrame.
+        
+        Parameters
+        ----------
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        file = self.get_file(resp_req=resp_req)
+        return pd.read_csv(file, sep=";")
+    
+    def run(
+        self, 
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "<COUNTRY_ORIGIN_NAME>"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "<COUNTRY_ORIGIN_NAME>"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response()
+        df_ = self.transform_response(resp_req)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "COL_1": str,
+                "COL_2": float, 
+                "COL_3": int, 
+                "COL_4": "date"
+            }
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
         else:
-            source = None
-            int_idx_row = None
-        if source is None or int_idx_row is None:
-            return None
-        else:
-            list_rows_1, list_rows_2 = self.list_rows_injection(resp_req)
-            data_rows = locals()[f"list_rows_{int_idx_row}"]
-            df_ = pd.DataFrame([row.split("@") for row in data_rows],
-                            columns=list(YAML_ANBIMA_INFOS[source]["dtypes"].keys()))
-        return df_
+            return df_
