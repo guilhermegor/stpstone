@@ -1,4 +1,8 @@
-"""Implementation of ingestion instance."""
+"""BMF Interest Rates.
+
+This module provides an implementation of the BMF Interest Rates ingestion class.
+It inherits from the ABCIngestionOperations class and implements the run method.
+"""
 
 from datetime import date
 from io import StringIO
@@ -26,7 +30,7 @@ from stpstone.utils.parsers.html import HtmlHandler
 
 
 class BMFInterestRates(ABCIngestionOperations):
-    """Ingestion concrete class."""
+    """BMF Interest Rates Ingestion Class."""
     
     def __init__(
         self, 
