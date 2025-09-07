@@ -1,359 +1,460 @@
-"""Unit tests for ingestion operations in the stpstone package.
+"""Unit tests for ingestion operations.
 
-Tests the functionality of ABCIngestion, CoreIngestion, and ABCIngestionOperations
-classes, covering initialization, DataFrame standardization, database insertion,
-and abstract method implementations.
+Tests the functionality of ABCIngestion, CoreIngestion, ContentAggregator, ContentParser,
+and ABCIngestionOperations classes, covering initialization, data processing, and error handling.
 """
 
 from datetime import date
-from typing import Optional, Union
-from unittest.mock import Mock
+import importlib
+from io import BytesIO, StringIO
+import sys
+from typing import Any, Union
+from unittest.mock import MagicMock
 
+import fitz
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
 import pytest
 from pytest_mock import MockerFixture
-from requests import Response
+from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
 from stpstone.ingestion.abc.ingestion_abc import (
     ABCIngestion,
     ABCIngestionOperations,
+    ContentAggregator,
+    ContentParser,
     CoreIngestion,
 )
-from stpstone.transformations.standardization.standardizer_df import DFStandardization
 from stpstone.utils.loggs.db_logs import DBLogs
+from stpstone.utils.parsers.dicts import HandlingDicts
+from stpstone.utils.parsers.str import StrHandler
 
 
 # --------------------------
 # Fixtures
 # --------------------------
 @pytest.fixture
-def mock_response() -> Mock:
-    """Fixture providing a mock response object.
+def mock_response() -> Response:
+    """Fixture providing a mock Response object.
 
     Returns
     -------
-    Mock
-        Mock object simulating a response
+    Response
+        Mocked Response object with sample text content.
     """
-    return Mock()
+    response = MagicMock(spec=Response)
+    response.text = "sample content"
+    return response
+
+
+@pytest.fixture
+def mock_playwright_page() -> PlaywrightPage:
+    """Fixture providing a mock PlaywrightPage object.
+
+    Returns
+    -------
+    PlaywrightPage
+        Mocked PlaywrightPage object with sample text content.
+    """
+    page = MagicMock(spec=PlaywrightPage)
+    page.text = "sample content"
+    return page
+
+
+@pytest.fixture
+def mock_selenium_webdriver() -> SeleniumWebDriver:
+    """Fixture providing a mock SeleniumWebDriver object.
+
+    Returns
+    -------
+    SeleniumWebDriver
+        Mocked SeleniumWebDriver object with sample text content.
+    """
+    driver = MagicMock(spec=SeleniumWebDriver)
+    driver.text = "sample content"
+    return driver
+
+
+@pytest.fixture
+def mock_session() -> Session:
+    """Fixture providing a mock Session object.
+
+    Returns
+    -------
+    Session
+        Mocked Session object with insert method.
+    """
+    session = MagicMock(spec=Session)
+    session.insert = MagicMock()
+    return session
+
+
+@pytest.fixture
+def mock_bytes_file() -> BytesIO:
+    """Fixture providing a mock BytesIO object.
+
+    Returns
+    -------
+    BytesIO
+        Mocked BytesIO object with sample content.
+    """
+    return BytesIO(b"sample pdf content")
+
+
+@pytest.fixture
+def mock_fitz_document() -> fitz.Document:
+    """Fixture providing a mock fitz.Document object.
+
+    Returns
+    -------
+    fitz.Document
+        Mocked fitz.Document with sample text pages.
+    """
+    doc = MagicMock(spec=fitz.Document)
+    doc.__len__.return_value = 2
+    doc.__getitem__.side_effect = lambda i: MagicMock(
+        get_text=lambda x: f"page {i} content"
+    )
+    return doc
 
 
 @pytest.fixture
 def sample_dataframe() -> pd.DataFrame:
-    """Fixture providing a sample DataFrame for testing.
+    """Fixture providing a sample DataFrame.
 
     Returns
     -------
     pd.DataFrame
-        DataFrame with sample data
+        Sample DataFrame with test data.
     """
     return pd.DataFrame({
         "col1": ["A", "B", "C"],
         "col2": [1, 2, 3],
-        "col3": [date(2023, 1, 1), date(2023, 1, 2), date(2023, 1, 3)]
+        "date": ["2023-01-01", "2023-01-02", "2023-01-03"]
     })
 
 
 @pytest.fixture
-def core_ingestion() -> CoreIngestion:
-    """Fixture providing a CoreIngestion instance with default parameters.
+def sample_date() -> date:
+    """Fixture providing a sample date.
 
     Returns
     -------
-    CoreIngestion
-        Initialized CoreIngestion instance
+    date
+        Sample date object.
     """
-    return CoreIngestion(
-        url="https://example.com",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str, "col2": int, "col3": date}
-    )
+    return date(2023, 1, 1)
 
 
 @pytest.fixture
-def mock_db_session(mocker: MockerFixture) -> Mock:
-    """Fixture providing a mock database session.
-
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
+def sample_dtypes() -> dict[str, Union[str, int, date]]:
+    """Fixture providing a sample dictionary of data types.
 
     Returns
     -------
-    Mock
-        Mock object simulating a database session
+    dict[str, Union[str, int, date]]
+        Dictionary mapping column names to their expected types.
     """
-    mock_session = Mock()
-    mock_session.insert = Mock()
-    return mock_session
+    return {
+        "col1": str,
+        "col2": int,
+        "date": str  # Changed from date to str to fix pandas compatibility
+    }
+
+
+@pytest.fixture
+def sample_regex_patterns() -> dict[str, dict[str, str]]:
+    """Fixture providing sample regex patterns.
+
+    Returns
+    -------
+    dict[str, dict[str, str]]
+        Dictionary of regex patterns for testing.
+    """
+    return {
+        "event1": {"pattern1": r"test\d+"},
+        "event2": {"pattern2": r"sample\d+"}
+    }
 
 
 # --------------------------
 # Tests for ABCIngestion
 # --------------------------
-def test_abc_ingestion_cannot_instantiate_without_implementing_methods() -> None:
-    """Test that ABCIngestion cannot be instantiated without implementing abstract methods.
+def test_abc_ingestion_init(mock_session: Session) -> None:
+    """Test initialization of ABCIngestion with valid and None inputs.
 
     Verifies
     --------
-    - Cannot create instance without implementing get_response
-    - Cannot create instance without implementing transform_data
-
-    Returns
-    -------
-    None
-    """
-    # Test missing get_response implementation
-    class TestIngestionMissingGetResponse(ABCIngestion):
-        """Missing get_response implementation."""
-
-        def transform_data(
-            self, 
-            resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-        ) -> pd.DataFrame:
-            """Missing transform_data implementation.
-            
-            Parameters
-            ----------
-            resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-                The response object.
-            
-            Returns
-            -------
-            pd.DataFrame
-                The transformed DataFrame.
-            """
-            return pd.DataFrame()
-
-    with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-        TestIngestionMissingGetResponse()
-
-    # Test missing transform_data implementation  
-    class TestIngestionMissingTransformResponse(ABCIngestion):
-        """Missing transform_data implementation."""
-
-        def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
-            """Missing get_response implementation.
-            
-            Returns
-            -------
-            Union[Response, PlaywrightPage, SeleniumWebDriver]
-                The response object.
-            """
-            return Mock()
-
-    with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-        TestIngestionMissingTransformResponse()
-
-
-def test_abc_ingestion_can_instantiate_with_all_methods() -> None:
-    """Test that ABCIngestion can be instantiated when all methods are implemented.
+    - Initialization with a valid Session object
+    - Initialization with None
+    - Correct storage of cls_db attribute
 
     Returns
     -------
     None
     """
     class TestIngestion(ABCIngestion):
-        """Test implementation of ABCIngestion."""
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+            
+        def get_response(self, timeout=(12.0, 21.0)):
+            pass
+        def parse_raw_file(self, resp_req):
+            pass
+        def transform_data(self, file):
+            pass
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            pass
 
-        def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
-            """Test get_response implementation.
-            
-            Returns
-            -------
-            Union[Response, PlaywrightPage, SeleniumWebDriver]
-                The response object.
-            """
-            return Mock()
-        
-        def transform_data(
-            self, 
-            resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-        ) -> pd.DataFrame:
-            """Test transform_data implementation.
-            
-            Parameters
-            ----------
-            resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-                The response object.
-            
-            Returns
-            -------
-            pd.DataFrame
-                The transformed DataFrame.
-            """
-            return pd.DataFrame()
+    ingestion = TestIngestion(cls_db=mock_session)
+    assert ingestion.cls_db == mock_session
 
-    # Should not raise any exception
+    ingestion_none = TestIngestion(cls_db=None)
+    assert ingestion_none.cls_db is None
+
+
+def test_abc_ingestion_abstract_methods() -> None:
+    """Test that ABCIngestion abstract methods raise NotImplementedError.
+
+    Verifies
+    --------
+    - All abstract methods raise NotImplementedError when called
+
+    Returns
+    -------
+    None
+    """
+    class TestIngestion(ABCIngestion):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+
     ingestion = TestIngestion()
-    assert isinstance(ingestion, ABCIngestion)
+    
+    with pytest.raises(NotImplementedError):
+        ingestion.get_response()
+    
+    with pytest.raises(NotImplementedError):
+        ingestion.parse_raw_file(None)
+    
+    with pytest.raises(NotImplementedError):
+        ingestion.transform_data(None)
+    
+    with pytest.raises(NotImplementedError):
+        ingestion.run()
 
 
 # --------------------------
 # Tests for CoreIngestion
 # --------------------------
-def test_core_ingestion_init_valid_inputs(core_ingestion: CoreIngestion) -> None:
-    """Test initialization of CoreIngestion with valid inputs.
+def test_core_ingestion_init() -> None:
+    """Test initialization of CoreIngestion.
 
     Verifies
     --------
-    - Instance is created with correct attribute values
-    - DFStandardization and DBLogs are properly initialized
-    - Type hints are respected
-
-    Parameters
-    ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
+    - Correct initialization of cls_db_logs
+    - Instance creation without errors
 
     Returns
     -------
     None
     """
-    assert core_ingestion.url == "https://example.com"
-    assert core_ingestion.date_ref == date(2023, 1, 1)
-    assert core_ingestion.bool_format_log_as_str is True
-    assert isinstance(core_ingestion.cls_df_standardization, DFStandardization)
-    assert isinstance(core_ingestion.cls_db_logs, DBLogs)
-    assert core_ingestion.cls_df_standardization.dict_dtypes == {
-        "col1": str,
-        "col2": int,
-        "col3": date
-    }
-
-
-@pytest.mark.parametrize(
-    "url", [None, 123, [], {}]
-)
-def test_core_ingestion_invalid_url(url: Optional[Union[str, int, list, dict]]) -> None:
-    """Test initialization with invalid URL raises TypeError.
-
-    Parameters
-    ----------
-    url : Optional[Union[str, int, list, dict]]
-        Invalid URL values to test
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="url must be of type"):
-        CoreIngestion(
-            url=url,
-            date_ref=date(2023, 1, 1),
-            dict_dtypes={"col1": str}
-        )
-
-
-def test_core_ingestion_empty_url_allowed() -> None:
-    """Test that empty strings and whitespace-only URLs are allowed.
-
-    Returns
-    -------
-    None
-    """
-    # Empty string should be allowed
-    ingestion = CoreIngestion(
-        url="",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str}
-    )
-    assert ingestion.url == ""
-
-    # Whitespace-only string should be allowed
-    ingestion = CoreIngestion(
-        url="  ",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str}
-    )
-    assert ingestion.url == "  "
-
-
-@pytest.mark.parametrize(
-    "date_ref", [None, "2023-01-01", 123, [], {}]
-)
-def test_core_ingestion_invalid_date_ref(date_ref: Optional[Union[str, int, list, dict]]) -> None:
-    """Test initialization with invalid date_ref raises TypeError.
-
-    Parameters
-    ----------
-    date_ref : Optional[Union[str, int, list, dict]]
-        Invalid date_ref values to test
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="date_ref must be of type"):
-        CoreIngestion(
-            url="https://example.com",
-            date_ref=date_ref,
-            dict_dtypes={"col1": str}
-        )
-
-
-@pytest.mark.parametrize(
-    "dict_dtypes", [None, [], "dict", 123]
-)
-def test_core_ingestion_invalid_dict_dtypes(
-    dict_dtypes: Optional[Union[list, str, int, dict]]
-) -> None:
-    """Test initialization with invalid dict_dtypes raises TypeError.
-
-    Parameters
-    ----------
-    dict_dtypes : Optional[Union[list, str, int, dict]]
-        Invalid dict_dtypes values to test
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="dict_dtypes must be of type"):
-        CoreIngestion(
-            url="https://example.com",
-            date_ref=date(2023, 1, 1),
-            dict_dtypes=dict_dtypes
-        )
-
-
-def test_core_ingestion_empty_dict_dtypes_raises_value_error() -> None:
-    """Test initialization with empty dict_dtypes raises ValueError.
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(ValueError, match="dict_dtypes cannot be empty"):
-        CoreIngestion(
-            url="https://example.com",
-            date_ref=date(2023, 1, 1),
-            dict_dtypes={}
-        )
+    ingestion = CoreIngestion()
+    assert isinstance(ingestion.cls_db_logs, DBLogs)
 
 
 def test_standardize_dataframe(
-    core_ingestion: CoreIngestion,
+    mocker: MockerFixture,
     sample_dataframe: pd.DataFrame,
-    mocker: MockerFixture
+    sample_date: date,
+    sample_dtypes: dict[str, Union[str, int, date]]
 ) -> None:
-    """Test standardize_dataframe method.
+    """Test standardize_dataframe method with valid inputs.
 
     Verifies
     --------
-    - Pipeline is called with correct DataFrame
-    - Audit log is called with correct parameters
-    - Returns standardized DataFrame
+    - Correct standardization of DataFrame
+    - Proper interaction with DFStandardization and DBLogs
+    - Return type is pd.DataFrame
 
     Parameters
     ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
     sample_dataframe : pd.DataFrame
         Sample DataFrame from fixture
+    sample_date : date
+        Sample date from fixture
+    sample_dtypes : dict[str, Union[str, int, date]]
+        Sample data types from fixture
+
+    Returns
+    -------
+    None
+    """
+    ingestion = CoreIngestion()
+    mock_df_standardization = mocker.patch(
+        "stpstone.transformations.standardization.standardizer_df.DFStandardization"
+    )
+    mock_df_standardization.return_value.pipeline.return_value = sample_dataframe
+    mock_audit_log = mocker.patch.object(DBLogs, "audit_log", return_value=sample_dataframe)
+
+    result = ingestion.standardize_dataframe(
+        df_=sample_dataframe,
+        date_ref=sample_date,
+        dict_dtypes=sample_dtypes,
+        str_data_fillna="-99999"
+    )
+
+    assert isinstance(result, pd.DataFrame)
+    mock_df_standardization.assert_called_once()
+    mock_audit_log.assert_called_once_with(
+        sample_dataframe, None, sample_date, True
+    )
+
+
+def test_standardize_dataframe_invalid_types(
+    sample_date: date,
+    sample_dtypes: dict[str, Union[str, int, date]]
+) -> None:
+    """Test standardize_dataframe with invalid DataFrame type.
+
+    Verifies
+    --------
+    - Raises TypeError for non-DataFrame input
+    - Error message contains "must be of type"
+
+    Parameters
+    ----------
+    sample_date : date
+        Sample date from fixture
+    sample_dtypes : dict[str, Union[str, int, date]]
+        Sample data types from fixture
+
+    Returns
+    -------
+    None
+    """
+    ingestion = CoreIngestion()
+    with pytest.raises(TypeError, match="must be of type"):
+        ingestion.standardize_dataframe(
+            df_="not a dataframe",
+            date_ref=sample_date,
+            dict_dtypes=sample_dtypes
+        )
+
+
+def test_insert_table_db(
+    mock_session: Session,
+    sample_dataframe: pd.DataFrame
+) -> None:
+    """Test insert_table_db method with valid inputs.
+
+    Verifies
+    --------
+    - Correct interaction with Session.insert
+    - Proper conversion of DataFrame to records
+    - Handling of bool_insert_or_ignore parameter
+
+    Parameters
+    ----------
+    mock_session : Session
+        Mocked Session object from fixture
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame from fixture
+
+    Returns
+    -------
+    None
+    """
+    ingestion = CoreIngestion()
+
+    ingestion.insert_table_db(
+        cls_db=mock_session,
+        str_table_name="test_table",
+        df_=sample_dataframe,
+        bool_insert_or_ignore=True
+    )
+
+    mock_session.insert.assert_called_once_with(
+        sample_dataframe.to_dict(orient="records"),
+        str_table_name="test_table",
+        bool_insert_or_ignore=True
+    )
+
+
+# --------------------------
+# Tests for ContentAggregator
+# --------------------------
+def test_content_aggregator_init() -> None:
+    """Test initialization of ContentAggregator.
+
+    Verifies
+    --------
+    - Correct initialization of cls_handling_dicts and cls_str_handler
+    - Instance creation without errors
+
+    Returns
+    -------
+    None
+    """
+    aggregator = ContentAggregator()
+    assert isinstance(aggregator.cls_handling_dicts, HandlingDicts)
+    assert isinstance(aggregator.cls_str_handler, StrHandler)
+
+
+def test_paginate_text_blocks(
+    mocker: MockerFixture,
+    mock_fitz_document: fitz.Document
+) -> None:
+    """Test paginate_text_blocks method with valid inputs.
+
+    Verifies
+    --------
+    - Correct pagination of text blocks
+    - Proper handling of page joining
+    - Interaction with StrHandler for diacritics removal
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    mock_fitz_document : fitz.Document
+        Mocked fitz.Document from fixture
+
+    Returns
+    -------
+    None
+    """
+    aggregator = ContentAggregator()
+    mocker.patch.object(
+        aggregator.cls_str_handler,
+        "remove_diacritics_nfkd",
+        return_value="cleaned text"
+    )
+
+    result = aggregator.paginate_text_blocks(
+        stream_file=mock_fitz_document,
+        int_pages_join=1
+    )
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result == ["cleaned text", "cleaned text"]
+
+
+def test_paginate_text_blocks_empty_document(
+    mocker: MockerFixture
+) -> None:
+    """Test paginate_text_blocks with empty document.
+
+    Verifies
+    --------
+    - Returns list with empty string for empty document
+    - Handles edge case correctly
+
+    Parameters
+    ----------
     mocker : MockerFixture
         Pytest-mock fixture for creating mocks
 
@@ -361,336 +462,427 @@ def test_standardize_dataframe(
     -------
     None
     """
-    mock_pipeline = mocker.patch.object(
-        core_ingestion.cls_df_standardization,
-        "pipeline",
-        return_value=sample_dataframe
-    )
-    mock_audit_log = mocker.patch.object(
-        core_ingestion.cls_db_logs,
-        "audit_log",
-        return_value=sample_dataframe
+    aggregator = ContentAggregator()
+    mock_doc = MagicMock(spec=fitz.Document)
+    mock_doc.__len__.return_value = 0
+
+    result = aggregator.paginate_text_blocks(
+        stream_file=mock_doc,
+        int_pages_join=1
     )
 
-    result = core_ingestion.standardize_dataframe(sample_dataframe)
-
-    mock_pipeline.assert_called_once_with(sample_dataframe)
-    mock_audit_log.assert_called_once_with(
-        sample_dataframe,
-        core_ingestion.url,
-        core_ingestion.date_ref,
-        core_ingestion.bool_format_log_as_str
-    )
-    assert isinstance(result, pd.DataFrame)
-    pd.testing.assert_frame_equal(result, sample_dataframe)
+    assert result == [""]
 
 
-def test_standardize_dataframe_invalid_input(
-    core_ingestion: CoreIngestion
-) -> None:
-    """Test standardize_dataframe with invalid input raises TypeError.
-
-    Parameters
-    ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="df_ must be of type"):
-        core_ingestion.standardize_dataframe([1, 2, 3])
-
-
-def test_insert_table_db(
-    core_ingestion: CoreIngestion,
-    sample_dataframe: pd.DataFrame,
-    mock_db_session: Mock,
-) -> None:
-    """Test insert_table_db method.
+# --------------------------
+# Tests for ContentParser
+# --------------------------
+def test_get_file(mock_response: Response) -> None:
+    """Test get_file method with valid response.
 
     Verifies
     --------
-    - DataFrame is converted to records correctly
-    - Database session insert is called with correct parameters
-    - No return value (None)
+    - Correct conversion of response text to StringIO
+    - Return type is StringIO
 
     Parameters
     ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    mock_db_session : Mock
-        Mock database session from fixture
+    mock_response : Response
+        Mocked Response object from fixture
 
     Returns
     -------
     None
     """
-    result = core_ingestion.insert_table_db(
-        mock_db_session,
-        "test_table",
-        sample_dataframe,
-        bool_insert_or_ignore=True
+    parser = ContentParser()
+    result = parser.get_file(mock_response)
+    assert isinstance(result, StringIO)
+    assert result.getvalue() == "sample content"
+
+
+def test_pdf_docx_tables_response(
+    mocker: MockerFixture,
+    mock_bytes_file: BytesIO
+) -> None:
+    """Test pdf_docx_tables_response with valid BytesIO input.
+
+    Verifies
+    --------
+    - Correct parsing of tables from PDF
+    - Interaction with pdfplumber and HandlingDicts
+    - Return type is pd.DataFrame
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    mock_bytes_file : BytesIO
+        Mocked BytesIO object from fixture
+
+    Returns
+    -------
+    None
+    """
+    parser = ContentParser()
+    mock_pdfplumber = mocker.patch("pdfplumber.open")
+    mock_page = MagicMock()
+    mock_page.extract_tables.return_value = [["header1", "header2"], ["data1", "data2"]]
+    mock_pdfplumber.return_value.__enter__.return_value.pages = [mock_page]
+    mocker.patch.object(
+        parser.cls_handling_dicts,
+        "pair_keys_with_values",
+        return_value=[{"header1": "data1", "header2": "data2"}]
     )
 
-    expected_records = sample_dataframe.to_dict(orient="records")
-    mock_db_session.insert.assert_called_once_with(
-        expected_records,
-        str_table_name="test_table",
-        bool_insert_or_ignore=True
-    )
-    assert result is None
+    result = parser.pdf_docx_tables_response(mock_bytes_file)
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == 1
+    assert result.to_dict(orient="records") == [{"header1": "data1", "header2": "data2"}]
 
 
-@pytest.mark.parametrize(
-    "cls_db", [None, "not_a_session", 123, []]
-)
-def test_insert_table_db_invalid_session(
-    core_ingestion: CoreIngestion,
-    sample_dataframe: pd.DataFrame,
-    cls_db: Optional[Union[str, int, list]]
+def test_pdf_docx_regex(
+    mocker: MockerFixture,
+    mock_bytes_file: BytesIO,
+    sample_regex_patterns: dict[str, dict[str, str]]
 ) -> None:
-    """Test insert_table_db with invalid database session raises TypeError.
+    """Test pdf_docx_regex with valid inputs.
+
+    Verifies
+    --------
+    - Correct parsing using regex patterns
+    - Interaction with paginate_text_blocks and regex matching
+    - Proper DataFrame processing (drop duplicates, sorting)
 
     Parameters
     ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    cls_db : Optional[Union[str, int, list]]
-        Invalid database session values to test
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    mock_bytes_file : BytesIO
+        Mocked BytesIO object from fixture
+    sample_regex_patterns : dict[str, dict[str, str]]
+        Sample regex patterns from fixture
 
     Returns
     -------
     None
     """
-    with pytest.raises(TypeError, match="cls_db must be of type"):
-        core_ingestion.insert_table_db(cls_db, "test_table", sample_dataframe)
-
-
-@pytest.mark.parametrize(
-    "str_table_name", [None, 123, []]
-)
-def test_insert_table_db_invalid_table_name(
-    core_ingestion: CoreIngestion,
-    sample_dataframe: pd.DataFrame,
-    mock_db_session: Mock,
-    str_table_name: Optional[Union[str, int, list]]
-) -> None:
-    """Test insert_table_db with invalid table name raises TypeError.
-
-    Parameters
-    ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    mock_db_session : Mock
-        Mock database session from fixture
-    str_table_name : Optional[Union[str, int, list]]
-        Invalid table name values to test
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="str_table_name must be of type"):
-        core_ingestion.insert_table_db(mock_db_session, str_table_name, sample_dataframe)
-
-
-def test_insert_table_db_empty_string_table_name_allowed(
-    core_ingestion: CoreIngestion,
-    sample_dataframe: pd.DataFrame,
-    mock_db_session: Mock,
-) -> None:
-    """Test insert_table_db allows empty string and whitespace table names.
-
-    Parameters
-    ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    mock_db_session : Mock
-        Mock database session from fixture
-
-    Returns
-    -------
-    None
-    """
-    # Empty string should be allowed
-    core_ingestion.insert_table_db(mock_db_session, "", sample_dataframe)
+    parser = ContentParser()
+    # Mock fitz.open to avoid actual PDF parsing
+    mock_fitz_open = mocker.patch("fitz.open")
+    mock_doc = MagicMock()
+    mock_fitz_open.return_value = mock_doc
     
-    # Whitespace-only string should be allowed
-    core_ingestion.insert_table_db(mock_db_session, "  ", sample_dataframe)
+    mocker.patch.object(
+        parser,
+        "paginate_text_blocks",
+        return_value=["test123", "sample456"]
+    )
+    mocker.patch.object(
+        parser,
+        "_regex_patterns_match",
+        return_value=[
+            {"EVENT": "EVENT1", "MATCH_PATTERN": "PATTERN1", "PATTERN_REGEX": r"test\d+"}
+        ]
+    )
+
+    result = parser.pdf_docx_regex(
+        bytes_file=mock_bytes_file,
+        str_file_extension="pdf",
+        int_pages_join=1,
+        dict_regex_patterns=sample_regex_patterns
+    )
+
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == 1
+    assert result.to_dict(orient="records") == [
+        {"EVENT": "EVENT1", "MATCH_PATTERN": "PATTERN1", "PATTERN_REGEX": r"test\d+"}
+    ]
 
 
-def test_insert_table_db_invalid_dataframe(
-    core_ingestion: CoreIngestion,
-    mock_db_session: Mock
+def test_regex_patterns_match(
+    mocker: MockerFixture,
+    sample_regex_patterns: dict[str, dict[str, str]]
 ) -> None:
-    """Test insert_table_db with invalid DataFrame raises TypeError.
+    """Test _regex_patterns_match with valid inputs.
+
+    Verifies
+    --------
+    - Correct matching of regex patterns
+    - Proper handling of matches and fallbacks
+    - Return type is list of dictionaries
 
     Parameters
     ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    mock_db_session : Mock
-        Mock database session from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    sample_regex_patterns : dict[str, dict[str, str]]
+        Sample regex patterns from fixture
 
     Returns
     -------
     None
     """
-    with pytest.raises(TypeError, match="df_ must be of type"):
-        core_ingestion.insert_table_db(mock_db_session, "test_table", [1, 2, 3])
+    parser = ContentParser()
+    mocker.patch.object(
+        parser.cls_str_handler,
+        "remove_diacritics_nfkd",
+        return_value=r"test\d+"
+    )
+    
+    # Mock re.search to return match only for event1
+    def mock_search(pattern, text):
+        if pattern == r"test\d+" and "test123" in text:
+            return MagicMock(
+                group=lambda i: "test123" if i == 0 else "123",
+                groups=lambda: ["123"]
+            )
+        return None
+    
+    mocker.patch("re.search", side_effect=mock_search)
+
+    result = parser._regex_patterns_match(
+        list_blocks_pages=["test123"],
+        dict_regex_patterns=sample_regex_patterns
+    )
+
+    assert isinstance(result, list)
+    assert len(result) == 2  # One match for event1, one fallback for event2
+    assert result[0]["EVENT"] == "EVENT1"
+    assert result[0]["MATCH_PATTERN"] == "PATTERN1"
+    assert result[0]["REGEX_GROUP_0"] == "TEST123"
+    assert result[1]["EVENT"] == "EVENT2"
+    assert result[1]["MATCH_PATTERN"] == "ZZNN/A"
+
+
+def test_regex_patterns_match_no_matches(
+    mocker: MockerFixture,
+    sample_regex_patterns: dict[str, dict[str, str]]
+) -> None:
+    """Test _regex_patterns_match with no matches.
+
+    Verifies
+    --------
+    - Fallback behavior when no regex matches
+    - Correct return of fallback dictionary
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    sample_regex_patterns : dict[str, dict[str, str]]
+        Sample regex patterns from fixture
+
+    Returns
+    -------
+    None
+    """
+    parser = ContentParser()
+    mocker.patch.object(
+        parser.cls_str_handler,
+        "remove_diacritics_nfkd",
+        return_value=r"test\d+"
+    )
+    mocker.patch("re.search", return_value=None)
+
+    result = parser._regex_patterns_match(
+        list_blocks_pages=["no match"],
+        dict_regex_patterns=sample_regex_patterns
+    )
+
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0] == {
+        "EVENT": "EVENT1",
+        "MATCH_PATTERN": "ZZNN/A",
+        "PATTERN_REGEX": "ZZN/A"
+    }
+    assert result[1] == {
+        "EVENT": "EVENT2",
+        "MATCH_PATTERN": "ZZNN/A",
+        "PATTERN_REGEX": "ZZN/A"
+    }
 
 
 # --------------------------
 # Tests for ABCIngestionOperations
 # --------------------------
-def test_abc_ingestion_operations_inherits_correctly() -> None:
-    """Test ABCIngestionOperations inherits from both parent classes.
+def test_abc_ingestion_operations_init(mock_session: Session) -> None:
+    """Test initialization of ABCIngestionOperations.
 
     Verifies
     --------
-    - ABCIngestionOperations inherits from ABCIngestion and CoreIngestion
-    - Instance can be created with valid parameters
+    - Correct initialization of inherited attributes
+    - Proper setup of cls_db, cls_db_logs, cls_handling_dicts, and cls_str_handler
+
+    Parameters
+    ----------
+    mock_session : Session
+        Mocked Session object from fixture
 
     Returns
     -------
     None
     """
-    class TestIngestionOperations(ABCIngestionOperations):
-        """Test class for ABCIngestionOperations."""
-
-        def get_response(self) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
-            """Test get_response implementation.
+    # Create a concrete implementation for testing
+    class TestABCIngestionOperations(ABCIngestionOperations):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
             
-            Returns
-            -------
-            Union[Response, PlaywrightPage, SeleniumWebDriver]
-                The response object.
-            """
-            return Mock()
-        
-        def transform_data(
-            self, 
-            resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-        ) -> pd.DataFrame:
-            """Test transform_data implementation.
-            
-            Parameters
-            ----------
-            resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-                The response object.
-            
-            Returns
-            -------
-            pd.DataFrame
-                The transformed DataFrame.
-            """
-            return pd.DataFrame()
-
-    ingestion = TestIngestionOperations(
-        url="https://example.com",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str}
-    )
-    assert isinstance(ingestion, ABCIngestion)
-    assert isinstance(ingestion, CoreIngestion)
-    assert isinstance(ingestion, TestIngestionOperations)
+        def get_response(self, timeout=(12.0, 21.0)):
+            pass
+        def parse_raw_file(self, resp_req):
+            pass
+        def transform_data(self, file):
+            pass
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            pass
+    
+    ingestion = TestABCIngestionOperations(cls_db=mock_session)
+    assert ingestion.cls_db == mock_session
+    assert isinstance(ingestion.cls_db_logs, DBLogs)
+    assert isinstance(ingestion.cls_handling_dicts, HandlingDicts)
+    assert isinstance(ingestion.cls_str_handler, StrHandler)
 
 
 # --------------------------
 # Edge Cases and Error Conditions
 # --------------------------
-def test_core_ingestion_empty_dataframe(
-    core_ingestion: CoreIngestion,
-    mocker: MockerFixture
-) -> None:
-    """Test standardize_dataframe with empty DataFrame.
+@pytest.mark.parametrize("invalid_timeout", [
+    "invalid",  # wrong type
+    -1,         # negative value
+    (0, 0),     # zero values
+])
+def test_get_response_invalid_timeout(invalid_timeout: Any) -> None:
+    """Test get_response with invalid timeout values.
 
     Verifies
     --------
-    - Empty DataFrame is processed correctly
-    - Pipeline and audit log are called
+    - Raises TypeError for invalid timeout types/values
 
     Parameters
     ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
+    invalid_timeout : Any
+        Invalid timeout value to test
 
     Returns
     -------
     None
     """
-    empty_df = pd.DataFrame()
-    mock_pipeline = mocker.patch.object(
-        core_ingestion.cls_df_standardization,
-        "pipeline",
-        return_value=empty_df
-    )
-    mock_audit_log = mocker.patch.object(
-        core_ingestion.cls_db_logs,
-        "audit_log",
-        return_value=empty_df
-    )
+    class TestIngestion(ABCIngestion):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+            
+        def get_response(self, timeout=(12.0, 21.0)):
+            return super().get_response(timeout)
+        def parse_raw_file(self, resp_req):
+            pass
+        def transform_data(self, file):
+            pass
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            pass
 
-    result = core_ingestion.standardize_dataframe(empty_df)
-    mock_pipeline.assert_called_once_with(empty_df)
-    mock_audit_log.assert_called_once()
-    assert isinstance(result, pd.DataFrame)
-    assert result.empty
+    ingestion = TestIngestion()
+    with pytest.raises(TypeError, match="must be of type"):
+        ingestion.get_response(timeout=invalid_timeout)
 
 
-def test_insert_table_db_empty_dataframe(
-    core_ingestion: CoreIngestion,
-    mock_db_session: Mock,
-) -> None:
-    """Test insert_table_db with empty DataFrame.
+def test_parse_raw_file_invalid_input() -> None:
+    """Test parse_raw_file with invalid input type.
 
     Verifies
     --------
-    - Empty DataFrame results in empty records list
-    - Database insert is called with empty list
-
-    Parameters
-    ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    mock_db_session : Mock
-        Mock database session from fixture
+    - Raises TypeError for invalid response type
 
     Returns
     -------
     None
     """
-    empty_df = pd.DataFrame()
-    core_ingestion.insert_table_db(mock_db_session, "test_table", empty_df)
-    mock_db_session.insert.assert_called_once_with(
-        [],
-        str_table_name="test_table",
-        bool_insert_or_ignore=False
-    )
+    class TestIngestion(ABCIngestion):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+            
+        def get_response(self, timeout=(12.0, 21.0)):
+            pass
+        def parse_raw_file(self, resp_req):
+            return super().parse_raw_file(resp_req)
+        def transform_data(self, file):
+            pass
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            pass
+
+    ingestion = TestIngestion()
+    with pytest.raises(TypeError, match="must be of type"):
+        ingestion.parse_raw_file("invalid")
+
+
+def test_transform_data_invalid_input() -> None:
+    """Test transform_data with invalid input type.
+
+    Verifies
+    --------
+    - Raises TypeError for invalid file input
+
+    Returns
+    -------
+    None
+    """
+    class TestIngestion(ABCIngestion):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+            
+        def get_response(self, timeout=(12.0, 21.0)):
+            pass
+        def parse_raw_file(self, resp_req):
+            pass
+        def transform_data(self, file):
+            return super().transform_data(file)
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            pass
+
+    ingestion = TestIngestion()
+    with pytest.raises(TypeError, match="must be of type"):
+        ingestion.transform_data("invalid")
+
+
+def test_run_invalid_table_name() -> None:
+    """Test run method with invalid table name.
+
+    Verifies
+    --------
+    - Raises TypeError for non-string table name
+
+    Returns
+    -------
+    None
+    """
+    class TestIngestion(ABCIngestion):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+            
+        def get_response(self, timeout=(12.0, 21.0)):
+            pass
+        def parse_raw_file(self, resp_req):
+            pass
+        def transform_data(self, file):
+            pass
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            return super().run(timeout, bool_verify, bool_insert_or_ignore, str_table_name)
+
+    ingestion = TestIngestion()
+    with pytest.raises(TypeError, match="must be of type"):
+        ingestion.run(str_table_name=123)
 
 
 # --------------------------
-# Reload Logic
+# Reload Logic Tests
 # --------------------------
 def test_module_reload(mocker: MockerFixture) -> None:
-    """Test module reload preserves functionality.
+    """Test module reload behavior.
 
     Verifies
     --------
-    - Module can be reloaded without breaking functionality
-    - CoreIngestion instance can still be created post-reload
+    - Module can be reloaded without errors
+    - Classes maintain their functionality post-reload
 
     Parameters
     ----------
@@ -701,137 +893,74 @@ def test_module_reload(mocker: MockerFixture) -> None:
     -------
     None
     """
-    import importlib
-
-    import stpstone
-
-    mocker.patch.object(DFStandardization, "__init__", return_value=None)
-    mocker.patch.object(DBLogs, "__init__", return_value=None)
-
-    importlib.reload(stpstone)
-    ingestion = CoreIngestion(
-        url="https://example.com",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str}
-    )
-    assert isinstance(ingestion, CoreIngestion)
-
-
-# --------------------------
-# Type Validation
-# --------------------------
-def test_core_ingestion_type_checker() -> None:
-    """Test TypeChecker metaclass enforces type validation.
-
-    Verifies
-    --------
-    - TypeChecker raises TypeError for invalid types
-    - Valid types pass without errors
-
-    Returns
-    -------
-    None
-    """
-    # Valid initialization
-    CoreIngestion(
-        url="https://example.com",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str}
-    )
-
-    # Invalid types should raise TypeError
-    with pytest.raises(TypeError, match="url must be of type"):
-        CoreIngestion(
-            url=123,
-            date_ref=date(2023, 1, 1),
-            dict_dtypes={"col1": str}
-        )
-
-
-def test_optional_parameters_type_validation() -> None:
-    """Test optional parameters accept None or correct types.
-
-    Verifies
-    --------
-    - Optional parameters accept None
-    - Optional parameters accept correct types
-    - Invalid types raise TypeError
-
-    Returns
-    -------
-    None
-    """
-    # Valid optional parameters
-    ingestion = CoreIngestion(
-        url="https://example.com",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str},
-        cols_from_case=None,
-        cols_to_case=None,
-        list_cols_drop_dupl=None,
-        dict_fillna_strt=None,
-        str_dt_fillna=None,
-        logger=None
-    )
-    assert ingestion.cls_df_standardization.cols_from_case is None
-    assert ingestion.cls_df_standardization.cols_to_case is None
-    # Note: list_cols_drop_dupl defaults to [] when None is passed
-    assert ingestion.cls_df_standardization.list_cols_drop_dupl == []
-    # Note: dict_fillna_strt defaults to {} when None is passed
-    assert ingestion.cls_df_standardization.dict_fillna_strt == {}
-    # Note: str_dt_fillna defaults to '2099-12-31' when None is passed
-    assert ingestion.cls_df_standardization.str_dt_fillna == '2099-12-31'
-    assert ingestion.cls_df_standardization.logger is None
-
-    # Test with valid non-None values
-    ingestion_with_values = CoreIngestion(
-        url="https://example.com",
-        date_ref=date(2023, 1, 1),
-        dict_dtypes={"col1": str},
-        list_cols_drop_dupl=["col1"],
-        str_data_fillna="-88888",
-        bool_format_log_as_str=False
-    )
-    assert ingestion_with_values.cls_df_standardization.list_cols_drop_dupl == ["col1"]
-    assert ingestion_with_values.cls_df_standardization.str_data_fillna == "-88888"
-    assert ingestion_with_values.bool_format_log_as_str is False
+    importlib.reload(sys.modules["stpstone.ingestion.abc.ingestion_abc"])
+    
+    # Create a concrete implementation for testing
+    class TestABCIngestionOperations(ABCIngestionOperations):
+        def __init__(self, cls_db=None):
+            super().__init__(cls_db)
+            
+        def get_response(self, timeout=(12.0, 21.0)):
+            pass
+        def parse_raw_file(self, resp_req):
+            pass
+        def transform_data(self, file):
+            pass
+        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
+            pass
+    
+    ingestion = TestABCIngestionOperations()
+    assert isinstance(ingestion.cls_db_logs, DBLogs)
+    assert isinstance(ingestion.cls_handling_dicts, HandlingDicts)
+    assert isinstance(ingestion.cls_str_handler, StrHandler)
 
 
 # --------------------------
-# Fallback Logic
+# Fallback Logic Tests
 # --------------------------
-def test_standardize_dataframe_fallback(
-    core_ingestion: CoreIngestion,
-    sample_dataframe: pd.DataFrame,
-    mocker: MockerFixture
+def test_pdf_docx_regex_no_pages(
+    mocker: MockerFixture,
+    mock_bytes_file: BytesIO,
+    sample_regex_patterns: dict[str, dict[str, str]]
 ) -> None:
-    """Test standardize_dataframe handles pipeline errors gracefully.
+    """Test pdf_docx_regex with empty document.
 
     Verifies
     --------
-    - If pipeline raises an error, audit_log is not called
-    - Error is propagated correctly
+    - Fallback behavior when document has no pages
+    - Returns empty DataFrame
 
     Parameters
     ----------
-    core_ingestion : CoreIngestion
-        CoreIngestion instance from fixture
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
     mocker : MockerFixture
         Pytest-mock fixture for creating mocks
+    mock_bytes_file : BytesIO
+        Mocked BytesIO object from fixture
+    sample_regex_patterns : dict[str, dict[str, str]]
+        Sample regex patterns from fixture
 
     Returns
     -------
     None
     """
+    parser = ContentParser()
+    # Mock fitz.open to avoid actual PDF parsing
+    mock_fitz_open = mocker.patch("fitz.open")
+    mock_doc = MagicMock()
+    mock_fitz_open.return_value = mock_doc
+    
     mocker.patch.object(
-        core_ingestion.cls_df_standardization,
-        "pipeline",
-        side_effect=ValueError("Pipeline error")
+        parser,
+        "paginate_text_blocks",
+        return_value=[]
     )
-    mock_audit_log = mocker.patch.object(core_ingestion.cls_db_logs, "audit_log")
 
-    with pytest.raises(ValueError, match="Pipeline error"):
-        core_ingestion.standardize_dataframe(sample_dataframe)
-    mock_audit_log.assert_not_called()
+    result = parser.pdf_docx_regex(
+        bytes_file=mock_bytes_file,
+        str_file_extension="pdf",
+        int_pages_join=1,
+        dict_regex_patterns=sample_regex_patterns
+    )
+
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == 0
