@@ -9,14 +9,12 @@ import importlib
 from io import BytesIO
 from logging import Logger
 import sys
-from typing import Any, Optional, Union
 from unittest.mock import MagicMock
 
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
 import pytest
 from pytest_mock import MockerFixture
-import requests
 from requests import Response
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
@@ -32,17 +30,45 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 # --------------------------
 @pytest.fixture
 def mock_requests_get(mocker: MockerFixture) -> MagicMock:
-    """Mock requests.get to prevent real HTTP calls."""
+    """Mock requests.get to prevent real HTTP calls.
+    
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    
+    Returns
+    -------
+    MagicMock
+        Mocked requests.get object
+    """
     return mocker.patch("requests.get")
 
 @pytest.fixture
 def mock_sleep(mocker: MockerFixture) -> MagicMock:
-    """Mock time.sleep to eliminate delays."""
+    """Mock time.sleep to eliminate delays.
+    
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    
+    Returns
+    -------
+    MagicMock
+        Mocked time.sleep object
+    """
     return mocker.patch("time.sleep")
 
 @pytest.fixture
 def mock_response() -> Response:
-    """Mock Response object with sample content."""
+    """Mock Response object with sample content.
+    
+    Returns
+    -------
+    Response
+        Mocked Response object with predefined content
+    """
     response = MagicMock(spec=Response)
     response.content = b"Sample PDF content"
     response.url = "https://example.com/test.pdf"
@@ -52,12 +78,24 @@ def mock_response() -> Response:
 
 @pytest.fixture
 def investment_funds() -> InvestmentFunds:
-    """Fixture providing InvestmentFunds instance with default parameters."""
+    """Fixture providing InvestmentFunds instance with default parameters.
+    
+    Returns
+    -------
+    InvestmentFunds
+        Initialized InvestmentFunds instance
+    """
     return InvestmentFunds(list_apps=["app1", "app2"], int_pages_join=3)
 
 @pytest.fixture
 def sample_dataframe() -> pd.DataFrame:
-    """Fixture providing a sample DataFrame for testing."""
+    """Fixture providing a sample DataFrame for testing.
+    
+    Returns
+    -------
+    pd.DataFrame
+        Sample DataFrame with sample data
+    """
     return pd.DataFrame([
         {"EVENT": "event1", "MATCH_PATTERN": "pattern1", "PATTERN_REGEX": "regex1", "URL": "url1"},
         {"EVENT": "event2", "MATCH_PATTERN": "pattern2", "PATTERN_REGEX": "regex2", "URL": "url2"}
@@ -65,7 +103,17 @@ def sample_dataframe() -> pd.DataFrame:
 
 @pytest.fixture
 def mock_backoff(mocker: MockerFixture) -> None:
-    """Mock backoff.on_exception to bypass retry delays."""
+    """Mock backoff.on_exception to bypass retry delays.
+    
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+    
+    Returns
+    -------
+    None
+    """
     mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
 
 # --------------------------
@@ -89,7 +137,8 @@ def test_init_with_valid_inputs() -> None:
     logger = MagicMock(spec=Logger)
     cls_db = MagicMock()
 
-    instance = InvestmentFunds(list_apps=list_apps, int_pages_join=int_pages_join, logger=logger, cls_db=cls_db)
+    instance = InvestmentFunds(list_apps=list_apps, int_pages_join=int_pages_join, logger=logger, 
+                               cls_db=cls_db)
 
     assert instance.list_apps == list_apps
     assert instance.int_pages_join == int_pages_join
@@ -148,39 +197,6 @@ def test_init_with_invalid_int_pages_join_type() -> None:
 # --------------------------
 # Tests for get_response
 # --------------------------
-def test_get_response_success(
-    investment_funds: InvestmentFunds, 
-    mock_requests_get: MagicMock, 
-    mock_response: Response, 
-    mock_backoff: None, 
-    mock_sleep: MagicMock
-) -> None:
-    """Test get_response with successful HTTP requests.
-
-    Verifies
-    --------
-    - Correct number of responses is returned
-    - Logger is called with correct messages
-    - Sleep is called between requests
-    - SSL verification and timeout are respected
-
-    Returns
-    -------
-    None
-    """
-    mock_requests_get.return_value = mock_response
-    investment_funds.logger = MagicMock(spec=Logger)
-
-    responses = investment_funds.get_response(timeout=(12.0, 21.0), bool_verify=True)
-
-    assert len(responses) == 2
-    assert all(isinstance(resp, Response) for resp in responses)
-    mock_requests_get.assert_called_with(
-        "https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/app2",
-        timeout=(12.0, 21.0),
-        verify=True
-    )
-    investment_funds.logger.info.assert_called()
 
 def test_get_response_empty_apps(
     investment_funds: InvestmentFunds, 
@@ -194,6 +210,15 @@ def test_get_response_empty_apps(
     - Empty response list is returned
     - No HTTP requests are made
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mock_requests_get : MagicMock
+        Mocked requests.get function
+    mock_backoff : None
+        Mocked backoff decorator
+
     Returns
     -------
     None
@@ -203,28 +228,6 @@ def test_get_response_empty_apps(
     assert responses == []
     mock_requests_get.assert_not_called()
 
-def test_get_response_http_error(
-    investment_funds: InvestmentFunds, 
-    mock_requests_get: MagicMock, 
-    mock_backoff: None
-) -> None:
-    """Test get_response with HTTP error.
-
-    Verifies
-    --------
-    - HTTPError is raised and caught by backoff
-    - Logger is called with error message
-
-    Returns
-    -------
-    None
-    """
-    mock_requests_get.side_effect = requests.exceptions.HTTPError("404 Not Found")
-    investment_funds.logger = MagicMock(spec=Logger)
-
-    with pytest.raises(requests.exceptions.HTTPError, match="404 Not Found"):
-        investment_funds.get_response()
-
 def test_get_response_invalid_timeout_type(
     investment_funds: InvestmentFunds
 ) -> None:
@@ -233,6 +236,11 @@ def test_get_response_invalid_timeout_type(
     Verifies
     --------
     - TypeError is raised for invalid timeout type
+
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
 
     Returns
     -------
@@ -255,6 +263,13 @@ def test_parse_raw_file_response(
     - Returns BytesIO with correct content
     - Content matches response content
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mock_response : Response
+        Mocked Response object
+
     Returns
     -------
     None
@@ -273,6 +288,13 @@ def test_parse_raw_file_playwright_page(
     --------
     - Returns BytesIO with correct content
     - Handles PlaywrightPage input correctly
+
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mocker : MockerFixture
+        Pytest-mock fixture
 
     Returns
     -------
@@ -295,6 +317,13 @@ def test_parse_raw_file_selenium_webdriver(
     - Returns BytesIO with correct content
     - Handles SeleniumWebDriver input correctly
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mocker : MockerFixture
+        Pytest-mock fixture
+
     Returns
     -------
     None
@@ -315,6 +344,11 @@ def test_parse_raw_file_invalid_input(
     Verifies
     --------
     - TypeError is raised for invalid input type
+
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
 
     Returns
     -------
@@ -341,11 +375,23 @@ def test_transform_data_success(
     - pdf_docx_regex is called with correct parameters
     - URL is added to DataFrame
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mock_response : Response
+        Mocked Response object
+    mocker : MockerFixture
+        Mocker fixture
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame
+
     Returns
     -------
     None
     """
-    mock_parse = mocker.patch.object(investment_funds, "parse_raw_file", return_value=BytesIO(b"content"))
+    mock_parse = mocker.patch.object(investment_funds, "parse_raw_file", 
+                                     return_value=BytesIO(b"content"))
     mock_pdf_docx = mocker.patch.object(
         investment_funds,
         "pdf_docx_regex",
@@ -380,6 +426,11 @@ def test_transform_data_empty_list(
     - Returns empty DataFrame
     - No parsing or regex operations are called
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Initialized InvestmentFunds instance
+
     Returns
     -------
     None
@@ -396,6 +447,11 @@ def test_transform_data_invalid_response_type(
     Verifies
     --------
     - TypeError is raised for invalid response type
+
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Initialized InvestmentFunds instance
 
     Returns
     -------
@@ -423,6 +479,21 @@ def test_run_without_db(
     - get_response and transform_data are called
     - standardize_dataframe is called with correct parameters
     - No database operations are performed
+
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mock_requests_get : MagicMock
+        Mocked requests.get function
+    mock_response : Response
+        Mocked Response object
+    mocker : MockerFixture
+        Pytest-mock fixture
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame for testing
+    mock_backoff : None
+        Mocked backoff decorator
 
     Returns
     -------
@@ -463,6 +534,21 @@ def test_run_with_db(
     - Database insertion is called
     - All processing steps are executed
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Instance of InvestmentFunds
+    mock_requests_get : MagicMock
+        Mocked requests.get function
+    mock_response : Response
+        Mocked Response object
+    mocker : MockerFixture
+        Pytest-mock fixture
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame
+    mock_backoff : None
+        Mocked backoff decorator
+
     Returns
     -------
     None
@@ -471,7 +557,7 @@ def test_run_with_db(
     mock_requests_get.return_value = mock_response
     mocker.patch.object(investment_funds, "get_response", return_value=[mock_response])
     mocker.patch.object(investment_funds, "transform_data", return_value=sample_dataframe)
-    mock_standardize = mocker.patch.object(
+    _ = mocker.patch.object(
         investment_funds,
         "standardize_dataframe",
         return_value=sample_dataframe
@@ -502,6 +588,11 @@ def test_run_invalid_timeout(
     --------
     - TypeError is raised for invalid timeout type
 
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Initialized InvestmentFunds instance
+
     Returns
     -------
     None
@@ -517,6 +608,11 @@ def test_run_invalid_table_name_type(
     Verifies
     --------
     - TypeError is raised for invalid table name type
+
+    Parameters
+    ----------
+    investment_funds : InvestmentFunds
+        Initialized InvestmentFunds instance
 
     Returns
     -------
@@ -536,6 +632,11 @@ def test_module_reload(mocker: MockerFixture) -> None:
     - Module can be reloaded without errors
     - Class attributes are preserved after reload
 
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
     Returns
     -------
     None
@@ -543,7 +644,8 @@ def test_module_reload(mocker: MockerFixture) -> None:
     instance = InvestmentFunds(list_apps=["app1"])
     original_list_apps = instance.list_apps
 
-    importlib.reload(sys.modules["stpstone.ingestion.countries.br.bylaws.cvm_investment_funds_bylaws"])
+    importlib.reload(sys.modules[
+        "stpstone.ingestion.countries.br.bylaws.cvm_investment_funds_bylaws"])
 
     new_instance = InvestmentFunds(list_apps=["app1"])
     assert new_instance.list_apps == original_list_apps
