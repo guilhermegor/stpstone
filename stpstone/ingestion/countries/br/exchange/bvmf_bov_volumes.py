@@ -5,8 +5,8 @@ It inherits from the ABCIngestionOperations class and implements the run method.
 """
 
 from datetime import date
-from io import StringIO
 from logging import Logger
+from time import sleep
 from typing import Optional, Union
 
 import backoff
@@ -71,8 +71,8 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
         self.cls_num_handler = NumHandler()
         self.cls_dict_handler = HandlingDicts()
         self.date_ref = date_ref or \
-            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -6)
-        self.url = f"https://bvmf.bmfbovespa.com.br/sig/FormConsultaNegociacoes.asp?" \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -7)
+        self.url = "https://bvmf.bmfbovespa.com.br/sig/FormConsultaNegociacoes.asp?" \
             + "strTipoResumo=RES_NEGOCIACOES&strSocEmissora=B3SA&" \
             + "strDtReferencia={}".format(self.date_ref.strftime("%m/%Y")) \
             + "&strIdioma=P&intCodNivel=1&intCodCtrl=100"
@@ -100,9 +100,31 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
+
+        Raises
+        ------
+        ValueError
+            If the response is empty.
         """
-        resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
-        resp_req.raise_for_status()
+        bool_parsed_tables: bool = False
+        int_max_retries: int = 5
+        i : int = 0
+        
+        while not bool_parsed_tables:
+            resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
+            resp_req.raise_for_status()
+            html_root = self.parse_raw_file(resp_req=resp_req)
+            len_tables = len(html_root.find_all("table"))
+            if len_tables > 0:
+                bool_parsed_tables = True
+            elif i < int_max_retries:
+                sleep(5)
+                i += 1
+            else:
+                raise ValueError(
+                    f"Failed to get response after {int_max_retries} attempts."
+                )
+        
         return resp_req
     
     def parse_raw_file(
@@ -121,7 +143,6 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
         bs4.BeautifulSoup
             The parsed content.
         """
-        print(f"status code: {resp_req.status_code}")
         return self.cls_html_handler.bs_parser(resp_req=resp_req)
     
     def transform_data(
@@ -145,12 +166,9 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
             "NEGOCIACOES", 
             "VOLUME_BRL", 
             "NEGOCIACOES_12M", 
-            "VOLUME_BRL_12M", 
-            "PERIODO_REF"
+            "VOLUME_BRL_12M",
         ]
         list_td: list[Union[str, float]] = []
-        print(f"URL: {self.url}")
-        print(f"List TD: {list_td}")
         html_table = html_root.find_all("table")[11]
         for i, tr in enumerate(html_table.find_all("tr")):
             if i >= 2:
@@ -158,12 +176,12 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
                     self._td_parser(el)
                     for el in tr.find_all("td")
                 ])
-        list_td.append("")
 
-        return self.cls_dict_handler.pair_headers_with_data(
+        list_ser = self.cls_dict_handler.pair_headers_with_data(
             list_headers=list_th, 
             list_data=list_td
         )
+        return pd.DataFrame(list_ser)
     
     def _td_parser(self, el: bs4.element.Tag) -> str:
         """Table data parser.
@@ -245,7 +263,6 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
                 "VOLUME_BRL": "float",
                 "NEGOCIACOES_12M": "int",
                 "VOLUME_BRL_12M": "float",
-                "PERIODO_REF": "int",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             url=self.url,

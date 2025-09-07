@@ -1,6 +1,6 @@
 """BVMF BOV Trading Volumes."""
 
-from stpstone.ingestion.countries.br.exchange.bvmf_bov import BVMFVBOVTradingVolumes
+from stpstone.ingestion.countries.br.exchange.bvmf_bov_volumes import BVMFVBOVTradingVolumes
 
 
 cls_ = BVMFVBOVTradingVolumes(

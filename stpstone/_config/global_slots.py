@@ -19,8 +19,6 @@ YAML_B3_UP2DATA_VOLUMES_TRD = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/up2data_volumes_trd.yaml"))
 YAML_B3_SEARCH_BY_TRADING_SESSION = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/search_by_trading_session.yaml"))
-YAML_B3_BVMF_BOV = reading_yaml(
-    os.path.join(root_path, "countries/br/exchange/bvmf_bov.yaml"))
 YAML_B3_OPTIONS_CALENDAR = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/options_calendar.yaml"))
 YAML_B3_WARRANTY = reading_yaml(
