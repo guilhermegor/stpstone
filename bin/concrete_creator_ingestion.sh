@@ -85,6 +85,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
         self.cls_dates_br = DatesBRAnbima()
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        self.url = "FILL_ME"
 
     @backoff.on_exception(
         backoff.expo, 
@@ -107,31 +108,52 @@ class IngestionConcreteClass(ABCIngestionOperations):
         list[requests.Response]
             A list of response objects.
         """
-        pass
+        resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
+        resp_req.raise_for_status()
+        return resp_req
+    
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+        """
+        return self.get_file(resp_req=resp_req)
     
     def transform_data(
         self, 
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        file: StringIO
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
         Parameters
         ----------
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
+        file : StringIO
+            The parsed content.
         
         Returns
         -------
         pd.DataFrame
             The transformed DataFrame.
         """
-        file = self.get_file(resp_req=resp_req)
         return pd.read_csv(file, sep=";")
     
     def run(
-        self, 
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "<COUNTRY_ORIGIN_NAME>"
+        str_table_name: str = "br_anbima_br_treasuries"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -140,18 +162,23 @@ class IngestionConcreteClass(ABCIngestionOperations):
 
         Parameters
         ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "<COUNTRY_ORIGIN_NAME>"
+            The name of the table, by default "br_anbima_br_treasuries"
 
         Returns
         -------
         Optional[pd.DataFrame]
             The transformed DataFrame.
         """
-        resp_req = self.get_response()
-        df_ = self.transform_data(resp_req)
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        file = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(file=file)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.date_ref,
@@ -160,7 +187,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
                 "COL_2": float, 
                 "COL_3": int, 
                 "COL_4": "date"
-            }
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
         )
         if self.cls_db:
             self.insert_table_db(
