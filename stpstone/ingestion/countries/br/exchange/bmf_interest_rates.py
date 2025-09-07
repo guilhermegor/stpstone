@@ -1,133 +1,256 @@
-from datetime import datetime
+"""Implementation of ingestion instance."""
+
+from datetime import date
+from io import StringIO
 from logging import Logger
-from numbers import Number
-from time import sleep
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
-from lxml.html import HtmlElement
+import backoff
 import pandas as pd
-from requests import Response
-from sqlalchemy.orm import Session
+from playwright.sync_api import Page as PlaywrightPage
+import requests
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
-from stpstone._config.global_slots import YAML_BMF_INTEREST_RATES
-from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.ingestion.abc.ingestion_abc import (
+    ABCIngestionOperations,
+    ContentParser,
+    CoreIngestion,
+)
+from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
 from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.html import HtmlHandler
-from stpstone.utils.parsers.str import StrHandler
 
 
-class BMFInterestRates(ABCRequests):
-
+class BMFInterestRates(ABCIngestionOperations):
+    """Ingestion concrete class."""
+    
     def __init__(
-        self,
-        session: Optional[Session] = None,
-        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
-        cls_db: Optional[Session] = None,
+        self, 
+        date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
-        token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None
+        cls_db: Optional[Session] = None,
     ) -> None:
-        super().__init__(
-            dict_metadata=YAML_BMF_INTEREST_RATES,
-            session=session,
-            date_ref=date_ref,
-            cls_db=cls_db,
-            logger=logger,
-            token=token,
-            list_slugs=list_slugs
-        )
-        self.session = session
-        self.date_ref = date_ref
-        self.cls_db = cls_db
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(cls_db=cls_db)
+        CoreIngestion.__init__(self)
+        ContentParser.__init__(self)
+
         self.logger = logger
-        self.token = token
-        self.list_slugs = list_slugs
-        self.date_ref_ddmmyyyy = date_ref.strftime('%d/%m/%Y')
-        self.date_ref_yyyymmdd = date_ref.strftime('%Y%m%d')
+        self.cls_db = cls_db
+        self.cls_dir_files_management = DirFilesManagement()
+        self.cls_dates_current = DatesCurrent()
+        self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.cls_html_handler = HtmlHandler()
+        self.cls_dict_handler = HandlingDicts()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        self.url = "https://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/TxRef1.asp?"\
+            + "Data={}".format(self.date_ref.strftime("%d/%m/%Y")) \
+            + "&Data1={}&slcTaxa=TODOS".format(self.date_ref.strftime("%Y%m%d"))
 
-    def td_th_parser(self, root: HtmlElement, int_iter: int) -> List[Dict[str, Union[str, Number]]]:
-        list_th = list()
-        for x in HtmlHandler().lxml_xpath(
-            root, YAML_BMF_INTEREST_RATES['rates']['xpaths']['list_th'].format(int_iter)
-        ):
-            str_raw = StrHandler().remove_diacritics(x.text.strip().lower())
-            if str_raw == "dias":
-                list_th.append("DIAS_CORRIDOS")
-            elif str_raw == "di x pre":
-                list_th.append("DI_PRE_252")
-                list_th.append("DI_PRE_360")
-            elif str_raw == "selic x pre":
-                list_th.append("SELIC_PRE_252")
-            elif str_raw == "di x tr":
-                list_th.append("DI_TR_252")
-                list_th.append("DI_TR_360")
-            elif str_raw == "dolar x pre":
-                list_th.append("DOLAR_PRE_252")
-                list_th.append("DOLAR_PRE_360")
-            elif str_raw == "real x euro":
-                list_th.append("REAL_EURO")
-            elif str_raw == "di x euro":
-                list_th.append("DI_EURO_360")
-            elif str_raw == "tbf x pre":
-                list_th.append("TBF_PRE_252")
-                list_th.append("TBF_PRE_360")
-            elif str_raw == "tr x pre":
-                list_th.append("TR_PRE_252")
-                list_th.append("TR_PRE_360")
-            elif str_raw == "di x dolar":
-                list_th.append("DI_DOLAR_360")
-            elif str_raw == "cupom cambial oc1":
-                list_th.append("CUPOM_CAMBIAL_OC1_360")
-            elif str_raw == "cupom limpo":
-                list_th.append("CUPOM_LIMPO_360")
-            elif str_raw == "real x dolar":
-                list_th.append("REAL_DOLAR")
-            elif str_raw == "ibrx-50":
-                list_th.append("IBRX_50")
-            elif str_raw == "ibovespa":
-                list_th.append("IBOVESPA")
-            elif str_raw == "di x igp-m":
-                list_th.append("DI_IGP_M_252")
-            elif str_raw == "di x ipca":
-                list_th.append("DI_IPCA_252")
-            elif str_raw == "ajuste pre":
-                list_th.append("AJUSTE_PRE_252")
-                list_th.append("AJUSTE_PRE_360")
-            elif str_raw == "ajuste cupom":
-                list_th.append("AJUSTE_CUPOM_360")
-            elif str_raw == "real x iene":
-                list_th.append("REAL_IENE")
-            elif str_raw == "spread libor euro x dolar":
-                list_th.append("SPREAD_LIBOR_EURO_DOLAR")
-            elif str_raw == "libor":
-                list_th.append("LIBOR_360")
-            else:
-                raise Exception(f"Table Header not Found: {str_raw}")
-        list_td = [
-            float(x.text.strip().replace(",", "."))
-            for x in HtmlHandler().lxml_xpath(
-                root, YAML_BMF_INTEREST_RATES['rates']['xpaths']['list_td'].format(int_iter)
-            )
+    @backoff.on_exception(
+        backoff.expo, 
+        requests.exceptions.HTTPError, 
+        max_time=60
+    )
+    def get_response(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+        """Return a list of response objects.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
+        
+        Returns
+        -------
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
+            A list of response objects.
+        """
+        resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
+        resp_req.raise_for_status()
+        return resp_req
+    
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+        """
+        list_ser: list[dict[str, float]] = []
+        xpath_td: str = """
+        //table[starts-with(@id, "tb_principal")]//td[contains(@class, "tabelaConteudo")]
+        """
+        list_th: list[str] = [
+            "DIAS_CORRIDOS", 
+            "DI_PRE_252", 
+            "DI_PRE_360", 
+            "SELIC_PRE_252", 
+            "DI_TR_252", 
+            "DI_TR_360", 
+            "DOLAR_PRE_252", 
+            "DOLAR_PRE_360", 
+            "REAL_EURO_PRECO",
+            "DIAS_CORRIDOS",
+            "DI_EURO_360", 
+            "TBF_PRE_252",
+            "TBF_PRE_360",
+            "TR_PRE_252",
+            "TR_PRE_360",
+            "DI_DOLAR_360",
+            "CUPOM_CAMBIAL_OC1_360",
+            "CUPOM_LIMPO_360",
+            "DIAS_CORRIDOS", 
+            "REAL_DOLAR_PRECO", 
+            "IBRX_50", 
+            "IBOVESPA", 
+            "DI_IGP_M_252", 
+            "DI_IPCA_252", 
+            "AJUSTE_PRE_252", 
+            "AJUSTE_PRE_360", 
+            "AJUSTE_CUPOM_360",
+            "DIAS_CORRIDOS", 
+            "REAL_IENE_PRECO", 
+            "SPEAD_LIBOR_EURO_DOLAR_TAXA", 
+            "LIBOR_360",
         ]
-        list_ser = HandlingDicts().pair_headers_with_data(list_th, list_td)
-        return list_ser
 
-    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        list_dfs = list()
-        bool_debug = True if StrHandler().match_string_like(
-            resp_req.url, '*bool_debug=True*') == True else False
-        root = HtmlHandler().lxml_parser(resp_req)
-        # export html tree to data folder, if is user's will
-        if bool_debug == True:
-            path_project = DirFilesManagement().find_project_root(marker='pyproject.toml')
-            HtmlHandler().html_tree(root, file_path=rf'{path_project}/data/test.html')
-        for i in range(1, 5):
-            list_ser = self.td_th_parser(root, i)
-            list_dfs.append(pd.DataFrame(list_ser))
-        df_ = list_dfs[0]
-        for i in range(1, len(list_dfs)):
-            df_ = df_.merge(list_dfs[i], how='left', on='DIAS_CORRIDOS', suffixes=('', f'_{i}'))
-        return df_
+        html_root = self.cls_html_handler.lxml_parser(resp_req=resp_req)
+        list_td = self.cls_html_handler.lxml_xpath(html_content=html_root, str_xpath=xpath_td)
+        list_td = [float(x.text.strip().replace(",", ".")) for x in list_td]
+        list_ser = self.cls_dict_handler.pair_headers_with_data(
+            list_headers=list_th, 
+            list_data=list_td
+        )
+        
+        return list_ser
+    
+    def transform_data(
+        self, 
+        list_ser: list[dict[str, float]]
+    ) -> pd.DataFrame:
+        """Transform a list of response objects into a DataFrame.
+        
+        Parameters
+        ----------
+        list_ser : list[dict[str, float]]
+            The list of dictionaries to transform.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.DataFrame(list_ser)
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_anbima_br_treasuries"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_anbima_br_treasuries"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        list_ser = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(list_ser=list_ser)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "DIAS_CORRIDOS": "int",
+                "DI_PRE_252": "float",
+                "DI_PRE_360": "float",
+                "SELIC_PRE_252": "float",
+                "DI_TR_252": "float",
+                "DI_TR_360": "float",
+                "DOLAR_PRE_252": "float",
+                "DOLAR_PRE_360": "float",
+                "REAL_EURO_PRECO": "float",
+                "DI_EURO_360": "float",
+                "TBF_PRE_252": "float",
+                "TBF_PRE_360": "float",
+                "TR_PRE_252": "float",
+                "TR_PRE_360": "float",
+                "DI_DOLAR_360": "float",
+                "CUPOM_CAMBIAL_OC1_360": "float",
+                "CUPOM_LIMPO_360": "float",
+                "REAL_DOLAR_PRECO": "float",
+                "IBRX_50": "float",
+                "IBOVESPA": "float",
+                "DI_IGP_M_252": "float",
+                "DI_IPCA_252": "float",
+                "AJUSTE_PRE_252": "float",
+                "AJUSTE_PRE_360": "float",
+                "AJUSTE_CUPOM_360": "float",
+                "REAL_IENE_PRECO": "float",
+                "SPEAD_LIBOR_EURO_DOLAR_TAXA": "float",
+                "LIBOR_360": "float"
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
+            list_cols_drop_dupl=["DIAS_CORRIDOS"],
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
