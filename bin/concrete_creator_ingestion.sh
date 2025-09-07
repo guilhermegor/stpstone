@@ -28,6 +28,7 @@ cat <<EOF > "$full_dir_path/$file_name.py"
 """Implementation of ingestion instance."""
 
 from datetime import date
+from io import StringIO
 from logging import Logger
 from typing import Optional, Union
 
@@ -94,7 +95,8 @@ class IngestionConcreteClass(ABCIngestionOperations):
     )
     def get_response(
         self, 
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
     ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
         """Return a list of response objects.
 
@@ -102,10 +104,12 @@ class IngestionConcreteClass(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
-        list[requests.Response]
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
         """
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
