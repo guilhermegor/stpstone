@@ -157,7 +157,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_anbima_br_treasuries"
+        str_table_name: str = "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -173,7 +173,7 @@ class IngestionConcreteClass(ABCIngestionOperations):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_anbima_br_treasuries"
+            The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
 
         Returns
         -------
