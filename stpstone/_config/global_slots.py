@@ -43,8 +43,6 @@ YAML_ANBIMA_INDEXES = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/indexes_anbima.yaml"))
 YAML_BMF_INTEREST_RATES = reading_yaml(
     os.path.join(root_path, "countries/br/exchange/bmf_interest_rates.yaml"))
-YAML_ANBIMA_INFOS = reading_yaml(
-    os.path.join(root_path, "countries/br/exchange/anbima_site_infos.yaml"))
 #   US
 YAML_US_ALPHAVANTAGE = reading_yaml(
     os.path.join(root_path, "countries/us/exchange/alphavantage.yaml"))
