@@ -174,3 +174,15 @@ class IngestionConcreteClass(ABCIngestionOperations):
 EOF
 
 echo "File succesfully created at: $full_dir_path/$file_name.py"
+
+# create test directory and empty test file
+test_dir_path="$PROJECT_ROOT/tests/unit"
+mkdir -p "$test_dir_path"
+
+test_file_path="$test_dir_path/test_$file_name.py"
+
+# create empty test file
+touch "$test_file_path"
+
+echo "Empty test file successfully created at: $test_file_path"
+echo "Both files have been created successfully!"
