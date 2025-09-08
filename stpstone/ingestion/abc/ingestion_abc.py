@@ -267,11 +267,13 @@ class CoreIngestion(metaclass=TypeChecker):
         bool_insert_or_ignore : bool, optional
             Whether to use INSERT OR IGNORE or INSERT WITHOUT IGNORING CONFLICTS (default: False)
         """
+        if not str_table_name:
+            raise ValueError("str_table_name cannot be empty")
         list_ser = df_.to_dict(orient="records")
         cls_db.insert(
             list_ser,
             str_table_name=str_table_name,
-            bool_insert_or_ignore = bool_insert_or_ignore,
+            bool_insert_or_ignore=bool_insert_or_ignore,
         )
 
 
@@ -307,6 +309,8 @@ class ContentAggregator(metaclass=TypeChecker):
         list[str]
             A list of paginated text blocks.
         """
+        if not isinstance(int_pages_join, int) or int_pages_join <= 0:
+            raise ValueError("int_pages_join must be a positive integer")
         str_ = ""
         list_blocks_pages: list[str] = []
 

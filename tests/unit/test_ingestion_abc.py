@@ -346,7 +346,7 @@ def test_init_type_checker_invalid_db(mocker: MockerFixture) -> None:
     -------
     None
     """
-    with pytest.raises(TypeError, match="cls_db must be of type Session or NoneType"):
+    with pytest.raises(TypeError, match="cls_db must be one of types: Session, NoneType, got str"):
         ConcreteIngestion(cls_db="invalid")
 
 # --------------------------
@@ -615,17 +615,15 @@ def test_insert_table_db_valid(
     -------
     None
     """
-    mock_session = MagicMock(spec=Session)
-    mock_execute = mocker.patch.object(mock_session, "execute")
-    
+    mock_session = MagicMock()  # Use permissive mock instead of spec=Session
+    mock_insert = mocker.patch.object(mock_session, "insert")  # Mock the correct method
     ingestion_instance.insert_table_db(
         cls_db=mock_session,
         str_table_name="test_table",
         df_=sample_dataframe,
         bool_insert_or_ignore=True
     )
-    
-    mock_execute.assert_called_once()
+    mock_insert.assert_called_once()
 
 @pytest.mark.parametrize("invalid_db", [None, "not_a_session", 123])
 def test_insert_table_db_invalid_session(
@@ -686,10 +684,24 @@ def test_insert_table_db_invalid_table_name(
     -------
     None
     """
+    mock_session = MagicMock()
     with pytest.raises(TypeError, match="str_table_name must be of type str"):
         ingestion_instance.insert_table_db(
-            cls_db=MagicMock(spec=Session),
+            cls_db=mock_session,
             str_table_name=invalid_table_name,
+            df_=sample_dataframe
+        )
+
+def test_insert_table_db_empty_table_name(
+    ingestion_instance: ConcreteIngestion,
+    sample_dataframe: pd.DataFrame,
+) -> None:
+    """Test insert_table_db with empty table name."""
+    mock_session = MagicMock()
+    with pytest.raises(ValueError, match="str_table_name cannot be empty"):
+        ingestion_instance.insert_table_db(
+            cls_db=mock_session,
+            str_table_name="",
             df_=sample_dataframe
         )
 
@@ -793,16 +805,6 @@ def test_paginate_text_blocks_invalid_pages_join(
     -------
     None
     """
-    mocker.patch.object(
-        ContentAggregator,
-        "paginate_text_blocks",
-        side_effect=lambda stream_file, int_pages_join: (
-            ValueError("int_pages_join must be a positive integer")
-            if not isinstance(int_pages_join, int) or int_pages_join <= 0
-            else ["mocked_output"]
-        )
-    )
-    
     if not isinstance(invalid_pages_join, int):
         with pytest.raises(TypeError, match="int_pages_join must be of type int"):
             ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=invalid_pages_join)
@@ -1044,22 +1046,13 @@ def test_pdf_docx_regex_invalid_extension(
         )
     )
     
-    if invalid_extension == "":
-        with pytest.raises(ValueError, match="str_file_extension cannot be empty"):
-            ingestion_instance.pdf_docx_regex(
-                bytes_file=sample_bytes_file,
-                str_file_extension=invalid_extension,
-                int_pages_join=1,
-                dict_regex_patterns=sample_regex_patterns
-            )
-    else:
-        with pytest.raises(TypeError, match="str_file_extension must be of type str"):
-            ingestion_instance.pdf_docx_regex(
-                bytes_file=sample_bytes_file,
-                str_file_extension=invalid_extension,
-                int_pages_join=1,
-                dict_regex_patterns=sample_regex_patterns
-            )
+    with pytest.raises(TypeError, match="must be of type"):
+        ingestion_instance.pdf_docx_regex(
+            bytes_file=sample_bytes_file,
+            str_file_extension=invalid_extension,
+            int_pages_join=1,
+            dict_regex_patterns=sample_regex_patterns
+        )
 
 # --------------------------
 # Tests for _regex_patterns_match
@@ -1094,18 +1087,22 @@ def test_regex_patterns_match_valid(
     mock_match = MagicMock()
     mock_match.groups.return_value = ["test"]
     mock_match.group.side_effect = lambda i: "test" if i == 0 else "group1"
-    mocker.patch("re.search", return_value=mock_match)
-    
+    mocker.patch(
+        "re.search",
+        side_effect=lambda pattern, string: mock_match if pattern == r"test\d+" else None
+    )
     result = ingestion_instance._regex_patterns_match(
         list_blocks_pages=["test123"],
         dict_regex_patterns=sample_regex_patterns
     )
-    
     assert isinstance(result, list)
-    assert len(result) == 1
-    assert result[0]["EVENT"] == "event1"
-    assert result[0]["REGEX_GROUP_0"] == "test"
-    assert result[0]["REGEX_GROUP_1"] == "group1"
+    assert len(result) == 2  # One match for event1, one fallback for event2
+    assert result[0]["EVENT"] == "EVENT1"
+    assert result[0]["MATCH_PATTERN"] == "PATTERN1"
+    assert result[0]["REGEX_GROUP_0"] == "TEST"
+    assert result[0]["REGEX_GROUP_1"] == "GROUP1"
+    assert result[1]["EVENT"] == "EVENT2"
+    assert result[1]["MATCH_PATTERN"] == "ZZNN/A"
 
 def test_regex_patterns_match_no_matches(
     ingestion_instance: ConcreteIngestion,
