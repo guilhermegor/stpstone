@@ -1,30 +1,58 @@
 #!/bin/bash
 
-# define the project root directory
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m'
+
 PROJECT_ROOT="$(pwd)/stpstone"
 
-# prompt for folder path within the project
-read -p "Enter the PY folder path within the project (default: ./ingestion): " folder_path
-folder_path=${folder_path:-./ingestion}
+print_status() {
+    local status="$1"
+    local message="$2"
+    case "$status" in
+        "success") echo -e "${GREEN}[✓]${NC} ${message}" ;;
+        "error") echo -e "${RED}[✗]${NC} ${message}" >&2 ;;
+        "warning") echo -e "${YELLOW}[!]${NC} ${message}" ;;
+        "info") echo -e "${BLUE}[i]${NC} ${message}" ;;
+        "config") echo -e "${CYAN}[→]${NC} ${message}" ;;
+        "debug") echo -e "${MAGENTA}[»]${NC} ${message}" ;;
+        *) echo -e "[ ] ${message}" ;;
+    esac
+}
 
-# ensure the folder path is within the project directory
-if [[ "$folder_path" != ./* ]]; then
-    echo "Error: The folder path must be within the project directory."
-    exit 1
-fi
+validate_folder_path() {
+    local folder_path="$1"
+    
+    if [[ "$folder_path" != ./* ]]; then
+        print_status "error" "The folder path must be within the project directory."
+        return 1
+    fi
+    
+    return 0
+}
 
-# construct the full directory path
-full_dir_path="$PROJECT_ROOT/$folder_path"
+create_directory() {
+    local full_dir_path="$1"
+    
+    mkdir -p "$full_dir_path"
+    if [ $? -ne 0 ]; then
+        print_status "error" "Failed to create directory: $full_dir_path"
+        return 1
+    fi
+    
+    print_status "success" "Directory created: $full_dir_path"
+    return 0
+}
 
-# ensure the directory exists
-mkdir -p "$full_dir_path"
-
-# require path and file name
-read -p "Enter the PY file name (without extension, default: request_config): " file_name
-file_name=${file_name:-request_config}
-
-# create yaml file
-cat <<EOF > "$full_dir_path/$file_name.py"
+create_python_file() {
+    local full_dir_path="$1"
+    local file_name="$2"
+    
+    cat <<EOF > "$full_dir_path/$file_name.py"
 """Implementation of ingestion instance."""
 
 from datetime import date
@@ -206,16 +234,84 @@ class IngestionConcreteClass(ABCIngestionOperations):
             return df_
 EOF
 
-echo "File succesfully created at: $full_dir_path/$file_name.py"
+    if [ $? -eq 0 ]; then
+        print_status "success" "Python file created: $full_dir_path/$file_name.py"
+        return 0
+    else
+        print_status "error" "Failed to create Python file: $full_dir_path/$file_name.py"
+        return 1
+    fi
+}
 
-# create test directory and empty test file
-test_dir_path="$PROJECT_ROOT/tests/unit"
-mkdir -p "$test_dir_path"
+create_test_file() {
+    local test_dir_path="$1"
+    local file_name="$2"
+    
+    mkdir -p "$test_dir_path"
+    if [ $? -ne 0 ]; then
+        print_status "error" "Failed to create test directory: $test_dir_path"
+        return 1
+    fi
+    
+    local test_file_path="$test_dir_path/test_$file_name.py"
+    touch "$test_file_path"
+    
+    if [ $? -eq 0 ]; then
+        print_status "success" "Test file created: $test_file_path"
+        return 0
+    else
+        print_status "error" "Failed to create test file: $test_file_path"
+        return 1
+    fi
+}
 
-test_file_path="$test_dir_path/test_$file_name.py"
+create_example_file() {
+    local example_dir_path="$1"
+    local file_name="$2"
+    
+    mkdir -p "$test_dir_path"
+    if [ $? -ne 0 ]; then
+        print_status "error" "Failed to create example directory: $example_dir_path"
+        return 1
+    fi
+    
+    local example_file_path="$example_dir_path/$file_name.py"
+    touch "$example_file_path"
+    
+    if [ $? -eq 0 ]; then
+        print_status "success" "Test file created: $example_file_path"
+        return 0
+    else
+        print_status "error" "Failed to create test file: $example_file_path"
+        return 1
+    fi
+}
 
-# create empty test file
-touch "$test_file_path"
+main() {
+    print_status "info" "Starting Python file creation script"
+    
+    read -p "Enter the PY folder path within the project (default: ./ingestion): " folder_path
+    folder_path=${folder_path:-./ingestion}
+    
+    validate_folder_path "$folder_path" || exit 1
+    
+    full_dir_path="$PROJECT_ROOT/$folder_path"
+    
+    create_directory "$full_dir_path" || exit 1
+    
+    read -p "Enter the PY file name (without extension, default: request_config): " file_name
+    file_name=${file_name:-request_config}
+    
+    create_python_file "$full_dir_path" "$file_name" || exit 1
+    
+    test_dir_path="$PROJECT_ROOT/tests/unit"
+    example_dir_path="$PROJECT_ROOT/examples"
+    create_test_file "$test_dir_path" "$file_name" || exit 1
+    create_example_file "$example_dir_path" "$file_name" || exit 1
+    
+    print_status "success" "All files created successfully!"
+    print_status "info" "Main file: $full_dir_path/$file_name.py"
+    print_status "info" "Test file: $test_dir_path/test_$file_name.py"
+}
 
-echo "Empty test file successfully created at: $test_file_path"
-echo "Both files have been created successfully!"
+main "$@"
