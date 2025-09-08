@@ -244,7 +244,7 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_anbima_br_treasuries"
+            The name of the table, by default "br_b3_volumes"
 
         Returns
         -------
