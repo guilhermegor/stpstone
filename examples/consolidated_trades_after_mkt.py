@@ -11,7 +11,7 @@ cls_ = B3ConsolidatedTradesAfterMarket(
     cls_db=None
 )
 
-df_ = B3ConsolidatedTradesAfterMarket().run()
+df_ = cls_.run()
 
 print(f"DF CONSOLIDATED TRADES AFTER MARKET: \n{df_}")
 df_.info()
