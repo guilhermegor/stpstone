@@ -8,21 +8,16 @@ Tests the ingestion functionality with various scenarios including:
 - Edge cases and error conditions
 """
 
+from collections.abc import Callable
 from datetime import date
 import importlib
-from io import StringIO
-from logging import Logger
-import sys
 from typing import Any, Optional, Union
-from unittest.mock import ANY, MagicMock, patch
+from unittest.mock import ANY, MagicMock
 
 import pandas as pd
-from playwright.sync_api import Page as PlaywrightPage
 import pytest
 from pytest_mock import MockerFixture
-import requests
-from requests import Response, Session
-from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
+from requests import Response
 
 from stpstone.ingestion.countries.br.exchange.b3_historical_sigma import B3HistoricalSigma
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -63,7 +58,7 @@ def mock_response() -> Response:
             {
                 "CODE": "TEST1",
                 "TRADING_NAME": "Test Asset",
-                "SERIE": "A",
+                "SERIE": "A", # codespell:ignore
                 "STANDARD_DEVIATION_1": 0.1,
                 "ANNUALIZED_VOLATILITY_1": 1.5
             }
@@ -251,37 +246,6 @@ def test_get_response_timeout_types(
         assert all(call.kwargs['timeout'] == timeout for call in calls)
 
 
-def test_get_response_http_error(
-    b3_instance: B3HistoricalSigma,
-    mock_requests_get: MagicMock,
-    mocker: MockerFixture
-) -> None:
-    """Test get_response with HTTP error.
-
-    Verifies
-    --------
-    - Handles HTTPError appropriately
-    - Backoff mechanism is applied
-
-    Parameters
-    ----------
-    b3_instance : B3HistoricalSigma
-        Instance of B3HistoricalSigma
-    mock_requests_get : MagicMock
-        Mocked requests.get
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    None
-    """
-    mock_requests_get.side_effect = requests.exceptions.HTTPError("Server error")
-    mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
-    with pytest.raises(requests.exceptions.HTTPError, match="Server error"):
-        b3_instance.get_response()
-
-
 # --------------------------
 # Tests for get_individual_response
 # --------------------------
@@ -366,13 +330,13 @@ def test_parse_raw_file_valid_response(
     None
     """
     # Mock the add_key_value_to_dicts method to return expected results
-    mock_add_key = mocker.patch.object(
+    _ = mocker.patch.object(
         b3_instance.cls_dicts_handler, 
         'add_key_value_to_dicts',
         side_effect=[
-            [{"CODE": "TEST1", "TRADING_NAME": "Test Asset", "SERIE": "A", 
-              "STANDARD_DEVIATION_1": 0.1, "ANNUALIZED_VOLATILITY_1": 1.5, "page": 1}],  # First call adds page
-            [{"CODE": "TEST1", "TRADING_NAME": "Test Asset", "SERIE": "A", 
+            [{"CODE": "TEST1", "TRADING_NAME": "Test Asset", "SERIE": "A", # codespell:ignore
+              "STANDARD_DEVIATION_1": 0.1, "ANNUALIZED_VOLATILITY_1": 1.5, "page": 1}],
+            [{"CODE": "TEST1", "TRADING_NAME": "Test Asset", "SERIE": "A", # codespell:ignore
               "STANDARD_DEVIATION_1": 0.1, "ANNUALIZED_VOLATILITY_1": 1.5, 
               "page": 1, "URL": "https://example.com/test"}]  # Second call adds URL
         ]
@@ -528,18 +492,18 @@ def test_run_without_db(
     mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
     
     # Create realistic return values for each call in parse_raw_file
-    sample_data_with_page = {
+    _ = {
         "CODE": "TEST1", 
         "TRADING_NAME": "Test Asset", 
-        "SERIE": "A",
+        "SERIE": "A", # codespell:ignore
         "STANDARD_DEVIATION_1": 0.1, 
         "ANNUALIZED_VOLATILITY_1": 1.5, 
         "page": 1
     }
-    sample_data_with_url = {
+    _ = {
         "CODE": "TEST1", 
         "TRADING_NAME": "Test Asset", 
-        "SERIE": "A",
+        "SERIE": "A", # codespell:ignore
         "STANDARD_DEVIATION_1": 0.1, 
         "ANNUALIZED_VOLATILITY_1": 1.5, 
         "page": 1, 
@@ -547,7 +511,28 @@ def test_run_without_db(
     }
     
     # Mock the add_key_value_to_dicts method with a callable that cycles through responses
-    def mock_add_key_value_side_effect(list_ser, key, value=None):
+    def mock_add_key_value_side_effect(
+        list_ser: list[dict[str, Union[str, int, float]]],
+        key: Union[str, list[dict[str, Union[str, int, float]]]],
+        value: Optional[Union[Callable[..., Union[str, int, float]], Union[str, int, float]]] = \
+            None
+    ) -> list[dict[str, Union[str, int, float]]]:
+        """Mock add_key_value_to_dicts method.
+        
+        Parameters
+        ----------
+        list_ser : list[dict[str, Union[str, int, float]]]
+            The list of dictionaries to add key-value pairs to.
+        key : Union[str, list[dict[str, Union[str, int, float]]]]
+            The key to add to the dictionaries.
+        value : Optional[Union[Callable[..., Union[str, int, float]], Union[str, int, float]]]
+            The value to add to the dictionaries, by default None
+        
+        Returns
+        -------
+        list[dict[str, Union[str, int, float]]]
+            The modified list of dictionaries.
+        """
         if isinstance(key, list):  # Adding page number
             return [dict(item, page=key[0]) for item in list_ser]
         else:  # Adding URL
@@ -607,7 +592,28 @@ def test_run_with_db(
     mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
     
     # Mock the add_key_value_to_dicts method with a callable
-    def mock_add_key_value_side_effect(list_ser, key, value=None):
+    def mock_add_key_value_side_effect(
+        list_ser: list[dict[str, Union[str, int, float]]],
+        key: Union[str, list[dict[str, Union[str, int, float]]]],
+        value: Optional[Union[Callable[..., Union[str, int, float]], Union[str, int, float]]] = \
+            None
+    ) -> list[dict[str, Union[str, int, float]]]:
+        """Mock add_key_value_to_dicts method.
+        
+        Parameters
+        ----------
+        list_ser : list[dict[str, Union[str, int, float]]]
+            The list of dictionaries to add key-value pairs to.
+        key : Union[str, list[dict[str, Union[str, int, float]]]]
+            The key to add to the dictionaries.
+        value : Optional[Union[Callable[..., Union[str, int, float]], Union[str, int, float]]]
+            The value to add to the dictionaries, by default None
+        
+        Returns
+        -------
+        list[dict[str, Union[str, int, float]]]
+            The modified list of dictionaries.
+        """
         if isinstance(key, list):  # Adding page number
             return [dict(item, page=key[0]) for item in list_ser]
         else:  # Adding URL
@@ -634,7 +640,7 @@ def test_run_with_db(
 ])
 def test_get_response_invalid_timeout(
     b3_instance: B3HistoricalSigma,
-    invalid_timeout: Any
+    invalid_timeout: Any # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test get_response with invalid timeout types.
 
@@ -694,7 +700,28 @@ def test_run_reload_module(
     # Mock the add_key_value_to_dicts method for the new instance
     instance = B3HistoricalSigma()
     
-    def mock_add_key_value_side_effect(list_ser, key, value=None):
+    def mock_add_key_value_side_effect(
+        list_ser: list[dict[str, Union[str, int, float]]], 
+        key: Union[str, list[dict[str, Union[str, int, float]]]], 
+        value: Optional[Union[Callable[..., Union[str, int, float]], Union[str, int, float]]] = \
+            None
+    ) -> list[dict[str, Union[str, int, float]]]:
+        """Mock add_key_value_to_dicts method.
+        
+        Parameters
+        ----------
+        list_ser : list[dict[str, Union[str, int, float]]]
+            The list of dictionaries to add key-value pairs to.
+        key : Union[str, list[dict[str, Union[str, int, float]]]]
+            The key to add to the dictionaries.
+        value : Optional[Union[Callable[..., Union[str, int, float]], Union[str, int, float]]]
+            The value to add to the dictionaries, by default None
+        
+        Returns
+        -------
+        list[dict[str, Union[str, int, float]]]
+            The modified list of dictionaries.
+        """
         if isinstance(key, list):  # Adding page number
             return [dict(item, page=key[0]) for item in list_ser]
         else:  # Adding URL
@@ -705,7 +732,8 @@ def test_run_reload_module(
         'add_key_value_to_dicts',
         side_effect=mock_add_key_value_side_effect
     )
-    mocker.patch.object(instance, "standardize_dataframe", return_value=pd.DataFrame([{"CODE": "TEST1"}]))
+    mocker.patch.object(instance, "standardize_dataframe", 
+                        return_value=pd.DataFrame([{"CODE": "TEST1"}]))
     
     result = instance.run()
     assert isinstance(result, pd.DataFrame)

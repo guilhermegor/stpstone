@@ -5,9 +5,7 @@ It handles the retrieval of data from the B3 website and stores it in a database
 """
 
 from datetime import date
-from io import StringIO
 from logging import Logger
-from time import sleep
 from typing import Optional, Union
 
 import backoff
@@ -117,6 +115,8 @@ class B3HistoricalSigma(ABCIngestionOperations):
         
         Parameters
         ----------
+        fstr_url : str
+            The URL.
         list_apps : list[str]
             The list of apps.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
@@ -137,11 +137,11 @@ class B3HistoricalSigma(ABCIngestionOperations):
                 timeout=timeout, 
                 verify=bool_verify, 
                 headers={
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
                     'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
                     'cache-control': 'max-age=0',
                     'priority': 'u=0, i',
-                    'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+                    'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"', # noqa E501: line too long
                     'sec-ch-ua-mobile': '?0',
                     'sec-ch-ua-platform': '"Linux"',
                     'sec-fetch-dest': 'document',
@@ -149,8 +149,8 @@ class B3HistoricalSigma(ABCIngestionOperations):
                     'sec-fetch-site': 'none',
                     'sec-fetch-user': '?1',
                     'upgrade-insecure-requests': '1',
-                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-                    'Cookie': 'cf_clearance=itszyrYiXr_toGtzXiIcCSCG7x0lWwCn69TAg9ouAGE-1756239908-1.2.1.1-YB4wmQcLRebNZeEEvA2cM_wvG.MoMGdf2COeGIdPAv.tFZKcvCXnMPMmZEQGDyyPmmhcF788EVzWmpt3mfdPS3DoxgFONQLHrBXdW74Hlwa.eAQcdz9uSMMgLUEf5nXnaxQ8OpAtQfeoWYZA4c0Zmz2C5cN4upPHH7a2TzeOOv45MMqDzUbxoEmdmX4iWkPEyuuhZWuRi0qmg157frqsBiwmuMdDU.THOSj0SaOyd9Q; _clck=e74245%5E2%5Efys%5E0%5E2064; _ga=GA1.1.246440908.1756239909; OptanonConsent=isGpcEnabled=0&datestamp=Tue+Aug+26+2025+17%3A25%3A13+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A0%2CC0001%3A1%2CC0004%3A0%2CC0002%3A0&AwaitingReconsent=false; _ga_SS7FXRTPP3=GS2.1.s1756239908$o1$g1$t1756239939$j29$l0$h0; __cf_bm=ADLsMTtgNWeE1hxV328TmSmmL5T0h5juIl9HDTeB5QI-1757366809-1.0.1.1-7h3DELukUG6euRfReS72LRMnTrimUT16GDO2wtnV8FTwTAdzqx8SWbe1DnLMBhdXpgNSSQDII.bmd1Xvhsx8sNdVHnqJuOVrXu.JNayywFE; dtCookie=v_4_srv_28_sn_10CF716BB87F454582E5FEB0008052DD_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_0; TS01f22489=011d592ce18e9ac1ca3a299cef05b705e6afd43fc37d490e9f885f490d69ee6bea3a26badfa2073de71994d26aa346e63fcd013653'
+                    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', # noqa E501: line too long
+                    'Cookie': 'cf_clearance=itszyrYiXr_toGtzXiIcCSCG7x0lWwCn69TAg9ouAGE-1756239908-1.2.1.1-YB4wmQcLRebNZeEEvA2cM_wvG.MoMGdf2COeGIdPAv.tFZKcvCXnMPMmZEQGDyyPmmhcF788EVzWmpt3mfdPS3DoxgFONQLHrBXdW74Hlwa.eAQcdz9uSMMgLUEf5nXnaxQ8OpAtQfeoWYZA4c0Zmz2C5cN4upPHH7a2TzeOOv45MMqDzUbxoEmdmX4iWkPEyuuhZWuRi0qmg157frqsBiwmuMdDU.THOSj0SaOyd9Q; _clck=e74245%5E2%5Efys%5E0%5E2064; _ga=GA1.1.246440908.1756239909; OptanonConsent=isGpcEnabled=0&datestamp=Tue+Aug+26+2025+17%3A25%3A13+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A0%2CC0001%3A1%2CC0004%3A0%2CC0002%3A0&AwaitingReconsent=false; _ga_SS7FXRTPP3=GS2.1.s1756239908$o1$g1$t1756239939$j29$l0$h0; __cf_bm=ADLsMTtgNWeE1hxV328TmSmmL5T0h5juIl9HDTeB5QI-1757366809-1.0.1.1-7h3DELukUG6euRfReS72LRMnTrimUT16GDO2wtnV8FTwTAdzqx8SWbe1DnLMBhdXpgNSSQDII.bmd1Xvhsx8sNdVHnqJuOVrXu.JNayywFE; dtCookie=v_4_srv_28_sn_10CF716BB87F454582E5FEB0008052DD_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_0; TS01f22489=011d592ce18e9ac1ca3a299cef05b705e6afd43fc37d490e9f885f490d69ee6bea3a26badfa2073de71994d26aa346e63fcd013653' # noqa E501: line too long
                 }
             )
             resp_req.raise_for_status()
@@ -166,7 +166,7 @@ class B3HistoricalSigma(ABCIngestionOperations):
         
         Parameters
         ----------
-        list_resp_req: Union[list[Response], list[PlaywrightPage], list[SeleniumWebDriver]]
+        list_resp_req : Union[list[Response], list[PlaywrightPage], list[SeleniumWebDriver]]
             The response object.
         
         Returns
@@ -248,7 +248,7 @@ class B3HistoricalSigma(ABCIngestionOperations):
             dict_dtypes={
                 "CODE": str,
                 "TRADING_NAME": str,
-                "SERIE": str,
+                "SERIE": str, # codespell:ignore
                 "STANDARD_DEVIATION_1": float,
                 "ANNUALIZED_VOLATILITY_1": float,
                 "STANDARD_DEVIATION_3": float,
