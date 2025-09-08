@@ -1,6 +1,6 @@
 """Consolidated Trades."""
 
-from stpstone.ingestion.countries.br.exchange.consolidated_trades import (
+from stpstone.ingestion.countries.br.exchange.b3_consolidated_trades import (
     B3ConsolidatedTrades,
 )
 

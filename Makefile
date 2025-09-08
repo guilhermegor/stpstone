@@ -28,7 +28,7 @@ update:
 # -------------------
 # TESTING
 # -------------------
-.PHONY: unit_tests integration_tests test_cov test_feat test_urls_docstrings fix_playwright
+.PHONY: unit_tests integration_tests test_cov test_slowest test_feat test_urls_docstrings fix_playwright
 
 unit_tests:
 	@poetry run pytest tests/unit/
@@ -37,9 +37,13 @@ integration_tests:
 	@poetry run pytest tests/integration/
 
 test_cov:
-	@poetry run pytest --cov=stpstone tests/unit/
+	@poetry run pytest tests/unit/ --cov=stpstone
 	@poetry run coverage report -m
 	@poetry run coverage-badge -o coverage.svg -f
+
+test_slowest:
+	@echo "Running tests to identify the 10 slowest tests..."
+	@poetry run pytest tests/unit/ --durations=10 --tb=short
 
 test_feat:
 	@bash bin/test_feature.sh $(MODULE)

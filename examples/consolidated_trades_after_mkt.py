@@ -1,6 +1,6 @@
 """Consolidated Trades After Market."""
 
-from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt import (
+from stpstone.ingestion.countries.br.exchange.b3_consolidated_trades_after_mkt import (
     B3ConsolidatedTradesAfterMarket,
 )
 

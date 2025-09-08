@@ -377,7 +377,7 @@ def test_run_with_db(
     assert result is None
     mock_insert.assert_called_once_with(
         cls_db=mock_db,
-        str_table_name="br_anbima_br_treasuries",
+        str_table_name="br_b3_interest_rates",
         df_=mock_standardize.return_value,
         bool_insert_or_ignore=False
     )

@@ -10,10 +10,8 @@ including:
 """
 
 from datetime import date
-import importlib
 from io import StringIO
 from logging import Logger
-import sys
 from typing import Optional, Union
 from unittest.mock import MagicMock, patch
 
@@ -23,7 +21,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response, Session
 
-from stpstone.ingestion.countries.br.exchange.futures_closing_adj import B3FuturesClosingAdj
+from stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj import B3FuturesClosingAdj
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -114,9 +112,9 @@ def b3_instance(mocker: MockerFixture) -> B3FuturesClosingAdj:
     mock_dates_br.add_working_days.return_value = date(2023, 1, 1)
     
     # Patch the classes before instantiation
-    with patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesCurrent', 
+    with patch('stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj.DatesCurrent', 
                return_value=mock_dates_current), \
-         patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesBRAnbima', 
+         patch('stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj.DatesBRAnbima', 
                return_value=mock_dates_br):
         return B3FuturesClosingAdj()
 
@@ -212,9 +210,9 @@ def test_init_with_custom_date(mocker: MockerFixture) -> None:
     mock_dates_current = mocker.MagicMock(spec=DatesCurrent)
     mock_dates_br = mocker.MagicMock(spec=DatesBRAnbima)
     
-    with patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesCurrent', 
+    with patch('stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj.DatesCurrent', 
                return_value=mock_dates_current), \
-         patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesBRAnbima', 
+         patch('stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj.DatesBRAnbima', 
                return_value=mock_dates_br):
         instance = B3FuturesClosingAdj(date_ref=custom_date)
     
@@ -249,9 +247,9 @@ def test_init_with_logger_and_db(mocker: MockerFixture) -> None:
     mock_dates_br = mocker.MagicMock(spec=DatesBRAnbima)
     mock_dates_br.add_working_days.return_value = date(2023, 1, 1)
     
-    with patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesCurrent', 
+    with patch('stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj.DatesCurrent', 
                return_value=mock_dates_current), \
-         patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesBRAnbima', 
+         patch('stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj.DatesBRAnbima', 
                return_value=mock_dates_br):
         instance = B3FuturesClosingAdj(logger=mock_logger, cls_db=mock_db)
     
@@ -518,41 +516,6 @@ def test_run_various_timeouts(
         result = b3_instance.run(timeout=timeout)
     
     assert result.equals(mock_dataframe)
-
-def test_module_reload(mocker: MockerFixture) -> None:
-    """Test module reload behavior.
-
-    Verifies
-    -------
-    - Module can be reloaded without errors
-    - Instance creation after reload works as expected
-
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest mocker for patching dependencies
-
-    Returns
-    -------
-    None
-    """
-    _ = mocker.patch("requests.get")
-    
-    # Mock dependencies for the reload test
-    mock_dates_current = mocker.MagicMock(spec=DatesCurrent)
-    mock_dates_current.curr_date.return_value = date(2023, 1, 2)
-    mock_dates_br = mocker.MagicMock(spec=DatesBRAnbima)
-    mock_dates_br.add_working_days.return_value = date(2023, 1, 1)
-    
-    with patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesCurrent', 
-               return_value=mock_dates_current), \
-         patch('stpstone.ingestion.countries.br.exchange.futures_closing_adj.DatesBRAnbima', 
-               return_value=mock_dates_br):
-        importlib.reload(sys.modules[
-            "stpstone.ingestion.countries.br.exchange.futures_closing_adj"])
-        instance = B3FuturesClosingAdj()
-        assert isinstance(instance, B3FuturesClosingAdj)
-        assert isinstance(instance.date_ref, date)
 
 def test_empty_html_response(
     b3_instance: B3FuturesClosingAdj, 

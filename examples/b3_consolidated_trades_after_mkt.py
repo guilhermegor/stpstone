@@ -2,7 +2,7 @@ import os
 
 
 os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
-from stpstone.ingestion.countries.br.exchange.consolidated_trades_after_mkt import (
+from stpstone.ingestion.countries.br.exchange.b3_consolidated_trades_after_mkt import (
     ConsolidatedTrdsAfterMktB3,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima

@@ -1,6 +1,6 @@
 """Futures Closing Adjustments."""
 
-from stpstone.ingestion.countries.br.exchange.futures_closing_adj import B3FuturesClosingAdj
+from stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj import B3FuturesClosingAdj
 
 
 cls_ = B3FuturesClosingAdj(

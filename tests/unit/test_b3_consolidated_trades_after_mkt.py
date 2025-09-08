@@ -1,4 +1,4 @@
-"""Unit tests for B3ConsolidatedTrades class.
+"""Unit tests for B3ConsolidatedTradesAfterMarket class.
 
 Tests the B3 consolidated trades ingestion functionality, covering:
 - Initialization with various inputs
@@ -21,8 +21,8 @@ from pytest_mock import MockerFixture
 from requests import Response
 from requests.exceptions import HTTPError
 
-from stpstone.ingestion.countries.br.exchange.consolidated_trades import (
-    B3ConsolidatedTrades,
+from stpstone.ingestion.countries.br.exchange.b3_consolidated_trades_after_mkt import (
+    B3ConsolidatedTradesAfterMarket,
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -88,8 +88,8 @@ def sample_date() -> date:
 def b3_instance(
     sample_date: date, 
     mock_requests_get: MagicMock
-) -> B3ConsolidatedTrades:
-    """Fixture providing B3ConsolidatedTrades instance.
+) -> B3ConsolidatedTradesAfterMarket:
+    """Fixture providing B3ConsolidatedTradesAfterMarket instance.
 
     Parameters
     ----------
@@ -100,10 +100,10 @@ def b3_instance(
 
     Returns
     -------
-    B3ConsolidatedTrades
+    B3ConsolidatedTradesAfterMarket
         Initialized instance with sample date
     """
-    return B3ConsolidatedTrades(date_ref=sample_date)
+    return B3ConsolidatedTradesAfterMarket(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -145,7 +145,7 @@ def test_init_with_valid_inputs(sample_date: date, mock_requests_get: MagicMock)
     -------
     None
     """
-    instance = B3ConsolidatedTrades(date_ref=sample_date)
+    instance = B3ConsolidatedTradesAfterMarket(date_ref=sample_date)
     assert instance.date_ref == sample_date
     assert isinstance(instance.logger, Logger) or instance.logger is None
     assert instance.cls_db is None
@@ -178,7 +178,7 @@ def test_init_without_date_ref(mocker: MockerFixture, mock_requests_get: MagicMo
     mock_dates_br = mocker.patch.object(DatesBRAnbima, "add_working_days", 
                                         return_value=date(2025, 1, 1))
     
-    instance = B3ConsolidatedTrades()
+    instance = B3ConsolidatedTradesAfterMarket()
     assert instance.date_ref == date(2025, 1, 1)
     mock_dates_current.assert_called_once()
     mock_dates_br.assert_called_once_with(date(2025, 1, 2), -1)
@@ -206,7 +206,7 @@ def test_get_token_success(mock_requests_get: MagicMock, mock_response: Response
     None
     """
     mock_requests_get.return_value = mock_response
-    instance = B3ConsolidatedTrades(date_ref=date(2025, 1, 1))
+    instance = B3ConsolidatedTradesAfterMarket(date_ref=date(2025, 1, 1))
     mock_response.json.reset_mock()
     token = instance.get_token()
     assert token == "mock_token" # noqa S105: possible hardcoded password
@@ -237,15 +237,15 @@ def test_get_token_http_error(mock_requests_get: MagicMock, mock_backoff: None) 
     mock_requests_get.side_effect = HTTPError("HTTP error")
     
     # Create instance without calling get_token during init
-    with patch.object(B3ConsolidatedTrades, 'get_token', return_value="mock_token"):
-        instance = B3ConsolidatedTrades(date_ref=date(2025, 1, 1))
+    with patch.object(B3ConsolidatedTradesAfterMarket, 'get_token', return_value="mock_token"):
+        instance = B3ConsolidatedTradesAfterMarket(date_ref=date(2025, 1, 1))
     
     # Now test get_token method specifically
     with pytest.raises(HTTPError, match="HTTP error"):
         instance.get_token()
 
 def test_get_response_success(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_response: Response,
     mock_backoff: None
@@ -260,7 +260,7 @@ def test_get_response_success(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -287,7 +287,7 @@ def test_get_response_success(
     (5, 10),
 ])
 def test_get_response_valid_timeout(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_response: Response,
     mock_backoff: None,
@@ -302,7 +302,7 @@ def test_get_response_valid_timeout(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -324,7 +324,7 @@ def test_get_response_valid_timeout(
 
 
 def test_get_response_invalid_timeout(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_backoff: None
 ) -> None:
@@ -337,7 +337,7 @@ def test_get_response_invalid_timeout(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -353,7 +353,7 @@ def test_get_response_invalid_timeout(
 
 
 def test_parse_raw_file(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_response: Response
 ) -> None:
     """Test parsing raw file content.
@@ -365,7 +365,7 @@ def test_parse_raw_file(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_response : Response
         Mocked response object
@@ -381,7 +381,7 @@ def test_parse_raw_file(
         mock_get_file.assert_called_once_with(resp_req=mock_response)
 
 
-def test_transform_data(b3_instance: B3ConsolidatedTrades) -> None:
+def test_transform_data(b3_instance: B3ConsolidatedTradesAfterMarket) -> None:
     """Test data transformation into DataFrame.
 
     Verifies
@@ -392,7 +392,7 @@ def test_transform_data(b3_instance: B3ConsolidatedTrades) -> None:
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
 
     Returns
@@ -415,7 +415,7 @@ def test_transform_data(b3_instance: B3ConsolidatedTrades) -> None:
 
 
 def test_run_without_db(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_response: Response,
     mock_backoff: None
@@ -430,7 +430,7 @@ def test_run_without_db(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -454,7 +454,7 @@ def test_run_without_db(
 
 
 def test_run_with_db(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_response: Response,
     mock_backoff: None
@@ -469,7 +469,7 @@ def test_run_with_db(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -502,7 +502,7 @@ def test_run_with_db(
     "invalid",
     123,
 ])
-def test_invalid_date_ref(invalid_input: Any) -> None: # noqa ANN401: typing.Any is not allowed
+def test_invalid_date_ref(invalid_input: Any, mocker: MockerFixture) -> None: # noqa ANN401: typing.Any is not allowed
     """Test initialization with invalid date_ref types.
 
     Verifies
@@ -514,22 +514,32 @@ def test_invalid_date_ref(invalid_input: Any) -> None: # noqa ANN401: typing.Any
     ----------
     invalid_input : Any
         Invalid input to test
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
+    # Mock the calendar dependencies to avoid external calls
+    mock_dates_current = mocker.patch.object(DatesCurrent, "curr_date", 
+                                             return_value=date(2025, 1, 2))
+    mock_dates_br = mocker.patch.object(DatesBRAnbima, "add_working_days", 
+                                        return_value=date(2025, 1, 1))
+    
     # Allow None as a valid input since date_ref is Optional[date]
     if invalid_input is None:
-        instance = B3ConsolidatedTrades(date_ref=invalid_input)
-        assert instance.date_ref is not None  # Should fallback to default date
+        instance = B3ConsolidatedTradesAfterMarket(date_ref=invalid_input)
+        assert instance.date_ref == date(2025, 1, 1)  # Should fallback to default date
+        mock_dates_current.assert_called_once()
+        mock_dates_br.assert_called_once_with(date(2025, 1, 2), -1)
     else:
         with pytest.raises(TypeError, match="date_ref must be one of types: date, NoneType"):
-            B3ConsolidatedTrades(date_ref=invalid_input)
+            B3ConsolidatedTradesAfterMarket(date_ref=invalid_input)
 
 
 def test_empty_response(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_backoff: None
 ) -> None:
@@ -542,7 +552,7 @@ def test_empty_response(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -586,10 +596,10 @@ def test_reload_module() -> None:
     """
     import importlib
 
-    import stpstone.ingestion.countries.br.exchange.consolidated_trades
-    importlib.reload(stpstone.ingestion.countries.br.exchange.consolidated_trades)
-    instance = B3ConsolidatedTrades(date_ref=date(2025, 1, 1))
-    assert isinstance(instance, B3ConsolidatedTrades)
+    import stpstone.ingestion.countries.br.exchange.b3_consolidated_trades_after_mkt
+    importlib.reload(stpstone.ingestion.countries.br.exchange.b3_consolidated_trades_after_mkt)
+    instance = B3ConsolidatedTradesAfterMarket(date_ref=date(2025, 1, 1))
+    assert isinstance(instance, B3ConsolidatedTradesAfterMarket)
     assert instance.date_ref == date(2025, 1, 1)
 
 
@@ -614,12 +624,12 @@ def test_fallback_no_requests(mocker: MockerFixture, sample_date: date) -> None:
     """
     mocker.patch("requests.get", side_effect=ImportError("requests module unavailable"))
     with pytest.raises(ImportError, match="requests module unavailable"):
-        B3ConsolidatedTrades(date_ref=sample_date)
+        B3ConsolidatedTradesAfterMarket(date_ref=sample_date)
 
 
 @pytest.mark.parametrize("bool_verify", [True, False])
 def test_bool_verify_variations(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_response: Response,
     mock_backoff: None,
@@ -634,7 +644,7 @@ def test_bool_verify_variations(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
@@ -655,7 +665,7 @@ def test_bool_verify_variations(
     mock_requests_get.assert_any_call(b3_instance.url, timeout=(12.0, 21.0), verify=bool_verify)
 
 
-def test_transform_data_empty_input(b3_instance: B3ConsolidatedTrades) -> None:
+def test_transform_data_empty_input(b3_instance: B3ConsolidatedTradesAfterMarket) -> None:
     """Test data transformation with empty input.
 
     Verifies
@@ -666,7 +676,7 @@ def test_transform_data_empty_input(b3_instance: B3ConsolidatedTrades) -> None:
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
 
     Returns
@@ -684,7 +694,7 @@ def test_transform_data_empty_input(b3_instance: B3ConsolidatedTrades) -> None:
     }
 
 
-def test_standardize_dataframe_types(b3_instance: B3ConsolidatedTrades) -> None:
+def test_standardize_dataframe_types(b3_instance: B3ConsolidatedTradesAfterMarket) -> None:
     """Test DataFrame standardization with correct dtypes.
 
     Verifies
@@ -695,7 +705,7 @@ def test_standardize_dataframe_types(b3_instance: B3ConsolidatedTrades) -> None:
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
 
     Returns
@@ -734,7 +744,7 @@ def test_standardize_dataframe_types(b3_instance: B3ConsolidatedTrades) -> None:
 
 
 def test_insert_table_db_called(
-    b3_instance: B3ConsolidatedTrades,
+    b3_instance: B3ConsolidatedTradesAfterMarket,
     mock_requests_get: MagicMock,
     mock_response: Response,
     mock_backoff: None
@@ -748,7 +758,7 @@ def test_insert_table_db_called(
 
     Parameters
     ----------
-    b3_instance : B3ConsolidatedTrades
+    b3_instance : B3ConsolidatedTradesAfterMarket
         B3 instance for testing
     mock_requests_get : MagicMock
         Mocked requests.get
