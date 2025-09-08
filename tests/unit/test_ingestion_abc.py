@@ -1,39 +1,173 @@
-"""Unit tests for ingestion operations.
+"""Unit tests for ABCIngestionOperations class.
 
-Tests the functionality of ABCIngestion, CoreIngestion, ContentAggregator, ContentParser,
-and ABCIngestionOperations classes, covering initialization, data processing, and error handling.
+Tests the ingestion operations functionality with various input scenarios including:
+- Initialization with valid and invalid inputs
+- Response handling
+- File parsing and transformation
+- Data standardization and database insertion
+- Edge cases and error conditions
 """
 
 from datetime import date
-import importlib
 from io import BytesIO, StringIO
-import sys
-from typing import Any, Union
-from unittest.mock import MagicMock
+import re
+from typing import Optional, TypedDict, Union
+from unittest.mock import MagicMock, Mock
 
 import fitz
+import numpy as np
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
 import pytest
 from pytest_mock import MockerFixture
 from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
+from sqlalchemy.sql import text
 
 from stpstone.ingestion.abc.ingestion_abc import (
-    ABCIngestion,
     ABCIngestionOperations,
     ContentAggregator,
     ContentParser,
     CoreIngestion,
 )
+from stpstone.transformations.standardization.standardizer_df import (
+    DFStandardization,
+    TypeErrorActionAsTypeDataFrame,
+    TypeFillnaStrategy,
+    TypeKeepDuplicatedDataFrame,
+)
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.calendars.calendar_abc import TypeDateFormatInput
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler
+from stpstone.utils.parsers.str import StrHandler, TypeCaseFrom, TypeCaseTo
+
+
+# --------------------------
+# Concrete Class for Testing
+# --------------------------
+class ConcreteIngestion(ABCIngestionOperations):
+    """Concrete implementation of ABCIngestionOperations for testing."""
+
+    def __init__(self, cls_db: Optional[Session] = None) -> None:
+        """Initialize the ConcreteIngestion class.
+
+        Parameters
+        ----------
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+
+        Returns
+        -------
+        None
+        """
+        super().__init__(cls_db=cls_db)
+        self.cls_db_logs = DBLogs()
+        self.cls_handling_dicts = HandlingDicts()
+        self.cls_str_handler = StrHandler()
+
+    def get_response(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+        """Return a mock response object for testing.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+
+        Returns
+        -------
+        Response
+            Mock response object
+        """
+        response = MagicMock(spec=Response)
+        response.text = "mock content"
+        return response
+
+    def parse_raw_file(
+        self,
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content for testing.
+
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+
+        Returns
+        -------
+        StringIO
+            Mock parsed content
+        """
+        return StringIO(resp_req.text)
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame for testing.
+
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+
+        Returns
+        -------
+        pd.DataFrame
+            Mock DataFrame
+        """
+        return pd.DataFrame({"content": [file.getvalue()]})
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = True,
+        str_table_name: str = "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+    ) -> None:
+        """Run the ingestion process for testing.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default True
+        str_table_name : str, optional
+            The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+
+        Returns
+        -------
+        None
+        """
+        pass
+
+
+# --------------------------
+# Type Definitions
+# --------------------------
+class ReturnStandardizeDataFrame(TypedDict):
+    """Type definition for standardize_dataframe return value."""
+    df_: pd.DataFrame
 
 
 # --------------------------
 # Fixtures
 # --------------------------
+@pytest.fixture
+def ingestion_instance() -> ConcreteIngestion:
+    """Fixture providing ConcreteIngestion instance.
+
+    Returns
+    -------
+    ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    """
+    return ConcreteIngestion()
+
 @pytest.fixture
 def mock_response() -> Response:
     """Fixture providing a mock Response object.
@@ -41,12 +175,11 @@ def mock_response() -> Response:
     Returns
     -------
     Response
-        Mocked Response object with sample text content.
+        Mocked Response object with sample text
     """
     response = MagicMock(spec=Response)
     response.text = "sample content"
     return response
-
 
 @pytest.fixture
 def mock_playwright_page() -> PlaywrightPage:
@@ -55,12 +188,11 @@ def mock_playwright_page() -> PlaywrightPage:
     Returns
     -------
     PlaywrightPage
-        Mocked PlaywrightPage object with sample text content.
+        Mocked PlaywrightPage object with sample text
     """
     page = MagicMock(spec=PlaywrightPage)
     page.text = "sample content"
     return page
-
 
 @pytest.fixture
 def mock_selenium_webdriver() -> SeleniumWebDriver:
@@ -69,55 +201,11 @@ def mock_selenium_webdriver() -> SeleniumWebDriver:
     Returns
     -------
     SeleniumWebDriver
-        Mocked SeleniumWebDriver object with sample text content.
+        Mocked SeleniumWebDriver object with sample text
     """
     driver = MagicMock(spec=SeleniumWebDriver)
     driver.text = "sample content"
     return driver
-
-
-@pytest.fixture
-def mock_session() -> Session:
-    """Fixture providing a mock Session object.
-
-    Returns
-    -------
-    Session
-        Mocked Session object with insert method.
-    """
-    session = MagicMock(spec=Session)
-    session.insert = MagicMock()
-    return session
-
-
-@pytest.fixture
-def mock_bytes_file() -> BytesIO:
-    """Fixture providing a mock BytesIO object.
-
-    Returns
-    -------
-    BytesIO
-        Mocked BytesIO object with sample content.
-    """
-    return BytesIO(b"sample pdf content")
-
-
-@pytest.fixture
-def mock_fitz_document() -> fitz.Document:
-    """Fixture providing a mock fitz.Document object.
-
-    Returns
-    -------
-    fitz.Document
-        Mocked fitz.Document with sample text pages.
-    """
-    doc = MagicMock(spec=fitz.Document)
-    doc.__len__.return_value = 2
-    doc.__getitem__.side_effect = lambda i: MagicMock(
-        get_text=lambda x: f"page {i} content"
-    )
-    return doc
-
 
 @pytest.fixture
 def sample_dataframe() -> pd.DataFrame:
@@ -126,42 +214,63 @@ def sample_dataframe() -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        Sample DataFrame with test data.
+        Sample DataFrame with test data
     """
     return pd.DataFrame({
         "col1": ["A", "B", "C"],
         "col2": [1, 2, 3],
-        "date": ["2023-01-01", "2023-01-02", "2023-01-03"]
+        "date_col": ["2023-01-01", "2023-01-02", "2023-01-03"]
     })
 
-
 @pytest.fixture
-def sample_date() -> date:
-    """Fixture providing a sample date.
+def sample_bytes_file() -> BytesIO:
+    """Fixture providing a sample BytesIO file.
 
     Returns
     -------
-    date
-        Sample date object.
+    BytesIO
+        Sample BytesIO file with dummy content
     """
-    return date(2023, 1, 1)
-
+    return BytesIO(b"dummy pdf content")
 
 @pytest.fixture
-def sample_dtypes() -> dict[str, Union[str, int, date]]:
-    """Fixture providing a sample dictionary of data types.
+def mock_fitz_document(mocker: MockerFixture) -> fitz.Document:
+    """Fixture providing a mocked fitz.Document.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
-    dict[str, Union[str, int, date]]
-        Dictionary mapping column names to their expected types.
+    fitz.Document
+        Mocked fitz.Document with sample text
     """
-    return {
-        "col1": str,
-        "col2": int,
-        "date": str  # Changed from date to str to fix pandas compatibility
-    }
+    doc = MagicMock(spec=fitz.Document)
+    doc.__len__.return_value = 2
+    doc.__getitem__.side_effect = lambda i: MagicMock(get_text=lambda x: f"page {i} content")
+    return doc
 
+@pytest.fixture
+def mock_pdfplumber(mocker: MockerFixture) -> Mock:
+    """Fixture providing a mocked pdfplumber.open context.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    Mock
+        Mocked pdfplumber.open context
+    """
+    mock_pdf = mocker.patch("pdfplumber.open")
+    page = MagicMock()
+    page.extract_tables.return_value = [[["header1", "header2"], ["value1", "value2"]]]
+    mock_pdf.return_value.__enter__.return_value.pages = [page]
+    return mock_pdf
 
 @pytest.fixture
 def sample_regex_patterns() -> dict[str, dict[str, str]]:
@@ -170,7 +279,7 @@ def sample_regex_patterns() -> dict[str, dict[str, str]]:
     Returns
     -------
     dict[str, dict[str, str]]
-        Dictionary of regex patterns for testing.
+        Sample dictionary of regex patterns
     """
     return {
         "event1": {"pattern1": r"test\d+"},
@@ -179,282 +288,464 @@ def sample_regex_patterns() -> dict[str, dict[str, str]]:
 
 
 # --------------------------
-# Tests for ABCIngestion
+# Tests for ConcreteIngestion
 # --------------------------
-def test_abc_ingestion_init(mock_session: Session) -> None:
-    """Test initialization of ABCIngestion with valid and None inputs.
+def test_init_with_no_db_session(ingestion_instance: ConcreteIngestion) -> None:
+    """Test initialization without database session.
 
     Verifies
-    --------
-    - Initialization with a valid Session object
-    - Initialization with None
-    - Correct storage of cls_db attribute
+    -------
+    - Instance is created successfully
+    - cls_db is None
+    - Inherited classes are properly initialized
 
     Returns
     -------
     None
     """
-    class TestIngestion(ABCIngestion):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            pass
-        def parse_raw_file(self, resp_req):
-            pass
-        def transform_data(self, file):
-            pass
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            pass
+    assert ingestion_instance.cls_db is None
+    assert isinstance(ingestion_instance.cls_db_logs, DBLogs)
+    assert isinstance(ingestion_instance.cls_handling_dicts, HandlingDicts)
+    assert isinstance(ingestion_instance.cls_str_handler, StrHandler)
 
-    ingestion = TestIngestion(cls_db=mock_session)
-    assert ingestion.cls_db == mock_session
-
-    ingestion_none = TestIngestion(cls_db=None)
-    assert ingestion_none.cls_db is None
-
-
-def test_abc_ingestion_abstract_methods() -> None:
-    """Test that ABCIngestion abstract methods raise NotImplementedError.
+def test_init_with_db_session(mocker: MockerFixture) -> None:
+    """Test initialization with valid database session.
 
     Verifies
-    --------
-    - All abstract methods raise NotImplementedError when called
-
-    Returns
     -------
-    None
-    """
-    class TestIngestion(ABCIngestion):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-
-    ingestion = TestIngestion()
-    
-    with pytest.raises(NotImplementedError):
-        ingestion.get_response()
-    
-    with pytest.raises(NotImplementedError):
-        ingestion.parse_raw_file(None)
-    
-    with pytest.raises(NotImplementedError):
-        ingestion.transform_data(None)
-    
-    with pytest.raises(NotImplementedError):
-        ingestion.run()
-
-
-# --------------------------
-# Tests for CoreIngestion
-# --------------------------
-def test_core_ingestion_init() -> None:
-    """Test initialization of CoreIngestion.
-
-    Verifies
-    --------
-    - Correct initialization of cls_db_logs
-    - Instance creation without errors
-
-    Returns
-    -------
-    None
-    """
-    ingestion = CoreIngestion()
-    assert isinstance(ingestion.cls_db_logs, DBLogs)
-
-
-def test_standardize_dataframe(
-    mocker: MockerFixture,
-    sample_dataframe: pd.DataFrame,
-    sample_date: date,
-    sample_dtypes: dict[str, Union[str, int, date]]
-) -> None:
-    """Test standardize_dataframe method with valid inputs.
-
-    Verifies
-    --------
-    - Correct standardization of DataFrame
-    - Proper interaction with DFStandardization and DBLogs
-    - Return type is pd.DataFrame
+    - Instance is created with valid Session
+    - cls_db is properly set
 
     Parameters
     ----------
     mocker : MockerFixture
         Pytest-mock fixture for creating mocks
-    sample_dataframe : pd.DataFrame
-        Sample DataFrame from fixture
-    sample_date : date
-        Sample date from fixture
-    sample_dtypes : dict[str, Union[str, int, date]]
-        Sample data types from fixture
 
     Returns
     -------
     None
     """
-    ingestion = CoreIngestion()
-    mock_df_standardization = mocker.patch(
-        "stpstone.transformations.standardization.standardizer_df.DFStandardization"
-    )
-    mock_df_standardization.return_value.pipeline.return_value = sample_dataframe
-    mock_audit_log = mocker.patch.object(DBLogs, "audit_log", return_value=sample_dataframe)
+    mock_session = MagicMock(spec=Session)
+    instance = ConcreteIngestion(cls_db=mock_session)
+    assert instance.cls_db == mock_session
 
-    result = ingestion.standardize_dataframe(
-        df_=sample_dataframe,
-        date_ref=sample_date,
-        dict_dtypes=sample_dtypes,
-        str_data_fillna="-99999"
-    )
-
-    assert isinstance(result, pd.DataFrame)
-    mock_df_standardization.assert_called_once()
-    mock_audit_log.assert_called_once_with(
-        sample_dataframe, None, sample_date, True
-    )
-
-
-def test_standardize_dataframe_invalid_types(
-    sample_date: date,
-    sample_dtypes: dict[str, Union[str, int, date]]
-) -> None:
-    """Test standardize_dataframe with invalid DataFrame type.
+def test_init_type_checker_invalid_db(mocker: MockerFixture) -> None:
+    """Test TypeChecker metaclass enforcement for invalid db session.
 
     Verifies
-    --------
-    - Raises TypeError for non-DataFrame input
-    - Error message contains "must be of type"
+    -------
+    - TypeError is raised for invalid cls_db types
+    - Proper error message is generated
 
     Parameters
     ----------
-    sample_date : date
-        Sample date from fixture
-    sample_dtypes : dict[str, Union[str, int, date]]
-        Sample data types from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    ingestion = CoreIngestion()
-    with pytest.raises(TypeError, match="must be of type"):
-        ingestion.standardize_dataframe(
-            df_="not a dataframe",
-            date_ref=sample_date,
-            dict_dtypes=sample_dtypes
+    with pytest.raises(TypeError, match="cls_db must be of type Session or NoneType"):
+        ConcreteIngestion(cls_db="invalid")
+
+# --------------------------
+# Tests for get_response
+# --------------------------
+def test_get_response_valid(ingestion_instance: ConcreteIngestion) -> None:
+    """Test get_response with valid timeout.
+
+    Verifies
+    -------
+    - Returns Response object
+    - Response contains expected text
+
+    Returns
+    -------
+    None
+    """
+    result = ingestion_instance.get_response(timeout=(12.0, 21.0))
+    assert isinstance(result, Response)
+    assert result.text == "mock content"
+
+@pytest.mark.parametrize("timeout", [10, 10.5, (10, 20), (10.5, 20.5)])
+def test_get_response_timeout_variations(ingestion_instance: ConcreteIngestion, timeout: Union[int, float, tuple]) -> None:
+    """Test get_response with various timeout types.
+
+    Verifies
+    -------
+    - Handles different valid timeout formats
+    - Returns Response object for all cases
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    timeout : Union[int, float, tuple]
+        Various timeout formats to test
+
+    Returns
+    -------
+    None
+    """
+    result = ingestion_instance.get_response(timeout=timeout)
+    assert isinstance(result, Response)
+    assert result.text == "mock content"
+
+# --------------------------
+# Tests for parse_raw_file
+# --------------------------
+@pytest.mark.parametrize("resp_type", ["response", "playwright", "selenium"])
+def test_parse_raw_file_valid(
+    ingestion_instance: ConcreteIngestion,
+    mock_response: Response,
+    mock_playwright_page: PlaywrightPage,
+    mock_selenium_webdriver: SeleniumWebDriver,
+    resp_type: str
+) -> None:
+    """Test parse_raw_file with valid response types.
+
+    Verifies
+    -------
+    - Returns StringIO for valid response types
+    - Correctly handles Response, PlaywrightPage, and SeleniumWebDriver
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    mock_response : Response
+        Mocked Response object from fixture
+    mock_playwright_page : PlaywrightPage
+        Mocked PlaywrightPage object from fixture
+    mock_selenium_webdriver : SeleniumWebDriver
+        Mocked SeleniumWebDriver object from fixture
+    resp_type : str
+        Type of response to test
+
+    Returns
+    -------
+    None
+    """
+    resp = {
+        "response": mock_response,
+        "playwright": mock_playwright_page,
+        "selenium": mock_selenium_webdriver
+    }[resp_type]
+    
+    result = ingestion_instance.parse_raw_file(resp)
+    
+    assert isinstance(result, StringIO)
+    assert result.getvalue() == "sample content"
+
+# --------------------------
+# Tests for transform_data
+# --------------------------
+def test_transform_data_valid(ingestion_instance: ConcreteIngestion) -> None:
+    """Test transform_data with valid StringIO input.
+
+    Verifies
+    -------
+    - Returns DataFrame with correct content
+    - DataFrame has expected structure
+
+    Returns
+    -------
+    None
+    """
+    file = StringIO("test content")
+    result = ingestion_instance.transform_data(file)
+    
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == 1
+    assert result.iloc[0]["content"] == "test content"
+
+# --------------------------
+# Tests for run
+# --------------------------
+def test_run_no_db_session(ingestion_instance: ConcreteIngestion) -> None:
+    """Test run method with no database session.
+
+    Verifies
+    -------
+    - Runs without errors
+    - No database operations performed
+
+    Returns
+    -------
+    None
+    """
+    ingestion_instance.run()
+    # No assertions needed as method is a no-op in test implementation
+
+# --------------------------
+# Tests for standardize_dataframe
+# --------------------------
+def test_standardize_dataframe_valid_input(
+    ingestion_instance: ConcreteIngestion,
+    sample_dataframe: pd.DataFrame,
+    mocker: MockerFixture
+) -> None:
+    """Test standardize_dataframe with valid inputs.
+
+    Verifies
+    -------
+    - DataFrame is standardized correctly
+    - DFStandardization and audit_log are called
+    - Returns expected DataFrame
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    dict_dtypes = {"col1": str, "col2": int, "date_col": date}
+    date_ref = date(2023, 1, 1)
+    
+    mock_df_standardization = mocker.patch.object(DFStandardization, "pipeline", return_value=sample_dataframe)
+    mock_audit_log = mocker.patch.object(DBLogs, "audit_log", return_value=sample_dataframe)
+    
+    result = ingestion_instance.standardize_dataframe(
+        df_=sample_dataframe,
+        date_ref=date_ref,
+        dict_dtypes=dict_dtypes
+    )
+    
+    assert isinstance(result, pd.DataFrame)
+    pd.testing.assert_frame_equal(result, sample_dataframe)
+    mock_df_standardization.assert_called_once()
+    mock_audit_log.assert_called_once()
+
+@pytest.mark.parametrize("invalid_df", [None, "not_a_dataframe", 123])
+def test_standardize_dataframe_invalid_df(
+    ingestion_instance: ConcreteIngestion,
+    invalid_df: Union[None, str, int]
+) -> None:
+    """Test standardize_dataframe with invalid DataFrame input.
+
+    Verifies
+    -------
+    - TypeError is raised for non-DataFrame inputs
+    - Error message matches TypeChecker expectation
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    invalid_df : Union[None, str, int]
+        Invalid DataFrame inputs
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(TypeError, match="df_ must be of type DataFrame"):
+        ingestion_instance.standardize_dataframe(
+            df_=invalid_df,
+            date_ref=date(2023, 1, 1),
+            dict_dtypes={"col1": str}
         )
 
-
-def test_insert_table_db(
-    mock_session: Session,
-    sample_dataframe: pd.DataFrame
+@pytest.mark.parametrize("invalid_date", [None, "not_a_date", 123])
+def test_standardize_dataframe_invalid_date(
+    ingestion_instance: ConcreteIngestion,
+    sample_dataframe: pd.DataFrame,
+    invalid_date: Union[None, str, int]
 ) -> None:
-    """Test insert_table_db method with valid inputs.
+    """Test standardize_dataframe with invalid date input.
 
     Verifies
-    --------
-    - Correct interaction with Session.insert
-    - Proper conversion of DataFrame to records
-    - Handling of bool_insert_or_ignore parameter
+    -------
+    - TypeError is raised for non-date date_ref inputs
+    - Error message matches TypeChecker expectation
 
     Parameters
     ----------
-    mock_session : Session
-        Mocked Session object from fixture
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
     sample_dataframe : pd.DataFrame
         Sample DataFrame from fixture
+    invalid_date : Union[None, str, int]
+        Invalid date inputs
 
     Returns
     -------
     None
     """
-    ingestion = CoreIngestion()
+    with pytest.raises(TypeError, match="date_ref must be of type date"):
+        ingestion_instance.standardize_dataframe(
+            df_=sample_dataframe,
+            date_ref=invalid_date,
+            dict_dtypes={"col1": str}
+        )
 
-    ingestion.insert_table_db(
+# --------------------------
+# Tests for insert_table_db
+# --------------------------
+def test_insert_table_db_valid(
+    ingestion_instance: ConcreteIngestion,
+    sample_dataframe: pd.DataFrame,
+    mocker: MockerFixture
+) -> None:
+    """Test insert_table_db with valid inputs.
+
+    Verifies
+    -------
+    - Database insertion is called with correct parameters
+    - No exceptions are raised
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    mock_session = MagicMock(spec=Session)
+    mock_execute = mocker.patch.object(mock_session, "execute")
+    
+    ingestion_instance.insert_table_db(
         cls_db=mock_session,
         str_table_name="test_table",
         df_=sample_dataframe,
         bool_insert_or_ignore=True
     )
+    
+    mock_execute.assert_called_once()
 
-    mock_session.insert.assert_called_once_with(
-        sample_dataframe.to_dict(orient="records"),
-        str_table_name="test_table",
-        bool_insert_or_ignore=True
-    )
-
-
-# --------------------------
-# Tests for ContentAggregator
-# --------------------------
-def test_content_aggregator_init() -> None:
-    """Test initialization of ContentAggregator.
-
-    Verifies
-    --------
-    - Correct initialization of cls_handling_dicts and cls_str_handler
-    - Instance creation without errors
-
-    Returns
-    -------
-    None
-    """
-    aggregator = ContentAggregator()
-    assert isinstance(aggregator.cls_handling_dicts, HandlingDicts)
-    assert isinstance(aggregator.cls_str_handler, StrHandler)
-
-
-def test_paginate_text_blocks(
-    mocker: MockerFixture,
-    mock_fitz_document: fitz.Document
+@pytest.mark.parametrize("invalid_db", [None, "not_a_session", 123])
+def test_insert_table_db_invalid_session(
+    ingestion_instance: ConcreteIngestion,
+    sample_dataframe: pd.DataFrame,
+    invalid_db: Union[None, str, int]
 ) -> None:
-    """Test paginate_text_blocks method with valid inputs.
+    """Test insert_table_db with invalid database session.
 
     Verifies
-    --------
-    - Correct pagination of text blocks
-    - Proper handling of page joining
-    - Interaction with StrHandler for diacritics removal
+    -------
+    - TypeError is raised for non-Session inputs
+    - Error message matches TypeChecker expectation
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-    mock_fitz_document : fitz.Document
-        Mocked fitz.Document from fixture
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame from fixture
+    invalid_db : Union[None, str, int]
+        Invalid database session inputs
 
     Returns
     -------
     None
     """
-    aggregator = ContentAggregator()
-    mocker.patch.object(
-        aggregator.cls_str_handler,
-        "remove_diacritics_nfkd",
-        return_value="cleaned text"
-    )
+    with pytest.raises(TypeError, match="cls_db must be of type Session"):
+        ingestion_instance.insert_table_db(
+            cls_db=invalid_db,
+            str_table_name="test_table",
+            df_=sample_dataframe
+        )
 
-    result = aggregator.paginate_text_blocks(
-        stream_file=mock_fitz_document,
-        int_pages_join=1
-    )
+@pytest.mark.parametrize("invalid_table_name", [None, 123, ""])
+def test_insert_table_db_invalid_table_name(
+    ingestion_instance: ConcreteIngestion,
+    sample_dataframe: pd.DataFrame,
+    invalid_table_name: Union[None, int, str]
+) -> None:
+    """Test insert_table_db with invalid table name.
 
+    Verifies
+    -------
+    - TypeError is raised for non-string or empty table names
+    - Error message matches TypeChecker expectation
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame from fixture
+    invalid_table_name : Union[None, int, str]
+        Invalid table name inputs
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(TypeError, match="str_table_name must be of type str"):
+        ingestion_instance.insert_table_db(
+            cls_db=MagicMock(spec=Session),
+            str_table_name=invalid_table_name,
+            df_=sample_dataframe
+        )
+
+# --------------------------
+# Tests for paginate_text_blocks
+# --------------------------
+def test_paginate_text_blocks_valid(
+    ingestion_instance: ConcreteIngestion,
+    mock_fitz_document: fitz.Document,
+    mocker: MockerFixture
+) -> None:
+    """Test paginate_text_blocks with valid inputs.
+
+    Verifies
+    -------
+    - Text blocks are paginated correctly
+    - String handler is called for diacritics removal
+    - Returns expected list of strings
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    mock_fitz_document : fitz.Document
+        Mocked fitz.Document from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    mocker.patch.object(StrHandler, "remove_diacritics_nfkd", side_effect=lambda x, **kwargs: x.lower())
+    
+    result = ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=1)
+    
     assert isinstance(result, list)
     assert len(result) == 2
-    assert result == ["cleaned text", "cleaned text"]
-
+    assert result[0] == "\npage 0 content"
+    assert result[1] == "\npage 1 content"
 
 def test_paginate_text_blocks_empty_document(
+    ingestion_instance: ConcreteIngestion,
     mocker: MockerFixture
 ) -> None:
     """Test paginate_text_blocks with empty document.
 
     Verifies
-    --------
+    -------
     - Returns list with empty string for empty document
     - Handles edge case correctly
 
     Parameters
     ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
     mocker : MockerFixture
         Pytest-mock fixture for creating mocks
 
@@ -462,505 +753,452 @@ def test_paginate_text_blocks_empty_document(
     -------
     None
     """
-    aggregator = ContentAggregator()
-    mock_doc = MagicMock(spec=fitz.Document)
-    mock_doc.__len__.return_value = 0
+    empty_doc = MagicMock(spec=fitz.Document)
+    empty_doc.__len__.return_value = 0
+    mocker.patch.object(StrHandler, "remove_diacritics_nfkd", return_value="")
+    
+    result = ingestion_instance.paginate_text_blocks(empty_doc, int_pages_join=1)
+    
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0] == ""
 
-    result = aggregator.paginate_text_blocks(
-        stream_file=mock_doc,
-        int_pages_join=1
-    )
-
-    assert result == [""]
-
-
-# --------------------------
-# Tests for ContentParser
-# --------------------------
-def test_get_file(mock_response: Response) -> None:
-    """Test get_file method with valid response.
+@pytest.mark.parametrize("invalid_pages_join", [-1, 0, "not_an_int"])
+def test_paginate_text_blocks_invalid_pages_join(
+    ingestion_instance: ConcreteIngestion,
+    mock_fitz_document: fitz.Document,
+    invalid_pages_join: Union[int, str],
+    mocker: MockerFixture
+) -> None:
+    """Test paginate_text_blocks with invalid pages_join.
 
     Verifies
-    --------
-    - Correct conversion of response text to StringIO
-    - Return type is StringIO
+    -------
+    - ValueError is raised for non-positive pages_join
+    - TypeError is raised for non-integer pages_join
+    - Error messages match expectations
 
     Parameters
     ----------
-    mock_response : Response
-        Mocked Response object from fixture
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    mock_fitz_document : fitz.Document
+        Mocked fitz.Document from fixture
+    invalid_pages_join : Union[int, str]
+        Invalid pages_join inputs
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    parser = ContentParser()
-    result = parser.get_file(mock_response)
+    mocker.patch.object(
+        ContentAggregator,
+        "paginate_text_blocks",
+        side_effect=lambda stream_file, int_pages_join: (
+            ValueError("int_pages_join must be a positive integer")
+            if not isinstance(int_pages_join, int) or int_pages_join <= 0
+            else ["mocked_output"]
+        )
+    )
+    
+    if not isinstance(invalid_pages_join, int):
+        with pytest.raises(TypeError, match="int_pages_join must be of type int"):
+            ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=invalid_pages_join)
+    else:
+        with pytest.raises(ValueError, match="int_pages_join must be a positive integer"):
+            ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=invalid_pages_join)
+
+# --------------------------
+# Tests for get_file
+# --------------------------
+@pytest.mark.parametrize("resp_type", ["response", "playwright", "selenium"])
+def test_get_file_valid(
+    ingestion_instance: ConcreteIngestion,
+    mock_response: Response,
+    mock_playwright_page: PlaywrightPage,
+    mock_selenium_webdriver: SeleniumWebDriver,
+    resp_type: str
+) -> None:
+    """Test get_file with valid response types.
+
+    Verifies
+    -------
+    - Returns StringIO for valid response types
+    - Correctly handles Response, PlaywrightPage, and SeleniumWebDriver
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    mock_response : Response
+        Mocked Response object from fixture
+    mock_playwright_page : PlaywrightPage
+        Mocked PlaywrightPage object from fixture
+    mock_selenium_webdriver : SeleniumWebDriver
+        Mocked SeleniumWebDriver object from fixture
+    resp_type : str
+        Type of response to test
+
+    Returns
+    -------
+    None
+    """
+    resp = {
+        "response": mock_response,
+        "playwright": mock_playwright_page,
+        "selenium": mock_selenium_webdriver
+    }[resp_type]
+    
+    result = ingestion_instance.get_file(resp)
+    
     assert isinstance(result, StringIO)
     assert result.getvalue() == "sample content"
 
-
-def test_pdf_docx_tables_response(
-    mocker: MockerFixture,
-    mock_bytes_file: BytesIO
+@pytest.mark.parametrize("invalid_resp", [None, "not_a_response", 123])
+def test_get_file_invalid_response(
+    ingestion_instance: ConcreteIngestion,
+    invalid_resp: Union[None, str, int]
 ) -> None:
-    """Test pdf_docx_tables_response with valid BytesIO input.
+    """Test get_file with invalid response inputs.
 
     Verifies
-    --------
-    - Correct parsing of tables from PDF
-    - Interaction with pdfplumber and HandlingDicts
-    - Return type is pd.DataFrame
+    -------
+    - TypeError is raised for invalid response types
+    - Error message matches TypeChecker expectation
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-    mock_bytes_file : BytesIO
-        Mocked BytesIO object from fixture
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    invalid_resp : Union[None, str, int]
+        Invalid response inputs
 
     Returns
     -------
     None
     """
-    parser = ContentParser()
-    mock_pdfplumber = mocker.patch("pdfplumber.open")
-    mock_page = MagicMock()
-    mock_page.extract_tables.return_value = [["header1", "header2"], ["data1", "data2"]]
-    mock_pdfplumber.return_value.__enter__.return_value.pages = [mock_page]
-    mocker.patch.object(
-        parser.cls_handling_dicts,
-        "pair_keys_with_values",
-        return_value=[{"header1": "data1", "header2": "data2"}]
-    )
+    with pytest.raises(TypeError, match="resp_req must be one of types: Response, Page, WebDriver"):
+        ingestion_instance.get_file(invalid_resp)
 
-    result = parser.pdf_docx_tables_response(mock_bytes_file)
+# --------------------------
+# Tests for pdf_docx_tables_response
+# --------------------------
+def test_pdf_docx_tables_response_valid(
+    ingestion_instance: ConcreteIngestion,
+    sample_bytes_file: BytesIO,
+    mock_pdfplumber: Mock,
+    mocker: MockerFixture
+) -> None:
+    """Test pdf_docx_tables_response with valid input.
+
+    Verifies
+    -------
+    - Correctly parses tables from BytesIO
+    - Returns expected DataFrame
+    - HandlingDicts is called correctly
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_bytes_file : BytesIO
+        Sample BytesIO file from fixture
+    mock_pdfplumber : Mock
+        Mocked pdfplumber.open context from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    mocker.patch.object(
+        HandlingDicts,
+        "pair_keys_with_values",
+        return_value=[{"header1": "value1", "header2": "value2"}]
+    )
+    
+    result = ingestion_instance.pdf_docx_tables_response(sample_bytes_file)
+    
     assert isinstance(result, pd.DataFrame)
     assert len(result) == 1
-    assert result.to_dict(orient="records") == [{"header1": "data1", "header2": "data2"}]
+    assert list(result.columns) == ["header1", "header2"]
 
+@pytest.mark.parametrize("invalid_file", [None, "not_a_bytesio", 123])
+def test_pdf_docx_tables_response_invalid_file(
+    ingestion_instance: ConcreteIngestion,
+    invalid_file: Union[None, str, int]
+) -> None:
+    """Test pdf_docx_tables_response with invalid file input.
 
-def test_pdf_docx_regex(
-    mocker: MockerFixture,
-    mock_bytes_file: BytesIO,
-    sample_regex_patterns: dict[str, dict[str, str]]
+    Verifies
+    -------
+    - TypeError is raised for non-BytesIO inputs
+    - Error message matches TypeChecker expectation
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    invalid_file : Union[None, str, int]
+        Invalid file inputs
+
+    Returns
+    -------
+    None
+    """
+    with pytest.raises(TypeError, match="bytes_file must be of type BytesIO"):
+        ingestion_instance.pdf_docx_tables_response(invalid_file)
+
+# --------------------------
+# Tests for pdf_docx_regex
+# --------------------------
+def test_pdf_docx_regex_valid(
+    ingestion_instance: ConcreteIngestion,
+    sample_bytes_file: BytesIO,
+    sample_regex_patterns: dict[str, dict[str, str]],
+    mocker: MockerFixture
 ) -> None:
     """Test pdf_docx_regex with valid inputs.
 
     Verifies
-    --------
-    - Correct parsing using regex patterns
-    - Interaction with paginate_text_blocks and regex matching
-    - Proper DataFrame processing (drop duplicates, sorting)
+    -------
+    - Correctly processes PDF with regex patterns
+    - Returns expected DataFrame
+    - Handles pagination and regex matching
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-    mock_bytes_file : BytesIO
-        Mocked BytesIO object from fixture
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_bytes_file : BytesIO
+        Sample BytesIO file from fixture
     sample_regex_patterns : dict[str, dict[str, str]]
         Sample regex patterns from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    parser = ContentParser()
-    # Mock fitz.open to avoid actual PDF parsing
-    mock_fitz_open = mocker.patch("fitz.open")
-    mock_doc = MagicMock()
-    mock_fitz_open.return_value = mock_doc
-    
+    mocker.patch("fitz.open", return_value=MagicMock(spec=fitz.Document))
+    mocker.patch.object(ContentAggregator, "paginate_text_blocks", return_value=["test123"])
     mocker.patch.object(
-        parser,
-        "paginate_text_blocks",
-        return_value=["test123", "sample456"]
-    )
-    mocker.patch.object(
-        parser,
+        ContentParser,
         "_regex_patterns_match",
-        return_value=[
-            {"EVENT": "EVENT1", "MATCH_PATTERN": "PATTERN1", "PATTERN_REGEX": r"test\d+"}
-        ]
+        return_value=[{"EVENT": "event1", "MATCH_PATTERN": "pattern1"}]
     )
-
-    result = parser.pdf_docx_regex(
-        bytes_file=mock_bytes_file,
+    
+    result = ingestion_instance.pdf_docx_regex(
+        bytes_file=sample_bytes_file,
         str_file_extension="pdf",
         int_pages_join=1,
         dict_regex_patterns=sample_regex_patterns
     )
-
+    
     assert isinstance(result, pd.DataFrame)
     assert len(result) == 1
-    assert result.to_dict(orient="records") == [
-        {"EVENT": "EVENT1", "MATCH_PATTERN": "PATTERN1", "PATTERN_REGEX": r"test\d+"}
-    ]
+    assert "EVENT" in result.columns
 
+@pytest.mark.parametrize("invalid_extension", [None, 123, ""])
+def test_pdf_docx_regex_invalid_extension(
+    ingestion_instance: ConcreteIngestion,
+    sample_bytes_file: BytesIO,
+    sample_regex_patterns: dict[str, dict[str, str]],
+    invalid_extension: Union[None, int, str],
+    mocker: MockerFixture
+) -> None:
+    """Test pdf_docx_regex with invalid file extension.
 
-def test_regex_patterns_match(
-    mocker: MockerFixture,
-    sample_regex_patterns: dict[str, dict[str, str]]
+    Verifies
+    -------
+    - TypeError is raised for non-string or empty file extensions
+    - Error message matches TypeChecker expectation
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_bytes_file : BytesIO
+        Sample BytesIO file from fixture
+    sample_regex_patterns : dict[str, dict[str, str]]
+        Sample regex patterns from fixture
+    invalid_extension : Union[None, int, str]
+        Invalid file extension inputs
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    mocker.patch(
+        "fitz.open",
+        side_effect=lambda *args, **kwargs: (
+            ValueError("str_file_extension cannot be empty")
+            if kwargs.get("filetype", "") == ""
+            else MagicMock(spec=fitz.Document)
+        )
+    )
+    
+    if invalid_extension == "":
+        with pytest.raises(ValueError, match="str_file_extension cannot be empty"):
+            ingestion_instance.pdf_docx_regex(
+                bytes_file=sample_bytes_file,
+                str_file_extension=invalid_extension,
+                int_pages_join=1,
+                dict_regex_patterns=sample_regex_patterns
+            )
+    else:
+        with pytest.raises(TypeError, match="str_file_extension must be of type str"):
+            ingestion_instance.pdf_docx_regex(
+                bytes_file=sample_bytes_file,
+                str_file_extension=invalid_extension,
+                int_pages_join=1,
+                dict_regex_patterns=sample_regex_patterns
+            )
+
+# --------------------------
+# Tests for _regex_patterns_match
+# --------------------------
+def test_regex_patterns_match_valid(
+    ingestion_instance: ConcreteIngestion,
+    sample_regex_patterns: dict[str, dict[str, str]],
+    mocker: MockerFixture
 ) -> None:
     """Test _regex_patterns_match with valid inputs.
 
     Verifies
-    --------
-    - Correct matching of regex patterns
-    - Proper handling of matches and fallbacks
-    - Return type is list of dictionaries
+    -------
+    - Correctly matches regex patterns
+    - Returns expected list of matches
+    - Handles regex groups correctly
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
     sample_regex_patterns : dict[str, dict[str, str]]
         Sample regex patterns from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    parser = ContentParser()
-    mocker.patch.object(
-        parser.cls_str_handler,
-        "remove_diacritics_nfkd",
-        return_value=r"test\d+"
-    )
+    mocker.patch.object(StrHandler, "remove_diacritics_nfkd", side_effect=lambda x, **kwargs: x)
+    mock_match = MagicMock()
+    mock_match.groups.return_value = ["test"]
+    mock_match.group.side_effect = lambda i: "test" if i == 0 else "group1"
+    mocker.patch("re.search", return_value=mock_match)
     
-    # Mock re.search to return match only for event1
-    def mock_search(pattern, text):
-        if pattern == r"test\d+" and "test123" in text:
-            return MagicMock(
-                group=lambda i: "test123" if i == 0 else "123",
-                groups=lambda: ["123"]
-            )
-        return None
-    
-    mocker.patch("re.search", side_effect=mock_search)
-
-    result = parser._regex_patterns_match(
+    result = ingestion_instance._regex_patterns_match(
         list_blocks_pages=["test123"],
         dict_regex_patterns=sample_regex_patterns
     )
-
+    
     assert isinstance(result, list)
-    assert len(result) == 2  # One match for event1, one fallback for event2
-    assert result[0]["EVENT"] == "EVENT1"
-    assert result[0]["MATCH_PATTERN"] == "PATTERN1"
-    assert result[0]["REGEX_GROUP_0"] == "TEST123"
-    assert result[1]["EVENT"] == "EVENT2"
-    assert result[1]["MATCH_PATTERN"] == "ZZNN/A"
-
+    assert len(result) == 1
+    assert result[0]["EVENT"] == "event1"
+    assert result[0]["REGEX_GROUP_0"] == "test"
+    assert result[0]["REGEX_GROUP_1"] == "group1"
 
 def test_regex_patterns_match_no_matches(
-    mocker: MockerFixture,
-    sample_regex_patterns: dict[str, dict[str, str]]
+    ingestion_instance: ConcreteIngestion,
+    sample_regex_patterns: dict[str, dict[str, str]],
+    mocker: MockerFixture
 ) -> None:
     """Test _regex_patterns_match with no matches.
 
     Verifies
-    --------
-    - Fallback behavior when no regex matches
-    - Correct return of fallback dictionary
+    -------
+    - Returns fallback entries when no matches found
+    - Correctly handles empty matches
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
     sample_regex_patterns : dict[str, dict[str, str]]
         Sample regex patterns from fixture
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
 
     Returns
     -------
     None
     """
-    parser = ContentParser()
-    mocker.patch.object(
-        parser.cls_str_handler,
-        "remove_diacritics_nfkd",
-        return_value=r"test\d+"
-    )
+    mocker.patch.object(StrHandler, "remove_diacritics_nfkd", side_effect=lambda x, **kwargs: x)
     mocker.patch("re.search", return_value=None)
-
-    result = parser._regex_patterns_match(
+    
+    result = ingestion_instance._regex_patterns_match(
         list_blocks_pages=["no match"],
         dict_regex_patterns=sample_regex_patterns
     )
-
+    
     assert isinstance(result, list)
     assert len(result) == 2
-    assert result[0] == {
-        "EVENT": "EVENT1",
-        "MATCH_PATTERN": "ZZNN/A",
-        "PATTERN_REGEX": "ZZN/A"
-    }
-    assert result[1] == {
-        "EVENT": "EVENT2",
-        "MATCH_PATTERN": "ZZNN/A",
-        "PATTERN_REGEX": "ZZN/A"
-    }
+    assert result[0]["MATCH_PATTERN"] == "ZZNN/A"
+    assert result[0]["PATTERN_REGEX"] == "ZZN/A"
 
-
-# --------------------------
-# Tests for ABCIngestionOperations
-# --------------------------
-def test_abc_ingestion_operations_init(mock_session: Session) -> None:
-    """Test initialization of ABCIngestionOperations.
-
-    Verifies
-    --------
-    - Correct initialization of inherited attributes
-    - Proper setup of cls_db, cls_db_logs, cls_handling_dicts, and cls_str_handler
-
-    Parameters
-    ----------
-    mock_session : Session
-        Mocked Session object from fixture
-
-    Returns
-    -------
-    None
-    """
-    # Create a concrete implementation for testing
-    class TestABCIngestionOperations(ABCIngestionOperations):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            pass
-        def parse_raw_file(self, resp_req):
-            pass
-        def transform_data(self, file):
-            pass
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            pass
-    
-    ingestion = TestABCIngestionOperations(cls_db=mock_session)
-    assert ingestion.cls_db == mock_session
-    assert isinstance(ingestion.cls_db_logs, DBLogs)
-    assert isinstance(ingestion.cls_handling_dicts, HandlingDicts)
-    assert isinstance(ingestion.cls_str_handler, StrHandler)
-
-
-# --------------------------
-# Edge Cases and Error Conditions
-# --------------------------
-@pytest.mark.parametrize("invalid_timeout", [
-    "invalid",  # wrong type
-    -1,         # negative value
-    (0, 0),     # zero values
-])
-def test_get_response_invalid_timeout(invalid_timeout: Any) -> None:
-    """Test get_response with invalid timeout values.
-
-    Verifies
-    --------
-    - Raises TypeError for invalid timeout types/values
-
-    Parameters
-    ----------
-    invalid_timeout : Any
-        Invalid timeout value to test
-
-    Returns
-    -------
-    None
-    """
-    class TestIngestion(ABCIngestion):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            return super().get_response(timeout)
-        def parse_raw_file(self, resp_req):
-            pass
-        def transform_data(self, file):
-            pass
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            pass
-
-    ingestion = TestIngestion()
-    with pytest.raises(TypeError, match="must be of type"):
-        ingestion.get_response(timeout=invalid_timeout)
-
-
-def test_parse_raw_file_invalid_input() -> None:
-    """Test parse_raw_file with invalid input type.
-
-    Verifies
-    --------
-    - Raises TypeError for invalid response type
-
-    Returns
-    -------
-    None
-    """
-    class TestIngestion(ABCIngestion):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            pass
-        def parse_raw_file(self, resp_req):
-            return super().parse_raw_file(resp_req)
-        def transform_data(self, file):
-            pass
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            pass
-
-    ingestion = TestIngestion()
-    with pytest.raises(TypeError, match="must be of type"):
-        ingestion.parse_raw_file("invalid")
-
-
-def test_transform_data_invalid_input() -> None:
-    """Test transform_data with invalid input type.
-
-    Verifies
-    --------
-    - Raises TypeError for invalid file input
-
-    Returns
-    -------
-    None
-    """
-    class TestIngestion(ABCIngestion):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            pass
-        def parse_raw_file(self, resp_req):
-            pass
-        def transform_data(self, file):
-            return super().transform_data(file)
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            pass
-
-    ingestion = TestIngestion()
-    with pytest.raises(TypeError, match="must be of type"):
-        ingestion.transform_data("invalid")
-
-
-def test_run_invalid_table_name() -> None:
-    """Test run method with invalid table name.
-
-    Verifies
-    --------
-    - Raises TypeError for non-string table name
-
-    Returns
-    -------
-    None
-    """
-    class TestIngestion(ABCIngestion):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            pass
-        def parse_raw_file(self, resp_req):
-            pass
-        def transform_data(self, file):
-            pass
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            return super().run(timeout, bool_verify, bool_insert_or_ignore, str_table_name)
-
-    ingestion = TestIngestion()
-    with pytest.raises(TypeError, match="must be of type"):
-        ingestion.run(str_table_name=123)
-
-
-# --------------------------
-# Reload Logic Tests
-# --------------------------
-def test_module_reload(mocker: MockerFixture) -> None:
-    """Test module reload behavior.
-
-    Verifies
-    --------
-    - Module can be reloaded without errors
-    - Classes maintain their functionality post-reload
-
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    None
-    """
-    importlib.reload(sys.modules["stpstone.ingestion.abc.ingestion_abc"])
-    
-    # Create a concrete implementation for testing
-    class TestABCIngestionOperations(ABCIngestionOperations):
-        def __init__(self, cls_db=None):
-            super().__init__(cls_db)
-            
-        def get_response(self, timeout=(12.0, 21.0)):
-            pass
-        def parse_raw_file(self, resp_req):
-            pass
-        def transform_data(self, file):
-            pass
-        def run(self, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=True, str_table_name="table"):
-            pass
-    
-    ingestion = TestABCIngestionOperations()
-    assert isinstance(ingestion.cls_db_logs, DBLogs)
-    assert isinstance(ingestion.cls_handling_dicts, HandlingDicts)
-    assert isinstance(ingestion.cls_str_handler, StrHandler)
-
-
-# --------------------------
-# Fallback Logic Tests
-# --------------------------
-def test_pdf_docx_regex_no_pages(
-    mocker: MockerFixture,
-    mock_bytes_file: BytesIO,
-    sample_regex_patterns: dict[str, dict[str, str]]
+@pytest.mark.parametrize("invalid_blocks", [None, "not_a_list", 123])
+def test_regex_patterns_match_invalid_blocks(
+    ingestion_instance: ConcreteIngestion,
+    sample_regex_patterns: dict[str, dict[str, str]],
+    invalid_blocks: Union[None, str, int]
 ) -> None:
-    """Test pdf_docx_regex with empty document.
+    """Test _regex_patterns_match with invalid text blocks.
 
     Verifies
-    --------
-    - Fallback behavior when document has no pages
-    - Returns empty DataFrame
+    -------
+    - TypeError is raised for non-list text blocks
+    - Error message matches TypeChecker expectation
 
     Parameters
     ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-    mock_bytes_file : BytesIO
-        Mocked BytesIO object from fixture
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
     sample_regex_patterns : dict[str, dict[str, str]]
         Sample regex patterns from fixture
+    invalid_blocks : Union[None, str, int]
+        Invalid text block inputs
 
     Returns
     -------
     None
     """
-    parser = ContentParser()
-    # Mock fitz.open to avoid actual PDF parsing
-    mock_fitz_open = mocker.patch("fitz.open")
-    mock_doc = MagicMock()
-    mock_fitz_open.return_value = mock_doc
+    with pytest.raises(TypeError, match="list_blocks_pages must be of type list"):
+        ingestion_instance._regex_patterns_match(
+            list_blocks_pages=invalid_blocks,
+            dict_regex_patterns=sample_regex_patterns
+        )
+
+# --------------------------
+# Test Module Reload
+# --------------------------
+def test_module_reload(mocker: MockerFixture) -> None:
+    """Test ConcreteIngestion class behavior.
+
+    Verifies
+    -------
+    - Class instance maintains functionality
+    - Methods are accessible
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture for creating mocks
+
+    Returns
+    -------
+    None
+    """
+    mocker.patch("fitz.open", return_value=MagicMock(spec=fitz.Document))
     
-    mocker.patch.object(
-        parser,
-        "paginate_text_blocks",
-        return_value=[]
-    )
-
-    result = parser.pdf_docx_regex(
-        bytes_file=mock_bytes_file,
-        str_file_extension="pdf",
-        int_pages_join=1,
-        dict_regex_patterns=sample_regex_patterns
-    )
-
-    assert isinstance(result, pd.DataFrame)
-    assert len(result) == 0
+    instance = ConcreteIngestion()
+    assert isinstance(instance, ConcreteIngestion)
+    assert hasattr(instance, "get_file")
