@@ -206,7 +206,7 @@ def test_validate_string_non_string(db_logs: DBLogs) -> None:
     -------
     None
     """
-    with pytest.raises(TypeError, match="must be of type"):
+    with pytest.raises(TypeError, match="must be one of types"):
         db_logs._validate_string(123, "url")
 
 def test_validate_string_valid(db_logs: DBLogs) -> None:
@@ -719,9 +719,9 @@ def test_log_data_insert_valid(
     action_type = "insert"
     result = db_logs.log_data_insert(sample_df, action_type, sample_date)
     assert "ACTION_TYPE" in result.columns
-    assert "ACTION_TYPE" in result.columns
+    assert "ACTION_TIMESTAMP" in result.columns
     assert result["ACTION_TYPE"].iloc[0] == action_type
-    assert result["ACTION_TYPE"].iloc[0] == sample_date
+    assert result["ACTION_TIMESTAMP"].iloc[0] == sample_date
 
 def test_log_data_insert_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
     """Test log_data_insert raises TypeError for invalid DataFrame.

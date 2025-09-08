@@ -76,11 +76,6 @@ class DBLogs(metaclass=TypeChecker):
         -------
         pd.DataFrame
             Updated DataFrame with audit columns
-
-        Raises
-        ------
-        ValueError
-            If url is empty
         """
         self._validate_dataframe(df_)
         if "URL" not in df_.columns:
