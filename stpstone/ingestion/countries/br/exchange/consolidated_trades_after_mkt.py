@@ -63,18 +63,25 @@ class B3ConsolidatedTradesAfterMarket(ABCIngestionOperations):
             + "fileName=TradeInformationConsolidatedAfterHoursFile&" \
             + "date={}&recaptchaToken=".format(self.date_ref.strftime("%Y-%m-%d"))
         self.token = self.get_token()
-        self.url = "https://arquivos.b3.com.br/api/download/?token={}#format=.csv".format(
-            self.token)
+        self.url = f"https://arquivos.b3.com.br/api/download/?token={self.token}#format=.csv"
 
-    def get_token(self) -> str:
+    def get_token(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+    ) -> str:
         """Get the token.
         
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+
         Returns
         -------
         str
             The token.
         """
-        resp_req = requests.get(self.url_token)
+        resp_req = requests.get(self.url_token, timeout=timeout)
         resp_req.raise_for_status()
         return resp_req.json()["token"]
 
