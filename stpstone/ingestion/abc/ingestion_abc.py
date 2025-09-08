@@ -90,7 +90,7 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         
         Returns
         -------
-        str
+        StringIO
             The parsed content.
 
         Raises
@@ -109,8 +109,8 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         
         Parameters
         ----------
-        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
+        file : StringIO
+            The file content.
         
         Returns
         -------
@@ -151,6 +151,11 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         Returns
         -------
         None
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented in a subclass.
         """
         raise NotImplementedError
 
@@ -266,6 +271,15 @@ class CoreIngestion(metaclass=TypeChecker):
             The DataFrame to insert.
         bool_insert_or_ignore : bool, optional
             Whether to use INSERT OR IGNORE or INSERT WITHOUT IGNORING CONFLICTS (default: False)
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If str_table_name is empty
         """
         if not str_table_name:
             raise ValueError("str_table_name cannot be empty")
@@ -308,6 +322,11 @@ class ContentAggregator(metaclass=TypeChecker):
         -------
         list[str]
             A list of paginated text blocks.
+
+        Raises
+        ------
+        ValueError
+            If int_pages_join is not a positive integer
         """
         if not isinstance(int_pages_join, int) or int_pages_join <= 0:
             raise ValueError("int_pages_join must be a positive integer")
@@ -341,7 +360,7 @@ class ContentParser(ContentAggregator):
         
         Returns
         -------
-        str
+        StringIO
             The file.
         """
         return StringIO(resp_req.text)

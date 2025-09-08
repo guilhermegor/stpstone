@@ -10,37 +10,26 @@ Tests the ingestion operations functionality with various input scenarios includ
 
 from datetime import date
 from io import BytesIO, StringIO
-import re
 from typing import Optional, TypedDict, Union
 from unittest.mock import MagicMock, Mock
 
 import fitz
-import numpy as np
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
 import pytest
 from pytest_mock import MockerFixture
 from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
-from sqlalchemy.sql import text
 
 from stpstone.ingestion.abc.ingestion_abc import (
     ABCIngestionOperations,
     ContentAggregator,
     ContentParser,
-    CoreIngestion,
 )
-from stpstone.transformations.standardization.standardizer_df import (
-    DFStandardization,
-    TypeErrorActionAsTypeDataFrame,
-    TypeFillnaStrategy,
-    TypeKeepDuplicatedDataFrame,
-)
-from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
-from stpstone.utils.calendars.calendar_abc import TypeDateFormatInput
+from stpstone.transformations.standardization.standardizer_df import DFStandardization
 from stpstone.utils.loggs.db_logs import DBLogs
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.str import StrHandler, TypeCaseFrom, TypeCaseTo
+from stpstone.utils.parsers.str import StrHandler
 
 
 # --------------------------
@@ -79,7 +68,7 @@ class ConcreteIngestion(ABCIngestionOperations):
 
         Returns
         -------
-        Response
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
             Mock response object
         """
         response = MagicMock(spec=Response)
@@ -151,6 +140,7 @@ class ConcreteIngestion(ABCIngestionOperations):
 # --------------------------
 class ReturnStandardizeDataFrame(TypedDict):
     """Type definition for standardize_dataframe return value."""
+    
     df_: pd.DataFrame
 
 
@@ -299,6 +289,11 @@ def test_init_with_no_db_session(ingestion_instance: ConcreteIngestion) -> None:
     - cls_db is None
     - Inherited classes are properly initialized
 
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+
     Returns
     -------
     None
@@ -360,6 +355,11 @@ def test_get_response_valid(ingestion_instance: ConcreteIngestion) -> None:
     - Returns Response object
     - Response contains expected text
 
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+
     Returns
     -------
     None
@@ -369,7 +369,10 @@ def test_get_response_valid(ingestion_instance: ConcreteIngestion) -> None:
     assert result.text == "mock content"
 
 @pytest.mark.parametrize("timeout", [10, 10.5, (10, 20), (10.5, 20.5)])
-def test_get_response_timeout_variations(ingestion_instance: ConcreteIngestion, timeout: Union[int, float, tuple]) -> None:
+def test_get_response_timeout_variations(
+    ingestion_instance: ConcreteIngestion, 
+    timeout: Union[int, float, tuple]
+) -> None:
     """Test get_response with various timeout types.
 
     Verifies
@@ -449,6 +452,11 @@ def test_transform_data_valid(ingestion_instance: ConcreteIngestion) -> None:
     - Returns DataFrame with correct content
     - DataFrame has expected structure
 
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+
     Returns
     -------
     None
@@ -470,6 +478,11 @@ def test_run_no_db_session(ingestion_instance: ConcreteIngestion) -> None:
     -------
     - Runs without errors
     - No database operations performed
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
 
     Returns
     -------
@@ -510,7 +523,8 @@ def test_standardize_dataframe_valid_input(
     dict_dtypes = {"col1": str, "col2": int, "date_col": date}
     date_ref = date(2023, 1, 1)
     
-    mock_df_standardization = mocker.patch.object(DFStandardization, "pipeline", return_value=sample_dataframe)
+    mock_df_standardization = mocker.patch.object(DFStandardization, "pipeline", 
+                                                  return_value=sample_dataframe)
     mock_audit_log = mocker.patch.object(DBLogs, "audit_log", return_value=sample_dataframe)
     
     result = ingestion_instance.standardize_dataframe(
@@ -615,8 +629,8 @@ def test_insert_table_db_valid(
     -------
     None
     """
-    mock_session = MagicMock()  # Use permissive mock instead of spec=Session
-    mock_insert = mocker.patch.object(mock_session, "insert")  # Mock the correct method
+    mock_session = MagicMock()
+    mock_insert = mocker.patch.object(mock_session, "insert")
     ingestion_instance.insert_table_db(
         cls_db=mock_session,
         str_table_name="test_table",
@@ -658,18 +672,25 @@ def test_insert_table_db_invalid_session(
             df_=sample_dataframe
         )
 
-@pytest.mark.parametrize("invalid_table_name", [None, 123, ""])
+@pytest.mark.parametrize("invalid_table_name,expected_exception,expected_message", [
+    (None, TypeError, "str_table_name must be of type str"),
+    (123, TypeError, "str_table_name must be of type str"),
+    ("", ValueError, "str_table_name cannot be empty")
+])
 def test_insert_table_db_invalid_table_name(
     ingestion_instance: ConcreteIngestion,
     sample_dataframe: pd.DataFrame,
-    invalid_table_name: Union[None, int, str]
+    invalid_table_name: Union[None, int, str],
+    expected_exception: type[Exception],
+    expected_message: str
 ) -> None:
     """Test insert_table_db with invalid table name.
 
     Verifies
     -------
-    - TypeError is raised for non-string or empty table names
-    - Error message matches TypeChecker expectation
+    - TypeError is raised for non-string table names
+    - ValueError is raised for empty table names
+    - Error message matches expectation
 
     Parameters
     ----------
@@ -679,13 +700,17 @@ def test_insert_table_db_invalid_table_name(
         Sample DataFrame from fixture
     invalid_table_name : Union[None, int, str]
         Invalid table name inputs
+    expected_exception : Type[Exception]
+        Expected exception type
+    expected_message : str
+        Expected exception message
 
     Returns
     -------
     None
     """
     mock_session = MagicMock()
-    with pytest.raises(TypeError, match="str_table_name must be of type str"):
+    with pytest.raises(expected_exception, match=expected_message):
         ingestion_instance.insert_table_db(
             cls_db=mock_session,
             str_table_name=invalid_table_name,
@@ -696,7 +721,24 @@ def test_insert_table_db_empty_table_name(
     ingestion_instance: ConcreteIngestion,
     sample_dataframe: pd.DataFrame,
 ) -> None:
-    """Test insert_table_db with empty table name."""
+    """Test insert_table_db with empty table name.
+    
+    Verifies
+    -------
+    - ValueError is raised for empty table names
+    - Error message matches expectation
+
+    Parameters
+    ----------
+    ingestion_instance : ConcreteIngestion
+        Instance of the ConcreteIngestion class
+    sample_dataframe : pd.DataFrame
+        Sample DataFrame from fixture
+
+    Returns
+    -------
+    None
+    """
     mock_session = MagicMock()
     with pytest.raises(ValueError, match="str_table_name cannot be empty"):
         ingestion_instance.insert_table_db(
@@ -734,7 +776,8 @@ def test_paginate_text_blocks_valid(
     -------
     None
     """
-    mocker.patch.object(StrHandler, "remove_diacritics_nfkd", side_effect=lambda x, **kwargs: x.lower())
+    mocker.patch.object(StrHandler, "remove_diacritics_nfkd", side_effect=lambda x, 
+                        **kwargs: x.lower())
     
     result = ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=1)
     
@@ -807,10 +850,12 @@ def test_paginate_text_blocks_invalid_pages_join(
     """
     if not isinstance(invalid_pages_join, int):
         with pytest.raises(TypeError, match="int_pages_join must be of type int"):
-            ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=invalid_pages_join)
+            ingestion_instance.paginate_text_blocks(mock_fitz_document, 
+                                                    int_pages_join=invalid_pages_join)
     else:
         with pytest.raises(ValueError, match="int_pages_join must be a positive integer"):
-            ingestion_instance.paginate_text_blocks(mock_fitz_document, int_pages_join=invalid_pages_join)
+            ingestion_instance.paginate_text_blocks(mock_fitz_document, 
+                                                    int_pages_join=invalid_pages_join)
 
 # --------------------------
 # Tests for get_file
@@ -881,7 +926,8 @@ def test_get_file_invalid_response(
     -------
     None
     """
-    with pytest.raises(TypeError, match="resp_req must be one of types: Response, Page, WebDriver"):
+    with pytest.raises(TypeError, 
+                       match="resp_req must be one of types: Response, Page, WebDriver"):
         ingestion_instance.get_file(invalid_resp)
 
 # --------------------------
