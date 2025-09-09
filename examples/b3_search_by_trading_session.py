@@ -15,6 +15,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3InstrumentsFileOptnOnEqts,
     B3InstrumentsFileOptnOnSpotAndFutrs,
     B3MappingOTCInstrumentGroups,
+    B3MappingStandardizedInstrumentGroups,
     B3OtherDailyLiquidityLimits,
     B3PriceReport,
     B3PrimitiveRiskFactors,
@@ -24,6 +25,16 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3VariableFees,
 )
 
+
+cls_ = B3MappingStandardizedInstrumentGroups(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 MAPPING STANDARDIZED INSTRUMENT GROUPS: \n{df_}")
+df_.info()
 
 cls_ = B3MappingOTCInstrumentGroups(
     date_ref=None,

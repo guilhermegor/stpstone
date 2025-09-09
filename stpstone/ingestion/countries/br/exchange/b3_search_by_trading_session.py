@@ -2353,7 +2353,7 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=",", skiprows=0, names=[
+        return pd.read_csv(file, sep=";", skiprows=1, names=[
             "TIPO",
             "ID_GRUPO_INSTRUMENTOS",
             "ID_CAMARA_ATIVO_OBJETO",
@@ -2382,7 +2382,74 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
             "DESCRICAO_QUALIFICADOR": "category",
         },
         str_fmt_dt: str = "YYYY-MM-DD",
-        str_table_name: str = "br_b3_tradable_security_list"
+        str_table_name: str = "br_b3_mapping_otc_instrument_groups"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+
+
+class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
+    """B3 Mapping Standardized Instrument Groups."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=MP{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.read_csv(file, sep=";", skiprows=1, names=[
+                "TIPO",
+                "ID_GRUPO_INSTRUMENTOS",
+                "ID_FORMULA_RISCO",
+                "ID_FPR",
+                "ID_QUALIFICADOR",
+                "DESCRICAO_QUALIFICADOR",
+                "DATA_INICIAL_INTERVALO_VENCIMENTOS", 
+                "DATA_FINAL_INTERVALO_VENCIMENTOS",
+                "INDICADOR_FPR_INDEPENDENTE",
+            ]
+        )
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "TIPO": str,
+            "ID_GRUPO_INSTRUMENTOS": int,
+            "ID_FORMULA_RISCO": int,
+            "ID_FPR": int,
+            "ID_QUALIFICADOR": int,
+            "DESCRICAO_QUALIFICADOR": "category",
+            "DATA_INICIAL_INTERVALO_VENCIMENTOS": "date",
+            "DATA_FINAL_INTERVALO_VENCIMENTOS": "date",
+            "INDICADOR_FPR_INDEPENDENTE": int,
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        str_table_name: str = "br_b3_mapping_otc_instrument_groups"
     ) -> Optional[pd.DataFrame]:
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
