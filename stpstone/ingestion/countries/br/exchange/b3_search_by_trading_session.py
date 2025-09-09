@@ -9,7 +9,7 @@ import tempfile
 from typing import Optional, Union
 
 import backoff
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
 import requests
@@ -657,7 +657,6 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
                 self.logger, f"Failed to cleanup cache: {e}", 
                 "warning"
             )
-            raise ValueError(f"Failed to cleanup cache. Erro: {e}")
 
     def __del__(self):
         """Cleanup on destruction."""
@@ -847,7 +846,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
                 "TradgCcy", 
                 "MktCptlstn", 
                 "LastPric", 
-                "FirstPric", 
+                "FrstPric", 
                 "DaysToSttlm", 
                 "RghtsIssePric", 
                 "AsstSubTp", 
@@ -856,7 +855,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
             list_tups_attributes=[
                 ("MktCptlstn", "Ccy"),
                 ("LastPric", "Ccy"),
-                ("FirstPric", "Ccy"),
+                ("FrstPric", "Ccy"),
                 ("RghtsIssePric", "Ccy"),
             ]
         )
@@ -891,14 +890,14 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
                 "TRADG_CCY": str,
                 "MKT_CPTLSTN": str,
                 "LAST_PRIC": float,
-                "FIRST_PRIC": float,
+                "FRST_PRIC": float,
                 "DAYS_TO_STTLM": int,
                 "RGHTS_ISSE_PRIC": float,
                 "ASST_SUB_TP": str,
                 "AUCTN_TP": str, 
                 "MKT_CPTLSTN_CCY": str,
                 "LAST_PRIC_CCY": str,
-                "FIRST_PRIC_CCY": str,
+                "FRST_PRIC_CCY": str,
                 "RGHTS_ISSE_PRIC_CCY": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
@@ -1462,3 +1461,127 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
             cols_from_case="pascal", 
             str_table_name=str_table_name
         )
+
+
+class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
+    """B3 Instruments File Indicators - BVBG.029.02 InstrumentsFile Indicator."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=II{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        soup_xml = self.cls_xml_handler.memory_parser(file)
+        soup_node = self.cls_xml_handler.find_all(soup_xml=soup_xml, tag="Inds")
+        list_ser: list[dict[str, Union[str, int, float]]] = []
+
+        for soup_parent in soup_node:
+            list_ser.append(self._instrument_indicator_node(soup_parent))
+
+        return pd.DataFrame(list_ser)
+    
+    def _instrument_indicator_node(self, soup_parent: Tag) -> dict[str, Union[str, int, float]]:
+        """Get node information from BeautifulSoup XML.
+        
+        Parameters
+        ----------
+        soup_parent : Tag
+            Parsed XML document
+        
+        Returns
+        -------
+        dict[str, Union[str, int, float]]
+            Dictionary containing node information
+        """
+        dict_: dict[str, Union[str, int, float]] = {}
+
+        dict_["ActvtyInd"] = soup_parent.find("RptParams").find("ActvtyInd").text
+        dict_["Frqcy"] = soup_parent.find("RptParams").find("Frqcy").text
+        dict_["NetPosId"] = soup_parent.find("RptParams").find("NetPosId").text
+        dict_["Dt"] = soup_parent.find("RptParams").find("RptDtAndTm").find("Dt").text
+        dict_["Id"] = soup_parent.find("InstrmId").find("OthrId").find("Id").text
+        dict_["Prtry"] = soup_parent.find("InstrmId").find("OthrId").find("Tp")\
+            .find("Prtry").text
+        dict_["MktIdrCd"] = soup_parent.find("InstrmId").find("PlcOfListg")\
+            .find("MktIdrCd").text
+        dict_["InstrmNm"] = soup_parent.find("InstrmInf").find("InstrmNm").text
+        dict_["Desc"] = soup_parent.find("InstrmInf").find("Desc").text
+        dict_["Sgmt"] = soup_parent.find("InstrmInf").find("Sgmt").text
+        dict_["Mkt"] = soup_parent.find("InstrmInf").find("Mkt").text
+        dict_["Asst"] = soup_parent.find("InstrmInf").find("Asst").text
+        dict_["SctyCtgy"] = soup_parent.find("InstrmInf").find("SctyCtgy").text
+        dict_["TpCd"] = soup_parent.find("InstrmDtls").find("EcncIndsInf").find("TpCd").text
+        dict_["EcncIndDesc"] = soup_parent.find("InstrmDtls").find("EcncIndsInf")\
+            .find("EcncIndDesc").text
+        dict_["BaseCd"] = soup_parent.find("InstrmDtls").find("EcncIndsInf")\
+            .find("BaseCd").text
+        dict_["ValTpCd"] = soup_parent.find("InstrmDtls").find("EcncIndsInf")\
+            .find("ValTpCd").text
+        dict_["NtryRefCd"] = soup_parent.find("InstrmDtls").find("EcncIndsInf")\
+            .find("NtryRefCd").text
+        dict_["DcmlPrcsn"] = soup_parent.find("InstrmDtls").find("EcncIndsInf")\
+            .find("DcmlPrcsn").text
+        dict_["Mtrty"] = soup_parent.find("InstrmDtls").find("EcncIndsInf").find("Mtrty").text
+
+        return dict_
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ACTVTY_IND": str,
+            "FRQCY": str,
+            "NET_POS_ID": str,
+            "DT": "date",
+            "ID": str, 
+            "PRTRY": str, 
+            "MKT_IDR_CD": str, 
+            "INSTRM_NM": str, 
+            "DESC": str, 
+            "SGMT": str, 
+            "MKT": str, 
+            "ASST": str, 
+            "SCTY_CTGY": str, 
+            "TP_CD": str, 
+            "ECNC_IND_DESC": str, 
+            "BASE_CD": str, 
+            "VAL_TP_CD": str, 
+            "NTRY_REF_CD": str, 
+            "DCML_PRCSN": str, 
+            "MTRTY": str
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        cols_from_case: str = "pascal",
+        cols_to_case: str = "upper_constant",
+        str_table_name: str = "br_b3_instruments_file_indicator"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
+                           str_table_name=str_table_name)
+    
+

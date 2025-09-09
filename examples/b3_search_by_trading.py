@@ -8,11 +8,23 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3InstrumentsFileEqtyFwd,
     B3InstrumentsFileExrcEqts,
     B3InstrumentsFileFxdIncm,
+    B3InstrumentsFileIndicators,
     B3InstrumentsFileOptnOnEqts,
     B3InstrumentsFileOptnOnSpotAndFutrs,
     B3PriceReport,
     B3StandardizedInstrumentGroups,
 )
+
+
+cls_ = B3InstrumentsFileIndicators(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 INSTRUMENTS FILE INDICATORS: \n{df_}")
+df_.info()
 
 
 cls_ = B3InstrumentsFileEqty(
