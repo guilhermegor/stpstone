@@ -6,6 +6,7 @@ It includes methods for fetching, parsing, and extracting data from XML document
 with proper error handling.
 """
 
+from io import StringIO
 from typing import Optional, Union
 from xml.etree.ElementTree import Element
 
@@ -134,13 +135,13 @@ class XMLFiles(metaclass=TypeChecker):
         except Exception as err:
             raise ValueError(f"Failed to parse XML file_path: {str(err)}") from err
 
-    def memory_parser(self, cache: str) -> BeautifulSoup:
+    def memory_parser(self, cache: Union[str, StringIO]) -> BeautifulSoup:
         """Parse XML content from memory using BeautifulSoup.
 
         Parameters
         ----------
-        cache : str
-            XML content as string
+        cache : Union[str, StringIO]
+            XML content as string or StringIO object
 
         Returns
         -------
@@ -154,10 +155,18 @@ class XMLFiles(metaclass=TypeChecker):
         """
         if not cache:
             raise ValueError("Cache cannot be empty")
+        
+        content = cache.getvalue() if isinstance(cache, StringIO) else cache
+        
         try:
-            # validate xml before parsing with BeautifulSoup, raising an error for invalid ones
-            fromstring(cache)
-            return BeautifulSoup(cache, "xml")
+            if isinstance(content, str):
+                content_bytes = content.encode('utf-8')
+            else:
+                raise ValueError("Cache must be a string or StringIO object")
+            
+            # validate XML before parsing with BeautifulSoup
+            fromstring(content_bytes)
+            return BeautifulSoup(content, "xml")
         except Exception as err:
             raise ValueError(f"Failed to parse XML from memory: {str(err)}") from err
 

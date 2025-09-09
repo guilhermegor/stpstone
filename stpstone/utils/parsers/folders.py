@@ -8,14 +8,14 @@ from collections.abc import Iterable
 from datetime import datetime
 import fnmatch
 import hashlib
-from io import BufferedReader, BytesIO, TextIOWrapper
+from io import BufferedReader, BytesIO, StringIO, TextIOWrapper
 import os
 from pathlib import Path
 import shutil
 import tarfile
 import tempfile
 from typing import Literal, Optional, TypedDict, Union
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import ZIP_DEFLATED, ZipExtFile, ZipFile
 
 import chardet
 import py7zr
@@ -881,6 +881,33 @@ class DirFilesManagement(metaclass=TypeChecker):
             extracted_file = zipfile.open(file_name)
             return TextIOWrapper(extracted_file) if bool_io_interpreting else extracted_file
         return [zipfile.open(file_name) for file_name in zip_names]
+    
+    def recursive_unzip_in_memory(
+        self, 
+        file: Union[BytesIO, ZipExtFile]
+    ) -> list[StringIO]:
+        """Recursive unzip a zip file in memory.
+        
+        Parameters
+        ----------
+        file : Union[BytesIO, ZipExtFile]
+            Zip file to unzip
+
+        Returns
+        -------
+        list[StringIO]
+            List of extracted files
+        """
+        list_: list[StringIO] = []
+        zipfile = ZipFile(file)
+
+        for file_name in zipfile.namelist():
+            if file_name.endswith(".zip"):
+                list_.extend(self.recursive_unzip_in_memory(zipfile.open(file_name)))
+                continue
+            content = zipfile.read(file_name).decode('utf-8')
+            list_.append(StringIO(content))
+        return list_
 
     def calculate_file_hash(self, file_path: str, algorithm: str = "sha256") -> str:
         """Calculate file hash.
