@@ -84,7 +84,7 @@ class DBLogs(metaclass=TypeChecker):
         df_["REF_DATE"] = dt_db_ref
         log_ts = DatesBRAnbima().utc_log_ts()
         df_["LOG_TIMESTAMP"] = (
-            log_ts.strftime("%Y-%m-%d") if bool_format_log_as_str else log_ts
+            log_ts.strftime("%Y-%m-%d %H:%M:%S.%f%z") if bool_format_log_as_str else log_ts
         )
         return df_
 
