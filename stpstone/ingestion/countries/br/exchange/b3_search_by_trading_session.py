@@ -2449,7 +2449,70 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
             "INDICADOR_FPR_INDEPENDENTE": int,
         },
         str_fmt_dt: str = "YYYY-MM-DD",
-        str_table_name: str = "br_b3_mapping_otc_instrument_groups"
+        str_table_name: str = "br_b3_mapping_standardized_instrument_groups"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+
+
+class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
+    """B3 Maximum Theoretical Margin."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=MT{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4, 5, 6], names=[
+                "INSTRUMENT_MTM",
+                "HOLDING_DAY",
+                "MTM_MAX_C_PHI1",
+                "MTM_MAX_V_PHI1",
+                "MIN_MARGIN_CREDIT_COLLATERAL_PHI1",
+                "MIN_MARGIN_CREDIT_COLLATERAL_PHI2",
+                "TICKER",
+            ]
+        )
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "INSTRUMENT_MTM": str,
+            "HOLDING_DAY": str,
+            "MTM_MAX_C_PHI1": str,
+            "MTM_MAX_V_PHI1": str,
+            "MIN_MARGIN_CREDIT_COLLATERAL_PHI1": str,
+            "MIN_MARGIN_CREDIT_COLLATERAL_PHI2": str,
+            "TICKER": str
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        str_table_name: str = "br_b3_maximum_theoretical_margin"
     ) -> Optional[pd.DataFrame]:
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
