@@ -1,46 +1,52 @@
-from getpass import getuser
+"""Anbima data indexes."""
 
-from stpstone.ingestion.countries.br.exchange.indexes_anbima_data import AnbimaDataIndexes
-from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+from stpstone.ingestion.countries.br.exchange.anbima_data_indexes import (
+    AnbimaDataIDAGeral,
+    AnbimaDataIDALIQGeral,
+    AnbimaDataIDKAPre1A,
+    AnbimaDataIMAGeral,
+)
 
 
-cls_ = AnbimaDataIndexes(
-    session=None,
+cls_ = AnbimaDataIMAGeral(
+    date_ref=None,
+    logger=None, 
     cls_db=None
 )
 
-df_ = cls_.source("ima_geral", bool_fetch=True)
-print(f"DF ANBIMA DATA IMA GERAL: \n{df_}")
-df_.info()
-df_.to_csv("data/anbima-ima-geral_{}_{}_{}.csv".format(
-    getuser(),
-    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-    DatesBRAnbima().curr_time().strftime('%H%M%S')
-), index=False)
+df_ = cls_.run()
+print(f"DF ANBIMA DATA INDEXES IMAGERAL: \n{df_}")
+df_.info
 
-df_ = cls_.source("ida_geral", bool_fetch=True)
-print(f"DF ANBIMA DATA IDA GERAL: \n{df_}")
-df_.info()
-df_.to_csv("data/anbima-ida-geral_{}_{}_{}.csv".format(
-    getuser(),
-    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-    DatesBRAnbima().curr_time().strftime('%H%M%S')
-), index=False)
 
-df_ = cls_.source("ida_liq_geral", bool_fetch=True)
-print(f"DF ANBIMA DATA IDA LIQ GERAL: \n{df_}")
-df_.info()
-df_.to_csv("data/anbima-ida-liq-geral_{}_{}_{}.csv".format(
-    getuser(),
-    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-    DatesBRAnbima().curr_time().strftime('%H%M%S')
-), index=False)
+cls_ = AnbimaDataIDAGeral(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
 
-df_ = cls_.source("idka_pre_1a", bool_fetch=True)
-print(f"DF ANBIMA DATA IDKA PRE 1A: \n{df_}")
-df_.info()
-df_.to_csv("data/anbima-idka-pre-1a_{}_{}_{}.csv".format(
-    getuser(),
-    DatesBRAnbima().curr_date().strftime('%Y%m%d'),
-    DatesBRAnbima().curr_time().strftime('%H%M%S')
-), index=False)
+df_ = cls_.run()
+print(f"DF ANBIMA DATA INDEXES IDA GERAL: \n{df_}")
+df_.info
+
+
+cls_ = AnbimaDataIDALIQGeral(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run()
+print(f"DF ANBIMA DATA INDEXES IDA LIQ GERAL: \n{df_}")
+df_.info
+
+
+cls_ = AnbimaDataIDKAPre1A(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run()
+print(f"DF ANBIMA DATA INDEXES IDKA PRE1A: \n{df_}")
+df_.info
