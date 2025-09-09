@@ -293,7 +293,7 @@ class DFStandardization(metaclass=TypeChecker):
         """
         df_ = df_.replace("", np.nan)
         list_cols = [col_ for col_ in list(df_.columns) if col_ not in self.list_cols_dt]
-        if self.dict_fillna_strt:
+        if self.dict_fillna_strt and len(self.dict_fillna_strt) > 0:
             for col_, strt_fill_na in self.dict_fillna_strt.items():
                 if col_ not in list_cols:
                     continue
@@ -306,30 +306,6 @@ class DFStandardization(metaclass=TypeChecker):
         if self.list_cols_dt:
             df_[self.list_cols_dt] = df_[self.list_cols_dt].fillna(self.str_dt_fillna)
         df_[list_cols] = df_[list_cols].fillna(self.str_data_fillna)
-        return df_
-
-    def replace_num_delimiters(self, df_: pd.DataFrame) -> pd.DataFrame:
-        """Replace numeric delimiters in the DataFrame.
-        
-        Parameters
-        ----------
-        df_ : pd.DataFrame
-            The DataFrame to replace numeric delimiters in.
-        
-        Returns
-        -------
-        pd.DataFrame
-            The DataFrame with numeric delimiters replaced.
-        """
-        list_cols_numerical = [
-            k for k, v in self.dict_dtypes.items()
-            if v in ["int64", "float64", "int32", "float32", int, float, "int", "float"]
-        ]
-        for col_ in list_cols_numerical:
-            if col_ in df_.columns and df_[col_].dtype == "object":
-                df_[col_] = df_[col_].str.replace(r"\.", "", regex=True)
-                df_[col_] = df_[col_].str.replace(",", ".", regex=True)
-                df_[col_] = pd.to_numeric(df_[col_], errors="coerce")
         return df_
 
     def change_dtypes(self, df_: pd.DataFrame) -> pd.DataFrame:
@@ -468,7 +444,6 @@ class DFStandardization(metaclass=TypeChecker):
             self.limit_columns_to_dtypes,
             self.delete_empty_rows,
             self.filler,
-            self.replace_num_delimiters,
             self.change_dtypes,
             self.strip_hidden_characters,
             self.strip_data,
