@@ -14,6 +14,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3InstrumentsFileIndicators,
     B3InstrumentsFileOptnOnEqts,
     B3InstrumentsFileOptnOnSpotAndFutrs,
+    B3MappingOTCInstrumentGroups,
     B3OtherDailyLiquidityLimits,
     B3PriceReport,
     B3PrimitiveRiskFactors,
@@ -22,6 +23,17 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3MappingOTCInstrumentGroups(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 MAPPING OTC INSTRUMENT GROUPS: \n{df_}")
+df_.info()
 
 
 cls_ = B3TradableSecurityList(

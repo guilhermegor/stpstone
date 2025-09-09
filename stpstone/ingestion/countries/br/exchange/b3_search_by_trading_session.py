@@ -1919,7 +1919,7 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
     
 
 class B3VariableFees(ABCB3SearchByTradingSession):
-    """B3 Variable Fees - BVBG.024.01 Fee Variables."""
+    """B3 Variable Fees BVBG.024.01 Fee Variables."""
 
     def __init__(
         self, 
@@ -2236,7 +2236,6 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
             "MIN_CROSS_QTY",
             "ISIN_NUMBER",
             "CLEARING_HOUSE_ID",
-            "FILE_NAME"
         ])
     
     def run(
@@ -2261,17 +2260,17 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
             "MATURITY_DATE": "date",
             "ISSUE_DATE": "date",
             "COUNTRY_OF_ISSUE": "category",
-            "STRIKE_PRICE": "float",
+            "STRIKE_PRICE": float,
             "STRIKE_CURRENCY": "category",
             "EXERCISE_STYLE": "category",
-            "CONTRACT_MULTIPLIER": "float",
+            "CONTRACT_MULTIPLIER": float,
             "SECURITY_DESC": str,
             "CONTRACT_SETTL_MONTH": int,
             "DATED_DATE": int,
             "SETTL_TYPE": "category",
             "SETTL_DATE": "date",
             "PRICE_DIVISOR": int,
-            "MIN_PRICE_INCREMENT": "float",
+            "MIN_PRICE_INCREMENT": float,
             "TICK_SIZE_DENOMINATOR": int,
             "MIN_ORDER_QTY": int,
             "MAX_ORDER_QTY": int,
@@ -2315,7 +2314,6 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
             "MIN_CROSS_QTY": int,
             "ISIN_NUMBER": str,
             "CLEARING_HOUSE_ID": int,
-            "FILE_NAME": str
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_tradable_security_list"
@@ -2326,3 +2324,67 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
                            str_table_name=str_table_name)
     
     
+class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
+    """B3 Mapping OTC Instrument Groups."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=MO{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.read_csv(file, sep=",", skiprows=0, names=[
+            "TIPO",
+            "ID_GRUPO_INSTRUMENTOS",
+            "ID_CAMARA_ATIVO_OBJETO",
+            "ID_INSTRUMENTO_ATIVO_OBJETO",
+            "ORIGEM_INSTRUMENTO_ATIVO_OBJETO",
+            "ID_FORMULA_RISCO",
+            "ID_FPR",
+            "ID_QUALIFICADOR",
+            "DESCRICAO_QUALIFICADOR",
+        ])
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "TIPO": str,
+            "ID_GRUPO_INSTRUMENTOS": int,
+            "ID_CAMARA_ATIVO_OBJETO": "category",
+            "ID_INSTRUMENTO_ATIVO_OBJETO": int,
+            "ORIGEM_INSTRUMENTO_ATIVO_OBJETO": "category",
+            "ID_FORMULA_RISCO": int,
+            "ID_FPR": int,
+            "ID_QUALIFICADOR": int,
+            "DESCRICAO_QUALIFICADOR": "category",
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        str_table_name: str = "br_b3_tradable_security_list"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
