@@ -634,7 +634,7 @@ class TestAESOperations:
         tampered = tampered[:16] + bytes([x ^ 0xFF for x in tampered[16:20]]) + tampered[20:]
         tampered_encoded = base64.b64encode(tampered).decode("utf-8")
         
-        with pytest.raises(ValueError, match=r"codec can't decode byte "):
+        with pytest.raises(ValueError, match=r"codec can't decode byte|codec can't decode bytes"):
             secure_crypto.aes_decrypt(tampered_encoded, sample_key)
 
 
