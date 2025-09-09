@@ -307,6 +307,50 @@ class DFStandardization(metaclass=TypeChecker):
             df_[self.list_cols_dt] = df_[self.list_cols_dt].fillna(self.str_dt_fillna)
         df_[list_cols] = df_[list_cols].fillna(self.str_data_fillna)
         return df_
+    
+    def replace_num_delimiters(self, df_: pd.DataFrame) -> pd.DataFrame:
+        """Replace comma decimal separators with periods in numeric string columns and convert.
+        
+        Only processes columns that:
+        1. Are of object type (strings)
+        2. Contain data with either "." or "," characters
+        3. Appear to contain numeric values with European-style formatting
+        
+        Parameters
+        ----------
+        df_ : pd.DataFrame
+            The DataFrame to process.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with numeric string columns converted to float.
+        """
+        df_ = df_.copy()
+        
+        for col in df_.columns:
+            if df_[col].dtype == "object":
+                try:
+                    sample_data = df_[col].dropna().head(10)
+
+                    has_numeric_pattern = any(
+                        isinstance(val, str) and 
+                        ('.' in val or ',' in val) and
+                        any(char.isdigit() for char in val) and
+                        (',' in val and val.replace(',', '').replace('.', '').isdigit() or
+                        '.' in val and val.count('.') > 1)
+                        for val in sample_data if pd.notna(val)
+                    )
+                    
+                    if has_numeric_pattern:
+                        df_[col] = df_[col].str.replace(r"\.", "", regex=True)
+                        df_[col] = df_[col].str.replace(",", ".", regex=True)
+                        df_[col] = pd.to_numeric(df_[col], errors="coerce")
+                        
+                except (AttributeError, TypeError):
+                    continue
+        
+        return df_
 
     def change_dtypes(self, df_: pd.DataFrame) -> pd.DataFrame:
         """Change the data types of the DataFrame.
@@ -327,10 +371,7 @@ class DFStandardization(metaclass=TypeChecker):
         }
         df_ = df_.astype(dict_dtypes, errors=self.type_error_action)
         for col_ in self.list_cols_dt:
-            if col_ != "REF_DATE":
-                str_fmt_dt = self.str_fmt_dt
-            else:
-                str_fmt_dt = "YYYY-MM-DD"
+            str_fmt_dt = self.str_fmt_dt if col_ != "REF_DATE" else "YYYY-MM-DD"
             df_[col_] = df_[col_].apply(
                 lambda x, fmt=str_fmt_dt: (
                     self.cls_dates.str_date_to_datetime(x, fmt)
@@ -444,6 +485,7 @@ class DFStandardization(metaclass=TypeChecker):
             self.limit_columns_to_dtypes,
             self.delete_empty_rows,
             self.filler,
+            self.replace_num_delimiters,
             self.change_dtypes,
             self.strip_hidden_characters,
             self.strip_data,
