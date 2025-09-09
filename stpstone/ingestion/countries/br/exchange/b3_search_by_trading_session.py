@@ -1585,3 +1585,106 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
                            str_table_name=str_table_name)
     
 
+class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
+    """B3 Fee Daily Unit Cost - BVBG.044.01 Fee Daily Unit Cost."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=DI{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        soup_xml = self.cls_xml_handler.memory_parser(file)
+        soup_node = self.cls_xml_handler.find_all(soup_xml=soup_xml, tag="FeeInstrmInf")
+        list_ser: list[dict[str, Union[str, int, float]]] = []
+
+        for soup_parent in soup_node:
+            list_ser.append(self._instrument_indicator_node(soup_parent))
+
+        return pd.DataFrame(list_ser)
+    
+    def _instrument_indicator_node(self, soup_parent: Tag) -> dict[str, Union[str, int, float]]:
+        """Get node information from BeautifulSoup XML.
+        
+        Parameters
+        ----------
+        soup_parent : Tag
+            Parsed XML document
+        
+        Returns
+        -------
+        dict[str, Union[str, int, float]]
+            Dictionary containing node information
+        """
+        dict_: dict[str, Union[str, int, float]] = {}
+
+        dict_["Sgmt"] = soup_parent.find("FinInstrmAttrbts").find("Sgmt").text
+        dict_["Mkt"] = soup_parent.find("FinInstrmAttrbts").find("Mkt").text
+        dict_["Asst"] = soup_parent.find("FinInstrmAttrbts").find("Asst").text
+        dict_["XprtnCd"] = soup_parent.find("FinInstrmAttrbts").find("XprtnCd").text
+        dict_["DayTradInd"] = soup_parent.find("TradInf").find("DayTradInd").text
+        dict_["TradTxTp"] = soup_parent.find("TradInf").find("TradTxTp").text
+        dict_["AmtXchgFeeUnitCost"] = soup_parent.find("XchgFeeUnitCost").find("Amt").text
+        dict_["AmtXchgFeeUnitCostCcy"] = soup_parent.find("XchgFeeUnitCost").find("Amt").get("Ccy")
+        dict_["AmtRegnFeeUnitCost"] = soup_parent.find("RegnFeeUnitCost").find("Amt").text
+        dict_["AmtRegnFeeUnitCostCcy"] = soup_parent.find("RegnFeeUnitCost").find("Amt").get("Ccy")
+
+        return dict_
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ACTVTY_IND": str,
+            "FRQCY": str,
+            "NET_POS_ID": str,
+            "DT": "date",
+            "ID": str, 
+            "PRTRY": str, 
+            "MKT_IDR_CD": str, 
+            "INSTRM_NM": str, 
+            "DESC": str, 
+            "SGMT": str, 
+            "MKT": str, 
+            "ASST": str, 
+            "SCTY_CTGY": str, 
+            "TP_CD": str, 
+            "ECNC_IND_DESC": str, 
+            "BASE_CD": str, 
+            "VAL_TP_CD": str, 
+            "NTRY_REF_CD": str, 
+            "DCML_PRCSN": str, 
+            "MTRTY": str
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        cols_from_case: str = "pascal",
+        cols_to_case: str = "upper_constant",
+        str_table_name: str = "br_b3_instruments_file_indicator"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
+                           str_table_name=str_table_name)

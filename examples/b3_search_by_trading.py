@@ -13,7 +13,19 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3InstrumentsFileOptnOnSpotAndFutrs,
     B3PriceReport,
     B3StandardizedInstrumentGroups,
+    B3FeeDailyUnitCost
 )
+
+
+cls_ = B3InstrumentsFileIndicators(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 FEE DAILY UNIT COST: \n{df_}")
+df_.info()
 
 
 cls_ = B3InstrumentsFileIndicators(
