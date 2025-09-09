@@ -4,6 +4,8 @@ from abc import abstractmethod
 from datetime import date
 from io import BytesIO, StringIO
 from logging import Logger
+from pathlib import Path
+import tempfile
 from typing import Optional, Union
 
 import backoff
@@ -482,7 +484,7 @@ class B3PriceReport(ABCB3SearchByTradingSession):
 
 
 class B3InstrumentsFile(ABCB3SearchByTradingSession):
-    """B3 Instruments File BVBG.028.02 InstrumentsFile."""
+    """B3 Instruments File BVBG.028.02 InstrumentsFile with temporary caching."""
 
     def __init__(
         self, 
@@ -494,8 +496,176 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             date_ref=date_ref, 
             logger=logger, 
             cls_db=cls_db, 
-            url="https://www.b3.com.br/pesquisapregao/download?filelist=PR{}.zip"
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=IN{}.zip"
         )
+        
+        self.temp_dir = Path(tempfile.mkdtemp(prefix="b3_instruments_"))
+        self.cls_create_log.log_message(
+            self.logger, 
+            f"Created temporary directory: {self.temp_dir}", 
+            "info"
+        )
+
+    def _get_cached_file_path(self) -> Path:
+        """Get the cached file path for the current date.
+        
+        Returns
+        -------
+        Path
+            Path to the cached XML file
+        """
+        filename = f"instruments_{self.date_ref.strftime('%y%m%d')}.xml"
+        return self.temp_dir / filename
+
+    def _load_from_cache(self) -> Optional[StringIO]:
+        """Load XML content from cache if available.
+        
+        Returns
+        -------
+        Optional[StringIO]
+            Cached XML content or None if not found
+
+        Raises
+        ------
+        ValueError
+            If cache file is not found
+            If failing to load from cache
+        """
+        cache_path = self._get_cached_file_path()
+        if cache_path.exists():
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Loading XML from cache: {cache_path}", 
+                "info"
+            )
+            try:
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                return StringIO(content)
+            except Exception as e:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Failed to load from cache: {e}", 
+                    "error"
+                )
+                raise ValueError(f"Failed to load from cache. Erro: {e}")
+        raise ValueError("Cache file not found.")
+
+    def _save_to_cache(self, xml_content: str) -> None:
+        """Save XML content to cache.
+        
+        Parameters
+        ----------
+        xml_content : str
+            XML content to save
+        """
+        cache_path = self._get_cached_file_path()
+        try:
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                f.write(xml_content)
+                
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Saved XML to cache: {cache_path}", 
+                "info"
+            )
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, f"Failed to save to cache: {e}", 
+                "warning"
+            )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content and cache it.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+        """
+        file_io = self.cls_dir_files_management.recursive_unzip_in_memory(
+            BytesIO(resp_req.content))[0]
+        
+        xml_content = file_io.getvalue()
+        self._save_to_cache(xml_content)
+        
+        # reset file pointer
+        file_io.seek(0)
+        return file_io
+
+    def get_cached_or_fetch(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True
+    ) -> StringIO:
+        """Get XML content from cache or fetch from server.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
+        
+        Returns
+        -------
+        StringIO
+            The XML content
+        """
+        try:
+            cached_content = self._load_from_cache()
+            return cached_content
+        except ValueError:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Cache miss, fetching from server: {self.url}", 
+                "warning"
+            )
+            
+            resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+            return self.parse_raw_file(resp_req)
+
+    def cleanup_cache(self) -> None:
+        """Clean up the temporary directory and all cached files.
+        
+        Raises
+        ------
+        ValueError
+            If failing to cleanup cache
+        """
+        try:
+            import shutil
+            if self.temp_dir.exists():
+                shutil.rmtree(self.temp_dir)
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Cleaned up temporary directory: {self.temp_dir}", 
+                    "info"
+                )
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, f"Failed to cleanup cache: {e}", 
+                "warning"
+            )
+            raise ValueError(f"Failed to cleanup cache. Erro: {e}")
+
+    def __del__(self):
+        """Cleanup on destruction."""
+        try:
+            self.cleanup_cache()
+        except:
+            # ignore errors during cleanup in destructor
+            pass
 
     def transform_data(
         self, 
@@ -517,7 +687,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             The transformed DataFrame.
         """
         soup_xml = self.cls_xml_handler.memory_parser(file)
-        list_ser = self.get_node_info(
+        list_ser = self._get_node_info(
             soup_xml=soup_xml, 
             tag_parent=tag_parent, 
             list_tags_children=list_tags_children, 
@@ -525,7 +695,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         )
         return pd.DataFrame(list_ser)
     
-    def get_node_info(
+    def _get_node_info(
         self, 
         soup_xml: BeautifulSoup, 
         tag_parent: str, 
@@ -558,11 +728,14 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             for tag in list_tags_children:
                 soup_content_tag = soup_parent.find(tag)
                 dict_[tag] = soup_content_tag.getText() if soup_content_tag else None
-            for tag, attribute in list_tups_attributes:
-                soup_content_tag = soup_parent.find(tag)
-                dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag \
-                    else None
+            if list_tups_attributes is not None and len(list_tups_attributes) > 0:
+                for tag, attribute in list_tups_attributes:
+                    soup_content_tag = soup_parent.find(tag)
+                    dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag \
+                        else None
             list_ser.append(dict_)
+
+        return list_ser
 
     def run(
         self,
@@ -575,11 +748,53 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         cols_to_case: str = "upper_constant",
         str_table_name: str = "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        """Run the ingestion process with caching.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        dict_dtypes : dict[str, Union[str, int, float]], optional
+            Data types mapping, by default {}
+        str_fmt_dt : str, optional
+            Date format string, by default "YYYY-MM-DD"
+        cols_from_case : str, optional
+            Source column case format, by default "pascal"
+        cols_to_case : str, optional
+            Target column case format, by default "upper_constant"
+        str_table_name : str, optional
+            The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        # Use cached file or fetch from server
+        file = self.get_cached_or_fetch(timeout=timeout, bool_verify=bool_verify)
+        df_ = self.transform_data(file=file)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes=dict_dtypes, 
+            str_fmt_dt=str_fmt_dt,
+            url=self.url,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
 
 
 class B3InstrumentsFileEqty(B3InstrumentsFile):
@@ -594,8 +809,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
-            cls_db=cls_db, 
-            url="https://www.b3.com.br/pesquisapregao/download?filelist=PR{}.zip"
+            cls_db=cls_db,
         )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
@@ -651,47 +865,48 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "SCTY_CTGY": str,
-            "ISIN": str,
-            "DSTRBTN_ID": str,
-            "CFI_CD": str,
-            "SPCFCTN_CD": str,
-            "CRPN_NM": str,
-            "TCKR_SYMB": str,
-            "PMT_TP": str,
-            "ALLCN_RND_LOT": int,
-            "PRIC_FCTR": float,
-            "TRADG_START_DT": str,
-            "TRADG_END_DT": str,
-            "CORP_ACTN_START_DT": str,
-            "EXDSTRBTN_NB": int,
-            "CTDY_TRTMNT_TP": str,
-            "TRADG_CCY": str,
-            "MKT_CPTLSTN": str,
-            "LAST_PRIC": float,
-            "FIRST_PRIC": float,
-            "DAYS_TO_STTLM": int,
-            "RGHTS_ISSE_PRIC": float,
-            "ASST_SUB_TP": str,
-            "AUCTN_TP": str, 
-            "MKT_CPTLSTN_CCY": str,
-            "LAST_PRIC_CCY": str,
-            "FIRST_PRIC_CCY": str,
-            "RGHTS_ISSE_PRIC_CCY": str,
-        },
-        str_fmt_dt: str = "YYYY-MM-DD",
-        cols_from_case: str = "pascal",
-        cols_to_case: str = "upper_constant",
+        bool_insert_or_ignore: bool = False,
         str_table_name: str = "br_b3_instruments_file_eqty"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
-    
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "ISIN": str,
+                "DSTRBTN_ID": str,
+                "CFICD": str,
+                "SPCFCTN_CD": str,
+                "CRPN_NM": str,
+                "TCKR_SYMB": str,
+                "PMT_TP": str,
+                "ALLCN_RND_LOT": int,
+                "PRIC_FCTR": float,
+                "TRADG_START_DT": str,
+                "TRADG_END_DT": str,
+                "CORP_ACTN_START_DT": str,
+                "EXDSTRBTN_NB": int,
+                "CTDY_TRTMNT_TP": str,
+                "TRADG_CCY": str,
+                "MKT_CPTLSTN": str,
+                "LAST_PRIC": float,
+                "FIRST_PRIC": float,
+                "DAYS_TO_STTLM": int,
+                "RGHTS_ISSE_PRIC": float,
+                "ASST_SUB_TP": str,
+                "AUCTN_TP": str, 
+                "MKT_CPTLSTN_CCY": str,
+                "LAST_PRIC_CCY": str,
+                "FIRST_PRIC_CCY": str,
+                "RGHTS_ISSE_PRIC_CCY": str,
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            cols_to_case="upper_constant",
+            str_table_name=str_table_name,
+        )
+
 
 class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
     """B3 Instruments File BVBG.028.02 InstrumentsFile (OptnOnEqts)."""
@@ -705,8 +920,7 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
-            cls_db=cls_db, 
-            url="https://www.b3.com.br/pesquisapregao/download?filelist=PR{}.zip"
+            cls_db=cls_db,
         )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
@@ -758,37 +972,493 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "SCTY_CTGY": str,
-            "ISIN": str,
-            "DSTRBTN_ID": str,
-            "CFI_CD": str,
-            "TCKR_SYMB": str,
-            "EXRC_PRIC": float,
-            "OPTN_STYLE": str,
-            "XPRTN_DT": "date",
-            "OPTN_TP": str,
-            "SRS_TP": str,
-            "PRTCN_FLG": str,
-            "PRM_UPFRNT_IND": str,
-            "TRADG_START_DT": "date",
-            "TRADG_END_DT": "date",
-            "PMT_TP": str,
-            "ALLCN_RND_LOT": int,
-            "PRIC_FCTR": int,
-            "TRADG_CCY": str,
-            "DAYS_TO_STTLM": int,
-            "DLVRY_TP": str,
-            "AUTOMTC_EXRC_IND": str,
-            "EXRC_PRIC_CCY": str,
-        },
-        str_fmt_dt: str = "YYYY-MM-DD",
-        cols_from_case: str = "pascal",
-        cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_instruments_file_optn_on_eqts"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "ISIN": str,
+                "DSTRBTN_ID": str,
+                "CFICD": str,
+                "TCKR_SYMB": str,
+                "EXRC_PRIC": float,
+                "OPTN_STYLE": str,
+                "XPRTN_DT": "date",
+                "OPTN_TP": str,
+                "SRS_TP": str,
+                "PRTCN_FLG": str,
+                "PRM_UPFRNT_IND": str,
+                "TRADG_START_DT": "date",
+                "TRADG_END_DT": "date",
+                "PMT_TP": str,
+                "ALLCN_RND_LOT": int,
+                "PRIC_FCTR": int,
+                "TRADG_CCY": str,
+                "DAYS_TO_STTLM": int,
+                "DLVRY_TP": str,
+                "AUTOMTC_EXRC_IND": str,
+                "EXRC_PRIC_CCY": str,
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )
+    
+
+class B3InstrumentsFileOptnOnSpotAndFutrs(B3InstrumentsFile):
+    """B3 Instruments File BVBG.028.02 InstrumentsFile (OptnOnSpotAndFutrs)."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db,
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            file=file, 
+            tag_parent="OptnOnSpotAndFutrsInf", 
+            list_tags_children=[
+                "ISIN", 
+                "TckrSymb", 
+                "ExrcPric",
+                "ExrcStyle", 
+                "XprtnCd", 
+                "OptnTp",
+                "CtrctMltplr",
+                "AsstQtnQty",
+                "PmtTp",
+                "AllcnRndLot",
+                "CFICd",
+                "PrmUpfrntInd",
+                "TradgStartDt",
+                "TradgEndDt",
+                "OpngPosLmtDt",
+                "TradgCcy",
+                "WdrwlDays",
+                "WrkgDays",
+                "ClnrDays",
+            ], 
+            list_tups_attributes=[
+                ("ExrcPric", "Ccy"),
+            ]
+        )
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_instruments_file_optn_on_spot_and_futrs"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "ISIN": str,
+                "TCKR_SYMB": str,
+                "EXRC_PRIC": float,
+                "EXRC_STYLE": str,
+                "XPRTN_DT": "date",
+                "XPRTN_CD": str,
+                "OPTN_TP": str,
+                "CTRCT_MLTPLR": float,
+                "ASST_QTN_QTY": int,
+                "PMT_TP": str,
+                "ALLCN_RND_LOT": int,
+                "CFICD": str,
+                "PRM_UPFRNT_IND": str,
+                "TRADG_START_DT": "date",
+                "TRADG_END_DT": "date",
+                "OPNG_POS_LMT_DT": "date",
+                "TRADG_CCY": str,
+                "WDRWL_DAYS": int,
+                "WRKG_DAYS": int,
+                "CLNR_DAYS": int,
+                "EXRC_PRIC_CCY": str,
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )
+    
+
+class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
+    """B3 Instruments File BVBG.028.02 InstrumentsFile (ExrcEqts)."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db,
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            file=file, 
+            tag_parent="ExrcEqtsInf", 
+            list_tags_children=[
+                "SctyCtgy",
+                "TckrSymb",
+                "ISIN",
+                "TradgCcy",
+                "TradgStartDt",
+                "TradgEndDt",
+                "DlvryTp",
+            ], 
+            list_tups_attributes=[]
+        )
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_instruments_file_exrc_eqts"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "TCKR_SYMB": str,
+                "ISIN": str,
+                "TRADG_CCY": str,
+                "TRADG_START_DT": "date",
+                "TRADG_END_DT": "date",
+                "DLVRY_TP": str
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )
+
+
+class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
+    """B3 Instruments File BVBG.028.02 InstrumentsFile (EqtyFwd)."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db,
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            file=file, 
+            tag_parent="EqtyFwdInf", 
+            list_tags_children=[
+                "SctyCtgy",
+                "TckrSymb",
+                "ISIN",
+                "DstrbtnId",
+                "CFICd",
+                "PmtTp",
+                "AllcnRndLot",
+                "PricFctr",
+                "TradgStartDt",
+                "TradgEndDt", 
+                "CtdyTrtmntTp",
+                "TradgCcy",
+            ], 
+            list_tups_attributes=[]
+        )
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_instruments_file_eqty_fwd"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "TCKR_SYMB": str,
+                "ISIN": str,
+                "DSTRBTN_ID": str,
+                "CFICD": str,
+                "PMT_TP": str,
+                "ALLCN_RND_LOT": int,
+                "PRIC_FCTR": int,
+                "TRADG_START_DT": "date",
+                "TRADG_END_DT": "date",
+                "CTDY_TRTMNT_TP": str,
+                "TRADG_CCY": str
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )
+    
+
+class B3InstrumentsFileBTC(B3InstrumentsFile):
+    """B3 Instruments File BVBG.028.02 InstrumentsFile (BTC)."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db,
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            file=file, 
+            tag_parent="BTCInf", 
+            list_tags_children=[
+                "SctyCtgy",
+                "TckrSymb",
+                "FngbINd", 
+                "PmtTp",
+            ], 
+            list_tups_attributes=[]
+        )
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_instruments_file_btc"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "TCKR_SYMB": str,
+                "FNGB_IND": str,
+                "PMT_TP": str
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )
+
+
+class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
+    """B3 Instruments File BVBG.028.02 InstrumentsFile (FxdIncm)."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db,
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            file=file, 
+            tag_parent="FxdIncmInf", 
+            list_tags_children=[
+                "SctyCtgy",
+                "ISIN",
+                "TckrSymb",
+                "TradgStartDt",
+                "TradgEndDt",
+                "TradgCcy",
+                "PmtTp",
+                "DaysToSttlm", 
+                "AllcnRndLot",
+                "PricFctr",
+            ], 
+            list_tups_attributes=[]
+        )
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_instruments_file_fxd_incm"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "ISIN": str,
+                "TCKR_SYMB": str,
+                "TRADG_START_DT": "date",
+                "TRADG_END_DT": "date",
+                "TRADG_CCY": str,
+                "PMT_TP": str,
+                "DAYS_TO_STTLM": int,
+                "ALLCN_RND_LOT": int,
+                "PRIC_FCTR": int
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )
+
+
+class B3InstrumentsFileADR(B3InstrumentsFile):
+    """B3 Instruments File BVBG.028.02 InstrumentsFile (ADRInf)."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db,
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            file=file, 
+            tag_parent="FxdIncmInf", 
+            list_tags_children=[
+                "SctyCtgy",
+                "TckrSymb",
+                "ISIN",
+                "CFICd",
+                "CUSIP",
+                "PrgmLvl",
+                "Ppsn",
+                "TradgCcy",
+            ], 
+            list_tups_attributes=[
+                ("Ppsn", "Ccy"),
+            ]
+        )
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_instruments_file_adr"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            dict_dtypes={
+                "SCTY_CTGY": str,
+                "TCKR_SYMB": str,
+                "ISIN": str,
+                "CFICD": str,
+                "CUSIP": str,
+                "PRGM_LVL": str,
+                "PPSN": str,
+                "TRADG_CCY": str,
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="pascal", 
+            str_table_name=str_table_name
+        )

@@ -217,41 +217,25 @@ class DFStandardization(metaclass=TypeChecker):
         pd.DataFrame
             The DataFrame with the columns limited to the specified data types.
         """
-        if self.logger:
-            list_cols_excluded = [
-                x for x in list(df_.columns) 
-                if x not in list(self.dict_dtypes.keys())
-            ]
-            self.cls_create_log.log_message(
-                self.logger,
-                f"list cols dataframe before filtering: {list(df_.columns)}",
-                "info"
-            )
-            self.cls_create_log.log_message(
-                self.logger, 
-                f"list cols to filter: {list(self.dict_dtypes.keys())}",
-                "info"
-            )
-            self.cls_create_log.log_message(
-                self.logger,
-                f"list of columns excluded: {list_cols_excluded}",
-                "info"
-            )
-            self.cls_create_log.log_message(
-                self.logger,
-                f"list cols dataframe before filtering: {list(df_.columns)}",
-                "info"
-            )
-            self.cls_create_log.log_message(
-                self.logger,
-                f"list cols to filter: {list(self.dict_dtypes.keys())}", 
-                "info"
-            )
-            self.cls_create_log.log_message(
-                self.logger,
-                f"list of columns excluded: {list_cols_excluded}", 
-                "info"
-            )
+        list_cols_excluded = [
+            x for x in list(df_.columns) 
+            if x not in list(self.dict_dtypes.keys())
+        ]
+        self.cls_create_log.log_message(
+            self.logger,
+            f"list cols dataframe before filtering: {list(df_.columns)}",
+            "info"
+        )
+        self.cls_create_log.log_message(
+            self.logger, 
+            f"list cols to filter: {list(self.dict_dtypes.keys())}",
+            "info"
+        )
+        self.cls_create_log.log_message(
+            self.logger,
+            f"list of columns excluded: {list_cols_excluded}",
+            "info"
+        )
         list_cols = list(self.dict_dtypes.keys())
         df_ = df_[list_cols]
         return df_
