@@ -4148,3 +4148,99 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
+    
+
+class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
+    """B3 Securities Market - Government Securities Reference Prices."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=PU{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "b3_securities_market_government_securities_prices_",
+        file_name: str = "b3_securities_market_government_securities_prices"
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.read_csv(file, sep=";", skiprows=1, names=[
+                "TIPO_REGISTRO", 
+                "CODIGO_TITULO", 
+                "DESCRICAO_TITULO",
+                "DATA_EMISSAO_TITULO", 
+                "DATA_VENCIMENTO_TITULO",
+                "VALOR_MERCADO_PU", 
+                "VALOR_PU_CENARIO_ESTRESSE", 
+                "VALOR_MTM_PU_D_MAIS_1"
+            ]
+        )
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "TIPO_REGISTRO": str,
+            "CODIGO_TITULO": str,
+            "DESCRICAO_TITULO": str,
+            "DATA_EMISSAO_TITULO": "data",
+            "DATA_VENCIMENTO_TITULO": "data",
+            "VALOR_MERCADO_PU": str,
+            "VALOR_PU_CENARIO_ESTRESSE": str,
+            "VALOR_MTM_PU_D_MAIS_1": str
+        },
+        str_fmt_dt: str = "YYYYMMDD",
+        str_table_name: str = "br_b3_securities_market_government_securities_prices"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)

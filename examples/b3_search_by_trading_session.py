@@ -35,11 +35,22 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3PriceReport,
     B3PrimitiveRiskFactors,
     B3RiskFormulas,
+    B3SecuritiesMarketGovernmentSecuritiesPrices,
     B3StandardizedInstrumentGroups,
     B3TradableSecurityList,
     B3VariableFees,
 )
 
+
+cls_ = B3SecuritiesMarketGovernmentSecuritiesPrices(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 SECURITIES MARKET GOVERNMENT SECURITIES PRICES: \n{df_}")
+df_.info()
 
 cls_ = B3DerivativesMarketSwapMarketRates(
     date_ref=None,
