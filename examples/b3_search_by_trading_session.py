@@ -19,6 +19,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3FXMarketContractedTransactions,
     B3FXMarketVolumeSettled,
     B3IndexReport,
+    B3InstrumentGroupParameters,
     B3InstrumentsFileADR,
     B3InstrumentsFileBTC,
     B3InstrumentsFileEqty,
@@ -42,6 +43,17 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 )
 
 
+cls_ = B3InstrumentGroupParameters(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 INSTRUMENT GROUP PARAMETERS: \n{df_}")
+df_.info()
+
+
 cls_ = B3SecuritiesMarketGovernmentSecuritiesPrices(
     date_ref=None,
     logger=None, 
@@ -51,6 +63,7 @@ cls_ = B3SecuritiesMarketGovernmentSecuritiesPrices(
 df_ = cls_.run(bool_verify=False)
 print(f"DF B3 SECURITIES MARKET GOVERNMENT SECURITIES PRICES: \n{df_}")
 df_.info()
+
 
 cls_ = B3DerivativesMarketSwapMarketRates(
     date_ref=None,

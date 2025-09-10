@@ -4244,3 +4244,76 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
+    
+
+class B3InstrumentGroupParameters(ABCB3SearchByTradingSession):
+    """B3 Instrument Group Parameters."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=PG{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.read_csv(file, sep=";", skiprows=1, names=[
+                "TIPO", 
+                "ID_GRUPO_INSTRUMENTOS", 
+                "MERCADO", 
+                "NOME_CLASSIFICACAO",
+                "PRAZO_MINIMO_ENCERRAMENTO",
+                "LIMITE_LIQUIDEZ",
+                "PRAZO_SUBCARTEIRA", 
+                "PRAZO_LIQUIDACAO", 
+                "PRAZO_LIQUIDACAO_NO_VENCIMENTO", 
+                "DATA_INICIAL_INTERVALO_VENCIMENTOS", 
+                "DATA_FINAL_INTERVALO_VENCIMENTOS",
+                "INDICADOR_MODELO_GENERICO",
+            ]
+        )
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "TIPO": str,
+            "ID_GRUPO_INSTRUMENTOS": str,
+            "MERCADO": str,
+            "NOME_CLASSIFICACAO": str,
+            "PRAZO_MINIMO_ENCERRAMENTO": str,
+            "LIMITE_LIQUIDEZ": str,
+            "PRAZO_SUBCARTEIRA": str,
+            "PRAZO_LIQUIDACAO": str,
+            "PRAZO_LIQUIDACAO_NO_VENCIMENTO": str,
+            "DATA_INICIAL_INTERVALO_VENCIMENTOS": str,
+            "DATA_FINAL_INTERVALO_VENCIMENTOS": str,
+            "INDICADOR_MODELO_GENERICO": str
+        },
+        str_fmt_dt: str = "DD/MM/YYYY",
+        str_table_name: str = "br_b3_instrument_group_parameters"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
