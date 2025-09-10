@@ -3803,6 +3803,135 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
                            str_table_name=str_table_name)
     
 
+class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
+    """B3 Derivatives Market - IDxUS Dollar Swap - Mark-to-Market."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=MM{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "b3_derivatives_market_list_isin_swaps_",
+        file_name: str = "b3_derivatives_market_list_isin_swaps"
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 6), # ID_TRANSACAO
+            (6, 9), # COMPLEMENTO_TRANSACAO
+            (9, 11), # TIPO_REGISTRO
+            (11, 19), # DATA_GERACAO_ARQUIVO
+            (19, 25), # REFERENCIA
+            (25, 28), # CODIGO_PRODUTO
+            (28, 32), # SERIE
+            (32, 33), # INDICADOR_AJUSTE_PERIODO
+            (33, 41), # DATA_VENCIMENTO
+            (41, 46), # PRAZO_DIAS_CORRIDOS
+            (46, 47), # SINAL_TAXA_MERCADO
+            (47, 59), # TAXA_MERCADO
+            (59, 75), # FATOR_DESCONTO
+            (75, 97), # VALOR_MERCADO
+            (97, 113), # FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA
+        ]
+        
+        column_names = [
+            "ID_TRANSACAO",
+            "COMPLEMENTO_TRANSACAO",
+            "TIPO_REGISTRO",
+            "DATA_GERACAO_ARQUIVO",
+            "REFERENCIA",
+            "CODIGO_PRODUTO",
+            "SERIE",
+            "INDICADOR_AJUSTE_PERIODO",
+            "DATA_VENCIMENTO",
+            "PRAZO_DIAS_CORRIDOS",
+            "SINAL_TAXA_MERCADO",
+            "TAXA_MERCADO",
+            "FATOR_DESCONTO",
+            "VALOR_MERCADO",
+            "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA",
+        ]
+        
+        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ID_TRANSACAO": str,
+            "COMPLEMENTO_TRANSACAO": str,
+            "TIPO_REGISTRO": str,
+            "DATA_GERACAO_ARQUIVO": str,
+            "REFERENCIA": str,
+            "CODIGO_PRODUTO": str,
+            "SERIE": str,
+            "INDICADOR_AJUSTE_PERIODO": str,
+            "DATA_VENCIMENTO": str,
+            "PRAZO_DIAS_CORRIDOS": str,
+            "SINAL_TAXA_MERCADO": str,
+            "TAXA_MERCADO": str,
+            "FATOR_DESCONTO": str,
+            "VALOR_MERCADO": str,
+            "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA": str
+        },
+        str_fmt_dt: str = "YYYYMMDD",
+        str_table_name: str = "br_b3_derivatives_market_dollar_swap"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+    
+
 class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
     """B3 Derivatives Market List ISIN Numbers for Swaps."""
 
@@ -3822,8 +3951,8 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
     def parse_raw_file(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
-        prefix: str = "br_derivatives_market_option_reference_premiums_",
-        file_name: str = "b3_derivatives_market_option_reference_premiums"
+        prefix: str = "b3_derivatives_market_list_isin_swaps_",
+        file_name: str = "b3_derivatives_market_list_isin_swaps"
     ) -> StringIO:
         """Parse the raw file content by executing Windows executable with Wine.
         
@@ -3891,11 +4020,9 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
             "CODIGO_ISIN": str
         },
         str_fmt_dt: str = "YYYYMMDD",
-        str_table_name: str = "br_b3_derivatives_market_option_reference_premiums_isin"
+        str_table_name: str = "br_b3_derivatives_market_list_isin_swaps"
     ) -> Optional[pd.DataFrame]:
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
-    
-

@@ -5,6 +5,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3DerivatiesMarketListISINCPRs,
     B3DerivativesMarketCombinedPositions,
     B3DerivativesMarketConsiderationFactors,
+    B3DerivativesMarketDollarSwap,
     B3DerivativesMarketEconomicAgriculturalIndicators,
     B3DerivativesMarketListISINDerivativesContracts,
     B3DerivativesMarketListISINSwaps,
@@ -37,6 +38,17 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3DerivativesMarketDollarSwap(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET DOLLAR SWAP: \n{df_}")
+df_.info()
 
 
 cls_ = B3DerivativesMarketListISINSwaps(
