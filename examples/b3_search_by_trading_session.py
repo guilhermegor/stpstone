@@ -2,6 +2,8 @@
 
 from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session import (
     B3DailyLiquidityLimits,
+    B3DerivativesMarketConsiderationFactors,
+    B3DerivativesMarketMarginScenarios,
     B3FeeDailyUnitCost,
     B3FeeUnitCost,
     B3FXMarketContractedTransactions,
@@ -28,6 +30,27 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3VariableFees,
 )
 
+
+cls_ = B3DerivativesMarketConsiderationFactors(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET CONSIDERATION FACTORS: \n{df_.head(30)}")
+df_.info()
+
+
+cls_ = B3DerivativesMarketMarginScenarios(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET MARGIN SCENARIOS: \n{df_}")
+df_.info()
 
 cls_ = B3FXMarketVolumeSettled(
     date_ref=None,
