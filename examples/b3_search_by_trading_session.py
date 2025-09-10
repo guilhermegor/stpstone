@@ -5,6 +5,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3DerivativesMarketConsiderationFactors,
     B3DerivativesMarketEconomicAgriculturalIndicators,
     B3DerivativesMarketMarginScenarios,
+    B3DerivativesMarketOTCMarketTrades,
     B3EquitiesOptionReferencePremiums,
     B3FeeDailyUnitCost,
     B3FeeUnitCost,
@@ -31,6 +32,17 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3DerivativesMarketOTCMarketTrades(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET OTC MARKET TRADES: \n{df_}")
+df_.info()
 
 
 cls_ = B3EquitiesOptionReferencePremiums(
