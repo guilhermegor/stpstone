@@ -2850,3 +2850,76 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
+
+
+class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
+    """B3 FX Market Volume Settled.
+    
+    Volume settled on a net basis.
+    """
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=CV{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 8),    # ID_TRANSACAO
+            (8, 16),   # DATA_REFERENCIA  
+            (16, 24),  # DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO
+            (24, 37),  # VALOR_LIQUIDO_COMPENSADO_DOLAR
+            (37, 50),  # VALOR_LIQUIDO_COMPENSADO_REAL
+        ]
+        
+        column_names = [
+            "ID_TRANSACAO",
+            "DATA_REFERENCIA",
+            "DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO",
+            "VALOR_LIQUIDO_COMPENSADO_DOLAR",
+            "VALOR_LIQUIDO_COMPENSADO_REAL"
+        ]
+        
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        
+        return df_
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ID_TRANSACAO": str,
+            "DATA_REFERENCIA": "date",
+            "DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO": "date",
+            "VALOR_LIQUIDO_COMPENSADO_DOLAR": float,
+            "VALOR_LIQUIDO_COMPENSADO_REAL": float,
+        },
+        str_fmt_dt: str = "YYYYMMDD",
+        str_table_name: str = "br_b3_fx_market_volume_settled"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
