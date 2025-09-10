@@ -44,7 +44,7 @@ class DFStandardization(metaclass=TypeChecker):
 
     def __init__(
         self,
-        dict_dtypes: dict[str, Any],
+        dict_dtypes: Optional[dict[str, Any]] = {},
         cols_from_case: Optional[TypeCaseFrom] = None,
         cols_to_case: Optional[TypeCaseTo] = None,
         list_cols_drop_dupl: list[str] = None,
@@ -60,8 +60,8 @@ class DFStandardization(metaclass=TypeChecker):
         
         Parameters
         ----------
-        dict_dtypes : dict[str, Any]
-            Dictionary of column names and data types.
+        dict_dtypes : Optional[dict[str, Any]], optional
+            Dictionary of column names and data types, by default {}.
         cols_from_case : Optional[TypeCaseFrom], optional
             Case conversion for column names, by default None.
         cols_to_case : Optional[TypeCaseTo], optional
@@ -92,8 +92,6 @@ class DFStandardization(metaclass=TypeChecker):
         ValueError
             If dict_dtypes is empty
         """
-        if not dict_dtypes:
-            raise ValueError("dict_dtypes cannot be empty")
         self.dict_dtypes = dict_dtypes
         self.cols_from_case = cols_from_case
         self.cols_to_case = cols_to_case

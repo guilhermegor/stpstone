@@ -1,5 +1,7 @@
 """B3 Search by Trading Ingestion."""
 
+from datetime import date
+
 from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session import (
     B3DailyLiquidityLimits,
     B3DerivatiesMarketListISINCPRs,
@@ -13,6 +15,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3DerivativesMarketOptionReferencePremium,
     B3DerivativesMarketOTCMarketTrades,
     B3DerivativesMarketSwapMarketRates,
+    B3EquitiesFeePublicInformation,
     B3EquitiesOptionReferencePremiums,
     B3FeeDailyUnitCost,
     B3FeeUnitCost,
@@ -42,6 +45,17 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3EquitiesFeePublicInformation(
+    date_ref=date(2025, 9, 1),
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 EQUITIES FEE PUBLIC INFORMATION: \n{df_}")
+df_.info()
 
 
 cls_ = B3FixedIncome(

@@ -519,7 +519,7 @@ class B3IndexReport(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
-        str_table_name: str = "br_b3_standardized_instrument_groups"
+        str_table_name: str = "br_b3_index_report"
     ) -> Optional[pd.DataFrame]:
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
@@ -4338,8 +4338,8 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
     def parse_raw_file(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
-        prefix: str = "b3_securities_market_government_securities_prices_",
-        file_name: str = "b3_securities_market_government_securities_prices"
+        prefix: str = "b3_fixed_income_",
+        file_name: str = "b3_fixed_income"
     ) -> StringIO:
         """Parse the raw file content by executing Windows executable with Wine.
         
@@ -4412,4 +4412,167 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+
+
+class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
+    """B3 Equities Fee Public Information."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=TX{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        soup_xml = self.cls_xml_handler.memory_parser(file)
+        soup_node = self.cls_xml_handler.find_all(soup_xml=soup_xml, tag="EqtsFeeInf")
+        list_ser: list[dict[str, Union[str, int, float]]] = []
+
+        for soup_parent in soup_node:
+            # _instrument_indicator_node now returns a list of records
+            records = self._instrument_indicator_node(soup_parent)
+            list_ser.extend(records)
+
+        return pd.DataFrame(list_ser)
+    
+    def _instrument_indicator_node(
+        self, 
+        soup_parent: Tag
+    ) -> list[dict[str, Union[str, int, float]]]:
+        """Get node information from BeautifulSoup XML.
+        
+        Parameters
+        ----------
+        soup_parent : Tag
+            Parsed XML document
+        
+        Returns
+        -------
+        list[dict[str, Union[str, int, float]]]
+            List of dictionaries containing node information for each fee record
+        """
+        list_records: list[dict[str, Union[str, int, float]]] = []
+        
+        # Extract common report information
+        rpt_params = soup_parent.find("RptParams")
+        validity_period = soup_parent.find("VldtyPrd")
+        
+        frqcy = rpt_params.find("Frqcy").text if rpt_params.find("Frqcy") else None
+        rpt_nb = rpt_params.find("RptNb").text if rpt_params.find("RptNb") else None
+        dt = rpt_params.find("RptDtAndTm").find("Dt").text if rpt_params.find("RptDtAndTm") \
+            and rpt_params.find("RptDtAndTm").find("Dt") else None
+        fr_dt = validity_period.find("FrDt").text if validity_period.find("FrDt") else None
+        to_dt = validity_period.find("ToDt").text if validity_period.find("ToDt") else None
+        
+        # extract fee details for each instrument
+        fee_details = soup_parent.find("EqtsFeeDtls")
+        if fee_details:
+            fee_instrm_infos = fee_details.find_all("FeeInstrmInf")
+            
+            for fee_instrm_info in fee_instrm_infos:
+                fee_grp_mkt = fee_instrm_info.find("FeeGrpMkt").text \
+                    if fee_instrm_info.find("FeeGrpMkt") else None
+                
+                # get all fee nodes within this instrument
+                fees = fee_instrm_info.find_all("Fee")
+                
+                for fee in fees:
+                    day_trad_ind = fee.find("DayTradInd").text if fee.find("DayTradInd") else None
+                    
+                    # get all TierAndCost nodes within this fee
+                    tier_and_costs = fee.find_all("TierAndCost")
+                    
+                    for tier_and_cost in tier_and_costs:
+                        dict_record: dict[str, Union[str, int, float]] = {}
+                        
+                        # common fields
+                        dict_record["Frqcy"] = frqcy
+                        dict_record["RptNb"] = rpt_nb
+                        dict_record["Dt"] = dt
+                        dict_record["FrDt"] = fr_dt
+                        dict_record["ToDt"] = to_dt
+                        dict_record["FeeGrpMkt"] = fee_grp_mkt
+                        dict_record["DayTradInd"] = day_trad_ind
+                        
+                        # tier information (optional)
+                        tier_initl_val = tier_and_cost.find("TierInitlVal")
+                        tier_fnl_val = tier_and_cost.find("TierFnlVal")
+                        dict_record["TierInitlVal"] = tier_initl_val.text if tier_initl_val \
+                            else None
+                        dict_record["TierFnlVal"] = tier_fnl_val.text if tier_fnl_val else None
+                        
+                        # fee type
+                        fee_tp = tier_and_cost.find("FeeTp")
+                        dict_record["FeeTp"] = fee_tp.text if fee_tp else None
+                        
+                        # cost information
+                        cost_inf = tier_and_cost.find("CostInf")
+                        if cost_inf:
+                            fee_cost_val = cost_inf.find("FeeCostVal")
+                            dict_record["FeeCostVal"] = fee_cost_val.text if fee_cost_val \
+                                else None
+                            dict_record["FeeCostCcy"] = fee_cost_val.get("Ccy") if fee_cost_val \
+                                else None
+                            
+                            # client category (optional)
+                            clnt_ctgy_dtls = cost_inf.find("ClntCtgyDtls")
+                            if clnt_ctgy_dtls:
+                                clnt_ctgy = clnt_ctgy_dtls.find("ClntCtgy")
+                                dict_record["ClntCtgy"] = clnt_ctgy.text if clnt_ctgy else None
+                            else:
+                                dict_record["ClntCtgy"] = None
+                        
+                        list_records.append(dict_record)
+        
+        return list_records
+
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "FRQCY": str, 
+            "RPT_NB": str,
+            "DT": str,
+            "FR_DT": str,
+            "TO_DT": str,
+            "FEE_GRP_MKT": str,
+            "DAY_TRAD_IND": str,
+            "TIER_INITL_VAL": str,
+            "TIER_FNL_VAL": str,
+            "FEE_TP": str,
+            "FEE_COST_VAL": str,
+            "FEE_COST_CCY": str,
+            "CLNT_CTGY": str,
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        cols_from_case: str = "pascal",
+        cols_to_case: str = "upper_constant",
+        str_table_name: str = "br_b3_instruments_fee_unit_cost"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
                            str_table_name=str_table_name)
