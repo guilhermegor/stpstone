@@ -3705,7 +3705,7 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
     
 
 class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSession):
-    """B3 Derivatives Market List ISIN Numbers for Derivatives Contracts."""
+    """B3 Derivatives Market List ISIN Numbers for Deri1vatives Contracts."""
 
     def __init__(
         self, 
@@ -3801,3 +3801,101 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
+    
+
+class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
+    """B3 Derivatives Market List ISIN Numbers for Swaps."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=IS{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "br_derivatives_market_option_reference_premiums_",
+        file_name: str = "b3_derivatives_market_option_reference_premiums"
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 8), # DATA_CADASTRO
+            (8, 13), # CONTRATO
+            (13, 63), # NOME_CONTRATO
+            (63, 75), # CODIGO_ISIN
+        ]
+        
+        column_names = [
+            "DATA_CADASTRO",
+            "CONTRATO",
+            "NOME_CONTRATO",
+            "CODIGO_ISIN",
+        ]
+        
+        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "DATA_CADASTRO": str,
+            "CONTRATO": str,
+            "NOME_CONTRATO": str,
+            "CODIGO_ISIN": str
+        },
+        str_fmt_dt: str = "YYYYMMDD",
+        str_table_name: str = "br_b3_derivatives_market_option_reference_premiums_isin"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+    
+
