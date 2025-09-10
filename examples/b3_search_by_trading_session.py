@@ -3,7 +3,9 @@
 from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session import (
     B3DailyLiquidityLimits,
     B3DerivativesMarketConsiderationFactors,
+    B3DerivativesMarketEconomicAgriculturalIndicators,
     B3DerivativesMarketMarginScenarios,
+    B3EquitiesOptionReferencePremiums,
     B3FeeDailyUnitCost,
     B3FeeUnitCost,
     B3FXMarketContractedTransactions,
@@ -29,6 +31,28 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3EquitiesOptionReferencePremiums(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 EQUITIES OPTION REFERENCE PREMIUMS: \n{df_}")
+df_.info()
+
+
+cls_ = B3DerivativesMarketEconomicAgriculturalIndicators(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET ECONOMIC AGRICULTURAL INDICATORS: \n{df_}")
+df_.info()
 
 
 cls_ = B3DerivativesMarketConsiderationFactors(

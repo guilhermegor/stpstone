@@ -123,6 +123,167 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         return self.cls_dir_files_management.recursive_unzip_in_memory(
             BytesIO(resp_req.content))[0]
     
+    def parse_raw_ex_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str, 
+        file_name: str,
+    ) -> StringIO:
+        """Parse the raw file content.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        prefix : str
+            The prefix for the temporary directory.
+        file_name : str
+            The name of the file.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+        """
+        ex_file = self.cls_dir_files_management.recursive_unzip_in_memory(
+            BytesIO(resp_req.content))[0]
+        
+        temp_dir = Path(tempfile.mkdtemp(prefix=prefix))
+        
+        try:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Created temporary directory: {temp_dir}", 
+                "info"
+            )
+            
+            exe_filename = f"{file_name}_{self.date_ref.strftime('%y%m%d')}.exe"
+            exe_path = temp_dir / exe_filename
+            
+            ex_content = ex_file.getvalue()
+            if isinstance(ex_content, str):
+                ex_content = ex_content.encode('latin-1')
+                
+            with open(exe_path, 'wb') as f:
+                f.write(ex_content)
+                
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Saved executable to: {exe_path}", 
+                "info"
+            )
+            
+            os.chmod(exe_path, 0o755)
+            
+            original_cwd = os.getcwd()
+            os.chdir(temp_dir)
+            
+            try:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Executing Wine command: wine {exe_filename}", 
+                    "info"
+                )
+                
+                result = subprocess.run(
+                    ['wine', exe_filename], 
+                    capture_output=True, 
+                    text=True, 
+                    timeout=300,
+                    check=False
+                )
+                
+                if result.returncode != 0:
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f"Wine execution failed with return code {result.returncode}: " \
+                            + f"{result.stderr}", 
+                        "warning"
+                    )
+                
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Wine execution completed. Stdout: {result.stdout[:200]}...", 
+                    "info"
+                )
+                
+            finally:
+                os.chdir(original_cwd)
+            
+            output_patterns = [
+                "*.txt", "*.csv", "*.dat", "*.out", "*.xlsx", "*.xls",
+                f"*{self.date_ref.strftime('%y%m%d')}*",
+                "premiums*", "option*", "PE*"
+            ]
+            
+            output_files = []
+            for pattern in output_patterns:
+                output_files.extend(temp_dir.glob(pattern))
+            
+            output_files = [f for f in output_files if f != exe_path]
+            
+            if not output_files:
+                all_files = list(temp_dir.iterdir())
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"No output files found. All files in temp dir: {[f.name for f in all_files]}", 
+                    "error"
+                )
+                raise RuntimeError(
+                    f"No output file generated after Wine execution. "
+                    f"Wine stderr: {result.stderr if 'result' in locals() else 'N/A'}"
+                )
+            
+            if len(output_files) > 1:
+                output_file = max(output_files, key=lambda f: f.stat().st_size)
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Multiple output files found, using largest: {output_file.name}", 
+                    "info"
+                )
+            else:
+                output_file = output_files[0]
+            
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Reading output file: {output_file}", 
+                "info"
+            )
+            
+            try:
+                with open(output_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                with open(output_file, 'r', encoding='latin-1') as f:
+                    content = f.read()
+            
+            return StringIO(content)
+            
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Error in parse_raw_file: {str(e)}", 
+                "error"
+            )
+            raise
+            
+        finally:
+            # cleanup temp directory
+            try:
+                if temp_dir.exists():
+                    shutil.rmtree(temp_dir)
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f"Cleaned up temporary directory: {temp_dir}", 
+                        "info"
+                    )
+            except Exception as cleanup_error:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Failed to cleanup temp directory: {cleanup_error}", 
+                    "warning"
+                )
+    
     @abstractmethod
     def transform_data(
         self, 
@@ -2540,7 +2701,9 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
 
     def parse_raw_file(
         self, 
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "b3_option_premiums_",
+        file_name: str = "b3_equities_option_reference_premiums_"
     ) -> StringIO:
         """Parse the raw file content by executing Windows executable with Wine.
         
@@ -2561,144 +2724,11 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         ValueError
             If no .ex_ file found in ZIP or multiple files found
         """
-        ex_file = self.cls_dir_files_management.recursive_unzip_in_memory(
-            BytesIO(resp_req.content))[0]
-        
-        temp_dir = Path(tempfile.mkdtemp(prefix="b3_option_premiums_"))
-        
-        try:
-            self.cls_create_log.log_message(
-                self.logger, 
-                f"Created temporary directory: {temp_dir}", 
-                "info"
-            )
-            
-            exe_filename = f"premiums_{self.date_ref.strftime('%y%m%d')}.exe"
-            exe_path = temp_dir / exe_filename
-            
-            ex_content = ex_file.getvalue()
-            if isinstance(ex_content, str):
-                ex_content = ex_content.encode('latin-1')
-                
-            with open(exe_path, 'wb') as f:
-                f.write(ex_content)
-                
-            self.cls_create_log.log_message(
-                self.logger, 
-                f"Saved executable to: {exe_path}", 
-                "info"
-            )
-            
-            os.chmod(exe_path, 0o755)
-            
-            original_cwd = os.getcwd()
-            os.chdir(temp_dir)
-            
-            try:
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"Executing Wine command: wine {exe_filename}", 
-                    "info"
-                )
-                
-                result = subprocess.run(
-                    ['wine', exe_filename], 
-                    capture_output=True, 
-                    text=True, 
-                    timeout=300,
-                    check=False
-                )
-                
-                if result.returncode != 0:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"Wine execution failed with return code {result.returncode}: " \
-                            + f"{result.stderr}", 
-                        "warning"
-                    )
-                
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"Wine execution completed. Stdout: {result.stdout[:200]}...", 
-                    "info"
-                )
-                
-            finally:
-                os.chdir(original_cwd)
-            
-            output_patterns = [
-                "*.txt", "*.csv", "*.dat", "*.out", 
-                f"*{self.date_ref.strftime('%y%m%d')}*",
-                "premiums*", "option*", "PE*"
-            ]
-            
-            output_files = []
-            for pattern in output_patterns:
-                output_files.extend(temp_dir.glob(pattern))
-            
-            output_files = [f for f in output_files if f != exe_path]
-            
-            if not output_files:
-                all_files = list(temp_dir.iterdir())
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"No output files found. All files in temp dir: {[f.name for f in all_files]}", 
-                    "error"
-                )
-                raise RuntimeError(
-                    f"No output file generated after Wine execution. "
-                    f"Wine stderr: {result.stderr if 'result' in locals() else 'N/A'}"
-                )
-            
-            if len(output_files) > 1:
-                output_file = max(output_files, key=lambda f: f.stat().st_size)
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"Multiple output files found, using largest: {output_file.name}", 
-                    "info"
-                )
-            else:
-                output_file = output_files[0]
-            
-            self.cls_create_log.log_message(
-                self.logger, 
-                f"Reading output file: {output_file}", 
-                "info"
-            )
-            
-            try:
-                with open(output_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-            except UnicodeDecodeError:
-                with open(output_file, 'r', encoding='latin-1') as f:
-                    content = f.read()
-            
-            return StringIO(content)
-            
-        except Exception as e:
-            self.cls_create_log.log_message(
-                self.logger, 
-                f"Error in parse_raw_file: {str(e)}", 
-                "error"
-            )
-            raise
-            
-        finally:
-            # Cleanup temp directory
-            try:
-                if temp_dir.exists():
-                    shutil.rmtree(temp_dir)
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"Cleaned up temporary directory: {temp_dir}", 
-                        "info"
-                    )
-            except Exception as cleanup_error:
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"Failed to cleanup temp directory: {cleanup_error}", 
-                    "warning"
-                )
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -3064,6 +3094,117 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
         },
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_consideration_factors"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+
+
+class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSession):
+    """B3 Derivatives Market - Economic and Agricultural Indicators."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=ID{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "b3_derivatives_mkt_ec_ag_",
+        file_name: str = "b3_derivatives_market_economic_agricultural_indicators"
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 6),    # ID_TRANSACAO
+            (6, 9),    # COMPLEMENTO_TRANSACAO
+            (9, 11),   # TIPO_REGISTRO
+            (11, 19),  # DATA_BASE
+            (19, 21),  # GRUPO_INDICADOR
+            (21, 46),  # GRUPO_INDICADOR
+            (46, 71),  # VALOR_INDICADOR
+            (71, 73),  # NUMERO_DECIMAIS_VALOR
+            (73, 109), # FILLER
+        ]
+        
+        column_names = [
+            "ID_TRANSACAO",
+            "COMPLEMENTO_TRANSACAO",
+            "TIPO_REGISTRO",
+            "DATA_BASE",
+            "GRUPO_INDICADOR",
+            "DESCRICAO_INDICADOR",
+            "VALOR_INDICADOR",
+            "NUMERO_DECIMAIS_VALOR",
+            "FILLER"
+        ]
+        
+        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ID_TRANSACAO": str,
+            "COMPLEMENTO_TRANSACAO": str,
+            "TIPO_REGISTRO": str,
+            "DATA_BASE": str,
+            "GRUPO_INDICADOR": str,
+            "DESCRICAO_INDICADOR": str,
+            "VALOR_INDICADOR": str,
+            "NUMERO_DECIMAIS_VALOR": str,
+            "FILLER": str,
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        str_table_name: str = "br_b3_equities_option_reference_premiums"
     ) -> Optional[pd.DataFrame]:
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
