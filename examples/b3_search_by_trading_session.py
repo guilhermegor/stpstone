@@ -4,6 +4,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3DailyLiquidityLimits,
     B3FeeDailyUnitCost,
     B3FeeUnitCost,
+    B3FXMarketContractedTransactions,
     B3IndexReport,
     B3InstrumentsFileADR,
     B3InstrumentsFileBTC,
@@ -25,6 +26,17 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3FXMarketContractedTransactions(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 FX MARKET CONTRACTED TRANSACTIONS: \n{df_}")
+df_.info()
 
 
 cls_ = B3MaximumTheoreticalMargin(

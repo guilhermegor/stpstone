@@ -4,7 +4,10 @@ from abc import abstractmethod
 from datetime import date
 from io import BytesIO, StringIO
 from logging import Logger
+import os
 from pathlib import Path
+import shutil
+import subprocess
 import tempfile
 from typing import Optional, Union
 
@@ -644,7 +647,6 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             If failing to cleanup cache
         """
         try:
-            import shutil
             if self.temp_dir.exists():
                 shutil.rmtree(self.temp_dir)
                 self.cls_create_log.log_message(
@@ -2513,6 +2515,336 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_maximum_theoretical_margin"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+    
+
+class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
+    """B3 Equities Option Reference Premiums."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=PE{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        ex_file = self.cls_dir_files_management.recursive_unzip_in_memory(
+            BytesIO(resp_req.content))[0]
+        
+        temp_dir = Path(tempfile.mkdtemp(prefix="b3_option_premiums_"))
+        
+        try:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Created temporary directory: {temp_dir}", 
+                "info"
+            )
+            
+            exe_filename = f"premiums_{self.date_ref.strftime('%y%m%d')}.exe"
+            exe_path = temp_dir / exe_filename
+            
+            ex_content = ex_file.getvalue()
+            if isinstance(ex_content, str):
+                ex_content = ex_content.encode('latin-1')
+                
+            with open(exe_path, 'wb') as f:
+                f.write(ex_content)
+                
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Saved executable to: {exe_path}", 
+                "info"
+            )
+            
+            os.chmod(exe_path, 0o755)
+            
+            original_cwd = os.getcwd()
+            os.chdir(temp_dir)
+            
+            try:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Executing Wine command: wine {exe_filename}", 
+                    "info"
+                )
+                
+                result = subprocess.run(
+                    ['wine', exe_filename], 
+                    capture_output=True, 
+                    text=True, 
+                    timeout=300,
+                    check=False
+                )
+                
+                if result.returncode != 0:
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f"Wine execution failed with return code {result.returncode}: " \
+                            + f"{result.stderr}", 
+                        "warning"
+                    )
+                
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Wine execution completed. Stdout: {result.stdout[:200]}...", 
+                    "info"
+                )
+                
+            finally:
+                os.chdir(original_cwd)
+            
+            output_patterns = [
+                "*.txt", "*.csv", "*.dat", "*.out", 
+                f"*{self.date_ref.strftime('%y%m%d')}*",
+                "premiums*", "option*", "PE*"
+            ]
+            
+            output_files = []
+            for pattern in output_patterns:
+                output_files.extend(temp_dir.glob(pattern))
+            
+            output_files = [f for f in output_files if f != exe_path]
+            
+            if not output_files:
+                all_files = list(temp_dir.iterdir())
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"No output files found. All files in temp dir: {[f.name for f in all_files]}", 
+                    "error"
+                )
+                raise RuntimeError(
+                    f"No output file generated after Wine execution. "
+                    f"Wine stderr: {result.stderr if 'result' in locals() else 'N/A'}"
+                )
+            
+            if len(output_files) > 1:
+                output_file = max(output_files, key=lambda f: f.stat().st_size)
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Multiple output files found, using largest: {output_file.name}", 
+                    "info"
+                )
+            else:
+                output_file = output_files[0]
+            
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Reading output file: {output_file}", 
+                "info"
+            )
+            
+            try:
+                with open(output_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                with open(output_file, 'r', encoding='latin-1') as f:
+                    content = f.read()
+            
+            return StringIO(content)
+            
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Error in parse_raw_file: {str(e)}", 
+                "error"
+            )
+            raise
+            
+        finally:
+            # Cleanup temp directory
+            try:
+                if temp_dir.exists():
+                    shutil.rmtree(temp_dir)
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f"Cleaned up temporary directory: {temp_dir}", 
+                        "info"
+                    )
+            except Exception as cleanup_error:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Failed to cleanup temp directory: {cleanup_error}", 
+                    "warning"
+                )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return pd.read_csv(file, sep=";", skiprows=1, names=[
+            "TICKER_SYMBOL",
+            "OPTION_TYPE",
+            "OPTION_STYLE",
+            "EXPIRY_DATE",
+            "EXERCISE_PRICE",
+            "REFERENCE_PREMIUM",
+            "IMPLIED_VOLATILITY",
+        ])
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "TICKER_SYMBOL": str,
+            "OPTION_TYPE": str,
+            "OPTION_STYLE": str,
+            "EXPIRY_DATE": int,
+            "EXERCISE_PRICE": float,
+            "REFERENCE_PREMIUM": float,
+            "IMPLIED_VOLATILITY": float,
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        str_table_name: str = "br_b3_equities_option_reference_premiums"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+    
+
+class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
+    """B3 FX Market Contracted Transactions.
+    
+    Traded rates, opening parameters and contracted transactions.
+    """
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=CT{}.zip"
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 8),    # ID_TRANSACAO
+            (8, 16),   # DATA_REFERENCIA  
+            (16, 24),  # DATA_CONTRATACAO_TXS_PRATICADAS
+            (24, 32),  # DATA_LIQUIDACAO_TXS_PRATICADAS
+            (32, 41),  # TX_PRATICADA_MX
+            (41, 50),  # TX_PRATICADA_MIN
+            (50, 59),  # TX_PRATICADA_MEDIA
+            (59, 67),  # DATA_CONTRATACAO_PARAMETROS_ABERTURA
+            (67, 75),  # DATA_LIQUIDACAO_PARAMETROS_ABERTURA
+            (75, 84),  # TAXA_ABERTURA
+            (84, 89),  # PERCENTAUL_GARANTIDO
+            (89, 97),  # DATA_CONTRATACAO_OPERACOES_CONTRATADAS
+            (97, 105), # DATA_LIQUIDACAO_OPERACOES_CONTRATADAS
+            (105, 113), # NUMERO_OPERACOES_CONTRATADAS
+            (113, 126), # VALOR_OPERACOES_CONTRATADAS_DOLAR
+            (126, 139)  # VALOR_OPERACOES_CONTRATADAS_REAIS
+        ]
+        
+        column_names = [
+            "ID_TRANSACAO",
+            "DATA_REFERENCIA",
+            "DATA_CONTRATACAO_TXS_PRATICADAS",
+            "DATA_LIQUIDACAO_TXS_PRATICADAS",
+            "TX_PRATICADA_MX",
+            "TX_PRATICADA_MIN",
+            "TX_PRATICADA_MEDIA",
+            "DATA_CONTRATACAO_PARAMETROS_ABERTURA",
+            "DATA_LIQUIDACAO_PARAMETROS_ABERTURA",
+            "TAXA_ABERTURA",
+            "PERCENTAUL_GARANTIDO",
+            "DATA_CONTRATACAO_OPERACOES_CONTRATADAS",
+            "DATA_LIQUIDACAO_OPERACOES_CONTRATADAS",
+            "NUMERO_OPERACOES_CONTRATADAS",
+            "VALOR_OPERACOES_CONTRATADAS_DOLAR",
+            "VALOR_OPERACOES_CONTRATADAS_REAIS"
+        ]
+        
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        
+        return df_
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ID_TRANSACAO": str,
+            "DATA_REFERENCIA": "date",
+            "DATA_CONTRATACAO_TXS_PRATICADAS": "date",
+            "DATA_LIQUIDACAO_TXS_PRATICADAS": "date",
+            "TX_PRATICADA_MX": float,
+            "TX_PRATICADA_MIN": float,
+            "TX_PRATICADA_MEDIA": float,
+            "DATA_CONTRATACAO_PARAMETROS_ABERTURA": "date",
+            "DATA_LIQUIDACAO_PARAMETROS_ABERTURA": "date",
+            "TAXA_ABERTURA": float,
+            "PERCENTAUL_GARANTIDO": float,
+            "DATA_CONTRATACAO_OPERACOES_CONTRATADAS": "date",
+            "DATA_LIQUIDACAO_OPERACOES_CONTRATADAS": "date",
+            "NUMERO_OPERACOES_CONTRATADAS": int,
+            "VALOR_OPERACOES_CONTRATADAS_DOLAR": float,
+            "VALOR_OPERACOES_CONTRATADAS_REAIS": float,
+        },
+        str_fmt_dt: str = "YYYYMMDD",
+        str_table_name: str = "br_b3_fx_market_contracted_transactions"
     ) -> Optional[pd.DataFrame]:
         return super().run(timeout=timeout, bool_verify=bool_verify, 
                            bool_insert_or_ignore=bool_insert_or_ignore, 
