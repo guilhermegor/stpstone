@@ -2,9 +2,11 @@
 
 from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session import (
     B3DailyLiquidityLimits,
+    B3DerivativesMarketCombinedPositions,
     B3DerivativesMarketConsiderationFactors,
     B3DerivativesMarketEconomicAgriculturalIndicators,
     B3DerivativesMarketMarginScenarios,
+    B3DerivativesMarketOptionReferencePremium,
     B3DerivativesMarketOTCMarketTrades,
     B3EquitiesOptionReferencePremiums,
     B3FeeDailyUnitCost,
@@ -32,6 +34,28 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3TradableSecurityList,
     B3VariableFees,
 )
+
+
+cls_ = B3DerivativesMarketOptionReferencePremium(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET OPTION REFERENCE PREMIUM: \n{df_}")
+df_.info()
+
+
+cls_ = B3DerivativesMarketCombinedPositions(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 DERIVATIVES MARKET COMBINED POSITIONS: \n{df_}")
+df_.info()
 
 
 cls_ = B3DerivativesMarketOTCMarketTrades(

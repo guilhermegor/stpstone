@@ -3363,3 +3363,237 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
                            bool_insert_or_ignore=bool_insert_or_ignore, 
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
+    
+
+class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
+    """B3 Derivatives Market Combined Positions."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=PT{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "br_derivatives_market_combined_positions_",
+        file_name: str = "b3_derivatives_market_combined_positions"
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 8), # DATA_PREGAO
+            (8, 10), # TIPO_NEGOCIACAO
+            (10, 13), # CODIGO_MERCADORIA
+            (13, 14), # TIPO_MERCADO
+            (14, 18), # VENCIMENTO
+            (18, 29), # QTD_CONTRATOS_TRAVADOS
+            (29, 40), # QTD_CONTRATOS_BAIXADOS
+        ]
+        
+        column_names = [
+            "DATA_PREGAO",
+            "TIPO_NEGOCIACAO",
+            "CODIGO_MERCADORIA",
+            "TIPO_MERCADO",
+            "VENCIMENTO",
+            "QTD_CONTRATOS_TRAVADOS",
+            "QTD_CONTRATOS_BAIXADOS",
+        ]
+        
+        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "DATA_PREGAO": str,
+            "TIPO_NEGOCIACAO": str,
+            "CODIGO_MERCADORIA": str,
+            "TIPO_MERCADO": str,
+            "VENCIMENTO": str,
+            "QTD_CONTRATOS_TRAVADOS": float,
+            "QTD_CONTRATOS_BAIXADOS": float
+        },
+        str_fmt_dt: str = "YYYY-MM-DD",
+        str_table_name: str = "br_b3_derivatives_market_combined_positions"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
+    
+
+class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
+    """B3 Derivatives Market Option Reference Premium."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pesquisapregao/download?filelist=RE{}.ex_"
+        )
+
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
+        prefix: str = "br_derivatives_market_option_reference_premiums_",
+        file_name: str = "b3_derivatives_market_option_reference_premiums"
+    ) -> StringIO:
+        """Parse the raw file content by executing Windows executable with Wine.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+            
+        Raises
+        ------
+        RuntimeError
+            If Wine execution fails or output file is not found
+        ValueError
+            If no .ex_ file found in ZIP or multiple files found
+        """
+        self.parse_raw_ex_file(
+            resp_req=resp_req,
+            prefix=prefix, 
+            file_name=file_name
+        )
+
+    def transform_data(self, file: StringIO) -> pd.DataFrame:
+        """Transform file content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The file content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        colspecs = [
+            (0, 6), # ID_TRANSACAO
+            (6, 9), # COMPLEMENTO_TRANSACAO
+            (9, 11), # TIPO_REGISTRO
+            (11, 19), # DATA_BASE
+            (19, 22), # CODIGO_MERCADORIA
+            (22, 23), # TIPO_MERCADO - 3 (Options on available) / 4 (Options on futures)
+            (23, 27), # SERIE_OPCOES
+            (27, 28), # INDICADOR_TIPO_OPCAO - C (Buy) / V (Sell)
+            (28, 29), # TIPO_OPCAO - A (American) / E (European)
+            (29, 37), # DATA_VENCIMENTO_CONTRATO
+            (37, 52), # PRECO_EXERCICIO_OPCOES
+            (52, 67), # PRECO_REFERENCIA_OPCOES
+            (67, 68), # NUMERO_CASAS_DECIMAIS
+        ]
+        
+        column_names = [
+            "ID_TRANSACAO",
+            "COMPLEMENTO_TRANSACAO",
+            "TIPO_REGISTRO",
+            "DATA_BASE",
+            "CODIGO_MERCADORIA",
+            "TIPO_MERCADO",
+            "SERIE_OPCOES",
+            "INDICADOR_TIPO_OPCAO",
+            "TIPO_OPCAO",
+            "SERIE_OPCOES",
+            "INDICADOR_TIPO_OPCAO",
+            "TIPO_OPCAO",
+            "DATA_VENCIMENTO_CONTRATO",
+            "PRECO_EXERCICIO_OPCOES",
+            "PRECO_REFERENCIA_OPCOES",
+            "NUMERO_CASAS_DECIMAIS"
+        ]
+        
+        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "ID_TRANSACAO": str,
+            "COMPLEMENTO_TRANSACAO": str,
+            "TIPO_REGISTRO": str,
+            "DATA_BASE": str,
+            "CODIGO_MERCADORIA": str,
+            "TIPO_MERCADO": str,
+            "SERIE_OPCOES": str,
+            "INDICADOR_TIPO_OPCAO": str,
+            "TIPO_OPCAO": str,
+            "SERIE_OPCOES": str,
+            "INDICADOR_TIPO_OPCAO": str,
+            "TIPO_OPCAO": str,
+            "DATA_VENCIMENTO_CONTRATO": str,
+            "PRECO_EXERCICIO_OPCOES": float,
+            "PRECO_REFERENCIA_OPCOES": float,
+            "NUMERO_CASAS_DECIMAIS": int
+        },
+        str_fmt_dt: str = "YYYYMMDD",
+        str_table_name: str = "br_b3_derivatives_market_option_reference_premiums"
+    ) -> Optional[pd.DataFrame]:
+        return super().run(timeout=timeout, bool_verify=bool_verify, 
+                           bool_insert_or_ignore=bool_insert_or_ignore, 
+                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
+                           str_table_name=str_table_name)
