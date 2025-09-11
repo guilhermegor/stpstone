@@ -424,7 +424,7 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
-        str_table_name: str = "br_b3_trading_hours_stocks"
+        str_table_name: str = "br_b3_trading_hours_options_exercise",
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -442,7 +442,7 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_b3_trading_hours_stocks"
+            The name of the table, by default "br_b3_trading_hours_options_exercise"
 
         Returns
         -------
