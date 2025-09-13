@@ -1,4 +1,7 @@
-"""Implementation of ingestion instance."""
+"""B3 Consolidated Trades Ingestion.
+
+This module provides an ingestion class for B3 Consolidated Trades data.
+It handles the retrieval of data from the B3 website and stores it in a database."""
 
 from datetime import date
 from io import StringIO
