@@ -4,6 +4,8 @@ from stpstone.ingestion.countries.br.exchange.b3_trading_hours import (
     B3TradingHoursCommoditiesFutures,
     B3TradingHoursCryptoFutures,
     B3TradingHoursExchangeRateFutures,
+    B3TradingHoursExerciseBlockingOptionsAfterExerciseDate,
+    B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate,
     B3TradingHoursOptionsExercise,
     B3TradingHoursOTC,
     B3TradingHoursPMIFutures,
@@ -12,6 +14,28 @@ from stpstone.ingestion.countries.br.exchange.b3_trading_hours import (
     B3TradingHoursStocks,
     B3TradingHoursUSDollarDenominatedInterestRatesFutures,
 )
+
+
+cls_ = B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 TRADING HOURS EXERCISE BLOCKING OPTIONS AFTER EXERCISE DATE: \n{df_}")
+df_.info()
+
+
+cls_ = B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 TRADING HOURS EXERCISE BLOCKING OPTIONS BEFORE EXERCISE DATE: \n{df_}")
+df_.info()
 
 
 cls_ = B3TradingHoursOTC(
