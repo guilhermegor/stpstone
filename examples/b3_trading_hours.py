@@ -5,12 +5,24 @@ from stpstone.ingestion.countries.br.exchange.b3_trading_hours import (
     B3TradingHoursCryptoFutures,
     B3TradingHoursExchangeRateFutures,
     B3TradingHoursOptionsExercise,
+    B3TradingHoursOTC,
     B3TradingHoursPMIFutures,
     B3TradingHoursRealDenominatedInterestRates,
     B3TradingHoursStockIndexFutures,
     B3TradingHoursStocks,
     B3TradingHoursUSDollarDenominatedInterestRatesFutures,
 )
+
+
+cls_ = B3TradingHoursOTC(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 TRADING HOURS OTC: \n{df_}")
+df_.info()
 
 
 cls_ = B3TradingHoursExchangeRateFutures(
