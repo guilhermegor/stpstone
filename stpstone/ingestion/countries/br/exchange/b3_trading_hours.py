@@ -46,6 +46,8 @@ class B3TradingHoursCore(ABCIngestionOperations):
             The logger, by default None.
         cls_db : Optional[Session], optional
             The database session, by default None.
+        url : str, optional
+            The url, by default "FILL_ME".
         
         Returns
         -------
@@ -91,9 +93,40 @@ class B3TradingHoursCore(ABCIngestionOperations):
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             A list of response objects.
         """
+        self._validate_get_reponse(timeout=timeout, bool_verify=bool_verify)
+
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
         resp_req.raise_for_status()
         return resp_req
+    
+    def _validate_get_reponse(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]], 
+        bool_verify: bool
+    ) -> None:
+        """Validate the parameters of the get_response method.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
+            The timeout.
+        bool_verify : bool
+            Verify the SSL certificate.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If timeout is not a tuple of positive numbers or bool_verify is not of type bool
+        """
+        if not isinstance(timeout, tuple) \
+            or not all(isinstance(t, (int, float)) and t > 0 for t in timeout):
+            raise TypeError("timeout must be a tuple of positive numbers")
+        if not isinstance(bool_verify, bool):
+            raise TypeError("bool_verify must be of type bool")
     
     def parse_raw_file(
         self, 
@@ -138,6 +171,13 @@ class B3TradingHoursCore(ABCIngestionOperations):
         pd.DataFrame
             The transformed DataFrame.
         """
+        self._validate_transform_data(
+            html_root=html_root,
+            list_th=list_th,
+            xpath_td=xpath_td,
+            na_values=na_values
+        )
+
         list_td = self.cls_html_handler.lxml_xpath(
             html_content=html_root, 
             str_xpath=xpath_td,
@@ -150,6 +190,47 @@ class B3TradingHoursCore(ABCIngestionOperations):
         df_ = pd.DataFrame(list_ser)
         df_ = df_.replace(to_replace=na_values, value=None)
         return df_
+        
+    def _validate_transform_data(
+        self, 
+        html_root: HtmlElement, 
+        list_th: list[str], 
+        xpath_td: str, 
+        na_values: str
+    ) -> None:
+        """Validate the parameters of the transform_data method.
+        
+        Parameters
+        ----------
+        html_root : HtmlElement
+            The root element of the HTML document.
+        list_th : list[str]
+            The list of table headers.
+        xpath_td : str
+            The XPath expression for the table data.
+        na_values : str
+            The value to use for missing data.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If html_root is not of type HtmlElement.
+            If list_th is not a list of strings.
+            If xpath_td is not of type str.
+            If na_values is not of type str.
+        """
+        if not isinstance(html_root, HtmlElement):
+            raise TypeError("html_root must be of type HtmlElement")
+        if not isinstance(list_th, list) or not all(isinstance(th, str) for th in list_th):
+            raise TypeError("list_th must be a list of strings")
+        if not isinstance(xpath_td, str):
+            raise TypeError("xpath_td must be of type str")
+        if not isinstance(na_values, str):
+            raise TypeError("na_values must be of type str")
     
     def run(
         self,
@@ -185,6 +266,14 @@ class B3TradingHoursCore(ABCIngestionOperations):
         Optional[pd.DataFrame]
             The transformed DataFrame.
         """
+        self._validate_run(
+            dict_dtypes=dict_dtypes,
+            str_table_name=str_table_name,
+            str_fmt_dt=str_fmt_dt,
+            timeout=timeout,
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore
+        )
         resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
         html_root = self.parse_raw_file(resp_req)
         df_ = self.transform_data(html_root=html_root)
@@ -204,7 +293,61 @@ class B3TradingHoursCore(ABCIngestionOperations):
             )
         else:
             return df_
+
+    def _validate_run(
+        self, 
+        dict_dtypes: dict[str, Union[str, int, float]],
+        str_table_name: str,
+        str_fmt_dt: str,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]],
+        bool_verify: bool,
+        bool_insert_or_ignore: bool
+    ) -> None:
+        """Validate the parameters of the run method.
         
+        Parameters
+        ----------
+        dict_dtypes : dict[str, Union[str, int, float]]
+            The data types of the columns.
+        str_table_name : str
+            The name of the table.
+        str_fmt_dt : str
+            The date format string.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
+            The timeout.
+        bool_verify : bool
+            Whether to verify the SSL certificate.
+        bool_insert_or_ignore : bool
+            Whether to insert or ignore the data.
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError
+            If dict_dtypes is not of type dict.
+            If str_table_name is not of type str or is empty.
+            If str_fmt_dt is not of type str.
+            If timeout is not a tuple of positive numbers.
+            If bool_verify is not of type bool.
+            If bool_insert_or_ignore is not of type bool.
+        """
+        if not isinstance(dict_dtypes, dict):
+            raise TypeError("dict_dtypes must be of type dict")
+        if not isinstance(str_table_name, str) or not str_table_name.strip():
+            raise TypeError("str_table_name must be of type str and non-empty")
+        if not isinstance(str_fmt_dt, str):
+            raise TypeError("str_fmt_dt must be of type str")
+        if not isinstance(timeout, tuple) \
+            or not all(isinstance(t, (int, float)) and t > 0 for t in timeout):
+            raise TypeError("timeout must be a tuple of positive numbers")
+        if not isinstance(bool_verify, bool):
+            raise TypeError("bool_verify must be of type bool")
+        if not isinstance(bool_insert_or_ignore, bool):
+            raise TypeError("bool_insert_or_ignore must be of type bool")
+
 
 class B3TradingHoursStocks(B3TradingHoursCore):
     """B3 Trading Hours for Stocks Market."""
@@ -214,7 +357,6 @@ class B3TradingHoursStocks(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -231,31 +373,16 @@ class B3TradingHoursStocks(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "MERCADO",
-            "CANCELAMENTO_DE_OFERTAS_INICIO",
-            "CANCELAMENTO_DE_OFERTAS_FIM",
-            "PRE_ABERTURA_INICIO",
-            "PRE_ABERTURA_FIM",
-            "NEGOCIACAO_INICIO",
-            "NEGOCIACAO_FIM",
-            "CALL_DE_FECHAMENTO_INICIO",
-            "CALL_DE_FECHAMENTO_FIM",
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_INICIO",
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FIM",
-            "AFTER_MARKET_NEGOCIACAO_INICIO",
-            "AFTER_MARKET_NEGOCIACAO_FIM",
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_INICIO",
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_FIM", 
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/' \
-            + 'tbody/tr[position() > 1]/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -263,12 +390,6 @@ class B3TradingHoursStocks(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -277,30 +398,30 @@ class B3TradingHoursStocks(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "MERCADO",
+                "CANCELAMENTO_DE_OFERTAS_INICIO",
+                "CANCELAMENTO_DE_OFERTAS_FIM",
+                "PRE_ABERTURA_INICIO",
+                "PRE_ABERTURA_FIM",
+                "NEGOCIACAO_INICIO",
+                "NEGOCIACAO_FIM",
+                "CALL_DE_FECHAMENTO_INICIO",
+                "CALL_DE_FECHAMENTO_FIM",
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_INICIO",
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FIM",
+                "AFTER_MARKET_NEGOCIACAO_INICIO",
+                "AFTER_MARKET_NEGOCIACAO_FIM",
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_INICIO",
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_FIM", 
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/' \
+            + 'tbody/tr[position() > 1]/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "MERCADO": str,
-            "CANCELAMENTO_DE_OFERTAS_INICIO": str,
-            "CANCELAMENTO_DE_OFERTAS_FIM": str,
-            "PRE_ABERTURA_INICIO": str,
-            "PRE_ABERTURA_FIM": str,
-            "NEGOCIACAO_INICIO": str,
-            "NEGOCIACAO_FIM": str,
-            "CALL_DE_FECHAMENTO_INICIO": str,
-            "CALL_DE_FECHAMENTO_FIM": str,
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_INICIO": str,
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FIM": str,
-            "AFTER_MARKET_NEGOCIACAO_INICIO": str,
-            "AFTER_MARKET_NEGOCIACAO_FIM": str,
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_INICIO": str,
-            "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_FIM": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -313,8 +434,6 @@ class B3TradingHoursStocks(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -330,7 +449,23 @@ class B3TradingHoursStocks(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "MERCADO": str,
+                "CANCELAMENTO_DE_OFERTAS_INICIO": str,
+                "CANCELAMENTO_DE_OFERTAS_FIM": str,
+                "PRE_ABERTURA_INICIO": str,
+                "PRE_ABERTURA_FIM": str,
+                "NEGOCIACAO_INICIO": str,
+                "NEGOCIACAO_FIM": str,
+                "CALL_DE_FECHAMENTO_INICIO": str,
+                "CALL_DE_FECHAMENTO_FIM": str,
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_INICIO": str,
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FIM": str,
+                "AFTER_MARKET_NEGOCIACAO_INICIO": str,
+                "AFTER_MARKET_NEGOCIACAO_FIM": str,
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_INICIO": str,
+                "AFTER_MARKET_CANCELAMENTO_DE_OFERTAS_FECHAMENTO_FIM": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -346,7 +481,6 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -363,25 +497,16 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/acoes/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "MERCADO",
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_INICIO",
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_FIM",
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO",
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_FIM",
-            "ARQUIVO_DE_POSICOES_MAIS_IMBARQ_NO_VENCIMENTO",
-            "CONTRARY_EXERCISE_NO_VENCIMENTO_INICIO",
-            "CONTRARY_EXERCISE_NO_VENCIMENTO_FIM",
-            "EXERCICIO_AUTOMATICO_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/' \
-            + 'tbody/tr[position() > 1]/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -389,12 +514,6 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -403,24 +522,24 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "MERCADO",
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_INICIO",
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_FIM",
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO",
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_FIM",
+                "ARQUIVO_DE_POSICOES_MAIS_IMBARQ_NO_VENCIMENTO",
+                "CONTRARY_EXERCISE_NO_VENCIMENTO_INICIO",
+                "CONTRARY_EXERCISE_NO_VENCIMENTO_FIM",
+                "EXERCICIO_AUTOMATICO_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/' \
+            + 'tbody/tr[position() > 1]/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "MERCADO": str,
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_INICIO": str,
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_FIM": str,
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO": str,
-            "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_FIM": str,
-            "ARQUIVO_DE_POSICOES_MAIS_IMBARQ_NO_VENCIMENTO": str,
-            "CONTRARY_EXERCISE_NO_VENCIMENTO_INICIO": str,
-            "CONTRARY_EXERCISE_NO_VENCIMENTO_FIM": str,
-            "EXERCICIO_AUTOMATICO_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -433,8 +552,6 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -450,7 +567,17 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "MERCADO": str,
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_INICIO": str,
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_ANTES_DO_VENCIMENTO_FIM": str,
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO": str,
+                "EXERCICIO_MANUAL_DE_POSICAO_TITULAR_NO_VENCIMENTO_FIM": str,
+                "ARQUIVO_DE_POSICOES_MAIS_IMBARQ_NO_VENCIMENTO": str,
+                "CONTRARY_EXERCISE_NO_VENCIMENTO_INICIO": str,
+                "CONTRARY_EXERCISE_NO_VENCIMENTO_FIM": str,
+                "EXERCICIO_AUTOMATICO_DE_POSICAO_TITULAR_NO_VENCIMENTO_INICIO": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -458,7 +585,7 @@ class B3TradingHoursOptionsExercise(B3TradingHoursCore):
         )
     
 
-class B3TradingHoursPMIFutures(B3TradingHoursCore):
+class B3TradingHoursPMIFuture(B3TradingHoursCore):
     """B3 Trading Hours for Options Exercise."""
 
     def __init__(
@@ -466,7 +593,6 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -483,28 +609,16 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "ELECTRONIC_CALL_OPENING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "EXTENDED_HOURS_T_0_OPENING",
-            "EXTENDED_HOURS_T_0_CLOSING",
-            "AFTER_HOURS_T_1_OPENING",
-            "AFTER_HOURS_T_1_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -512,12 +626,6 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -526,28 +634,27 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING",
+                "ELECTRONIC_CALL_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING",
+                "EXTENDED_HOURS_T_0_OPENING",
+                "EXTENDED_HOURS_T_0_CLOSING",
+                "AFTER_HOURS_T_1_OPENING",
+                "AFTER_HOURS_T_1_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "ELECTRONIC_CALL_OPENING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "EXTENDED_HOURS_T_0_OPENING": str,
-            "EXTENDED_HOURS_T_0_CLOSING": str,
-            "AFTER_HOURS_T_1_OPENING": str,
-            "AFTER_HOURS_T_1_CLOSING": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -560,8 +667,6 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -577,7 +682,21 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING": str,
+                "ELECTRONIC_CALL_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING": str,
+                "EXTENDED_HOURS_T_0_OPENING": str,
+                "EXTENDED_HOURS_T_0_CLOSING": str,
+                "AFTER_HOURS_T_1_OPENING": str,
+                "AFTER_HOURS_T_1_CLOSING": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -593,7 +712,6 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -605,33 +723,23 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
             The logger, by default None.
         cls_db : Optional[Session], optional
             The database session, by default None.
+        url : str, optional
+            The URL of the website.
         
         Returns
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/indices/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "ELECTRONIC_CALL_OPENING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "EXTENDED_HOURS_T_0_OPENING",
-            "EXTENDED_HOURS_T_0_CLOSING",
-            "AFTER_HOURS_T_1_OPENING",
-            "AFTER_HOURS_T_1_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -639,12 +747,6 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -653,28 +755,27 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING",
+                "ELECTRONIC_CALL_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING",
+                "EXTENDED_HOURS_T_0_OPENING",
+                "EXTENDED_HOURS_T_0_CLOSING",
+                "AFTER_HOURS_T_1_OPENING",
+                "AFTER_HOURS_T_1_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "ELECTRONIC_CALL_OPENING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "EXTENDED_HOURS_T_0_OPENING": str,
-            "EXTENDED_HOURS_T_0_CLOSING": str,
-            "AFTER_HOURS_T_1_OPENING": str,
-            "AFTER_HOURS_T_1_CLOSING": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -687,8 +788,6 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -704,7 +803,21 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING": str,
+                "ELECTRONIC_CALL_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING": str,
+                "EXTENDED_HOURS_T_0_OPENING": str,
+                "EXTENDED_HOURS_T_0_CLOSING": str,
+                "AFTER_HOURS_T_1_OPENING": str,
+                "AFTER_HOURS_T_1_CLOSING": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -723,7 +836,6 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -740,28 +852,16 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "ELECTRONIC_CALL_OPENING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "EXTENDED_HOURS_T_0_OPENING",
-            "EXTENDED_HOURS_T_0_CLOSING",
-            "AFTER_HOURS_T_1_OPENING",
-            "AFTER_HOURS_T_1_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -769,12 +869,6 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -783,28 +877,27 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING",
+                "ELECTRONIC_CALL_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING",
+                "EXTENDED_HOURS_T_0_OPENING",
+                "EXTENDED_HOURS_T_0_CLOSING",
+                "AFTER_HOURS_T_1_OPENING",
+                "AFTER_HOURS_T_1_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "ELECTRONIC_CALL_OPENING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "EXTENDED_HOURS_T_0_OPENING": str,
-            "EXTENDED_HOURS_T_0_CLOSING": str,
-            "AFTER_HOURS_T_1_OPENING": str,
-            "AFTER_HOURS_T_1_CLOSING": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -817,8 +910,6 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -834,7 +925,21 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING": str,
+                "ELECTRONIC_CALL_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING": str,
+                "EXTENDED_HOURS_T_0_OPENING": str,
+                "EXTENDED_HOURS_T_0_CLOSING": str,
+                "AFTER_HOURS_T_1_OPENING": str,
+                "AFTER_HOURS_T_1_CLOSING": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -853,7 +958,6 @@ class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -870,28 +974,16 @@ class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "ELECTRONIC_CALL_OPENING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "EXTENDED_HOURS_T_0_OPENING",
-            "EXTENDED_HOURS_T_0_CLOSING",
-            "AFTER_HOURS_T_1_OPENING",
-            "AFTER_HOURS_T_1_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -899,12 +991,6 @@ class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -913,28 +999,27 @@ class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING",
+                "ELECTRONIC_CALL_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING",
+                "EXTENDED_HOURS_T_0_OPENING",
+                "EXTENDED_HOURS_T_0_CLOSING",
+                "AFTER_HOURS_T_1_OPENING",
+                "AFTER_HOURS_T_1_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "ELECTRONIC_CALL_OPENING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "EXTENDED_HOURS_T_0_OPENING": str,
-            "EXTENDED_HOURS_T_0_CLOSING": str,
-            "AFTER_HOURS_T_1_OPENING": str,
-            "AFTER_HOURS_T_1_CLOSING": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -947,8 +1032,6 @@ class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -965,7 +1048,21 @@ class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING": str,
+                "ELECTRONIC_CALL_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING": str,
+                "EXTENDED_HOURS_T_0_OPENING": str,
+                "EXTENDED_HOURS_T_0_CLOSING": str,
+                "AFTER_HOURS_T_1_OPENING": str,
+                "AFTER_HOURS_T_1_CLOSING": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -984,7 +1081,6 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -1001,21 +1097,16 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/commodities/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "AFTER_HOURS_T_1_OPENING",
-            "AFTER_HOURS_T_1_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/div[1]/table/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -1023,12 +1114,6 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -1037,21 +1122,20 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "AFTER_HOURS_T_1_OPENING",
+                "AFTER_HOURS_T_1_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/div[1]/table/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "AFTER_HOURS_T_1_OPENING": str,
-            "AFTER_HOURS_T_1_CLOSING": str
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -1064,8 +1148,6 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -1081,7 +1163,14 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "AFTER_HOURS_T_1_OPENING": str,
+                "AFTER_HOURS_T_1_CLOSING": str
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -1097,7 +1186,6 @@ class B3TradingHoursCryptoFutures(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -1114,26 +1202,16 @@ class B3TradingHoursCryptoFutures(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "ELETRONIC_CALL_OPENING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "EXTENDED_HOURS_T_0_OPENING",
-            "EXTENDED_HOURS_T_0_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/table/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -1141,12 +1219,6 @@ class B3TradingHoursCryptoFutures(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -1155,26 +1227,25 @@ class B3TradingHoursCryptoFutures(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING",
+                "ELETRONIC_CALL_OPENING",
+                "ELETRONIC_CALL_ORDER_CANCELLATION_OPENING",
+                "ELETRONIC_CALL_ORDER_CANCELLATION_CLOSING",
+                "EXTENDED_HOURS_T_0_OPENING",
+                "EXTENDED_HOURS_T_0_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/table/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "ELETRONIC_CALL_OPENING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "EXTENDED_HOURS_T_0_OPENING": str,
-            "EXTENDED_HOURS_T_0_CLOSING": str
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -1187,8 +1258,6 @@ class B3TradingHoursCryptoFutures(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -1204,7 +1273,19 @@ class B3TradingHoursCryptoFutures(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING": str,
+                "ELETRONIC_CALL_OPENING": str,
+                "ELETRONIC_CALL_ORDER_CANCELLATION_OPENING": str,
+                "ELETRONIC_CALL_ORDER_CANCELLATION_CLOSING": str,
+                "EXTENDED_HOURS_T_0_OPENING": str,
+                "EXTENDED_HOURS_T_0_CLOSING": str
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -1220,7 +1301,6 @@ class B3TradingHoursExchangeRateFutures(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -1237,28 +1317,16 @@ class B3TradingHoursExchangeRateFutures(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/foreign-exchange-and-dollar-spot/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "REGULAR_HOURS_OPENING",
-            "REGULAR_HOURS_CLOSING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "ELECTRONIC_CALL_OPENING",
-            "ORDER_CANCELLATION_OPENING",
-            "ORDER_CANCELLATION_CLOSING",
-            "EXTENDED_HOURS_T_0_OPENING",
-            "EXTENDED_HOURS_T_0_CLOSING",
-            "AFTER_HOURS_T_1_OPENING",
-            "AFTER_HOURS_T_1_CLOSING",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -1266,12 +1334,6 @@ class B3TradingHoursExchangeRateFutures(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -1280,28 +1342,27 @@ class B3TradingHoursExchangeRateFutures(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "REGULAR_HOURS_OPENING",
+                "REGULAR_HOURS_CLOSING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING",
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING",
+                "ELECTRONIC_CALL_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING",
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING",
+                "EXTENDED_HOURS_T_0_OPENING",
+                "EXTENDED_HOURS_T_0_CLOSING",
+                "AFTER_HOURS_T_1_OPENING",
+                "AFTER_HOURS_T_1_CLOSING",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "REGULAR_HOURS_OPENING": str,
-            "REGULAR_HOURS_CLOSING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "ELECTRONIC_CALL_OPENING": str,
-            "ORDER_CANCELLATION_OPENING": str,
-            "ORDER_CANCELLATION_CLOSING": str,
-            "EXTENDED_HOURS_T_0_OPENING": str,
-            "EXTENDED_HOURS_T_0_CLOSING": str,
-            "AFTER_HOURS_T_1_OPENING": str,
-            "AFTER_HOURS_T_1_CLOSING": str
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -1314,8 +1375,6 @@ class B3TradingHoursExchangeRateFutures(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -1331,7 +1390,21 @@ class B3TradingHoursExchangeRateFutures(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "REGULAR_HOURS_OPENING": str,
+                "REGULAR_HOURS_CLOSING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_OPENING": str,
+                "REGULAR_HOURS_ORDER_CANCELLATION_CLOSING": str,
+                "ELECTRONIC_CALL_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_OPENING": str,
+                "ELECTRONIC_CALL_ORDER_CANCELLATION_CLOSING": str,
+                "EXTENDED_HOURS_T_0_OPENING": str,
+                "EXTENDED_HOURS_T_0_CLOSING": str,
+                "AFTER_HOURS_T_1_OPENING": str,
+                "AFTER_HOURS_T_1_CLOSING": str
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -1347,7 +1420,6 @@ class B3TradingHoursOTC(B3TradingHoursCore):
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/balcao-organizado/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -1364,34 +1436,16 @@ class B3TradingHoursOTC(B3TradingHoursCore):
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/horario-de-negociacao/balcao-organizado/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "MERCADO",
-            "CANCELAMENTO_DE_OFERTAS_INICIO",
-            "CANCELAMENTO_DE_OFERTAS_FIM",
-            "PRE_ABERTURA_INICIO",
-            "PRE_ABERTURA_FIM",
-            "NEGOCIACAO_INICIO",
-            "NEGOCIACAO_FIM",
-            "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_INICIO",
-            "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_FIM",
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_INICIO",
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_FIM",
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_INICIO",
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_FIM",
-            "CALL_DE_FECHAMENTO_INICIO",
-            "CALL_DE_FECHAMENTO_FIM",
-            "CANCELAMENTO_DE_OFERTAS_INICIO",
-            "CANCELAMENTO_DE_OFERTAS_FIM",
-            "AFTER_MARKET_NEGOCIACAO_INICIO",
-            "AFTER_MARKET_NEGOCIACAO_FIM",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -1399,12 +1453,6 @@ class B3TradingHoursOTC(B3TradingHoursCore):
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -1413,34 +1461,33 @@ class B3TradingHoursOTC(B3TradingHoursCore):
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "MERCADO",
+                "CANCELAMENTO_DE_OFERTAS_INICIO",
+                "CANCELAMENTO_DE_OFERTAS_FIM",
+                "PRE_ABERTURA_INICIO",
+                "PRE_ABERTURA_FIM",
+                "NEGOCIACAO_INICIO",
+                "NEGOCIACAO_FIM",
+                "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_INICIO",
+                "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_FIM",
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_INICIO",
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_FIM",
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_INICIO",
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_FIM",
+                "CALL_DE_FECHAMENTO_INICIO",
+                "CALL_DE_FECHAMENTO_FIM",
+                "CALL_DE_FECHAMENTO_CANCELAMENTO_DE_OFERTAS_INICIO",
+                "CALL_DE_FECHAMENTO_CANCELAMENTO_DE_OFERTAS_FIM",
+                "AFTER_MARKET_NEGOCIACAO_INICIO",
+                "AFTER_MARKET_NEGOCIACAO_FIM",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "MERCADO": str,
-            "CANCELAMENTO_DE_OFERTAS_INICIO": str,
-            "CANCELAMENTO_DE_OFERTAS_FIM": str,
-            "PRE_ABERTURA_INICIO": str,
-            "PRE_ABERTURA_FIM": str,
-            "NEGOCIACAO_INICIO": str,
-            "NEGOCIACAO_FIM": str,
-            "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_INICIO": str,
-            "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_FIM": str,
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_INICIO": str,
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_FIM": str,
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_INICIO": str,
-            "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_FIM": str,
-            "CALL_DE_FECHAMENTO_INICIO": str,
-            "CALL_DE_FECHAMENTO_FIM": str,
-            "CANCELAMENTO_DE_OFERTAS_INICIO": str,
-            "CANCELAMENTO_DE_OFERTAS_FIM": str,
-            "AFTER_MARKET_NEGOCIACAO_INICIO": str,
-            "AFTER_MARKET_NEGOCIACAO_FIM": str
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -1453,8 +1500,6 @@ class B3TradingHoursOTC(B3TradingHoursCore):
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -1470,7 +1515,27 @@ class B3TradingHoursOTC(B3TradingHoursCore):
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "MERCADO": str,
+                "CANCELAMENTO_DE_OFERTAS_INICIO": str,
+                "CANCELAMENTO_DE_OFERTAS_FIM": str,
+                "PRE_ABERTURA_INICIO": str,
+                "PRE_ABERTURA_FIM": str,
+                "NEGOCIACAO_INICIO": str,
+                "NEGOCIACAO_FIM": str,
+                "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_INICIO": str,
+                "EXERCICIO_DE_OPCOES_ANTES_DO_VENCIMENTO_EXERCICIO_POSICAO_TITULAR_FIM": str,
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_INICIO": str,
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_ENCERRAMENTO_POSICAO_FIM": str,
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_INICIO": str,
+                "EXERCICIO_DE_OPCOES_NO_VENCIMENTO_EXERCICIO_DE_POSICAO_TITULAR_FIM": str,
+                "CALL_DE_FECHAMENTO_INICIO": str,
+                "CALL_DE_FECHAMENTO_FIM": str,
+                "CALL_DE_FECHAMENTO_CANCELAMENTO_DE_OFERTAS_INICIO": str,
+                "CALL_DE_FECHAMENTO_CANCELAMENTO_DE_OFERTAS_FIM": str,
+                "AFTER_MARKET_NEGOCIACAO_INICIO": str,
+                "AFTER_MARKET_NEGOCIACAO_FIM": str
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -1486,7 +1551,6 @@ class B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(B3TradingHoursCore
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -1503,19 +1567,16 @@ class B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(B3TradingHoursCore
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "EXERCISE", 
-            "PURCHASE_FOR_BLOCKING_WITH_EXERCISE_RISK"
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -1523,12 +1584,6 @@ class B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(B3TradingHoursCore
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -1537,19 +1592,18 @@ class B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(B3TradingHoursCore
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "EXERCISE", 
+                "PURCHASE_FOR_BLOCKING_WITH_EXERCISE_RISK"
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "EXERCISE": str,
-            "PURCHASE_FOR_BLOCKING_WITH_EXERCISE_RISK": str,
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -1562,8 +1616,6 @@ class B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(B3TradingHoursCore
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -1580,7 +1632,12 @@ class B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate(B3TradingHoursCore
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "EXERCISE": str,
+                "PURCHASE_FOR_BLOCKING_WITH_EXERCISE_RISK": str,
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,
@@ -1596,7 +1653,6 @@ class B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(B3TradingHoursCore)
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
-        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/",
     ) -> None:
         """Initialize the ingestion class.
         
@@ -1613,20 +1669,16 @@ class B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(B3TradingHoursCore)
         -------
         None
         """
-        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+        super().__init__(
+            date_ref=date_ref, 
+            logger=logger, 
+            cls_db=cls_db, 
+            url="https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/exercise-and-blocking-of-options/"
+        )
 
     def transform_data(
         self, 
-        html_root: HtmlElement, 
-        list_th: list[str] = [
-            "CONTRACT",
-            "TICKER",
-            "EXERCISE", 
-            "BLOCKING_WITHOUT_EXERCISE_RISK", 
-            "BLOCKING_HOLDER",
-        ], 
-        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td', 
-        na_values: str = "-"
+        html_root: HtmlElement,
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -1634,12 +1686,6 @@ class B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(B3TradingHoursCore)
         ----------
         html_root : HtmlElement
             The root element of the HTML document.
-        list_th : list[str], optional
-            The list of table headers.
-        xpath_td : str, optional
-            The XPath expression for the table data.
-        na_values : str, optional
-            The value to use for missing data, by default "-"
         
         Returns
         -------
@@ -1648,20 +1694,19 @@ class B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(B3TradingHoursCore)
         """
         return super().transform_data(
             html_root=html_root, 
-            list_th=list_th, 
-            xpath_td=xpath_td,
-            na_values=na_values,
+            list_th=[
+                "CONTRACT",
+                "TICKER",
+                "EXERCISE", 
+                "BLOCKING_WITHOUT_EXERCISE_RISK", 
+                "BLOCKING_HOLDER",
+            ], 
+            xpath_td='//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td',
+            na_values="-",
         )
     
     def run(
-        self, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "CONTRACT": str,
-            "TICKER": str,
-            "EXERCISE": str,
-            "BLOCKING_WITHOUT_EXERCISE_RISK": str,
-            "BLOCKING_HOLDER": str
-        },
+        self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
@@ -1674,8 +1719,6 @@ class B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(B3TradingHoursCore)
 
         Parameters
         ----------
-        dict_dtypes : dict[str, Union[str, int, float]], optional
-            The data types of the columns.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -1692,7 +1735,13 @@ class B3TradingHoursExerciseBlockingOptionsAfterExerciseDate(B3TradingHoursCore)
             The transformed DataFrame.
         """
         return super().run(
-            dict_dtypes=dict_dtypes,
+            dict_dtypes={
+                "CONTRACT": str,
+                "TICKER": str,
+                "EXERCISE": str,
+                "BLOCKING_WITHOUT_EXERCISE_RISK": str,
+                "BLOCKING_HOLDER": str
+            },
             timeout=timeout,
             bool_verify=bool_verify,
             bool_insert_or_ignore=bool_insert_or_ignore,

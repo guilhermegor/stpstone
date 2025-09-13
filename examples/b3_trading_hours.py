@@ -8,7 +8,7 @@ from stpstone.ingestion.countries.br.exchange.b3_trading_hours import (
     B3TradingHoursExerciseBlockingOptionsBeforeExerciseDate,
     B3TradingHoursOptionsExercise,
     B3TradingHoursOTC,
-    B3TradingHoursPMIFutures,
+    B3TradingHoursPMIFuture,
     B3TradingHoursRealDenominatedInterestRates,
     B3TradingHoursStockIndexFutures,
     B3TradingHoursStocks,
@@ -103,7 +103,7 @@ df_ = cls_.run(bool_verify=False)
 print(f"DF B3 TRADING HOURS REAL DENOMINATED INTEREST RATES: \n{df_}")
 df_.info()
 
-cls_ = B3TradingHoursPMIFutures(
+cls_ = B3TradingHoursPMIFuture(
     date_ref=None,
     logger=None, 
     cls_db=None
