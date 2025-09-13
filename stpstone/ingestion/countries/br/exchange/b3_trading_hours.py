@@ -1087,3 +1087,126 @@ class B3TradingHoursCommoditiesFutures(B3TradingHoursCore):
             bool_insert_or_ignore=bool_insert_or_ignore,
             str_table_name=str_table_name,
         )
+    
+
+class B3TradingHoursCryptoFutures(B3TradingHoursCore):
+    """B3 Trading Hours for Crypto Futures."""
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/cryptoassets/",
+    ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+
+    def transform_data(
+        self, 
+        html_root: HtmlElement, 
+        list_th: list[str] = [
+            "CONTRACT",
+            "TICKER",
+            "REGULAR_HOURS_OPENING",
+            "REGULAR_HOURS_CLOSING",
+            "ORDER_CANCELLATION_OPENING",
+            "ORDER_CANCELLATION_CLOSING",
+            "ELETRONIC_CALL_OPENING",
+            "ORDER_CANCELLATION_OPENING",
+            "ORDER_CANCELLATION_CLOSING",
+            "EXTENDED_HOURS_T_0_OPENING",
+            "EXTENDED_HOURS_T_0_CLOSING",
+        ], 
+        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/table/tbody/tr/td', 
+        na_values: str = "-"
+    ) -> pd.DataFrame:
+        """Transform a list of response objects into a DataFrame.
+        
+        Parameters
+        ----------
+        html_root : HtmlElement
+            The root element of the HTML document.
+        list_th : list[str], optional
+            The list of table headers.
+        xpath_td : str, optional
+            The XPath expression for the table data.
+        na_values : str, optional
+            The value to use for missing data, by default "-"
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            html_root=html_root, 
+            list_th=list_th, 
+            xpath_td=xpath_td,
+            na_values=na_values,
+        )
+    
+    def run(
+        self, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "CONTRACT": str,
+            "TICKER": str,
+            "REGULAR_HOURS_OPENING": str,
+            "REGULAR_HOURS_CLOSING": str,
+            "ORDER_CANCELLATION_OPENING": str,
+            "ORDER_CANCELLATION_CLOSING": str,
+            "ELETRONIC_CALL_OPENING": str,
+            "ORDER_CANCELLATION_OPENING": str,
+            "ORDER_CANCELLATION_CLOSING": str,
+            "EXTENDED_HOURS_T_0_OPENING": str,
+            "EXTENDED_HOURS_T_0_CLOSING": str
+        },
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False,
+        str_table_name: str = "br_b3_trading_hours_crypto_futures",
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        dict_dtypes : dict[str, Union[str, int, float]], optional
+            The data types of the columns.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_trading_hours_crypto_futures"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        return super().run(
+            dict_dtypes=dict_dtypes,
+            timeout=timeout,
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore,
+            str_table_name=str_table_name,
+        )

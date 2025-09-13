@@ -2,6 +2,7 @@
 
 from stpstone.ingestion.countries.br.exchange.b3_trading_hours import (
     B3TradingHoursCommoditiesFutures,
+    B3TradingHoursCryptoFutures,
     B3TradingHoursOptionsExercise,
     B3TradingHoursPMIFutures,
     B3TradingHoursRealDenominatedInterestRates,
@@ -9,6 +10,17 @@ from stpstone.ingestion.countries.br.exchange.b3_trading_hours import (
     B3TradingHoursStocks,
     B3TradingHoursUSDollarDenominatedInterestRatesFutures,
 )
+
+
+cls_ = B3TradingHoursCryptoFutures(\
+    date_ref=None,
+    logger=None, 
+    cls_db=None    
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 TRADING HOURS CRYPTO FUTURES: \n{df_}")
+df_.info()
 
 
 cls_ = B3TradingHoursCommoditiesFutures(
