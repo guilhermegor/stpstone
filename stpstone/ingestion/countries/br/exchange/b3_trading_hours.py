@@ -569,7 +569,7 @@ class B3TradingHoursPMIFutures(B3TradingHoursCore):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_b3_trading_hours_options_exercise"
+            The name of the table, by default "br_b3_trading_hours_pmi_future"
 
         Returns
         -------
@@ -678,7 +678,7 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False,
-        str_table_name: str = "br_b3_trading_hours_pmi_future",
+        str_table_name: str = "br_b3_trading_hours_stock_index_futures",
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -696,7 +696,268 @@ class B3TradingHoursStockIndexFutures(B3TradingHoursCore):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_b3_trading_hours_options_exercise"
+            The name of the table, by default "br_b3_trading_hours_stock_index_futures"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        return super().run(
+            dict_dtypes=dict_dtypes,
+            timeout=timeout,
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore,
+            str_table_name=str_table_name,
+        )
+    
+
+class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
+    """B3 Trading Hours for Real Denominated Interest Rates.
+    
+    Real denominated interest rates, options contracts and structured transactions.
+    """
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/",
+    ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+
+    def transform_data(
+        self, 
+        html_root: HtmlElement, 
+        list_th: list[str] = [
+            "CONTRACT",
+            "TICKER",
+            "REGULAR_HOURS_OPENING",
+            "REGULAR_HOURS_CLOSING",
+            "ORDER_CANCELLATION_OPENING",
+            "ORDER_CANCELLATION_CLOSING",
+            "ELECTRONIC_CALL_OPENING",
+            "ORDER_CANCELLATION_EOD_OPENING",
+            "ORDER_CANCELLATION_EOD_CLOSING",
+            "EXTENDED_HOURS_T_0_OPENING",
+            "EXTENDED_HOURS_T_0_CLOSING",
+            "AFTER_HOURS_T_1_OPENING",
+            "AFTER_HOURS_T_1_CLOSING",
+        ], 
+        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[1]/tbody/tr/td', 
+        na_values: str = "-"
+    ) -> pd.DataFrame:
+        """Transform a list of response objects into a DataFrame.
+        
+        Parameters
+        ----------
+        html_root : HtmlElement
+            The root element of the HTML document.
+        list_th : list[str], optional
+            The list of table headers.
+        xpath_td : str, optional
+            The XPath expression for the table data.
+        na_values : str, optional
+            The value to use for missing data, by default "-"
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            html_root=html_root, 
+            list_th=list_th, 
+            xpath_td=xpath_td,
+            na_values=na_values,
+        )
+    
+    def run(
+        self, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "CONTRACT": str,
+            "TICKER": str,
+            "REGULAR_HOURS_OPENING": str,
+            "REGULAR_HOURS_CLOSING": str,
+            "ORDER_CANCELLATION_OPENING": str,
+            "ORDER_CANCELLATION_CLOSING": str,
+            "ELECTRONIC_CALL_OPENING": str,
+            "ORDER_CANCELLATION_EOD_OPENING": str,
+            "ORDER_CANCELLATION_EOD_CLOSING": str,
+            "EXTENDED_HOURS_T_0_OPENING": str,
+            "EXTENDED_HOURS_T_0_CLOSING": str,
+            "AFTER_HOURS_T_1_OPENING": str,
+            "AFTER_HOURS_T_1_CLOSING": str,
+        },
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False,
+        str_table_name: str = "br_b3_trading_hours_real_denominated_interest_rates",
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        dict_dtypes : dict[str, Union[str, int, float]], optional
+            The data types of the columns.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_trading_hours_real_denominated_interest_rates"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        return super().run(
+            dict_dtypes=dict_dtypes,
+            timeout=timeout,
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore,
+            str_table_name=str_table_name,
+        )
+    
+
+class B3TradingHoursUSDollarDenominatedInterestRatesFutures(B3TradingHoursCore):
+    """B3 Trading Hours for US Dollar Denominated Interest Rates Futures.
+    
+    Dollar Denominated Interest Rates Futures, Options Contracts and Structures Transactions.
+    """
+
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+        url: str = "https://www.b3.com.br/en_us/solutions/platforms/puma-trading-system/for-members-and-traders/trading-hours/derivatives/interest-rates/",
+    ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(date_ref=date_ref, logger=logger, cls_db=cls_db, url=url)
+
+    def transform_data(
+        self, 
+        html_root: HtmlElement, 
+        list_th: list[str] = [
+            "CONTRACT",
+            "TICKER",
+            "REGULAR_HOURS_OPENING",
+            "REGULAR_HOURS_CLOSING",
+            "ORDER_CANCELLATION_OPENING",
+            "ORDER_CANCELLATION_CLOSING",
+            "ELECTRONIC_CALL_OPENING",
+            "ORDER_CANCELLATION_EOD_OPENING",
+            "ORDER_CANCELLATION_EOD_CLOSING",
+            "EXTENDED_HOURS_T_0_OPENING",
+            "EXTENDED_HOURS_T_0_CLOSING",
+            "AFTER_HOURS_T_1_OPENING",
+            "AFTER_HOURS_T_1_CLOSING",
+        ], 
+        xpath_td: str = '//*[@id="conteudo-principal"]/div[4]/div/div/table[2]/tbody/tr/td', 
+        na_values: str = "-"
+    ) -> pd.DataFrame:
+        """Transform a list of response objects into a DataFrame.
+        
+        Parameters
+        ----------
+        html_root : HtmlElement
+            The root element of the HTML document.
+        list_th : list[str], optional
+            The list of table headers.
+        xpath_td : str, optional
+            The XPath expression for the table data.
+        na_values : str, optional
+            The value to use for missing data, by default "-"
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        return super().transform_data(
+            html_root=html_root, 
+            list_th=list_th, 
+            xpath_td=xpath_td,
+            na_values=na_values,
+        )
+    
+    def run(
+        self, 
+        dict_dtypes: dict[str, Union[str, int, float]] = {
+            "CONTRACT": str,
+            "TICKER": str,
+            "REGULAR_HOURS_OPENING": str,
+            "REGULAR_HOURS_CLOSING": str,
+            "ORDER_CANCELLATION_OPENING": str,
+            "ORDER_CANCELLATION_CLOSING": str,
+            "ELECTRONIC_CALL_OPENING": str,
+            "ORDER_CANCELLATION_EOD_OPENING": str,
+            "ORDER_CANCELLATION_EOD_CLOSING": str,
+            "EXTENDED_HOURS_T_0_OPENING": str,
+            "EXTENDED_HOURS_T_0_CLOSING": str,
+            "AFTER_HOURS_T_1_OPENING": str,
+            "AFTER_HOURS_T_1_CLOSING": str,
+        },
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False,
+        str_table_name: str = "br_b3_trading_hours_usdollar_denominated_interest_rates_futures",
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        dict_dtypes : dict[str, Union[str, int, float]], optional
+            The data types of the columns.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default 
+            "br_b3_trading_hours_usdollar_denominated_interest_rates_futures"
 
         Returns
         -------
