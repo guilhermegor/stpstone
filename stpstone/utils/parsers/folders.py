@@ -885,7 +885,7 @@ class DirFilesManagement(metaclass=TypeChecker):
     def recursive_unzip_in_memory(
         self, 
         file: Union[BytesIO, ZipExtFile]
-    ) -> list[StringIO]:
+    ) -> list[tuple[Union[StringIO, BytesIO], str]]:
         """Recursive unzip a zip file in memory.
         
         Parameters
@@ -895,18 +895,34 @@ class DirFilesManagement(metaclass=TypeChecker):
 
         Returns
         -------
-        list[StringIO]
-            List of extracted files
+        list[tuple[Union[StringIO, BytesIO], str]]
+            List of tuples containing (file_content, filename)
         """
-        list_: list[StringIO] = []
+        list_: list[tuple[Union[StringIO, BytesIO], str]] = []
         zipfile = ZipFile(file)
 
         for file_name in zipfile.namelist():
             if file_name.endswith(".zip"):
                 list_.extend(self.recursive_unzip_in_memory(zipfile.open(file_name)))
                 continue
-            content = zipfile.read(file_name).decode('utf-8')
-            list_.append(StringIO(content))
+            
+            content_bytes = zipfile.read(file_name)
+
+            if file_name.lower().endswith((".xlsx", ".xls", ".xlsm", ".xlsb")):
+                list_.append((BytesIO(content_bytes), file_name))
+            elif file_name.lower().endswith((".txt", ".csv", ".json", ".html", ".py", ".js")):
+                try:
+                    content = content_bytes.decode("utf-8")
+                    list_.append((StringIO(content), file_name))
+                except UnicodeDecodeError:
+                    try:
+                        content = content_bytes.decode("latin-1")
+                        list_.append((StringIO(content), file_name))
+                    except UnicodeDecodeError:
+                        list_.append((BytesIO(content_bytes), file_name))
+            else:
+                list_.append((BytesIO(content_bytes), file_name))
+        
         return list_
 
     def calculate_file_hash(self, file_path: str, algorithm: str = "sha256") -> str:
