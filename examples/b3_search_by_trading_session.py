@@ -363,15 +363,15 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # df_.info()
 
 
-# cls_ = B3InstrumentsFileIndicators(
-#     date_ref=None,
-#     logger=None, 
-#     cls_db=None
-# )
+cls_ = B3InstrumentsFileIndicators(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
 
-# df_ = cls_.run(bool_verify=False)
-# print(f"DF B3 INSTRUMENTS FILE INDICATORS: \n{df_}")
-# df_.info()
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 INSTRUMENTS FILE INDICATORS: \n{df_}")
+df_.info()
 
 
 # cls_ = B3InstrumentsFileEqtyFwd(
@@ -439,15 +439,15 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # df_.info()
 
 
-cls_ = B3InstrumentsFileOptnOnEqts(
-    date_ref=None,
-    logger=None, 
-    cls_db=None
-)
+# cls_ = B3InstrumentsFileOptnOnEqts(
+#     date_ref=None,
+#     logger=None, 
+#     cls_db=None
+# )
 
-df_ = cls_.run(bool_verify=False)
-print(f"DF B3 INSTRUMENTS FILE OPTN ON EQTS: \n{df_}")
-df_.info()
+# df_ = cls_.run(bool_verify=False)
+# print(f"DF B3 INSTRUMENTS FILE OPTN ON EQTS: \n{df_}")
+# # df_.info()
 
 
 # cls_ = B3InstrumentsFileOptnOnSpotAndFutures(

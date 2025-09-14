@@ -1,4 +1,12 @@
-"""Implementation of ingestion instance."""
+"""B3 Search by Trading Session.
+
+This module provides an ingestion class for B3 Search by Trading Session data.
+It handles the retrieval of data from the B3 website and stores it in a database.
+
+References
+----------
+[1] https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/boletins-diarios/pesquisa-por-pregao/pesquisa-por-pregao/
+"""
 
 from abc import abstractmethod
 from contextlib import suppress
@@ -223,6 +231,11 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         -------
         StringIO
             The parsed content.
+
+        Raises
+        ------
+        RuntimeError
+            If no .ex_ file found in the downloaded ZIP
         """
         # get the list of files from the zip
         files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
@@ -400,11 +413,6 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         -------
         pd.DataFrame
             The transformed DataFrame.
-
-        Raises
-        ------
-        NotImplementedError
-            If the method is not implemented in a subclass.
         """
         return pd.read_csv(file, sep=";")
 
@@ -418,6 +426,21 @@ class B3StandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -433,6 +456,26 @@ class B3StandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            Date format string, by default "YYYY-MM-DD
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "TIPO_REGISTRO": str,
@@ -447,7 +490,7 @@ class B3StandardizedInstrumentGroups(ABCB3SearchByTradingSession):
             bool_insert_or_ignore=bool_insert_or_ignore,
             str_fmt_dt=str_fmt_dt,
             str_table_name=str_table_name
-    )
+        )
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -484,6 +527,21 @@ class B3IndexReport(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -501,6 +559,26 @@ class B3IndexReport(ABCB3SearchByTradingSession):
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_index_report"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            Date format string, by default "YYYY-MM-DD
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "TCKR_SYMB": str,
@@ -596,6 +674,21 @@ class B3PriceReport(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -613,6 +706,26 @@ class B3PriceReport(ABCB3SearchByTradingSession):
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            Date format string, by default "YYYY-MM-DD
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "DT": "date",
@@ -736,6 +849,21 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -914,6 +1042,10 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         ----------
         xml_content : str
             XML content to save
+
+        Returns
+        -------
+        None
         """
         cache_path = self._get_cached_file_path()
         try:
@@ -958,6 +1090,14 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
+        tag_parent : str
+            Parent tag name
+        list_tags_children : list[str]
+            List of child tags
+        list_tups_attributes : list[tuple[str, str]]
+            List of tuples containing tag name and attribute name
         
         Returns
         -------
@@ -981,7 +1121,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         tag_parent: str, 
         list_tags_children: list[str], 
         list_tups_attributes: list[tuple[str, str]]
-    ) -> str:
+    ) -> list[dict[str, Union[str, int, float]]]:
         """Get node information from BeautifulSoup XML.
         
         Parameters
@@ -1017,18 +1157,12 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 
         return list_ser
 
-    def __del__(self) -> None:
-        """Cleanup on destruction."""
-        with suppress(Exception):
-            self.cleanup_cache()
-
     def cleanup_cache(self) -> None:
         """Clean up the temporary directory and all cached files.
         
-        Raises
-        ------
-        ValueError
-            If failing to cleanup cache
+        Returns
+        -------
+        None
         """
         try:
             if self.temp_dir.exists():
@@ -1054,6 +1188,21 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1067,6 +1216,26 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False,
         str_table_name: str = "br_b3_instruments_file_eqty"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default br_b3_instruments_file_eqty
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -1114,6 +1283,8 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -1167,6 +1338,21 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1180,6 +1366,26 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_b3_instruments_file_optn_on_eqts"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default br_b3_instruments_file_optn_on_eqts
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1221,6 +1427,8 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -1269,6 +1477,21 @@ class B3InstrumentsFileOptnOnSpotAndFutures(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1280,8 +1503,28 @@ class B3InstrumentsFileOptnOnSpotAndFutures(B3InstrumentsFile):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_instruments_file_optn_on_spot_and_futures"
+        str_table_name: str = "br_b3_instruments_options_on_spot_and_futures"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default br_b3_instruments_options_on_spot_and_futures
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1291,11 +1534,10 @@ class B3InstrumentsFileOptnOnSpotAndFutures(B3InstrumentsFile):
                 "TCKR_SYMB": str,
                 "EXRC_PRIC": float,
                 "EXRC_STYLE": str,
-                "XPRTN_DT": "date",
                 "XPRTN_CD": str,
                 "OPTN_TP": str,
                 "CTRCT_MLTPLR": float,
-                "ASST_QTN_QTY": int,
+                "ASST_QTN_QTY": str,
                 "PMT_TP": str,
                 "ALLCN_RND_LOT": int,
                 "CFICD": str,
@@ -1322,6 +1564,8 @@ class B3InstrumentsFileOptnOnSpotAndFutures(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -1368,6 +1612,21 @@ class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1381,6 +1640,27 @@ class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_b3_instruments_file_exrc_eqts"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The table name, by default "br_b3_instruments_file_exrc_eqts
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1407,6 +1687,8 @@ class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -1439,6 +1721,21 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1452,6 +1749,27 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_b3_instruments_file_eqty_fwd"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_file_eqty_fwd
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1483,6 +1801,8 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -1520,6 +1840,21 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1533,6 +1868,27 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_b3_instruments_file_btc"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_file_btc
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1585,6 +1941,21 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1598,6 +1969,27 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_b3_instruments_file_fxd_incm"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_file_fxd_incm
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1627,6 +2019,8 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -1662,6 +2056,21 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1675,6 +2084,27 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_b3_instruments_file_adr"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_file_adr
+            
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -1702,6 +2132,8 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -1737,6 +2169,21 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1748,40 +2195,54 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ACTVTY_IND": str,
-            "FRQCY": str,
-            "NET_POS_ID": str,
-            "DT": "date",
-            "ID": str, 
-            "PRTRY": str, 
-            "MKT_IDR_CD": str, 
-            "INSTRM_NM": str, 
-            "DESC": str, 
-            "SGMT": str, 
-            "MKT": str, 
-            "ASST": str, 
-            "SCTY_CTGY": str, 
-            "TP_CD": str, 
-            "ECNC_IND_DESC": str, 
-            "BASE_CD": str, 
-            "VAL_TP_CD": str, 
-            "NTRY_REF_CD": str, 
-            "DCML_PRCSN": str, 
-            "MTRTY": str, 
-            "FILE_NAME": str,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_instruments_file_indicator"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool
+            Whether to verify the data, by default True
+        bool_insert_or_ignore : bool
+            Whether to insert or ignore the data, by default False"""
+        return super().run(
+            dict_dtypes={
+                "ACTVTY_IND": str,
+                "FRQCY": str,
+                "NET_POS_ID": str,
+                "DT": "date",
+                "ID": str, 
+                "PRTRY": str, 
+                "MKT_IDR_CD": str, 
+                "INSTRM_NM": str, 
+                "DESC": str, 
+                "SGMT": str, 
+                "MKT": str, 
+                "ASST": str, 
+                "SCTY_CTGY": str, 
+                "TP_CD": str, 
+                "ECNC_IND_DESC": str, 
+                "BASE_CD": str, 
+                "VAL_TP_CD": str, 
+                "NTRY_REF_CD": str, 
+                "DCML_PRCSN": str, 
+                "MTRTY": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -1790,6 +2251,8 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -1862,6 +2325,21 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1879,6 +2357,30 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_fee_daily_unit_cost"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Insert or ignore, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD
+        cols_from_case : str, optional
+            The case of the columns, by default "pascal"
+        cols_to_case : str, optional
+            The case of the columns, by default "upper_constant"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_fee_daily_unit_cost"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "ACTVTY_IND": str,
@@ -1919,6 +2421,8 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -1975,6 +2479,21 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The reference date, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -1992,6 +2511,30 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_instruments_fee_unit_cost"
     ) -> Optional[pd.DataFrame]:
+        """Run the class.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the data, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD
+        cols_from_case : str, optional
+            The case of the columns, by default "pascal"
+        cols_to_case : str, optional
+            The case of the columns, by default "upper_constant"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_fee_unit_cost"
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The dataframe
+        """
         return super().run(
             dict_dtypes={
                 "ACTVTY_IND": str,
@@ -2032,6 +2575,8 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -2087,6 +2632,21 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Constructor method.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date reference, by default None
+        logger : Optional[Logger], optional
+            The logger, by default None
+        cls_db : Optional[Session], optional
+            The database session, by default None
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2102,6 +2662,26 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_primitive_risk_factors"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            If True, verify the data before inserting it into the database, by default True
+        bool_insert_or_ignore : bool, optional
+            If True, insert the data into the database, by default False
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD"
+        str_table_name : str, optional
+            The table name, by default "br_b3_primitive_risk_factors
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame
+        """
         return super().run(
             dict_dtypes={
                 "TIPO_REGISTRO": str,
@@ -2131,6 +2711,8 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -2164,6 +2746,21 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Constructor method.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date reference, by default None
+        logger : Optional[Logger], optional
+            The logger, by default None
+        cls_db : Optional[Session], optional
+            The database session, by default None
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2175,20 +2772,43 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TIPO_REGISTRO": str,
-            "ID_FORMULA": str,
-            "NOME_FORMULA": str,
-            "FILE_NAME": str,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_primitive_risk_formulas"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            If True, verify the data before inserting it into the database, by default True
+        bool_insert_or_ignore : bool, optional
+            If True, insert the data into the database, by default False
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD"
+        str_table_name : str, optional
+            The table name, by default "br_b3_primitive_risk_formulas
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame
+        """
+        return super().run(
+            dict_dtypes={
+                "TIPO_REGISTRO": str,
+                "ID_FORMULA": str,
+                "NOME_FORMULA": str,
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2197,6 +2817,8 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -2222,6 +2844,21 @@ class B3VariableFees(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Constructor method.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date reference, by default None
+        logger : Optional[Logger], optional
+            The logger, by default None
+        cls_db : Optional[Session], optional
+            The database session, by default None
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2233,32 +2870,60 @@ class B3VariableFees(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "FRQCY": str,
-            "RPT_NB": str,
-            "DT": str,
-            "FR_DT_TM": str,
-            "TO_DT_TM": str,
-            "SGMT": str,
-            "ASST": str,
-            "REF_DT": str,
-            "CONVS_IND_VAL": str,
-            "ID": str,
-            "PRTY": str,
-            "MKT_IDR_CD": str, 
-            "FILE_NAME": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_variable_fees"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            If True, verify the data before inserting it into the database, by default True
+        bool_insert_or_ignore : bool, optional
+            If True, insert the data into the database, by default False
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD"
+        cols_from_case : str, optional
+            The case of the columns, by default "pascal"
+        cols_to_case : str, optional
+            The case of the columns, by default "upper_constant"
+        str_table_name : str, optional
+            The table name, by default "br_b3_variable_fees"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame
+        """
+        return super().run(
+            dict_dtypes={
+                "FRQCY": str,
+                "RPT_NB": str,
+                "DT": str,
+                "FR_DT_TM": str,
+                "TO_DT_TM": str,
+                "SGMT": str,
+                "ASST": str,
+                "REF_DT": str,
+                "CONVS_IND_VAL": str,
+                "ID": str,
+                "PRTY": str,
+                "MKT_IDR_CD": str, 
+                "FILE_NAME": str
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2267,6 +2932,8 @@ class B3VariableFees(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -2328,6 +2995,21 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2339,22 +3021,45 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_CAMARA": str,
-            "ORIGMEM_INSTRUMENTO": str,
-            "ID_INSTRUMENTO": str,
-            "SIMBOLO_INSTRUMENTO": str,
-            "LIMITE_LIQUIDEZ": str, 
-            "FILE_NAME": str,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_daily_liquidity_limits"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_daily_liquidity_limits".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        return super().run(
+            dict_dtypes={
+                "ID_CAMARA": str,
+                "ORIGMEM_INSTRUMENTO": str,
+                "ID_INSTRUMENTO": str,
+                "SIMBOLO_INSTRUMENTO": str,
+                "LIMITE_LIQUIDEZ": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
@@ -2364,6 +3069,8 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -2391,6 +3098,21 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2402,22 +3124,25 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_CAMARA": str,
-            "ORIGMEM_INSTRUMENTO": str,
-            "ID_INSTRUMENTO": str,
-            "SIMBOLO_INSTRUMENTO": str,
-            "LIMITE_LIQUIDEZ": str, 
-            "FILE_NAME": str,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_other_daily_liquidity_limits"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_CAMARA": str,
+                "ORIGMEM_INSTRUMENTO": str,
+                "ID_INSTRUMENTO": str,
+                "SIMBOLO_INSTRUMENTO": str,
+                "LIMITE_LIQUIDEZ": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2426,6 +3151,8 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -2453,6 +3180,21 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2464,87 +3206,110 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "SYMBOL": str,
-            "SECURITY_ID": int,
-            "SECURITY_ID_SOURCE": "category",
-            "SECURITY_EXCHANGE": "category",
-            "NO_APPL_IDS": "category",
-            "APPL_ID": str,
-            "PUT_OR_CALL": "category",
-            "PRODUCT": "category",
-            "CFI_CODE": "category",
-            "SECURITY_GROUP": str,
-            "SECURITY_TYPE": "category",
-            "SECURITY_SUB_TYPE": "category",
-            "MATURITY_MONTH_YEAR": int,
-            "MATURITY_DATE": "date",
-            "ISSUE_DATE": "date",
-            "COUNTRY_OF_ISSUE": "category",
-            "STRIKE_PRICE": float,
-            "STRIKE_CURRENCY": "category",
-            "EXERCISE_STYLE": "category",
-            "CONTRACT_MULTIPLIER": float,
-            "SECURITY_DESC": str,
-            "CONTRACT_SETTL_MONTH": int,
-            "DATED_DATE": int,
-            "SETTL_TYPE": "category",
-            "SETTL_DATE": "date",
-            "PRICE_DIVISOR": int,
-            "MIN_PRICE_INCREMENT": float,
-            "TICK_SIZE_DENOMINATOR": int,
-            "MIN_ORDER_QTY": int,
-            "MAX_ORDER_QTY": int,
-            "MULTI_LEG_MODEL": int,
-            "MULTI_LEG_PRICE_METHOD": int,
-            "INDEX_PCT": str,
-            "NO_INSTR_ATTRIB": int,
-            "INSTR_ATTRIB_TYPE": str,
-            "INSTR_ATTRIB_VALUE": str,
-            "START_DATE": str,
-            "END_DATE": str,
-            "NO_UNDERLYINGS": int,
-            "UNDERLYING_SYMBOL": str,
-            "UNDERLYING_SECURITY_ID": str,
-            "UNDERLYING_SECURITY_ID_SOURCE": str,
-            "UNDERLYING_SECURITY_EXCHANGE": "category",
-            "INDEX_THEORETICAL_QTY": str,
-            "CURRENCY": "category",
-            "SETTL_CURRENCY": "category",
-            "SECURITY_STRATEGY_TYPE": "category",
-            "ASSET": "category",
-            "NO_SHARES_ISSUED": int,
-            "SECURITY_VALIDITY_TIMESTAMP": str,
-            "MARKET_SEGMENT_ID": int,
-            "GOVERNANCE_INDICATOR": "category",
-            "CORPORATE_ACTION_EVENT_ID": int,
-            "SECURITY_MATCH_TYPE": int,
-            "NO_LEGS": int,
-            "LEG_SYMBOL": str,
-            "LEG_SECURITY_ID": str,
-            "LEG_SECURITY_ID_SOURCE": str,
-            "LEG_SECURITY_TYPE": "category",
-            "LEG_SECURITY_EXCHANGE": "category",
-            "LEG_RATIO_QTY": "category",
-            "LEG_SIDE": "category",
-            "NO_TICK_RULES": str,
-            "NO_LOT_TYPE_RULES": int,
-            "LOT_TYPE": "category",
-            "MIN_LOT_SIZE": int,
-            "IMPLIED_MARKET_INDICATOR": "category",
-            "MIN_CROSS_QTY": int,
-            "ISIN_NUMBER": str,
-            "CLEARING_HOUSE_ID": int,
-            "FILE_NAME": str,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_tradable_security_list"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_tradable_security_list".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
+        return super().run(
+            dict_dtypes={
+                "SYMBOL": str,
+                "SECURITY_ID": int,
+                "SECURITY_ID_SOURCE": "category",
+                "SECURITY_EXCHANGE": "category",
+                "NO_APPL_IDS": "category",
+                "APPL_ID": str,
+                "PUT_OR_CALL": "category",
+                "PRODUCT": "category",
+                "CFI_CODE": "category",
+                "SECURITY_GROUP": str,
+                "SECURITY_TYPE": "category",
+                "SECURITY_SUB_TYPE": "category",
+                "MATURITY_MONTH_YEAR": int,
+                "MATURITY_DATE": "date",
+                "ISSUE_DATE": "date",
+                "COUNTRY_OF_ISSUE": "category",
+                "STRIKE_PRICE": float,
+                "STRIKE_CURRENCY": "category",
+                "EXERCISE_STYLE": "category",
+                "CONTRACT_MULTIPLIER": float,
+                "SECURITY_DESC": str,
+                "CONTRACT_SETTL_MONTH": int,
+                "DATED_DATE": int,
+                "SETTL_TYPE": "category",
+                "SETTL_DATE": "date",
+                "PRICE_DIVISOR": int,
+                "MIN_PRICE_INCREMENT": float,
+                "TICK_SIZE_DENOMINATOR": int,
+                "MIN_ORDER_QTY": int,
+                "MAX_ORDER_QTY": int,
+                "MULTI_LEG_MODEL": int,
+                "MULTI_LEG_PRICE_METHOD": int,
+                "INDEX_PCT": str,
+                "NO_INSTR_ATTRIB": int,
+                "INSTR_ATTRIB_TYPE": str,
+                "INSTR_ATTRIB_VALUE": str,
+                "START_DATE": str,
+                "END_DATE": str,
+                "NO_UNDERLYINGS": int,
+                "UNDERLYING_SYMBOL": str,
+                "UNDERLYING_SECURITY_ID": str,
+                "UNDERLYING_SECURITY_ID_SOURCE": str,
+                "UNDERLYING_SECURITY_EXCHANGE": "category",
+                "INDEX_THEORETICAL_QTY": str,
+                "CURRENCY": "category",
+                "SETTL_CURRENCY": "category",
+                "SECURITY_STRATEGY_TYPE": "category",
+                "ASSET": "category",
+                "NO_SHARES_ISSUED": int,
+                "SECURITY_VALIDITY_TIMESTAMP": str,
+                "MARKET_SEGMENT_ID": int,
+                "GOVERNANCE_INDICATOR": "category",
+                "CORPORATE_ACTION_EVENT_ID": int,
+                "SECURITY_MATCH_TYPE": int,
+                "NO_LEGS": int,
+                "LEG_SYMBOL": str,
+                "LEG_SECURITY_ID": str,
+                "LEG_SECURITY_ID_SOURCE": str,
+                "LEG_SECURITY_TYPE": "category",
+                "LEG_SECURITY_EXCHANGE": "category",
+                "LEG_RATIO_QTY": "category",
+                "LEG_SIDE": "category",
+                "NO_TICK_RULES": str,
+                "NO_LOT_TYPE_RULES": int,
+                "LOT_TYPE": "category",
+                "MIN_LOT_SIZE": int,
+                "IMPLIED_MARKET_INDICATOR": "category",
+                "MIN_CROSS_QTY": int,
+                "ISIN_NUMBER": str,
+                "CLEARING_HOUSE_ID": int,
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2553,6 +3318,8 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -2645,6 +3412,21 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2660,6 +3442,26 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_mapping_otc_instrument_groups"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The table name, by default "br_b3_mapping_otc_instrument_groups".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "TIPO_REGISTRO": str,
@@ -2679,13 +3481,15 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -2703,7 +3507,7 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
             "ID_QUALIFICADOR",
             "DESCRICAO_QUALIFICADOR",
         ])
-        df_["FILE_NAME"] = file.name
+        df_["FILE_NAME"] = file_name
 
         return df_
 
@@ -2717,6 +3521,21 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2732,6 +3551,26 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_mapping_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The table name, by default "br_b3_mapping_standardized_instrument_groups".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "TIPO_REGISTRO": str,
@@ -2751,13 +3590,15 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -2776,7 +3617,7 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
                 "INDICADOR_FPR_INDEPENDENTE",
             ]
         )
-        df_["FILE_NAME"] = file.name
+        df_["FILE_NAME"] = file_name
 
         return df_
 
@@ -2790,6 +3631,21 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2805,6 +3661,26 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_maximum_theoretical_margin"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The table name, by default "br_b3_maximum_theoretical_margin".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "INSTRUMENT_MTM": str,
@@ -2829,6 +3705,8 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -2859,6 +3737,21 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2874,6 +3767,26 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_equities_option_reference_premiums"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The table name, by default "br_b3_equities_option_reference_premiums".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "TICKER_SYMBOL": str,
@@ -2908,13 +3821,6 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -2929,6 +3835,8 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -2961,6 +3869,21 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -2976,6 +3899,26 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_fx_market_contracted_transactions"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The date format, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The table name, by default "br_b3_fx_market_contracted_transactions".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -3072,6 +4015,21 @@ class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3087,6 +4045,26 @@ class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_fx_market_volume_settled"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_fx_market_volume_settled".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -3109,6 +4087,8 @@ class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -3149,6 +4129,21 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3164,6 +4159,26 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_margin_scenarios"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_margin_scenarios".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "TIPO_REGISTRO": str,
@@ -3190,6 +4205,8 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -3221,6 +4238,21 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3236,6 +4268,26 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_consideration_factors"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_consideration_factors".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "DATA_BASE": str,
@@ -3261,6 +4313,8 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -3304,6 +4358,21 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3DerivativesMarketEconomicAgriculturalIndicators class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3319,6 +4388,27 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_economic_agricultural_indicators"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default 
+            "br_b3_derivatives_market_economic_agricultural_indicators".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -3350,18 +4440,16 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default "b3_derivatives_mkt_ec_ag_".
+        file_name : str, optional
+            The name of the file, by default 
+            "b3_derivatives_market_economic_agricultural_indicators".
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -3376,6 +4464,8 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -3421,6 +4511,21 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3DerivativesMarketOTCMarketTrades class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3436,6 +4541,26 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_otc_market_trades"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_otc_market_trades".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -3479,18 +4604,15 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default "b3_derivatives_mkt_otc_trades_".
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_otc_market_trades".
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -3505,6 +4627,8 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -3580,6 +4704,21 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3DerivativesMarketCombinedPositions class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3595,6 +4734,26 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_combined_positions"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_combined_positions".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The data.
+        """
         return super().run(
             dict_dtypes={
                 "DATA_PREGAO": str,
@@ -3603,7 +4762,8 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
                 "TIPO_MERCADO": str,
                 "VENCIMENTO": str,
                 "QTD_CONTRATOS_TRAVADOS": float,
-                "QTD_CONTRATOS_BAIXADOS": float
+                "QTD_CONTRATOS_BAIXADOS": float,
+                "FILE_NAME": str
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3624,18 +4784,15 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default "br_derivatives_market_combined_positions_".
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_combined_positions".
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -3643,13 +4800,15 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -3677,7 +4836,7 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
         ]
         
         df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
-        df_["FILE_NAME"] = file.name
+        df_["FILE_NAME"] = file_name
         
         return df_
     
@@ -3691,6 +4850,21 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3DerivativesMarketOptionReferencePremium class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3706,6 +4880,26 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_option_reference_premiums"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_option_reference_premiums".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The data.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -3723,7 +4917,8 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
                 "DATA_VENCIMENTO_CONTRATO": str,
                 "PRECO_EXERCICIO_OPCOES": float,
                 "PRECO_REFERENCIA_OPCOES": float,
-                "NUMERO_CASAS_DECIMAIS": int
+                "NUMERO_CASAS_DECIMAIS": int, 
+                "FILE_NAME": str,
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3744,18 +4939,16 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default 
+            "br_derivatives_market_option_reference_premiums_".
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_option_reference_premiums".
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -3770,6 +4963,8 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -3826,6 +5021,21 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3841,6 +5051,27 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_option_reference_premiums_isin"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD".
+        str_table_name : str, optional
+            The name of the table, by default 
+            "br_b3_derivatives_market_option_reference_premiums_isin".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "DATA_CADASTRO": str,
@@ -3897,6 +5128,8 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -3938,6 +5171,21 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -3953,6 +5201,27 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_option_reference_premiums_isin"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the data, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD
+        str_table_name : str, optional
+            The name of the table, by default 
+            "br_b3_derivatives_market_option_reference_premiums_isin"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The resulting DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "DATA_CADASTRO": str,
@@ -3981,6 +5250,11 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix for the temporary directory, by default 
+            "br_derivatives_market_option_reference_premiums_"
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_option_reference_premiums"
         
         Returns
         -------
@@ -4007,6 +5281,8 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4044,6 +5320,21 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3DerivativesMarketListISINSwaps class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -4059,6 +5350,26 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_list_isin_swaps"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the data, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_list_isin_swaps"
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "DATA_CADASTRO": str,
@@ -4086,18 +5397,16 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix for the temporary directory, by default 
+            "b3_derivatives_market_list_isin_swaps_"
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_list_isin_swaps"
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -4112,6 +5421,8 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4147,6 +5458,21 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3DerivativesMarketDollarSwap class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -4162,6 +5488,26 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_dollar_swap"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout value, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the data, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_dollar_swap"
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -4178,7 +5524,8 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
                 "TAXA_MERCADO": str,
                 "FATOR_DESCONTO": str,
                 "VALOR_MERCADO": str,
-                "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA": str
+                "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA": str,
+                "FILE_NAME": str,
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4199,18 +5546,15 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default "b3_derivatives_market_list_isin_swaps_"
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_list_isin_swaps"
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -4225,6 +5569,8 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4282,6 +5628,21 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -4297,6 +5658,26 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_swap_market_rates"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout for the ingestion process, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the ingestion process, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the ingestion process, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_derivatives_market_swap_market_rates".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the ingestion process.
+        """
         return super().run(
             dict_dtypes={
                 "ID_TRANSACAO": str,
@@ -4333,18 +5714,16 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix for the temporary directory, by default 
+            "b3_derivatives_market_swap_market_rates_".
+        file_name : str, optional
+            The name of the file, by default "b3_derivatives_market_swap_market_rates".
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -4359,6 +5738,8 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4412,6 +5793,21 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the B3SecuritiesMarketGovernmentSecuritiesPrices class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -4427,6 +5823,27 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_securities_market_government_securities_prices"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout for the request, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD".
+        str_table_name : str, optional
+            The name of the table, by default 
+            "br_b3_securities_market_government_securities_prices".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The DataFrame with the data.
+        """
         return super().run(
             dict_dtypes={
                 "TIPO_REGISTRO": str,
@@ -4458,18 +5875,16 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default 
+            "b3_securities_market_government_securities_prices_".
+        file_name : str, optional
+            The name of the file, by default "b3_securities_market_government_securities_prices".
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -4484,6 +5899,8 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4515,6 +5932,21 @@ class B3InstrumentGroupParameters(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -4530,6 +5962,26 @@ class B3InstrumentGroupParameters(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "DD/MM/YYYY",
         str_table_name: str = "br_b3_instrument_group_parameters"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "DD/MM/YYYY".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instrument_group_parameters".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "TIPO": str,
@@ -4560,6 +6012,8 @@ class B3InstrumentGroupParameters(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4595,6 +6049,21 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref,
             logger=logger,
@@ -4610,6 +6079,26 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_fixed_income"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYYMMDD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_fixed_income".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "TICKER": str,
@@ -4644,13 +6133,6 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         return self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -4665,6 +6147,8 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4695,6 +6179,21 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
         super().__init__(
             date_ref=date_ref, 
             logger=logger, 
@@ -4712,6 +6211,30 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_instruments_fee_public_information"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        cols_from_case : str, optional
+            The case conversion for column names, by default "pascal".
+        cols_to_case : str, optional
+            The case conversion for column names, by default "upper_constant".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_fee_public_information".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The ingested data.
+        """
         return super().run(
             dict_dtypes={
                 "FRQCY": str, 
@@ -4745,6 +6268,8 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -4783,7 +6308,7 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
         """
         list_records: list[dict[str, Union[str, int, float]]] = []
         
-        # Extract common report information
+        # extract common report information
         rpt_params = soup_parent.find("RptParams")
         validity_period = soup_parent.find("VldtyPrd")
         
