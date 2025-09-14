@@ -1,6 +1,7 @@
 """Implementation of ingestion instance."""
 
 from abc import abstractmethod
+from contextlib import suppress
 from datetime import date
 from io import BytesIO, StringIO
 from logging import Logger
@@ -74,15 +75,10 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
     
     def run(
         self,
+        dict_dtypes: dict[str, Union[str, int, float]],
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "COL_1": str,
-            "COL_2": float, 
-            "COL_3": int, 
-            "COL_4": "date"
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: Optional[TypeCaseFrom] = None,
         cols_to_case: Optional[TypeCaseTo] = None,
@@ -95,6 +91,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 
         Parameters
         ----------
+        dict_dtypes : dict[str, Union[str, int, float]]
+            The dictionary of data types.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -110,8 +108,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
             The transformed DataFrame.
         """
         resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        file = self.parse_raw_file(resp_req)
-        df_ = self.transform_data(file=file)
+        file, file_name = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(file=file, file_name=file_name)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.date_ref,
@@ -166,7 +164,7 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
     def parse_raw_file(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-    ) -> StringIO:
+    ) -> tuple[StringIO, str]:
         """Parse the raw file content.
         
         Parameters
@@ -176,11 +174,33 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         
         Returns
         -------
-        StringIO
-            The parsed content.
+        tuple[StringIO, str]
+            The parsed content and the name of the file.
+
+        Raises
+        ------
+        ValueError
+            If no files found in the downloaded content
         """
-        return self.cls_dir_files_management.recursive_unzip_in_memory(
-            BytesIO(resp_req.content))[0]
+        files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
+        BytesIO(resp_req.content))
+        
+        if files_list:
+            file_content, filename = files_list[0]
+            
+            if isinstance(file_content, BytesIO) \
+                and filename.lower().endswith(('.txt', '.csv', '.dat', '.xml')):
+                try:
+                    content_str = file_content.getvalue().decode('utf-8')
+                    file_content = StringIO(content_str)
+                except UnicodeDecodeError:
+                    with suppress(UnicodeDecodeError):
+                        content_str = file_content.getvalue().decode('latin-1')
+                        file_content = StringIO(content_str)
+            
+            return file_content, filename
+        else:
+            raise ValueError("No files found in the downloaded content")
     
     def parse_raw_ex_file(
         self, 
@@ -204,8 +224,21 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         StringIO
             The parsed content.
         """
-        ex_file = self.cls_dir_files_management.recursive_unzip_in_memory(
-            BytesIO(resp_req.content))[0]
+        # get the list of files from the zip
+        files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
+            BytesIO(resp_req.content))
+        
+        # find the .ex_ file (should be the first and likely only file)
+        ex_file_content = None
+        ex_file_name = None
+        for file_content, filename in files_list:
+            if filename.lower().endswith('.ex_'):
+                ex_file_content = file_content
+                ex_file_name = filename
+                break
+        
+        if ex_file_content is None:
+            raise ValueError("No .ex_ file found in the downloaded ZIP")
         
         temp_dir = Path(tempfile.mkdtemp(prefix=prefix))
         
@@ -219,7 +252,13 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
             exe_filename = f"{file_name}_{self.date_ref.strftime('%y%m%d')}.exe"
             exe_path = temp_dir / exe_filename
             
-            ex_content = ex_file.getvalue()
+            # get the content from the file object
+            if hasattr(ex_file_content, 'getvalue'):
+                ex_content = ex_file_content.getvalue()
+            else:
+                # if it's already bytes
+                ex_content = ex_file_content
+                
             if isinstance(ex_content, str):
                 ex_content = ex_content.encode('latin-1')
                 
@@ -321,13 +360,12 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         except Exception as e:
             self.cls_create_log.log_message(
                 self.logger, 
-                f"Error in parse_raw_file: {str(e)}", 
+                f"Error in parse_raw_ex_file: {str(e)}", 
                 "error"
             )
             raise
             
         finally:
-            # cleanup temp directory
             try:
                 if temp_dir.exists():
                     shutil.rmtree(temp_dir)
@@ -346,7 +384,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
     @abstractmethod
     def transform_data(
         self, 
-        file: StringIO
+        file: StringIO, 
+        file_name: str
     ) -> pd.DataFrame:
         """Transform a list of response objects into a DataFrame.
         
@@ -354,6 +393,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         ----------
         file : StringIO
             The parsed content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -388,42 +429,50 @@ class B3StandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TIPO_REGISTRO": str,
-            "ID_GRUPO_INSTRUMENTOS": str, 
-            "ID_CAMARA": str, 
-            "ID_INSTRUMENTO": str, 
-            "ORIGEM_INSTRUMENTO": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TIPO_REGISTRO": str,
+                "ID_GRUPO_INSTRUMENTOS": str, 
+                "ID_CAMARA": str, 
+                "ID_INSTRUMENTO": str, 
+                "ORIGEM_INSTRUMENTO": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore,
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+    )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
             "TIPO_REGISTRO", 
             "ID_GRUPO_INSTRUMENTOS", 
             "ID_CAMARA", 
             "ID_INSTRUMENTO", 
             "ORIGEM_INSTRUMENTO",
         ])
+        df_["FILE_NAME"] = file_name
+        return df_
 
 
 class B3IndexReport(ABCB3SearchByTradingSession):
@@ -446,45 +495,52 @@ class B3IndexReport(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TCKR_SYMB": str,
-            "ID": str, 
-            "PRTRY": str, 
-            "MKT_IDR_CD": str, 
-            "OPNG_PRIC": float, 
-            "MIN_PRIC": float,
-            "MAX_PRIC": float,
-            "TRAD_AVRG_PRIC": float,
-            "PRVS_DAY_CLSG_PRIC": float,
-            "CLSG_PRIC": float,
-            "INDX_VAL": float,
-            "OSCN_VAL": float,
-            "ASST_DESC": str,
-            "STTLM_VAL": str,
-            "STTLM_VAL_CCY": str,
-            "RSNG_SHRS_NB": int,
-            "FLNG_SHRS_NB": int,
-            "STBL_SHRS_NB": int,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_index_report"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TCKR_SYMB": str,
+                "ID": str, 
+                "PRTRY": str, 
+                "MKT_IDR_CD": str, 
+                "OPNG_PRIC": float, 
+                "MIN_PRIC": float,
+                "MAX_PRIC": float,
+                "TRAD_AVRG_PRIC": float,
+                "PRVS_DAY_CLSG_PRIC": float,
+                "CLSG_PRIC": float,
+                "INDX_VAL": float,
+                "OSCN_VAL": float,
+                "ASST_DESC": str,
+                "STTLM_VAL": str,
+                "STTLM_VAL_CCY": str,
+                "RSNG_SHRS_NB": int,
+                "FLNG_SHRS_NB": int,
+                "STBL_SHRS_NB": int, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -522,10 +578,13 @@ class B3IndexReport(ABCB3SearchByTradingSession):
                 ("SttlmVal", "Ccy"),
             ]:
                 soup_content_tag = soup_parent.find(tag)
-                dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag else None
+                dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag \
+                    else None
             list_ser.append(dict_)
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file_name
+        return df_
 
 
 class B3PriceReport(ABCB3SearchByTradingSession):
@@ -548,48 +607,54 @@ class B3PriceReport(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "DT": "date",
-            "TCKR_SYMB": str,
-            "ID": str, 
-            "PRTRY": str, 
-            "MKT_IDR_CD": "category",
-            "TRAD_QTY": int, 
-            "OPN_INTRST": float, 
-            "FIN_INSTRM_QTY": int, 
-            "OSCN_PCTG": float, 
-            "NTL_FIN_VOL": float, 
-            "INTL_FIN_VOL": float, 
-            "BEST_BID_PRIC": float, 
-            "BEST_ASK_PRIC": float, 
-            "FRST_PRIC": float, 
-            "MIN_PRIC": float, 
-            "MAX_PRIC": float, 
-            "TRAD_AVRG_PRIC": float, 
-            "LAST_PRIC": float, 
-            "VARTN_PTS": float, 
-            "MAX_TRAD_LMT": float, 
-            "MIN_TRAD_LMT": float, 
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        return super().run(
+                dict_dtypes={
+                "DT": "date",
+                "TCKR_SYMB": str,
+                "ID": str, 
+                "PRTRY": str, 
+                "MKT_IDR_CD": "category",
+                "TRAD_QTY": int, 
+                "OPN_INTRST": float, 
+                "FIN_INSTRM_QTY": int, 
+                "OSCN_PCTG": float, 
+                "NTL_FIN_VOL": float, 
+                "INTL_FIN_VOL": float, 
+                "BEST_BID_PRIC": float, 
+                "BEST_ASK_PRIC": float, 
+                "FRST_PRIC": float, 
+                "MIN_PRIC": float, 
+                "MAX_PRIC": float, 
+                "TRAD_AVRG_PRIC": float, 
+                "LAST_PRIC": float, 
+                "VARTN_PTS": float, 
+                "MAX_TRAD_LMT": float, 
+                "MIN_TRAD_LMT": float, 
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The name of the file.
         
         Returns
         -------
@@ -644,7 +709,9 @@ class B3PriceReport(ABCB3SearchByTradingSession):
                 dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag else None
             list_ser.append(dict_)
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file_name
+        return df_
 
 
 class B3InstrumentsFile(ABCB3SearchByTradingSession):
@@ -4325,23 +4392,23 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
     """B3 Fixed Income."""
 
     def __init__(
-        self, 
-        date_ref: Optional[date] = None, 
+        self,
+        date_ref: Optional[date] = None,
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
         super().__init__(
-            date_ref=date_ref, 
-            logger=logger, 
-            cls_db=cls_db, 
+            date_ref=date_ref,
+            logger=logger,
+            cls_db=cls_db,
             url="https://www.b3.com.br/pesquisapregao/download?filelist=RF{}.ex_"
         )
-    
+
     def run(
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
+        bool_insert_or_ignore: bool = False,
         dict_dtypes: dict[str, Union[str, int, float]] = {
             "TICKER": str,
             "DATE": str,
@@ -4355,16 +4422,18 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_fixed_income"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            timeout=timeout, 
+            bool_verify=bool_verify,
+            bool_insert_or_ignore=bool_insert_or_ignore,
+            dict_dtypes=dict_dtypes, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
-        self, 
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
-        prefix: str = "b3_fixed_income_",
-        file_name: str = "b3_fixed_income"
+        self,
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
     ) -> StringIO:
         """Parse the raw file content by executing Windows executable with Wine.
         
@@ -4385,10 +4454,10 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
         ValueError
             If no .ex_ file found in ZIP or multiple files found
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
-            prefix=prefix, 
-            file_name=file_name
+            prefix="b3_fixed_income_",
+            file_name="b3_fixed_income"
         )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
@@ -4405,16 +4474,15 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
             The transformed DataFrame.
         """
         return pd.read_csv(file, sep=";", skiprows=1, names=[
-                "TICKER", 
-                "DATE", 
-                "PRAZO_DIAS_UTEIS",
-                "PRAZO_DIAS_CORRIDOS", 
-                "PRECO_UNITARIO", 
-                "TAXA_COMPRA", 
-                "TAXA_VENDA",
-                "TAXA_INDICATIVA",
-            ]
-        )
+            "TICKER",
+            "DATE",
+            "PRAZO_DIAS_UTEIS",
+            "PRAZO_DIAS_CORRIDOS",
+            "PRECO_UNITARIO",
+            "TAXA_COMPRA",
+            "TAXA_VENDA",
+            "TAXA_INDICATIVA",
+        ])
 
 
 class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
