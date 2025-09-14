@@ -1627,9 +1627,7 @@ class TestDirFilesManagement:
         for content, filename in result:
             if filename in ["text.txt", "data.csv"]:
                 assert isinstance(content, StringIO)
-            elif filename == "sheet.xlsx":
-                assert isinstance(content, BytesIO)
-            elif filename == "binary.bin":
+            elif filename == "sheet.xlsx" or filename == "binary.bin":
                 assert isinstance(content, BytesIO)
 
     def test_recursive_unzip_in_memory_nested_zip(
@@ -1712,7 +1710,7 @@ class TestDirFilesManagement:
         """
         # Create empty zip
         buffer = BytesIO()
-        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED):
             pass  # Empty zip
         buffer.seek(0)
         
@@ -1803,7 +1801,7 @@ class TestDirFilesManagement:
         
         assert len(result) == len(excel_extensions) * 2
         
-        for content, filename in result:
+        for content, _ in result:
             assert isinstance(content, BytesIO)
             assert content.read() == b"fake excel content"
 
