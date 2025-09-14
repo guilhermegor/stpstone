@@ -61,6 +61,75 @@ class B3TheoreticalPortfolio(ABCIngestionOperations):
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
         self.url = "FILL_ME"
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        list_ser = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(list_ser=list_ser)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "SEGMENT": str,
+                "COD": str, 
+                "ASSET": str, 
+                "TYPE": str, 
+                "PART": float, 
+                "PART_ACUM": str, 
+                "THEORICAL_QTY": int, 
+                "PAGE_NUMBER": int, 
+                "PAGE_SIZE": int,
+                "TOTAL_RECORDS": int, 
+                "TOTAL_PAGES": int, 
+                "DATE_HEADER": "date", 
+                "TEXT_HEADER": str, 
+                "PART_HEADER": int, 
+                "PART_ACUM_HEADER": str, 
+                "TEXT_REDUCTOR_HEADER": str, 
+                "REDUCTOR_HEADER": str, 
+                "THEORICAL_QTY_HEADER": int,
+            }, 
+            str_fmt_dt="DD/MM/YY",
+            url=self.url,
+            cols_from_case="camel", 
+            cols_to_case="upper_constant"
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
 
     @backoff.on_exception(
         backoff.expo, 
@@ -135,75 +204,6 @@ class B3TheoreticalPortfolio(ABCIngestionOperations):
             The transformed DataFrame.
         """
         return pd.DataFrame(list_ser)
-    
-    def run(
-        self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
-        bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
-    ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process.
-        
-        If the database session is provided, the data is inserted into the database.
-        Otherwise, the transformed DataFrame is returned.
-
-        Parameters
-        ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
-            Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
-            The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
-
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            The transformed DataFrame.
-        """
-        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        list_ser = self.parse_raw_file(resp_req)
-        df_ = self.transform_data(list_ser=list_ser)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.date_ref,
-            dict_dtypes={
-                "SEGMENT": str,
-                "COD": str, 
-                "ASSET": str, 
-                "TYPE": str, 
-                "PART": float, 
-                "PART_ACUM": str, 
-                "THEORICAL_QTY": int, 
-                "PAGE_NUMBER": int, 
-                "PAGE_SIZE": int,
-                "TOTAL_RECORDS": int, 
-                "TOTAL_PAGES": int, 
-                "DATE_HEADER": "date", 
-                "TEXT_HEADER": str, 
-                "PART_HEADER": int, 
-                "PART_ACUM_HEADER": str, 
-                "TEXT_REDUCTOR_HEADER": str, 
-                "REDUCTOR_HEADER": str, 
-                "THEORICAL_QTY_HEADER": int,
-            }, 
-            str_fmt_dt="DD/MM/YY",
-            url=self.url,
-            cols_from_case="camel", 
-            cols_to_case="upper_constant"
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_
         
 
 class B3TheoricalPortfolioIBOV(B3TheoreticalPortfolio):

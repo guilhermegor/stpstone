@@ -70,6 +70,84 @@ class BMFInterestRates(ABCIngestionOperations):
         self.url = "https://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/TxRef1.asp?"\
             + "Data={}".format(self.date_ref.strftime("%d/%m/%Y")) \
             + "&Data1={}&slcTaxa=TODOS".format(self.date_ref.strftime("%Y%m%d"))
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_interest_rates"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_interest_rates"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        list_ser = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(list_ser=list_ser)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "DIAS_CORRIDOS": "int",
+                "DI_PRE_252": "float",
+                "DI_PRE_360": "float",
+                "SELIC_PRE_252": "float",
+                "DI_TR_252": "float",
+                "DI_TR_360": "float",
+                "DOLAR_PRE_252": "float",
+                "DOLAR_PRE_360": "float",
+                "REAL_EURO_PRECO": "float",
+                "DI_EURO_360": "float",
+                "TBF_PRE_252": "float",
+                "TBF_PRE_360": "float",
+                "TR_PRE_252": "float",
+                "TR_PRE_360": "float",
+                "DI_DOLAR_360": "float",
+                "CUPOM_CAMBIAL_OC1_360": "float",
+                "CUPOM_LIMPO_360": "float",
+                "REAL_DOLAR_PRECO": "float",
+                "IBRX_50": "float",
+                "IBOVESPA": "float",
+                "DI_IGP_M_252": "float",
+                "DI_IPCA_252": "float",
+                "AJUSTE_PRE_252": "float",
+                "AJUSTE_PRE_360": "float",
+                "AJUSTE_CUPOM_360": "float",
+                "REAL_IENE_PRECO": "float",
+                "SPEAD_LIBOR_EURO_DOLAR_TAXA": "float",
+                "LIBOR_360": "float"
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
+            list_cols_drop_dupl=["DIAS_CORRIDOS"],
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
 
     @backoff.on_exception(
         backoff.expo, 
@@ -180,81 +258,3 @@ class BMFInterestRates(ABCIngestionOperations):
             The transformed DataFrame.
         """
         return pd.DataFrame(list_ser)
-    
-    def run(
-        self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
-        bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_interest_rates"
-    ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process.
-        
-        If the database session is provided, the data is inserted into the database.
-        Otherwise, the transformed DataFrame is returned.
-
-        Parameters
-        ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
-            Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
-            The name of the table, by default "br_b3_interest_rates"
-
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            The transformed DataFrame.
-        """
-        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        list_ser = self.parse_raw_file(resp_req)
-        df_ = self.transform_data(list_ser=list_ser)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.date_ref,
-            dict_dtypes={
-                "DIAS_CORRIDOS": "int",
-                "DI_PRE_252": "float",
-                "DI_PRE_360": "float",
-                "SELIC_PRE_252": "float",
-                "DI_TR_252": "float",
-                "DI_TR_360": "float",
-                "DOLAR_PRE_252": "float",
-                "DOLAR_PRE_360": "float",
-                "REAL_EURO_PRECO": "float",
-                "DI_EURO_360": "float",
-                "TBF_PRE_252": "float",
-                "TBF_PRE_360": "float",
-                "TR_PRE_252": "float",
-                "TR_PRE_360": "float",
-                "DI_DOLAR_360": "float",
-                "CUPOM_CAMBIAL_OC1_360": "float",
-                "CUPOM_LIMPO_360": "float",
-                "REAL_DOLAR_PRECO": "float",
-                "IBRX_50": "float",
-                "IBOVESPA": "float",
-                "DI_IGP_M_252": "float",
-                "DI_IPCA_252": "float",
-                "AJUSTE_PRE_252": "float",
-                "AJUSTE_PRE_360": "float",
-                "AJUSTE_CUPOM_360": "float",
-                "REAL_IENE_PRECO": "float",
-                "SPEAD_LIBOR_EURO_DOLAR_TAXA": "float",
-                "LIBOR_360": "float"
-            }, 
-            str_fmt_dt="YYYY-MM-DD",
-            url=self.url,
-            list_cols_drop_dupl=["DIAS_CORRIDOS"],
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_

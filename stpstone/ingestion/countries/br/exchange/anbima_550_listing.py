@@ -1,4 +1,4 @@
-"""Implementation of ingestion instance."""
+"""Anbima 550 Listing."""
 
 from datetime import date
 from io import StringIO
@@ -24,7 +24,7 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 class Anbima550Listing(ABCIngestionOperations):
-    """Ingestion concrete class."""
+    """Anbima 550 Listing Class."""
     
     def __init__(
         self, 
@@ -62,6 +62,60 @@ class Anbima550Listing(ABCIngestionOperations):
         self.date_ref_yyyymmdd = self.date_ref.strftime("%Y%m%d")
         self.url = \
             f"https://www.anbima.com.br/informacoes/res-550/arqs/{self.date_ref_yyyymmdd}_550.tex"
+    
+    def run(
+        self,
+        bool_verify: bool = True,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_anbima_550_listing"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_anbima_550_listing"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        file = self.parse_raw_file(resp_req=resp_req)
+        df_ = self.transform_data(file)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.cls_dates_current.curr_date(),
+            dict_dtypes={
+                "TITULO": int,
+                "VENCIMENTO": "date",
+                "PRECO_UNITARIO": float,
+                "PRECO_RETORNO": float,
+                "POSICAO_CUSTODIA": float,
+            }, 
+            str_fmt_dt="DD/MM/YYYY", 
+            url=self.url
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
 
     @backoff.on_exception(
         backoff.expo, 
@@ -130,57 +184,3 @@ class Anbima550Listing(ABCIngestionOperations):
             names=["TITULO", "VENCIMENTO", "PRECO_UNITARIO", "PRECO_RETORNO", "POSICAO_CUSTODIA"],
             thousands=".", decimal=","
         )
-    
-    def run(
-        self,
-        bool_verify: bool = True,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
-        bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_anbima_550_listing"
-    ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process.
-        
-        If the database session is provided, the data is inserted into the database.
-        Otherwise, the transformed DataFrame is returned.
-
-        Parameters
-        ----------
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_insert_or_ignore : bool, optional
-            Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
-            The name of the table, by default "br_anbima_550_listing"
-
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            The transformed DataFrame.
-        """
-        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        file = self.parse_raw_file(resp_req=resp_req)
-        df_ = self.transform_data(file)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.cls_dates_current.curr_date(),
-            dict_dtypes={
-                "TITULO": int,
-                "VENCIMENTO": "date",
-                "PRECO_UNITARIO": float,
-                "PRECO_RETORNO": float,
-                "POSICAO_CUSTODIA": float,
-            }, 
-            str_fmt_dt="DD/MM/YYYY", 
-            url=self.url
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_

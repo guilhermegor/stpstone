@@ -77,6 +77,60 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
             + "strDtReferencia={}".format(self.date_ref.strftime("%m/%Y")) \
             + "&strIdioma=P&intCodNivel=1&intCodCtrl=100"
 
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_volumes"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_volumes"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        html_root = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(html_root=html_root)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "MERCADO": "str",
+                "NEGOCIACOES": "int",
+                "VOLUME_BRL": "float",
+                "NEGOCIACOES_12M": "int",
+                "VOLUME_BRL_12M": "float",
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
+
     @backoff.on_exception(
         backoff.expo, 
         requests.exceptions.HTTPError, 
@@ -222,57 +276,3 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
                 .replace(")", "")\
                 .replace("/", "")\
                 .upper()
-
-    def run(
-        self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
-        bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_volumes"
-    ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process.
-        
-        If the database session is provided, the data is inserted into the database.
-        Otherwise, the transformed DataFrame is returned.
-
-        Parameters
-        ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
-            Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
-            The name of the table, by default "br_b3_volumes"
-
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            The transformed DataFrame.
-        """
-        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        html_root = self.parse_raw_file(resp_req)
-        df_ = self.transform_data(html_root=html_root)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.date_ref,
-            dict_dtypes={
-                "MERCADO": "str",
-                "NEGOCIACOES": "int",
-                "VOLUME_BRL": "float",
-                "NEGOCIACOES_12M": "int",
-                "VOLUME_BRL_12M": "float",
-            }, 
-            str_fmt_dt="YYYY-MM-DD",
-            url=self.url,
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_

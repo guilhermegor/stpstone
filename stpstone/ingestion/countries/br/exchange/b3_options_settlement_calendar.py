@@ -67,6 +67,60 @@ class B3OptionsSettlementCalendar(ABCIngestionOperations):
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
         self.url = "https://www.b3.com.br/pt_br/solucoes/plataformas/puma-trading-system/para-participantes-e-traders/calendario-de-negociacao/vencimentos/calendario-de-vencimentos-de-opcoes-sobre-acoes-e-indices/"
 
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_options_settlement_calendar"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_options_settlement_calendar"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        html_root = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(html_root=html_root)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "DIA": str,
+                "DETALHE": str,
+                "ANO_CALENDARIO": str, 
+                "MES": str,
+                "DATA_VENCIMENTO": "date"
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
+
     @backoff.on_exception(
         backoff.expo, 
         requests.exceptions.HTTPError, 
@@ -185,6 +239,32 @@ class B3OptionsSettlementCalendar(ABCIngestionOperations):
 
         return df_
     
+    def _months_options_settlement(self) -> list[int]:
+        """Return the list of months for options settlement.
+        
+        Returns
+        -------
+        list[int]
+            The list of months.
+
+        Notes
+        -----
+        [1] The number of month name appearance is the number of dates with options settlements
+        [2] Two indicate maturity dates for options with the reference price in IBOV and stocks
+        [3] Three indicate maturity dates for options with the reference price in IBOV, stocks and 
+        IBRX50
+        """
+        list_months_raw = [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+        ]
+        list_months_trt: list[str] = []
+        for i in range(len(list_months_raw)):
+            list_months_trt.extend([list_months_raw[i]] * 2)
+            if i % 2 == 1:
+                list_months_trt.append(list_months_raw[i])
+        
+        return list_months_trt
+    
     def _fill_missing_values_td(self, df_: pd.DataFrame) -> list[str]:
         """Fill missing values in a list of strings.
         
@@ -216,84 +296,3 @@ class B3OptionsSettlementCalendar(ABCIngestionOperations):
                     df_.loc[index, "DETALHE"] = df_.loc[index - 2, "DETALHE"] # noqa SIM114: combine `if` branches using logical `or` operator
 
         return df_
-    
-    def _months_options_settlement(self) -> list[int]:
-        """Return the list of months for options settlement.
-        
-        Returns
-        -------
-        list[int]
-            The list of months.
-
-        Notes
-        -----
-        [1] The number of month name appearance is the number of dates with options settlements
-        [2] Two indicate maturity dates for options with the reference price in IBOV and stocks
-        [3] Three indicate maturity dates for options with the reference price in IBOV, stocks and 
-        IBRX50
-        """
-        list_months_raw = [
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-        ]
-        list_months_trt: list[str] = []
-        for i in range(len(list_months_raw)):
-            list_months_trt.extend([list_months_raw[i]] * 2)
-            if i % 2 == 1:
-                list_months_trt.append(list_months_raw[i])
-        
-        return list_months_trt
-
-
-    def run(
-        self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
-        bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_options_settlement_calendar"
-    ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process.
-        
-        If the database session is provided, the data is inserted into the database.
-        Otherwise, the transformed DataFrame is returned.
-
-        Parameters
-        ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
-            Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
-            The name of the table, by default "br_b3_options_settlement_calendar"
-
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            The transformed DataFrame.
-        """
-        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        html_root = self.parse_raw_file(resp_req)
-        df_ = self.transform_data(html_root=html_root)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.date_ref,
-            dict_dtypes={
-                "DIA": str,
-                "DETALHE": str,
-                "ANO_CALENDARIO": str, 
-                "MES": str,
-                "DATA_VENCIMENTO": "date"
-            }, 
-            str_fmt_dt="YYYY-MM-DD",
-            url=self.url,
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_

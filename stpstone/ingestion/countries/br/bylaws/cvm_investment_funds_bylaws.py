@@ -68,92 +68,6 @@ class InvestmentFunds(ABCIngestionOperations):
         self.cls_dir_files_management = DirFilesManagement()
         self.cls_dates_current = DatesCurrent()
         self.cls_create_log = CreateLog()
-
-    @backoff.on_exception(
-        backoff.expo, 
-        requests.exceptions.HTTPError, 
-        max_time=60
-    )
-    def get_response(
-        self, 
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
-        bool_verify: bool = True
-    ) -> list[requests.Response]:
-        """Return a list of response objects.
-
-        Parameters
-        ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        
-        Returns
-        -------
-        list[requests.Response]
-            A list of response objects.
-        """
-        fstr_url = r"https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/{}"
-        list_resp_req = list()
-        for app in self.list_apps:
-            self.cls_create_log.log_message(
-                logger=self.logger,
-                message=f"Requesting: {fstr_url.format(app)}",
-                log_level="info"
-            )
-            resp_req = requests.get(fstr_url.format(app), timeout=timeout, verify=bool_verify)
-            resp_req.raise_for_status()
-            list_resp_req.append(resp_req)
-            sleep(10)
-        return list_resp_req
-    
-    def parse_raw_file(
-        self, 
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-    ) -> BytesIO:
-        """Parse the raw file content.
-        
-        Parameters
-        ----------
-        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
-        
-        Returns
-        -------
-        BytesIO
-            The parsed content.
-        """
-        return BytesIO(resp_req.content)
-    
-    def transform_data(self, list_resp_req: list[requests.Response]) -> pd.DataFrame:
-        """Transform a list of response objects into a DataFrame.
-        
-        Parameters
-        ----------
-        list_resp_req : list[requests.Response]
-            The response object.
-        
-        Returns
-        -------
-        pd.DataFrame
-            The transformed DataFrame.
-        """
-        list_ser = list()
-
-        for resp_req in list_resp_req:
-            bytes_file = self.parse_raw_file(resp_req)
-            df_ = self.pdf_docx_regex(
-                bytes_file=bytes_file, 
-                str_file_extension=self.cls_dir_files_management.get_last_file_extension(
-                    file_path=resp_req.url
-                ), 
-                int_pages_join=self.int_pages_join, 
-                dict_regex_patterns=YAML_INVESTMENT_FUNDS_BYLAWS["regex_patterns"]
-            )
-            df_["URL"] = resp_req.url
-            list_ser.extend(df_.to_dict(orient="records"))
-
-        return pd.DataFrame(list_ser)
     
     def run(
         self,
@@ -204,3 +118,89 @@ class InvestmentFunds(ABCIngestionOperations):
             )
         else:
             return df_
+
+    @backoff.on_exception(
+        backoff.expo, 
+        requests.exceptions.HTTPError, 
+        max_time=60
+    )
+    def get_response(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
+    ) -> list[requests.Response]:
+        """Return a list of response objects.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        
+        Returns
+        -------
+        list[requests.Response]
+            A list of response objects.
+        """
+        fstr_url = r"https://web.cvm.gov.br/app/fundosweb/fundos/regulamento/obter/por/arquivo/{}"
+        list_resp_req = list()
+        for app in self.list_apps:
+            self.cls_create_log.log_message(
+                logger=self.logger,
+                message=f"Requesting: {fstr_url.format(app)}",
+                log_level="info"
+            )
+            resp_req = requests.get(fstr_url.format(app), timeout=timeout, verify=bool_verify)
+            resp_req.raise_for_status()
+            list_resp_req.append(resp_req)
+            sleep(10)
+        return list_resp_req
+    
+    def transform_data(self, list_resp_req: list[requests.Response]) -> pd.DataFrame:
+        """Transform a list of response objects into a DataFrame.
+        
+        Parameters
+        ----------
+        list_resp_req : list[requests.Response]
+            The response object.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        list_ser = list()
+
+        for resp_req in list_resp_req:
+            bytes_file = self.parse_raw_file(resp_req)
+            df_ = self.pdf_docx_regex(
+                bytes_file=bytes_file, 
+                str_file_extension=self.cls_dir_files_management.get_last_file_extension(
+                    file_path=resp_req.url
+                ), 
+                int_pages_join=self.int_pages_join, 
+                dict_regex_patterns=YAML_INVESTMENT_FUNDS_BYLAWS["regex_patterns"]
+            )
+            df_["URL"] = resp_req.url
+            list_ser.extend(df_.to_dict(orient="records"))
+
+        return pd.DataFrame(list_ser)
+    
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> BytesIO:
+        """Parse the raw file content.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        BytesIO
+            The parsed content.
+        """
+        return BytesIO(resp_req.content)

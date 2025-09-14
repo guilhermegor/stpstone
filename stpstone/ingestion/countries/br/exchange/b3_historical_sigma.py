@@ -68,6 +68,73 @@ class B3HistoricalSigma(ABCIngestionOperations):
             + "SecuritiesVolatilityCall/GetListVolatilities/" \
             + "eyJsYW5ndWFnZSI6InB0LWJyIiwia2V5d29yZCI6IiIsInBhZ2VOdW1iZXIiOj" \
             + "{}sInBhZ2VTaXplIjo2MH0="
+    
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_b3_historical_sigma"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_historical_sigma"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        list_resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        list_ser = self.parse_raw_file(list_resp_req=list_resp_req)
+        df_ = self.transform_data(list_ser=list_ser)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "CODE": str,
+                "TRADING_NAME": str,
+                "SERIE": str, # codespell:ignore
+                "STANDARD_DEVIATION_1": float,
+                "ANNUALIZED_VOLATILITY_1": float,
+                "STANDARD_DEVIATION_3": float,
+                "ANNUALIZED_VOLATILITY_3": float,
+                "STANDARD_DEVIATION_6": float,
+                "ANNUALIZED_VOLATILITY_6": float,
+                "STANDARD_DEVIATION_12": float,
+                "ANNUALIZED_VOLATILITY_12": float,
+                "PAGE_NUMBER": int,
+                "PAGE_SIZE": int,
+                "TOTAL_RECORDS": int,
+                "TOTAL_PAGES": int,
+                "URL": str,
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            cols_from_case="camel",
+            cols_to_case="upper_constant",
+            url=None
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
 
     def get_response(
         self, 
@@ -210,70 +277,3 @@ class B3HistoricalSigma(ABCIngestionOperations):
         df_ = pd.DataFrame(list_ser)
         df_ = df_.drop_duplicates()
         return df_
-    
-    def run(
-        self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
-        bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_historical_sigma"
-    ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process.
-        
-        If the database session is provided, the data is inserted into the database.
-        Otherwise, the transformed DataFrame is returned.
-
-        Parameters
-        ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
-            The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
-            Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
-            The name of the table, by default "br_b3_historical_sigma"
-
-        Returns
-        -------
-        Optional[pd.DataFrame]
-            The transformed DataFrame.
-        """
-        list_resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
-        list_ser = self.parse_raw_file(list_resp_req=list_resp_req)
-        df_ = self.transform_data(list_ser=list_ser)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.date_ref,
-            dict_dtypes={
-                "CODE": str,
-                "TRADING_NAME": str,
-                "SERIE": str, # codespell:ignore
-                "STANDARD_DEVIATION_1": float,
-                "ANNUALIZED_VOLATILITY_1": float,
-                "STANDARD_DEVIATION_3": float,
-                "ANNUALIZED_VOLATILITY_3": float,
-                "STANDARD_DEVIATION_6": float,
-                "ANNUALIZED_VOLATILITY_6": float,
-                "STANDARD_DEVIATION_12": float,
-                "ANNUALIZED_VOLATILITY_12": float,
-                "PAGE_NUMBER": int,
-                "PAGE_SIZE": int,
-                "TOTAL_RECORDS": int,
-                "TOTAL_PAGES": int,
-                "URL": str,
-            }, 
-            str_fmt_dt="YYYY-MM-DD",
-            cols_from_case="camel",
-            cols_to_case="upper_constant",
-            url=None
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_
