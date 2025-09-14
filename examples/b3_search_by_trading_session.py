@@ -32,7 +32,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3InstrumentsFileFxdIncm,
     B3InstrumentsFileIndicators,
     B3InstrumentsFileOptnOnEqts,
-    B3InstrumentsFileOptnOnSpotAndFutrs,
+    B3InstrumentsFileOptnOnSpotAndFutures,
     B3MappingOTCInstrumentGroups,
     B3MappingStandardizedInstrumentGroups,
     B3MaximumTheoreticalMargin,
@@ -428,29 +428,29 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # print(f"DF B3 INSTRUMENTS FILE EXRC EQTS: \n{df_}")
 # df_.info()
 
-cls_ = B3InstrumentsFileEqty(
-    date_ref=None,
-    logger=None, 
-    cls_db=None
-)
-
-df_ = cls_.run(bool_verify=False)
-print(f"DF B3 INSTRUMENTS FILE EQTY: \n{df_}")
-df_.info()
-
-
-# cls_ = B3InstrumentsFileOptnOnEqts(
+# cls_ = B3InstrumentsFileEqty(
 #     date_ref=None,
 #     logger=None, 
 #     cls_db=None
 # )
 
 # df_ = cls_.run(bool_verify=False)
-# print(f"DF B3 INSTRUMENTS FILE OPTN ON EQTS: \n{df_}")
+# print(f"DF B3 INSTRUMENTS FILE EQTY: \n{df_}")
 # df_.info()
 
 
-# cls_ = B3InstrumentsFileOptnOnSpotAndFutrs(
+cls_ = B3InstrumentsFileOptnOnEqts(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 INSTRUMENTS FILE OPTN ON EQTS: \n{df_}")
+df_.info()
+
+
+# cls_ = B3InstrumentsFileOptnOnSpotAndFutures(
 #     date_ref=None,
 #     logger=None, 
 #     cls_db=None

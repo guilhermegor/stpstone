@@ -1260,7 +1260,7 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         )
     
 
-class B3InstrumentsFileOptnOnSpotAndFutrs(B3InstrumentsFile):
+class B3InstrumentsFileOptnOnSpotAndFutures(B3InstrumentsFile):
     """B3 Instruments File BVBG.028.02 InstrumentsFile (OptnOnSpotAndFutrs)."""
 
     def __init__(
@@ -1280,7 +1280,7 @@ class B3InstrumentsFileOptnOnSpotAndFutrs(B3InstrumentsFile):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_instruments_file_optn_on_spot_and_futrs"
+        str_table_name: str = "br_b3_instruments_file_optn_on_spot_and_futures"
     ) -> Optional[pd.DataFrame]:
         return super().run(
             timeout=timeout, 
@@ -1468,7 +1468,8 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
                 "TRADG_START_DT": "date",
                 "TRADG_END_DT": "date",
                 "CTDY_TRTMNT_TP": str,
-                "TRADG_CCY": str
+                "TRADG_CCY": str, 
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1540,7 +1541,8 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
                 "SCTY_CTGY": str,
                 "TCKR_SYMB": str,
                 "FNGB_IND": str,
-                "PMT_TP": str
+                "PMT_TP": str, 
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1610,7 +1612,8 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
                 "PMT_TP": str,
                 "DAYS_TO_STTLM": int,
                 "ALLCN_RND_LOT": int,
-                "PRIC_FCTR": int
+                "PRIC_FCTR": int, 
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1685,6 +1688,7 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
                 "PRGM_LVL": str,
                 "PPSN": str,
                 "TRADG_CCY": str,
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1896,7 +1900,8 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
                 "VAL_TP_CD": str, 
                 "NTRY_REF_CD": str, 
                 "DCML_PRCSN": str, 
-                "MTRTY": str
+                "MTRTY": str, 
+                "FILE_NAME": str,
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -2020,7 +2025,7 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2041,7 +2046,7 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
             list_ser.append(self._instrument_indicator_node(soup_parent))
 
         df_ = pd.DataFrame(list_ser)
-        df_["FILE_NAME"] = file.name
+        df_["FILE_NAME"] = file_name
 
         return df_
     
@@ -2175,6 +2180,7 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
             "TIPO_REGISTRO": str,
             "ID_FORMULA": str,
             "NOME_FORMULA": str,
+            "FILE_NAME": str,
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_primitive_risk_formulas"
@@ -2184,7 +2190,7 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2197,11 +2203,14 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
             "TIPO_REGISTRO",
             "ID_FORMULA",
             "NOME_FORMULA",
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3VariableFees(ABCB3SearchByTradingSession):
@@ -2237,7 +2246,8 @@ class B3VariableFees(ABCB3SearchByTradingSession):
             "CONVS_IND_VAL": str,
             "ID": str,
             "PRTY": str,
-            "MKT_IDR_CD": str
+            "MKT_IDR_CD": str, 
+            "FILE_NAME": str
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
@@ -2250,7 +2260,7 @@ class B3VariableFees(ABCB3SearchByTradingSession):
                            cols_from_case=cols_from_case, cols_to_case=cols_to_case,
                            str_table_name=str_table_name)
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2270,7 +2280,10 @@ class B3VariableFees(ABCB3SearchByTradingSession):
         for soup_parent in soup_node:
             list_ser.append(self._instrument_indicator_node(soup_parent))
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
     def _instrument_indicator_node(self, soup_parent: Tag) -> dict[str, Union[str, int, float]]:
         """Get node information from BeautifulSoup XML.
@@ -2332,7 +2345,8 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
             "ORIGMEM_INSTRUMENTO": str,
             "ID_INSTRUMENTO": str,
             "SIMBOLO_INSTRUMENTO": str,
-            "LIMITE_LIQUIDEZ": str
+            "LIMITE_LIQUIDEZ": str, 
+            "FILE_NAME": str,
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_daily_liquidity_limits"
@@ -2343,7 +2357,7 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
                            str_table_name=str_table_name)
 
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2356,13 +2370,16 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4], names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4], names=[
             "ID_CAMARA",
             "ORIGMEM_INSTRUMENTO",
             "ID_INSTRUMENTO",
             "SIMBOLO_INSTRUMENTO",
             "LIMITE_LIQUIDEZ",
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
 
 
 class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
@@ -2391,7 +2408,8 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
             "ORIGMEM_INSTRUMENTO": str,
             "ID_INSTRUMENTO": str,
             "SIMBOLO_INSTRUMENTO": str,
-            "LIMITE_LIQUIDEZ": str
+            "LIMITE_LIQUIDEZ": str, 
+            "FILE_NAME": str,
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_other_daily_liquidity_limits"
@@ -2401,7 +2419,7 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2414,13 +2432,16 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4], names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4], names=[
             "ID_CAMARA",
             "ORIGMEM_INSTRUMENTO",
             "ID_INSTRUMENTO",
             "SIMBOLO_INSTRUMENTO",
             "LIMITE_LIQUIDEZ",
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3TradableSecurityList(ABCB3SearchByTradingSession):
@@ -2515,6 +2536,7 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
             "MIN_CROSS_QTY": int,
             "ISIN_NUMBER": str,
             "CLEARING_HOUSE_ID": int,
+            "FILE_NAME": str,
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_tradable_security_list"
@@ -2524,7 +2546,7 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
                            dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
                            str_table_name=str_table_name)
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2537,7 +2559,7 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=",", skiprows=0, names=[
+        df_ = pd.read_csv(file, sep=",", skiprows=0, names=[
             "SYMBOL",
             "SECURITY_ID",
             "SECURITY_ID_SOURCE",
@@ -2609,6 +2631,9 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
             "ISIN_NUMBER",
             "CLEARING_HOUSE_ID",
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
     
 class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
@@ -2631,25 +2656,28 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TIPO_REGISTRO": str,
-            "ID_GRUPO_INSTRUMENTOS": int,
-            "ID_CAMARA_ATIVO_OBJETO": "category",
-            "ID_INSTRUMENTO_ATIVO_OBJETO": int,
-            "ORIGEM_INSTRUMENTO_ATIVO_OBJETO": "category",
-            "ID_FORMULA_RISCO": int,
-            "ID_FPR": int,
-            "ID_QUALIFICADOR": int,
-            "DESCRICAO_QUALIFICADOR": "category",
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_mapping_otc_instrument_groups"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TIPO_REGISTRO": str,
+                "ID_GRUPO_INSTRUMENTOS": int,
+                "ID_CAMARA_ATIVO_OBJETO": "category",
+                "ID_INSTRUMENTO_ATIVO_OBJETO": int,
+                "ORIGEM_INSTRUMENTO_ATIVO_OBJETO": "category",
+                "ID_FORMULA_RISCO": int,
+                "ID_FPR": int,
+                "ID_QUALIFICADOR": int,
+                "DESCRICAO_QUALIFICADOR": "category",
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2664,7 +2692,7 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
             "TIPO_REGISTRO",
             "ID_GRUPO_INSTRUMENTOS",
             "ID_CAMARA_ATIVO_OBJETO",
@@ -2675,6 +2703,9 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
             "ID_QUALIFICADOR",
             "DESCRICAO_QUALIFICADOR",
         ])
+        df_["FILE_NAME"] = file.name
+
+        return df_
 
 
 class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
@@ -2698,24 +2729,27 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TIPO_REGISTRO": str,
-            "ID_GRUPO_INSTRUMENTOS": int,
-            "ID_FORMULA_RISCO": int,
-            "ID_FPR": int,
-            "ID_QUALIFICADOR": int,
-            "DESCRICAO_QUALIFICADOR": "category",
-            "DATA_INICIAL_INTERVALO_VENCIMENTOS": "date",
-            "DATA_FINAL_INTERVALO_VENCIMENTOS": "date",
-            "INDICADOR_FPR_INDEPENDENTE": int,
-        },
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_mapping_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TIPO_REGISTRO": str,
+                "ID_GRUPO_INSTRUMENTOS": int,
+                "ID_FORMULA_RISCO": int,
+                "ID_FPR": int,
+                "ID_QUALIFICADOR": int,
+                "DESCRICAO_QUALIFICADOR": "category",
+                "DATA_INICIAL_INTERVALO_VENCIMENTOS": "date",
+                "DATA_FINAL_INTERVALO_VENCIMENTOS": "date",
+                "INDICADOR_FPR_INDEPENDENTE": int,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2730,7 +2764,7 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
                 "TIPO_REGISTRO",
                 "ID_GRUPO_INSTRUMENTOS",
                 "ID_FORMULA_RISCO",
@@ -2742,6 +2776,9 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
                 "INDICADOR_FPR_INDEPENDENTE",
             ]
         )
+        df_["FILE_NAME"] = file.name
+
+        return df_
 
 
 class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
@@ -2764,25 +2801,28 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "INSTRUMENT_MTM": str,
-            "HOLDING_DAY": str,
-            "MTM_MAX_C_PHI1": str,
-            "MTM_MAX_V_PHI1": str,
-            "MIN_MARGIN_CREDIT_COLLATERAL_PHI1": str,
-            "MIN_MARGIN_CREDIT_COLLATERAL_PHI2": str,
-            "TICKER": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_maximum_theoretical_margin"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "INSTRUMENT_MTM": str,
+                "HOLDING_DAY": str,
+                "MTM_MAX_C_PHI1": str,
+                "MTM_MAX_V_PHI1": str,
+                "MIN_MARGIN_CREDIT_COLLATERAL_PHI1": str,
+                "MIN_MARGIN_CREDIT_COLLATERAL_PHI2": str,
+                "TICKER": str
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2795,7 +2835,7 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4, 5, 6], names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, usecols=[0, 1, 2, 3, 4, 5, 6], names=[
                 "INSTRUMENT_MTM",
                 "HOLDING_DAY",
                 "MTM_MAX_C_PHI1",
@@ -2805,6 +2845,9 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
                 "TICKER",
             ]
         )
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
@@ -2827,23 +2870,26 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TICKER_SYMBOL": str,
-            "OPTION_TYPE": str,
-            "OPTION_STYLE": str,
-            "EXPIRY_DATE": int,
-            "EXERCISE_PRICE": float,
-            "REFERENCE_PREMIUM": float,
-            "IMPLIED_VOLATILITY": float,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_equities_option_reference_premiums"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TICKER_SYMBOL": str,
+                "OPTION_TYPE": str,
+                "OPTION_STYLE": str,
+                "EXPIRY_DATE": int,
+                "EXERCISE_PRICE": float,
+                "REFERENCE_PREMIUM": float,
+                "IMPLIED_VOLATILITY": float,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -2876,7 +2922,7 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2889,7 +2935,7 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
             "TICKER_SYMBOL",
             "OPTION_TYPE",
             "OPTION_STYLE",
@@ -2898,6 +2944,9 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
             "REFERENCE_PREMIUM",
             "IMPLIED_VOLATILITY",
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
@@ -2923,34 +2972,38 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_TRANSACAO": str,
-            "DATA_REFERENCIA": "date",
-            "DATA_CONTRATACAO_TXS_PRATICADAS": "date",
-            "DATA_LIQUIDACAO_TXS_PRATICADAS": "date",
-            "TX_PRATICADA_MX": float,
-            "TX_PRATICADA_MIN": float,
-            "TX_PRATICADA_MEDIA": float,
-            "DATA_CONTRATACAO_PARAMETROS_ABERTURA": "date",
-            "DATA_LIQUIDACAO_PARAMETROS_ABERTURA": "date",
-            "TAXA_ABERTURA": float,
-            "PERCENTAUL_GARANTIDO": float,
-            "DATA_CONTRATACAO_OPERACOES_CONTRATADAS": "date",
-            "DATA_LIQUIDACAO_OPERACOES_CONTRATADAS": "date",
-            "NUMERO_OPERACOES_CONTRATADAS": int,
-            "VALOR_OPERACOES_CONTRATADAS_DOLAR": float,
-            "VALOR_OPERACOES_CONTRATADAS_REAIS": float,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_fx_market_contracted_transactions"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_TRANSACAO": str,
+                "DATA_REFERENCIA": "date",
+                "DATA_CONTRATACAO_TXS_PRATICADAS": "date",
+                "DATA_LIQUIDACAO_TXS_PRATICADAS": "date",
+                "TX_PRATICADA_MX": float,
+                "TX_PRATICADA_MIN": float,
+                "TX_PRATICADA_MEDIA": float,
+                "DATA_CONTRATACAO_PARAMETROS_ABERTURA": "date",
+                "DATA_LIQUIDACAO_PARAMETROS_ABERTURA": "date",
+                "TAXA_ABERTURA": float,
+                "PERCENTAUL_GARANTIDO": float,
+                "DATA_CONTRATACAO_OPERACOES_CONTRATADAS": "date",
+                "DATA_LIQUIDACAO_OPERACOES_CONTRATADAS": "date",
+                "NUMERO_OPERACOES_CONTRATADAS": int,
+                "VALOR_OPERACOES_CONTRATADAS_DOLAR": float,
+                "VALOR_OPERACOES_CONTRATADAS_REAIS": float,
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3002,6 +3055,7 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
         ]
         
         df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
         
         return df_
 
@@ -3029,23 +3083,26 @@ class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_TRANSACAO": str,
-            "DATA_REFERENCIA": "date",
-            "DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO": "date",
-            "VALOR_LIQUIDO_COMPENSADO_DOLAR": float,
-            "VALOR_LIQUIDO_COMPENSADO_REAL": float,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_fx_market_volume_settled"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_TRANSACAO": str,
+                "DATA_REFERENCIA": "date",
+                "DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO": "date",
+                "VALOR_LIQUIDO_COMPENSADO_DOLAR": float,
+                "VALOR_LIQUIDO_COMPENSADO_REAL": float,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3075,6 +3132,7 @@ class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
         ]
         
         df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
         
         return df_
 
@@ -3102,27 +3160,30 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TIPO_REGISTRO": str,
-            "FATOR_PRIMITIVO_RISCO": str,
-            "VERTICE_CODIGO_DISTRIBUICAO": str,
-            "ID_CENARIO": str,
-            "VALOR": float,
-            "FATOR_CENARIO": str,
-            "CHOQUE_CENARIO_POSITIVO": str,
-            "CHOQUE_CENARIO_NEGATIVO": str,
-            "TIPO_CHOQUE": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_margin_scenarios"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TIPO_REGISTRO": str,
+                "FATOR_PRIMITIVO_RISCO": str,
+                "VERTICE_CODIGO_DISTRIBUICAO": str,
+                "ID_CENARIO": str,
+                "VALOR": float,
+                "FATOR_CENARIO": str,
+                "CHOQUE_CENARIO_POSITIVO": str,
+                "CHOQUE_CENARIO_NEGATIVO": str,
+                "TIPO_CHOQUE": str
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3135,7 +3196,7 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
             "TIPO_REGISTRO", 
             "FATOR_PRIMITIVO_RISCO", 
             "VERTICE_CODIGO_DISTRIBUICAO", 
@@ -3146,6 +3207,9 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
             "CHOQUE_CENARIO_NEGATIVO", # fixed value with +00000000000000000
             "TIPO_CHOQUE", # A (aditivo / sum) or M (multiplicativo / product)
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
@@ -3168,26 +3232,29 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "DATA_BASE": str,
-            "ATIVO_BASE_FPR": str,
-            "DATA_FUTURA": str,
-            "ATIVO_FPR": str,
-            "TIPO_CENARIO_INDICADOR": str,
-            "CODIGO_INTERNO": str,
-            "VALOR_LIQUIDO_COMPENSADO_DOLAR": str,
-            "VALOR_LIQUIDO_COMPENSADO_REAL": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_consideration_factors"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "DATA_BASE": str,
+                "ATIVO_BASE_FPR": str,
+                "DATA_FUTURA": str,
+                "ATIVO_FPR": str,
+                "TIPO_CENARIO_INDICADOR": str,
+                "CODIGO_INTERNO": str,
+                "VALOR_LIQUIDO_COMPENSADO_DOLAR": str,
+                "VALOR_LIQUIDO_COMPENSADO_REAL": str
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3222,7 +3289,10 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
             "VALOR_LIQUIDO_COMPENSADO_REAL"
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
 
 
 class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSession):
@@ -3245,25 +3315,28 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_TRANSACAO": str,
-            "COMPLEMENTO_TRANSACAO": str,
-            "TIPO_REGISTRO": str,
-            "DATA_BASE": str,
-            "GRUPO_INDICADOR": str,
-            "CODIGO_INDICADOR": str,
-            "VALOR_INDICADOR": str,
-            "NUMERO_DECIMAIS_VALOR": str,
-            "FILLER": str,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_economic_agricultural_indicators"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_TRANSACAO": str,
+                "COMPLEMENTO_TRANSACAO": str,
+                "TIPO_REGISTRO": str,
+                "DATA_BASE": str,
+                "GRUPO_INDICADOR": str,
+                "CODIGO_INDICADOR": str,
+                "VALOR_INDICADOR": str,
+                "NUMERO_DECIMAIS_VALOR": str,
+                "FILLER": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3296,7 +3369,7 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3333,7 +3406,10 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
             "FILLER",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
@@ -3356,37 +3432,40 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_TRANSACAO": str,
-            "COMPLEMENTO_TRANSACAO": str,
-            "TIPO_REGISTRO": str,
-            "DATA_GERACAO_ARQUIVO": str,
-            "TIPO_NEGOCIACAO": str,
-            "CODIGO_MERCADORIA": str,
-            "CODIGO_MERCADO": str,
-            "DATA_BASE": str,
-            "DATA_VENCIMENTO": str,
-            "VOLUME_DIA_BRL": float,
-            "VOLUME_DIA_USD": float,
-            "QTD_CONTRATOS_ABERTO_APOS_LIQUIDACAO": float,
-            "QTD_NEGOCIOS_EFETUADOS": float,
-            "QTD_CONTRATOS_NEGOCIADOS": float,
-            "QTD_CONTRATOS_ABERTOS_ANTES_LIQUIDACAO": float,
-            "QTD_CONTRATOS_LIQUIDADOS": float,
-            "QTD_CONTRATOS_ABERTO_FINAL": float,
-            "TAXA_MEDIA_SWAP_PREMIO_MEIO_OPC_FLEX": float,
-            "SINAL_TAXA_MEDIA_PREMIO_MEDIO": str,
-            "VOLUME_ABERTO_BRL": float,
-            "VOLUME_ABERTO_USD": float,
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_otc_market_trades"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_TRANSACAO": str,
+                "COMPLEMENTO_TRANSACAO": str,
+                "TIPO_REGISTRO": str,
+                "DATA_GERACAO_ARQUIVO": str,
+                "TIPO_NEGOCIACAO": str,
+                "CODIGO_MERCADORIA": str,
+                "CODIGO_MERCADO": str,
+                "DATA_BASE": str,
+                "DATA_VENCIMENTO": str,
+                "VOLUME_DIA_BRL": float,
+                "VOLUME_DIA_USD": float,
+                "QTD_CONTRATOS_ABERTO_APOS_LIQUIDACAO": float,
+                "QTD_NEGOCIOS_EFETUADOS": float,
+                "QTD_CONTRATOS_NEGOCIADOS": float,
+                "QTD_CONTRATOS_ABERTOS_ANTES_LIQUIDACAO": float,
+                "QTD_CONTRATOS_LIQUIDADOS": float,
+                "QTD_CONTRATOS_ABERTO_FINAL": float,
+                "TAXA_MEDIA_SWAP_PREMIO_MEIO_OPC_FLEX": float,
+                "SINAL_TAXA_MEDIA_PREMIO_MEDIO": str,
+                "VOLUME_ABERTO_BRL": float,
+                "VOLUME_ABERTO_USD": float,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3419,7 +3498,7 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3486,7 +3565,10 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
             "VOLUME_ABERTO_USD",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+        
+        return df_
     
 
 class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
@@ -3509,23 +3591,26 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "DATA_PREGAO": str,
-            "TIPO_NEGOCIACAO": str,
-            "CODIGO_MERCADORIA": str,
-            "TIPO_MERCADO": str,
-            "VENCIMENTO": str,
-            "QTD_CONTRATOS_TRAVADOS": float,
-            "QTD_CONTRATOS_BAIXADOS": float
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_derivatives_market_combined_positions"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "DATA_PREGAO": str,
+                "TIPO_NEGOCIACAO": str,
+                "CODIGO_MERCADORIA": str,
+                "TIPO_MERCADO": str,
+                "VENCIMENTO": str,
+                "QTD_CONTRATOS_TRAVADOS": float,
+                "QTD_CONTRATOS_BAIXADOS": float
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3591,7 +3676,10 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
             "QTD_CONTRATOS_BAIXADOS",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file.name
+        
+        return df_
     
 
 class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
@@ -3614,32 +3702,35 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_TRANSACAO": str,
-            "COMPLEMENTO_TRANSACAO": str,
-            "TIPO_REGISTRO": str,
-            "DATA_BASE": str,
-            "CODIGO_MERCADORIA": str,
-            "TIPO_MERCADO": str,
-            "SERIE_OPCOES": str,
-            "INDICADOR_TIPO_OPCAO": str,
-            "TIPO_OPCAO": str,
-            "SERIE_OPCOES": str,
-            "INDICADOR_TIPO_OPCAO": str,
-            "TIPO_OPCAO": str,
-            "DATA_VENCIMENTO_CONTRATO": str,
-            "PRECO_EXERCICIO_OPCOES": float,
-            "PRECO_REFERENCIA_OPCOES": float,
-            "NUMERO_CASAS_DECIMAIS": int
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_option_reference_premiums"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_TRANSACAO": str,
+                "COMPLEMENTO_TRANSACAO": str,
+                "TIPO_REGISTRO": str,
+                "DATA_BASE": str,
+                "CODIGO_MERCADORIA": str,
+                "TIPO_MERCADO": str,
+                "SERIE_OPCOES": str,
+                "INDICADOR_TIPO_OPCAO": str,
+                "TIPO_OPCAO": str,
+                "SERIE_OPCOES": str,
+                "INDICADOR_TIPO_OPCAO": str,
+                "TIPO_OPCAO": str,
+                "DATA_VENCIMENTO_CONTRATO": str,
+                "PRECO_EXERCICIO_OPCOES": float,
+                "PRECO_REFERENCIA_OPCOES": float,
+                "NUMERO_CASAS_DECIMAIS": int
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3672,7 +3763,7 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3720,7 +3811,10 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
             "NUMERO_CASAS_DECIMAIS"
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
@@ -3743,23 +3837,27 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "DATA_CADASTRO": str,
-            "EMISSOR": str,
-            "CNPJ": str,
-            "DATA_EMISSAO": str,
-            "VALOR_NOMINAL": float,
-            "DATA_VENCIMENTO": str,
-            "CODIGO_ISIN": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_option_reference_premiums_isin"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "DATA_CADASTRO": str,
+                "EMISSOR": str,
+                "CNPJ": str,
+                "DATA_EMISSAO": str,
+                "VALOR_NOMINAL": float,
+                "DATA_VENCIMENTO": str,
+                "CODIGO_ISIN": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3792,7 +3890,7 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3825,7 +3923,10 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
             "CODIGO_ISIN",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSession):
@@ -3849,20 +3950,24 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "DATA_CADASTRO": str,
-            "CODIGO_MERCADORIA": str,
-            "TIPO_MERCADO": str,
-            "VENCIMENTO_SERIE_PRAZO": str,
-            "CODIGO_ISIN": str
-        },
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_option_reference_premiums_isin"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "DATA_CADASTRO": str,
+                "CODIGO_MERCADORIA": str,
+                "TIPO_MERCADO": str,
+                "VENCIMENTO_SERIE_PRAZO": str,
+                "CODIGO_ISIN": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3895,7 +4000,7 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -3924,7 +4029,10 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
             "CODIGO_ISIN",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
@@ -3947,20 +4055,24 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "DATA_CADASTRO": str,
-            "CONTRATO": str,
-            "NOME_CONTRATO": str,
-            "CODIGO_ISIN": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_list_isin_swaps"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "DATA_CADASTRO": str,
+                "CONTRATO": str,
+                "NOME_CONTRATO": str,
+                "CODIGO_ISIN": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -3993,7 +4105,7 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -4020,7 +4132,10 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
             "CODIGO_ISIN",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
@@ -4043,31 +4158,34 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ID_TRANSACAO": str,
-            "COMPLEMENTO_TRANSACAO": str,
-            "TIPO_REGISTRO": str,
-            "DATA_GERACAO_ARQUIVO": str,
-            "REFERENCIA": str,
-            "CODIGO_PRODUTO": str,
-            "SERIE": str,
-            "INDICADOR_AJUSTE_PERIODO": str,
-            "DATA_VENCIMENTO": str,
-            "PRAZO_DIAS_CORRIDOS": str,
-            "SINAL_TAXA_MERCADO": str,
-            "TAXA_MERCADO": str,
-            "FATOR_DESCONTO": str,
-            "VALOR_MERCADO": str,
-            "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYYMMDD",
         str_table_name: str = "br_b3_derivatives_market_dollar_swap"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ID_TRANSACAO": str,
+                "COMPLEMENTO_TRANSACAO": str,
+                "TIPO_REGISTRO": str,
+                "DATA_GERACAO_ARQUIVO": str,
+                "REFERENCIA": str,
+                "CODIGO_PRODUTO": str,
+                "SERIE": str,
+                "INDICADOR_AJUSTE_PERIODO": str,
+                "DATA_VENCIMENTO": str,
+                "PRAZO_DIAS_CORRIDOS": str,
+                "SINAL_TAXA_MERCADO": str,
+                "TAXA_MERCADO": str,
+                "FATOR_DESCONTO": str,
+                "VALOR_MERCADO": str,
+                "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA": str
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
     def parse_raw_file(
         self, 
@@ -4100,7 +4218,7 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
             file_name=file_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -4149,7 +4267,10 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
             "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA",
         ]
         
-        return pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_ =  pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+        df_["FILE_NAME"] = file_name
+
+        return df_
 
 
 class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
