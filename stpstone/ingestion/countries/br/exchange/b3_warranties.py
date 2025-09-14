@@ -3,7 +3,6 @@
 from datetime import date
 from io import BytesIO, StringIO
 from logging import Logger
-import os
 from typing import Optional, Union
 
 import backoff
@@ -162,6 +161,10 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
@@ -211,7 +214,7 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
         
         Parameters
         ----------
-        list_tup_files : tuple[Union[StringIO, StringIO], ...]
+        list_tup_files : list[tuple[Union[StringIO, BytesIO], str]]
             The parsed content.
         url_href : str
             The URL.
@@ -230,7 +233,7 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
                 df_ = excel_file.parse(sheet_name=sheet_name)
                 df_ = df_.rename(columns={
                     "Código": "CODIGO", 
-                    "Limite (quantidade)": "LIMITE_QUANTIDADE",
+                    "Limite (quantidade)": "LIMITE_QUANTIDADE", # codespell:ignore
                 })
                 df_["NOME_PLANILHA"] = sheet_name
                 df_["NOME_PASTA_TRABALHO"] = filename
@@ -380,6 +383,10 @@ class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
@@ -429,7 +436,7 @@ class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
         
         Parameters
         ----------
-        list_tup_files : tuple[Union[StringIO, StringIO], ...]
+        list_tup_files : list[tuple[Union[StringIO, BytesIO], str]]
             The parsed content.
         url_href : str
             The URL.
@@ -604,6 +611,10 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
@@ -653,7 +664,7 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
         
         Parameters
         ----------
-        list_tup_files : tuple[Union[StringIO, StringIO], ...]
+        list_tup_files : list[tuple[Union[StringIO, BytesIO], str]]
             The parsed content.
         url_href : str
             The URL.
