@@ -693,12 +693,22 @@ def test_run_reload_module(
     mock_requests_get.return_value = mock_response
     mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
     
+    # Mock the calendar initialization to prevent API calls
+    mock_calendar_init = mocker.patch(
+        "stpstone.utils.calendars.calendar_br.DatesBRAnbima.__init__",
+        return_value=None
+    )
+    _ = mocker.patch(
+        "stpstone.utils.calendars.calendar_br.DatesBRAnbima.add_working_days",
+        return_value=date(2025, 9, 7)
+    )
+    
     # Import the module first to ensure it exists
     from stpstone.ingestion.countries.br.exchange import b3_historical_sigma
     importlib.reload(b3_historical_sigma)
     
     # Mock the add_key_value_to_dicts method for the new instance
-    instance = B3HistoricalSigma()
+    instance = B3HistoricalSigma(date_ref=date(2025, 9, 8))  # avoid calendar calls
     
     def mock_add_key_value_side_effect(
         list_ser: list[dict[str, Union[str, int, float]]], 
@@ -737,6 +747,10 @@ def test_run_reload_module(
     
     result = instance.run()
     assert isinstance(result, pd.DataFrame)
+    
+    # Verify that mocks were called
+    mock_calendar_init.assert_called()
+    # Note: mock_add_working_days won't be called since we provide explicit date_ref
 
 
 # --------------------------
