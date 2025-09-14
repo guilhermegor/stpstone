@@ -70,7 +70,7 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_sovereign_bonds"
+        str_table_name: str = "br_b3_warranties_stocks_units_etfs"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -86,7 +86,7 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_b3_sovereign_bonds"
+            The name of the table, by default "br_b3_warranties_stocks_units_etfs"
 
         Returns
         -------
@@ -109,7 +109,7 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
                 "NOME_PASTA_TRABALHO": str,
                 "URL_HREF": str
             }, 
-            str_fmt_dt="YYYY-MM-DD",
+            str_fmt_dt="D/M/YYYY",
             url=self.url,
         )
         if self.cls_db:
@@ -238,7 +238,7 @@ class B3WarrantiesStocksUnitsETFs(ABCIngestionOperations):
                 list_ser.extend(df_.to_dict(orient="records"))
 
         return pd.DataFrame(list_ser)
-    
+
 
 class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
     """B3 Warranties - Brazilian Sovereign Bonds."""
@@ -285,7 +285,7 @@ class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_sovereign_bonds"
+        str_table_name: str = "br_b3_warranties_brazilian_sovereign_bonds"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -301,7 +301,7 @@ class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_b3_sovereign_bonds"
+            The name of the table, by default "br_b3_warranties_brazilian_sovereign_bonds"
 
         Returns
         -------
@@ -322,7 +322,7 @@ class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
                 "ISIN": str, 
                 "SUBTIPO": str,
                 "IDENTIFICADOR_GARANTIA": str,
-                "VENCIMENTO": str,
+                "DATA_VENCIMENTO": "date",
                 "NOME_PLANILHA": str, 
                 "NOME_PASTA_TRABALHO": str,
                 "URL_HREF": str
@@ -448,7 +448,7 @@ class B3WarrantiesBRSovereignBonds(ABCIngestionOperations):
                 "Ativo": "ATIVO", 
                 "Sub Tipo": "SUBTIPO",
                 "Identificador da Garantia": "IDENTIFICADOR_GARANTIA",
-                "Vencimento": "VENCIMENTO",
+                "Vencimento": "DATA_VENCIMENTO",
             })
             df_["NOME_PLANILHA"] = "Títulos Públicos Federais"
             df_["NOME_PASTA_TRABALHO"] = filename
@@ -503,7 +503,7 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_b3_sovereign_bonds"
+        str_table_name: str = "br_b3_warranties_international_securities"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -519,7 +519,7 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_b3_sovereign_bonds"
+            The name of the table, by default "br_b3_warranties_international_securities"
 
         Returns
         -------
@@ -536,14 +536,15 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
             date_ref=self.date_ref,
             dict_dtypes={
                 "ID": str, 
-                "ATIVO": str,
-                "ISIN": str, 
-                "SUBTIPO": str,
-                "IDENTIFICADOR_GARANTIA": str,
-                "VENCIMENTO": str,
-                "NOME_PLANILHA": str, 
+                "TIPO_TITULO": str,
+                "CODIGO_TITULO": str,
+                "ISIN": str,
+                "CUSIP": str,
+                "DATA_VENCIMENTO": "date",
+                "PROXIMO_PAGAMENTO_CUPOM": "date",
+                "NOME_PLANILHA": str,
                 "NOME_PASTA_TRABALHO": str,
-                "URL_HREF": str
+                "URL_HREF": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             url=self.url,
@@ -585,7 +586,12 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
         resp_req.raise_for_status()
         return resp_req
-        
+    
+    @backoff.on_exception(
+        backoff.expo, 
+        (requests.exceptions.HTTPError, requests.exceptions.ReadTimeout), 
+        max_time=60
+    )
     def _get_href(
         self, 
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
@@ -663,14 +669,20 @@ class B3WarrantiesInternationalSecurities(ABCIngestionOperations):
             excel_file = pd.ExcelFile(file_content)
             df_ = excel_file.parse(sheet_name="Títulos Internacionais")
             df_ = df_.rename(columns={
-                "Ativo": "ATIVO", 
-                "Sub Tipo": "SUBTIPO",
-                "Identificador da Garantia": "IDENTIFICADOR_GARANTIA",
-                "Vencimento": "VENCIMENTO",
+                "Identificador do Instrumento": "ID", 
+                "Tipo TituloInternacional": "TIPO_TITULO",
+                "Código Titulo": "CODIGO_TITULO",
+                "Cusip": "CUSIP",
+                "Data de Vencimento": "DATA_VENCIMENTO",
+                "Próximo Pagamento de Coupon": "PROXIMO_PAGAMENTO_CUPOM",
             })
-            df_["NOME_PLANILHA"] = "Títulos Públicos Federais"
+            df_["NOME_PLANILHA"] = "Títulos Internacionais"
             df_["NOME_PASTA_TRABALHO"] = filename
             df_["URL_HREF"] = url_href
+            for col_dt in ["DATA_VENCIMENTO", "PROXIMO_PAGAMENTO_CUPOM"]:
+                df_[col_dt] = df_[col_dt].apply(
+                    lambda d: str(d).split(" ")[0] if pd.notna(d) and str(d) != 'NaT' else None
+                )
             list_ser.extend(df_.to_dict(orient="records"))
 
         return pd.DataFrame(list_ser)
