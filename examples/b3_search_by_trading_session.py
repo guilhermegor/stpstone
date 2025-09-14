@@ -428,15 +428,15 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # print(f"DF B3 INSTRUMENTS FILE EXRC EQTS: \n{df_}")
 # df_.info()
 
-# cls_ = B3InstrumentsFileEqty(
-#     date_ref=None,
-#     logger=None, 
-#     cls_db=None
-# )
+cls_ = B3InstrumentsFileEqty(
+    date_ref=None,
+    logger=None, 
+    cls_db=None
+)
 
-# df_ = cls_.run(bool_verify=False)
-# print(f"DF B3 INSTRUMENTS FILE EQTY: \n{df_}")
-# df_.info()
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 INSTRUMENTS FILE EQTY: \n{df_}")
+df_.info()
 
 
 # cls_ = B3InstrumentsFileOptnOnEqts(
@@ -450,15 +450,15 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # df_.info()
 
 
-cls_ = B3InstrumentsFileOptnOnSpotAndFutrs(
-    date_ref=None,
-    logger=None, 
-    cls_db=None
-)
+# cls_ = B3InstrumentsFileOptnOnSpotAndFutrs(
+#     date_ref=None,
+#     logger=None, 
+#     cls_db=None
+# )
 
-df_ = cls_.run(bool_verify=False)
-print(f"DF B3 INSTRUMENTS FILE OPTN ON SPOT AND FUTRS: \n{df_}")
-df_.info()
+# df_ = cls_.run(bool_verify=False)
+# print(f"DF B3 INSTRUMENTS FILE OPTN ON SPOT AND FUTRS: \n{df_}")
+# df_.info()
 
 
 # cls_ = B3PriceReport(

@@ -788,8 +788,8 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             The transformed DataFrame.
         """
         # Use cached file or fetch from server
-        file = self.get_cached_or_fetch(timeout=timeout, bool_verify=bool_verify)
-        df_ = self.transform_data(file=file)
+        file, file_name = self.get_cached_or_fetch(timeout=timeout, bool_verify=bool_verify)
+        df_ = self.transform_data(file=file, file_name=file_name)
         df_ = self.standardize_dataframe(
             df_=df_, 
             date_ref=self.date_ref,
@@ -875,16 +875,37 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
                 raise ValueError(f"Failed to load from cache. Erro: {e}")
         raise ValueError("Cache file not found.")
 
-    def _get_cached_file_path(self) -> Path:
-        """Get the cached file path for the current date.
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> tuple[StringIO, str]:
+        """Parse the raw file content and cache it.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
         
         Returns
         -------
-        Path
-            Path to the cached XML file
+        tuple[StringIO, str]
+            The parsed content and file name.
         """
-        filename = f"instruments_{self.date_ref.strftime('%y%m%d')}.xml"
-        return self.temp_dir / filename
+        file_io, file_name = self.cls_dir_files_management.recursive_unzip_in_memory(
+            BytesIO(resp_req.content))[0]
+        
+        xml_content = file_io.getvalue()
+        try:
+            xml_content_str = xml_content.decode("utf-8")
+        except UnicodeDecodeError:
+            xml_content_str = xml_content.decode("latin-1")
+        
+        self._save_to_cache(xml_content_str)
+        
+        # reset file pointer
+        file_io.seek(0)
+        string_io = StringIO(xml_content_str)
+        return string_io, file_name
 
     def _save_to_cache(self, xml_content: str) -> None:
         """Save XML content to cache.
@@ -912,65 +933,21 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
                 "warning"
             )
 
-    def parse_raw_file(
-        self, 
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-    ) -> StringIO:
-        """Parse the raw file content and cache it.
-        
-        Parameters
-        ----------
-        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
+    def _get_cached_file_path(self) -> Path:
+        """Get the cached file path for the current date.
         
         Returns
         -------
-        StringIO
-            The parsed content.
+        Path
+            Path to the cached XML file
         """
-        file_io = self.cls_dir_files_management.recursive_unzip_in_memory(
-            BytesIO(resp_req.content))[0]
-        
-        xml_content = file_io.getvalue()
-        self._save_to_cache(xml_content)
-        
-        # reset file pointer
-        file_io.seek(0)
-        return file_io
-
-    def cleanup_cache(self) -> None:
-        """Clean up the temporary directory and all cached files.
-        
-        Raises
-        ------
-        ValueError
-            If failing to cleanup cache
-        """
-        try:
-            if self.temp_dir.exists():
-                shutil.rmtree(self.temp_dir)
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"Cleaned up temporary directory: {self.temp_dir}", 
-                    "info"
-                )
-        except Exception as e:
-            self.cls_create_log.log_message(
-                self.logger, f"Failed to cleanup cache: {e}", 
-                "warning"
-            )
-
-    def __del__(self):
-        """Cleanup on destruction."""
-        try:
-            self.cleanup_cache()
-        except:
-            # ignore errors during cleanup in destructor
-            pass
+        filename = f"instruments_{self.date_ref.strftime('%y%m%d')}.xml"
+        return self.temp_dir / filename
 
     def transform_data(
         self, 
         file: StringIO, 
+        file_name: str,
         tag_parent: str, 
         list_tags_children: list[str],
         list_tups_attributes: list[tuple[str, str]],
@@ -994,7 +971,9 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             list_tags_children=list_tags_children, 
             list_tups_attributes=list_tups_attributes
         )
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file_name
+        return df_
     
     def _get_node_info(
         self, 
@@ -1037,6 +1016,33 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
             list_ser.append(dict_)
 
         return list_ser
+
+    def __del__(self) -> None:
+        """Cleanup on destruction."""
+        with suppress(Exception):
+            self.cleanup_cache()
+
+    def cleanup_cache(self) -> None:
+        """Clean up the temporary directory and all cached files.
+        
+        Raises
+        ------
+        ValueError
+            If failing to cleanup cache
+        """
+        try:
+            if self.temp_dir.exists():
+                shutil.rmtree(self.temp_dir)
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"Cleaned up temporary directory: {self.temp_dir}", 
+                    "info"
+                )
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, f"Failed to cleanup cache: {e}", 
+                "warning"
+            )
 
 
 class B3InstrumentsFileEqty(B3InstrumentsFile):
@@ -1093,6 +1099,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
                 "LAST_PRIC_CCY": str,
                 "FRST_PRIC_CCY": str,
                 "RGHTS_ISSE_PRIC_CCY": str,
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1100,7 +1107,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
             str_table_name=str_table_name,
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1115,6 +1122,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="EqtyInf", 
             list_tags_children=[
                 "SctyCtgy", 
@@ -1199,13 +1207,14 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
                 "DLVRY_TP": str,
                 "AUTOMTC_EXRC_IND": str,
                 "EXRC_PRIC_CCY": str,
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1220,6 +1229,7 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="OptnOnEqtsInf", 
             list_tags_children=[
                 "SctyCtgy", 
@@ -1298,13 +1308,14 @@ class B3InstrumentsFileOptnOnSpotAndFutrs(B3InstrumentsFile):
                 "WRKG_DAYS": int,
                 "CLNR_DAYS": int,
                 "EXRC_PRIC_CCY": str,
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1319,6 +1330,7 @@ class B3InstrumentsFileOptnOnSpotAndFutrs(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="OptnOnSpotAndFutrsInf", 
             list_tags_children=[
                 "ISIN", 
@@ -1380,14 +1392,15 @@ class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
                 "TRADG_CCY": str,
                 "TRADG_START_DT": "date",
                 "TRADG_END_DT": "date",
-                "DLVRY_TP": str
+                "DLVRY_TP": str,
+                "FILE_NAME": str,
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1402,6 +1415,7 @@ class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="ExrcEqtsInf", 
             list_tags_children=[
                 "SctyCtgy",
@@ -1461,7 +1475,7 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1476,6 +1490,7 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="EqtyFwdInf", 
             list_tags_children=[
                 "SctyCtgy",
@@ -1532,7 +1547,7 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1547,6 +1562,7 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="BTCInf", 
             list_tags_children=[
                 "SctyCtgy",
@@ -1601,7 +1617,7 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1616,6 +1632,7 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="FxdIncmInf", 
             list_tags_children=[
                 "SctyCtgy",
@@ -1674,7 +1691,7 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
             str_table_name=str_table_name
         )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1689,6 +1706,7 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
         """
         return super().transform_data(
             file=file, 
+            file_name=file_name,
             tag_parent="FxdIncmInf", 
             list_tags_children=[
                 "SctyCtgy",
@@ -1747,7 +1765,8 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
             "VAL_TP_CD": str, 
             "NTRY_REF_CD": str, 
             "DCML_PRCSN": str, 
-            "MTRTY": str
+            "MTRTY": str, 
+            "FILE_NAME": str,
         },
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
@@ -1760,7 +1779,7 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
                            cols_from_case=cols_from_case, cols_to_case=cols_to_case,
                            str_table_name=str_table_name)
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1780,7 +1799,9 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
         for soup_parent in soup_node:
             list_ser.append(self._instrument_indicator_node(soup_parent))
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file_name
+        return df_
     
     def _instrument_indicator_node(self, soup_parent: Tag) -> dict[str, Union[str, int, float]]:
         """Get node information from BeautifulSoup XML.
@@ -1848,41 +1869,45 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ACTVTY_IND": str,
-            "FRQCY": str,
-            "NET_POS_ID": str,
-            "DT": "date",
-            "ID": str, 
-            "PRTRY": str, 
-            "MKT_IDR_CD": str, 
-            "INSTRM_NM": str, 
-            "DESC": str, 
-            "SGMT": str, 
-            "MKT": str, 
-            "ASST": str, 
-            "SCTY_CTGY": str, 
-            "TP_CD": str, 
-            "ECNC_IND_DESC": str, 
-            "BASE_CD": str, 
-            "VAL_TP_CD": str, 
-            "NTRY_REF_CD": str, 
-            "DCML_PRCSN": str, 
-            "MTRTY": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_fee_daily_unit_cost"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ACTVTY_IND": str,
+                "FRQCY": str,
+                "NET_POS_ID": str,
+                "DT": "date",
+                "ID": str, 
+                "PRTRY": str, 
+                "MKT_IDR_CD": str, 
+                "INSTRM_NM": str, 
+                "DESC": str, 
+                "SGMT": str, 
+                "MKT": str, 
+                "ASST": str, 
+                "SCTY_CTGY": str, 
+                "TP_CD": str, 
+                "ECNC_IND_DESC": str, 
+                "BASE_CD": str, 
+                "VAL_TP_CD": str, 
+                "NTRY_REF_CD": str, 
+                "DCML_PRCSN": str, 
+                "MTRTY": str
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -1902,7 +1927,10 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
         for soup_parent in soup_node:
             list_ser.append(self._instrument_indicator_node(soup_parent))
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
     def _instrument_indicator_node(self, soup_parent: Tag) -> dict[str, Union[str, int, float]]:
         """Get node information from BeautifulSoup XML.
@@ -1953,39 +1981,44 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "ACTVTY_IND": str,
-            "FRQCY": str,
-            "NET_POS_ID": str,
-            "DT": "date",
-            "ID": str, 
-            "PRTRY": str, 
-            "MKT_IDR_CD": str, 
-            "INSTRM_NM": str, 
-            "DESC": str, 
-            "SGMT": str, 
-            "MKT": str, 
-            "ASST": str, 
-            "SCTY_CTGY": str, 
-            "TP_CD": str, 
-            "ECNC_IND_DESC": str, 
-            "BASE_CD": str, 
-            "VAL_TP_CD": str, 
-            "NTRY_REF_CD": str, 
-            "DCML_PRCSN": str, 
-            "MTRTY": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
         str_table_name: str = "br_b3_instruments_fee_unit_cost"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           cols_from_case=cols_from_case, cols_to_case=cols_to_case,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "ACTVTY_IND": str,
+                "FRQCY": str,
+                "NET_POS_ID": str,
+                "DT": "date",
+                "ID": str, 
+                "PRTRY": str, 
+                "MKT_IDR_CD": str, 
+                "INSTRM_NM": str, 
+                "DESC": str, 
+                "SGMT": str, 
+                "MKT": str, 
+                "ASST": str, 
+                "SCTY_CTGY": str, 
+                "TP_CD": str, 
+                "ECNC_IND_DESC": str, 
+                "BASE_CD": str, 
+                "VAL_TP_CD": str, 
+                "NTRY_REF_CD": str, 
+                "DCML_PRCSN": str, 
+                "MTRTY": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            cols_from_case=cols_from_case, 
+            cols_to_case=cols_to_case,
+            str_table_name=str_table_name
+        )
 
     def transform_data(self, file: StringIO) -> pd.DataFrame:
         """Transform file content into a DataFrame.
@@ -2007,7 +2040,10 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
         for soup_parent in soup_node:
             list_ser.append(self._instrument_indicator_node(soup_parent))
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_["FILE_NAME"] = file.name
+
+        return df_
     
     def _instrument_indicator_node(self, soup_parent: Tag) -> dict[str, Union[str, int, float]]:
         """Get node information from BeautifulSoup XML.
@@ -2057,29 +2093,33 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
         self,
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
-        bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {
-            "TIPO_REGISTRO": str,
-            "ID_FPR": str,
-            "NOME_FPR": str,
-            "FORMATO_VARIACAO": str,
-            "ID_GRUPO_FPR": str,
-            "ID_CAMARA_INDICADOR": str,
-            "ID_INSTRUMENTO_INDICADOR": str,
-            "ORIGEM_INSTRUMENTO_INDICADO": str,
-            "BASE": str,
-            "BASE_INTERPOLACAO": str,
-            "CRITERIO_CAPITALIZACAO": str
-        },
+        bool_insert_or_ignore: bool = False,
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_primitive_risk_factors"
     ) -> Optional[pd.DataFrame]:
-        return super().run(timeout=timeout, bool_verify=bool_verify, 
-                           bool_insert_or_ignore=bool_insert_or_ignore, 
-                           dict_dtypes=dict_dtypes, str_fmt_dt=str_fmt_dt,
-                           str_table_name=str_table_name)
+        return super().run(
+            dict_dtypes={
+                "TIPO_REGISTRO": str,
+                "ID_FPR": str,
+                "NOME_FPR": str,
+                "FORMATO_VARIACAO": str,
+                "ID_GRUPO_FPR": str,
+                "ID_CAMARA_INDICADOR": str,
+                "ID_INSTRUMENTO_INDICADOR": str,
+                "ORIGEM_INSTRUMENTO_INDICADO": str,
+                "BASE": str,
+                "BASE_INTERPOLACAO": str,
+                "CRITERIO_CAPITALIZACAO": str, 
+                "FILE_NAME": str,
+            },
+            timeout=timeout, 
+            bool_verify=bool_verify, 
+            bool_insert_or_ignore=bool_insert_or_ignore, 
+            str_fmt_dt=str_fmt_dt,
+            str_table_name=str_table_name
+        )
 
-    def transform_data(self, file: StringIO) -> pd.DataFrame:
+    def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
         """Transform file content into a DataFrame.
         
         Parameters
@@ -2092,7 +2132,7 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
         pd.DataFrame
             The transformed DataFrame.
         """
-        return pd.read_csv(file, sep=";", skiprows=1, names=[
+        df_ = pd.read_csv(file, sep=";", skiprows=1, names=[
             "TIPO_REGISTRO",
             "ID_FPR",
             "NOME_FPR",
@@ -2105,6 +2145,9 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
             "BASE_INTERPOLACAO",
             "CRITERIO_CAPITALIZACAO",
         ])
+        df_["FILE_NAME"] = file_name
+
+        return df_
     
 
 class B3RiskFormulas(ABCB3SearchByTradingSession):
