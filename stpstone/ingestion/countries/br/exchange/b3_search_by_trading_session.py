@@ -614,7 +614,7 @@ class B3PriceReport(ABCB3SearchByTradingSession):
         str_table_name: str = "br_b3_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
         return super().run(
-                dict_dtypes={
+            dict_dtypes={
                 "DT": "date",
                 "TCKR_SYMB": str,
                 "ID": str, 
@@ -635,7 +635,19 @@ class B3PriceReport(ABCB3SearchByTradingSession):
                 "LAST_PRIC": float, 
                 "VARTN_PTS": float, 
                 "MAX_TRAD_LMT": float, 
-                "MIN_TRAD_LMT": float, 
+                "MIN_TRAD_LMT": float,
+                "NTL_FIN_VOL_CCY": str,
+                "INTL_FIN_VOL_CCY": str,
+                "BEST_BID_PRIC_CCY": str,
+                "BEST_ASK_PRIC_CCY": str,
+                "FRST_PRIC_CCY": str,
+                "MIN_PRIC_CCY": str,
+                "MAX_PRIC_CCY": str,
+                "TRAD_AVRG_PRIC_CCY": str,
+                "LAST_PRIC_CCY": str,
+                "NTL_RGLR_VOL_CCY": str,
+                "INTL_RGLR_VOL_CCY": str,
+                "FILE_NAME": str,
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -706,7 +718,8 @@ class B3PriceReport(ABCB3SearchByTradingSession):
                 ("IntlRglrVol", "Ccy"),
             ]:
                 soup_content_tag = soup_parent.find(tag)
-                dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag else None
+                dict_[tag + attribute] = soup_content_tag.get(attribute) if soup_content_tag \
+                    else None
             list_ser.append(dict_)
 
         df_ = pd.DataFrame(list_ser)
