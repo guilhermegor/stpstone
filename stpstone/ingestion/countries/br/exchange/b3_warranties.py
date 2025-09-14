@@ -1,4 +1,4 @@
-"""Implementation of ingestion instance."""
+"""B3 Warranties."""
 
 from datetime import date
 from io import BytesIO, StringIO

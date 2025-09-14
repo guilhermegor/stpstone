@@ -6,7 +6,7 @@ compression/decompression, and remote file operations.
 
 from collections.abc import Generator
 from datetime import datetime
-from io import BytesIO, TextIOWrapper
+from io import BytesIO, StringIO, TextIOWrapper
 import os
 import tempfile
 from typing import Any
@@ -1507,6 +1507,353 @@ class TestDirFilesManagement:
             int_skip_footer=1, 
             list_sep=[","]
         )
+
+    def test_recursive_unzip_in_memory_single_text_file(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with single text file.
+
+        Verifies
+        --------
+        - Returns list of tuples
+        - Text file content decoded as StringIO
+        - Correct filename returned
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        # Create zip with text file
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("test.txt", "test content")
+        buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(buffer)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+        
+        content, filename = result[0]
+        assert isinstance(content, StringIO)
+        assert filename == "test.txt"
+        assert content.read() == "test content"
+
+    def test_recursive_unzip_in_memory_single_excel_file(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with single Excel file.
+
+        Verifies
+        --------
+        - Excel file content returned as BytesIO
+        - Correct filename returned
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        # Create zip with Excel file
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("test.xlsx", b"fake excel content")
+        buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(buffer)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+        
+        content, filename = result[0]
+        assert isinstance(content, BytesIO)
+        assert filename == "test.xlsx"
+        assert content.read() == b"fake excel content"
+
+    def test_recursive_unzip_in_memory_multiple_files(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with multiple files of different types.
+
+        Verifies
+        --------
+        - Returns multiple file entries
+        - Different file types handled correctly
+        - All filenames preserved
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        # Create zip with multiple file types
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("text.txt", "text content")
+            zf.writestr("data.csv", "col1,col2\nval1,val2")
+            zf.writestr("sheet.xlsx", b"fake excel")
+            zf.writestr("binary.bin", b"binary data")
+        buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(buffer)
+        
+        assert isinstance(result, list)
+        assert len(result) == 4
+        
+        # Check each file type
+        filenames = [item[1] for item in result]
+        assert "text.txt" in filenames
+        assert "data.csv" in filenames
+        assert "sheet.xlsx" in filenames
+        assert "binary.bin" in filenames
+        
+        # Find specific files and verify content types
+        for content, filename in result:
+            if filename in ["text.txt", "data.csv"]:
+                assert isinstance(content, StringIO)
+            elif filename == "sheet.xlsx":
+                assert isinstance(content, BytesIO)
+            elif filename == "binary.bin":
+                assert isinstance(content, BytesIO)
+
+    def test_recursive_unzip_in_memory_nested_zip(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with nested zip files.
+
+        Verifies
+        --------
+        - Recursively extracts nested zips
+        - All files from nested zips included
+        - No zip files in final result
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        # Create inner zip
+        inner_buffer = BytesIO()
+        with zipfile.ZipFile(inner_buffer, "w", zipfile.ZIP_DEFLATED) as inner_zf:
+            inner_zf.writestr("inner.txt", "inner content")
+            inner_zf.writestr("inner.csv", "a,b\n1,2")
+        inner_zip_content = inner_buffer.getvalue()
+        
+        # Create outer zip containing inner zip
+        outer_buffer = BytesIO()
+        with zipfile.ZipFile(outer_buffer, "w", zipfile.ZIP_DEFLATED) as outer_zf:
+            outer_zf.writestr("outer.txt", "outer content")
+            outer_zf.writestr("nested.zip", inner_zip_content)
+        outer_buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(outer_buffer)
+        
+        assert isinstance(result, list)
+        assert len(result) == 3  # outer.txt, inner.txt, inner.csv
+        
+        filenames = [item[1] for item in result]
+        assert "outer.txt" in filenames
+        assert "inner.txt" in filenames
+        assert "inner.csv" in filenames
+        assert "nested.zip" not in filenames  # Should be extracted, not included
+        
+        # Verify content
+        for content, filename in result:
+            if filename == "outer.txt":
+                assert isinstance(content, StringIO)
+                assert content.read() == "outer content"
+            elif filename == "inner.txt":
+                assert isinstance(content, StringIO)
+                assert content.read() == "inner content"
+            elif filename == "inner.csv":
+                assert isinstance(content, StringIO)
+                assert content.read() == "a,b\n1,2"
+
+    def test_recursive_unzip_in_memory_empty_zip(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with empty zip file.
+
+        Verifies
+        --------
+        - Returns empty list for empty zip
+        - No errors with empty content
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        # Create empty zip
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            pass  # Empty zip
+        buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(buffer)
+        
+        assert isinstance(result, list)
+        assert len(result) == 0
+
+    def test_recursive_unzip_in_memory_all_supported_text_extensions(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with all supported text file extensions.
+
+        Verifies
+        --------
+        - All text extensions return StringIO
+        - Content properly decoded
+        - Extensions handled case-insensitively
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        text_extensions = [".txt", ".csv", ".json", ".html", ".py", ".js"]
+        
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            for ext in text_extensions:
+                # Test both lowercase and uppercase
+                zf.writestr(f"test{ext}", f"content for {ext}")
+                zf.writestr(f"TEST{ext.upper()}", f"content for {ext.upper()}")
+        buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(buffer)
+        
+        assert len(result) == len(text_extensions) * 2
+        
+        for content, filename in result:
+            assert isinstance(content, StringIO)
+            # Check that content matches the filename pattern
+            content_text = content.read()
+            if filename.startswith("test"):
+                # Lowercase filename
+                ext = os.path.splitext(filename)[1]
+                assert f"content for {ext}" in content_text
+            else:
+                # Uppercase filename
+                ext = os.path.splitext(filename)[1]
+                assert f"content for {ext}" in content_text
+
+    def test_recursive_unzip_in_memory_all_supported_excel_extensions(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with all supported Excel file extensions.
+
+        Verifies
+        --------
+        - All Excel extensions return BytesIO
+        - Extensions handled case-insensitively
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        excel_extensions = [".xlsx", ".xls", ".xlsm", ".xlsb"]
+        
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            for ext in excel_extensions:
+                # Test both lowercase and uppercase
+                zf.writestr(f"test{ext}", b"fake excel content")
+                zf.writestr(f"TEST{ext.upper()}", b"fake excel content")
+        buffer.seek(0)
+        
+        result = dir_manager.recursive_unzip_in_memory(buffer)
+        
+        assert len(result) == len(excel_extensions) * 2
+        
+        for content, filename in result:
+            assert isinstance(content, BytesIO)
+            assert content.read() == b"fake excel content"
+
+    def test_recursive_unzip_in_memory_zipextfile_input(
+        self, 
+        dir_manager: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
+        """Test recursive unzip with ZipExtFile as input.
+
+        Verifies
+        --------
+        - Accepts ZipExtFile as input parameter
+        - Processes nested zip from ZipExtFile correctly
+
+        Parameters
+        ----------
+        dir_manager : Any
+            DirFilesManagement instance
+
+        Returns
+        -------
+        None
+        """
+        # Create outer zip
+        outer_buffer = BytesIO()
+        with zipfile.ZipFile(outer_buffer, "w", zipfile.ZIP_DEFLATED) as outer_zf:
+            # Create inner zip content
+            inner_buffer = BytesIO()
+            with zipfile.ZipFile(inner_buffer, "w", zipfile.ZIP_DEFLATED) as inner_zf:
+                inner_zf.writestr("inner.txt", "inner content")
+            
+            outer_zf.writestr("nested.zip", inner_buffer.getvalue())
+            outer_zf.writestr("outer.txt", "outer content")
+        
+        outer_buffer.seek(0)
+        
+        # Open the outer zip and get the nested zip as ZipExtFile
+        with zipfile.ZipFile(outer_buffer) as outer_zip:
+            nested_zip_file = outer_zip.open("nested.zip")
+            
+            # Test with ZipExtFile input
+            result = dir_manager.recursive_unzip_in_memory(nested_zip_file)
+            
+            assert isinstance(result, list)
+            assert len(result) == 1
+            
+            content, filename = result[0]
+            assert filename == "inner.txt"
+            assert isinstance(content, StringIO)
+            assert content.read() == "inner content"
 
 
 # --------------------------
