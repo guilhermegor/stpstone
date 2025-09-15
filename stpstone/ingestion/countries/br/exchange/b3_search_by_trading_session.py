@@ -6516,39 +6516,33 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
         pd.DataFrame
             The transformed DataFrame.
         """
-        xpath_td: str = '//*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table/tbody/tr/td[position() > 1]'
-        
-        list_th = ["ARQUIVOS_CLEARING_B3", "DATA_REF", "DATA_ATUALIZACAO"]
+        fstr_xpath_td: str = """
+        //*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table[{}]/tbody/tr[{}]/td[{}]
+        """
+        list_th: list[str] = ["ARQUIVOS_CLEARING_B3", "DATA_REF", "DATA_ATUALIZACAO"]
+        list_data: list[str] = []
+        td: Union[str, list[str]] = ''
 
-        # Get all cells
-        cells = self.cls_html_handler.lxml_xpath(
-            html_content=html_root, 
-            str_xpath=xpath_td
-        )
-        
-        # Process each cell to extract text content
-        list_data = []
-        for cell in cells:
-            # Check if cell has span elements
-            print(f"Cell: \n{cell.text}")
-            print(f"Bool has span: {self.cls_html_handler.lxml_xpath(html_content=cell, str_xpath='.//span')}")
-            if self.cls_html_handler.lxml_xpath(html_content=cell, str_xpath='.//span'):
-                # Get all text content from the cell, including from child elements
-                text_content = ' '.join(self.cls_html_handler.lxml_xpath(
-                    html_content=cell, str_xpath='.//span//text()'))
-            else:
-                # Get direct text content
-                text_content = cell.text or ''
-            
-            list_data.append(text_content.strip())
-        
-        # Filter out empty strings if needed
-        list_data = [data for data in list_data if data]
+        for int_table in [1, 2]:
+            for int_tr in range(2, 5):
+                for int_td in range(1, 4):
+                    td = self.cls_html_handler.lxml_xpath(
+                        html_content=html_root, 
+                        str_xpath=fstr_xpath_td.format(int_table, int_tr, int_td)
+                    )
+                    if isinstance(td, list):
+                        try:
+                            td = " ".join([x.text.strip() for x in td])
+                        except AttributeError:
+                            td = ""
+                    else:
+                        td = td.text.strip()
+                    list_data.append(td)
+        print(f"list_data: {list_data}")
         
         list_ser = self.cls_handling_dicts.pair_headers_with_data(
             list_headers=list_th,
             list_data=list_data,
         )
-        print(f"LIST SER UPDATE TIME SERIES B3 SEARCH BY TRADING SESSION: \n{list_ser}")
 
         return pd.DataFrame(list_ser)
