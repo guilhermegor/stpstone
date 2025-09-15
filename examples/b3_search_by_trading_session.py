@@ -49,15 +49,15 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
-cls_ = B3UpdatesSearchByTradingSessionUpdateTimeSeries(
-    date_ref=None,
-    logger=None, 
-    cls_db=None,
-)
+# cls_ = B3UpdatesSearchByTradingSessionUpdateTimeSeries(
+#     date_ref=None,
+#     logger=None, 
+#     cls_db=None,
+# )
 
-df_ = cls_.run(bool_verify=False)
-print(f"DF B3 UPDATES SEARCH BY TRADING SESSION UPDATE TIME SERIES: \n{df_}")
-df_.info()
+# df_ = cls_.run(bool_verify=False)
+# print(f"DF B3 UPDATES SEARCH BY TRADING SESSION UPDATE TIME SERIES: \n{df_}")
+# df_.info()
 
 
 # cls_ = B3FixedIncome(
@@ -235,6 +235,7 @@ df_.info()
 # print(f"DF B3 DERIVATIVES MARKET MARGIN SCENARIOS: \n{df_}")
 # df_.info()
 
+
 # cls_ = B3FXMarketVolumeSettled(
 #     date_ref=None,
 #     logger=None, 
@@ -277,6 +278,7 @@ df_.info()
 # df_ = cls_.run(bool_verify=False)
 # print(f"DF B3 MAPPING STANDARDIZED INSTRUMENT GROUPS: \n{df_}")
 # df_.info()
+
 
 # cls_ = B3MappingOTCInstrumentGroups(
 #     date_ref=None,

@@ -383,11 +383,34 @@ class DFStandardization(metaclass=TypeChecker):
         pd.DataFrame
             The DataFrame with hidden characters stripped.
         """
-        for col_ in [
+        string_cols = [
             c for c in df_.select_dtypes(include=["object", "category"]).columns
             if c not in self.list_cols_dt
-        ]:
-            df_[col_] = df_[col_].str.replace(r"[\u200B\u200C\u200D\uFEFF]", "", regex=True)
+        ]
+        
+        for col_ in string_cols:
+            try:
+                # Check if the column actually contains string data
+                if df_[col_].dtype in ["object", "category"]:
+                    # Additional check: ensure the column has string values
+                    sample_values = df_[col_].dropna().head(5)
+                    if len(sample_values) > 0 and all(isinstance(val, str) 
+                                                      for val in sample_values):
+                        df_[col_] = df_[col_].str.replace(
+                            r"[\u200B\u200C\u200D\uFEFF]", "", regex=True)
+            except AttributeError:
+                # Skip columns that don't support string operations
+                continue
+            except Exception as e:
+                # Log the error and continue with other columns
+                if self.logger:
+                    self.cls_create_log.log_message(
+                        self.logger,
+                        f"Warning: Could not strip hidden characters from column {col_}: {e}",
+                        "warning"
+                    )
+                continue
+        
         return df_
 
     def strip_data(self, df_: pd.DataFrame) -> pd.DataFrame:

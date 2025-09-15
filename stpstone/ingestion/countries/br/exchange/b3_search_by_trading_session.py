@@ -193,20 +193,33 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
             If no files found in the downloaded content
         """
         files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
-        BytesIO(resp_req.content))
+            BytesIO(resp_req.content))
         
         if files_list:
             file_content, filename = files_list[0]
             
-            if isinstance(file_content, BytesIO) \
-                and filename.lower().endswith(('.txt', '.csv', '.dat', '.xml')):
+            if isinstance(file_content, BytesIO):
                 try:
-                    content_str = file_content.getvalue().decode('utf-8')
+                    content_str = file_content.getvalue().decode("utf-8")
                     file_content = StringIO(content_str)
                 except UnicodeDecodeError:
-                    with suppress(UnicodeDecodeError):
-                        content_str = file_content.getvalue().decode('latin-1')
+                    try:
+                        content_str = file_content.getvalue().decode("latin-1")
                         file_content = StringIO(content_str)
+                    except UnicodeDecodeError:
+                        try:
+                            content_str = file_content.getvalue().decode("cp1252")
+                            file_content = StringIO(content_str)
+                        except UnicodeDecodeError:
+                            content_str = file_content.getvalue().decode("utf-8", errors="replace")
+                            file_content = StringIO(content_str)
+            
+            elif isinstance(file_content, str):
+                file_content = StringIO(file_content)
+            
+            elif not isinstance(file_content, StringIO):
+                content_str = str(file_content)
+                file_content = StringIO(content_str)
             
             return file_content, filename
         else:
@@ -217,7 +230,7 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver], 
         prefix: str, 
         file_name: str,
-    ) -> StringIO:
+    ) -> tuple[StringIO, str]:
         """Parse the raw file content.
         
         Parameters
@@ -231,8 +244,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         
         Returns
         -------
-        StringIO
-            The parsed content.
+        tuple[StringIO, str]
+            The parsed content and the name of the file.
 
         Raises
         ------
@@ -370,7 +383,7 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
                 with open(output_file, 'r', encoding='latin-1') as f:
                     content = f.read()
             
-            return StringIO(content)
+            return StringIO(content), filename
             
         except Exception as e:
             self.cls_create_log.log_message(
@@ -485,7 +498,7 @@ class B3StandardizedInstrumentGroups(ABCB3SearchByTradingSession):
                 "ID_CAMARA": str, 
                 "ID_INSTRUMENTO": str, 
                 "ORIGEM_INSTRUMENTO": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -601,7 +614,7 @@ class B3IndexReport(ABCB3SearchByTradingSession):
                 "RSNG_SHRS_NB": int,
                 "FLNG_SHRS_NB": int,
                 "STBL_SHRS_NB": int, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -762,7 +775,7 @@ class B3PriceReport(ABCB3SearchByTradingSession):
                 "LAST_PRIC_CCY": str,
                 "NTL_RGLR_VOL_CCY": str,
                 "INTL_RGLR_VOL_CCY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -1270,7 +1283,7 @@ class B3InstrumentsFileEqty(B3InstrumentsFile):
                 "LAST_PRIC_CCY": str,
                 "FRST_PRIC_CCY": str,
                 "RGHTS_ISSE_PRIC_CCY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1415,7 +1428,7 @@ class B3InstrumentsFileOptnOnEqts(B3InstrumentsFile):
                 "DLVRY_TP": str,
                 "AUTOMTC_EXRC_IND": str,
                 "EXRC_PRIC_CCY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1552,7 +1565,7 @@ class B3InstrumentsFileOptnOnSpotAndFutures(B3InstrumentsFile):
                 "WRKG_DAYS": int,
                 "CLNR_DAYS": int,
                 "EXRC_PRIC_CCY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1675,7 +1688,7 @@ class B3InstrumentsFileExrcEqts(B3InstrumentsFile):
                 "TRADG_START_DT": "date",
                 "TRADG_END_DT": "date",
                 "DLVRY_TP": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1789,7 +1802,7 @@ class B3InstrumentsFileEqtyFwd(B3InstrumentsFile):
                 "TRADG_END_DT": "date",
                 "CTDY_TRTMNT_TP": str,
                 "TRADG_CCY": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -1900,7 +1913,7 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
                 "TCKR_SYMB": str,
                 "FNGB_IND": str,
                 "PMT_TP": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -2007,7 +2020,7 @@ class B3InstrumentsFileFxdIncm(B3InstrumentsFile):
                 "DAYS_TO_STTLM": int,
                 "ALLCN_RND_LOT": int,
                 "PRIC_FCTR": int, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -2120,7 +2133,7 @@ class B3InstrumentsFileADR(B3InstrumentsFile):
                 "PRGM_LVL": str,
                 "PPSN": str,
                 "TRADG_CCY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             }, 
             str_fmt_dt="YYYY-MM-DD",
             cols_from_case="pascal", 
@@ -2235,7 +2248,7 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
                 "NTRY_REF_CD": str, 
                 "DCML_PRCSN": str, 
                 "MTRTY": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -2395,7 +2408,7 @@ class B3FeeDailyUnitCost(ABCB3SearchByTradingSession):
                 "AMT_XCHG_FEE_UNIT_COST_CCY": str,
                 "AMT_REGN_FEE_UNIT_COST": float,
                 "AMT_REGN_FEE_UNIT_COST_CCY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -2538,7 +2551,7 @@ class B3FeeUnitCost(ABCB3SearchByTradingSession):
                 "AMT_XCHG_FEE_UNIT_COST_CCY": str,
                 "AMT_REGN_FEE_UNIT_COST": float,
                 "AMT_REGN_FEE_UNIT_COST_CCY": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -2676,7 +2689,7 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
                 "BASE": str,
                 "BASE_INTERPOLACAO": str,
                 "CRITERIO_CAPITALIZACAO": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -2782,7 +2795,7 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
                 "TIPO_REGISTRO": str,
                 "ID_FORMULA": str,
                 "NOME_FORMULA": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -2895,7 +2908,7 @@ class B3VariableFees(ABCB3SearchByTradingSession):
                 "ID": str,
                 "PRTRY": str,
                 "MKT_IDR_CD": str, 
-                "FILE_NAME": str
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3033,7 +3046,7 @@ class B3DailyLiquidityLimits(ABCB3SearchByTradingSession):
                 "ID_INSTRUMENTO": str,
                 "SIMBOLO_INSTRUMENTO": str,
                 "LIMITE_LIQUIDEZ": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3116,7 +3129,7 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
                 "ID_INSTRUMENTO": str,
                 "SIMBOLO_INSTRUMENTO": str,
                 "LIMITE_LIQUIDEZ": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3283,7 +3296,7 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
                 "MIN_CROSS_QTY": int,
                 "ISIN_NUMBER": str,
                 "CLEARING_HOUSE_ID": int,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3454,6 +3467,7 @@ class B3MappingOTCInstrumentGroups(ABCB3SearchByTradingSession):
                 "ID_FPR": int,
                 "ID_QUALIFICADOR": int,
                 "DESCRICAO_QUALIFICADOR": "category",
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3529,7 +3543,7 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_fmt_dt: str = "YYYY-MM-DD",
+        str_fmt_dt: str = "DD/MM/YYYY",
         str_table_name: str = "br_b3_mapping_standardized_instrument_groups"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
@@ -3543,7 +3557,7 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False.
         str_fmt_dt : str, optional
-            The date format, by default "YYYY-MM-DD".
+            The date format, by default "DD/MM/YYYY".
         str_table_name : str, optional
             The table name, by default "br_b3_mapping_standardized_instrument_groups".
         
@@ -3563,6 +3577,7 @@ class B3MappingStandardizedInstrumentGroups(ABCB3SearchByTradingSession):
                 "DATA_INICIAL_INTERVALO_VENCIMENTOS": "date",
                 "DATA_FINAL_INTERVALO_VENCIMENTOS": "date",
                 "INDICADOR_FPR_INDEPENDENTE": int,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3670,7 +3685,8 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
                 "MTM_MAX_V_PHI1": str,
                 "MIN_MARGIN_CREDIT_COLLATERAL_PHI1": str,
                 "MIN_MARGIN_CREDIT_COLLATERAL_PHI2": str,
-                "TICKER": str
+                "TICKER": str, 
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3776,7 +3792,8 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
                 "EXPIRY_DATE": int,
                 "EXERCISE_PRICE": float,
                 "REFERENCE_PREMIUM": float,
-                "IMPLIED_VOLATILITY": float,
+                "IMPLIED_VOLATILITY": float, 
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -3803,7 +3820,7 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -3918,7 +3935,7 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
                 "NUMERO_OPERACOES_CONTRATADAS": int,
                 "VALOR_OPERACOES_CONTRATADAS_DOLAR": float,
                 "VALOR_OPERACOES_CONTRATADAS_REAIS": float,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4052,7 +4069,8 @@ class B3FXMarketVolumeSettled(ABCB3SearchByTradingSession):
                 "DATA_REFERENCIA": "date",
                 "DATA_LIQUIDACAO_VALORES_LIQUIDOS_COMPENSADO": "date",
                 "VALOR_LIQUIDO_COMPENSADO_DOLAR": float,
-                "VALOR_LIQUIDO_COMPENSADO_REAL": float,
+                "VALOR_LIQUIDO_COMPENSADO_REAL": float, 
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4170,7 +4188,8 @@ class B3DerivativesMarketMarginScenarios(ABCB3SearchByTradingSession):
                 "FATOR_CENARIO": str,
                 "CHOQUE_CENARIO_POSITIVO": str,
                 "CHOQUE_CENARIO_NEGATIVO": str,
-                "TIPO_CHOQUE": str
+                "TIPO_CHOQUE": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4278,7 +4297,8 @@ class B3DerivativesMarketConsiderationFactors(ABCB3SearchByTradingSession):
                 "TIPO_CENARIO_INDICADOR": str,
                 "CODIGO_INTERNO": str,
                 "VALOR_LIQUIDO_COMPENSADO_DOLAR": str,
-                "VALOR_LIQUIDO_COMPENSADO_REAL": str
+                "VALOR_LIQUIDO_COMPENSADO_REAL": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4400,7 +4420,8 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
                 "CODIGO_INDICADOR": str,
                 "VALOR_INDICADOR": str,
                 "NUMERO_DECIMAIS_VALOR": str,
-                "FILLER": str,
+                "FILLER": str, 
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4432,7 +4453,7 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -4564,7 +4585,8 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
                 "TAXA_MEDIA_SWAP_PREMIO_MEIO_OPC_FLEX": float,
                 "SINAL_TAXA_MEDIA_PREMIO_MEDIO": str,
                 "VOLUME_ABERTO_BRL": float,
-                "VOLUME_ABERTO_USD": float,
+                "VOLUME_ABERTO_USD": float, 
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4595,7 +4617,7 @@ class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -4744,7 +4766,7 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
                 "VENCIMENTO": str,
                 "QTD_CONTRATOS_TRAVADOS": float,
                 "QTD_CONTRATOS_BAIXADOS": float,
-                "FILE_NAME": str
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4775,7 +4797,7 @@ class B3DerivativesMarketCombinedPositions(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -4886,20 +4908,17 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
                 "ID_TRANSACAO": str,
                 "COMPLEMENTO_TRANSACAO": str,
                 "TIPO_REGISTRO": str,
-                "DATA_BASE": str,
+                "DATA_BASE": "date",
                 "CODIGO_MERCADORIA": str,
-                "TIPO_MERCADO": str,
+                "TIPO_MERCADO": str, 
                 "SERIE_OPCOES": str,
                 "INDICADOR_TIPO_OPCAO": str,
                 "TIPO_OPCAO": str,
-                "SERIE_OPCOES": str,
-                "INDICADOR_TIPO_OPCAO": str,
-                "TIPO_OPCAO": str,
-                "DATA_VENCIMENTO_CONTRATO": str,
-                "PRECO_EXERCICIO_OPCOES": float,
-                "PRECO_REFERENCIA_OPCOES": float,
-                "NUMERO_CASAS_DECIMAIS": int, 
-                "FILE_NAME": str,
+                "DATA_VENCIMENTO_CONTRATO": "date",
+                "PRECO_EXERCICIO_OPCOES": str,
+                "PRECO_REFERENCIA_OPCOES": str,
+                "NUMERO_CASAS_DECIMAIS": str, 
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -4931,7 +4950,7 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -4975,9 +4994,6 @@ class B3DerivativesMarketOptionReferencePremium(ABCB3SearchByTradingSession):
             "DATA_BASE",
             "CODIGO_MERCADORIA",
             "TIPO_MERCADO",
-            "SERIE_OPCOES",
-            "INDICADOR_TIPO_OPCAO",
-            "TIPO_OPCAO",
             "SERIE_OPCOES",
             "INDICADOR_TIPO_OPCAO",
             "TIPO_OPCAO",
@@ -5062,7 +5078,7 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
                 "VALOR_NOMINAL": float,
                 "DATA_VENCIMENTO": str,
                 "CODIGO_ISIN": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -5096,7 +5112,7 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
         ValueError
             If no .ex_ file found in ZIP or multiple files found
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -5210,7 +5226,7 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
                 "TIPO_MERCADO": str,
                 "VENCIMENTO_SERIE_PRAZO": str,
                 "CODIGO_ISIN": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -5249,7 +5265,7 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         ValueError
             If no .ex_ file found in ZIP or multiple files found
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -5357,7 +5373,7 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
                 "CONTRATO": str,
                 "NOME_CONTRATO": str,
                 "CODIGO_ISIN": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -5389,7 +5405,7 @@ class B3DerivativesMarketListISINSwaps(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -5506,7 +5522,7 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
                 "FATOR_DESCONTO": str,
                 "VALOR_MERCADO": str,
                 "FATOR_DESCONTO_TAXA_OPERACIONAL_BASICA": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -5537,7 +5553,7 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -5674,7 +5690,7 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
                 "TAXA_TEORICA": str,
                 "CARACTERISTICA_VERTICE": str,
                 "CODIGO_VERTICE": str, 
-                "FILE_NAME": str
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -5706,7 +5722,7 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -5830,12 +5846,12 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
                 "TIPO_REGISTRO": str,
                 "CODIGO_TITULO": str,
                 "DESCRICAO_TITULO": str,
-                "DATA_EMISSAO_TITULO": "data",
-                "DATA_VENCIMENTO_TITULO": "data",
+                "DATA_EMISSAO_TITULO": "date",
+                "DATA_VENCIMENTO_TITULO": "date",
                 "VALOR_MERCADO_PU": str,
                 "VALOR_PU_CENARIO_ESTRESSE": str,
                 "VALOR_MTM_PU_D_MAIS_1": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -5867,7 +5883,7 @@ class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
         StringIO
             The parsed content.
         """
-        self.parse_raw_ex_file(
+        return self.parse_raw_ex_file(
             resp_req=resp_req,
             prefix=prefix, 
             file_name=file_name
@@ -5977,7 +5993,7 @@ class B3InstrumentGroupParameters(ABCB3SearchByTradingSession):
                 "DATA_INICIAL_INTERVALO_VENCIMENTOS": str,
                 "DATA_FINAL_INTERVALO_VENCIMENTOS": str,
                 "INDICADOR_MODELO_GENERICO": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
@@ -6090,7 +6106,7 @@ class B3FixedIncome(ABCB3SearchByTradingSession):
                 "TAXA_COMPRA": str,
                 "TAXA_VENDA": str,
                 "TAXA_INDICATIVA": str, 
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify,
@@ -6231,7 +6247,7 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
                 "FEE_COST_VAL": str,
                 "FEE_COST_CCY": str,
                 "CLNT_CTGY": str,
-                "FILE_NAME": str,
+                "FILE_NAME": "category",
             },
             timeout=timeout, 
             bool_verify=bool_verify, 
