@@ -43,8 +43,21 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
     B3SecuritiesMarketGovernmentSecuritiesPrices,
     B3StandardizedInstrumentGroups,
     B3TradableSecurityList,
+    B3UpdatesSearchByTradingSessionUpdateTimeSeries,
     B3VariableFees,
 )
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+
+
+cls_ = B3UpdatesSearchByTradingSessionUpdateTimeSeries(
+    date_ref=None,
+    logger=None, 
+    cls_db=None,
+)
+
+df_ = cls_.run(bool_verify=False)
+print(f"DF B3 UPDATES SEARCH BY TRADING SESSION UPDATE TIME SERIES: \n{df_}")
+df_.info()
 
 
 # cls_ = B3FixedIncome(
@@ -310,7 +323,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 
 
 # cls_ = B3VariableFees(
-#     date_ref=None,
+#     date_ref=DatesBRAnbima().build_date(2025, 9, 1),
 #     logger=None, 
 #     cls_db=None
 # )
@@ -318,6 +331,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # df_ = cls_.run(bool_verify=False)
 # print(f"DF B3 VARIABLE FEES: \n{df_}")
 # df_.info()
+
 
 # cls_ = B3RiskFormulas(
 #     date_ref=None,
@@ -342,7 +356,7 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 
 
 # cls_ = B3FeeUnitCost(
-#     date_ref=None,
+#     date_ref=DatesBRAnbima().build_date(2025, 9, 1),
 #     logger=None, 
 #     cls_db=None
 # )
@@ -363,15 +377,15 @@ from stpstone.ingestion.countries.br.exchange.b3_search_by_trading_session impor
 # df_.info()
 
 
-cls_ = B3InstrumentsFileIndicators(
-    date_ref=None,
-    logger=None, 
-    cls_db=None
-)
+# cls_ = B3InstrumentsFileIndicators(
+#     date_ref=None,
+#     logger=None, 
+#     cls_db=None
+# )
 
-df_ = cls_.run(bool_verify=False)
-print(f"DF B3 INSTRUMENTS FILE INDICATORS: \n{df_}")
-df_.info()
+# df_ = cls_.run(bool_verify=False)
+# print(f"DF B3 INSTRUMENTS FILE INDICATORS: \n{df_}")
+# df_.info()
 
 
 # cls_ = B3InstrumentsFileEqtyFwd(
