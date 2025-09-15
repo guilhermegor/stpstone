@@ -6438,7 +6438,6 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
             date_ref=self.date_ref,
             dict_dtypes={
                 "ARQUIVOS_CLEARING_B3": str,
-                "DATA_REF": "date",
                 "DATA_ATUALIZACAO": str,
             }, 
             str_fmt_dt="DD/MM/YYYY",
@@ -6516,33 +6515,43 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
         pd.DataFrame
             The transformed DataFrame.
         """
-        fstr_xpath_td: str = """
-        //*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table[{}]/tbody/tr[{}]/td[{}]
+        fstr_xpath_file_name_tbl1: str = """
+        //*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table[1]/tbody/tr[{}]/td[2]/span//text()
         """
-        list_th: list[str] = ["ARQUIVOS_CLEARING_B3", "DATA_REF", "DATA_ATUALIZACAO"]
+        fstr_xpath_file_name_tbl2: str = """
+        //*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table[2]/tbody/tr[{}]/td[2]//text()
+        """
+        fstr_xpath_update_timestamp: str = """
+        //*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table[{}]/tbody/tr[{}]/td[4]//text()
+        """
+        list_th: list[str] = ["ARQUIVOS_CLEARING_B3", "DATA_ATUALIZACAO"]
         list_data: list[str] = []
-        td: Union[str, list[str]] = ''
+        str_span_file_name: str = ""
+        str_span_update_timestamp: str = ""
 
         for int_table in [1, 2]:
-            for int_tr in range(2, 5):
-                for int_td in range(1, 4):
-                    td = self.cls_html_handler.lxml_xpath(
-                        html_content=html_root, 
-                        str_xpath=fstr_xpath_td.format(int_table, int_tr, int_td)
-                    )
-                    if isinstance(td, list):
-                        try:
-                            td = " ".join([x.text.strip() for x in td])
-                        except AttributeError:
-                            td = ""
-                    else:
-                        td = td.text.strip()
-                    list_data.append(td)
-        print(f"list_data: {list_data}")
+            for int_tr in range(1, 100):
+                if int_table == 1:
+                    fstr_xpath_file_name = fstr_xpath_file_name_tbl1.format(int_tr)
+                elif int_table == 2:
+                    fstr_xpath_file_name = fstr_xpath_file_name_tbl2.format(int_tr)
+                else:
+                    raise ValueError(f"Invalid table number: {int_table}")
+                str_span_file_name = " ".join(self.cls_html_handler.lxml_xpath(
+                    html_content=html_root, 
+                    str_xpath=fstr_xpath_file_name,
+                ))
+                str_span_update_timestamp = " ".join(self.cls_html_handler.lxml_xpath(
+                    html_content=html_root, 
+                    str_xpath=fstr_xpath_update_timestamp.format(int_table, int_tr)
+                ))
+                list_data.extend([str_span_file_name, str_span_update_timestamp])
         
         list_ser = self.cls_handling_dicts.pair_headers_with_data(
             list_headers=list_th,
             list_data=list_data,
         )
 
-        return pd.DataFrame(list_ser)
+        df_ = pd.DataFrame(list_ser)
+        df_ = df_.dropna(how="all")
+        return df_
