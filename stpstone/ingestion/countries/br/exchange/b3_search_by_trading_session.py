@@ -62,6 +62,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
             The logger, by default None.
         cls_db : Optional[Session], optional
             The database session, by default None.
+        url : str, optional
+            The url of the website, by default "FILL_ME".
         
         Returns
         -------
@@ -101,13 +103,19 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
         Parameters
         ----------
         dict_dtypes : dict[str, Union[str, int, float]]
-            The dictionary of data types.
+            The data types of the columns
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
             Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD"
+        cols_from_case : Optional[TypeCaseFrom], optional
+            The case of the columns, by default None
+        cols_to_case : Optional[TypeCaseTo], optional
+            The case of the columns, by default None
         str_table_name : str, optional
             The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
 
@@ -248,8 +256,10 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 
         Raises
         ------
+        ValueError
+            If no files found in the downloaded content.
         RuntimeError
-            If no .ex_ file found in the downloaded ZIP
+            If no .ex_ file found in the downloaded content.
         """
         # get the list of files from the zip
         files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
@@ -298,7 +308,7 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
                 "info"
             )
             
-            os.chmod(exe_path, 0o755)
+            os.chmod(exe_path, 0o755) # noqa S103: `os.chmod` setting a permissive mask `0o755` on file or directory
             
             original_cwd = os.getcwd()
             os.chdir(temp_dir)
@@ -310,8 +320,8 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
                     "info"
                 )
                 
-                result = subprocess.run(
-                    ['wine', exe_filename], 
+                result = subprocess.run( # noqa S603: `subprocess.run` check for execution of untrusted input
+                    ['wine', exe_filename], # noqa S607: starting a process with a partial executable path
                     capture_output=True, 
                     text=True, 
                     timeout=300,
@@ -349,9 +359,10 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
             
             if not output_files:
                 all_files = list(temp_dir.iterdir())
+                list_ = [f.name for f in all_files]
                 self.cls_create_log.log_message(
                     self.logger, 
-                    f"No output files found. All files in temp dir: {[f.name for f in all_files]}", 
+                    f"No output files found. All files in temp dir: {list_}", 
                     "error"
                 )
                 raise RuntimeError(
@@ -376,10 +387,10 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
             )
             
             try:
-                with open(output_file, 'r', encoding='utf-8') as f:
+                with open(output_file, encoding='utf-8') as f:
                     content = f.read()
             except UnicodeDecodeError:
-                with open(output_file, 'r', encoding='latin-1') as f:
+                with open(output_file, encoding='latin-1') as f:
                     content = f.read()
             
             return StringIO(content), filename
@@ -484,6 +495,8 @@ class B3StandardizedInstrumentGroups(ABCB3SearchByTradingSession):
             Whether to insert or ignore the data, by default False
         str_fmt_dt : str, optional
             Date format string, by default "YYYY-MM-DD
+        str_table_name : str, optional
+            Table name, by default "br_b3_standardized_instrument_groups"
             
         Returns
         -------
@@ -586,7 +599,13 @@ class B3IndexReport(ABCB3SearchByTradingSession):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_fmt_dt : str, optional
-            Date format string, by default "YYYY-MM-DD
+            Date format string, by default "YYYY-MM-DD"
+        cols_from_case : str, optional
+            The case of the columns, by default "pascal"
+        cols_to_case : str, optional
+            The case of the columns, by default "upper_constant"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_index_report"
             
         Returns
         -------
@@ -734,6 +753,12 @@ class B3PriceReport(ABCB3SearchByTradingSession):
             Whether to insert or ignore the data, by default False
         str_fmt_dt : str, optional
             Date format string, by default "YYYY-MM-DD
+        cols_from_case : str, optional
+            The case of the columns, by default "pascal"
+        cols_to_case : str, optional
+            The case of the columns, by default "upper_constant"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_price_report"
             
         Returns
         -------
@@ -897,7 +922,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        dict_dtypes: dict[str, Union[str, int, float]] = {},
+        dict_dtypes: dict[str, Union[str, int, float]] = None,
         str_fmt_dt: str = "YYYY-MM-DD",
         cols_from_case: str = "pascal",
         cols_to_case: str = "upper_constant",
@@ -929,7 +954,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
         Optional[pd.DataFrame]
             The transformed DataFrame.
         """
-        # Use cached file or fetch from server
+        # use cached file or fetch from server
         file, file_name = self.get_cached_or_fetch(timeout=timeout, bool_verify=bool_verify)
         df_ = self.transform_data(file=file, file_name=file_name)
         df_ = self.standardize_dataframe(
@@ -1005,7 +1030,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
                 "info"
             )
             try:
-                with open(cache_path, 'r', encoding='utf-8') as f:
+                with open(cache_path, encoding='utf-8') as f:
                     content = f.read()
                 return StringIO(content)
             except Exception as e:
@@ -1014,7 +1039,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
                     f"Failed to load from cache: {e}", 
                     "error"
                 )
-                raise ValueError(f"Failed to load from cache. Erro: {e}")
+                raise ValueError(f"Failed to load from cache. Error: {e}") from e
         raise ValueError("Cache file not found.")
 
     def parse_raw_file(
@@ -1926,6 +1951,8 @@ class B3InstrumentsFileBTC(B3InstrumentsFile):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name.
         
         Returns
         -------
@@ -2221,10 +2248,24 @@ class B3InstrumentsFileIndicators(ABCB3SearchByTradingSession):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool
-            Whether to verify the data, by default True
-        bool_insert_or_ignore : bool
-            Whether to insert or ignore the data, by default False"""
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD"
+        cols_from_case : str, optional
+            The case of the columns, by default "pascal"
+        cols_to_case : str, optional
+            The case of the columns, by default "upper_constant"
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_instruments_file_indicator"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "ACTVTY_IND": str,
@@ -2625,7 +2666,7 @@ class B3PrimitiveRiskFactors(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
-        """Constructor method.
+        """Instantiate Constructor method.
         
         Parameters
         ----------
@@ -2739,7 +2780,7 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
-        """Constructor method.
+        """Implement the constructor method.
         
         Parameters
         ----------
@@ -2837,7 +2878,7 @@ class B3VariableFees(ABCB3SearchByTradingSession):
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
     ) -> None:
-        """Constructor method.
+        """Instantiate Constructor method.
         
         Parameters
         ----------
@@ -3121,6 +3162,26 @@ class B3OtherDailyLiquidityLimits(ABCB3SearchByTradingSession):
         str_fmt_dt: str = "YYYY-MM-DD",
         str_table_name: str = "br_b3_other_daily_liquidity_limits"
     ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Whether to verify the data, by default True.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_fmt_dt : str, optional
+            The format of the date, by default "YYYY-MM-DD".
+        str_table_name : str, optional
+            The name of the table, by default "br_b3_other_daily_liquidity_limits".
+        
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
         return super().run(
             dict_dtypes={
                 "ID_CAMARA": str,
@@ -3813,6 +3874,10 @@ class B3EquitiesOptionReferencePremiums(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default "b3_option_premiums_"
+        file_name : str, optional
+            The name of the file, by default "b3_equities_option_reference_premiums_"
         
         Returns
         -------
@@ -3950,6 +4015,8 @@ class B3FXMarketContractedTransactions(ABCB3SearchByTradingSession):
         ----------
         file : StringIO
             The file content.
+        file_name : str
+            The file name
         
         Returns
         -------
@@ -5098,18 +5165,15 @@ class B3DerivatiesMarketListISINCPRs(ABCB3SearchByTradingSession):
         ----------
         resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
             The response object.
+        prefix : str, optional
+            The prefix of the file name, by default "b3_option_premiums_"
+        file_name : str, optional
+            The name of the file, by default "b3_equities_option_reference_premiums_"
         
         Returns
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         return self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -5256,13 +5320,6 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
         -------
         StringIO
             The parsed content.
-            
-        Raises
-        ------
-        RuntimeError
-            If Wine execution fails or output file is not found
-        ValueError
-            If no .ex_ file found in ZIP or multiple files found
         """
         return self.parse_raw_ex_file(
             resp_req=resp_req,
@@ -5512,7 +5569,7 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
                 "DATA_GERACAO_ARQUIVO": str,
                 "REFERENCIA": str,
                 "CODIGO_PRODUTO": str,
-                "SERIE": str,
+                "SERIE": str, # codespell:ignore
                 "INDICADOR_AJUSTE_PERIODO": str,
                 "DATA_VENCIMENTO": str,
                 "PRAZO_DIAS_CORRIDOS": str,
@@ -5580,7 +5637,7 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
             (11, 19), # DATA_GERACAO_ARQUIVO
             (19, 25), # REFERENCIA
             (25, 28), # CODIGO_PRODUTO
-            (28, 32), # SERIE
+            (28, 32), # SERIE # codespell:ignore
             (32, 33), # INDICADOR_AJUSTE_PERIODO
             (33, 41), # DATA_VENCIMENTO
             (41, 46), # PRAZO_DIAS_CORRIDOS
@@ -5598,7 +5655,7 @@ class B3DerivativesMarketDollarSwap(ABCB3SearchByTradingSession):
             "DATA_GERACAO_ARQUIVO",
             "REFERENCIA",
             "CODIGO_PRODUTO",
-            "SERIE",
+            "SERIE", # codespell:ignore
             "INDICADOR_AJUSTE_PERIODO",
             "DATA_VENCIMENTO",
             "PRAZO_DIAS_CORRIDOS",
@@ -6522,13 +6579,18 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
         
         Parameters
         ----------
-        html_root: HtmlElement
+        html_root : HtmlElement
             The root element of the HTML document.
         
         Returns
         -------
         pd.DataFrame
             The transformed DataFrame.
+
+        Raises
+        ------
+        ValueError
+            If the table number is unexpected.
         """
         fstr_xpath_file_name_tbl1: str = """
         //*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]/section/div/div/div/table[1]/tbody/tr[{}]/td[2]/span//text()
