@@ -555,3 +555,142 @@ class PlaywrightScraper(metaclass=TypeChecker):
                 "error"
             )
             raise RuntimeError(f"Failed to save HTML file: {err}") from err
+        
+    def trigger_strategies(
+        self, 
+        list_ser_strategies: list[dict[str, str]],
+        timeout: Optional[int] = 30_000,
+    ) -> None:
+        """Trigger strategies.
+
+        Parameters
+        ----------
+        list_ser_strategies : list[dict[str, str]]
+            List of strategy dictionaries
+        timeout : Optional[int]
+            Maximum wait time in milliseconds
+
+        Returns
+        -------
+        None
+        """
+        try:
+            self._handle_cookie_popup()
+        except Exception as e:
+            if self.logger:
+                CreateLog().log_message(
+                    self.logger, 
+                    f"Cookie handling failed: {e}", 
+                    "warning"
+                )
+        
+        for i, strategy in enumerate(list_ser_strategies, 1):
+            try:
+                if self.logger:
+                    CreateLog().log_message(
+                        self.logger, 
+                        f"Trying strategy {i}: {strategy['description']}", 
+                        "info"
+                    )
+                
+                if strategy['type'] == 'xpath':
+                    selector = f"xpath={strategy['selector']}"
+                elif strategy['type'] == 'aria':
+                    selector = strategy['selector']
+                else:
+                    selector = strategy['selector']
+                
+                self.page.wait_for_selector(
+                    selector, 
+                    timeout=timeout,
+                    state='visible'
+                )
+                
+                # ensure element is clickable
+                element = self.page.locator(selector)
+                element.wait_for(state='attached', timeout=timeout)
+                
+                # click the element
+                self.page.click(selector, timeout=timeout)
+                
+                if self.logger:
+                    CreateLog().log_message(
+                        self.logger, 
+                        f"Successfully clicked button with: {strategy['description']}", 
+                        "info"
+                    )
+                
+                self.page.wait_for_timeout(2000)
+                
+                # wait for network activity to settle
+                try:
+                    self.page.wait_for_load_state("networkidle", timeout=15000)
+                except Exception:
+                    # if networkidle fails, just wait a bit more
+                    self.page.wait_for_timeout(3000)
+                
+                # Verify that content has loaded by checking for tables
+                tables_found = False
+                table_selectors = [
+                    "table",
+                    "[id='profile'] table",
+                    ".table",
+                    "//table[contains(., 'DATA') or contains(., 'MES')]"
+                ]
+                
+                for table_selector in table_selectors:
+                    try:
+                        if table_selector.startswith('//'):
+                            check_selector = f"xpath={table_selector}"
+                        else:
+                            check_selector = table_selector
+                            
+                        tables = self.page.locator(check_selector).all()
+                        if len(tables) > 0:
+                            # Check if any table has meaningful content
+                            for table in tables[:3]:  # Check first 3 tables
+                                text_content = table.text_content()
+                                if text_content and len(text_content) > 100:  # Has substantial content
+                                    tables_found = True
+                                    break
+                            if tables_found:
+                                break
+                    except Exception:
+                        continue
+                
+                if tables_found:
+                    if self.logger:
+                        CreateLog().log_message(
+                            self.logger, 
+                            "Content successfully loaded - tables detected", 
+                            "info"
+                        )
+                    return
+                else:
+                    if self.logger:
+                        CreateLog().log_message(
+                            self.logger, 
+                            "Click successful but content verification failed", 
+                            "warning"
+                        )
+                    # Continue to next strategy
+                        
+            except Exception as e:
+                if self.logger:
+                    CreateLog().log_message(
+                        self.logger, 
+                        f"Strategy {i} failed ({strategy['description']}): {e}", 
+                        "error"
+                    )
+                continue
+        
+        # If all strategies failed
+        if self.logger:
+            CreateLog().log_message(
+                self.logger, 
+                "All list_ser_strategies failed", 
+                "error"
+            )
+        
+        # Final attempt: wait a bit more in case content loads automatically
+        self.page.wait_for_timeout(5000)
