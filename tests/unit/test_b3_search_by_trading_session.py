@@ -7,11 +7,12 @@ Tests the B3 ingestion classes for market data with various input scenarios incl
 - Network request mocking for fast execution
 """
 
+from collections.abc import Callable
 from contextlib import suppress
 from datetime import date
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 import unittest.mock
 from unittest.mock import MagicMock, mock_open, patch
 
@@ -158,40 +159,6 @@ def create_sample_xml_content() -> str:
     </IndxInf>
 </root>"""
 
-def create_mock_logger() -> MagicMock:
-    """Create a mock logger for testing.
-
-    Returns
-    -------
-    MagicMock
-        Mock logger instance
-    """
-    return MagicMock()
-
-
-def create_mock_db_session() -> MagicMock:
-    """Create a mock database session for testing.
-
-    Returns
-    -------
-    MagicMock
-        Mock database session instance
-    """
-    return MagicMock()
-
-
-def create_sample_csv_content() -> str:
-    """Create sample CSV content for testing.
-
-    Returns
-    -------
-    str
-        Sample CSV content
-    """
-    return """HEADER1;HEADER2;HEADER3
-value1;value2;value3
-value4;value5;value6"""
-
 
 # --------------------------
 # Fixtures
@@ -283,8 +250,37 @@ def mock_fast_operations(mocker: MockerFixture) -> dict[str, MagicMock]:
         Dictionary of mock objects
     """
     # mock backoff decorator completely 
-    def bypass_backoff(*args, **kwargs):
-        def decorator(func):
+    def bypass_backoff(
+        *args: Any, # noqa ANN401: typing.Any is not allowed
+        **kwargs: Any # noqa ANN401: typing.Any is not allowed
+    ) -> Callable:
+        """Bypass backoff decorator.
+        
+        Parameters
+        ----------
+        *args : Any
+            Variable-length argument list
+        **kwargs : Any
+            Arbitrary keyword arguments
+        
+        Returns
+        -------
+        Callable
+            Function unchanged
+        """
+        def decorator(func: Callable) -> Callable:
+            """Return the function unchanged.
+            
+            Parameters
+            ----------
+            func : Callable
+                Function to be decorated
+            
+            Returns
+            -------
+            Callable
+                Function unchanged
+            """
             return func
         return decorator
     
@@ -300,80 +296,9 @@ def mock_fast_operations(mocker: MockerFixture) -> dict[str, MagicMock]:
     # setup default successful responses
     mocks["requests_get"].return_value = create_mock_response()
     mocks["subprocess_run"].return_value = MagicMock(returncode=0, stdout="", stderr="")
-    mocks["tempfile_mkdtemp"].return_value = "/tmp/test_dir"
+    mocks["tempfile_mkdtemp"].return_value = "/tmp/test_dir" # noqa S108: probable insecure usage of temporary file or directory
     
     return mocks
-
-@pytest.fixture
-def mock_logger() -> MagicMock:
-    """Fixture providing a mock logger.
-
-    Returns
-    -------
-    MagicMock
-        Mock logger instance
-    """
-    return create_mock_logger()
-
-
-@pytest.fixture
-def mock_db_session() -> MagicMock:
-    """Fixture providing a mock database session.
-
-    Returns
-    -------
-    MagicMock
-        Mock database session instance
-    """
-    return create_mock_db_session()
-
-
-@pytest.fixture
-def sample_date() -> date:
-    """Fixture providing a sample date for testing.
-
-    Returns
-    -------
-    date
-        Sample date object
-    """
-    return date(2024, 1, 15)
-
-
-@pytest.fixture
-def mock_response() -> MagicMock:
-    """Fixture providing a mock response object.
-
-    Returns
-    -------
-    MagicMock
-        Mock response object
-    """
-    return create_mock_response()
-
-
-@pytest.fixture
-def csv_stringio() -> StringIO:
-    """Fixture providing CSV content as StringIO.
-
-    Returns
-    -------
-    StringIO
-        StringIO object with CSV data
-    """
-    return StringIO(create_sample_csv_content())
-
-
-@pytest.fixture
-def xml_stringio() -> StringIO:
-    """Fixture providing XML content as StringIO.
-
-    Returns
-    -------
-    StringIO
-        StringIO object with XML data
-    """
-    return StringIO(create_sample_xml_content())
 
 
 @pytest.fixture(autouse=True)
@@ -391,13 +316,26 @@ def mock_fast_operations(mocker: MockerFixture) -> dict[str, MagicMock]:
         Dictionary of mock objects
     """
     # create a simple identity decorator that returns the function unchanged
-    def identity_decorator(func):
+    def identity_decorator(func: Callable) -> Callable:
+        """Identity decorator that returns the function unchanged.
+        
+        Parameters
+        ----------
+        func : Callable
+            Function to be decorated
+        
+        Returns
+        -------
+        Callable
+            Function unchanged
+        """
         return func
     
     mocks = {
         "requests_get": mocker.patch("requests.get"),
         "time_sleep": mocker.patch("time.sleep"),
-        "backoff_on_exception": mocker.patch("backoff.on_exception", return_value=identity_decorator),
+        "backoff_on_exception": mocker.patch("backoff.on_exception", 
+                                             return_value=identity_decorator),
         "subprocess_run": mocker.patch("subprocess.run"),
         "shutil_rmtree": mocker.patch("shutil.rmtree"),
         "tempfile_mkdtemp": mocker.patch("tempfile.mkdtemp"),
@@ -406,7 +344,7 @@ def mock_fast_operations(mocker: MockerFixture) -> dict[str, MagicMock]:
     # setup default successful responses
     mocks["requests_get"].return_value = create_mock_response()
     mocks["subprocess_run"].return_value = MagicMock(returncode=0, stdout="", stderr="")
-    mocks["tempfile_mkdtemp"].return_value = "/tmp/test_dir"
+    mocks["tempfile_mkdtemp"].return_value = "/tmp/test_dir" # noqa S108: probable insecure usage of temporary file or directory
     
     return mocks
 
@@ -805,13 +743,13 @@ class TestABCB3SearchByTradingSession:
         mock_response = create_mock_response()
         
         # mock temp directory
-        temp_dir = Path("/tmp/test_dir")
+        temp_dir = Path("/tmp/test_dir") # noqa S108: probable insecure usage of temporary file or directory
         mock_fast_operations["tempfile_mkdtemp"].return_value = str(temp_dir)
         
         # mock file operations
         with patch.object(instance.cls_dir_files_management, "recursive_unzip_in_memory") \
             as mock_unzip, \
-            patch("builtins.open", mock_open(read_data="output content")) as mock_file, \
+            patch("builtins.open", mock_open(read_data="output content")), \
             patch("os.chmod"), \
             patch("os.getcwd", return_value="/current"), \
             patch("os.chdir"), \
@@ -820,7 +758,7 @@ class TestABCB3SearchByTradingSession:
             patch.object(Path, "stat") as mock_stat:
         
             mock_unzip.return_value = [(BytesIO(b"exe content"), "test.ex_")]
-            mock_glob.return_value = [Path("/tmp/test_dir/output.txt")]
+            mock_glob.return_value = [Path("/tmp/test_dir/output.txt")] # noqa S108: probable insecure usage of temporary file or directory
             mock_stat.return_value.st_size = 1000
             
             result_file, result_filename = instance.parse_raw_ex_file(
@@ -917,7 +855,7 @@ class TestABCB3SearchByTradingSession:
         instance = ConcreteB3Class(url="https://example.com/{}")
         mock_response = create_mock_response()
         
-        temp_dir = Path("/tmp/test_dir")
+        temp_dir = Path("/tmp/test_dir") # noqa S108: probable insecure usage of temporary file or directory
         mock_fast_operations["tempfile_mkdtemp"].return_value = str(temp_dir)
         mock_fast_operations["subprocess_run"].return_value = MagicMock(
             returncode=1, 
@@ -1104,23 +1042,14 @@ class TestABCB3SearchByTradingSession:
 
         instance = ConcreteB3Class(url="https://example.com/{}")
         
-        try:
+        with pytest.raises(TypeError):
             instance.run(dict_dtypes={}, timeout="invalid")
-            assert False, "Should have raised TypeError for invalid timeout"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(dict_dtypes={}, bool_verify="invalid")
-            assert False, "Should have raised TypeError for invalid bool_verify"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(dict_dtypes={}, str_table_name=123)
-            assert False, "Should have raised TypeError for invalid table name"
-        except TypeError:
-            pass
 
 
 # --------------------------
@@ -1155,7 +1084,7 @@ class TestB3StandardizedInstrumentGroups:
                 {"TIPO_REGISTRO": ["1"], "FILE_NAME": ["test.csv"]})
             mock_standardize.return_value = pd.DataFrame({"TIPO_REGISTRO": ["1"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             # Verify correct dtypes were passed
             expected_dtypes = {
@@ -1250,23 +1179,14 @@ class TestB3StandardizedInstrumentGroups:
         """
         instance = B3StandardizedInstrumentGroups()
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(timeout="invalid")
-            assert False, "Should have raised TypeError for invalid timeout"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(bool_verify="not_bool")
-            assert False, "Should have raised TypeError for invalid bool_verify"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(str_table_name=123)
-            assert False, "Should have raised TypeError for invalid table name"
-        except TypeError:
-            pass
 
 
 # --------------------------
@@ -1325,7 +1245,7 @@ class TestB3IndexReport:
                 {"TckrSymb": ["TEST"], "FILE_NAME": ["test.xml"]})
             mock_standardize.return_value = pd.DataFrame({"TCKR_SYMB": ["TEST"]})
             
-            result = instance.run(
+            _ = instance.run(
                 cols_from_case="snake",
                 cols_to_case="lower"
             )
@@ -1368,7 +1288,19 @@ class TestB3IndexReport:
             mock_find_all.return_value = [mock_node]
             
             # mock individual tag finding
-            def mock_find(tag):
+            def mock_find(tag: str) -> MagicMock:
+                """Mock find method.
+                
+                Parameters
+                ----------
+                tag : str
+                    Tag to find
+
+                Returns
+                -------
+                MagicMock
+                    Mocked element
+                """
                 mock_element = MagicMock()
                 mock_element.getText.return_value = f"test_{tag}"
                 if tag == "SttlmVal":
@@ -1544,7 +1476,18 @@ class TestB3PriceReport:
             mock_find_all.return_value = [mock_node]
             
             # mock the complex find behavior for price report
-            def mock_find(tag):
+            def mock_find(tag: str) -> MagicMock:
+                """Mock find method.
+                
+                Parameters
+                ----------
+                tag : str
+                    Tag to find
+
+                Returns
+                -------
+                MagicMock
+                """
                 mock_element = MagicMock()
                 if tag == "Dt":
                     mock_element.getText.return_value = "20240115"
@@ -1592,8 +1535,30 @@ class TestB3PriceReport:
             mock_node2 = MagicMock()
             mock_find_all.return_value = [mock_node1, mock_node2]
             
-            def create_mock_find(node_id):
-                def mock_find(tag):
+            def create_mock_find(node_id: str) -> MagicMock:
+                """Create mock find method for each node.
+                
+                Parameters
+                ----------
+                node_id : str
+                    ID of the node
+
+                Returns
+                -------
+                MagicMock
+                """
+                def mock_find(tag: str) -> MagicMock:
+                    """Mock find method.
+                    
+                    Parameters
+                    ----------
+                    tag : str
+                        Tag to find
+
+                    Returns
+                    -------
+                    MagicMock
+                    """
                     mock_element = MagicMock()
                     mock_element.getText.return_value = f"value_{node_id}_{tag}"
                     mock_element.get.return_value = "BRL"
@@ -1633,7 +1598,7 @@ class TestB3InstrumentsFile:
         -------
         None
         """
-        temp_path = "/tmp/b3_instruments_test"
+        temp_path = "/tmp/b3_instruments_test" # noqa S108: probable insecure usage of temporary file or directory
         mock_fast_operations["tempfile_mkdtemp"].return_value = temp_path
         
         instance = B3InstrumentsFile()
@@ -1642,7 +1607,10 @@ class TestB3InstrumentsFile:
         assert "pesquisapregao/download?filelist=IN" in instance.url
         mock_fast_operations["tempfile_mkdtemp"].assert_called_once()
 
-    def test_get_cached_or_fetch_cache_hit(self, mock_fast_operations: dict[str, MagicMock]) -> None:
+    def test_get_cached_or_fetch_cache_hit(
+        self, 
+        mock_fast_operations: dict[str, MagicMock]
+    ) -> None:
         """Test get_cached_or_fetch with cache hit.
 
         Verifies
@@ -1701,7 +1669,7 @@ class TestB3InstrumentsFile:
             mock_get_response.return_value = create_mock_response()
             mock_parse.return_value = (StringIO("fresh content"), "test.xml")
             
-            result = instance.get_cached_or_fetch()
+            _ = instance.get_cached_or_fetch()
             
             mock_get_response.assert_called_once()
             mock_parse.assert_called_once()
@@ -1961,7 +1929,18 @@ class TestB3InstrumentsFile:
         with patch.object(instance.cls_xml_handler, "find_all") as mock_find_all:
             mock_find_all.return_value = [mock_node]
             
-            def mock_find(tag):
+            def mock_find(tag: str) -> MagicMock:
+                """Mock find method.
+                
+                Parameters
+                ----------
+                tag : str
+                    Tag to search for
+
+                Returns
+                -------
+                MagicMock
+                """
                 mock_element = MagicMock()
                 mock_element.getText.return_value = f"text_{tag}"
                 return mock_element
@@ -2075,10 +2054,11 @@ class TestB3InstrumentsFileEqty:
              patch.object(instance, "standardize_dataframe") as mock_standardize:
             
             mock_cached_fetch.return_value = (StringIO("<root></root>"), "equity.xml")
-            mock_transform.return_value = pd.DataFrame({"SctyCtgy": ["EQUITY"], "FILE_NAME": ["equity.xml"]})
+            mock_transform.return_value = pd.DataFrame(
+                {"SctyCtgy": ["EQUITY"], "FILE_NAME": ["equity.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["EQUITY"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -2111,7 +2091,7 @@ class TestB3InstrumentsFileEqty:
         with patch.object(B3InstrumentsFile, "transform_data") as mock_parent_transform:
             mock_parent_transform.return_value = pd.DataFrame({"test": [1]})
             
-            result = instance.transform_data(StringIO("<root></root>"), "equity.xml")
+            _ = instance.transform_data(StringIO("<root></root>"), "equity.xml")
             
             mock_parent_transform.assert_called_once_with(
                 instance,  # self parameter
@@ -2146,23 +2126,14 @@ class TestB3InstrumentsFileEqty:
         """
         instance = B3InstrumentsFileEqty()
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(timeout="invalid")
-            assert False, "Should have raised TypeError for invalid timeout"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(bool_verify=123)
-            assert False, "Should have raised TypeError for invalid bool_verify"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(str_table_name=["invalid"])
-            assert False, "Should have raised TypeError for invalid table name"
-        except TypeError:
-            pass
 
 
 # --------------------------
@@ -2216,7 +2187,7 @@ class TestB3EquitiesOptionReferencePremiums:
         with patch.object(instance, "parse_raw_ex_file") as mock_parse_ex:
             mock_parse_ex.return_value = (StringIO("output"), "filename")
             
-            result = instance.parse_raw_file(mock_response)
+            _ = instance.parse_raw_file(mock_response)
             
             mock_parse_ex.assert_called_once_with(
                 resp_req=mock_response,
@@ -2261,7 +2232,7 @@ class TestB3EquitiesOptionReferencePremiums:
             })
             mock_standardize.return_value = pd.DataFrame({"TICKER_SYMBOL": ["PETR4"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -2588,7 +2559,19 @@ class TestB3VariableFees:
             "ConvsInd": mock_convs_ind
         }.get(tag)
         
-        def create_text_mock(text):
+        def create_text_mock(text: str) -> MagicMock:
+            """Create mock for text extraction.
+            
+            Parameters
+            ----------
+            text : str
+                Text to mock.
+            
+            Returns
+            -------
+            MagicMock
+                Mock object for text extraction
+            """
             mock = MagicMock()
             mock.text = text
             return mock
@@ -2734,7 +2717,7 @@ class TestB3UpdatesSearchByTradingSessionUpdateTimeSeries:
             })
             mock_standardize.return_value = pd.DataFrame({"ARQUIVOS_CLEARING_B3": ["File1"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             assert call_args["str_fmt_dt"] == "DD/MM/YYYY"
@@ -2766,7 +2749,7 @@ class TestB3UpdatesSearchByTradingSessionUpdateTimeSeries:
         with patch.object(instance.cls_html_handler, "lxml_parser") as mock_lxml_parser:
             mock_lxml_parser.return_value = MagicMock()
             
-            result = instance.parse_raw_file(mock_response)
+            _ = instance.parse_raw_file(mock_response)
             
             mock_lxml_parser.assert_called_once_with(resp_req=mock_response)
 
@@ -2798,7 +2781,24 @@ class TestB3UpdatesSearchByTradingSessionUpdateTimeSeries:
             ]
             
             # create an iterator that will eventually exhaust
-            def xpath_side_effect(*args, **kwargs):
+            def xpath_side_effect(
+                *args: Any, # noqa ANN401: typing.Any is not allowed
+                **kwargs: Any # noqa ANN401: typing.Any is not allowed
+            ) -> list[str]:
+                """Cycle through XPath results and eventually return empty lists.
+                
+                Parameters
+                ----------
+                *args : Any
+                    Variable-length argument list.
+                **kwargs : Any
+                    Arbitrary keyword arguments.
+                
+                Returns
+                -------
+                list[str]
+                    List of strings.
+                """
                 if xpath_results:
                     return xpath_results.pop(0)
                 return []  # return empty list when exhausted
@@ -3020,12 +3020,9 @@ class TestPerformanceAndEdgeCases:
 02;GROUP2;CAM2;INST2""")  # missing last field
         
         # should handle gracefully without crashing
-        try:
+        with suppress(Exception):
             result = instance.transform_data(malformed_csv, "malformed.csv")
             assert isinstance(result, pd.DataFrame)
-        except Exception:
-            # if parsing fails, that's acceptable behavior for malformed data
-            pass
 
     def test_unicode_content_handling(self) -> None:
         """Test handling of Unicode content.
@@ -3075,7 +3072,20 @@ class TestPerformanceAndEdgeCases:
         results = []
         errors = []
         
-        def worker(instance_class, instance_id):
+        def worker(instance_class: type, instance_id: int) -> None:
+            """Worker function to run instances concurrently.
+            
+            Parameters
+            ----------
+            instance_class : type
+                Class of the instance to run
+            instance_id : int
+                ID of the instance
+
+            Returns
+            -------
+            None
+            """
             try:
                 instance = instance_class()
                 
@@ -3189,7 +3199,7 @@ class TestParametrizedMultipleClasses:
         -------
         None
         """
-        with patch("tempfile.mkdtemp", return_value="/tmp/test"):
+        with patch("tempfile.mkdtemp", return_value="/tmp/test"): # noqa S108: probable insecure usage of temporary file or directory
             instance = class_name()
             assert expected_url_pattern in instance.url
 
@@ -3218,22 +3228,16 @@ class TestParametrizedMultipleClasses:
         -------
         None
         """
-        with patch("tempfile.mkdtemp", return_value="/tmp/test"):
+        with patch("tempfile.mkdtemp", return_value="/tmp/test"): # noqa S108: probable insecure usage of temporary file or directory
             instance = class_name()
             
             # test timeout validation
-            try:
+            with pytest.raises(TypeError):
                 instance.run(timeout="invalid")
-                assert False, "Should have raised TypeError for invalid timeout"
-            except TypeError:
-                pass
             
             # test bool_verify validation
-            try:
+            with pytest.raises(TypeError):
                 instance.run(bool_verify="invalid")
-                assert False, "Should have raised TypeError for invalid bool_verify"
-            except TypeError:
-                pass
 
     @pytest.mark.parametrize("class_name,transform_method_exists", [
         (B3StandardizedInstrumentGroups, True),
@@ -3266,12 +3270,12 @@ class TestParametrizedMultipleClasses:
         -------
         None
         """
-        with patch("tempfile.mkdtemp", return_value="/tmp/test"):
+        with patch("tempfile.mkdtemp", return_value="/tmp/test"): # noqa S108: probable insecure usage of temporary file or directory
             instance = class_name()
             
             if transform_method_exists:
                 assert hasattr(instance, "transform_data")
-                assert callable(getattr(instance, "transform_data"))
+                assert callable(instance.transform_data)
 
 
 # --------------------------
@@ -3343,8 +3347,8 @@ class TestMockValidation:
             patch("os.getcwd", return_value="/current"), \
             patch("os.chdir"), \
             patch.object(Path, "exists", return_value=True), \
-            patch.object(Path, "glob", return_value=[Path("/tmp/output.txt")]), \
-            patch.object(Path, "stat") as mock_stat:
+            patch.object(Path, "glob", return_value=[Path("/tmp/output.txt")]), patch.object( # noqa S108: probable insecure usage of temporary file or directory
+                Path, "stat") as mock_stat:
             
             mock_unzip.return_value = [(BytesIO(b"exe content"), "test.ex_")]
             mock_stat.return_value.st_size = 1000
@@ -3448,12 +3452,8 @@ class TestFinalCoverageScenarios:
         instance = B3StandardizedInstrumentGroups()
         
         # test with invalid file object - expect specific TypeError from metaclass
-        try:
+        with pytest.raises(TypeError):
             instance.transform_data(None, "test.csv")
-            assert False, "Should have raised TypeError for None file"
-        except TypeError as e:
-            # the metaclass type checker should catch this
-            assert "must be of type" in str(e)
 
     def test_edge_case_data_values(self) -> None:
         """Test edge case data values.
@@ -3558,7 +3558,7 @@ class TestFinalCoverageScenarios:
         -------
         None
         """
-        with patch("tempfile.mkdtemp", return_value="/tmp/test"):
+        with patch("tempfile.mkdtemp", return_value="/tmp/test"): # noqa S108: probable insecure usage of temporary file or directory
             instance = B3StandardizedInstrumentGroups()
             
             # test all accessible properties
@@ -3628,7 +3628,7 @@ class TestFinalCoverageScenarios:
         -------
         None
         """
-        instance = B3StandardizedInstrumentGroups()
+        _ = B3StandardizedInstrumentGroups()
 
 
 # --------------------------
@@ -3689,7 +3689,7 @@ class TestB3RiskFormulas:
             })
             mock_standardize.return_value = pd.DataFrame({"TIPO_REGISTRO": ["1"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4012,7 +4012,7 @@ class TestB3InstrumentsFileADR:
                 {"SctyCtgy": ["ADR"], "FILE_NAME": ["adr.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["ADR"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4085,7 +4085,7 @@ class TestB3InstrumentsFileBTC:
                 {"SctyCtgy": ["BTC"], "FILE_NAME": ["btc.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["BTC"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4159,7 +4159,7 @@ class TestB3InstrumentsFileEqtyFwd:
                 {"SctyCtgy": ["FORWARD"], "FILE_NAME": ["eqty_fwd.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["FORWARD"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4237,7 +4237,7 @@ class TestB3InstrumentsFileExrcEqts:
                 {"SctyCtgy": ["EXERCISE"], "FILE_NAME": ["exrc_eqts.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["EXERCISE"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4311,7 +4311,7 @@ class TestB3InstrumentsFileFxdIncm:
                 {"SctyCtgy": ["BOND"], "FILE_NAME": ["fxd_incm.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["BOND"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4337,7 +4337,7 @@ class TestB3InstrumentsFileFxdIncm:
         -------
         None
         """
-        instance = B3InstrumentsFileFxdIncm()
+        _ = B3InstrumentsFileFxdIncm()
 
 
 # --------------------------
@@ -4402,7 +4402,7 @@ class TestB3InstrumentsFileEqty:
                 {"SctyCtgy": ["EQUITY"], "FILE_NAME": ["equity.xml"]})
             mock_standardize.return_value = pd.DataFrame({"SCTY_CTGY": ["EQUITY"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -4431,23 +4431,14 @@ class TestB3InstrumentsFileEqty:
         """
         instance = B3InstrumentsFileEqty()
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(timeout="invalid")
-            assert False, "Should have raised TypeError for invalid timeout"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(bool_verify=123)
-            assert False, "Should have raised TypeError for invalid bool_verify"
-        except TypeError:
-            pass
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(str_table_name=["invalid"])
-            assert False, "Should have raised TypeError for invalid table name"
-        except TypeError:
-            pass
 
 
 # --------------------------
@@ -4509,12 +4500,9 @@ class TestPerformanceAndEdgeCases:
 02;GROUP2;CAM2;INST2""")  # missing last field
         
         # should handle gracefully without crashing
-        try:
+        with suppress(Exception):
             result = instance.transform_data(malformed_csv, "malformed.csv")
             assert isinstance(result, pd.DataFrame)
-        except Exception:
-            # if parsing fails, that's acceptable behavior for malformed data
-            pass
 
     def test_unicode_content_handling(self) -> None:
         """Test handling of Unicode content.
@@ -4641,8 +4629,8 @@ class TestMockValidation:
             patch("os.getcwd", return_value="/current"), \
             patch("os.chdir"), \
             patch.object(Path, "exists", return_value=True), \
-            patch.object(Path, "glob", return_value=[Path("/tmp/output.txt")]), \
-            patch.object(Path, "stat") as mock_stat:
+            patch.object(Path, "glob", return_value=[Path("/tmp/output.txt")]), patch.object( # noqa S108: probable insecure usage of temporary file or directory
+                Path, "stat") as mock_stat:
             
             mock_unzip.return_value = [(BytesIO(b"exe content"), "test.ex_")]
             mock_stat.return_value.st_size = 1000
@@ -4706,12 +4694,8 @@ class TestFinalCoverageScenarios:
         instance = B3StandardizedInstrumentGroups()
         
         # test with invalid file object - expect specific TypeError from metaclass
-        try:
+        with pytest.raises(TypeError):
             instance.transform_data(None, "test.csv")
-            assert False, "Should have raised TypeError for None file"
-        except TypeError as e:
-            # the metaclass type checker should catch this
-            assert "must be of type" in str(e)
 
     def test_edge_case_data_values(self) -> None:
         """Test edge case data values.
@@ -4816,7 +4800,7 @@ class TestFinalCoverageScenarios:
         -------
         None
         """
-        with patch("tempfile.mkdtemp", return_value="/tmp/test"):
+        with patch("tempfile.mkdtemp", return_value="/tmp/test"): # noqa S108: probable insecure usage of temporary file or directory
             instance = B3StandardizedInstrumentGroups()
             
             # test all accessible properties
@@ -5041,23 +5025,14 @@ class TestB3StandardizedInstrumentGroups:
         """
         instance = B3StandardizedInstrumentGroups()
 
-        try:
+        with pytest.raises(TypeError):
             instance.run(timeout="invalid")
-            assert False, "Should have raised TypeError for invalid timeout"
-        except TypeError:
-            pass
-
-        try:
+        
+        with pytest.raises(TypeError):
             instance.run(bool_verify="not_bool")
-            assert False, "Should have raised TypeError for invalid bool_verify"
-        except TypeError:
-            pass
-
-        try:
+        
+        with pytest.raises(TypeError):
             instance.run(str_table_name=123)
-            assert False, "Should have raised TypeError for invalid table name"
-        except TypeError:
-            pass
 
 
 # --------------------------
@@ -5159,7 +5134,18 @@ class TestB3IndexReport:
             mock_find_all.return_value = [mock_node]
             
             # mock individual tag finding
-            def mock_find(tag):
+            def mock_find(tag: str) -> MagicMock:
+                """Mock find method.
+                
+                Parameters
+                ----------
+                tag : str
+                    Tag name
+
+                Returns
+                -------
+                MagicMock
+                """
                 mock_element = MagicMock()
                 mock_element.getText.return_value = f"test_{tag}"
                 if tag == "SttlmVal":
@@ -5270,7 +5256,7 @@ class TestB3DerivatiesMarketListISINCPRs:
             })
             mock_standardize.return_value = pd.DataFrame({"DATA_CADASTRO": ["20240115"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -5648,7 +5634,7 @@ class TestB3InstrumentGroupParameters:
             })
             mock_standardize.return_value = pd.DataFrame({"TIPO": ["1"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             assert call_args["str_fmt_dt"] == "DD/MM/YYYY"
@@ -5925,7 +5911,7 @@ class TestB3DerivativesMarketDollarSwap:
             })
             mock_standardize.return_value = pd.DataFrame({"ID_TRANSACAO": ["123456"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             assert call_args["str_fmt_dt"] == "YYYYMMDD"
@@ -5981,7 +5967,7 @@ class TestB3DerivativesMarketEconomicAgriculturalIndicators:
         with patch.object(instance, "parse_raw_ex_file") as mock_parse_ex:
             mock_parse_ex.return_value = (StringIO("output"), "filename")
             
-            result = instance.parse_raw_file(mock_response)
+            _ = instance.parse_raw_file(mock_response)
             
             mock_parse_ex.assert_called_once_with(
                 resp_req=mock_response,
@@ -6005,7 +5991,7 @@ class TestB3DerivativesMarketEconomicAgriculturalIndicators:
         instance = B3DerivativesMarketEconomicAgriculturalIndicators()
         
         fixed_width_content = StringIO(
-            "12345601202401151001SELIC                   0000000000000001125000200                                   "
+            "12345601202401151001SELIC                   0000000000000001125000200                                   " # noqa E501: line too long
         )
         
         result = instance.transform_data(fixed_width_content, "indicators.txt")
@@ -6076,7 +6062,7 @@ class TestB3DerivativesMarketListISINDerivativesContracts:
             })
             mock_standardize.return_value = pd.DataFrame({"DATA_CADASTRO": ["20240115"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -6367,7 +6353,18 @@ class TestB3EquitiesFeePublicInformation:
         }.get(tag)
         
         # mock text extraction
-        def create_text_mock(text):
+        def create_text_mock(text: str) -> MagicMock:
+            """Create mock for text extraction.
+            
+            Parameters
+            ----------
+            text : str
+                Text to mock.
+            
+            Returns
+            -------
+            MagicMock
+            """
             mock = MagicMock()
             mock.text = text
             return mock
@@ -6496,7 +6493,7 @@ class TestB3InstrumentsFileIndicators:
         mock_instrm_dtls = MagicMock()
         
         def create_nested_mock(text: str, nested_text: Optional[str] = None) -> MagicMock:
-            """Helper function to create nested mock structure.
+            """Create nested mock structure.
             
             Parameters
             ----------
@@ -6668,7 +6665,7 @@ class TestB3InstrumentsFileOptnOnSpotAndFutures:
                 {"ISIN": ["BROPT123"], "FILE_NAME": ["spot_futures.xml"]})
             mock_standardize.return_value = pd.DataFrame({"ISIN": ["BROPT123"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -6933,7 +6930,7 @@ class TestB3OtherDailyLiquidityLimits:
             })
             mock_standardize.return_value = pd.DataFrame({"ID_CAMARA": ["CAM001"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             expected_dtypes = call_args["dict_dtypes"]
@@ -7028,7 +7025,7 @@ class TestB3SecuritiesMarketGovernmentSecuritiesPrices:
             })
             mock_standardize.return_value = pd.DataFrame({"CODIGO_TITULO": ["LTN"]})
             
-            result = instance.run()
+            _ = instance.run()
             
             call_args = mock_standardize.call_args[1]
             assert call_args["str_fmt_dt"] == "YYYYMMDD"
@@ -7506,7 +7503,7 @@ class TestParametrizedNewClasses:
             instance = class_name()
             
             assert hasattr(instance, "run")
-            assert callable(getattr(instance, "run"))
+            assert callable(instance.run)
 
     @pytest.mark.parametrize("class_name", [
         B3InstrumentsFileOptnOnEqts,
