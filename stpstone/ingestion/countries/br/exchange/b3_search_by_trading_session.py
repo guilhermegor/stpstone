@@ -9,7 +9,6 @@ References
 """
 
 from abc import abstractmethod
-from contextlib import suppress
 from datetime import date
 from io import BytesIO, StringIO
 from logging import Logger
