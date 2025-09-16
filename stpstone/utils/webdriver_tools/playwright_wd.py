@@ -10,7 +10,7 @@ from datetime import datetime
 from logging import Logger
 import os
 from pathlib import Path
-from typing import Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict, Union
 
 from playwright.sync_api import sync_playwright
 
@@ -685,3 +685,117 @@ class PlaywrightScraper(metaclass=TypeChecker):
         )
         
         self.page.wait_for_timeout(5000)
+
+    def get_json(
+        self, 
+        url: str, 
+        timeout: Optional[int] = None, 
+        cookies: Optional[Union[dict[str, str], list[dict[str, str]]]] = None,
+    ) -> Union[dict, list]:
+        """Fetch JSON data from a URL using Playwright browser automation.
+    
+        This method uses a real browser instance to bypass anti-bot protections
+        like Cloudflare, handle JavaScript-rendered content, and manage complex
+        authentication flows that would otherwise block simple HTTP requests.
+        
+        Parameters
+        ----------
+        url : str
+            The URL to fetch JSON data from. Must be a valid HTTP/HTTPS URL
+            that returns JSON content.
+        timeout : Optional[int], optional
+            Request timeout in milliseconds. If None, uses the instance's
+            default timeout (self.int_default_timeout). Default is None.
+        cookies : Optional[Union[dict[str, str], list[dict[str, str]]]], optional
+            Cookies to add to the browser context. Can be either:
+            - dict: Simple key-value pairs {"name": "value"}
+            - list[dict]: Full cookie objects with domain, path, etc.
+            Example: [{"name": "session_id", "value": "abc123", "domain": ".example.com"}]
+            Default is None.
+        
+        Returns
+        -------
+        Union[dict, list]
+            The parsed JSON response. Returns a dictionary for JSON objects
+            or a list for JSON arrays.
+        
+        Raises
+        ------
+        Exception
+            If the HTTP request fails (non-200 status code) or if the response
+            cannot be parsed as JSON.
+        ValueError
+            If the URL is invalid or malformed.
+        TimeoutError
+            If the request exceeds the specified timeout.
+        
+        Examples
+        --------
+        Basic usage:
+        >>> scraper = PlaywrightScraper()
+        >>> data = scraper.get_json("https://api.example.com/data.json")
+        >>> print(data["results"])
+        
+        With cookies:
+        >>> cookies = {"session": "abc123", "user_pref": "en"}
+        >>> data = scraper.get_json("https://protected-api.com/data.json", cookies=cookies)
+        
+        With timeout:
+        >>> data = scraper.get_json("https://slow-api.com/data.json", timeout=30000)
+        
+        Notes
+        -----
+        - Uses Chromium browser engine with the configured user agent and viewport
+        - Automatically handles JavaScript execution and dynamic content loading
+        - More resource-intensive than simple HTTP requests but necessary for
+        protected endpoints
+        - Browser context is created fresh for each request to avoid state issues
+        - Use this method when requests.get() fails with 403/bot detection errors
+        """
+        with sync_playwright() as playwright:
+            self.browser = playwright.chromium.launch(headless=self.bool_headless)
+            context = self.browser.new_context(
+                user_agent=self.user_agent,
+                viewport=self.viewport,
+            )
+
+            if cookies:
+                if isinstance(cookies, dict):
+                    cookie_list = [
+                        {"name": name, "value": value, "domain": url.split("//")[1].split("/")[0]}
+                        for name, value in cookies.items()
+                    ]
+                    context.add_cookies(cookie_list)
+                else:
+                    context.add_cookies(cookies)
+            
+            page = context.new_page()
+            resp_req = page.goto(url, timeout=timeout or self.int_default_timeout)
+
+            if resp_req.status != 200:
+                raise Exception(f"Request failed with status code {resp_req.status}")
+            
+            json_data = resp_req.json()
+            return json_data
+        
+    def __del__(self) -> None:
+        """Cleanup browser resources when the instance is destroyed.
+        
+        Safely closes the browser instance to prevent resource leaks.
+        Uses suppress to handle cases where the browser might already
+        be closed or never initialized.
+        
+        Returns
+        -------
+        None
+            This method doesn't return anything.
+        
+        Notes
+        -----
+        [1] Called automatically when the object is garbage collected
+        [2] Uses contextlib.suppress to handle cleanup errors gracefully
+        [3] Prevents memory leaks from unclosed browser processes
+        """
+        with suppress(Exception):
+            if hasattr(self, 'browser') and self.browser:
+                self.browser.close()
