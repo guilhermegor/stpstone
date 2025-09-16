@@ -5,11 +5,8 @@ parsing, and transforming IGPM forecast data, covering normal operations,
 edge cases, error conditions, and type validation.
 """
 
-from collections import Counter
 from datetime import date
 from logging import Logger
-from math import nan
-import re
 import sys
 from typing import Any, Optional, Union
 from unittest.mock import MagicMock, patch
@@ -42,6 +39,11 @@ from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 def mock_logger(mocker: MockerFixture) -> Logger:
     """Mock logger instance for testing logging behavior.
 
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture
+
     Returns
     -------
     Logger
@@ -54,6 +56,11 @@ def mock_logger(mocker: MockerFixture) -> Logger:
 def mock_session(mocker: MockerFixture) -> Session:
     """Mock database session for testing database operations.
 
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture
+
     Returns
     -------
     Session
@@ -65,6 +72,11 @@ def mock_session(mocker: MockerFixture) -> Session:
 @pytest.fixture
 def mock_playwright_scraper(mocker: MockerFixture) -> PlaywrightScraper:
     """Mock PlaywrightScraper for testing web scraping operations.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture
 
     Returns
     -------
@@ -96,7 +108,7 @@ def sample_flat_list() -> list[str]:
 
 @pytest.fixture
 def expected_columns_ltm() -> list[str]:
-    """Expected columns for AnbimaIGPMForecastsLTM.
+    """Return expected columns for AnbimaIGPMForecastsLTM.
 
     Returns
     -------
@@ -126,7 +138,10 @@ def anbima_igpm_core(mock_logger: Logger, mock_session: Session) -> AnbimaIGPMCo
 
 
 @pytest.fixture
-def anbima_igpm_current_month(mock_logger: Logger, mock_session: Session) -> AnbimaIGPMForecastsCurrentMonth:
+def anbima_igpm_current_month(
+    mock_logger: Logger, 
+    mock_session: Session
+) -> AnbimaIGPMForecastsCurrentMonth:
     """Fixture providing AnbimaIGPMForecastsCurrentMonth instance.
 
     Parameters
@@ -145,7 +160,10 @@ def anbima_igpm_current_month(mock_logger: Logger, mock_session: Session) -> Anb
 
 
 @pytest.fixture
-def anbima_igpm_next_month(mock_logger: Logger, mock_session: Session) -> AnbimaIGPMForecastsNextMonth:
+def anbima_igpm_next_month(
+    mock_logger: Logger, 
+    mock_session: Session
+) -> AnbimaIGPMForecastsNextMonth:
     """Fixture providing AnbimaIGPMForecastsNextMonth instance.
 
     Parameters
@@ -197,6 +215,11 @@ class TestAnbimaIGPMCore:
         - Inherited classes are initialized correctly
         - Default URL is set
 
+        Parameters
+        ----------
+        anbima_igpm_core : AnbimaIGPMCore
+            Initialized AnbimaIGPMCore instance
+
         Returns
         -------
         None
@@ -213,7 +236,12 @@ class TestAnbimaIGPMCore:
         assert isinstance(anbima_igpm_core.cls_list_handler, ListHandler)
         assert anbima_igpm_core.url == "FILL_ME"
 
-    def test_init_with_default_date(self, mock_logger: Logger, mock_session: Session, mocker: MockerFixture) -> None:
+    def test_init_with_default_date(
+        self, 
+        mock_logger: Logger, 
+        mock_session: Session, 
+        mocker: MockerFixture
+    ) -> None:
         """Test initialization with default date.
 
         Verifies
@@ -239,7 +267,11 @@ class TestAnbimaIGPMCore:
         core = AnbimaIGPMCore(logger=mock_logger, cls_db=mock_session)
         assert core.date_ref == date(2025, 1, 1)
 
-    def test_init_invalid_date_type_string(self, mock_logger: Logger, mock_session: Session) -> None:
+    def test_init_invalid_date_type_string(
+        self, 
+        mock_logger: Logger, 
+        mock_session: Session
+    ) -> None:
         """Test initialization with invalid date type raises TypeError.
 
         Parameters
@@ -298,6 +330,11 @@ class TestAnbimaIGPMCore:
         - Returns PlaywrightScraper with correct configuration
         - Headless mode and timeout are set correctly
 
+        Parameters
+        ----------
+        anbima_igpm_core : AnbimaIGPMCore
+            AnbimaIGPMCore instance
+
         Returns
         -------
         None
@@ -307,7 +344,12 @@ class TestAnbimaIGPMCore:
         assert scraper.bool_headless is True
         assert scraper.int_default_timeout == 5_000
 
-    def test_run_with_db(self, anbima_igpm_core: AnbimaIGPMCore, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_run_with_db(
+        self, 
+        anbima_igpm_core: AnbimaIGPMCore, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test run method with database session.
 
         Verifies
@@ -330,18 +372,29 @@ class TestAnbimaIGPMCore:
         None
         """
         mock_df = pd.DataFrame({"MES_COLETA": ["Janeiro 2025"], "DATA": ["01/01/25"]})
-        mocker.patch.object(AnbimaIGPMCore, "parse_raw_file", return_value=mock_playwright_scraper)
+        mocker.patch.object(AnbimaIGPMCore, "parse_raw_file", 
+                            return_value=mock_playwright_scraper)
         mocker.patch.object(AnbimaIGPMCore, "transform_data", return_value=mock_df)
         mocker.patch.object(AnbimaIGPMCore, "standardize_dataframe", return_value=mock_df)
         mock_insert = mocker.patch.object(AnbimaIGPMCore, "insert_table_db")
         
         dict_dtypes = {"MES_COLETA": str, "DATA": "date"}
-        result = anbima_igpm_core.run(dict_dtypes, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=False, str_table_name="test_table")
+        result = anbima_igpm_core.run(
+            dict_dtypes, timeout=(12.0, 21.0), 
+            bool_verify=True, bool_insert_or_ignore=False, str_table_name="test_table")
         
         assert result is None
-        mock_insert.assert_called_once_with(cls_db=anbima_igpm_core.cls_db, str_table_name="test_table", df_=mock_df, bool_insert_or_ignore=False)
+        mock_insert.assert_called_once_with(cls_db=anbima_igpm_core.cls_db, 
+                                            str_table_name="test_table", 
+                                            df_=mock_df, 
+                                            bool_insert_or_ignore=False)
 
-    def test_run_without_db(self, anbima_igpm_core: AnbimaIGPMCore, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_run_without_db(
+        self, 
+        anbima_igpm_core: AnbimaIGPMCore, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test run method without database session.
 
         Verifies
@@ -365,13 +418,15 @@ class TestAnbimaIGPMCore:
         """
         anbima_igpm_core.cls_db = None
         mock_df = pd.DataFrame({"MES_COLETA": ["Janeiro 2025"], "DATA": ["01/01/25"]})
-        mocker.patch.object(AnbimaIGPMCore, "parse_raw_file", return_value=mock_playwright_scraper)
+        mocker.patch.object(AnbimaIGPMCore, "parse_raw_file", 
+                            return_value=mock_playwright_scraper)
         mocker.patch.object(AnbimaIGPMCore, "transform_data", return_value=mock_df)
         mocker.patch.object(AnbimaIGPMCore, "standardize_dataframe", return_value=mock_df)
         mock_insert = mocker.patch.object(AnbimaIGPMCore, "insert_table_db")
         
         dict_dtypes = {"MES_COLETA": str, "DATA": "date"}
-        result = anbima_igpm_core.run(dict_dtypes, timeout=(12.0, 21.0), bool_verify=True, bool_insert_or_ignore=False, str_table_name="test_table")
+        result = anbima_igpm_core.run(dict_dtypes, timeout=(12.0, 21.0), bool_verify=True, 
+                                      bool_insert_or_ignore=False, str_table_name="test_table")
         
         assert result.equals(mock_df)
         mock_insert.assert_not_called()
@@ -392,6 +447,11 @@ class TestAnbimaIGPMForecastsCurrentMonth:
         - Sets correct URL
         - Initializes dependencies properly
 
+        Parameters
+        ----------
+        anbima_igpm_current_month : AnbimaIGPMForecastsCurrentMonth
+            AnbimaIGPMForecastsCurrentMonth instance
+
         Returns
         -------
         None
@@ -399,7 +459,12 @@ class TestAnbimaIGPMForecastsCurrentMonth:
         assert isinstance(anbima_igpm_current_month, AnbimaIGPMCore)
         assert anbima_igpm_current_month.url == "https://www.anbima.com.br/pt_br/informar/estatisticas/precos-e-indices/projecao-de-inflacao-gp-m.htm"
 
-    def test_run(self, anbima_igpm_current_month: AnbimaIGPMForecastsCurrentMonth, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_run(
+        self, 
+        anbima_igpm_current_month: AnbimaIGPMForecastsCurrentMonth, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test run method for current month forecasts.
 
         Verifies
@@ -421,9 +486,16 @@ class TestAnbimaIGPMForecastsCurrentMonth:
         -------
         None
         """
-        mock_df = pd.DataFrame({"MES_COLETA": ["Janeiro 2025"], "DATA": ["01/01/25"], "PROJECAO_PCT": [2.5], "DATA_VALIDADE": ["31/01/25"]})
-        mocker.patch.object(AnbimaIGPMCore, "parse_raw_file", return_value=mock_playwright_scraper)
-        mocker.patch.object(AnbimaIGPMForecastsCurrentMonth, "transform_data", return_value=mock_df)
+        mock_df = pd.DataFrame({
+            "MES_COLETA": ["Janeiro 2025"], 
+            "DATA": ["01/01/25"], 
+            "PROJECAO_PCT": [2.5], 
+            "DATA_VALIDADE": ["31/01/25"]
+        })
+        mocker.patch.object(AnbimaIGPMCore, 
+                            "parse_raw_file", return_value=mock_playwright_scraper)
+        mocker.patch.object(AnbimaIGPMForecastsCurrentMonth, 
+                            "transform_data", return_value=mock_df)
         mocker.patch.object(AnbimaIGPMCore, "standardize_dataframe", return_value=mock_df)
         
         anbima_igpm_current_month.cls_db = None
@@ -432,7 +504,12 @@ class TestAnbimaIGPMForecastsCurrentMonth:
         assert result.equals(mock_df)
         assert result.columns.tolist() == ["MES_COLETA", "DATA", "PROJECAO_PCT", "DATA_VALIDADE"]
 
-    def test_transform_data(self, anbima_igpm_current_month: AnbimaIGPMForecastsCurrentMonth, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_transform_data(
+        self, 
+        anbima_igpm_current_month: AnbimaIGPMForecastsCurrentMonth, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test transform_data method for current month forecasts.
 
         Verifies
@@ -458,7 +535,8 @@ class TestAnbimaIGPMForecastsCurrentMonth:
             {"text": "Janeiro 2025"}, {"text": "01/01/25"}, {"text": "2,5"}, {"text": "31/01/25"}
         ]
         mocker.patch.object(HandlingDicts, "pair_headers_with_data", return_value=[
-            {"MES_COLETA": "Janeiro 2025", "DATA": "01/01/25", "PROJECAO_PCT": "2.5", "DATA_VALIDADE": "31/01/25"}
+            {"MES_COLETA": "Janeiro 2025", "DATA": "01/01/25", 
+             "PROJECAO_PCT": "2.5", "DATA_VALIDADE": "31/01/25"}
         ])
         
         result = anbima_igpm_current_month.transform_data(mock_playwright_scraper)
@@ -482,6 +560,11 @@ class TestAnbimaIGPMForecastsNextMonth:
         - Sets correct URL
         - Initializes dependencies properly
 
+        Parameters
+        ----------
+        anbima_igpm_next_month : AnbimaIGPMForecastsNextMonth
+            AnbimaIGPMForecastsNextMonth instance
+
         Returns
         -------
         None
@@ -489,7 +572,12 @@ class TestAnbimaIGPMForecastsNextMonth:
         assert isinstance(anbima_igpm_next_month, AnbimaIGPMCore)
         assert anbima_igpm_next_month.url == "https://www.anbima.com.br/pt_br/informar/estatisticas/precos-e-indices/projecao-de-inflacao-gp-m.htm"
 
-    def test_run(self, anbima_igpm_next_month: AnbimaIGPMForecastsNextMonth, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_run(
+        self, 
+        anbima_igpm_next_month: AnbimaIGPMForecastsNextMonth, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test run method for next month forecasts.
 
         Verifies
@@ -511,7 +599,8 @@ class TestAnbimaIGPMForecastsNextMonth:
         -------
         None
         """
-        mock_df = pd.DataFrame({"MES_COLETA": ["Fevereiro 2025"], "DATA": ["01/02/25"], "PROJECAO_PCT": [2.7]})
+        mock_df = pd.DataFrame({"MES_COLETA": ["Fevereiro 2025"], 
+                                "DATA": ["01/02/25"], "PROJECAO_PCT": [2.7]})
         mocker.patch.object(AnbimaIGPMCore, "parse_raw_file", return_value=mock_playwright_scraper)
         mocker.patch.object(AnbimaIGPMForecastsNextMonth, "transform_data", return_value=mock_df)
         mocker.patch.object(AnbimaIGPMCore, "standardize_dataframe", return_value=mock_df)
@@ -522,7 +611,12 @@ class TestAnbimaIGPMForecastsNextMonth:
         assert result.equals(mock_df)
         assert result.columns.tolist() == ["MES_COLETA", "DATA", "PROJECAO_PCT"]
 
-    def test_transform_data(self, anbima_igpm_next_month: AnbimaIGPMForecastsNextMonth, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_transform_data(
+        self, 
+        anbima_igpm_next_month: AnbimaIGPMForecastsNextMonth, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test transform_data method for next month forecasts.
 
         Verifies
@@ -572,6 +666,11 @@ class TestAnbimaIGPMForecastsLTM:
         - Sets correct URL
         - Initializes dependencies properly
 
+        Parameters
+        ----------
+        anbima_igpm_ltm : AnbimaIGPMForecastsLTM
+            AnbimaIGPMForecastsLTM instance
+
         Returns
         -------
         None
@@ -579,7 +678,12 @@ class TestAnbimaIGPMForecastsLTM:
         assert isinstance(anbima_igpm_ltm, AnbimaIGPMCore)
         assert anbima_igpm_ltm.url == "https://www.anbima.com.br/pt_br/informar/estatisticas/precos-e-indices/projecao-de-inflacao-gp-m.htm"
 
-    def test_run(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_run(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test run method for last twelve months forecasts.
 
         Verifies
@@ -616,9 +720,15 @@ class TestAnbimaIGPMForecastsLTM:
         result = anbima_igpm_ltm.run()
         
         assert result.equals(mock_df)
-        assert result.columns.tolist() == ["MES_COLETA", "DATA", "PROJECAO_PCT", "DATA_VALIDADE", "IGPM_EFETIVO_PCT"]
+        assert result.columns.tolist() \
+            == ["MES_COLETA", "DATA", "PROJECAO_PCT", "DATA_VALIDADE", "IGPM_EFETIVO_PCT"]
 
-    def test_transform_data(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, mock_playwright_scraper: PlaywrightScraper, mocker: MockerFixture) -> None:
+    def test_transform_data(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        mock_playwright_scraper: PlaywrightScraper, 
+        mocker: MockerFixture
+    ) -> None:
         """Test transform_data method for last twelve months forecasts.
 
         Verifies
@@ -642,7 +752,11 @@ class TestAnbimaIGPMForecastsLTM:
         None
         """
         mock_playwright_scraper.get_elements.return_value = [
-            {"text": "Janeiro 2025"}, {"text": "01/01/25"}, {"text": "2,5"}, {"text": "31/01/25"}, {"text": "2,3"}
+            {"text": "Janeiro 2025"}, 
+            {"text": "01/01/25"}, 
+            {"text": "2,5"}, 
+            {"text": "31/01/25"}, 
+            {"text": "2,3"}
         ]
         mock_restructure = mocker.patch.object(
             AnbimaIGPMForecastsLTM,
@@ -661,14 +775,19 @@ class TestAnbimaIGPMForecastsLTM:
         result = anbima_igpm_ltm.transform_data(mock_playwright_scraper)
         
         assert isinstance(result, pd.DataFrame)
-        assert result.columns.tolist() == ["MES_COLETA", "DATA", "PROJECAO_PCT", "DATA_VALIDADE", "IGPM_EFETIVO_PCT"]
+        assert result.columns.tolist() == \
+            ["MES_COLETA", "DATA", "PROJECAO_PCT", "DATA_VALIDADE", "IGPM_EFETIVO_PCT"]
         mock_restructure.assert_called_once()
         assert result.loc[0, "IGPM_EFETIVO_PCT"] == "2.3"
 
     @pytest.mark.parametrize("timeout", [
         None, 10, 10.5, (10.0, 20.0), (10, 20)
     ])
-    def test_run_timeout_validation(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, timeout: Optional[Union[int, float, tuple]]) -> None:
+    def test_run_timeout_validation(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        timeout: Optional[Union[int, float, tuple]]
+    ) -> None:
         """Test run method with various timeout values.
 
         Verifies
@@ -689,7 +808,7 @@ class TestAnbimaIGPMForecastsLTM:
         """
         anbima_igpm_ltm.cls_db = None
         with patch.object(AnbimaIGPMCore, "parse_raw_file") as mock_parse, \
-             patch.object(AnbimaIGPMForecastsLTM, "transform_data") as mock_transform, \
+             patch.object(AnbimaIGPMForecastsLTM, "transform_data"), \
              patch.object(AnbimaIGPMCore, "standardize_dataframe") as mock_standardize:
             mock_standardize.return_value = pd.DataFrame()
             anbima_igpm_ltm.run(timeout=timeout)
@@ -702,7 +821,12 @@ class TestAnbimaIGPMForecastsLTM:
 class TestRestructureTableWithMissingColumns:
     """Test cases for _restructure_table_with_missing_columns method."""
 
-    def test_restructure_complete_row(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, sample_flat_list: list[str], expected_columns_ltm: list[str]) -> None:
+    def test_restructure_complete_row(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        sample_flat_list: list[str], 
+        expected_columns_ltm: list[str]
+    ) -> None:
         """Test restructuring with complete row pattern.
 
         Verifies
@@ -744,7 +868,12 @@ class TestRestructureTableWithMissingColumns:
         # Verify logging was called (without checking exact message)
         assert mock_log.call_count > 0
 
-    def test_restructure_missing_last_column(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, sample_flat_list: list[str], expected_columns_ltm: list[str]) -> None:
+    def test_restructure_missing_last_column(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        sample_flat_list: list[str], 
+        expected_columns_ltm: list[str]
+    ) -> None:
         """Test restructuring with missing last column.
 
         Verifies
@@ -785,7 +914,12 @@ class TestRestructureTableWithMissingColumns:
         assert result == expected
         assert mock_log.call_count > 0
 
-    def test_restructure_missing_first_column(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, sample_flat_list: list[str], expected_columns_ltm: list[str]) -> None:
+    def test_restructure_missing_first_column(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        sample_flat_list: list[str], 
+        expected_columns_ltm: list[str]
+    ) -> None:
         """Test restructuring with missing first column.
 
         Verifies
@@ -826,7 +960,11 @@ class TestRestructureTableWithMissingColumns:
         assert result == expected
         assert mock_log.call_count > 0
 
-    def test_restructure_empty_list(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, expected_columns_ltm: list[str]) -> None:
+    def test_restructure_empty_list(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        expected_columns_ltm: list[str]
+    ) -> None:
         """Test restructuring with empty input list.
 
         Verifies
@@ -857,7 +995,11 @@ class TestRestructureTableWithMissingColumns:
         assert result == []
         mock_log.assert_not_called()
 
-    def test_restructure_invalid_values(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, expected_columns_ltm: list[str]) -> None:
+    def test_restructure_invalid_values(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        expected_columns_ltm: list[str]
+    ) -> None:
         """Test restructuring with invalid values.
 
         Verifies
@@ -897,7 +1039,12 @@ class TestRestructureTableWithMissingColumns:
 class TestDebugFlatListStructure:
     """Test cases for _debug_flat_list_structure method."""
 
-    def test_debug_flat_list_structure(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, sample_flat_list: list[str], mocker: MockerFixture) -> None:
+    def test_debug_flat_list_structure(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        sample_flat_list: list[str], 
+        mocker: MockerFixture
+    ) -> None:
         """Test debug_flat_list_structure with valid input.
 
         Verifies
@@ -925,7 +1072,11 @@ class TestDebugFlatListStructure:
         assert mock_print.call_count >= 5  # At least one call per item plus headers
         mock_print.assert_any_call("=== FLAT LIST STRUCTURE ANALYSIS ===")
 
-    def test_debug_flat_list_structure_empty(self, anbima_igpm_ltm: AnbimaIGPMForecastsLTM, mocker: MockerFixture) -> None:
+    def test_debug_flat_list_structure_empty(
+        self, 
+        anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
+        mocker: MockerFixture
+    ) -> None:
         """Test debug_flat_list_structure with empty list.
 
         Verifies
@@ -980,7 +1131,8 @@ def test_module_reload(anbima_igpm_ltm: AnbimaIGPMForecastsLTM, mocker: MockerFi
     mocker.patch.object(DatesCurrent, "curr_date", return_value=date(2025, 1, 2))
     mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2025, 1, 1))
     
-    importlib.reload(sys.modules["stpstone.ingestion.countries.br.macroeconomics.anbima_igpm_forecasts"])
+    importlib.reload(sys.modules[
+        "stpstone.ingestion.countries.br.macroeconomics.anbima_igpm_forecasts"])
     new_instance = AnbimaIGPMForecastsLTM()
     
     assert new_instance.url == original_url
@@ -995,7 +1147,7 @@ def test_module_reload(anbima_igpm_ltm: AnbimaIGPMForecastsLTM, mocker: MockerFi
 ])
 def test_run_invalid_timeout(
     anbima_igpm_ltm: AnbimaIGPMForecastsLTM, 
-    invalid_timeout: Any
+    invalid_timeout: Any # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test run method with invalid timeout values.
 

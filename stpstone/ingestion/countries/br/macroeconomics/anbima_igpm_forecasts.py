@@ -9,10 +9,8 @@ from typing import Optional, Union
 
 import backoff
 import pandas as pd
-from playwright.sync_api import Page as PlaywrightPage
 import requests
-from requests import Response, Session
-from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
+from requests import Session
 
 from stpstone.ingestion.abc.ingestion_abc import (
     ABCIngestionOperations,
@@ -50,6 +48,8 @@ class AnbimaIGPMCore(ABCIngestionOperations):
             The logger, by default None.
         cls_db : Optional[Session], optional
             The database session, by default None.
+        url : str, optional
+            The URL, by default "FILL_ME"
         
         Returns
         -------
@@ -126,7 +126,7 @@ class AnbimaIGPMCore(ABCIngestionOperations):
         self, 
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
         bool_verify: bool = True
-    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+    ) -> None:
         """Return a list of response objects.
 
         Parameters
@@ -147,7 +147,7 @@ class AnbimaIGPMCore(ABCIngestionOperations):
         
         Returns
         -------
-        HtmlElement
+        PlaywrightScraper
             The parsed content.
         """
         return PlaywrightScraper(bool_headless=True, int_default_timeout=5_000)
@@ -162,13 +162,22 @@ class AnbimaIGPMCore(ABCIngestionOperations):
         
         Parameters
         ----------
-        file : StringIO
-            The parsed content.
+        xpath_current_month_forecasts : str
+            The XPath to the current month forecasts
+        list_th : list[str]
+            The list of headers
+        scraper_playwright : PlaywrightScraper
+            The PlaywrightScraper
         
         Returns
         -------
         pd.DataFrame
             The transformed DataFrame.
+
+        Raises
+        ------
+        RuntimeError
+            If the navigation to the URL fails
         """
         with scraper_playwright.launch():
             if not scraper_playwright.navigate(self.url):
@@ -235,7 +244,8 @@ class AnbimaIGPMForecastsCurrentMonth(AnbimaIGPMCore):
         
         Returns
         -------
-        None
+        Optional[pd.DataFrame]
+            The DataFrame
         """
         return super().run(
             dict_dtypes={
@@ -320,7 +330,8 @@ class AnbimaIGPMForecastsNextMonth(AnbimaIGPMCore):
         
         Returns
         -------
-        None
+        Optional[pd.DataFrame]
+            The DataFrame
         """
         return super().run(
             dict_dtypes={
@@ -404,7 +415,8 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore):
         
         Returns
         -------
-        None
+        Optional[pd.DataFrame]
+            The DataFrame
         """
         return super().run(
             dict_dtypes={
@@ -596,7 +608,7 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore):
                 )
             
             # determine row structure based on the sequence
-            if len(sequence) >= 5:
+            if len(sequence) >= 5: # noqa SIM102: use a single `if` statement instead of nested `if` statements
                 # check for complete row pattern: month, date, numeric, date, numeric
                 if (sequence[0]['type'] == 'month' and 
                     sequence[1]['type'] == 'date' and 
@@ -623,7 +635,7 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore):
                     continue
             
             # check for incomplete patterns
-            if len(sequence) >= 4:
+            if len(sequence) >= 4: # noqa SIM102: use a single `if` statement instead of nested `if` statements
                 # pattern: month, date, numeric, date (missing last numeric)
                 if (sequence[0]['type'] == 'month' and 
                     sequence[1]['type'] == 'date' and 
@@ -669,7 +681,7 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore):
                     result_rows.append(row)
                     continue
             
-            if len(sequence) >= 3:
+            if len(sequence) >= 3: # noqa SIM102: use a single `if` statement instead of nested `if` statements
                 # pattern: date, numeric, date (missing first and last)
                 if (sequence[0]['type'] == 'date' and 
                     sequence[1]['type'] == 'numeric' and 
