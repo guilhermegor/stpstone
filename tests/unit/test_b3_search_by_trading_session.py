@@ -301,54 +301,6 @@ def mock_fast_operations(mocker: MockerFixture) -> dict[str, MagicMock]:
     return mocks
 
 
-@pytest.fixture(autouse=True)
-def mock_fast_operations(mocker: MockerFixture) -> dict[str, MagicMock]:
-    """Auto-mock expensive operations for all tests.
-
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture for creating mocks
-
-    Returns
-    -------
-    dict[str, MagicMock]
-        Dictionary of mock objects
-    """
-    # create a simple identity decorator that returns the function unchanged
-    def identity_decorator(func: Callable) -> Callable:
-        """Identity decorator that returns the function unchanged.
-        
-        Parameters
-        ----------
-        func : Callable
-            Function to be decorated
-        
-        Returns
-        -------
-        Callable
-            Function unchanged
-        """
-        return func
-    
-    mocks = {
-        "requests_get": mocker.patch("requests.get"),
-        "time_sleep": mocker.patch("time.sleep"),
-        "backoff_on_exception": mocker.patch("backoff.on_exception", 
-                                             return_value=identity_decorator),
-        "subprocess_run": mocker.patch("subprocess.run"),
-        "shutil_rmtree": mocker.patch("shutil.rmtree"),
-        "tempfile_mkdtemp": mocker.patch("tempfile.mkdtemp"),
-    }
-    
-    # setup default successful responses
-    mocks["requests_get"].return_value = create_mock_response()
-    mocks["subprocess_run"].return_value = MagicMock(returncode=0, stdout="", stderr="")
-    mocks["tempfile_mkdtemp"].return_value = "/tmp/test_dir" # noqa S108: probable insecure usage of temporary file or directory
-    
-    return mocks
-
-
 # --------------------------
 # Tests for ABCB3SearchByTradingSession
 # --------------------------
