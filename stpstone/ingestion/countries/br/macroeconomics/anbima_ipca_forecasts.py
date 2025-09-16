@@ -150,7 +150,11 @@ class AnbimaIPCACore(ABCIngestionOperations):
         PlaywrightScraper
             The parsed content.
         """
-        return PlaywrightScraper(bool_headless=True, int_default_timeout=5_000)
+        return PlaywrightScraper(
+            bool_headless=True, 
+            int_default_timeout=5_000, 
+            logger=self.logger
+        )
     
     def transform_data(
         self,
@@ -183,7 +187,57 @@ class AnbimaIPCACore(ABCIngestionOperations):
             if not scraper_playwright.navigate(self.url):
                 raise RuntimeError(f"Failed to navigate to URL: {self.url}")
             
-            self._trigger_ipca_content(scraper_playwright=scraper_playwright)
+            # click on IPCA window tab
+            scraper_playwright.trigger_strategies(
+                json_strategies=[
+                    {
+                        'type': 'aria',
+                        'selector': 'aria/IPCA',
+                        'description': 'ARIA selector for IPCA'
+                    },
+                    {
+                        'type': 'css',
+                        'selector': 'body > div.container li:nth-of-type(2) > a',
+                        'description': 'CSS selector from DevTools'
+                    },
+                    {
+                        'type': 'xpath',
+                        'selector': '//html/body/div[3]/div/main/ul/li[2]/a',
+                        'description': 'Exact XPath from recording'
+                    },
+                    {
+                        'type': 'css',
+                        'selector': 'body > div.container li:nth-of-type(2) > a',
+                        'description': 'Pierce selector fallback'
+                    },
+                    {
+                        'type': 'css',
+                        'selector': 'main ul li:nth-child(2) a',
+                        'description': 'Flexible CSS selector'
+                    },
+                    {
+                        'type': 'xpath',
+                        'selector': '//main//ul/li[2]/a',
+                        'description': 'Flexible XPath'
+                    },
+                    {
+                        'type': 'text',
+                        'selector': 'text=IPCA',
+                        'description': 'Text-based selector'
+                    },
+                    {
+                        'type': 'xpath',
+                        'selector': '//a[contains(text(), "IPCA")]',
+                        'description': 'XPath with text content'
+                    }
+                ], 
+                target_content_selectors=[
+                    "table",
+                    "[id='profile'] table",
+                    ".table",
+                    "//table[contains(., 'DATA') or contains(., 'MES')]"
+                ]
+            )
 
             list_td = scraper_playwright.get_elements(
                 selector=xpath_current_month_forecasts, 
@@ -197,187 +251,6 @@ class AnbimaIPCACore(ABCIngestionOperations):
 
         list_ser = self.cls_handling_dicts.pair_headers_with_data(list_th, list_td)
         return pd.DataFrame(list_ser)
-    
-    def _trigger_ipca_content(self, scraper_playwright: PlaywrightScraper) -> None:
-        """Trigger the IPCA content loading using recorded selectors.
-        
-        Parameters
-        ----------
-        scraper_playwright : PlaywrightScraper
-            The PlaywrightScraper
-
-        Returns
-        -------
-        None
-        """
-        
-        try:
-            scraper_playwright._handle_cookie_popup()
-        except Exception as e:
-            if self.logger:
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f"Cookie handling failed: {e}", 
-                    "warning"
-                )
-
-        dict_strategies = [
-            {
-                'type': 'aria',
-                'selector': 'aria/IPCA',
-                'description': 'ARIA selector for IPCA'
-            },
-            {
-                'type': 'css',
-                'selector': 'body > div.container li:nth-of-type(2) > a',
-                'description': 'CSS selector from DevTools'
-            },
-            {
-                'type': 'xpath',
-                'selector': '//html/body/div[3]/div/main/ul/li[2]/a',
-                'description': 'Exact XPath from recording'
-            },
-            {
-                'type': 'css',
-                'selector': 'body > div.container li:nth-of-type(2) > a',
-                'description': 'Pierce selector fallback'
-            },
-            {
-                'type': 'css',
-                'selector': 'main ul li:nth-child(2) a',
-                'description': 'Flexible CSS selector'
-            },
-            {
-                'type': 'xpath',
-                'selector': '//main//ul/li[2]/a',
-                'description': 'Flexible XPath'
-            },
-            # Strategy 6: Text-based selectors
-            {
-                'type': 'text',
-                'selector': 'text=IPCA',
-                'description': 'Text-based selector'
-            },
-            {
-                'type': 'xpath',
-                'selector': '//a[contains(text(), "IPCA")]',
-                'description': 'XPath with text content'
-            }
-        ]
-        
-        for i, strategy in enumerate(dict_strategies, 1):
-            try:
-                if self.logger:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"Trying strategy {i}: {strategy['description']}", 
-                        "info"
-                    )
-                
-                # Prepare selector based on type
-                if strategy['type'] == 'xpath':
-                    selector = f"xpath={strategy['selector']}"
-                elif strategy['type'] == 'aria':
-                    selector = strategy['selector']  # ARIA selectors don't need prefix
-                else:  # css or text
-                    selector = strategy['selector']
-                
-                # Wait for element to be available
-                scraper_playwright.page.wait_for_selector(
-                    selector, 
-                    timeout=8000,
-                    state='visible'
-                )
-                
-                # Additional check: ensure element is clickable
-                element = scraper_playwright.page.locator(selector)
-                element.wait_for(state='attached', timeout=3000)
-                
-                # Click the element
-                scraper_playwright.page.click(selector, timeout=5000)
-                
-                if self.logger:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"Successfully clicked IPCA button with: {strategy['description']}", 
-                        "info"
-                    )
-                
-                # Wait for content to load after clicking
-                scraper_playwright.page.wait_for_timeout(2000)
-                
-                # Wait for network activity to settle
-                try:
-                    scraper_playwright.page.wait_for_load_state("networkidle", timeout=15000)
-                except Exception:
-                    # If networkidle fails, just wait a bit more
-                    scraper_playwright.page.wait_for_timeout(3000)
-                
-                # Verify that content has loaded by checking for tables
-                tables_found = False
-                table_selectors = [
-                    "table",
-                    "[id='profile'] table",
-                    ".table",
-                    "//table[contains(., 'DATA') or contains(., 'MES')]"
-                ]
-                
-                for table_selector in table_selectors:
-                    try:
-                        if table_selector.startswith('//'):
-                            check_selector = f"xpath={table_selector}"
-                        else:
-                            check_selector = table_selector
-                            
-                        tables = scraper_playwright.page.locator(check_selector).all()
-                        if len(tables) > 0:
-                            # Check if any table has meaningful content
-                            for table in tables[:3]:  # Check first 3 tables
-                                text_content = table.text_content()
-                                if text_content and len(text_content) > 100:  # Has substantial content
-                                    tables_found = True
-                                    break
-                            if tables_found:
-                                break
-                    except Exception:
-                        continue
-                
-                if tables_found:
-                    if self.logger:
-                        self.cls_create_log.log_message(
-                            self.logger, 
-                            "Content successfully loaded - tables detected", 
-                            "info"
-                        )
-                    return
-                else:
-                    if self.logger:
-                        self.cls_create_log.log_message(
-                            self.logger, 
-                            "Click successful but content verification failed", 
-                            "warning"
-                        )
-                    # Continue to next strategy
-                        
-            except Exception as e:
-                if self.logger:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"Strategy {i} failed ({strategy['description']}): {e}", 
-                        "error"
-                    )
-                continue
-        
-        # If all dict_strategies failed
-        if self.logger:
-            self.cls_create_log.log_message(
-                self.logger, 
-                "All IPCA button click dict_strategies failed", 
-                "error"
-            )
-        
-        # Final attempt: wait a bit more in case content loads automatically
-        scraper_playwright.page.wait_for_timeout(5000)
     
 
 class AnbimaIPCAForecastsCurrentMonth(AnbimaIPCACore):
@@ -650,7 +523,56 @@ class AnbimaIPCAForecastsLTM(AnbimaIPCACore):
             if not scraper_playwright.navigate(self.url):
                 raise RuntimeError(f"Failed to navigate to URL: {self.url}")
 
-            self._trigger_ipca_content(scraper_playwright=scraper_playwright)
+            scraper_playwright.trigger_strategies(
+                json_strategies=[
+                    {
+                        'type': 'aria',
+                        'selector': 'aria/IPCA',
+                        'description': 'ARIA selector for IPCA'
+                    },
+                    {
+                        'type': 'css',
+                        'selector': 'body > div.container li:nth-of-type(2) > a',
+                        'description': 'CSS selector from DevTools'
+                    },
+                    {
+                        'type': 'xpath',
+                        'selector': '//html/body/div[3]/div/main/ul/li[2]/a',
+                        'description': 'Exact XPath from recording'
+                    },
+                    {
+                        'type': 'css',
+                        'selector': 'body > div.container li:nth-of-type(2) > a',
+                        'description': 'Pierce selector fallback'
+                    },
+                    {
+                        'type': 'css',
+                        'selector': 'main ul li:nth-child(2) a',
+                        'description': 'Flexible CSS selector'
+                    },
+                    {
+                        'type': 'xpath',
+                        'selector': '//main//ul/li[2]/a',
+                        'description': 'Flexible XPath'
+                    },
+                    {
+                        'type': 'text',
+                        'selector': 'text=IPCA',
+                        'description': 'Text-based selector'
+                    },
+                    {
+                        'type': 'xpath',
+                        'selector': '//a[contains(text(), "IPCA")]',
+                        'description': 'XPath with text content'
+                    }
+                ], 
+                target_content_selectors=[
+                    "table",
+                    "[id='profile'] table",
+                    ".table",
+                    "//table[contains(., 'DATA') or contains(., 'MES')]"
+                ]
+            )
 
             list_td = scraper_playwright.get_elements(
                 selector=xpath_current_month_forecasts, 
