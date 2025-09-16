@@ -773,3 +773,185 @@ class ListHandler(metaclass=TypeChecker):
                 "warning"
             )
         return list_
+    
+    def insert_value_every_nth_position(
+        self,
+        list_: list[Any],  # noqa ANN401: typing.Any is not allowed
+        value_to_insert: Any,  # noqa ANN401: typing.Any is not allowed
+        nth_position: int,
+        regex_pattern: str,
+        start_index: int = 0
+    ) -> list[Any]:  # noqa ANN401: typing.Any is not allowed
+        """Insert value at every nth position if current value doesn't match regex pattern.
+        
+        This method dynamically updates positions as the list grows during insertion.
+        Only inserts if the value at the target position doesn't match the regex pattern.
+        
+        Parameters
+        ----------
+        list_ : list[Any]
+            Input list to modify
+        value_to_insert : Any
+            Value to insert at specified positions
+        nth_position : int
+            Insert every nth position (e.g., 5 means every 5th position)
+        regex_pattern : str
+            Regex pattern to check against. If value matches, skip insertion
+        start_index : int, default=0
+            Starting index for nth position calculation
+            
+        Returns
+        -------
+        list[Any]
+            Modified list with values inserted
+            
+        Examples
+        --------
+        >>> handler = ListHandler()
+        >>> data = ['Agosto de 2025', '20/08/25', '0.25', '21/08/25', '0.36']
+        >>> pattern = r'^[A-Za-z]+ de \d{4}$'  # Month year pattern
+        >>> result = handler.insert_value_every_nth_position(data, 'X', 5, pattern)
+        >>> # Inserts 'X' at positions 0, 5, 10, etc. only if they don't match pattern
+        """
+        if not list_:
+            return list_
+            
+        if nth_position <= 0:
+            raise ValueError("nth_position must be greater than 0")
+        
+        result_list = list_.copy()
+        compiled_pattern = re.compile(regex_pattern)
+        
+        current_pos = start_index
+        insertions_made = 0
+        
+        while current_pos < len(result_list):
+            if current_pos < len(result_list):
+                current_value = str(result_list[current_pos])
+                if not compiled_pattern.match(current_value):
+                    result_list.insert(current_pos, value_to_insert)
+                    insertions_made += 1
+                    current_pos += 1
+                
+            current_pos += nth_position
+        
+        return result_list
+
+
+    def insert_value_every_nth_with_validation(
+        self,
+        list_: list[Any],  # noqa ANN401: typing.Any is not allowed
+        value_to_insert: Any,  # noqa ANN401: typing.Any is not allowed
+        nth_position: int,
+        regex_pattern: str,
+        start_index: int = 0,
+        logger: Optional[Logger] = None
+    ) -> dict[str, Any]:  # noqa ANN401: typing.Any is not allowed
+        """Enhanced version with detailed logging and statistics.
+        
+        Parameters
+        ----------
+        list_ : list[Any]
+            Input list to modify
+        value_to_insert : Any
+            Value to insert at specified positions
+        nth_position : int
+            Insert every nth position
+        regex_pattern : str
+            Regex pattern to check against
+        start_index : int, default=0
+            Starting index for calculation
+        logger : Optional[Logger], default=None
+            Logger for detailed operation info
+            
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary containing:
+            - 'result_list': Modified list
+            - 'insertions_made': Number of insertions
+            - 'positions_checked': List of positions that were checked
+            - 'positions_inserted': List of positions where insertions occurred
+            - 'positions_skipped': List of positions skipped due to regex match
+        """
+        if not list_:
+            return {
+                "result_list": [],
+                "insertions_made": 0,
+                "positions_checked": [],
+                "positions_inserted": [],
+                "positions_skipped": []
+            }
+            
+        if nth_position <= 0:
+            raise ValueError("nth_position must be greater than 0")
+        
+        result_list = list_.copy()
+        compiled_pattern = re.compile(regex_pattern)
+        
+        insertions_made = 0
+        positions_checked = []
+        positions_inserted = []
+        positions_skipped = []
+        
+        current_pos = start_index
+        
+        if logger:
+            CreateLog().log_message(
+                logger,
+                f"Starting insertion process: nth_position={nth_position}, "
+                f"pattern='{regex_pattern}', start_index={start_index}",
+                "info"
+            )
+        
+        while current_pos < len(result_list):
+            positions_checked.append(current_pos)
+            
+            if current_pos < len(result_list):
+                current_value = str(result_list[current_pos])
+                
+                # check if value matches regex pattern
+                if compiled_pattern.match(current_value):
+                    positions_skipped.append(current_pos)
+                    if logger:
+                        CreateLog().log_message(
+                            logger,
+                            f"Skipped insertion at position {current_pos}: "
+                            f"'{current_value}' matches pattern",
+                            "debug"
+                        )
+                else:
+                    # insert value and track the insertion
+                    result_list.insert(current_pos, value_to_insert)
+                    positions_inserted.append(current_pos)
+                    insertions_made += 1
+                    
+                    if logger:
+                        CreateLog().log_message(
+                            logger,
+                            f"Inserted '{value_to_insert}' at position {current_pos}. "
+                            f"Original value: '{current_value}'",
+                            "debug"
+                        )
+                    
+                    # move past the inserted value
+                    current_pos += 1
+            
+            # calculate next target position
+            current_pos += nth_position
+            
+        if logger:
+            CreateLog().log_message(
+                logger,
+                f"Insertion completed: {insertions_made} insertions made, "
+                f"original length: {len(list_)}, new length: {len(result_list)}",
+                "info"
+            )
+        
+        return {
+            "result_list": result_list,
+            "insertions_made": insertions_made,
+            "positions_checked": positions_checked,
+            "positions_inserted": positions_inserted,
+            "positions_skipped": positions_skipped
+        }
