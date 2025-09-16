@@ -1,7 +1,6 @@
 """B3 Financial Indicators."""
 
 from datetime import date
-from io import StringIO
 from logging import Logger
 from typing import Optional, Union
 
@@ -59,7 +58,7 @@ class B3FinancialIndicators(ABCIngestionOperations):
         self.cls_dates_br = DatesBRAnbima()
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
-        self.url = "https://sistemaswebb3-derivativos.b3.com.br/financialIndicatorsProxy/FinancialIndicators/GetFinancialIndicators/eyJsYW5ndWFnZSI6InB0LWJyIn0="
+        self.url = "https://sistemaswebb3-derivativos.b3.com.br/financialIndicatorsProxy/FinancialIndicators/GetFinancialIndicators/eyJsYW5ndWFnZSI6InB0LWJyIn0=" # noqa E501: line too long
     
     def run(
         self,
@@ -143,7 +142,7 @@ class B3FinancialIndicators(ABCIngestionOperations):
             A list of response objects.
         """
         dict_headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
             'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
             'cache-control': 'max-age=0',
             'priority': 'u=0, i',
@@ -155,8 +154,8 @@ class B3FinancialIndicators(ABCIngestionOperations):
             'sec-fetch-site': 'none',
             'sec-fetch-user': '?1',
             'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Cookie': '_ga=GA1.1.246440908.1756239909; OptanonAlertBoxClosed=2025-09-08T21:47:45.364Z; cf_clearance=81AcleE6TNbW7IQgud9uy_sRa.5sfjueLkqe15gz4nE-1757968582-1.2.1.1-CNPYCUrIpQ34h8MLWylDptCJ3h3I1N5e8_vEUAb26o6j0hHmnpxNGzO.F.w.noAbfnIhjijYSOoNOidWDzJBlRZhfiQU1rWnz1M1Xl0pmgtz21.dD61GyRVv.HG0hUMtmZshO6Y6YlluHo1PDlCp9hw6aMG1vhe4O5IBtctKdde4WL2yi_U.nZ0WziBNeslqLoxRum_KWH5Xv5rHZfI8xoE73VuUeM0NhS4yPREoApI; OptanonConsent=isGpcEnabled=0&datestamp=Mon+Sep+15+2025+17%3A36%3A22+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A0%2CC0001%3A1%2CC0004%3A0%2CC0002%3A0&AwaitingReconsent=false&geolocation=%3B; _clck=e74245%5E2%5Efzd%5E0%5E2064; _clsk=1xre1y3%5E1757986628229%5E1%5E1%5Es.clarity.ms%2Fcollect; _ga_SS7FXRTPP3=GS2.1.s1757986670$o22$g0$t1757986670$j60$l0$h0; dtCookie=v_4_srv_24_sn_111A186CD109496F79AB6311DF80D8C5_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_1_rcs-3Acss_0; TS01f22489=011d592ce13e3b778b79689befe5f561d64aba71e5ed75a3c0d1fd2cce64eb4760e39aae9a66740cf72b8aa5a13be525cd2aa8c0be; F051234a800=!pewsEGmYU9E2E4XjrAp71Xe4MLiPRnYX/lLdLWbPesXD7rTWMil0bAq8t2yZhsUPA51yD5Aw0/1S130=; __cf_bm=LYis5OMEuWIbKLZz6fIFaMNRXkq06HW6Q9kJbdKUa1w-1758057854-1.0.1.1-q87Wdy9R7UJ06pWyEZlX0kVHaU5aDnD8bQO1yI08doDs8P7sJhSKNnK_qtTmlnMI0aqEnxBmDO.WUkxJ.qfJbp6wjv8RNXb.KoFtjsYQrSE'
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',# noqa E501: line too long
+            'Cookie': '_ga=GA1.1.246440908.1756239909; OptanonAlertBoxClosed=2025-09-08T21:47:45.364Z; cf_clearance=81AcleE6TNbW7IQgud9uy_sRa.5sfjueLkqe15gz4nE-1757968582-1.2.1.1-CNPYCUrIpQ34h8MLWylDptCJ3h3I1N5e8_vEUAb26o6j0hHmnpxNGzO.F.w.noAbfnIhjijYSOoNOidWDzJBlRZhfiQU1rWnz1M1Xl0pmgtz21.dD61GyRVv.HG0hUMtmZshO6Y6YlluHo1PDlCp9hw6aMG1vhe4O5IBtctKdde4WL2yi_U.nZ0WziBNeslqLoxRum_KWH5Xv5rHZfI8xoE73VuUeM0NhS4yPREoApI; OptanonConsent=isGpcEnabled=0&datestamp=Mon+Sep+15+2025+17%3A36%3A22+GMT-0300+(Hor%C3%A1rio+Padr%C3%A3o+de+Bras%C3%ADlia)&version=6.21.0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A0%2CC0001%3A1%2CC0004%3A0%2CC0002%3A0&AwaitingReconsent=false&geolocation=%3B; _clck=e74245%5E2%5Efzd%5E0%5E2064; _clsk=1xre1y3%5E1757986628229%5E1%5E1%5Es.clarity.ms%2Fcollect; _ga_SS7FXRTPP3=GS2.1.s1757986670$o22$g0$t1757986670$j60$l0$h0; dtCookie=v_4_srv_24_sn_111A186CD109496F79AB6311DF80D8C5_perc_100000_ol_0_mul_1_app-3Afd69ce40c52bd20e_1_rcs-3Acss_0; TS01f22489=011d592ce13e3b778b79689befe5f561d64aba71e5ed75a3c0d1fd2cce64eb4760e39aae9a66740cf72b8aa5a13be525cd2aa8c0be; F051234a800=!pewsEGmYU9E2E4XjrAp71Xe4MLiPRnYX/lLdLWbPesXD7rTWMil0bAq8t2yZhsUPA51yD5Aw0/1S130=; __cf_bm=LYis5OMEuWIbKLZz6fIFaMNRXkq06HW6Q9kJbdKUa1w-1758057854-1.0.1.1-q87Wdy9R7UJ06pWyEZlX0kVHaU5aDnD8bQO1yI08doDs8P7sJhSKNnK_qtTmlnMI0aqEnxBmDO.WUkxJ.qfJbp6wjv8RNXb.KoFtjsYQrSE' # noqa E501: line too long
         }
         resp_req = requests.get(
             self.url, timeout=timeout, verify=bool_verify, headers=dict_headers)
@@ -189,8 +188,8 @@ class B3FinancialIndicators(ABCIngestionOperations):
         
         Parameters
         ----------
-        file : StringIO
-            The parsed content.
+        json_ : list[dict[str, Union[str, int, float]]]
+            The list of dictionaries to transform.
         
         Returns
         -------
