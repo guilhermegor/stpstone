@@ -1,12 +1,12 @@
 """Example for BCBQuotesBulletins."""
 
 from stpstone.ingestion.countries.br.macroeconomics.bcb_quotes_bulletins import (
-    BCBCurrenciesCodes,
+    BCBCurrenciesCodesPTAX,
     BCBQuotesBulletins,
 )
 
 
-cls_ = BCBCurrenciesCodes(
+cls_ = BCBCurrenciesCodesPTAX(
     date_ref=None,
     logger=None, 
     cls_db=None,
