@@ -72,7 +72,7 @@ class BCBCurrenciesCodesPTAX(ABCIngestionOperations):
         self,
         timeout: int = 30_000,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_bcb_currencies_codes"
+        str_table_name: str = "br_bcb_currencies_codes_ptax"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -81,14 +81,12 @@ class BCBCurrenciesCodesPTAX(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : int
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_bcb_currencies_codes"
+            The name of the table, by default "br_bcb_currencies_codes_ptax"
 
         Returns
         -------
@@ -136,7 +134,7 @@ class BCBCurrenciesCodesPTAX(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : int
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
             Verify the SSL certificate, by default True
@@ -147,7 +145,7 @@ class BCBCurrenciesCodesPTAX(ABCIngestionOperations):
             A list of response objects.
         """
         dict_headers = {
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
             'Accept-Language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
             'Connection': 'keep-alive',
             'Referer': 'https://ptax.bcb.gov.br/',
@@ -156,11 +154,11 @@ class BCBCurrenciesCodesPTAX(ABCIngestionOperations):
             'Sec-Fetch-Site': 'same-site',
             'Sec-Fetch-User': '?1',
             'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', # noqa E501: line too long
             'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Linux"',
-            'Cookie': 'bcb-aceitacookiev2=%7Bnecessary%3A%20true%2C%20performance%3A%20false%2C%20marketing%3A%20false%7D'
+            'Cookie': 'bcb-aceitacookiev2=%7Bnecessary%3A%20true%2C%20performance%3A%20false%2C%20marketing%3A%20false%7D' # noqa E501: line too long
         }
         resp_req = requests.get(self.url, timeout=timeout, headers=dict_headers)
         resp_req.raise_for_status()
@@ -252,7 +250,7 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
         self,
         timeout: int = 30_000,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_bcb_currencies_codes"
+        str_table_name: str = "br_bcb_currencies_codes_quotes_bulletins"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -261,14 +259,14 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : int
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
             Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_bcb_currencies_codes"
+            The name of the table, by default "br_bcb_currencies_codes_quotes_bulletins"
 
         Returns
         -------
@@ -311,10 +309,8 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : int
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Verify the SSL certificate, by default True
         
         Returns
         -------
@@ -322,7 +318,7 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
             A list of response objects.
         """
         dict_headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
             'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
             'priority': 'u=0, i',
             'referer': 'https://www.bcb.gov.br/',
@@ -333,8 +329,8 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
             'sec-fetch-mode': 'navigate',
             'sec-fetch-site': 'same-site',
             'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Cookie': 'bcb-aceitacookiev2=%7Bnecessary%3A%20true%2C%20performance%3A%20false%2C%20marketing%3A%20false%7D; JSESSIONID=0000KiClB2uMguEWEYcKXboFGiv:1d4qiornc; BIGipServer~was_s_as3~was_s~pool_was_443_s=!7WFD6HSDNlfA8wovwy5NpAoojAV4FS2iqM6sVPDz2rmo32d5Yi/ZvTSMhUCo2vkYlGmYSmUvpHbBxA==; TS0129e25e=01b3424a9def659519ce36e27f43bdfdb0f22583b5101d00f4da532b74ae7a4f6834313c7226bf9fe774fedcd4a3e2057ac2221daefd11540c19f8bacd3936ecf860238735545a9b5f1e4e274062c663582ca39ef5'
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', # noqa E501: line too long
+            'Cookie': 'bcb-aceitacookiev2=%7Bnecessary%3A%20true%2C%20performance%3A%20false%2C%20marketing%3A%20false%7D; JSESSIONID=0000KiClB2uMguEWEYcKXboFGiv:1d4qiornc; BIGipServer~was_s_as3~was_s~pool_was_443_s=!7WFD6HSDNlfA8wovwy5NpAoojAV4FS2iqM6sVPDz2rmo32d5Yi/ZvTSMhUCo2vkYlGmYSmUvpHbBxA==; TS0129e25e=01b3424a9def659519ce36e27f43bdfdb0f22583b5101d00f4da532b74ae7a4f6834313c7226bf9fe774fedcd4a3e2057ac2221daefd11540c19f8bacd3936ecf860238735545a9b5f1e4e274062c663582ca39ef5' # noqa E501: line too long
         }
         resp_req = requests.get(self.url, timeout=timeout, headers=dict_headers)
         resp_req.raise_for_status()
@@ -345,10 +341,15 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
         resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
     ) -> HtmlElement:
         """Parse the raw file content.
+
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
         
         Returns
         -------
-        PlaywrightScraper
+        HtmlElement
             The parsed content.
         """
         return self.cls_html_handler.lxml_parser(resp_req=resp_req)
@@ -361,7 +362,7 @@ class BCBCurrenciesCodesQuotesBulletins(ABCIngestionOperations):
         
         Parameters
         ----------
-        file : StringIO
+        html_root : HtmlElement
             The parsed content.
         
         Returns
@@ -446,7 +447,7 @@ class BCBQuotesBulletins(ABCIngestionOperations):
         timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
         bool_verify: bool = True,
         bool_insert_or_ignore: bool = False, 
-        str_table_name: str = "br_bcb_currencies_codes"
+        str_table_name: str = "br_bcb_quotes_bulletins"
     ) -> Optional[pd.DataFrame]:
         """Run the ingestion process.
         
@@ -462,7 +463,7 @@ class BCBQuotesBulletins(ABCIngestionOperations):
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
-            The name of the table, by default "br_bcb_currencies_codes"
+            The name of the table, by default "br_bcb_quotes_bulletins"
 
         Returns
         -------
@@ -524,7 +525,7 @@ class BCBQuotesBulletins(ABCIngestionOperations):
         
         Returns
         -------
-        pd.DataFrame
+        list[str]
             The currencies codes.
         """
         df_ptax = self.cls_bcb_currencies_codes_ptax.run(timeout=timeout)
@@ -550,6 +551,8 @@ class BCBQuotesBulletins(ABCIngestionOperations):
 
         Parameters
         ----------
+        currency_code : str
+            The currency code
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -561,10 +564,10 @@ class BCBQuotesBulletins(ABCIngestionOperations):
             A list of response objects.
         """
         dict_headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
             'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
             'priority': 'u=0, i',
-            'referer': 'https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?method=consultarBoletim',
+            'referer': 'https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?method=consultarBoletim', # noqa E501: line too long
             'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Linux"',
@@ -573,8 +576,8 @@ class BCBQuotesBulletins(ABCIngestionOperations):
             'sec-fetch-site': 'same-origin',
             'sec-fetch-user': '?1',
             'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Cookie': 'bcb-aceitacookiev2=%7Bnecessary%3A%20true%2C%20performance%3A%20false%2C%20marketing%3A%20false%7D; JSESSIONID=0000KiClB2uMguEWEYcKXboFGiv:1d4qiornc; BIGipServer~was_s_as3~was_s~pool_was_443_s=!7WFD6HSDNlfA8wovwy5NpAoojAV4FS2iqM6sVPDz2rmo32d5Yi/ZvTSMhUCo2vkYlGmYSmUvpHbBxA==; TS0129e25e=01b3424a9d71002e0aae7533aac013a1f4857095e1c797920d55a3336983ac691466568dc5833c202443bb2f53b4cf869e1d4a89166d64d166cea342c7e7e9b00f3b86ef681dfeb012bb377ed9c1314b3d0dbd7a3b'
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', # noqa E501: line too long
+            'Cookie': 'bcb-aceitacookiev2=%7Bnecessary%3A%20true%2C%20performance%3A%20false%2C%20marketing%3A%20false%7D; JSESSIONID=0000KiClB2uMguEWEYcKXboFGiv:1d4qiornc; BIGipServer~was_s_as3~was_s~pool_was_443_s=!7WFD6HSDNlfA8wovwy5NpAoojAV4FS2iqM6sVPDz2rmo32d5Yi/ZvTSMhUCo2vkYlGmYSmUvpHbBxA==; TS0129e25e=01b3424a9d71002e0aae7533aac013a1f4857095e1c797920d55a3336983ac691466568dc5833c202443bb2f53b4cf869e1d4a89166d64d166cea342c7e7e9b00f3b86ef681dfeb012bb377ed9c1314b3d0dbd7a3b' # noqa E501: line too long
         }
         resp_req = requests.get(self.fstr_url.format(
             currency_code, 
