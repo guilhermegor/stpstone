@@ -21,7 +21,7 @@ from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCh
 TypeDateFormatInput = TypeVar(
     "TypeDateFormatInput", 
     bound=Literal["DD/MM/YYYY", "D/M/YYYY", "YYYY-MM-DD", "YYMMDD", "DDMMYY", "DDMMYYYY", 
-                  "YYYYMMDD", "MM-DD-YYYY", "DD/MM/YY", "DD.MM.YY"]
+                  "DMMYYY", "YYYYMMDD", "MM-DD-YYYY", "DD/MM/YY", "DD.MM.YY"]
 )
 
 TypeDatetimeDate = TypeVar("TypeDatetimeDate", bound=Union[datetime, date])
@@ -486,6 +486,7 @@ class DateManipulation(CalendarCore):
             "YYMMDD": "%y%m%d",
             "DDMMYY": "%d%m%y",
             "DDMMYYYY": "%d%m%Y",
+            "DMMYYY": "%d%m%Y",
             "YYYYMMDD": "%Y%m%d",
             "MM-DD-YYYY": "%m-%d-%Y",
             "DD/MM/YY": "%d/%m/%y",
