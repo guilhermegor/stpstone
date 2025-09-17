@@ -155,7 +155,7 @@ class BCBOlindaCurrencies(ABCIngestionOperations):
         
         Returns
         -------
-        StringIO
+        list[dict[str, Union[str, int, float]]]
             The parsed content.
         """
         return resp_req.json()["value"]
@@ -193,8 +193,10 @@ class BCBOlindaPTAXUSDBRL(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -306,7 +308,7 @@ class BCBOlindaPTAXUSDBRL(ABCIngestionOperations):
             A list of response objects.
         """
         dict_headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
             'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
             'cache-control': 'max-age=0',
             'priority': 'u=0, i',
@@ -318,8 +320,8 @@ class BCBOlindaPTAXUSDBRL(ABCIngestionOperations):
             'sec-fetch-site': 'none',
             'sec-fetch-user': '?1',
             'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Cookie': 'JSESSIONID=00000a8R4vabgSlpTeY6TtlE9A7:1cn7m3fq4; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; TS013694c2=012e4f88b34db898ff3986b27881eb78507825f32ff9acda736e1d6e492db32cd815bbeba23e52ee205bf738fdf0e2fff3d326bee9; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000uL1SngKW858i5EZcQ-uqotJ:1dof89mke; TS013694c2=012e4f88b30d5bc0d002ffe4c3fb3bb998df95f3ce7fc8e3af1d8e0eb6f28d70ded3a4aad1a7c33208ad781942617da86b243e1824'
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', # noqa E501: line too long
+            'Cookie': 'JSESSIONID=00000a8R4vabgSlpTeY6TtlE9A7:1cn7m3fq4; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; TS013694c2=012e4f88b34db898ff3986b27881eb78507825f32ff9acda736e1d6e492db32cd815bbeba23e52ee205bf738fdf0e2fff3d326bee9; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000uL1SngKW858i5EZcQ-uqotJ:1dof89mke; TS013694c2=012e4f88b30d5bc0d002ffe4c3fb3bb998df95f3ce7fc8e3af1d8e0eb6f28d70ded3a4aad1a7c33208ad781942617da86b243e1824' # noqa E501: line too long
         }
         resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify, 
                                 headers=dict_headers)
@@ -339,7 +341,7 @@ class BCBOlindaPTAXUSDBRL(ABCIngestionOperations):
         
         Returns
         -------
-        StringIO
+        list[dict[str, Union[str, int, float]]]
             The parsed content.
         """
         return resp_req.json()["value"]
@@ -377,8 +379,10 @@ class BCBOlindaCurrenciesTS(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -484,6 +488,13 @@ class BCBOlindaCurrenciesTS(ABCIngestionOperations):
         bool_verify: bool = True,
     ) -> list[str]:
         """Return a list of currencies.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
         
         Returns
         -------
@@ -513,6 +524,8 @@ class BCBOlindaCurrenciesTS(ABCIngestionOperations):
 
         Parameters
         ----------
+        url : str
+            The URL
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         bool_verify : bool, optional
@@ -524,7 +537,7 @@ class BCBOlindaCurrenciesTS(ABCIngestionOperations):
             A list of response objects.
         """
         dict_headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', # noqa E501: line too long
             'accept-language': 'en-US,en;q=0.9,pt;q=0.8,es;q=0.7',
             'cache-control': 'max-age=0',
             'priority': 'u=0, i',
@@ -536,8 +549,8 @@ class BCBOlindaCurrenciesTS(ABCIngestionOperations):
             'sec-fetch-site': 'none',
             'sec-fetch-user': '?1',
             'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Cookie': 'JSESSIONID=00000a8R4vabgSlpTeY6TtlE9A7:1cn7m3fq4; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; TS013694c2=012e4f88b34db898ff3986b27881eb78507825f32ff9acda736e1d6e492db32cd815bbeba23e52ee205bf738fdf0e2fff3d326bee9; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000uL1SngKW858i5EZcQ-uqotJ:1dof89mke; TS013694c2=012e4f88b30d5bc0d002ffe4c3fb3bb998df95f3ce7fc8e3af1d8e0eb6f28d70ded3a4aad1a7c33208ad781942617da86b243e1824'
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36', # noqa E501: line too long
+            'Cookie': 'JSESSIONID=00000a8R4vabgSlpTeY6TtlE9A7:1cn7m3fq4; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; TS013694c2=012e4f88b34db898ff3986b27881eb78507825f32ff9acda736e1d6e492db32cd815bbeba23e52ee205bf738fdf0e2fff3d326bee9; BIGipServer~was_p_as3~was_p~pool_was_443_p=4275048876.47873.0000; JSESSIONID=0000uL1SngKW858i5EZcQ-uqotJ:1dof89mke; TS013694c2=012e4f88b30d5bc0d002ffe4c3fb3bb998df95f3ce7fc8e3af1d8e0eb6f28d70ded3a4aad1a7c33208ad781942617da86b243e1824' # noqa E501: line too long
         }
         resp_req = requests.get(url, timeout=timeout, verify=bool_verify, 
                                 headers=dict_headers)
@@ -557,7 +570,7 @@ class BCBOlindaCurrenciesTS(ABCIngestionOperations):
         
         Returns
         -------
-        StringIO
+        list[dict[str, Union[str, int, float]]]
             The parsed content.
         """
         return resp_req.json()["value"]
@@ -617,7 +630,7 @@ class BCBOlindaAnnualMarketExpectations(ABCIngestionOperations):
         self.cls_dates_br = DatesBRAnbima()
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
-        self.url = "https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?$top=100000&$orderby=Data%20desc&$format=json&$select=Indicador,IndicadorDetalhe,Data,DataReferencia,Media,Mediana,Minimo,Maximo,numeroRespondentes"
+        self.url = "https://olinda.bcb.gov.br/olinda/servico/Expectativas/versao/v1/odata/ExpectativasMercadoAnuais?$top=100000&$orderby=Data%20desc&$format=json&$select=Indicador,IndicadorDetalhe,Data,DataReferencia,Media,Mediana,Minimo,Maximo,numeroRespondentes" # noqa E501: line too long
     
     def run(
         self,
@@ -720,7 +733,7 @@ class BCBOlindaAnnualMarketExpectations(ABCIngestionOperations):
         
         Returns
         -------
-        StringIO
+        list[dict[str, Union[str, int, float]]]
             The parsed content.
         """
         return resp_req.json()["value"]
