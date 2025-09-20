@@ -1,4 +1,4 @@
-"""Implementation of ingestion instance."""
+"""IBGE Disclosure Economic Indicators."""
 
 from datetime import date
 from logging import Logger
