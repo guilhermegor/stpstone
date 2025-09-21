@@ -189,7 +189,7 @@ class AnbimaIPCACore(ABCIngestionOperations):
             
             # click on IPCA window tab
             scraper_playwright.trigger_strategies(
-                json_strategies=[
+                json_steps=[
                     {
                         'type': 'aria',
                         'selector': 'aria/IPCA',
@@ -524,7 +524,7 @@ class AnbimaIPCAForecastsLTM(AnbimaIPCACore):
                 raise RuntimeError(f"Failed to navigate to URL: {self.url}")
 
             scraper_playwright.trigger_strategies(
-                json_strategies=[
+                json_steps=[
                     {
                         'type': 'aria',
                         'selector': 'aria/IPCA',

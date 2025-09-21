@@ -558,7 +558,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         
     def trigger_strategies(
         self, 
-        json_strategies: list[dict[str, str]],
+        json_steps: list[dict[str, str]],
         target_content_selectors: Optional[list[str]] = None,
         timeout: Optional[int] = 30_000,
     ) -> None:
@@ -569,7 +569,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
 
         Parameters
         ----------
-        json_strategies : list[dict[str, str]]
+        json_steps : list[dict[str, str]]
             List of strategy dictionaries
         target_content_selectors : Optional[list[str]]
             List of selectors to check for target content
@@ -583,7 +583,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         Notes
         -----
         [1] Go to Recorder section, in Google Chrome DevTools, and create a new recorder in order 
-        to get the json_strategies.
+        to get the json_steps.
         [2] The target content selectors are used to check if the page has reached the desired 
         state.
         """
@@ -597,7 +597,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
                     "warning"
                 )
         
-        for i, strategy in enumerate(json_strategies, 1):
+        for i, strategy in enumerate(json_steps, 1):
             try:
                 CreateLog().log_message(
                     self.logger, 
@@ -680,7 +680,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
             
         CreateLog().log_message(
             self.logger, 
-            "All json_strategies failed", 
+            "All json_steps failed", 
             "error"
         )
         
