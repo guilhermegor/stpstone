@@ -45,8 +45,10 @@ class DebenturesComBrMTM(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -226,8 +228,10 @@ class DebenturesComBrInfos(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -290,7 +294,7 @@ class DebenturesComBrInfos(ABCIngestionOperations):
             dict_dtypes={
                 "CODIGO_DO_ATIVO": str,
                 "EMPRESA": str,
-                "SERIE": str,
+                "SERIE": str, # codespell:ignore
                 "EMISSAO": str,
                 "IPO": str,
                 "SITUACAO": str,
@@ -312,7 +316,7 @@ class DebenturesComBrInfos(ABCIngestionOperations):
                 "DATA_DO_ATO_2": "date",
                 "FORMA": str,
                 "GARANTIA_ESPECIE": str,
-                "CLASSE": "category",
+                "CLASSE": "category", # codespell:ignore
                 "QUANTIDADE_EMITIDA": int,
                 "ARTIGO_14": str,
                 "ARTIGO_24": str,
@@ -456,7 +460,7 @@ class DebenturesComBrInfos(ABCIngestionOperations):
             names=[
                 "CODIGO_DO_ATIVO",
                 "EMPRESA",
-                "SERIE",
+                "SERIE", # codespell:ignore
                 "EMISSAO",
                 "IPO",
                 "SITUACAO",
@@ -478,7 +482,7 @@ class DebenturesComBrInfos(ABCIngestionOperations):
                 "DATA_DO_ATO_2",
                 "FORMA",
                 "GARANTIA_ESPECIE",
-                "CLASSE",
+                "CLASSE", # codespell:ignore
                 "QUANTIDADE_EMITIDA",
                 "ARTIGO_14",
                 "ARTIGO_24",
@@ -568,8 +572,10 @@ class DebenturesComBrOTCPVs(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -756,8 +762,10 @@ class DebenturesComBrPrimaryOffers(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
@@ -929,6 +937,7 @@ class DebenturesComBrSecondaryExchange(ABCIngestionOperations):
     """Debentures.com.br Secondary Exchange.
     
     Notes
+    -----
     [1] Metadata: https://www.debentures.com.br/exploreosnd/consultaadados/mercadosecundario/precosdenegociacao_f.asp?op_exc=Nada
     """
     
@@ -943,8 +952,10 @@ class DebenturesComBrSecondaryExchange(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
-            The date of reference, by default None.
+        date_start : Optional[date], optional
+            The start date, by default None.
+        date_end : Optional[date], optional
+            The end date, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
