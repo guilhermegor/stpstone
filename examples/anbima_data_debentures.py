@@ -1,3 +1,5 @@
+"""Example Anbima Data debentures."""
+
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
     AnbimaDataDebenturesAvailable,
 )

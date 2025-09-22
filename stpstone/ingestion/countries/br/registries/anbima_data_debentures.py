@@ -16,6 +16,7 @@ from stpstone.ingestion.abc.ingestion_abc import (
     ContentParser,
     CoreIngestion,
 )
+from stpstone.utils.cache.cache_manager import CacheManager
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -24,7 +25,14 @@ from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
 class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
-    """Anbima Data debentures available."""
+    """Anbima Data debentures available.
+    
+    Notes
+    -----
+    [1] Metadata: https://data.anbima.com.br/busca/debentures
+    [2] bool_headless: Run browser in headless mode must be False because otherwise it is 
+    triggered https://data.anbima.com.br/robo, which blocks the access.
+    """
     
     def __init__(
         self, 
@@ -36,6 +44,12 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         int_default_timeout_miliseconds: int = 30_000,
         int_wait_next_request_seconds: int = 10,
         bool_headless: bool = False,
+        bool_minimized_window: bool = False,
+        bool_persist_cache: bool = True,
+        bool_reuse_cache: bool = True,
+        int_days_cache_expiration: int = 1,
+        int_cache_ttl_days: int = 7,
+        path_cache_dir: Optional[str] = None,
     ) -> None:
         """Initialize the ingestion class.
         
@@ -69,6 +83,16 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         self.logger = logger
         self.cls_db = cls_db
         self.int_wait_next_request_seconds = int_wait_next_request_seconds
+
+        self.cls_cache_manager = CacheManager(
+            bool_persist_cache=bool_persist_cache,
+            bool_reuse_cache=bool_reuse_cache,
+            int_days_cache_expiration=int_days_cache_expiration,
+            int_cache_ttl_days=int_cache_ttl_days,
+            path_cache_dir=path_cache_dir,
+            logger=logger,
+        )
+
         self.cls_dir_files_management = DirFilesManagement()
         self.cls_dates_current = DatesCurrent()
         self.cls_create_log = CreateLog()
@@ -77,6 +101,7 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
             bool_headless=bool_headless,
             int_default_timeout=int_default_timeout_miliseconds, 
             bool_incognito=True,
+            bool_minimized_window=bool_minimized_window,
         )
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
@@ -271,8 +296,7 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         xpath_sector: str = '//*[contains(@id, "debentures-item-setor-")]/dd'
         xpath_issue_date: str = '//*[contains(@id, "debentures-item-data-emissao-")]/dd'
         xpath_face_value: str = '//*[contains(@id, "debentures-item-pu-par")]/dd'
-        xpath_indicative_price: str = \
-            '//*[contains(@id, "debentures-item-pu-indicativo-")]/dd'
+        xpath_indicative_price: str = '//*[contains(@id, "debentures-item-pu-indicativo-")]/dd'
 
         list_codes = self._get_elements(xpath_codes)
         list_issuers = self._get_elements(xpath_issuers)
@@ -394,6 +418,7 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
             
             raise ValueError(error_msg)
 
+    @CacheManager.cache_value(key="anbima_debentures_total_pages")
     def get_number_pages(self, timeout: int = 30_000) -> int:
         """Get the number of pages.
         

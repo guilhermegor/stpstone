@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Literal, Optional, TypedDict, Union
 
 from playwright.sync_api import sync_playwright
+import requests
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -64,6 +65,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         int_default_timeout: int = 10,
         bool_accept_cookies: bool = True,
         bool_incognito: bool = False,
+        bool_minimized_window: bool = False,
         logger: Optional[Logger] = None
     ) -> None:
         """Initialize Playwright scraper instance.
@@ -84,6 +86,8 @@ class PlaywrightScraper(metaclass=TypeChecker):
             Attempt to accept cookies if popup appears (default: True)
         bool_incognito : bool
             Run browser in incognito mode (default: False)
+        bool_minimized_window : bool
+            Run browser in minimized window mode (default: False)
         logger : Optional[Logger]
             Custom logger instance
         """
@@ -97,6 +101,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         self.int_default_timeout = int_default_timeout
         self.bool_accept_cookies = bool_accept_cookies
         self.bool_incognito = bool_incognito
+        self.bool_minimized_window = bool_minimized_window
         self.logger = logger
         self.playwright = None
         self.browser = None
@@ -117,28 +122,55 @@ class PlaywrightScraper(metaclass=TypeChecker):
         RuntimeError
             If browser launch fails
         """
+        launch_args: list[str] = []
+
         try:
             self.playwright = sync_playwright().start()
-            browser_args = {
-                "headless": self.bool_headless,
-                "proxy": {"server": self.proxy} if self.proxy else None
-            }
+            if not self.bool_headless and self.bool_minimized_window:
+                launch_args = [
+                    "--start-minimized",
+                    "--window-position=0,0",
+                    "--window-size=400,300",
+                    "--disable-extensions",
+                    "--disable-plugins",
+                    "--disable-background-timer-throttling",
+                    "--disable-renderer-backgrounding",
+                    "--disable-background-networking",
+                    "--no-first-run",
+                ]
+                CreateLog().log_message(
+                    self.logger,
+                    "Browser configured with minimized window settings",
+                    "info"
+                )
 
             if self.bool_incognito:
                 self.context = self.playwright.chromium.launch_persistent_context(
                     user_data_dir=None,
-                    **browser_args,
+                    headless=self.bool_headless,
+                    proxy={"server": self.proxy} if self.proxy else None,
+                    args=launch_args,
                     viewport=self.viewport,
                     user_agent=self.user_agent
                 )
                 self.page = self.context.pages[0]
             else:
+                browser_args = {
+                    "headless": self.bool_headless,
+                    "proxy": {"server": self.proxy} if self.proxy else None,
+                    "args": launch_args if launch_args else None
+                }
+                browser_args = {k: v for k, v in browser_args.items() if v is not None}
+                
                 self.browser = self.playwright.chromium.launch(**browser_args)
                 self.context = self.browser.new_context(
                     viewport=self.viewport,
                     user_agent=self.user_agent
                 )
                 self.page = self.context.new_page()
+            
+            if not self.bool_headless and self.bool_minimized_window:
+                self._minimize_window_os_level()
 
             self.page.set_default_timeout(self.int_default_timeout)
             yield self
@@ -151,6 +183,103 @@ class PlaywrightScraper(metaclass=TypeChecker):
             raise RuntimeError(f"Browser launch failed: {err}") from err
         finally:
             self.close()
+
+    def _minimize_window_os_level(self) -> None:
+        """Minimize browser window using OS-specific commands.
+        
+        Notes
+        -----
+        [1] Extensions to install for linux distributions:
+        ```bash
+        # ubuntu/Debian
+        sudo apt-get install wmctrl xdotool -y
+
+        # fedora/RHEL  
+        sudo dnf install wmctrl xdotool -y
+
+        # arch Linux
+        sudo pacman -S wmctrl xdotool -y
+        ```
+        """
+        import subprocess
+        import sys
+        import time
+        
+        time.sleep(2)
+        
+        try:
+            if sys.platform == "win32":
+                subprocess.run( # noqa S607: starting a process with a partial executable path
+                    [ # noqa S607: starting a process with a partial executable path
+                        "powershell", "-WindowStyle", "Hidden", "-Command",
+                        "Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; " # noqa E501: line too long
+                        "public class Win32 { [DllImport(\"user32.dll\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow); }';" # noqa E501: line too long
+                        "(Get-Process | Where-Object {$_.MainWindowTitle -match 'Chrome|Chromium'}) | " # noqa E501: line too long
+                        "ForEach-Object { [Win32]::ShowWindow($_.MainWindowHandle, 2) }"
+                    ],
+                    shell=True, capture_output=True, timeout=10
+                )
+                
+            elif sys.platform == "darwin":
+                subprocess.run(
+                    [ # noqa S607: starting a process with a partial executable path
+                        "osascript", "-e",
+                        'tell application "System Events" to tell (first process whose name contains "Chrome") to set properties of windows to {miniaturized:true}' # noqa E501: line too long
+                    ],
+                    capture_output=True, timeout=10
+                )
+                
+            elif sys.platform.startswith("linux"):
+                
+                success = False
+                try:
+                    subprocess.run( 
+                        ["wmctrl", "-r", "Chrome", "-b", "add,minimized"], # noqa S607: starting a process with a partial executable path
+                        check=True, capture_output=True, timeout=5
+                    )
+                    success = True
+                except (subprocess.CalledProcessError, FileNotFoundError):
+                    try:
+                        subprocess.run(
+                            ["wmctrl", "-r", "Chromium", "-b", "add,minimized"], # noqa S607: starting a process with a partial executable path
+                            check=True, capture_output=True, timeout=5
+                        )
+                        success = True
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        pass
+                
+                if not success:
+                    try:
+                        _ = subprocess.run(
+                            ["xdotool", "search", "--name", "Chrome", "windowminimize"], # noqa S607: starting a process with a partial executable path
+                            check=True, capture_output=True, timeout=5
+                        )
+                        success = True
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        try:
+                            subprocess.run(
+                                ["xdotool", "search", "--name", "Chromium", "windowminimize"], # noqa S607: starting a process with a partial executable path
+                                check=True, capture_output=True, timeout=5
+                            )
+                            success = True
+                        except (subprocess.CalledProcessError, FileNotFoundError):
+                            pass
+                
+                if not success:
+                    CreateLog().log_message(
+                        self.logger, 
+                        "Linux minimization failed: install wmctrl or xdotool", 
+                        "warning"
+                    )
+            
+            CreateLog().log_message(
+                self.logger, 
+                "Browser window minimized via OS command", 
+                "info"
+            )
+            
+        except Exception as e:
+            CreateLog().log_message(self.logger, f"OS minimization failed: {e}", "warning")
 
     def close(self) -> None:
         """Clean up browser resources.
@@ -718,16 +847,11 @@ class PlaywrightScraper(metaclass=TypeChecker):
         Union[dict, list]
             The parsed JSON response. Returns a dictionary for JSON objects
             or a list for JSON arrays.
-        
+
         Raises
         ------
-        Exception
-            If the HTTP request fails (non-200 status code) or if the response
-            cannot be parsed as JSON.
-        ValueError
-            If the URL is invalid or malformed.
-        TimeoutError
-            If the request exceeds the specified timeout.
+        requests.HTTPError
+            If the request fails or the JSON response is not valid.
         
         Examples
         --------
@@ -773,7 +897,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
             resp_req = page.goto(url, timeout=timeout or self.int_default_timeout)
 
             if resp_req.status != 200:
-                raise Exception(f"Request failed with status code {resp_req.status}")
+                raise requests.HTTPError(f"Request failed with status code {resp_req.status}")
             
             json_data = resp_req.json()
             return json_data

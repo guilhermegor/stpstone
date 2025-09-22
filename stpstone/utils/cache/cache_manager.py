@@ -40,7 +40,7 @@ import os
 from pathlib import Path
 import pickle
 import platform
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar, Union
 
 import pandas as pd
 
@@ -48,6 +48,9 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.pickle import PickleFiles
+
+
+T = TypeVar("T")
 
 
 class CacheManager(metaclass=TypeChecker):
@@ -211,6 +214,102 @@ class CacheManager(metaclass=TypeChecker):
                     key=f"{key}_{ABCCalendarOperations().current_timestamp_string()}", df_=df_)
                 cls_cache_manager._clean_old_cache()
                 return df_
+            return wrapper
+        return decorator
+    
+    @staticmethod
+    def cache_value(key: str) -> Callable:
+        """Decorate a function to cache its output as a generic value.
+        
+        Parameters
+        ----------
+        key : str
+            Key to use for caching
+        
+        Returns
+        -------
+        Callable
+            Decorated function
+        
+        Raises
+        ------
+        AttributeError
+            If the instance does not have a 'cls_cache_manager' attribute
+        """
+        @type_checker
+        def decorator(func: Callable[..., T]) -> Callable[..., T]:
+            """Decorate a function to cache its output as a generic value.
+            
+            Parameters
+            ----------
+            func : Callable
+                The function to decorate
+            
+            Returns
+            -------
+            Callable
+                Decorated function
+
+            Raises
+            ------
+            AttributeError
+                If the instance does not have a 'cls_cache_manager' attribute
+            """
+            @type_checker
+            @wraps(func)
+            def wrapper(
+                self: Any, # noqa ANN401: typing.Any is not allowed
+                *args: Any, # noqa ANN401: typing.Any is not allowed
+                **kwargs: Any # noqa ANN401: typing.Any is not allowed
+            ) -> T:
+                """Wrap the function to cache its output as a generic value.
+                
+                Parameters
+                ----------
+                self : Any
+                    Instance of the class
+                *args : Any
+                    Variable-length argument list
+                **kwargs : Any
+                    Arbitrary keyword arguments
+                
+                Returns
+                -------
+                T
+                    Cached value
+
+                Raises
+                ------
+                AttributeError
+                    If the instance does not have a 'cls_cache_manager' attribute
+                """
+                cls_cache_manager = getattr(self, 'cls_cache_manager', None)
+                if cls_cache_manager is None:
+                    raise AttributeError("Instance must have 'cls_cache_manager' attribute")
+                
+                cached_value = cls_cache_manager._load_cache_value(key=key)
+                if cached_value is not None and cls_cache_manager.bool_reuse_cache:
+                    cls_cache_manager.cls_create_log.log_message(
+                        cls_cache_manager.logger,
+                        f"Using cached value from {key}. "
+                        f"Path: {cls_cache_manager._path_cache_dir}", 
+                        "debug"
+                    )
+                    return cached_value
+                
+                cls_cache_manager.cls_create_log.log_message(
+                    cls_cache_manager.logger,
+                    f"Fetching value from {key}", 
+                    "info"
+                )
+                value = func(self, *args, **kwargs)
+                cls_cache_manager._save_cache_value(key=key, value=value)
+                cls_cache_manager._save_cache_value(
+                    key=f"{key}_{ABCCalendarOperations().current_timestamp_string()}", 
+                    value=value
+                )
+                cls_cache_manager._clean_old_cache()
+                return value
             return wrapper
         return decorator
     
