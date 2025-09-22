@@ -1,16 +1,15 @@
-"""Implementation of ingestion instance."""
+"""Anbima Data debentures."""
 
 from datetime import date
 from logging import Logger
+import re
 from time import sleep
 from typing import Optional, Union
 
 import backoff
 import pandas as pd
-from playwright.sync_api import Page as PlaywrightPage
 import requests
 from requests import Session
-from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
 from stpstone.ingestion.abc.ingestion_abc import (
     ABCIngestionOperations,
@@ -29,13 +28,14 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
     
     def __init__(
         self, 
-        int_pg_start: int,
-        int_pg_end: Optional[int] = 1_000,
+        int_pg_start: Optional[int] = None,
+        int_pg_end: Optional[int] = None,
         date_ref: Optional[date] = None, 
         logger: Optional[Logger] = None,
         cls_db: Optional[Session] = None,
         int_default_timeout_miliseconds: int = 30_000,
         int_wait_next_request_seconds: int = 10,
+        bool_headless: bool = False
     ) -> None:
         """Initialize the ingestion class.
         
@@ -56,8 +56,6 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         CoreIngestion.__init__(self)
         ContentParser.__init__(self)
 
-        self.int_pg_start = int_pg_start
-        self.int_pg_end = int_pg_end
         self.logger = logger
         self.cls_db = cls_db
         self.int_wait_next_request_seconds = int_wait_next_request_seconds
@@ -66,17 +64,20 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         self.cls_create_log = CreateLog()
         self.cls_dates_br = DatesBRAnbima()
         self.cls_playwright_scraper = PlaywrightScraper(
-            bool_headless=True,
+            bool_headless=bool_headless,
             int_default_timeout=int_default_timeout_miliseconds, 
             bool_incognito=True,
         )
         self.date_ref = date_ref or \
             self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
         self.url = "https://data.anbima.com.br/busca/debentures?size=100&page={}"
+        self.int_pg_start = int_pg_start or 1
+        self.int_pg_end = int_pg_end or self.get_number_pages()
+
     
     def run(
         self,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        timeout: int = 30_000,
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_anbima_data_debentures_available"
     ) -> Optional[pd.DataFrame]:
@@ -105,44 +106,49 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
 
         for i_pg in range(self.int_pg_start, self.int_pg_end + 1):
             url = self.url.format(i_pg)
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"Processing page {i_pg} of {self.int_pg_end}; URL: {url}", 
+                "info"
+            )
             tup_ = self.get_response(url=url, timeout=timeout)
             df_ = self.transform_data(
                 tup_debentures_infos=tup_,
                 url=url,
                 int_pg=i_pg
             )
-            list_ser.extend(df_.to_dict("records"))
+            df_ = self.standardize_dataframe(
+                df_=df_, 
+                date_ref=self.date_ref,
+                dict_dtypes={
+                    "CODE": str,
+                    "ISSUER": str,
+                    "YIELD": float,
+                    "MATURITY_DATE": "date",
+                    "DURATION": float,
+                    "SECTOR": str,
+                    "ISSUE_DATE": "date",
+                    "FACE_VALUE": float,
+                    "INDICATIVE_PRICE": float,
+                    "URL": str, 
+                    "PAGE": int,
+                }, 
+                str_fmt_dt="DD/MM/YYYY",
+                url=self.url,
+            )
+            if self.cls_db:
+                self.insert_table_db(
+                    cls_db=self.cls_db, 
+                    str_table_name=str_table_name, 
+                    df_=df_, 
+                    bool_insert_or_ignore=bool_insert_or_ignore
+                )
+            else:
+                list_ser.extend(df_.to_dict("records"))
             sleep(self.int_wait_next_request_seconds)
         
-        df_ = pd.DataFrame(list_ser)
-        df_ = self.standardize_dataframe(
-            df_=df_, 
-            date_ref=self.date_ref,
-            dict_dtypes={
-                "CODE": str,
-                "ISSUER": str,
-                "YIELD": float,
-                "MATURITY_DATE": "date",
-                "DURATION": float,
-                "SECTOR": str,
-                "ISSUE_DATE": "date",
-                "FACE_VALUE": float,
-                "INDICATIVE_PRICE": float,
-                "URL": str, 
-                "PAGE": int,
-            }, 
-            str_fmt_dt="DD/MM/YYYY",
-            url=self.url,
-        )
-        if self.cls_db:
-            self.insert_table_db(
-                cls_db=self.cls_db, 
-                str_table_name=str_table_name, 
-                df_=df_, 
-                bool_insert_or_ignore=bool_insert_or_ignore
-            )
-        else:
-            return df_
+        if not self.cls_db:
+            return pd.DataFrame(list_ser)
 
     @backoff.on_exception(
         backoff.expo, 
@@ -152,7 +158,7 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
     def get_response(
         self, 
         url: str,
-        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0)
+        timeout: int = 30_000
     ) -> tuple[list[Union[str, float, int]], ...]:
         """Return a list of response objects.
 
@@ -189,39 +195,52 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
                     "deviceScaleFactor": 1,
                     "isMobile": "false",
                     "hasTouch": "false",
-                    "isLandscape": "false"
+                    "isLandscape": "false", 
+                    "description": "Set viewport",
                 },
                 {
                     "type": "navigate",
-                    "url": "https://data.anbima.com.br/busca/debentures?view=precos&page=0&q=&size=100",
+                    "url": "https://data.anbima.com.br/busca/debentures?view=caracteristicas&page=0&q=&size=100",
                     "assertedEvents": [
                         {
                             "type": "navigation",
-                            "url": "https://data.anbima.com.br/busca/debentures?view=precos&page=0&q=&size=100",
+                            "url": "https://data.anbima.com.br/busca/debentures?view=caracteristicas&page=0&q=&size=100",
                             "title": "Resultado de busca em debêntures | ANBIMA Data"
                         }
-                    ]
+                    ], 
+                    "description": "Navigate to URL",
                 },
                 {
                     "type": "click",
                     "target": "main",
                     "selectors": [
                         [
-                            "aria/Características"
+                            "aria/Características",
+                            "aria/[role=\"generic\"]"
                         ],
                         [
-                            "div.BuscaDebentures_busca-tools--switch__UX80q button.anbima-ui-button--secondary"
+                            "div.BuscaDebentures_busca-tools--switch__UX80q button.anbima-ui-button--primary > span"
                         ],
                         [
-                            "xpath///*[@id=\"__next\"]/main/div/div/div/div/div[1]/div[2]/div[2]/div/button[2]"
+                            "xpath///*[@id=\"__next\"]/main/div/div/div/div/div[1]/div[2]/div[2]/div/button[2]/span"
                         ],
                         [
-                            "pierce/div.BuscaDebentures_busca-tools--switch__UX80q button.anbima-ui-button--secondary"
+                            "pierce/div.BuscaDebentures_busca-tools--switch__UX80q button.anbima-ui-button--primary > span"
+                        ],
+                        [
+                            "text/Características"
                         ]
                     ],
-                    "offsetY": 18,
-                    "offsetX": 6.78125
+                    "offsetY": 4,
+                    "offsetX": 83.78125, 
+                    "description": "Click on caracteristicas button",
                 }
+            ],
+            target_content_selectors=[
+                '//*[@id="item-nome-0"]',
+                '//*[@id="debentures-item-emissor-0"]',
+                '//div[contains(@class, "debentures-item")]', 
+                '//*[@id="__next"]/main/div/div/div/div/div[1]/div[2]/div[2]/div/button[2]/span',
             ]
         )
 
@@ -233,32 +252,168 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         tuple[list[Union[str, float, int]], ...]
             The parsed content.
         """
-        xpath_codes: str = '//*[@id="item-nome-0"]//text()'
-        xpath_issuers: str = '//*[@id="debentures-item-emissor-0"]/dd//text()'
-        xpath_yield: str = '//*[@id="debentures-item-remuneracao-0"]/dd//text()'
-        xpath_maturity_date: str = '//*[@id="debentures-item-data-vencimento-0"]/dd//text()'
-        xpath_duration: str = '//*[@id="debentures-item-duration-0"]/dd//text()'
-        xpath_sector: str = '//*[@id="debentures-item-setor-0"]/dd//text()'
-        xpath_issue_date: str = '//*[@id="debentures-item-setor-0"]/dd//text()'
-        xpath_face_value: str = '//*[@id="debentures-item-pu-par0"]/dd//text()'
-        xpath_indicative_price: str = '//*[@id="debentures-item-pu-indicativo-0"]/dd/span//text()'
+        xpath_codes: str = '//a[contains(@id, "item-title")]'
+        xpath_issuers: str = '//*[@id="debentures-item-emissor-0"]/dd'
+        xpath_yield: str = '//*[@id="debentures-item-remuneracao-0"]/dd'
+        xpath_maturity_date: str = '//*[@id="debentures-item-data-vencimento-0"]/dd'
+        xpath_duration: str = '//*[@id="debentures-item-duration-0"]/dd'
+        xpath_sector: str = '//*[@id="debentures-item-setor-0"]/dd'
+        xpath_issue_date: str = '//*[@id="debentures-item-setor-0"]/dd'
+        xpath_face_value: str = '//*[@id="debentures-item-pu-par0"]/dd'
+        xpath_indicative_price: str = '//*[@id="debentures-item-pu-indicativo-0"]/dd/span'
 
-        list_codes = self.cls_playwright_scraper.get_elements(xpath_codes)
-        list_issuers = self.cls_playwright_scraper.get_elements(xpath_issuers)
-        list_yield = self.cls_playwright_scraper.get_elements(xpath_yield)
-        list_maturity_date = self.cls_playwright_scraper.get_elements(xpath_maturity_date)
-        list_duration = self.cls_playwright_scraper.get_elements(xpath_duration)
-        list_sector = self.cls_playwright_scraper.get_elements(xpath_sector)
-        list_issue_date = self.cls_playwright_scraper.get_elements(xpath_issue_date)
-        list_face_value = self.cls_playwright_scraper.get_elements(xpath_face_value)
-        list_indicative_price = self.cls_playwright_scraper.get_elements(xpath_indicative_price)
+        list_codes = self._get_elements(xpath_codes)
+        list_issuers = self._get_elements(xpath_issuers)
+        list_yield = self._get_elements(xpath_yield)
+        list_maturity_date = self._get_elements(xpath_maturity_date)
+        list_duration = self._get_elements(xpath_duration)
+        list_sector = self._get_elements(xpath_sector)
+        list_issue_date = self._get_elements(xpath_issue_date)
+        list_face_value = self._get_elements(xpath_face_value)
+        list_indicative_price = self._get_elements(xpath_indicative_price)
+
+        self._validate_parse_raw_file(
+            list_codes=list_codes,
+            list_issuers=list_issuers,
+            list_yield=list_yield,
+            list_maturity_date=list_maturity_date,
+            list_duration=list_duration,
+            list_sector=list_sector,
+            list_issue_date=list_issue_date,
+            list_face_value=list_face_value,
+            list_indicative_price=list_indicative_price,
+        )
         
         return list_codes, list_issuers, list_yield, list_maturity_date, list_duration, \
             list_sector, list_issue_date, list_face_value, list_indicative_price
     
+    def _get_elements(self, xpath: str) -> list[Union[str, float, int]]:
+        """Get elements from the page.
+        
+        Parameters
+        ----------
+        xpath : str
+            The xpath to find elements.
+        
+        Returns
+        -------
+        list[Union[str, float, int]]
+            The list of elements.
+        """
+        list_ = self.cls_playwright_scraper.get_elements(xpath)
+        return [item['text'] for item in list_ if item.get('text')]
+
+    def _validate_parse_raw_file(
+        self, 
+        list_codes: list[Union[str, float, int]], 
+        list_issuers: list[Union[str, float, int]], 
+        list_yield: list[Union[str, float, int]], 
+        list_maturity_date: list[Union[str, float, int]], 
+        list_duration: list[Union[str, float, int]], 
+        list_sector: list[Union[str, float, int]], 
+        list_issue_date: list[Union[str, float, int]], 
+        list_face_value: list[Union[str, float, int]], 
+        list_indicative_price: list[Union[str, float, int]]   
+    ) -> None:
+        """Validate the parsed content.
+        
+        Parameters
+        ----------
+        list_codes : list[Union[str, float, int]]
+            The list of codes.
+        list_issuers : list[Union[str, float, int]]
+            The list of issuers.
+        list_yield : list[Union[str, float, int]]
+            The list of yields.
+        list_maturity_date : list[Union[str, float, int]]
+            The list of maturity dates.
+        list_duration : list[Union[str, float, int]]
+            The list of durations.
+        list_sector : list[Union[str, float, int]]
+            The list of sectors.
+        list_issue_date : list[Union[str, float, int]]
+            The list of issue dates.
+        list_face_value : list[Union[str, float, int]]
+            The list of face values.
+        list_indicative_price : list[Union[str, float, int]]
+            The list of indicative prices.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If the lengths of the lists are different.
+        """
+        lists_data = {
+            "codes": list_codes,
+            "issuers": list_issuers,
+            "yield": list_yield,
+            "maturity_date": list_maturity_date,
+            "duration": list_duration,
+            "sector": list_sector,
+            "issue_date": list_issue_date,
+            "face_value": list_face_value,
+            "indicative_price": list_indicative_price
+        }
+        
+        lengths = {name: len(data) for name, data in lists_data.items()}
+        unique_lengths = set(lengths.values())
+
+        if len(unique_lengths) > 1:
+            length_details = ", ".join([f"{name}: {length}" for name, length in lengths.items()])
+            min_length = min(lengths.values())
+            max_length = max(lengths.values())
+            
+            error_msg = (
+                f"Inconsistent list lengths detected. "
+                "Expected all lists to have the same length, but found lengths ranging "
+                f"from {min_length} to {max_length}. "
+                f"Details: {length_details}"
+            )
+            
+            self.cls_create_log.log_message(
+                self.logger,
+                error_msg,
+                "error"
+            )
+            
+            raise ValueError(error_msg)
+
+    def get_number_pages(self, timeout: int = 30_000) -> int:
+        """Get the number of pages.
+        
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        
+        Returns
+        -------
+        int
+            The number of pages.
+        """
+        with self.cls_playwright_scraper.launch():
+            if not self.cls_playwright_scraper.navigate(self.url.format(1), timeout=timeout):
+                return 1
+            
+            xpath_pages_number: str = '//*[@id="pagination"]/div[3]/span/span'
+            element = self.cls_playwright_scraper.get_element(xpath_pages_number, timeout=timeout)
+            if element and element.get("text"):
+                try:
+                    text = element["text"].strip()
+                    numbers = re.findall(r"\d+", text)
+                    if numbers:
+                        return int(numbers[-1])
+                except (ValueError, AttributeError):
+                    pass
+            return 1
+    
     def transform_data(
         self, 
-        tup_debentures_infos: list[tuple[Union[str, int, float]]], 
+        tup_debentures_infos: tuple[list[Union[str, float, int]], ...], 
         url: str, 
         int_pg: int,
     ) -> pd.DataFrame:
@@ -266,8 +421,12 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         
         Parameters
         ----------
-        file : StringIO
-            The parsed content.
+        tup_debentures_infos : tuple[list[Union[str, float, int]], ...]
+            The tuple of debentures infos.
+        url : str
+            The URL.
+        int_pg : int
+            The page number.
         
         Returns
         -------
