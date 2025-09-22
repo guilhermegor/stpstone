@@ -35,18 +35,28 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         cls_db: Optional[Session] = None,
         int_default_timeout_miliseconds: int = 30_000,
         int_wait_next_request_seconds: int = 10,
-        bool_headless: bool = False
+        bool_headless: bool = False,
     ) -> None:
         """Initialize the ingestion class.
         
         Parameters
         ----------
+        int_pg_start : Optional[int], optional
+            The start page number, by default None.
+        int_pg_end : Optional[int], optional
+            The end page number, by default None.
         date_ref : Optional[date], optional
             The date of reference, by default None.
         logger : Optional[Logger], optional
             The logger, by default None.
         cls_db : Optional[Session], optional
             The database session, by default None.
+        int_default_timeout_miliseconds : int, optional
+            The default timeout in milliseconds, by default 30_000.
+        int_wait_next_request_seconds : int, optional
+            The number of seconds to wait between requests, by default 10.
+        bool_headless : bool
+            Run browser in headless mode (default: True)
         
         Returns
         -------
@@ -74,7 +84,6 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         self.int_pg_start = int_pg_start or 1
         self.int_pg_end = int_pg_end or self.get_number_pages()
 
-    
     def run(
         self,
         timeout: int = 30_000,
@@ -123,13 +132,13 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
                 dict_dtypes={
                     "CODE": str,
                     "ISSUER": str,
-                    "YIELD": float,
+                    "YIELD": str,
                     "MATURITY_DATE": "date",
-                    "DURATION": float,
+                    "DURATION": str,
                     "SECTOR": str,
                     "ISSUE_DATE": "date",
-                    "FACE_VALUE": float,
-                    "INDICATIVE_PRICE": float,
+                    "FACE_VALUE": str,
+                    "INDICATIVE_PRICE": str,
                     "URL": str, 
                     "PAGE": int,
                 }, 
@@ -164,6 +173,8 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
 
         Parameters
         ----------
+        url : str
+            The URL.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
         
@@ -190,8 +201,8 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
             json_steps=[
                 {
                     "type": "setViewport",
-                    "width": 1643,
-                    "height": 959,
+                    "width": 1905,
+                    "height": 1080,
                     "deviceScaleFactor": 1,
                     "isMobile": "false",
                     "hasTouch": "false",
@@ -200,11 +211,11 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
                 },
                 {
                     "type": "navigate",
-                    "url": "https://data.anbima.com.br/busca/debentures?view=caracteristicas&page=0&q=&size=100",
+                    "url": "https://data.anbima.com.br/busca/debentures?size=100&page=2",
                     "assertedEvents": [
                         {
                             "type": "navigation",
-                            "url": "https://data.anbima.com.br/busca/debentures?view=caracteristicas&page=0&q=&size=100",
+                            "url": "https://data.anbima.com.br/busca/debentures?size=100&page=2",
                             "title": "Resultado de busca em debêntures | ANBIMA Data"
                         }
                     ], 
@@ -231,8 +242,8 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
                             "text/Características"
                         ]
                     ],
-                    "offsetY": 4,
-                    "offsetX": 83.78125, 
+                    "offsetY": 3,
+                    "offsetX": 37.78125, 
                     "description": "Click on caracteristicas button",
                 }
             ],
@@ -253,14 +264,15 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
             The parsed content.
         """
         xpath_codes: str = '//a[contains(@id, "item-title")]'
-        xpath_issuers: str = '//*[@id="debentures-item-emissor-0"]/dd'
-        xpath_yield: str = '//*[@id="debentures-item-remuneracao-0"]/dd'
-        xpath_maturity_date: str = '//*[@id="debentures-item-data-vencimento-0"]/dd'
-        xpath_duration: str = '//*[@id="debentures-item-duration-0"]/dd'
-        xpath_sector: str = '//*[@id="debentures-item-setor-0"]/dd'
-        xpath_issue_date: str = '//*[@id="debentures-item-setor-0"]/dd'
-        xpath_face_value: str = '//*[@id="debentures-item-pu-par0"]/dd'
-        xpath_indicative_price: str = '//*[@id="debentures-item-pu-indicativo-0"]/dd/span'
+        xpath_issuers: str = '//*[contains(@id, "debentures-item-emissor-")]/dd'
+        xpath_yield: str = '//*[contains(@id, "debentures-item-remuneracao-")]/dd'
+        xpath_maturity_date: str = '//*[contains(@id, "debentures-item-data-vencimento-")]/dd'
+        xpath_duration: str = '//*[contains(@id, "debentures-item-duration-")]/dd'
+        xpath_sector: str = '//*[contains(@id, "debentures-item-setor-")]/dd'
+        xpath_issue_date: str = '//*[contains(@id, "debentures-item-data-emissao-")]/dd'
+        xpath_face_value: str = '//*[contains(@id, "debentures-item-pu-par")]/dd'
+        xpath_indicative_price: str = \
+            '//*[contains(@id, "debentures-item-pu-indicativo-")]/dd'
 
         list_codes = self._get_elements(xpath_codes)
         list_issuers = self._get_elements(xpath_issuers)
