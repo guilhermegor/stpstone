@@ -21,7 +21,7 @@ from itertools import chain, product, tee
 from logging import Logger
 from numbers import Number
 import re
-from typing import Any, Optional, TypedDict
+from typing import Any, Optional, TypedDict, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -955,3 +955,43 @@ class ListHandler(metaclass=TypeChecker):
             "positions_inserted": positions_inserted,
             "positions_skipped": positions_skipped
         }
+    
+    def validate_lists_same_length(self, dict_lists_data: dict[str, list[Union[Any]]]) -> None:
+        """Validate that all lists have the same length.
+        
+        Parameters
+        ----------
+        dict_lists_data : dict[str, list[Union[Any]]]
+            Dictionary of lists to validate
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If lists have different lengths
+        """
+        lengths = {name: len(data) for name, data in dict_lists_data.items()}
+        unique_lengths = set(lengths.values())
+
+        if len(unique_lengths) > 1:
+            length_details = ", ".join([f"{name}: {length}" for name, length in lengths.items()])
+            min_length = min(lengths.values())
+            max_length = max(lengths.values())
+            
+            error_msg = (
+                f"Inconsistent list lengths detected. "
+                "Expected all lists to have the same length, but found lengths ranging "
+                f"from {min_length} to {max_length}. "
+                f"Details: {length_details}"
+            )
+            
+            self.cls_create_log.log_message(
+                self.logger,
+                error_msg,
+                "error"
+            )
+            
+            raise ValueError(error_msg)

@@ -193,25 +193,35 @@ class CacheManager(metaclass=TypeChecker):
                 if cls_cache_manager is None:
                     raise AttributeError("Instance must have 'cls_cache_manager' attribute")
                 
-                df_cached = cls_cache_manager._load_cache(key=key)
+                if callable(key):
+                    try:
+                        cache_key = key(self)
+                    except Exception as e:
+                        raise ValueError(f"Error generating cache key from callable: {e}") from e
+                else:
+                    cache_key = key
+                
+                df_cached = cls_cache_manager._load_cache(key=cache_key)
                 if df_cached is not None and not df_cached.empty \
                     and cls_cache_manager.bool_reuse_cache:
                     cls_cache_manager.cls_create_log.log_message(
                         cls_cache_manager.logger,
-                        f"Using cached holidays from {key}. "
+                        f"Using cached holidays from {cache_key}. "
                         f"Path: {cls_cache_manager._path_cache_dir}", 
                         "info"
                     )
                     return df_cached
                 cls_cache_manager.cls_create_log.log_message(
                     cls_cache_manager.logger,
-                    f"Fetching holidays from {key}", 
+                    f"Fetching holidays from {cache_key}", 
                     "info"
                 )
                 df_ = func(self, *args, **kwargs)
-                cls_cache_manager._save_cache(key=key, df_=df_)
+                cls_cache_manager._save_cache(key=cache_key, df_=df_)
                 cls_cache_manager._save_cache(
-                    key=f"{key}_{ABCCalendarOperations().current_timestamp_string()}", df_=df_)
+                    key=f"{cache_key}_{ABCCalendarOperations().current_timestamp_string()}", 
+                    df_=df_
+                )
                 cls_cache_manager._clean_old_cache()
                 return df_
             return wrapper
@@ -287,11 +297,19 @@ class CacheManager(metaclass=TypeChecker):
                 if cls_cache_manager is None:
                     raise AttributeError("Instance must have 'cls_cache_manager' attribute")
                 
-                cached_value = cls_cache_manager._load_cache_value(key=key)
+                if callable(key):
+                    try:
+                        cache_key = key(self)
+                    except Exception as e:
+                        raise ValueError(f"Error generating cache key from callable: {e}") from e
+                else:
+                    cache_key = key
+                
+                cached_value = cls_cache_manager._load_cache_value(key=cache_key)
                 if cached_value is not None and cls_cache_manager.bool_reuse_cache:
                     cls_cache_manager.cls_create_log.log_message(
                         cls_cache_manager.logger,
-                        f"Using cached value from {key}. "
+                        f"Using cached value from {cache_key}. "
                         f"Path: {cls_cache_manager._path_cache_dir}", 
                         "debug"
                     )
@@ -299,13 +317,13 @@ class CacheManager(metaclass=TypeChecker):
                 
                 cls_cache_manager.cls_create_log.log_message(
                     cls_cache_manager.logger,
-                    f"Fetching value from {key}", 
+                    f"Fetching value from {cache_key}", 
                     "info"
                 )
                 value = func(self, *args, **kwargs)
-                cls_cache_manager._save_cache_value(key=key, value=value)
+                cls_cache_manager._save_cache_value(key=cache_key, value=value)
                 cls_cache_manager._save_cache_value(
-                    key=f"{key}_{ABCCalendarOperations().current_timestamp_string()}", 
+                    key=f"{cache_key}_{ABCCalendarOperations().current_timestamp_string()}", 
                     value=value
                 )
                 cls_cache_manager._clean_old_cache()

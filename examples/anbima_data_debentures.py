@@ -6,7 +6,7 @@ from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
 
 
 cls_ = AnbimaDataDebenturesAvailable(
-    int_pg_start=4,
+    int_pg_start=9,
     int_pg_end=10, 
     date_ref=None, 
     logger=None,
