@@ -26,7 +26,7 @@ from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
-class AnbimaDataCoreInstrumentsAvailable(ABCIngestionOperations):
+class AnbimaDataCore(ABCIngestionOperations):
     """Anbima Data Core - Instruments Available.
     
     Notes
