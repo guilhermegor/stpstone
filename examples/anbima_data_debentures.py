@@ -1,18 +1,35 @@
 """Example of anbima data debentures."""
 
+from datetime import date
+from typing import Union
+
+import pandas as pd
+
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
     AnbimaDataDebenturesAvailable,
+    AnbimaDataDebenturesCharacteristics,
 )
 
 
-cls_ = AnbimaDataDebenturesAvailable(
+cls_ = AnbimaDataDebenturesCharacteristics(
     date_ref=None, 
     logger=None, 
     cls_db=None, 
-    start_page=1, 
-    end_page=5,
+    debenture_codes=["ABPA11", "AAJR11", "AALM11"],
 )
-
 df_ = cls_.run()
 print(f"DF ANBIMA DEBENTURES: \n{df_}")
 df_.info()
+
+
+# cls_ = AnbimaDataDebenturesAvailable(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None, 
+#     start_page=1, 
+#     end_page=5,
+# )
+
+# df_ = cls_.run()
+# print(f"DF ANBIMA DEBENTURES: \n{df_}")
+# df_.info()
