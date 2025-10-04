@@ -9,10 +9,11 @@ from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
     AnbimaDataDebenturesAvailable,
     AnbimaDataDebenturesCharacteristics,
     AnbimaDataDebenturesDocuments,
+    AnbimaDataDebenturesPrices,
 )
 
 
-cls_ = AnbimaDataDebenturesDocuments(
+cls_ = AnbimaDataDebenturesPrices(
     date_ref=None, 
     logger=None, 
     cls_db=None, 
@@ -22,6 +23,18 @@ cls_ = AnbimaDataDebenturesDocuments(
 df_ = cls_.run()
 print(f"DF ANBIMA DEBENTURES: \n{df_}")
 df_.info()
+
+
+# cls_ = AnbimaDataDebenturesDocuments(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None, 
+#     debenture_codes=["AALM11", "ABPA11", "AAJR11"],
+# )
+
+# df_ = cls_.run()
+# print(f"DF ANBIMA DEBENTURES: \n{df_}")
+# df_.info()
 
 
 # cls_ = AnbimaDataDebenturesCharacteristics(
