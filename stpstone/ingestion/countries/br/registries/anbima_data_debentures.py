@@ -1,11 +1,14 @@
 """Implementation of Anbima Debentures ingestion instance."""
 
+from contextlib import suppress
 from datetime import date
 from io import StringIO
 from logging import Logger
 from random import randint
+import re
 import time
 from typing import Optional, Union
+from urllib.parse import unquote
 
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage, sync_playwright
@@ -647,5 +650,421 @@ class AnbimaDataDebenturesCharacteristics(ABCIngestionOperations):
             "DATA_PROXIMO_EVENTO_AGENDA",
         ]:
             df_[col_] = [x.replace("-", "01/01/2100") for x in df_[col_]]
+        
+        return df_
+
+
+class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
+    """Anbima Debentures documents ingestion class."""
+    
+    def __init__(
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+        debenture_codes: Optional[list[str]] = None,
+    ) -> None:
+        """Initialize the Anbima Debentures documents ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        debenture_codes : Optional[list[str]], optional
+            List of debenture codes to scrape documents for, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(cls_db=cls_db)
+        CoreIngestion.__init__(self)
+        ContentParser.__init__(self)
+
+        self.logger = logger
+        self.cls_db = cls_db
+        self.cls_dir_files_management = DirFilesManagement()
+        self.cls_dates_current = DatesCurrent()
+        self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        self.base_url = "https://data.anbima.com.br/debentures"
+        self.debenture_codes = debenture_codes or []
+    
+    def run(
+        self,
+        timeout_ms: int = 30_000,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_anbimadata_debentures_documents"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout_ms : int, optional
+            The timeout in milliseconds, by default 30_000
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_anbimadata_debentures_characteristics"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
+        """
+        raw_data = self.get_response(timeout_ms=timeout_ms)
+        df_ = self.transform_data(raw_data=raw_data)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "CODIGO_DEBENTURE": str,
+                "EMISSOR": str,
+                "SETOR": str,
+                "NOME_DOCUMENTO": str,
+                "DATA_DIVULGACAO_DOCUMENTO": "date",
+                "LINK_DOCUMENTO": str,
+            }, 
+            str_fmt_dt="DD/MM/YYYY",
+            url=self.base_url,
+        )
+        
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
+            )
+        else:
+            return df_
+
+    def get_response(
+        self, 
+        timeout_ms: int = 30_000,
+    ) -> list:
+        """Scrape debentures documents using Playwright.
+
+        Parameters
+        ----------
+        timeout_ms : int, optional
+            The timeout in milliseconds, by default 30_000
+        
+        Returns
+        -------
+        list
+            List of scraped debentures documents data.
+        """
+        list_documents_data: list[dict[str, Union[str, int, float, date]]] = []
+        
+        if not self.debenture_codes:
+            self.cls_create_log.log_message(
+                self.logger, 
+                "⚠️ No debenture codes provided. Cannot scrape documents.", 
+                "warning"
+            )
+            return list_documents_data
+        
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False)
+            page = browser.new_page()
+
+            self.cls_create_log.log_message(
+                self.logger, 
+                f"🚀 Starting documents scraping for {len(self.debenture_codes)} debentures...", 
+                "info"
+            )
+            
+            for debenture_code in self.debenture_codes:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"📊 Fetching documents for: {debenture_code}...", 
+                    "info"
+                )
+                
+                try:
+                    url = f"{self.base_url}/{debenture_code}/documentos"
+                    page.goto(url)
+                    page.wait_for_timeout(timeout_ms)
+                    
+                    documents_data = self._extract_debenture_data(
+                        page, debenture_code, debenture_code)
+                    list_documents_data.extend(documents_data)
+                    
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f"✅ Successfully extracted {len(documents_data)} documents "
+                        f"for {debenture_code}", 
+                        "info"
+                    )
+                    
+                except Exception as e:
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f"❌ Error processing {debenture_code}: {str(e)}", 
+                        "error"
+                    )
+                
+                time.sleep(randint(2, 8))
+            
+            browser.close()
+        
+        self.cls_create_log.log_message(
+            self.logger, 
+            f"Documents scraping finished. Total: {len(list_documents_data)} records processed.", 
+            "info"
+        )
+        
+        return list_documents_data
+    
+    def _extract_debenture_data(
+        self, 
+        page: PlaywrightPage, 
+        id_number: str, 
+        nome: str
+    ) -> list[dict]:
+        """Extract debenture documents data using specific XPaths.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        id_number : str
+            The ID number/code of the debenture item.
+        nome : str
+            The name/code of the debenture.
+        
+        Returns
+        -------
+        list[dict]
+            List of dictionaries containing extracted document data.
+        """
+        list_documents = []
+        
+        # Extract base debenture info
+        try:
+            codigo_element = page.locator('xpath=//*[@id="root"]/main/div[1]/div/div/h1').first
+            codigo_debenture = codigo_element.inner_text().strip() \
+                if codigo_element.is_visible(timeout=5000) else nome
+        except:
+            codigo_debenture = nome
+        
+        try:
+            emissor_element = page.locator(
+                'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd').first
+            emissor = emissor_element.inner_text().strip() \
+                if emissor_element.is_visible(timeout=5000) else None
+        except:
+            emissor = None
+        
+        try:
+            setor_element = page.locator(
+                'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd').first
+            setor = setor_element.inner_text().strip() \
+                if setor_element.is_visible(timeout=5000) else None
+        except:
+            setor = None
+        
+        # Find all document containers
+        xpath_base = '//div[@class="card-content__container " and @style="padding: 0px; margin-bottom: 24px;"]'
+        document_containers = page.locator(f'xpath={xpath_base}').all()
+        
+        # If no documents found, log and return empty list
+        if len(document_containers) == 0:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'No document containers found for {codigo_debenture}', 
+                "warning"
+            )
+            return list_documents
+        
+        self.cls_create_log.log_message(
+            self.logger, 
+            f'Found {len(document_containers)} document containers for {codigo_debenture}', 
+            "info"
+        )
+        
+        for idx, container in enumerate(document_containers):
+            try:
+                # Extract document name with multiple fallback strategies
+                nome_documento = None
+                
+                # Strategy 1: Try to get the <p> element with class="large-text-bold"
+                try:
+                    nome_doc_element = container.locator('xpath=.//p[@class="large-text-bold"]').first
+                    if nome_doc_element.count() > 0:
+                        nome_documento = nome_doc_element.inner_text().strip()
+                except:
+                    pass
+                
+                # Strategy 2: If still None, try any <p> element in the card header
+                if not nome_documento:
+                    try:
+                        nome_doc_element = container.locator('xpath=.//div[@class="anbima-ui-card__header"]//p').first
+                        if nome_doc_element.count() > 0:
+                            nome_documento = nome_doc_element.inner_text().strip()
+                    except:
+                        pass
+                
+                # Strategy 3: Try to get from parent article header (for sections like "Ata de AGD")
+                if not nome_documento:
+                    try:
+                        # Go up to find the parent article and get its header
+                        parent_article = container.locator('xpath=./ancestor::article[1]//h2[@class="large-text-bold"]').first
+                        if parent_article.count() > 0:
+                            nome_documento = parent_article.inner_text().strip()
+                    except:
+                        pass
+                
+                # Strategy 4: Last resort - any <p> in the container
+                if not nome_documento:
+                    try:
+                        nome_doc_element = container.locator('xpath=.//p').first
+                        if nome_doc_element.count() > 0:
+                            nome_documento = nome_doc_element.inner_text().strip()
+                    except:
+                        pass
+                
+                # Extract document release date
+                data_divulgacao = None
+                try:
+                    data_divulgacao_element = container.locator('xpath=.//span[@class="normal-text"]').first
+                    if data_divulgacao_element.count() > 0:
+                        data_divulgacao = data_divulgacao_element.inner_text().strip()
+                except:
+                    pass
+                
+                # Find ALL links in this container
+                link_elements = container.locator('xpath=.//a').all()
+                
+                if len(link_elements) > 0:
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f'Document {idx + 1} ({nome_documento}): Found {len(link_elements)} links', 
+                        "info"
+                    )
+                    
+                    # Process each link
+                    for link_idx, link_element in enumerate(link_elements):
+                        try:
+                            # Click the link and capture URL from new tab
+                            with page.context.expect_page(timeout=15000) as new_page_info:
+                                link_element.click(timeout=10000)
+                            
+                            new_page = new_page_info.value
+                            new_page.wait_for_load_state('domcontentloaded', timeout=10000)
+                            link_documento = new_page.url
+                            new_page.close()
+                            
+                            self.cls_create_log.log_message(
+                                self.logger, 
+                                f'  Link {link_idx + 1}/{len(link_elements)}: {link_documento}', 
+                                "info"
+                            )
+                            
+                            # Create a separate record for each link
+                            document_data = {
+                                "CODIGO_DEBENTURE": codigo_debenture,
+                                "EMISSOR": emissor,
+                                "SETOR": setor,
+                                "NOME_DOCUMENTO": nome_documento,
+                                "DATA_DIVULGACAO_DOCUMENTO": data_divulgacao,
+                                "LINK_DOCUMENTO": link_documento,
+                            }
+                            
+                            list_documents.append(document_data)
+                            
+                            # Small delay between clicking links
+                            time.sleep(1)
+                            
+                        except Exception as e:
+                            self.cls_create_log.log_message(
+                                self.logger, 
+                                f'  Error extracting link {link_idx + 1} for document {nome_documento}: {e}', 
+                                "warning"
+                            )
+                else:
+                    # No links found - still create a record with null link
+                    self.cls_create_log.log_message(
+                        self.logger, 
+                        f'Document {idx + 1} ({nome_documento}): No links found', 
+                        "warning"
+                    )
+                    
+                    document_data = {
+                        "CODIGO_DEBENTURE": codigo_debenture,
+                        "EMISSOR": emissor,
+                        "SETOR": setor,
+                        "NOME_DOCUMENTO": nome_documento,
+                        "DATA_DIVULGACAO_DOCUMENTO": data_divulgacao,
+                        "LINK_DOCUMENTO": None,
+                    }
+                    
+                    list_documents.append(document_data)
+                    
+            except Exception as e:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f'Error extracting document {idx + 1} for {codigo_debenture}: {e}', 
+                    "warning"
+                )
+        
+        return list_documents
+    
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> StringIO:
+        """Parse the raw file content.
+        
+        This method is kept for compatibility but not used in web scraping.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        StringIO
+            The parsed content.
+        """
+        return StringIO()
+    
+    def transform_data(
+        self, 
+        raw_data: list
+    ) -> pd.DataFrame:
+        """Transform scraped documents data into a DataFrame.
+        
+        Parameters
+        ----------
+        raw_data : list
+            The scraped documents data list.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame.
+        """
+        if not raw_data:
+            return pd.DataFrame()
+        
+        df_ = pd.DataFrame(raw_data)
+        
+        # Only apply date replacement to DATA_DIVULGACAO_DOCUMENTO column
+        if "DATA_DIVULGACAO_DOCUMENTO" in df_.columns:
+            df_["DATA_DIVULGACAO_DOCUMENTO"] = df_["DATA_DIVULGACAO_DOCUMENTO"].apply(
+                lambda x: x.replace("-", "01/01/2100") if x and isinstance(x, str) else "01/01/2100"
+            )
         
         return df_

@@ -8,18 +8,31 @@ import pandas as pd
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
     AnbimaDataDebenturesAvailable,
     AnbimaDataDebenturesCharacteristics,
+    AnbimaDataDebenturesDocuments,
 )
 
 
-cls_ = AnbimaDataDebenturesCharacteristics(
+cls_ = AnbimaDataDebenturesDocuments(
     date_ref=None, 
     logger=None, 
     cls_db=None, 
-    debenture_codes=["ABPA11", "AAJR11", "AALM11"],
+    debenture_codes=["AALM11", "ABPA11", "AAJR11"],
 )
+
 df_ = cls_.run()
 print(f"DF ANBIMA DEBENTURES: \n{df_}")
 df_.info()
+
+
+# cls_ = AnbimaDataDebenturesCharacteristics(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None, 
+#     debenture_codes=["AALM11", "ABPA11", "AAJR11"],
+# )
+# df_ = cls_.run()
+# print(f"DF ANBIMA DEBENTURES: \n{df_}")
+# df_.info()
 
 
 # cls_ = AnbimaDataDebenturesAvailable(
