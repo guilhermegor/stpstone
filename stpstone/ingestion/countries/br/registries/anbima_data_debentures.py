@@ -7,7 +7,7 @@ from logging import Logger
 from random import randint
 import re
 import time
-from typing import Optional, Union
+from typing import Optional, TypedDict, Union
 from urllib.parse import unquote
 
 import pandas as pd
@@ -24,6 +24,17 @@ from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
+
+
+class ResultDocumentRecord(TypedDict):
+    """Result Document Record."""
+
+    CODIGO_DEBENTURE: str
+    EMISSOR: str
+    SETOR: str
+    NOME_DOCUMENTO: str
+    DATA_DIVULGACAO_DOCUMENTO: str
+    LINK_DOCUMENTO: str
 
 
 class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
@@ -796,8 +807,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
                     page.goto(url)
                     page.wait_for_timeout(timeout_ms)
                     
-                    documents_data = self._extract_debenture_data(
-                        page, debenture_code, debenture_code)
+                    documents_data = self._extract_debenture_data(page, debenture_code)
                     list_documents_data.extend(documents_data)
                     
                     self.cls_create_log.log_message(
@@ -828,8 +838,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
     
     def _extract_debenture_data(
         self, 
-        page: PlaywrightPage, 
-        id_number: str, 
+        page: PlaywrightPage,
         nome: str
     ) -> list[dict]:
         """Extract debenture documents data using specific XPaths.
@@ -838,8 +847,6 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         ----------
         page : PlaywrightPage
             The Playwright page object.
-        id_number : str
-            The ID number/code of the debenture item.
         nome : str
             The name/code of the debenture.
         
@@ -848,19 +855,16 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         list[dict]
             List of dictionaries containing extracted document data.
         """
-        # Extract base debenture information
         codigo_debenture = self._extract_codigo_debenture(page, nome)
         emissor = self._extract_emissor(page)
         setor = self._extract_setor(page)
         
-        # Find all document containers
         document_containers = self._find_document_containers(page, codigo_debenture)
         
         if not document_containers:
             return []
         
-        # Process each document container
-        list_documents = []
+        list_documents: list[dict[str, Union[str, int, float, date]]] = []
         for idx, container in enumerate(document_containers):
             documents = self._process_document_container(
                 container, idx, codigo_debenture, emissor, setor, page
@@ -941,7 +945,9 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         return None
 
     def _find_document_containers(
-        self, page: PlaywrightPage, codigo_debenture: str
+        self, 
+        page: PlaywrightPage, 
+        codigo_debenture: str,
     ) -> list:
         """Find all document containers on the page.
         
@@ -1020,7 +1026,6 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
                     codigo_debenture, emissor, setor, page, idx
                 )
             else:
-                # No links found - create record with null link
                 self.cls_create_log.log_message(
                     self.logger, 
                     f'Document {idx + 1} ({nome_documento}): No links found', 
@@ -1052,24 +1057,20 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         Optional[str]
             The extracted document name or None.
         """
-        # Strategy 1: Try <p> element with class="large-text-bold"
         nome_documento = self._try_extract_by_xpath(
             container, './/p[@class="large-text-bold"]'
         )
         
-        # Strategy 2: Try any <p> in card header
         if not nome_documento:
             nome_documento = self._try_extract_by_xpath(
                 container, './/div[@class="anbima-ui-card__header"]//p'
             )
-        
-        # Strategy 3: Try parent article header
+            
         if not nome_documento:
             nome_documento = self._try_extract_by_xpath(
                 container, './ancestor::article[1]//h2[@class="large-text-bold"]'
             )
-        
-        # Strategy 4: Last resort - any <p> in container
+            
         if not nome_documento:
             nome_documento = self._try_extract_by_xpath(container, './/p')
 
@@ -1121,16 +1122,12 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
             The extracted document name from URL or None.
         """
         try:
-            # Get the page object from the container's context
-            # We need access to the page to open new tabs
             link_element = container.locator('xpath=.//a').first
             if link_element.count() == 0:
                 return None
             
-            # Get the page from the container
             page = container.page
             
-            # Click the link and capture the new tab URL
             try:
                 with page.context.expect_page(timeout=10000) as new_page_info:
                     link_element.click(timeout=8000)
@@ -1140,38 +1137,34 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
                 url = new_page.url
                 new_page.close()
                 
-                # Extract filename from URL
-                # Example: .../AALM11_Ata%20de%20AGD_20230411_000.pdf
                 filename = url.split('/')[-1]
                 
-                # URL decode to handle %20 and other encoded characters
                 filename = unquote(filename)
                 
-                # Remove file extension
                 filename_no_ext = filename.rsplit('.', 1)[0]
                 
-                # Split by underscore
-                # Pattern: CODE_DOCUMENT_NAME_DATE_VERSION
                 parts = filename_no_ext.split('_')
                 
                 if len(parts) >= 3:
-                    # Remove first part (code) and last two parts (date and version)
-                    # Join the remaining parts as the document name
                     document_name_parts = parts[1:-2]
                     
                     if document_name_parts:
-                        # Join parts and clean up
                         document_name = ' '.join(document_name_parts).strip()
-                        # Convert to uppercase for consistency
                         return document_name.upper() if document_name else None
                         
             except Exception as e:
-                # If clicking fails, silently return None
-                # This is a fallback strategy, so failures are acceptable
-                pass
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f'Error extracting document name from URL: {e}', 
+                    "warning"
+                )
                 
-        except Exception:
-            pass
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'Error extracting document name from link URL: {e}', 
+                "warning"
+            )
         
         return None
 
@@ -1234,20 +1227,20 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
             "info"
         )
         
-        documents = []
+        list_documents: list[dict] = []
         for link_idx, link_element in enumerate(link_elements):
-            link_documento = self._extract_link_url(
+            link_document = self._extract_link_url(
                 link_element, page, link_idx, len(link_elements)
             )
             
-            if link_documento:
-                documents.append(self._create_document_record(
+            if link_document:
+                list_documents.append(self._create_document_record(
                     codigo_debenture, emissor, setor,
-                    nome_documento, data_divulgacao, link_documento
+                    nome_documento, data_divulgacao, link_document
                 ))
-                time.sleep(1)  # Small delay between clicking links
+                time.sleep(1)
         
-        return documents
+        return list_documents
 
     def _extract_link_url(
         self,
@@ -1280,16 +1273,16 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
             
             new_page = new_page_info.value
             new_page.wait_for_load_state('domcontentloaded', timeout=10000)
-            link_documento = new_page.url
+            link_document = new_page.url
             new_page.close()
             
             self.cls_create_log.log_message(
                 self.logger, 
-                f'  Link {link_idx + 1}/{total_links}: {link_documento}', 
+                f'  Link {link_idx + 1}/{total_links}: {link_document}', 
                 "info"
             )
             
-            return link_documento
+            return link_document
             
         except Exception as e:
             self.cls_create_log.log_message(
@@ -1306,8 +1299,8 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         setor: Optional[str],
         nome_documento: Optional[str],
         data_divulgacao: Optional[str],
-        link_documento: Optional[str]
-    ) -> dict:
+        link_document: Optional[str]
+    ) -> ResultDocumentRecord:
         """Create a document record dictionary.
         
         Parameters
@@ -1322,7 +1315,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
             The document name.
         data_divulgacao : Optional[str]
             The document date.
-        link_documento : Optional[str]
+        link_document : Optional[str]
             The document link.
         
         Returns
@@ -1336,7 +1329,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
             "SETOR": setor,
             "NOME_DOCUMENTO": nome_documento,
             "DATA_DIVULGACAO_DOCUMENTO": data_divulgacao,
-            "LINK_DOCUMENTO": link_documento,
+            "LINK_DOCUMENTO": link_document,
         }
     
     def parse_raw_file(
@@ -1380,10 +1373,10 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         df_ = pd.DataFrame(raw_data)
         
-        # Only apply date replacement to DATA_DIVULGACAO_DOCUMENTO column
         if "DATA_DIVULGACAO_DOCUMENTO" in df_.columns:
             df_["DATA_DIVULGACAO_DOCUMENTO"] = df_["DATA_DIVULGACAO_DOCUMENTO"].apply(
-                lambda x: x.replace("-", "01/01/2100") if x and isinstance(x, str) else "01/01/2100"
+                lambda x: x.replace("-", "01/01/2100") 
+                    if x and isinstance(x, str) else "01/01/2100"
             )
         
         return df_
