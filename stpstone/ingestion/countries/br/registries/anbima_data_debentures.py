@@ -848,177 +848,496 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         list[dict]
             List of dictionaries containing extracted document data.
         """
-        list_documents = []
-        
-        # Extract base debenture info
-        try:
-            codigo_element = page.locator('xpath=//*[@id="root"]/main/div[1]/div/div/h1').first
-            codigo_debenture = codigo_element.inner_text().strip() \
-                if codigo_element.is_visible(timeout=5000) else nome
-        except:
-            codigo_debenture = nome
-        
-        try:
-            emissor_element = page.locator(
-                'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd').first
-            emissor = emissor_element.inner_text().strip() \
-                if emissor_element.is_visible(timeout=5000) else None
-        except:
-            emissor = None
-        
-        try:
-            setor_element = page.locator(
-                'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd').first
-            setor = setor_element.inner_text().strip() \
-                if setor_element.is_visible(timeout=5000) else None
-        except:
-            setor = None
+        # Extract base debenture information
+        codigo_debenture = self._extract_codigo_debenture(page, nome)
+        emissor = self._extract_emissor(page)
+        setor = self._extract_setor(page)
         
         # Find all document containers
-        xpath_base = '//div[@class="card-content__container " and @style="padding: 0px; margin-bottom: 24px;"]'
+        document_containers = self._find_document_containers(page, codigo_debenture)
+        
+        if not document_containers:
+            return []
+        
+        # Process each document container
+        list_documents = []
+        for idx, container in enumerate(document_containers):
+            documents = self._process_document_container(
+                container, idx, codigo_debenture, emissor, setor, page
+            )
+            list_documents.extend(documents)
+        
+        return list_documents
+
+    def _extract_codigo_debenture(self, page: PlaywrightPage, fallback_nome: str) -> str:
+        """Extract codigo debenture from page header.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        fallback_nome : str
+            Fallback value if extraction fails.
+        
+        Returns
+        -------
+        str
+            The extracted codigo debenture.
+        """
+        try:
+            codigo_element = page.locator(
+                'xpath=//*[@id="root"]/main/div[1]/div/div/h1'
+            ).first
+            if codigo_element.is_visible(timeout=5000):
+                return codigo_element.inner_text().strip()
+        except Exception:
+            pass
+        return fallback_nome
+
+    def _extract_emissor(self, page: PlaywrightPage) -> Optional[str]:
+        """Extract emissor from page.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted emissor or None.
+        """
+        try:
+            emissor_element = page.locator(
+                'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd'
+            ).first
+            if emissor_element.is_visible(timeout=5000):
+                return emissor_element.inner_text().strip()
+        except Exception:
+            pass
+        return None
+
+    def _extract_setor(self, page: PlaywrightPage) -> Optional[str]:
+        """Extract setor from page.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted setor or None.
+        """
+        try:
+            setor_element = page.locator(
+                'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd'
+            ).first
+            if setor_element.is_visible(timeout=5000):
+                return setor_element.inner_text().strip()
+        except Exception:
+            pass
+        return None
+
+    def _find_document_containers(
+        self, page: PlaywrightPage, codigo_debenture: str
+    ) -> list:
+        """Find all document containers on the page.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        codigo_debenture : str
+            The debenture code for logging purposes.
+        
+        Returns
+        -------
+        list
+            List of document container elements.
+        """
+        xpath_base = (
+            '//div[@class="card-content__container " and '
+            '@style="padding: 0px; margin-bottom: 24px;"]'
+        )
         document_containers = page.locator(f'xpath={xpath_base}').all()
         
-        # If no documents found, log and return empty list
         if len(document_containers) == 0:
             self.cls_create_log.log_message(
                 self.logger, 
                 f'No document containers found for {codigo_debenture}', 
                 "warning"
             )
-            return list_documents
+        else:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'Found {len(document_containers)} document containers for {codigo_debenture}', 
+                "info"
+            )
         
+        return document_containers
+
+    def _process_document_container(
+        self,
+        container,
+        idx: int,
+        codigo_debenture: str,
+        emissor: Optional[str],
+        setor: Optional[str],
+        page: PlaywrightPage
+    ) -> list[dict]:
+        """Process a single document container and extract all documents.
+        
+        Parameters
+        ----------
+        container
+            The document container element.
+        idx : int
+            Container index for logging.
+        codigo_debenture : str
+            The debenture code.
+        emissor : Optional[str]
+            The emissor value.
+        setor : Optional[str]
+            The setor value.
+        page : PlaywrightPage
+            The Playwright page object.
+        
+        Returns
+        -------
+        list[dict]
+            List of document records extracted from this container.
+        """
+        try:
+            nome_documento = self._extract_document_name(container)
+            data_divulgacao = self._extract_document_date(container)
+            link_elements = container.locator('xpath=.//a').all()
+            
+            if len(link_elements) > 0:
+                return self._process_document_links(
+                    link_elements, nome_documento, data_divulgacao,
+                    codigo_debenture, emissor, setor, page, idx
+                )
+            else:
+                # No links found - create record with null link
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f'Document {idx + 1} ({nome_documento}): No links found', 
+                    "warning"
+                )
+                return [self._create_document_record(
+                    codigo_debenture, emissor, setor, 
+                    nome_documento, data_divulgacao, None
+                )]
+                
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'Error extracting document {idx + 1} for {codigo_debenture}: {e}', 
+                "warning"
+            )
+            return []
+
+    def _extract_document_name(self, container) -> Optional[str]:
+        """Extract document name from container using multiple strategies.
+        
+        Parameters
+        ----------
+        container
+            The document container element.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted document name or None.
+        """
+        # Strategy 1: Try <p> element with class="large-text-bold"
+        nome_documento = self._try_extract_by_xpath(
+            container, './/p[@class="large-text-bold"]'
+        )
+        
+        # Strategy 2: Try any <p> in card header
+        if not nome_documento:
+            nome_documento = self._try_extract_by_xpath(
+                container, './/div[@class="anbima-ui-card__header"]//p'
+            )
+        
+        # Strategy 3: Try parent article header
+        if not nome_documento:
+            nome_documento = self._try_extract_by_xpath(
+                container, './ancestor::article[1]//h2[@class="large-text-bold"]'
+            )
+        
+        # Strategy 4: Last resort - any <p> in container
+        if not nome_documento:
+            nome_documento = self._try_extract_by_xpath(container, './/p')
+
+        if not nome_documento:
+            nome_documento = self._extract_document_name_from_link(container)
+        
+        return nome_documento
+
+    def _try_extract_by_xpath(self, container, xpath: str) -> Optional[str]:
+        """Try to extract text from an element using XPath.
+        
+        Parameters
+        ----------
+        container
+            The container element.
+        xpath : str
+            The XPath expression.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted text or None.
+        """
+        try:
+            element = container.locator(f'xpath={xpath}').first
+            if element.count() > 0:
+                text = element.inner_text().strip()
+                return text if text else None
+        except Exception:
+            pass
+        return None
+    
+    def _extract_document_name_from_link(self, container) -> Optional[str]:
+        """Extract document name from the first link URL in the container.
+        
+        This method clicks the first link, captures the S3 URL from the new tab,
+        and parses the filename to extract the document type.
+        For example, from 'AALM11_Ata de AGD_20230411_000.pdf', 
+        it extracts 'ATA DE AGD'.
+        
+        Parameters
+        ----------
+        container
+            The document container element.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted document name from URL or None.
+        """
+        try:
+            # Get the page object from the container's context
+            # We need access to the page to open new tabs
+            link_element = container.locator('xpath=.//a').first
+            if link_element.count() == 0:
+                return None
+            
+            # Get the page from the container
+            page = container.page
+            
+            # Click the link and capture the new tab URL
+            try:
+                with page.context.expect_page(timeout=10000) as new_page_info:
+                    link_element.click(timeout=8000)
+                
+                new_page = new_page_info.value
+                new_page.wait_for_load_state('domcontentloaded', timeout=8000)
+                url = new_page.url
+                new_page.close()
+                
+                # Extract filename from URL
+                # Example: .../AALM11_Ata%20de%20AGD_20230411_000.pdf
+                filename = url.split('/')[-1]
+                
+                # URL decode to handle %20 and other encoded characters
+                filename = unquote(filename)
+                
+                # Remove file extension
+                filename_no_ext = filename.rsplit('.', 1)[0]
+                
+                # Split by underscore
+                # Pattern: CODE_DOCUMENT_NAME_DATE_VERSION
+                parts = filename_no_ext.split('_')
+                
+                if len(parts) >= 3:
+                    # Remove first part (code) and last two parts (date and version)
+                    # Join the remaining parts as the document name
+                    document_name_parts = parts[1:-2]
+                    
+                    if document_name_parts:
+                        # Join parts and clean up
+                        document_name = ' '.join(document_name_parts).strip()
+                        # Convert to uppercase for consistency
+                        return document_name.upper() if document_name else None
+                        
+            except Exception as e:
+                # If clicking fails, silently return None
+                # This is a fallback strategy, so failures are acceptable
+                pass
+                
+        except Exception:
+            pass
+        
+        return None
+
+    def _extract_document_date(self, container) -> Optional[str]:
+        """Extract document release date from container.
+        
+        Parameters
+        ----------
+        container
+            The document container element.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted date or None.
+        """
+        return self._try_extract_by_xpath(container, './/span[@class="normal-text"]')
+
+    def _process_document_links(
+        self,
+        link_elements: list,
+        nome_documento: Optional[str],
+        data_divulgacao: Optional[str],
+        codigo_debenture: str,
+        emissor: Optional[str],
+        setor: Optional[str],
+        page: PlaywrightPage,
+        container_idx: int
+    ) -> list[dict]:
+        """Process all links in a document container.
+        
+        Parameters
+        ----------
+        link_elements : list
+            List of link elements.
+        nome_documento : Optional[str]
+            The document name.
+        data_divulgacao : Optional[str]
+            The document date.
+        codigo_debenture : str
+            The debenture code.
+        emissor : Optional[str]
+            The emissor value.
+        setor : Optional[str]
+            The setor value.
+        page : PlaywrightPage
+            The Playwright page object.
+        container_idx : int
+            Container index for logging.
+        
+        Returns
+        -------
+        list[dict]
+            List of document records.
+        """
         self.cls_create_log.log_message(
             self.logger, 
-            f'Found {len(document_containers)} document containers for {codigo_debenture}', 
+            f'Document {container_idx + 1} ({nome_documento}): '
+            f'Found {len(link_elements)} links', 
             "info"
         )
         
-        for idx, container in enumerate(document_containers):
-            try:
-                # Extract document name with multiple fallback strategies
-                nome_documento = None
-                
-                # Strategy 1: Try to get the <p> element with class="large-text-bold"
-                try:
-                    nome_doc_element = container.locator('xpath=.//p[@class="large-text-bold"]').first
-                    if nome_doc_element.count() > 0:
-                        nome_documento = nome_doc_element.inner_text().strip()
-                except:
-                    pass
-                
-                # Strategy 2: If still None, try any <p> element in the card header
-                if not nome_documento:
-                    try:
-                        nome_doc_element = container.locator('xpath=.//div[@class="anbima-ui-card__header"]//p').first
-                        if nome_doc_element.count() > 0:
-                            nome_documento = nome_doc_element.inner_text().strip()
-                    except:
-                        pass
-                
-                # Strategy 3: Try to get from parent article header (for sections like "Ata de AGD")
-                if not nome_documento:
-                    try:
-                        # Go up to find the parent article and get its header
-                        parent_article = container.locator('xpath=./ancestor::article[1]//h2[@class="large-text-bold"]').first
-                        if parent_article.count() > 0:
-                            nome_documento = parent_article.inner_text().strip()
-                    except:
-                        pass
-                
-                # Strategy 4: Last resort - any <p> in the container
-                if not nome_documento:
-                    try:
-                        nome_doc_element = container.locator('xpath=.//p').first
-                        if nome_doc_element.count() > 0:
-                            nome_documento = nome_doc_element.inner_text().strip()
-                    except:
-                        pass
-                
-                # Extract document release date
-                data_divulgacao = None
-                try:
-                    data_divulgacao_element = container.locator('xpath=.//span[@class="normal-text"]').first
-                    if data_divulgacao_element.count() > 0:
-                        data_divulgacao = data_divulgacao_element.inner_text().strip()
-                except:
-                    pass
-                
-                # Find ALL links in this container
-                link_elements = container.locator('xpath=.//a').all()
-                
-                if len(link_elements) > 0:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f'Document {idx + 1} ({nome_documento}): Found {len(link_elements)} links', 
-                        "info"
-                    )
-                    
-                    # Process each link
-                    for link_idx, link_element in enumerate(link_elements):
-                        try:
-                            # Click the link and capture URL from new tab
-                            with page.context.expect_page(timeout=15000) as new_page_info:
-                                link_element.click(timeout=10000)
-                            
-                            new_page = new_page_info.value
-                            new_page.wait_for_load_state('domcontentloaded', timeout=10000)
-                            link_documento = new_page.url
-                            new_page.close()
-                            
-                            self.cls_create_log.log_message(
-                                self.logger, 
-                                f'  Link {link_idx + 1}/{len(link_elements)}: {link_documento}', 
-                                "info"
-                            )
-                            
-                            # Create a separate record for each link
-                            document_data = {
-                                "CODIGO_DEBENTURE": codigo_debenture,
-                                "EMISSOR": emissor,
-                                "SETOR": setor,
-                                "NOME_DOCUMENTO": nome_documento,
-                                "DATA_DIVULGACAO_DOCUMENTO": data_divulgacao,
-                                "LINK_DOCUMENTO": link_documento,
-                            }
-                            
-                            list_documents.append(document_data)
-                            
-                            # Small delay between clicking links
-                            time.sleep(1)
-                            
-                        except Exception as e:
-                            self.cls_create_log.log_message(
-                                self.logger, 
-                                f'  Error extracting link {link_idx + 1} for document {nome_documento}: {e}', 
-                                "warning"
-                            )
-                else:
-                    # No links found - still create a record with null link
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f'Document {idx + 1} ({nome_documento}): No links found', 
-                        "warning"
-                    )
-                    
-                    document_data = {
-                        "CODIGO_DEBENTURE": codigo_debenture,
-                        "EMISSOR": emissor,
-                        "SETOR": setor,
-                        "NOME_DOCUMENTO": nome_documento,
-                        "DATA_DIVULGACAO_DOCUMENTO": data_divulgacao,
-                        "LINK_DOCUMENTO": None,
-                    }
-                    
-                    list_documents.append(document_data)
-                    
-            except Exception as e:
-                self.cls_create_log.log_message(
-                    self.logger, 
-                    f'Error extracting document {idx + 1} for {codigo_debenture}: {e}', 
-                    "warning"
-                )
+        documents = []
+        for link_idx, link_element in enumerate(link_elements):
+            link_documento = self._extract_link_url(
+                link_element, page, link_idx, len(link_elements)
+            )
+            
+            if link_documento:
+                documents.append(self._create_document_record(
+                    codigo_debenture, emissor, setor,
+                    nome_documento, data_divulgacao, link_documento
+                ))
+                time.sleep(1)  # Small delay between clicking links
         
-        return list_documents
+        return documents
+
+    def _extract_link_url(
+        self,
+        link_element,
+        page: PlaywrightPage,
+        link_idx: int,
+        total_links: int
+    ) -> Optional[str]:
+        """Extract URL by clicking a link and capturing the new page URL.
+        
+        Parameters
+        ----------
+        link_element
+            The link element to click.
+        page : PlaywrightPage
+            The Playwright page object.
+        link_idx : int
+            Link index for logging.
+        total_links : int
+            Total number of links for logging.
+        
+        Returns
+        -------
+        Optional[str]
+            The extracted URL or None.
+        """
+        try:
+            with page.context.expect_page(timeout=15000) as new_page_info:
+                link_element.click(timeout=10000)
+            
+            new_page = new_page_info.value
+            new_page.wait_for_load_state('domcontentloaded', timeout=10000)
+            link_documento = new_page.url
+            new_page.close()
+            
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'  Link {link_idx + 1}/{total_links}: {link_documento}', 
+                "info"
+            )
+            
+            return link_documento
+            
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'  Error extracting link {link_idx + 1}: {e}', 
+                "warning"
+            )
+            return None
+
+    def _create_document_record(
+        self,
+        codigo_debenture: str,
+        emissor: Optional[str],
+        setor: Optional[str],
+        nome_documento: Optional[str],
+        data_divulgacao: Optional[str],
+        link_documento: Optional[str]
+    ) -> dict:
+        """Create a document record dictionary.
+        
+        Parameters
+        ----------
+        codigo_debenture : str
+            The debenture code.
+        emissor : Optional[str]
+            The emissor value.
+        setor : Optional[str]
+            The setor value.
+        nome_documento : Optional[str]
+            The document name.
+        data_divulgacao : Optional[str]
+            The document date.
+        link_documento : Optional[str]
+            The document link.
+        
+        Returns
+        -------
+        dict
+            The document record.
+        """
+        return {
+            "CODIGO_DEBENTURE": codigo_debenture,
+            "EMISSOR": emissor,
+            "SETOR": setor,
+            "NOME_DOCUMENTO": nome_documento,
+            "DATA_DIVULGACAO_DOCUMENTO": data_divulgacao,
+            "LINK_DOCUMENTO": link_documento,
+        }
     
     def parse_raw_file(
         self, 
