@@ -172,14 +172,12 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
                 "info"
             )
             
-            # Get total pages from first page load
             first_url = f"{self.base_url}?size=100&page={self.start_page}"
             page.goto(first_url)
             page.wait_for_timeout(timeout_ms)
             
             total_pages_available = self._get_total_pages(page)
             
-            # Adjust end_page if it exceeds total available pages
             actual_end_page = min(self.end_page, total_pages_available - 1)
             
             self.cls_create_log.log_message(
@@ -260,7 +258,6 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
             
             if pagination_element.is_visible(timeout=5000):
                 text = pagination_element.inner_text().strip()
-                # Extract number from text like "de 150"
                 match = re.search(r'(\d+)', text)
                 if match:
                     total_pages = int(match.group(1))
@@ -297,26 +294,21 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
             Dictionary containing extracted fund data.
         """
         data = {}
-
-        # Extract NOME_FUNDO
+        
         data["NOME_FUNDO"] = self._extract_from_card(
             card_element, 'xpath=.//*[@id="title"]'
         )
         
-        # Extract LINK_FUNDO
         data["LINK_FUNDO"] = self._extract_link_from_card(card_element)
         
-        # Extract tags (TIPO_FUNDO, PUBLICO_ALVO, STATUS_FUNDO)
         tags_data = self._extract_tags(card_element)
         data.update(tags_data)
         
-        # Extract CNPJ_FUNDO
         data["CNPJ_FUNDO"] = self._extract_from_card(
             card_element, 
             'xpath=.//p[@class="AccordionFundosCard_id__ddKzx"]'
         )
         
-        # Extract cell data
         cells_data = self._extract_cells(card_element)
         data.update(cells_data)
         
@@ -366,7 +358,6 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
             if link_element.count() > 0:
                 href = link_element.get_attribute('href')
                 if href:
-                    # Make it a full URL if it's relative
                     if href.startswith('/'):
                         return f"https://data.anbima.com.br{href}"
                     return href
@@ -392,26 +383,21 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
         }
         
         try:
-            # Get all regular tags
             regular_tags = card_element.locator(
                 'xpath=.//div[@class="AccordionFundosCard_tags__oIM0g"]'
                 '/p[@class="_tag_1p5q1_1"]'
             ).all()
             
-            # Get status tag separately
             status_tag = card_element.locator(
                 'xpath=.//p[@class="_tag_1p5q1_1 AccordionFundosCard_lastTag__Z7B_i"]'
             ).first
             
-            # Extract TIPO_FUNDO (first regular tag)
             if len(regular_tags) >= 1:
                 data["TIPO_FUNDO"] = regular_tags[0].inner_text().strip()
-            
-            # Extract PUBLICO_ALVO (second regular tag, if exists)
+                
             if len(regular_tags) >= 2:
                 data["PUBLICO_ALVO"] = regular_tags[1].inner_text().strip()
-            
-            # Extract STATUS_FUNDO
+                
             if status_tag.count() > 0:
                 data["STATUS_FUNDO"] = status_tag.inner_text().strip()
                 
