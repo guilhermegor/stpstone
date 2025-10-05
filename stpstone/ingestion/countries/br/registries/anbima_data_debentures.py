@@ -11,7 +11,7 @@ from typing import Optional, TypedDict, Union
 from urllib.parse import unquote
 
 import pandas as pd
-from playwright.sync_api import Page as PlaywrightPage, sync_playwright
+from playwright.sync_api import Locator, Page as PlaywrightPage, sync_playwright
 from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
@@ -67,6 +67,12 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         -------
         None
 
+        Raises
+        ------
+        ValueError
+            If start_page is less than 0.
+            If end_page is less than start_page.
+
         Notes
         -----
         [1] Metadata: https://data.anbima.com.br/busca/debentures
@@ -86,9 +92,9 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
         self.base_url = "https://data.anbima.com.br/busca/debentures"
         
         if start_page < 0:
-            raise ValueError("start_page deve ser maior ou igual a 0")
+            raise ValueError("start_page must be greater than 0")
         if end_page < start_page:
-            raise ValueError("end_page deve ser maior ou igual a start_page")
+            raise ValueError("end_page must be greater or equal than the start_page")
         
         self.start_page = start_page
         self.end_page = end_page
@@ -106,10 +112,8 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout_ms : int, optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Whether to verify the SSL certificate, by default True
         bool_insert_or_ignore : bool, optional
             Whether to insert or ignore the data, by default False
         str_table_name : str, optional
@@ -158,10 +162,8 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout_ms : int, optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
-            Verify the SSL certificate, by default True
         
         Returns
         -------
@@ -208,14 +210,14 @@ class AnbimaDataDebenturesAvailable(ABCIngestionOperations):
                             
                 self.cls_create_log.log_message(
                     self.logger, 
-                    f"✅ Page {page_num}: {len(list_page_data)} itens", 
+                    f"✅ Page {page_num}: {len(list_page_data)} items", 
                     "info"
                 )
                 
                 list_pages_data.extend(list_page_data)
                 
                 if page_num < self.end_page:
-                    time.sleep(randint(2, 10))
+                    time.sleep(randint(2, 10)) # noqa S311: standard pseudo-random generators are not suitable for cryptographic purposes
             
             browser.close()
         
@@ -435,6 +437,7 @@ class AnbimaDataDebenturesCharacteristics(ABCIngestionOperations):
                 "GARANTIA": str,
                 "PU_PAR": str,
                 "PU_INDICATIVO": str,
+                "PU_PAR_2": str,
             }, 
             str_fmt_dt="DD/MM/YYYY",
             url=self.base_url,
@@ -516,15 +519,14 @@ class AnbimaDataDebenturesCharacteristics(ABCIngestionOperations):
                         "error"
                     )
                 
-                time.sleep(randint(2, 8))
+                time.sleep(randint(2, 8)) # noqa S311: standard pseudo-random generators are not suitable for cryptographic purposes
             
             browser.close()
         
         self.cls_create_log.log_message(
             self.logger, 
-            "💾 Characteristics scraping finished. Total: {} records processed.".format(
-                len(list_characteristics_data)
-            ), 
+            f"💾 Characteristics scraping finished. Total: {len(list_characteristics_data)} "
+            "records processed.", 
             "info"
         )
         
@@ -556,42 +558,42 @@ class AnbimaDataDebenturesCharacteristics(ABCIngestionOperations):
 
         xpath_mapping = {
             'CODIGO_DEBENTURE': '//*[@id="root"]/main/div[1]/div/div/h1',
-            'NUMERO_SERIE': '//*[@id="root"]/main/div[3]/main/div/div[1]/article[1]/article/section/div/div[1]/h2 | //*[@id="root"]/main/div[3]/main/div/div[2]/article[1]/article/section/div/div[1]/h2',
+            'NUMERO_SERIE': '//*[@id="root"]/main/div[3]/main/div/div[1]/article[1]/article/section/div/div[1]/h2 | //*[@id="root"]/main/div[3]/main/div/div[2]/article[1]/article/section/div/div[1]/h2', # noqa E501: line too long
             'REMUNERACAO': '//*[@id="output__container--remuneracao"]/div/span',
-            'DATA_INICIO_RENTABILIDADE': '//*[@id="output__container--dataInicioRentabilidade"]/div/span',
+            'DATA_INICIO_RENTABILIDADE': '//*[@id="output__container--dataInicioRentabilidade"]/div/span', # noqa E501: line too long
             'PERIODO_CAPITALIZACAO_PAPEL': '//*[@id="output__container--expressaoPapel"]/div/span',
-            'QUANTIDADE_SERIE_DATA_EMISSAO': '//*[@id="output__container--quantidadeSerieEmissao"]/div/span',
-            'VOLUME_SERIE_DATA_EMISSAO': '//*[@id="output__container--volumeSerieEmissao"]/div/span',
+            'QUANTIDADE_SERIE_DATA_EMISSAO': '//*[@id="output__container--quantidadeSerieEmissao"]/div/span', # noqa E501: line too long
+            'VOLUME_SERIE_DATA_EMISSAO': '//*[@id="output__container--volumeSerieEmissao"]/div/span', # noqa E501: line too long
             'VNE': '//*[@id="output__container--vne"]/div//span[@class="anbima-ui-output__value"]',
             'VNA': '//*[@id="output__container--vna"]/div//span[@class="anbima-ui-output__value"]',
             'QUANTIDADE_MERCADO_B3': '//*[@id="output__container--quantidadeMercadoB3"]/div/span',
             'ESTOQUE_MERCADO_B3': '//*[@id="output__container--estoqueMercadoB3"]/div/span',
             'DATA_EMISSAO': '//*[@id="output__container--dataEmissao"]/div/span',
             'DATA_VENCIMENTO': '//*[@id="output__container--dataVencimento"]/div/span',
-            'DATA_PROXIMA_REPACTUACAO': '//*[@id="output__container--dataProximaRepactuacao"]/div/span',
+            'DATA_PROXIMA_REPACTUACAO': '//*[@id="output__container--dataProximaRepactuacao"]/div/span', # noqa E501: line too long
             'PRAZO_EMISSAO': '//*[@id="output__container--prazoEmissao"]/div/span',
             'PRAZO_REMANESCENTE': '//*[@id="output__container--prazoRemanescente"]/div/span',
             'RESGATE_ANTECIPADO': '//*[@id="output__container--resgateAntecipado"]/div/span',
             'ISIN': '//*[@id="output__container--isin"]/div/span',
-            'DATA_PROXIMO_EVENTO_AGENDA': '//*[@id="output__container--dataProximoEventoAgenda"]/div/span',
+            'DATA_PROXIMO_EVENTO_AGENDA': '//*[@id="output__container--dataProximoEventoAgenda"]/div/span', # noqa E501: line too long
             'LEI_12_431': '//*[@id="output__container--lei12431"]/div/span',
             'ARTIGO': '//*[@id="output__container--artigo"]/div/span', 
-            'EMISSAO': '//div[@id="root"]/main/div[3]/main/div/div[1]/article[2]/article/section/div/div[1]/h2',
+            'EMISSAO': '//div[@id="root"]/main/div[3]/main/div/div[1]/article[2]/article/section/div/div[1]/h2', # noqa E501: line too long
             'EMPRESA': '//*[@id="output__container--empresa"]/div/span',
             'SETOR': '//*[@id="output__container--setor"]/div/span', 
             'CNPJ': '//*[@id="output__container--cnpj"]/div/span',
             'VOLUME_EMISSAO': '//*[@id="output__container--volumeEmissao"]/div/span', 
             'QUANTIDADE_EMISSAO': '//*[@id="output__container--quantidadeEmissao"]/div/span',
-            'QUANTIDADE_MERCADO_B3': '//*[@id="output__container--quantidadeMercadoB3Emissao"]/div/span',
-            'COORDENADOR_LIDER_NOME': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[1]',
-            'COORDENADOR_LIDER_CNPJ': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[2]', 
-            'AGENTE_FIDUCIARIO_NOME': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[1]', 
-            'AGENTE_FIDUCIARIO_CNPJ': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[2]',
+            'QUANTIDADE_MERCADO_B3': '//*[@id="output__container--quantidadeMercadoB3Emissao"]/div/span', # noqa E501: line too long
+            'COORDENADOR_LIDER_NOME': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[1]',# noqa E501: line too long
+            'COORDENADOR_LIDER_CNPJ': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[2]', # noqa E501: line too long
+            'AGENTE_FIDUCIARIO_NOME': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[1]', # noqa E501: line too long
+            'AGENTE_FIDUCIARIO_CNPJ': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[2]', # noqa E501: line too long
             'BANCO_MANDATARIO_NOME': '//*[@id="output__container--bancoMandatorio"]/div/span',
             'GARANTIA': '//*[@id="output__container--garantia"]/div/span',
-            'PU_PAR': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[1]/p[2]', 
-            'PU_INDICATIVO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[2]/p[2]', 
-            'PU_PAR': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[3]/p[2]',
+            'PU_PAR': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[1]/p[2]', # noqa E501: line too long
+            'PU_INDICATIVO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[2]/p[2]', # noqa E501: line too long
+            'PU_PAR_2': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[3]/p[2]', # noqa E501: line too long
         }
 
         for field_name, xpath in xpath_mapping.items():
@@ -824,7 +826,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
                         "error"
                     )
                 
-                time.sleep(randint(2, 8))
+                time.sleep(randint(2, 8)) # noqa S311: standard pseudo-random generators are not suitable for cryptographic purposes
             
             browser.close()
         
@@ -892,14 +894,12 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         str
             The extracted codigo debenture.
         """
-        try:
+        with suppress(Exception):
             codigo_element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/h1'
             ).first
             if codigo_element.is_visible(timeout=5000):
                 return codigo_element.inner_text().strip()
-        except Exception:
-            pass
         return fallback_nome
 
     def _extract_emissor(self, page: PlaywrightPage) -> Optional[str]:
@@ -915,14 +915,12 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         Optional[str]
             The extracted emissor or None.
         """
-        try:
+        with suppress(Exception):
             emissor_element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd'
             ).first
             if emissor_element.is_visible(timeout=5000):
                 return emissor_element.inner_text().strip()
-        except Exception:
-            pass
         return None
 
     def _extract_setor(self, page: PlaywrightPage) -> Optional[str]:
@@ -938,14 +936,12 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         Optional[str]
             The extracted setor or None.
         """
-        try:
+        with suppress(Exception):
             setor_element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd'
             ).first
             if setor_element.is_visible(timeout=5000):
                 return setor_element.inner_text().strip()
-        except Exception:
-            pass
         return None
 
     def _find_document_containers(
@@ -990,7 +986,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
 
     def _process_document_container(
         self,
-        container,
+        container: Locator,
         idx: int,
         codigo_debenture: str,
         emissor: Optional[str],
@@ -1001,7 +997,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         Parameters
         ----------
-        container
+        container : Locator
             The document container element.
         idx : int
             Container index for logging.
@@ -1048,12 +1044,15 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
             )
             return []
 
-    def _extract_document_name(self, container) -> Optional[str]:
+    def _extract_document_name(
+        self, 
+        container: Locator
+    ) -> Optional[str]:
         """Extract document name from container using multiple strategies.
         
         Parameters
         ----------
-        container
+        container : Locator
             The document container element.
         
         Returns
@@ -1083,12 +1082,16 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         return nome_documento
 
-    def _try_extract_by_xpath(self, container, xpath: str) -> Optional[str]:
+    def _try_extract_by_xpath(
+        self, 
+        container: Locator, 
+        xpath: str
+    ) -> Optional[str]:
         """Try to extract text from an element using XPath.
         
         Parameters
         ----------
-        container
+        container : Locator
             The container element.
         xpath : str
             The XPath expression.
@@ -1098,16 +1101,17 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         Optional[str]
             The extracted text or None.
         """
-        try:
+        with suppress(Exception):
             element = container.locator(f'xpath={xpath}').first
             if element.count() > 0:
                 text = element.inner_text().strip()
                 return text if text else None
-        except Exception:
-            pass
         return None
     
-    def _extract_document_name_from_link(self, container) -> Optional[str]:
+    def _extract_document_name_from_link(
+        self, 
+        container: Locator
+    ) -> Optional[str]:
         """Extract document name from the first link URL in the container.
         
         This method clicks the first link, captures the S3 URL from the new tab,
@@ -1117,7 +1121,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         Parameters
         ----------
-        container
+        container : Locator
             The document container element.
         
         Returns
@@ -1172,12 +1176,15 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         return None
 
-    def _extract_document_date(self, container) -> Optional[str]:
+    def _extract_document_date(
+        self, 
+        container: Locator
+    ) -> Optional[str]:
         """Extract document release date from container.
         
         Parameters
         ----------
-        container
+        container : Locator
             The document container element.
         
         Returns
@@ -1248,7 +1255,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
 
     def _extract_link_url(
         self,
-        link_element,
+        link_element: Locator,
         page: PlaywrightPage,
         link_idx: int,
         total_links: int
@@ -1257,7 +1264,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         Parameters
         ----------
-        link_element
+        link_element : Locator
             The link element to click.
         page : PlaywrightPage
             The Playwright page object.
@@ -1324,7 +1331,7 @@ class AnbimaDataDebenturesDocuments(ABCIngestionOperations):
         
         Returns
         -------
-        dict
+        ResultDocumentRecord
             The document record.
         """
         return {
@@ -1564,7 +1571,7 @@ class AnbimaDataDebenturesPrices(ABCIngestionOperations):
                         )
                         
                         if page_num < total_pages:
-                            time.sleep(randint(1, 3))
+                            time.sleep(randint(1, 3)) # noqa S311: standard pseudo-random generator are not cryptographically secure
                     
                     self.cls_create_log.log_message(
                         self.logger, 
@@ -1579,7 +1586,7 @@ class AnbimaDataDebenturesPrices(ABCIngestionOperations):
                         "error"
                     )
                 
-                time.sleep(randint(2, 8))
+                time.sleep(randint(2, 8)) # noqa S311: standard pseudo-random generator are not cryptographically secure
             
             browser.close()
         
@@ -1673,14 +1680,12 @@ class AnbimaDataDebenturesPrices(ABCIngestionOperations):
         str
             The extracted codigo debenture.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/h1'
             ).first
             if element.is_visible(timeout=5000):
                 return element.inner_text().strip()
-        except Exception:
-            pass
         return fallback_code
     
     def _extract_emissor(self, page: PlaywrightPage) -> Optional[str]:
@@ -1696,14 +1701,12 @@ class AnbimaDataDebenturesPrices(ABCIngestionOperations):
         Optional[str]
             The extracted emissor or None.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd'
             ).first
             if element.is_visible(timeout=5000):
                 return element.inner_text().strip()
-        except Exception:
-            pass
         return None
     
     def _extract_setor(self, page: PlaywrightPage) -> Optional[str]:
@@ -1719,14 +1722,12 @@ class AnbimaDataDebenturesPrices(ABCIngestionOperations):
         Optional[str]
             The extracted setor or None.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd'
             ).first
             if element.is_visible(timeout=5000):
                 return element.inner_text().strip()
-        except Exception:
-            pass
         return None
     
     def _extract_price_rows(
@@ -1873,13 +1874,11 @@ class AnbimaDataDebenturesPrices(ABCIngestionOperations):
         Optional[str]
             The extracted text or None.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(f'xpath={xpath}').first
             if element.is_visible(timeout=5000):
                 text = element.inner_text().strip()
                 return text if text else None
-        except Exception:
-            pass
         return None
     
     def parse_raw_file(
@@ -2112,7 +2111,7 @@ class AnbimaDataDebenturesEvents(ABCIngestionOperations):
                         )
                         
                         if page_num < total_pages:
-                            time.sleep(randint(1, 3))
+                            time.sleep(randint(1, 3)) # noqa S311: standard pseudo-random generator are not cryptographically secure
                     
                     self.cls_create_log.log_message(
                         self.logger, 
@@ -2127,7 +2126,7 @@ class AnbimaDataDebenturesEvents(ABCIngestionOperations):
                         "error"
                     )
                 
-                time.sleep(randint(2, 8))
+                time.sleep(randint(2, 8)) # noqa S311: standard pseudo-random generator are not cryptographically secure
             
             browser.close()
         
@@ -2233,14 +2232,12 @@ class AnbimaDataDebenturesEvents(ABCIngestionOperations):
         str
             The extracted codigo debenture.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/h1'
             ).first
             if element.is_visible(timeout=5000):
                 return element.inner_text().strip()
-        except Exception:
-            pass
         return fallback_code
     
     def _extract_emissor(self, page: PlaywrightPage) -> Optional[str]:
@@ -2256,14 +2253,12 @@ class AnbimaDataDebenturesEvents(ABCIngestionOperations):
         Optional[str]
             The extracted emissor or None.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd'
             ).first
             if element.is_visible(timeout=5000):
                 return element.inner_text().strip()
-        except Exception:
-            pass
         return None
     
     def _extract_setor(self, page: PlaywrightPage) -> Optional[str]:
@@ -2279,14 +2274,12 @@ class AnbimaDataDebenturesEvents(ABCIngestionOperations):
         Optional[str]
             The extracted setor or None.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd'
             ).first
             if element.is_visible(timeout=5000):
                 return element.inner_text().strip()
-        except Exception:
-            pass
         return None
     
     def _extract_event_rows(
@@ -2441,13 +2434,11 @@ class AnbimaDataDebenturesEvents(ABCIngestionOperations):
         Optional[str]
             The extracted text or None.
         """
-        try:
+        with suppress(Exception):
             element = page.locator(f'xpath={xpath}').first
             if element.is_visible(timeout=5000):
                 text = element.inner_text().strip()
                 return text if text else None
-        except Exception:
-            pass
         return None
     
     def parse_raw_file(

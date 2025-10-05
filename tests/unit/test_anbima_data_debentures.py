@@ -10,8 +10,8 @@ Tests the web scraping functionality for Anbima debentures data including:
 from datetime import date
 from io import StringIO
 from logging import Logger
-from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from typing import Any
+from unittest.mock import Mock, patch
 
 import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
@@ -24,7 +24,6 @@ from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
     AnbimaDataDebenturesDocuments,
     AnbimaDataDebenturesEvents,
     AnbimaDataDebenturesPrices,
-    ResultDocumentRecord,
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -162,10 +161,10 @@ def sample_characteristics_data() -> list[dict[str, Any]]:
     return [
         {
             "CODIGO_DEBENTURE": "DEB001",
-            "NUMERO_SERIE": "SERIE A",
+            "NUMERO_SERIE": "SERIE A", # codespell:ignore
             "REMUNERACAO": "10.5%",
             "DATA_INICIO_RENTABILIDADE": "01/01/2023",
-            "PERIODO_CAPITALIZACAO_PAPEL": "ANUAL",
+            "PERIODO_CAPITALIZACAO_PAPEL": "ANUAL", # codespell:ignore
             "QUANTIDADE_SERIE_DATA_EMISSAO": "1000",
             "VOLUME_SERIE_DATA_EMISSAO": "1000000.00",
             "VNE": "950.00",
@@ -456,11 +455,10 @@ class TestAnbimaDataDebenturesAvailable:
             DatesBRAnbima=Mock(return_value=mock_dates_br),
             CreateLog=Mock(return_value=mock_create_log),
             DirFilesManagement=Mock(return_value=mock_dir_files_management),
-        ):
-            with pytest.raises(ValueError):
-                AnbimaDataDebenturesAvailable(
-                    logger=mock_logger, start_page=start_page, end_page=end_page
-                )
+        ), pytest.raises(ValueError):
+            AnbimaDataDebenturesAvailable(
+                logger=mock_logger, start_page=start_page, end_page=end_page
+            )
 
     def test_extract_debenture_data_success(
         self,
