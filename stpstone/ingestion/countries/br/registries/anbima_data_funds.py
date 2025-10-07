@@ -8,7 +8,6 @@ from random import randint
 import re
 import time
 from typing import Any, Optional, Union
-from urllib.parse import unquote
 
 import pandas as pd
 from playwright.sync_api import Locator, Page as PlaywrightPage, sync_playwright
@@ -275,7 +274,7 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
     def _extract_fund_data(
         self, 
         page: PlaywrightPage,
-        card_element,
+        card_element: Locator,
         idx: int
     ) -> dict:
         """Extract fund data from a fund card element.
@@ -284,7 +283,7 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
         ----------
         page : PlaywrightPage
             The Playwright page object.
-        card_element
+        card_element : Locator
             The fund card element.
         idx : int
             The index of the fund card.
@@ -317,14 +316,14 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
     
     def _extract_from_card(
         self, 
-        card_element, 
+        card_element: Locator, 
         selector: str
     ) -> Optional[str]:
         """Extract text from an element within the card.
         
         Parameters
         ----------
-        card_element
+        card_element : Locator
             The fund card element.
         selector : str
             The selector string.
@@ -341,12 +340,12 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
                 return text if text else None
         return None
     
-    def _extract_link_from_card(self, card_element) -> Optional[str]:
+    def _extract_link_from_card(self, card_element: Locator) -> Optional[str]:
         """Extract the href attribute from the link in the card.
         
         Parameters
         ----------
-        card_element
+        card_element : Locator
             The fund card element.
         
         Returns
@@ -364,12 +363,12 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
                     return href
         return None
     
-    def _extract_tags(self, card_element) -> dict:
+    def _extract_tags(self, card_element: Locator) -> dict:
         """Extract tag data (TIPO_FUNDO, PUBLICO_ALVO, STATUS_FUNDO).
         
         Parameters
         ----------
-        card_element
+        card_element : Locator
             The fund card element.
         
         Returns
@@ -411,12 +410,12 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
         
         return data
     
-    def _extract_cells(self, card_element) -> dict:
+    def _extract_cells(self, card_element: Locator) -> dict:
         """Extract cell data (PL, APLICACAO_MIN_INICIAL, PRAZO_RESGATE, RENTABILIDADE_12M).
         
         Parameters
         ----------
-        card_element
+        card_element : Locator
             The fund card element.
         
         Returns
@@ -609,7 +608,7 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
         str_table_name_characteristics : str, optional
             The name of the characteristics table, by default "br_anbimadata_funds_characteristics"
         str_table_name_related : str, optional
-            The name of the related structure table, by default "br_anbimadata_funds_related_structure_class_subclass"
+            The name of the related structure table
         str_table_name_about : str, optional
             The name of the about table, by default "br_anbimadata_funds_about"
 
@@ -944,7 +943,8 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
                     self.cls_create_log.log_message(
                         self.logger, 
                         f"✅ About fund data extracted for {fund_code} - "
-                        f"{len([v for v in about_data.values() if v is not None])} fields populated", 
+                        f"{len([v for v in about_data.values() if v is not None])} "
+                            "fields populated", 
                         "info"
                     )
                     
@@ -1008,31 +1008,31 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
         data = {"FUND_CODE": fund_code}
 
         xpath_mapping = {
-            'NOME_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[2]/h2',
-            'CLASSE_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[1]',
-            'CLASSE_ANBIMA_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[2]',
-            'STATUS_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[3]',
-            'CNPJ_COD_ANBIMA_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[4]',
+            'NOME_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[2]/h2', # noqa E501: line too long
+            'CLASSE_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[1]', # noqa E501: line too long
+            'CLASSE_ANBIMA_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[2]', # noqa E501: line too long
+            'STATUS_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[3]', # noqa E501: line too long
+            'CNPJ_COD_ANBIMA_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[1]/div/div[3]/p[4]', # noqa E501: line too long
             'PL': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[1]/p',
-            'ULTIMA_COTA': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[2]/p[1]',
-            'DATA_ULTIMA_COTA': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[2]/p[2]',
-            'APLICACAO_MINIMA_INICIAL': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[3]/p',
-            'PRAZO_RESGATE': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[4]/p[1]',
-            'PERIODO_PRAZO_RESGATE': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[4]/p[2]',
-            'NUMERO_COTISTAS': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[5]/p',
-            'RENTABILIDADE_12M': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[6]/p',
-            'FUNDO_CASCA_NOME': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[1]',
-            'FUNDO_CASCA_CNPJ': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[2]',
-            'TIPO_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[2]/p',
-            'ADMINISTRADOR_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[3]/p',
-            'GESTOR_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[5]/p',
-            'CLASSE_FUNDO_NOME': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[1]/p[1]',
-            'CLASSE_FUNDO_CNPJ': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[1]/p[2]',
-            'IS_ESG': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[1]/p[2]',
-            'BENCHMARK': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[3]/p',
-            'LINK_REGULAMENTO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[2]/a/@href',
-            'SUBCLASSE_NOME_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[4]/div/div/div/article[3]/div/article/p[1]',
-            'SUBCLASSE_CODIGO_ANBIMA': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[4]/div/div/div/article[3]/div/article/p[1]',
+            'ULTIMA_COTA': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[2]/p[1]', # noqa E501: line too long
+            'DATA_ULTIMA_COTA': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[2]/p[2]', # noqa E501: line too long
+            'APLICACAO_MINIMA_INICIAL': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[3]/p', # noqa E501: line too long
+            'PRAZO_RESGATE': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[4]/p[1]', # noqa E501: line too long
+            'PERIODO_PRAZO_RESGATE': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[4]/p[2]', # noqa E501: line too long
+            'NUMERO_COTISTAS': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[5]/p', # noqa E501: line too long
+            'RENTABILIDADE_12M': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[2]/div/article[6]/p', # noqa E501: line too long
+            'FUNDO_CASCA_NOME': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[1]', # noqa E501: line too long
+            'FUNDO_CASCA_CNPJ': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[2]', # noqa E501: line too long
+            'TIPO_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[2]/p', # noqa E501: line too long
+            'ADMINISTRADOR_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[3]/p', # noqa E501: line too long
+            'GESTOR_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[5]/p', # noqa E501: line too long
+            'CLASSE_FUNDO_NOME': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[1]/p[1]', # noqa E501: line too long
+            'CLASSE_FUNDO_CNPJ': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[1]/p[2]', # noqa E501: line too long
+            'IS_ESG': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[1]/p[2]', # noqa E501: line too long
+            'BENCHMARK': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[2]/div/article[3]/p', # noqa E501: line too long
+            'LINK_REGULAMENTO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[1]/div/div[2]/a/@href', # noqa E501: line too long
+            'SUBCLASSE_NOME_FUNDO': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[4]/div/div/div/article[3]/div/article/p[1]', # noqa E501: line too long
+            'SUBCLASSE_CODIGO_ANBIMA': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[4]/div/div/div/article[3]/div/article/p[1]', # noqa E501: line too long
         }
 
         for field_name, xpath in xpath_mapping.items():
@@ -1135,12 +1135,12 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
         
         Parameters
         ----------
-        element : Locator
-            The related structure element.
+        page : PlaywrightPage
+            The Playwright page object.
+        row_idx : int
+            The row index.
         fund_code : str
             The fund code.
-        idx : int
-            The index of the element.
         
         Returns
         -------
@@ -1150,29 +1150,31 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
         data = {"FUND_CODE": fund_code}
         
         xpath_mapping = {
-            'NOME_FUNDO': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//*[@id="title"]',
-            'TIPO_FUNDO': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_tags__0_r1w"]/p[1]',
-            'STATUS_FUNDO': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_tags__0_r1w"]/p[2]',
-            'CODIGO_ANBIMA': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//span[@class="EstruturaDrawerCard_code__LEoiD"]',
-            'PL': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[1]/p[2]',
-            'APLICACAO_INICIAL_MINIMA': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[2]/p[2]',
-            'PRAZO_RESGATE': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[1]/p[3]',
-            'RENTABILIDADE_12M': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[1]/p[4]',
-            'FUNDO_CASCA_NOME': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[1]',
-            'FUNDO_CASCA_CNPJ': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[2]',
+            'NOME_FUNDO': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//*[@id="title"]', # noqa E501: line too long
+            'TIPO_FUNDO': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_tags__0_r1w"]/p[1]', # noqa E501: line too long
+            'STATUS_FUNDO': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_tags__0_r1w"]/p[2]', # noqa E501: line too long
+            'CODIGO_ANBIMA': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//span[@class="EstruturaDrawerCard_code__LEoiD"]', # noqa E501: line too long
+            'PL': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[1]/p[2]', # noqa E501: line too long
+            'APLICACAO_INICIAL_MINIMA': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[2]/p[2]', # noqa E501: line too long
+            'PRAZO_RESGATE': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[1]/p[3]', # noqa E501: line too long
+            'RENTABILIDADE_12M': '//div[@class="EstruturaDrawer_drawer-content__3y7lB"]/a[{}]//div[@class="EstruturaDrawerCard_content__SRfh5"]/div[1]/p[4]', # noqa E501: line too long
+            'FUNDO_CASCA_NOME': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[1]', # noqa E501: line too long
+            'FUNDO_CASCA_CNPJ': '//*[@id="detalhes-do-fundo"]/div[1]/div/div/div[3]/div/div/div/article[1]/div/article[1]/p[2]', # noqa E501: line too long
         }
 
         for field_name, xpath in xpath_mapping.items():
             try:
                 if xpath.endswith('/@href'):
-                    element = page.locator(f"xpath={xpath.format(row_idx).replace('/@href', '')}").first
+                    element = page.locator(
+                        f"xpath={xpath.format(row_idx).replace('/@href', '')}").first
                     if element.count() > 0 and element.is_visible(timeout=5_000):
                         href = element.get_attribute('href')
                         data[field_name] = href if href else None
                     else:
                         data[field_name] = None
                 elif xpath.endswith('/text()[2]'):
-                    element = page.locator(f"xpath={xpath.format(row_idx).replace('/text()[2]', '')}").first
+                    element = page.locator(
+                        f"xpath={xpath.format(row_idx).replace('/text()[2]', '')}").first
                     if element.count() > 0 and element.is_visible(timeout=5_000):
                         text = element.inner_text().strip()
                         parts = text.split('\n')
@@ -1227,81 +1229,81 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
             'STATUS_FUNDO': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[4]/p',
             'IS_ADAPTADO_ICVM175': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[7]/p',
             'CODIGO_ANBIMA_FUNDO': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[2]/p',
-            'DATA_ENCERRAMENTO_FUNDO': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[5]/p',
+            'DATA_ENCERRAMENTO_FUNDO': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[5]/p', # noqa E501: line too long
             'TIPO_FUNDO': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[3]/p',
             'MOEDA_COTACAO': '//*[@id="fundoRef"]/ul/div/div/div/article/div/article[6]/p',
             'NOME_CASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[1]/p',
             'CNPJ_CLASSE': '//*[@id="classeRef"]/article/p[2]',
             'DATA_HORA_ATUALIZACAO_CLASSE': '//*[@id="classeRef"]/div/p/text()[2]',
-            'CODIGO_ANBIMA_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[2]/p',
+            'CODIGO_ANBIMA_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[2]/p', # noqa E501: line too long
             'CATEGORIA_ANBIMA': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[3]/p',
             'TIPO_ANBIMA': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[4]/p',
             'STATUS_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[5]/p',
-            'DATA_INICIO_ATIVIDADE_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[6]/p',
-            'DATA_ENCERRAMENTO_ATIVIDADE_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[7]/p',
+            'DATA_INICIO_ATIVIDADE_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[6]/p', # noqa E501: line too long
+            'DATA_ENCERRAMENTO_ATIVIDADE_CLASSE': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[7]/p', # noqa E501: line too long
             'CATEGORIA_CVM': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[8]/p',
             'SUFIXO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[9]/p',
             'IS_ESG': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[10]/p',
             'COMPOSICAO_FUNDO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[11]/p',
             'BENCHMARK': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[12]/p',
             'FOCO_ATUACAO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[13]/p',
-            'INVESTIMENTO_EXTERIOR': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[14]/p',
-            'PERCENTUAL_PERMITIDO_INVESTIMENTO_EXTERIOR': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[15]/p',
+            'INVESTIMENTO_EXTERIOR': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[14]/p', # noqa E501: line too long
+            'PERCENTUAL_PERMITIDO_INVESTIMENTO_EXTERIOR': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[15]/p', # noqa E501: line too long
             'CREDITO_PRIVADO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[16]/p',
-            'IS_FUNDO_ALAVANCADO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[17]/p',
+            'IS_FUNDO_ALAVANCADO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[17]/p', # noqa E501: line too long
             'FORMA_CONDOMINIO': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[18]/p',
-            'RESPONSABILIDADE_LIMITADA': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[19]/p',
-            'TRIBUTACAO_PERSEGUIDA': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[20]/p',
+            'RESPONSABILIDADE_LIMITADA': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[19]/p', # noqa E501: line too long
+            'TRIBUTACAO_PERSEGUIDA': '//*[@id="classeRef"]/ul/div/div/div/article/div/article[20]/p', # noqa E501: line too long
             'NOME_SUBCLASSE_FUNDO': '//*[@id="subclasseRef"]/article/h5',
             'CNPJ_CODIGO_ANBIMA_SUBCLASSE': '//*[@id="subclasseRef"]/article/p[2]',
             'DATA_ATAULIZACAO_SUBCLASSE': '//*[@id="subclasseRef"]/div/p/text()[2]',
-            'CODIGO_ANBIMA_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[1]/p',
+            'CODIGO_ANBIMA_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[1]/p', # noqa E501: line too long
             'CODIGO_B3': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[2]/p',
-            'TIPO_INVESTIDOR': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[3]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[22]/p',
+            'TIPO_INVESTIDOR': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[3]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[22]/p', # noqa E501: line too long
             'STATUS_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[4]/p',
-            'DATA_INICIO_ATIVIDADE_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[5]/p',
-            'DATA_ENCERRAMENTO_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[6]/p',
-            'RESTRICAO_INVESTIMENTO': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[7]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[21]/p',
-            'PERIODO_CALCULO_COTA': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[8]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[23]/p',
-            'APLICACO_AUTOMATICA': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[9]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[24]/p',
-            'PLANO_PREVIDENCIA': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[10]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[25]/p',
+            'DATA_INICIO_ATIVIDADE_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[5]/p', # noqa E501: line too long
+            'DATA_ENCERRAMENTO_SUBCLASSE': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[6]/p', # noqa E501: line too long
+            'RESTRICAO_INVESTIMENTO': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[7]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[21]/p', # noqa E501: line too long
+            'PERIODO_CALCULO_COTA': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[8]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[23]/p', # noqa E501: line too long
+            'APLICACO_AUTOMATICA': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[9]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[24]/p', # noqa E501: line too long
+            'PLANO_PREVIDENCIA': '//*[@id="subclasseRef"]/ul/div/div/div/article/div/article[10]/p | //*[@id="classeRef"]/ul/div/div/div/article/div/article[25]/p', # noqa E501: line too long
             'DATA_HORA_ATUALIZACAO_MOVIMENTACAO': '//*[@id="movimentacaoRef"]/div[1]/p/text()[2]',
             'APLICACO_MINIMA_INICIAL': '//*[@id="movimentacaoRef"]/div[2]/article[1]/h5',
             'APLICACAO_ADICIONAL_MINIMA': '//*[@id="movimentacaoRef"]/div[2]/article[2]/h5',
             'PRAZO_RESGATE': '//*[@id="movimentacaoRef"]/div[2]/article[3]/h5',
             'PERIODO_PRAZO_RESGATE': '//*[@id="movimentacaoRef"]/div[2]/article[3]/p[2]',
-            'PRAZO_EMISSAO_COTAS': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[1]/p[1]',
-            'PERIODO_PRAZO_EMISSAO_COTAS': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[1]/p[2]',
-            'PRAZO_CONVERSAO_RESGATE': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[2]/p[1]',
-            'PERIODO_CONVERSAO_RESGATE': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[2]/p[2]',
-            'CARENCIA_INICIAL': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[3]/p',
-            'CARENCIA_CICLICA': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[4]/p',
-            'VALOR_MINIMO_RESGATE': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[5]/p',
-            'VALOR_MINIMO_PERMANENCIA': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[6]/p',
+            'PRAZO_EMISSAO_COTAS': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[1]/p[1]', # noqa E501: line too long
+            'PERIODO_PRAZO_EMISSAO_COTAS': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[1]/p[2]', # noqa E501: line too long
+            'PRAZO_CONVERSAO_RESGATE': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[2]/p[1]', # noqa E501: line too long
+            'PERIODO_CONVERSAO_RESGATE': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[2]/p[2]', # noqa E501: line too long
+            'CARENCIA_INICIAL': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[3]/p', # noqa E501: line too long
+            'CARENCIA_CICLICA': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[4]/p', # noqa E501: line too long
+            'VALOR_MINIMO_RESGATE': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[5]/p', # noqa E501: line too long
+            'VALOR_MINIMO_PERMANENCIA': '//*[@id="movimentacaoRef"]/ul/div/div/div/article/div/article[6]/p', # noqa E501: line too long
             'DATA_HORA_ATUALIZACAO_TAXA': '//*[@id="taxasRef"]/div[1]/p/text()[2]',
             'TAXA_GLOBAL': '//*[@id="taxasRef"]/div[2]/article[1]/h5',
             'DATA_HORA_INICIO_VIGENCIA_TAXA_GLOBAL': '//*[@id="taxasRef"]/div[2]/article[1]/p[2]',
             'TAXA_GLOBAL_MAXIMA': '//*[@id="taxasRef"]/div[2]/article[2]/h5',
-            'DATA_HORA_INICIO_VIGENCIA_TAXA_GLOBAL_MAXIMA': '//*[@id="taxasRef"]/div[2]/article[2]/p[2]',
+            'DATA_HORA_INICIO_VIGENCIA_TAXA_GLOBAL_MAXIMA': '//*[@id="taxasRef"]/div[2]/article[2]/p[2]', # noqa E501: line too long
             'UNIDADE_TAXA_GLOBAL': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[1]/p',
             'PERFIL_TAXA_GLOBAL': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[2]/p',
-            'PERFIL_TAXA_PERFORMANCE': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[3]/p',
-            'PERIODICIDADE_TAXA_PERFORMANCE': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[4]/p',
-            'INFORMACOES_ADICIONAIS_TAXA_PERFORMANCE': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[5]/p',
+            'PERFIL_TAXA_PERFORMANCE': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[3]/p', # noqa E501: line too long
+            'PERIODICIDADE_TAXA_PERFORMANCE': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[4]/p', # noqa E501: line too long
+            'INFORMACOES_ADICIONAIS_TAXA_PERFORMANCE': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[5]/p', # noqa E501: line too long
             'TAXA_ENTRADA': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[6]/p',
             'TAXA_SAIDA': '//*[@id="taxasRef"]/ul/div/div/div/article/div/article[7]/p',
-            'DATA_HORA_ATUALIZACAO_PRESTADORES_FUNDO_CASCA': '//*[@id="prestadoresRef"]/div[2]/article[1]/header/p',
+            'DATA_HORA_ATUALIZACAO_PRESTADORES_FUNDO_CASCA': '//*[@id="prestadoresRef"]/div[2]/article[1]/header/p', # noqa E501: line too long
             'ADMINISTRADOR_NOME': '//*[@id="prestadoresRef"]/div[2]/article[1]/div[1]/h5',
             'ADMINISTRADOR_CNPJ': '//*[@id="prestadoresRef"]/div[2]/article[1]/div[1]/p[2]',
-            'ADMINISTRADOR_LINK_PERFIL_INSTITUICAO_ANBIMA': '//*[@id="prestadoresRef"]/div[2]/article[1]/div[1]/a/@href',
+            'ADMINISTRADOR_LINK_PERFIL_INSTITUICAO_ANBIMA': '//*[@id="prestadoresRef"]/div[2]/article[1]/div[1]/a/@href', # noqa E501: line too long
             'GESTOR_NOME': '//*[@id="prestadoresRef"]/div[2]/article[1]/div[2]/h5',
             'GESTOR_CNPJ': '//*[@id="prestadoresRef"]/div[2]/article[1]/div[2]/p[2]',
-            'DATA_HORA_ATUALIZACAO_PRESTADORES_CLASSE': '//*[@id="prestadoresRef"]/div[2]/article[2]/header/p',
+            'DATA_HORA_ATUALIZACAO_PRESTADORES_CLASSE': '//*[@id="prestadoresRef"]/div[2]/article[2]/header/p', # noqa E501: line too long
             'CONTROLADOR_CLASSE_NOME': '//*[@id="prestadoresRef"]/div[2]/article[2]/div[1]/h5',
             'CONTROLADOR_CLASSE_CNPJ': '//*[@id="prestadoresRef"]/div[2]/article[2]/div[1]/p[2]',
             'CUSTODIANTE_CLASSE_NOME': '//*[@id="prestadoresRef"]/div[2]/article[2]/div[2]/h5',
             'CUSTODIANTE_CLASSE_CNPJ': '//*[@id="prestadoresRef"]/div[2]/article[2]/div[2]/p[2]',
-            'DATA_HORA_ATUALIZACAO_PRESTADORES_SUBCLASSE': '//*[@id="prestadoresRef"]/div[2]/article[3]/header/p',
+            'DATA_HORA_ATUALIZACAO_PRESTADORES_SUBCLASSE': '//*[@id="prestadoresRef"]/div[2]/article[3]/header/p', # noqa E501: line too long
             'DISTRIBUIDOR_SUBCLASSE_NOME': '//*[@id="prestadoresRef"]/div[2]/article[3]/div/h5',
             'DISTRIBUIDOR_SUBCLASSE_CNPJ': '//*[@id="prestadoresRef"]/div[2]/article[3]/div/p[2]',
             'DATA_HORA_ATUALIZACAO_DOCUMENTOS': '//*[@id="documentosRef"]/div/p',
@@ -1400,13 +1402,8 @@ class AnbimaDataFundsAbout(ABCIngestionOperations):
         -------
         pd.DataFrame
             The transformed DataFrame.
-
-        Raises
-        ------
-        NotImplementedError
-            If the method is not implemented in a subclass.
         """
-        pass
+        return pd.DataFrame()
     
     def transform_characteristics_data(
         self, 
@@ -1718,12 +1715,10 @@ class AnbimaDataFundsHistoric(ABCIngestionOperations):
         list_records = []
         
         try:
-            # Extract update timestamp
             data_hora_atualizacao = self._extract_update_timestamp(page)
             
-            # Get all table rows
             rows = page.locator(
-                'xpath=//*[@id="detalhes-do-fundo"]/div[3]/div/div/div/div/section/div/table/tbody/tr'
+                'xpath=//*[@id="detalhes-do-fundo"]/div[3]/div/div/div/div/section/div/table/tbody/tr' # noqa E501: line too long
             ).all()
             
             self.cls_create_log.log_message(
@@ -1777,7 +1772,6 @@ class AnbimaDataFundsHistoric(ABCIngestionOperations):
             
             if element.count() > 0 and element.is_visible(timeout=5_000):
                 text = element.inner_text().strip()
-                # Extract the second part after splitting by newline
                 parts = text.split('\n')
                 if len(parts) >= 2:
                     return parts[1].strip() if parts[1].strip() else None
@@ -1793,7 +1787,7 @@ class AnbimaDataFundsHistoric(ABCIngestionOperations):
     
     def _extract_row_data(
         self, 
-        row, 
+        row: Locator, 
         fund_code: str, 
         data_hora_atualizacao: Optional[str],
         idx: int
@@ -1802,7 +1796,7 @@ class AnbimaDataFundsHistoric(ABCIngestionOperations):
         
         Parameters
         ----------
-        row
+        row : Locator
             The table row element.
         fund_code : str
             The fund code.
@@ -1889,7 +1883,6 @@ class AnbimaDataFundsHistoric(ABCIngestionOperations):
         
         df_ = pd.DataFrame(raw_data)
         
-        # Handle date columns - replace '-' or empty values with default date
         date_columns = ['DATA_COMPETENCIA']
         for col in date_columns:
             if col in df_.columns:
