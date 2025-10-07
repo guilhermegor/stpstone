@@ -10,9 +10,10 @@ from datetime import datetime
 from logging import Logger
 import os
 from pathlib import Path
-from typing import Literal, Optional, TypedDict, Union
+import re
+from typing import Any, Literal, Optional, TypedDict, Union
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import PlaywrightPage, sync_playwright
 import requests
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -901,6 +902,329 @@ class PlaywrightScraper(metaclass=TypeChecker):
             
             json_data = resp_req.json()
             return json_data
+        
+    def extract_data_from_xpath_mapping(
+        self,
+        page: PlaywrightPage,
+        xpath_mapping: dict[str, str],
+        row_idx: Optional[int] = None,
+        text_part_idx: Optional[int] = None,
+        timeout: int = 5_000,
+        logger: Optional[Any] = None # noqa ANN401: typing.Any is not allowed
+    ) -> dict[str, Any]: # noqa ANN401: typing.Any is not allowed
+        """Extract data from page using XPath/CSS selector mapping.
+        
+        This method generalizes the data extraction pattern used in Anbima scrapers,
+        allowing flexible configuration through parameters instead of hardcoded logic.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object to extract data from.
+        xpath_mapping : dict[str, str]
+            Dictionary mapping field names to their XPath/CSS selectors.
+            Selectors can contain:
+            - {} placeholder for row_idx formatting (e.g., '//table/tr[{}]/td[1]')
+            - /@attribute suffix to extract attribute values (e.g., '//a/@href')
+            - /text()[n] suffix to extract specific text node
+        row_idx : Optional[int], optional
+            Row index to format into selectors with {} placeholder.
+            If None, {} placeholders are not replaced. Default is None.
+        text_part_idx : Optional[int], optional
+            Index of text part to extract when splitting by newline.
+            Useful for elements with multiple text nodes.
+            If None, uses full text. If specified, splits by '\n' and
+            extracts the part at this index. Default is None.
+        timeout : int, optional
+            Timeout in milliseconds for element visibility checks.
+            Default is 5_000 (5 seconds).
+        logger : Optional[Any], optional
+            Logger instance for logging warnings. Default is None.
+        
+        Returns
+        -------
+        dict[str, Any]
+            Dictionary with extracted data where keys are field names from
+            xpath_mapping and values are extracted content (text or None).
+        
+        Examples
+        --------
+        Basic extraction without row index:
+        >>> mapping = {
+        ...     'title': '//h1[@class="title"]',
+        ...     'link': '//a[@class="main-link"]/@href',
+        ...     'description': '//p[@class="desc"]'
+        ... }
+        >>> data = scraper.extract_data_from_xpath_mapping(page, mapping)
+        >>> print(data['title'])
+        
+        Extraction with row index (for table rows):
+        >>> mapping = {
+        ...     'name': '//table/tr[{}]/td[1]',
+        ...     'value': '//table/tr[{}]/td[2]',
+        ...     'link': '//table/tr[{}]/td[3]/a/@href'
+        ... }
+        >>> for i in range(1, 6):
+        ...     data = scraper.extract_data_from_xpath_mapping(page, mapping, row_idx=i)
+        ...     print(f"Row {i}: {data['name']} = {data['value']}")
+        
+        Extraction with text part index:
+        >>> mapping = {
+        ...     'timestamp': '//div[@class="update-info"]/p'
+        ... }
+        >>> # Extract second line of text (e.g., "Last updated: 2024-01-15")
+        >>> data = scraper.extract_data_from_xpath_mapping(
+        ...     page, mapping, text_part_idx=1
+        ... )
+        
+        Combined usage:
+        >>> mapping = {
+        ...     'product_name': '//table/tbody/tr[{}]/td[1]',
+        ...     'product_price': '//table/tbody/tr[{}]/td[2]',
+        ...     'product_link': '//table/tbody/tr[{}]/td[1]/a/@href'
+        ... }
+        >>> products = []
+        >>> for idx in range(1, 11):
+        ...     product = scraper.extract_data_from_xpath_mapping(
+        ...         page, mapping, row_idx=idx
+        ...     )
+        ...     products.append(product)
+        
+        Notes
+        -----
+        [1] The method handles three special XPath suffixes:
+            - /@attribute: Extracts attribute value (e.g., href, src, class)
+            - /text()[n]: Extracts specific text node (though text_part_idx is preferred)
+            - No suffix: Extracts full inner text content
+        
+        [2] When text_part_idx is specified, the text content is split by '\n'
+            and the part at the given index is returned. This is useful for
+            elements that contain multiple lines or mixed content.
+        
+        [3] Error handling is built-in: if an element is not found or not visible,
+            the field value will be None instead of raising an exception.
+        
+        [4] The {} placeholder in selectors is only replaced when row_idx is not None,
+            allowing the same mapping to be reused for different rows.
+        """
+        data = {}
+        
+        for field_name, xpath in xpath_mapping.items():
+            try:
+                if row_idx is not None and '{}' in xpath:
+                    xpath = xpath.format(row_idx)
+                
+                if '/@' in xpath:
+                    parts = xpath.rsplit('/@', 1)
+                    clean_xpath = parts[0]
+                    attribute_name = parts[1]
+                    
+                    element = page.locator(f"xpath={clean_xpath}").first
+                    
+                    if element.count() > 0 and element.is_visible(timeout=timeout):
+                        attr_value = element.get_attribute(attribute_name)
+                        data[field_name] = attr_value if attr_value else None
+                    else:
+                        data[field_name] = None
+                
+                elif '/text()[' in xpath:
+                    match = re.search(r'/text\(\)\[(\d+)\]', xpath)
+                    if match:
+                        text_node_idx = int(match.group(1))
+                        clean_xpath = xpath.replace(f'/text()[{text_node_idx}]', '')
+                    else:
+                        clean_xpath = xpath.replace('/text()[2]', '')
+                        text_node_idx = text_part_idx if text_part_idx is not None else 1
+                    
+                    element = page.locator(f"xpath={clean_xpath}").first
+                    
+                    if element.count() > 0 and element.is_visible(timeout=timeout):
+                        text = element.inner_text().strip()
+                        parts = text.split('\n')
+                        
+                        idx = text_node_idx if 'text_node_idx' in locals() else (
+                            text_part_idx if text_part_idx is not None else 1
+                        )
+                        
+                        if len(parts) > idx:
+                            data[field_name] = parts[idx].strip() if parts[idx].strip() else None
+                        else:
+                            data[field_name] = text if text else None
+                    else:
+                        data[field_name] = None
+                        
+                else:
+                    if xpath.startswith('//'):
+                        selector = f"xpath={xpath}"
+                    else:
+                        selector = xpath
+                    
+                    element = page.locator(selector).first
+                    
+                    if element.count() > 0 and element.is_visible(timeout=timeout):
+                        text = element.inner_text().strip()
+                        
+                        if text_part_idx is not None:
+                            parts = text.split('\n')
+                            if len(parts) > text_part_idx:
+                                data[field_name] = (
+                                    parts[text_part_idx].strip() 
+                                    if parts[text_part_idx].strip() 
+                                    else None
+                                )
+                            else:
+                                data[field_name] = text if text else None
+                        else:
+                            data[field_name] = text if text else None
+                    else:
+                        data[field_name] = None
+                        
+            except Exception as e:
+                if logger:
+                    CreateLog().log_message(
+                        logger,
+                        f'Error extracting {field_name}: {e}',
+                        "warning"
+                    )
+                data[field_name] = None
+        
+        return data
+    
+    def extract_multiple_rows(
+        self,
+        page: PlaywrightPage,
+        xpath_mapping: dict[str, str],
+        start_idx: int = 1,
+        end_idx: Optional[int] = None,
+        max_rows: Optional[int] = None,
+        timeout: int = 5_000,
+        logger: Optional[Any] = None,
+        additional_data: Optional[dict[str, Any]] = None
+    ) -> list[dict[str, Any]]:
+        """Extract data from multiple rows using the same XPath mapping.
+        
+        This method automates the extraction of data from table rows or repeated
+        elements, applying the same selector pattern across multiple indices.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object to extract data from.
+        xpath_mapping : dict[str, str]
+            Dictionary mapping field names to XPath/CSS selectors with {}
+            placeholder for row index.
+        start_idx : int, optional
+            Starting row index (inclusive). Default is 1.
+        end_idx : Optional[int], optional
+            Ending row index (inclusive). If None, extracts until no more
+            elements are found. Default is None.
+        max_rows : Optional[int], optional
+            Maximum number of rows to extract. Useful for limiting results.
+            If None, no limit is applied. Default is None.
+        timeout : int, optional
+            Timeout in milliseconds for element visibility checks.
+            Default is 5_000 (5 seconds).
+        logger : Optional[Any], optional
+            Logger instance for logging. Default is None.
+        additional_data : Optional[dict[str, Any]], optional
+            Additional data to include in each row's dictionary.
+            Useful for adding context like fund_code, page_number, etc.
+            Default is None.
+        
+        Returns
+        -------
+        list[dict[str, Any]]
+            List of dictionaries, each containing extracted data for one row.
+        
+        Examples
+        --------
+        Extract all rows from a table:
+        >>> mapping = {
+        ...     'name': '//table/tr[{}]/td[1]',
+        ...     'value': '//table/tr[{}]/td[2]',
+        ...     'status': '//table/tr[{}]/td[3]'
+        ... }
+        >>> rows = scraper.extract_multiple_rows(page, mapping)
+        
+        Extract specific range with additional context:
+        >>> rows = scraper.extract_multiple_rows(
+        ...     page,
+        ...     mapping,
+        ...     start_idx=1,
+        ...     end_idx=10,
+        ...     additional_data={'fund_code': 'ABC123', 'page': 1}
+        ... )
+        
+        Extract with maximum limit:
+        >>> rows = scraper.extract_multiple_rows(
+        ...     page,
+        ...     mapping,
+        ...     max_rows=50,
+        ...     additional_data={'scrape_date': '2024-01-15'}
+        ... )
+        
+        Notes
+        -----
+        [1] If end_idx is None, the method continues until it encounters
+            an error (typically when no more elements are found), then stops.
+        
+        [2] Each dictionary in the returned list includes all fields from
+            xpath_mapping plus any additional_data provided.
+        
+        [3] Failed row extractions are logged but don't stop the process;
+            the method continues to the next row.
+        """
+        results = []
+        current_idx = start_idx
+        rows_extracted = 0
+        
+        while True:
+            if end_idx is not None and current_idx > end_idx:
+                break
+            if max_rows is not None and rows_extracted >= max_rows:
+                break
+            
+            try:
+                row_data = self.extract_data_from_xpath_mapping(
+                    page=page,
+                    xpath_mapping=xpath_mapping,
+                    row_idx=current_idx,
+                    timeout=timeout,
+                    logger=logger
+                )
+                
+                if any(value is not None for value in row_data.values()):
+                    if additional_data:
+                        row_data.update(additional_data)
+                    
+                    results.append(row_data)
+                    rows_extracted += 1
+                else:
+                    if end_idx is None:
+                        if logger:
+                            CreateLog().log_message(
+                                logger,
+                                f"No data found at row {current_idx}, stopping extraction",
+                                "info"
+                            )
+                        break
+                
+                current_idx += 1
+                
+            except Exception as e:
+                if logger:
+                    CreateLog().log_message(
+                        logger,
+                        f"Error extracting row {current_idx}: {e}",
+                        "warning"
+                    )
+                
+                if end_idx is None:
+                    break
+                
+                current_idx += 1
+        
+        return results
         
     def __del__(self) -> None:
         """Cleanup browser resources when the instance is destroyed.
