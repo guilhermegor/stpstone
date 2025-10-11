@@ -27,122 +27,22 @@ class ResultVegaGlobalMax(TypedDict):
     vega_max_global: float
 
 
-class InitialSettings(metaclass=TypeChecker):
-    """Initial settings for European options pricing models.
-
-    Parameters
-    ----------
-    s : float
-        spot price
-    k : float
-        strike price
-    r : float
-        risk free rate
-    t : float
-        time to maturity
-    sigma : float
-        volatility
-    q : float
-        dividend yield
-    b : float
-        risk free rate
-    opt_type : Literal['call', 'put']
-        option type ('call' or 'put')
-    """
-
-    def set_parameters(
-        self, 
-        *params: Union[float, str, list, tuple], 
-        opt_type: Optional[Literal["call", "put"]] = None,
-        **kwargs: Union[float, str, list, tuple]
-    ) -> list:
-        """Set parameters and validate option type.
-        
-        Parameters
-        ----------
-        *params : Union[float, str, list, tuple]
-            Variable-length list of expected numerical parameters
-        opt_type : Literal["call", "put"], optional
-            Option type, either 'call' or 'put'
-        **kwargs : Union[float, str, list, tuple]
-            Additional named parameters
-
-        Returns
-        -------
-        list
-            List of converted numerical parameters (excluding opt_type)
-
-        Raises
-        ------
-        ValueError
-            If opt_type is not 'call' or 'put'
-        TypeError
-            If any parameter cannot be converted to float
-        """
-        # collect all parameters (both positional and keyword)
-        all_params = []
-
-        # validate kwargs parameter names match their values
-        for key, value in kwargs.items():
-            if key == 'opt_type' or isinstance(value, (int, float)):
-                continue
-            elif isinstance(value, str) and value != key:
-                raise ValueError(
-                    f"Parameter name mismatch. Expected '{key}={key}', got '{key}={value}'. "
-                    "Named parameters must reference themselves (e.g., cp0=cp0)."
-                )
-
-        # first check if opt_type was passed as a regular parameter
-        for param in params:
-            if param in ["call", "put"]:
-                opt_type = param
-                break
-        
-        # then check kwargs
-        if 'opt_type' in kwargs:
-            opt_type = kwargs['opt_type']
-        
-        # set default if still None
-        if opt_type is None:
-            opt_type = "call"
-        
-        # validate opt_type
-        if opt_type not in ["call", "put"]:
-            raise ValueError("Option type must be either 'call' or 'put'")
-        
-        # process positional params first
-        for param in params:
-            if param in ["call", "put"]:  # skip if it was opt_type
-                continue
-            if isinstance(param, (list, tuple)):
-                param = param[0] if len(param) > 0 else 0.0
-            all_params.append(param)
-        
-        # then process kwargs (excluding opt_type)
-        for k, v in kwargs.items():
-            if k == 'opt_type':
-                continue
-            if isinstance(v, (list, tuple)):
-                v = v[0] if len(v) > 0 else 0.0
-            all_params.append(v)
-
-        # process numerical parameters
-        processed_params = []
-        for param in all_params:
-            try:
-                processed_params.append(float(param))
-            except (TypeError, ValueError) as e:
-                raise TypeError(f"Parameter must be numeric, got {param}") from e
-        
-        return processed_params
-
-class BlackScholesMerton(InitialSettings):
+class BlackScholesMerton(metaclass=TypeChecker):
     """Black Scholes Merton Model.
     
     References
     ----------
     https://brilliant.org/wiki/black-scholes-merton/
     """
+
+    def __init__(self) -> None:
+        """Initialize the class.
+        
+        Returns
+        -------
+        None
+        """
+        self.cls_normal_dist = NormalDistribution()
 
     def d1(self, s: float, k: float, b: float, t: float, sigma: float, q: float) -> float:
         """d1 is the probability for the option to be in the money (d1 > 0).
@@ -169,7 +69,6 @@ class BlackScholesMerton(InitialSettings):
         """
         if sigma == 0:
             return float('inf') if s != k else 0.0
-        s, k, b, t, sigma, q = self.set_parameters(s=s, k=k, b=b, t=t, sigma=sigma, q=q)
         return (np.log(s / k) + (b + sigma ** 2 / 2) * t) / (sigma * np.sqrt(t))
 
     def d2(self, s: float, k: float, b: float, t: float, sigma: float, q: float) -> float:
@@ -195,7 +94,6 @@ class BlackScholesMerton(InitialSettings):
         float
             d2 probability
         """
-        s, k, b, t, sigma, q = self.set_parameters(s=s, k=k, b=b, t=t, sigma=sigma, q=q)
         return self.d1(s, k, b, t, sigma, q) - sigma * np.sqrt(t)
 
     def general_opt_price(
@@ -239,21 +137,335 @@ class BlackScholesMerton(InitialSettings):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
             if t == 0:
                 return max(s - k, 0)
             return s * np.exp((b - r) * t) * \
-                NormalDistribution().cdf(self.d1(s, k, b, t, sigma, q)) \
-                - k * np.exp(-r * t) * NormalDistribution().cdf(BlackScholesMerton(
-                ).d2(s, k, b, t, sigma, q))
+                self.cls_normal_dist.cdf(self.d1(s, k, b, t, sigma, q)) \
+                - k * np.exp(-r * t) * self.cls_normal_dist.cdf(self.d2(s, k, b, t, sigma, q))
         elif opt_type == 'put':
             if t == 0:
                 return max(k - s, 0)
-            return k * np.exp(-r * t) * NormalDistribution().cdf(
+            return k * np.exp(-r * t) * self.cls_normal_dist.cdf(
                 -self.d2(s, k, b, t, sigma, q)) - s * np.exp((b - r) * t) \
-                    * NormalDistribution().cdf(-self.d1(s, k, b, t, sigma, q))
+                    * self.cls_normal_dist.cdf(-self.d1(s, k, b, t, sigma, q))
+
+
+class MonteCarlo(metaclass=TypeChecker):
+    """Monte Carlo simulation for European Options pricing."""
+
+    def vanilla_mc_price(
+        self, 
+        s: float, 
+        k: float, 
+        r: float, 
+        t: float, 
+        sigma: float,
+        opt_type: Literal["call", "put"], 
+        n_simulations: int = 100_000,
+        n_steps: int = 252, 
+        random_seed: Optional[int] = None
+    ) -> tuple[float, float]:
+        r"""
+        Price European options using Monte Carlo simulation with GBM.
+        
+        This function simulates trajectories of the underlying asset price using the
+        Geometric Brownian Motion (GBM) model and calculates the expected present
+        value of the option payoff.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        sigma : float
+            Volatility of the underlying asset.
+        opt_type : Literal['call', 'put']
+            Option type ('call' or 'put').
+        n_simulations : int, optional
+            Number of simulations. Default is 100,000.
+        n_steps : int, optional
+            Number of time steps. Default is 252 (1 year).
+        random_seed : Optional[int], optional
+            Random seed for reproducibility. Default is None.
+        
+        Returns
+        -------
+        tuple[float, float]
+            A tuple containing the estimated option price and its standard error.
+            float_option_price : float
+                Estimated option price discounted to present value.
+            float_se : float
+                Standard error of the estimate (for confidence interval calculation).
+                95% confidence interval: price ± 1.96 * se
+        
+        Notes
+        -----
+        The model uses the GBM (Geometric Brownian Motion) equation:
+        
+        .. math::
+            dS_t = r S_t dt + \sigma S_t dW_t
+        
+        Where:
+        - S_t is the asset price at time t
+        - r is the risk-free rate
+        - \sigma is the volatility
+        - W_t is a Wiener process (Brownian motion)
+        
+        The Euler discretization results in:
+        
+        .. math::
+            S_{t+\Delta t} = S_t \exp\left[(r - \frac{\sigma^2}{2})\Delta t + 
+                                            \sigma\sqrt{\Delta t} Z\right]
+        
+        Where Z ~ N(0,1)
+        
+        Examples
+        --------
+        >>> # European call: S0=100, K=105, T=1 year, r=5%, vol=20%
+        >>> float_price, float_error = monte_carlo_option_pricing(
+        ...     s=100.0,
+        ...     k=105.0,
+        ...     t=1.0,
+        ...     r=0.05,
+        ...     sigma=0.20,
+        ...     str_option_type='call'
+        ... )
+        >>> print(f"Price: ${float_price:.2f} ± {float_error:.2f}")
+        Price: $8.02 ± 0.03
+        
+        >>> # European put: S0=100, K=95, T=6 months, r=5%, vol=25%
+        >>> float_price_put, float_error_put = monte_carlo_option_pricing(
+        ...     s=100.0,
+        ...     k=95.0,
+        ...     t=0.5,
+        ...     r=0.05,
+        ...     sigma=0.25,
+        ...     str_option_type='put'
+        ... )
+        >>> print(f"Put Price: ${float_price_put:.2f}")
+        Put Price: $3.45
+        
+        See Also
+        --------
+        monte_carlo_barrier_option : Pricing of barrier options
+        
+        References
+        ----------
+        .. [1] Black, F., & Scholes, M. (1973). "The Pricing of Options and 
+            Corporate Liabilities". Journal of Political Economy, 81(3), 637-654.
+        .. [2] Hull, J. C. (2018). "Options, Futures, and Other Derivatives" 
+            (10th ed.). Pearson.
+        """
+        if random_seed is not None:
+            np.random.seed(random_seed)
+
+        dt: float = t / n_steps
+    
+        # generate random shocks from standard normal distribution
+        array_z: NDArray[np.float64] = np.random.standard_normal(
+            (n_simulations, n_steps)
+        )
+        
+        array_s: NDArray[np.float64] = np.zeros(
+            (n_simulations, n_steps + 1)
+        )
+        array_s[:, 0] = s
+        
+        # simulate trajectories using geometric brownian motion
+        for int_t in range(1, n_steps + 1):
+            array_s[:, int_t] = array_s[:, int_t-1] * np.exp(
+                (r - 0.5 * sigma**2) * dt +
+                sigma * np.sqrt(dt) * array_z[:, int_t-1]
+            )
+        
+        array_payoff: NDArray[np.float64]
+        if opt_type == 'call':
+            array_payoff = np.maximum(array_s[:, -1] - k, 0)
+        else:
+            array_payoff = np.maximum(k - array_s[:, -1], 0)
+        
+        # discount to present value
+        float_option_price: float = np.exp(-r * t) * np.mean(array_payoff)
+        float_se: float = (np.std(array_payoff) / np.sqrt(n_simulations) * 
+                        np.exp(-r * t))
+        
+        return float_option_price, float_se
+    
+    def monte_carlo_barrier_option(
+        s: float,
+        k: float,
+        r: float,
+        t: float,
+        sigma: float,
+        h: float,
+        str_barrier_type: Optional[Literal['down-and-out', 'up-and-out']] = 'down-and-out',
+        str_option_type: Optional[Literal['call', 'put']] = 'call',
+        n_simulations: int = 100_000,
+        n_steps: int = 252
+    ) -> tuple[float, float]:
+        r"""
+        Price barrier options using Monte Carlo simulation.
+        
+        Barrier options are path-dependent options whose payoff depends on whether
+        the underlying asset price hits a predetermined level (barrier) during
+        the option's life.
+        
+        Parameters
+        ----------
+        s : float
+            Current stock price.
+        k : float
+            Strike price of the option.
+        r : float
+            Risk-free interest rate.
+        t : float
+            Time to maturity in years.
+        sigma : float
+            Volatility of the underlying asset.
+        h : float
+            Barrier level.
+        str_barrier_type : Optional[Literal['down-and-out', 'up-and-out']]
+            Type of barrier ('down-and-out' or 'up-and-out'). Default is 'down-and-out'.
+        str_option_type : Optional[Literal['call', 'put']]
+            Option type ('call' or 'put'). Default is 'call'.
+        n_simulations : int, optional
+            Number of simulations. Default is 100,000.
+        n_steps : int, optional
+            Number of time steps. Default is 252 (1 year).
+        
+        Returns
+        -------
+        tuple[float, float]
+            A tuple containing the estimated barrier option price and its standard error.
+            float_option_price : float
+                Estimated price of the barrier option.
+            float_se : float
+                Standard error of the estimate.
+        
+        Notes
+        -----
+        Barrier options are cheaper than equivalent vanilla options (knock-out)
+        or can offer additional leverage (knock-in).
+        
+        The barrier is monitored continuously (or discretely, according to n_steps)
+        throughout the option's life. Once the barrier is:
+        
+        - Hit in knock-out: option cancels immediately and payoff = 0
+        - Hit in knock-in: option becomes a standard vanilla option
+        - Not hit in knock-out: option behaves like vanilla
+        - Not hit in knock-in: option expires worthless
+        
+        Warnings
+        --------
+        Using few time steps (n_steps) can result in:
+        
+        1. Discretization bias: the barrier can be "crossed" between steps
+        2. Underestimation of the probability of hitting the barrier
+        3. Incorrect pricing, especially for barriers close to current price
+        
+        Recommendation: use n_steps >= 252 for barriers.
+        
+        Examples
+        --------
+        >>> # Down-and-Out Call: cancels if it falls below 90
+        >>> float_price, float_error = monte_carlo_barrier_option(
+        ...     s=100.0,
+        ...     k=105.0,
+        ...     r=0.05,
+        ...     t=1.0,
+        ...     sigma=0.20,
+        ...     h=90.0,
+        ...     str_barrier_type='down-and-out',
+        ...     str_option_type='call'
+        ... )
+        >>> print(f"Price: ${float_price:.2f}")
+        Price: $6.45
+        
+        >>> # Up-and-In Put: only activates if it rises above 110
+        >>> float_price_uip, float_error_uip = monte_carlo_barrier_option(
+        ...     s=100.0,
+        ...     k=95.0,
+        ...     r=0.05,
+        ...     t=1.0,
+        ...     sigma=0.30,
+        ...     h=110.0,
+        ...     str_barrier_type='up-and-in',
+        ...     str_option_type='put'
+        ... )
+        >>> print(f"Up-and-In Put Price: ${float_price_uip:.2f}")
+        Up-and-In Put Price: $1.23
+        
+        See Also
+        --------
+        monte_carlo_option_pricing : Pricing of simple European options
+        
+        References
+        ----------
+        .. [1] Merton, R. C. (1973). "Theory of Rational Option Pricing". 
+            The Bell Journal of Economics and Management Science, 4(1), 141-183.
+        .. [2] Rubinstein, M., & Reiner, E. (1991). "Breaking Down the Barriers". 
+            Risk, 4(8), 28-35.
+        .. [3] Hull, J. C. (2018). "Options, Futures, and Other Derivatives" 
+            (10th ed.), Chapter 26: Exotic Options.
+        """
+        dt: float = t / n_steps
+        
+        array_z: NDArray[np.float64] = np.random.standard_normal(
+            (n_simulations, n_steps)
+        )
+        
+        array_s: NDArray[np.float64] = np.zeros(
+            (n_simulations, n_steps + 1)
+        )
+        array_s[:, 0] = s
+
+        # flag to track if barrier was hit
+        array_barrier_hit: NDArray[np.bool_] = np.zeros(
+            n_simulations, 
+            dtype=bool
+        )
+        
+        # simulate trajectories and monitor barrier
+        int_t: int
+        for int_t in range(1, n_steps + 1):
+            # calculate new price using GBM
+            array_s[:, int_t] = array_s[:, int_t-1] * np.exp(
+                (r - 0.5 * sigma**2) * dt + 
+                sigma * np.sqrt(dt) * array_z[:, int_t-1]
+            )
+            
+            # check barrier (permanent memory with |=)
+            #   |= accumulates hits flags over time steps
+            if 'down' in str_barrier_type:
+                array_barrier_hit |= (array_s[:, int_t] <= h)
+            else:
+                array_barrier_hit |= (array_s[:, int_t] >= h)
+        
+        # calculate payoff at maturity
+        array_payoff: NDArray[np.float64]
+        if str_option_type == 'call':
+            array_payoff = np.maximum(array_s[:, -1] - k, 0)
+        else:
+            array_payoff = np.maximum(k - array_s[:, -1], 0)
+        
+        # apply barrier condition
+        if 'out' in str_barrier_type:
+            array_payoff[array_barrier_hit] = 0  # knock-out
+        else:
+            array_payoff[~array_barrier_hit] = 0  # knock-in
+        
+        # discount to present value
+        float_option_price: float = np.exp(-r * t) * np.mean(array_payoff)
+        float_se: float = (np.std(array_payoff) / np.sqrt(n_simulations) * 
+                        np.exp(-r * t))
+        
+        return float_option_price, float_se
 
 
 class Greeks(BlackScholesMerton):
@@ -305,8 +517,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-    
         if sigma == 0:
             if opt_type == 'call':
                 return 1.0 if s > k else 0.0
@@ -315,9 +525,9 @@ class Greeks(BlackScholesMerton):
         
         d1 = self.d1(s, k, b, t, sigma, q)
         if opt_type == 'call':
-            return np.exp((b - r) * t) * NormalDistribution().cdf(d1)
+            return np.exp((b - r) * t) * self.cls_normal_dist.cdf(d1)
         else:
-            return np.exp((b - r) * t) * (NormalDistribution().cdf(d1) - 1)
+            return np.exp((b - r) * t) * (self.cls_normal_dist.cdf(d1) - 1)
 
     def future_delta_from_spot_delta(self, delta: float, b: float, t: float) -> float:
         """Future delta from spot delta.
@@ -339,7 +549,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        delta, b, t = self.set_parameters(delta=delta, b=b, t=t)
         return delta * np.exp(-b * t)
 
     def strike_from_delta(
@@ -382,13 +591,11 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, r, t, sigma, q, b = self.set_parameters(
-            s=s, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return s * np.exp(-NormalDistribution().inv_cdf(delta * np.exp((r - b) * t))
+            return s * np.exp(-self.cls_normal_dist.inv_cdf(delta * np.exp((r - b) * t))
                               * sigma * t ** 0.5 + (b + sigma ** 2 / 2.0) * t)
         elif opt_type == 'put':
-            return s * np.exp(NormalDistribution().inv_cdf(delta * np.exp((r - b) * t))
+            return s * np.exp(self.cls_normal_dist.inv_cdf(delta * np.exp((r - b) * t))
                               * sigma * t ** 0.5 + (b + sigma ** 2 / 2.0) * t)
 
     def gamma(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
@@ -423,8 +630,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-        return NormalDistribution().pdf(self.d1(s, k, b, t, sigma, q)) * np.exp((b - r) * t) \
+        return self.cls_normal_dist.pdf(self.d1(s, k, b, t, sigma, q)) * np.exp((b - r) * t) \
             / (s * sigma * t ** 0.5)
 
     def saddle_gamma(self, k: float, r: float, sigma: float, q: float, b: float) -> float:
@@ -451,7 +657,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        k, r, sigma, q, b = self.set_parameters(k=k, r=r, sigma=sigma, q=q, b=b)
         return np.sqrt((np.exp(1) / pi) * ((2 * b - r) / sigma ** 2 + 1)) / k
 
     def gamma_p(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
@@ -483,8 +688,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-        return NormalDistribution().pdf(self.d1(s, k, b, t, sigma, q)) * np.exp((b - r) * t) \
+        return self.cls_normal_dist.pdf(self.d1(s, k, b, t, sigma, q)) * np.exp((b - r) * t) \
             / (100.0 * sigma * t ** 0.5)
 
     def theta(
@@ -528,22 +732,20 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return -(s * np.exp((b - r) * t) * NormalDistribution().pdf(self.d1(
+            return -(s * np.exp((b - r) * t) * self.cls_normal_dist.pdf(self.d1(
                 s, k, b, t, sigma, q)) * sigma) / (2.0 * t ** 0.5) - (b - r) * s * np.exp(
-                (b - r) * t) * NormalDistribution().cdf(self.d1(s, k, b, t, sigma, q)) \
+                (b - r) * t) * self.cls_normal_dist.cdf(self.d1(s, k, b, t, sigma, q)) \
                 - r * k * \
                 np.exp(-r * t) * \
-                NormalDistribution().cdf(self.d2(s, k, b, t, sigma, q))
+                self.cls_normal_dist.cdf(self.d2(s, k, b, t, sigma, q))
         elif opt_type == 'put':
-            return -(s * np.exp((b - r) * t) * NormalDistribution().pdf(self.d1(
+            return -(s * np.exp((b - r) * t) * self.cls_normal_dist.pdf(self.d1(
                 s, k, b, t, sigma, q)) * sigma) / (2.0 * t ** 0.5) + (b - r) * s * np.exp(
-                (b - r) * t) * NormalDistribution().cdf(-self.d1(s, k, b, t, sigma, q)) \
+                (b - r) * t) * self.cls_normal_dist.cdf(-self.d1(s, k, b, t, sigma, q)) \
                 + r * k * \
                 np.exp(-r * t) * \
-                NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
+                self.cls_normal_dist.cdf(-self.d2(s, k, b, t, sigma, q))
 
     def vega(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
         -> float:
@@ -576,8 +778,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-        return s * np.exp((b - r) * t) * NormalDistribution().pdf(self.d1(
+        return s * np.exp((b - r) * t) * self.cls_normal_dist.pdf(self.d1(
             s, k, b, t, sigma, q)) * np.sqrt(t)
 
     def vega_local_maximum(self, k: float, t: float, sigma: float, b: float) -> float:
@@ -602,7 +803,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        k, t, sigma, b = self.set_parameters(k=k, t=t, sigma=sigma, b=b)
         return k * np.exp(-b + sigma ** 2 / 2.0) * t
 
     def strike_maximizes_vega(self, s: float, t: float, sigma: float, b: float) -> float:
@@ -627,7 +827,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, t, sigma, b = self.set_parameters(s=s, t=t, sigma=sigma, b=b)
         return s * np.exp(b + sigma ** 2 / 2.0) * t
 
     def time_to_maturity_maximum_vega(self, s: float, k: float, r: float, sigma: float, b: float) \
@@ -655,7 +854,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, sigma, b = self.set_parameters(s=s, k=k, r=r, sigma=sigma, b=b)
         return 2 * (1.0 + (1.0 + (8.0 * r / sigma ** 2 + 1.0) * np.log(s / k) ** 2) ** 0.5) \
             / (8.0 * r + sigma ** 2)
 
@@ -682,7 +880,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        k, r, sigma, b = self.set_parameters(k=k, r=r, sigma=sigma, b=b)
         # global maximum time for vega
         t = 1 / (2.0 * r)
         # stock price at the maximum time
@@ -732,7 +929,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.gamma(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * sigma * s ** 2 * t
 
     def vega_delta_relationship(
@@ -775,9 +971,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b, opt_type = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
-        return np.exp((b - r) * t) * NormalDistribution().pdf(NormalDistribution().inv_cdf(
+        return np.exp((b - r) * t) * self.cls_normal_dist.pdf(self.cls_normal_dist.inv_cdf(
             np.exp((r - b) * t) * np.abs(self.delta(s, k, r, t, sigma, q, b, opt_type)))) \
             / (s * sigma * t ** 0.5)
 
@@ -810,8 +1004,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-        return sigma / 10.0 * s * np.exp((b - r) * t) * NormalDistribution().pdf(
+        return sigma / 10.0 * s * np.exp((b - r) * t) * self.cls_normal_dist.pdf(
             self.d1(s, k, b, t, sigma, q)) * t ** 0.5
 
     def vega_elasticity(
@@ -854,8 +1047,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b, opt_type = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         return self.vega(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * sigma \
             / self.general_opt_price(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
 
@@ -902,13 +1093,11 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return t * k * np.exp(- r * t) * NormalDistribution().cdf(
+            return t * k * np.exp(- r * t) * self.cls_normal_dist.cdf(
                 self.d2(s, k, b, t, sigma, q))
         elif opt_type == 'put':
-            return -t * k * np.exp(- r * t) * NormalDistribution().cdf(
+            return -t * k * np.exp(- r * t) * self.cls_normal_dist.cdf(
                 -self.d2(s, k, b, t, sigma, q))
 
     def lambda_greek(
@@ -954,8 +1143,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         return self.delta(s, k, r, t, sigma, q, opt_type) * s / \
             self.general_opt_price(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
 
@@ -1007,9 +1194,7 @@ class Greeks(BlackScholesMerton):
         Essentially, it tells how much the option's sensitivity to price changes (delta) will be 
         affected by changes in the market's expectation of price fluctuations (implied volatility).
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
-        return -np.exp((b - r) * t) * self.d2(s, k, b, t, sigma, q) * NormalDistribution().pdf(
+        return -np.exp((b - r) * t) * self.d2(s, k, b, t, sigma, q) * self.cls_normal_dist.pdf(
             self.d1(s, k, b, t, sigma, q)) / sigma
 
     def vanna_vol(
@@ -1054,8 +1239,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         return self.vanna(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type) \
             * (1.0 / sigma) * (self.d1(s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)
                 - self.d1(s, k, b, t, sigma, q) / self.d2(s, k, b, t, sigma, q) - 1.0)
@@ -1100,17 +1283,15 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return -np.exp((b - r) * t) * (NormalDistribution().pdf(
+            return -np.exp((b - r) * t) * (self.cls_normal_dist.pdf(
                 self.d1(s, k, b, t, sigma, q)) * (b / (sigma * t ** 0.5) - self.d2(
-                    s, k, b, t, sigma, q) / (2.0 * t)) + (b - r) * NormalDistribution().cdf(
+                    s, k, b, t, sigma, q) / (2.0 * t)) + (b - r) * self.cls_normal_dist.cdf(
                         self.d1(s, k, b, t, sigma, q)))
         elif opt_type == 'put':
-            return -np.exp((b - r) * t) * (NormalDistribution().pdf(
+            return -np.exp((b - r) * t) * (self.cls_normal_dist.pdf(
                 self.d1(s, k, b, t, sigma, q)) * (b / (sigma * t ** 0.5) - self.d2(
-                    s, k, b, t, sigma, q) / (2.0 * t)) - (b - r) * NormalDistribution().cdf(
+                    s, k, b, t, sigma, q) / (2.0 * t)) - (b - r) * self.cls_normal_dist.cdf(
                         -self.d1(s, k, b, t, sigma, q)))
 
     def zomma(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
@@ -1145,8 +1326,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.gamma(s, k, r, t, sigma, q, b) * (self.d1(s, k, b, t, sigma, q) * self.d2(
             s, k, b, t, sigma, q) - 1) / sigma
 
@@ -1182,8 +1361,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.zomma(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * s / 100
 
     def speed(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
@@ -1217,8 +1394,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return -self.gamma(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) \
             * (1.0 + self.d1(s, k, b, t, sigma, q) / (sigma * t ** 0.5)) / s
 
@@ -1254,8 +1429,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.speed(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * s / 100
 
     def color(self, s: float, k: float, r: float, t: float, sigma: float, q: float, b: float) \
@@ -1287,8 +1460,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return -self.gamma(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * (r - b + b * self.d1(
             s, k, b, t, sigma, q) / (sigma * t ** 0.5) + (1.0 - self.d1(
                 s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
@@ -1325,8 +1496,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return -self.gamma_p(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) \
             * (r - b + b * self.d1(s, k, b, t, sigma, q)
                / (sigma * t ** 0.5) + (1.0 - self.d1(s, k, b, t, sigma, q)
@@ -1361,8 +1530,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.vega(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) \
             * self.d1(s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q) / sigma
 
@@ -1397,8 +1564,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.vega_p(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) \
             * self.d1(s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q) / sigma
 
@@ -1442,8 +1607,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         # sign of cost of carry, according to s_k being a spot or strike value
         if bool_spot:
             sign_ = 1
@@ -1486,8 +1649,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.vomma(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) / sigma \
             * (self.d1(s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)
                - self.d1(s, k, b, t, sigma, q) / self.d2(s, k, b, t, sigma, q)
@@ -1530,8 +1691,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.vega(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * (r - b + b * self.d1(
             s, k, b, t, sigma, q) / (sigma * t ** 0.5) - (1.0 + self.d1(
                 s, k, b, t, sigma, q) * self.d2(s, k, b, t, sigma, q)) / (2.0 * t))
@@ -1576,8 +1735,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.vega(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) / (2 * sigma)
 
     def variance_vanna(
@@ -1620,8 +1777,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return - s * np.exp((b - r) * t) * self.pdf(self.d1(s, k, b, t, sigma, q)) * self.d2(
             s, k, b, t, sigma, q) / (2.0 * sigma)
 
@@ -1664,8 +1819,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return s * np.exp((b - r) * t) * t ** 0.5 / (4.0 * sigma ** 3) * self.pdf(self.d1(
             s, k, b, t, sigma, q)) * (self.d1(s, k, b, t, sigma, q) * self.d2(
                 s, k, b, t, sigma, q) - 1.0)
@@ -1709,8 +1862,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return s * np.exp((b - r) * t) * t ** 0.5 / (8 * sigma ** 5) * self.pdf(self.d1(
             s, k, b, t, sigma, q)) * ((self.d1(s, k, b, t, sigma, q) * self.d2(
                 s, k, b, t, sigma, q) - 1.0) * (self.d1(s, k, b, t, sigma, q) * self.d2(
@@ -1754,9 +1905,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-        return s * NormalDistribution().pdf((np.log(s / k) + t * sigma ** 2 / 2.0)
+        return s * self.cls_normal_dist.pdf((np.log(s / k) + t * sigma ** 2 / 2.0)
                                             / (sigma * t ** 0.5))
 
     def driftless_theta(
@@ -1799,9 +1948,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
-        return -s * NormalDistribution().pdf(self.d1(s, k, b, t, sigma, q)) * sigma / (
+        return -s * self.cls_normal_dist.pdf(self.d1(s, k, b, t, sigma, q)) * sigma / (
             2.0 * t ** 0.5)
 
     def theta_vega_relationship(
@@ -1844,7 +1991,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return -self.gamma(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) * sigma / (2.0 * t)
 
     def bleed_offset_volatility(
@@ -1892,7 +2038,6 @@ class Greeks(BlackScholesMerton):
         Deep in-the-money (DITM) European options can have positive theta, and in this case 
         the offset volatility will be negative.
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return self.theta(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) \
             / self.vega(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
 
@@ -1935,7 +2080,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b)
         return -2.0 * self.driftless_theta(s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b) / (
             s ** 2 * sigma ** 2)
 
@@ -1982,13 +2126,11 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return -t * s * np.exp((b - r) * t) * NormalDistribution().cdf(self.d1(
+            return -t * s * np.exp((b - r) * t) * self.cls_normal_dist.cdf(self.d1(
                 s, k, b, t, sigma, q))
         elif opt_type == 'put':
-            return t * s * np.exp((b - r) * t) * NormalDistribution().cdf(-self.d1(
+            return t * s * np.exp((b - r) * t) * self.cls_normal_dist.cdf(-self.d1(
                 s, k, b, t, sigma, q))
 
     def carry_rho(
@@ -2033,13 +2175,11 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return t * s * np.exp((b - r) * t) * NormalDistribution().cdf(self.d1(
+            return t * s * np.exp((b - r) * t) * self.cls_normal_dist.cdf(self.d1(
                 s, k, b, t, sigma, q))
         elif opt_type == 'put':
-            return -t * s * np.exp((b - r) * t) * NormalDistribution().cdf(-self.d1(
+            return -t * s * np.exp((b - r) * t) * self.cls_normal_dist.cdf(-self.d1(
                 s, k, b, t, sigma, q))
 
     def risk_neutral_prob_itm(
@@ -2082,12 +2222,10 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return NormalDistribution().cdf(self.d2(s, k, b, t, sigma, q))
+            return self.cls_normal_dist.cdf(self.d2(s, k, b, t, sigma, q))
         elif opt_type == 'put':
-            return NormalDistribution().cdf(-self.d2(s, k, b, t, sigma, q))
+            return self.cls_normal_dist.cdf(-self.d2(s, k, b, t, sigma, q))
 
     def strike_given_risk_neutral_prob(
         self, 
@@ -2132,13 +2270,11 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b, p = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, p=p, opt_type=opt_type)
         if opt_type == 'call':
-            return s * np.exp(-NormalDistribution().inv_cdf(p) * sigma * t ** 0.5
+            return s * np.exp(-self.cls_normal_dist.inv_cdf(p) * sigma * t ** 0.5
                               + (b - sigma ** 2 / 2.0) * t)
         elif opt_type == 'call':
-            return s * np.exp(NormalDistribution().inv_cdf(p) * sigma * t ** 0.5
+            return s * np.exp(self.cls_normal_dist.inv_cdf(p) * sigma * t ** 0.5
                               + (b - sigma ** 2 / 2.0) * t)
 
     def d_zeta_d_vol(
@@ -2181,13 +2317,11 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
-            return -NormalDistribution().pdf(self.d2(s, k, b, t, sigma, q)) * self.d1(
+            return -self.cls_normal_dist.pdf(self.d2(s, k, b, t, sigma, q)) * self.d1(
                 s, k, b, t, sigma, q) / sigma
         elif opt_type == 'put':
-            return NormalDistribution().pdf(self.d2(s, k, b, t, sigma, q)) * self.d1(
+            return self.cls_normal_dist.pdf(self.d2(s, k, b, t, sigma, q)) * self.d1(
                 s, k, b, t, sigma, q) / sigma
 
     def d_zeta_d_time(
@@ -2230,8 +2364,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         if opt_type == 'call':
             return self.pdf(self.d2(s, k, b, t, sigma, q)) * (b / (sigma * t ** 0.5) - self.d1(
                 s, k, b, t, sigma, q) / (2.0 * t))
@@ -2281,9 +2413,7 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
-        return NormalDistribution().pdf(self.d2(s, k, b, t, sigma, q)) * np.exp(-r * t) / (
+        return self.cls_normal_dist.pdf(self.d2(s, k, b, t, sigma, q)) * np.exp(-r * t) / (
             k * sigma * t ** 0.5)
 
     def probability_ever_getting_itm(
@@ -2326,18 +2456,16 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        s, k, r, t, sigma, q, b = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, opt_type=opt_type)
         mu = (b - sigma ** 2 / 2.0) / sigma ** 2
         lambda_ = (mu ** 2 + 2 * r / sigma ** 2) ** 0.5
         z = np.log(k / s) / (sigma * t ** 0.5) + lambda_ * sigma * t ** 0.5
         if opt_type == 'call':
-            return (k / s) ** (mu + lambda_) * NormalDistribution().cdf(-z) \
-                + (k / s) ** (mu - lambda_) * NormalDistribution().cdf(
+            return (k / s) ** (mu + lambda_) * self.cls_normal_dist.cdf(-z) \
+                + (k / s) ** (mu - lambda_) * self.cls_normal_dist.cdf(
                 -z + 2 * lambda_ * sigma * t ** 0.5)
         elif opt_type == 'put':
-            return (k / s) ** (mu + lambda_) * NormalDistribution().cdf(z) \
-                + (k / s) ** (mu - lambda_) * NormalDistribution().cdf(
+            return (k / s) ** (mu + lambda_) * self.cls_normal_dist.cdf(z) \
+                + (k / s) ** (mu - lambda_) * self.cls_normal_dist.cdf(
                 z - 2 * lambda_ * sigma * t ** 0.5)
 
     def net_weighted_vega_exposure(self, psi_r: float, *dicts_opts: list[dict[str, float]]) \
@@ -2368,7 +2496,6 @@ class Greeks(BlackScholesMerton):
         ----------
         The Complete Guide To Option Pricing Formulas Espen Gaarder Haug
         """
-        psi_r = self.set_parameters(psi_r)
         return [float(dict_['q_vega']) * float(dict_['vega_t']) * float(dict_['psi_t'])
                 * float(dict_['corr_t']) / float(psi_r) for dict_ in dicts_opts].sum()
 
@@ -2423,8 +2550,6 @@ class IterativeMethods(Greeks):
         https://www.youtube.com/watch?v=a3906k9C0fM,
         https://www.youtube.com/watch?v=WxrRi9lNnqY
         """
-        s, k, r, t, n, u, d = self.set_parameters(
-            s=s, k=k, r=r, t=t, n=n, u=u, d=d, opt_type=opt_type)
         # precomute constants
         dt = t / n
         q = (np.exp(r * dt) - d) / (u - d)
@@ -2489,8 +2614,6 @@ class IterativeMethods(Greeks):
         ----------
         https://www.youtube.com/watch?v=nWslah9tHLk
         """
-        s, k, r, t, n, sigma = self.set_parameters(
-            s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
         # precomute constants
         dt = t / n
         u = np.exp(sigma * np.sqrt(dt))
@@ -2558,8 +2681,6 @@ class IterativeMethods(Greeks):
         ----------
         https://www.youtube.com/watch?v=nWslah9tHLk
         """
-        s, k, r, t, n, sigma = self.set_parameters(
-            s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
         # precomute constants
         dt = t / n
         nu = r - 0.5 * sigma**2
@@ -2628,8 +2749,6 @@ class IterativeMethods(Greeks):
         ----------
         https://www.youtube.com/watch?v=nWslah9tHLk
         """
-        s, k, r, t, n, sigma = self.set_parameters(
-            s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
         # precomute constants
         dt = t / n
         nu = r - 0.5 * sigma**2
@@ -2701,8 +2820,6 @@ class IterativeMethods(Greeks):
         ----------
         https://www.youtube.com/watch?v=nWslah9tHLk
         """
-        s, k, r, t, n, sigma = self.set_parameters(
-            s=s, k=k, r=r, t=t, n=n, sigma=sigma, opt_type=opt_type)
         # precomute constants
         dt = t / n
         nu = r - 0.5 * sigma**2
@@ -2783,10 +2900,6 @@ class EuropeanOptions(IterativeMethods):
         """
         if isinstance(sigma, (np.ndarray, list)):
             sigma = sigma.item() if sigma.size == 1 else float(sigma[0])
-        
-        s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, cp0=cp0, opt_type=opt_type
-        )
 
         result = np.power(
             self.general_opt_price(
@@ -2872,8 +2985,6 @@ class EuropeanOptions(IterativeMethods):
         https://www.youtube.com/watch?v=Jpy3iCsijIU,
         https://www.option-price.com/documentation.php#impliedvolatility
         """
-        s, k, r, t, sigma, q, b, cp0 = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, q=q, b=b, cp0=cp0, opt_type=opt_type)
         if list_bounds is None:
             list_bounds = [(0, 2)]
         count = 0
@@ -2962,7 +3073,6 @@ class EuropeanOptions(IterativeMethods):
         Mercado de Opções, Conceitos e Estratégias / Author: Luiz Maurício da Silva /
             Pgs. 74, 75, 76, 77, 78
         """
-        s, k, r, t, sigma, q = self.set_parameters(s=s, k=k, r=r, t=t, sigma=sigma, q=q)
         return (self.d1(s, k, r, t, sigma, q)
                 + self.d2(s, k, r, t, sigma, q)) / 2
 
@@ -3008,10 +3118,6 @@ class EuropeanOptions(IterativeMethods):
         ValueError
             If the inputs do not return appropriate values.
         """
-        s, k, r, t, sigma, q, pct_moneyness_atm = self.set_parameters(
-            s=s, k=k, r=r, t=t, sigma=sigma, opt_type=opt_type, q=q, 
-            pct_moneyness_atm=pct_moneyness_atm
-        )
         if abs(self.moneyness(s, k, r, t, sigma, q)) < pct_moneyness_atm:
             return "ATM"
         elif (self.moneyness(s, k, r, t, sigma, q) < pct_moneyness_atm and

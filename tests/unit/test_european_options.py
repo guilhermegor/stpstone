@@ -8,6 +8,7 @@ from stpstone.analytics.pricing.derivatives.european_options import (
     EuropeanOptions,
     Greeks,
     IterativeMethods,
+    MonteCarlo,
 )
 
 
@@ -36,6 +37,12 @@ def iterative_model() -> IterativeMethods:
 def euro_options_model() -> EuropeanOptions:
     """Fixture providing EuropeanOptions instance."""
     return EuropeanOptions()
+
+
+@pytest.fixture
+def mc_model() -> MonteCarlo:
+    """Fixture providing MonteCarlo instance."""
+    return MonteCarlo()
 
 
 @pytest.fixture
@@ -425,6 +432,664 @@ class TestIterativeMethods:
                 params["s"], params["k"], params["r"], params["t"], 
                 n, params["sigma"], params["opt_type"]
             )
+
+
+# --------------------------
+# MonteCarlo Tests
+# --------------------------
+class TestMonteCarlo:
+    """Test cases for MonteCarlo class."""
+
+    def test_vanilla_mc_call_price(
+        self, 
+        mc_model: MonteCarlo, 
+        bsm_model: BlackScholesMerton,
+        standard_params: dict
+    ) -> None:
+        """Test vanilla Monte Carlo call option pricing against BSM.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        bsm_model : BlackScholesMerton
+            BlackScholesMerton instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        
+        # Get BSM price for comparison
+        bsm_price = bsm_model.general_opt_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            q=0.0,
+            b=params["r"],
+            opt_type=params["opt_type"]
+        )
+        
+        # Get MC price with fixed seed for reproducibility
+        mc_price, mc_se = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=100_000,
+            random_seed=42
+        )
+        
+        # MC price should be close to BSM price (within 3 standard errors)
+        assert abs(mc_price - bsm_price) < 3 * mc_se
+        # Standard error should be positive and reasonable
+        assert mc_se > 0
+        assert mc_se < 1.0  # Should be fairly small with 100k simulations
+
+    def test_vanilla_mc_put_price(
+        self, 
+        mc_model: MonteCarlo, 
+        bsm_model: BlackScholesMerton,
+        standard_params: dict
+    ) -> None:
+        """Test vanilla Monte Carlo put option pricing against BSM.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        bsm_model : BlackScholesMerton
+            BlackScholesMerton instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        params["opt_type"] = "put"
+        
+        # Get BSM price for comparison
+        bsm_price = bsm_model.general_opt_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            q=0.0,
+            b=params["r"],
+            opt_type=params["opt_type"]
+        )
+        
+        # Get MC price with fixed seed
+        mc_price, mc_se = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=100_000,
+            random_seed=42
+        )
+        
+        # MC price should be close to BSM price (within 3 standard errors)
+        assert abs(mc_price - bsm_price) < 3 * mc_se
+        assert mc_se > 0
+
+    def test_vanilla_mc_deep_itm_call(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test deep in-the-money call option.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        params["k"] = 80.0  # Deep ITM
+        
+        mc_price, mc_se = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        # Deep ITM call should have significant value
+        assert mc_price > 15.0
+        assert mc_se > 0
+
+    def test_vanilla_mc_deep_otm_put(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test deep out-of-the-money put option.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        params["opt_type"] = "put"
+        params["k"] = 80.0  # Deep OTM for put
+        
+        mc_price, mc_se = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        # Deep OTM put should have low value
+        assert mc_price < 2.0
+        assert mc_se > 0
+
+    def test_vanilla_mc_reproducibility(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test that same seed produces same results.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        
+        price1, se1 = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=10_000,
+            random_seed=123
+        )
+        
+        price2, se2 = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=10_000,
+            random_seed=123
+        )
+        
+        # Same seed should produce identical results
+        assert price1 == price2
+        assert se1 == se2
+
+    def test_vanilla_mc_different_seeds(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test that different seeds produce different but close results.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        
+        price1, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=10_000,
+            random_seed=42
+        )
+        
+        price2, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=10_000,
+            random_seed=999
+        )
+        
+        # Different seeds should produce different results
+        assert price1 != price2
+        # But they should be reasonably close
+        assert abs(price1 - price2) < 1.0
+
+    def test_vanilla_mc_increased_simulations(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test that more simulations reduce standard error.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        
+        _, se_small = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=10_000,
+            random_seed=42
+        )
+        
+        _, se_large = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=100_000,
+            random_seed=42
+        )
+        
+        # More simulations should reduce standard error
+        assert se_large < se_small
+
+    def test_barrier_down_and_out_call(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test down-and-out barrier call option.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        barrier = 90.0
+        
+        barrier_price, barrier_se = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="down-and-out",
+            str_option_type=params["opt_type"],
+            n_simulations=50_000
+        )
+        
+        # Barrier option should be cheaper than vanilla
+        vanilla_price, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        assert barrier_price < vanilla_price
+        assert barrier_price > 0
+        assert barrier_se > 0
+
+    def test_barrier_up_and_out_call(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test up-and-out barrier call option.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        barrier = 110.0
+        
+        barrier_price, barrier_se = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="up-and-out",
+            str_option_type=params["opt_type"],
+            n_simulations=50_000
+        )
+        
+        # Barrier option should be cheaper than vanilla
+        vanilla_price, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        assert barrier_price < vanilla_price
+        assert barrier_price > 0
+        assert barrier_se > 0
+
+    def test_barrier_far_from_spot(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test barrier option with barrier far from spot.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        barrier = 50.0  # Very far below spot
+        
+        barrier_price, _ = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="down-and-out",
+            str_option_type=params["opt_type"],
+            n_simulations=50_000
+        )
+        
+        vanilla_price, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        # With barrier very far away, prices should be very similar
+        assert abs(barrier_price - vanilla_price) < 0.5
+
+    def test_barrier_close_to_spot(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test barrier option with barrier close to spot.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        barrier = 99.0  # Very close to spot
+        
+        barrier_price, _ = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="down-and-out",
+            str_option_type=params["opt_type"],
+            n_simulations=50_000
+        )
+        
+        vanilla_price, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        # With barrier very close, price should be much cheaper
+        assert barrier_price < vanilla_price * 0.7
+
+    def test_barrier_put_option(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test barrier put option.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        barrier = 90.0
+        
+        barrier_price, barrier_se = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="down-and-out",
+            str_option_type="put",
+            n_simulations=50_000
+        )
+        
+        assert barrier_price >= 0
+        assert barrier_se > 0
+
+    def test_vanilla_mc_zero_volatility(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test vanilla MC with zero volatility.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        params["sigma"] = 0.0
+        
+        mc_price, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=10_000,
+            random_seed=42
+        )
+        
+        # With zero volatility, price should equal discounted intrinsic value
+        expected = max(params["s"] * np.exp(params["r"] * params["t"]) - params["k"], 0) * \
+                   np.exp(-params["r"] * params["t"])
+        assert pytest.approx(mc_price, abs=0.1) == pytest.approx(expected, abs=0.1)
+
+    def test_vanilla_mc_high_volatility(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test vanilla MC with high volatility.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        params["sigma"] = 0.6  # High volatility
+        
+        mc_price_low_vol, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=0.2,
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        mc_price_high_vol, _ = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        # Higher volatility should increase option value
+        assert mc_price_high_vol > mc_price_low_vol
+
+    def test_vanilla_mc_short_maturity(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test vanilla MC with short time to maturity.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        params["t"] = 0.1  # Short maturity
+        
+        mc_price, mc_se = mc_model.vanilla_mc_price(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            opt_type=params["opt_type"],
+            n_simulations=50_000,
+            random_seed=42
+        )
+        
+        assert mc_price >= 0
+        assert mc_se > 0
+
+    def test_barrier_step_sensitivity(
+        self, 
+        mc_model: MonteCarlo,
+        standard_params: dict
+    ) -> None:
+        """Test barrier option with different number of steps.
+        
+        Parameters
+        ----------
+        mc_model : MonteCarlo
+            MonteCarlo instance.
+        standard_params : dict
+            Standard parameters for option pricing.
+        """
+        params = standard_params.copy()
+        barrier = 95.0
+        
+        price_few_steps, _ = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="down-and-out",
+            str_option_type=params["opt_type"],
+            n_simulations=20_000,
+            n_steps=50
+        )
+        
+        price_many_steps, _ = MonteCarlo.monte_carlo_barrier_option(
+            s=params["s"],
+            k=params["k"],
+            r=params["r"],
+            t=params["t"],
+            sigma=params["sigma"],
+            h=barrier,
+            str_barrier_type="down-and-out",
+            str_option_type=params["opt_type"],
+            n_simulations=20_000,
+            n_steps=252
+        )
+        
+        # Prices should be reasonably close but more steps should be more accurate
+        assert abs(price_few_steps - price_many_steps) < 2.0
+        # Both should be positive
+        assert price_few_steps > 0
+        assert price_many_steps > 0
 
 
 # --------------------------
