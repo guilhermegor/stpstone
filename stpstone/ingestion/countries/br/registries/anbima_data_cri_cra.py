@@ -551,6 +551,7 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
 class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
     """Anbima CRI/CRA prices ingestion class."""
     
+
     def __init__(
         self, 
         date_ref: Optional[date] = None, 
@@ -645,6 +646,7 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                 "DATA_REFERENCIA": "date",
                 "CODIGO_EMISSAO": str,
                 "NOME_DEVEDOR_ESTENDIDO": str,
+                "IS_CRI_CRA": str,
                 "NOME_EMISSOR": str,
                 "SERIE_EMISSAO": str,
                 "REMUNERACAO": str,
@@ -1005,6 +1007,10 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                 )
                 data[field_name] = None
         
+        # Extrair IS_CRI_CRA (tipo) usando o mesmo índice do article
+        tipo_data = self._extract_tipo_price(page, item_index)
+        data.update(tipo_data)
+        
         # Extrair PU_INDICATIVO (texto do link)
         pu_indicativo_data = self._extract_pu_indicativo(page, item_index, base_xpath)
         data.update(pu_indicativo_data)
@@ -1014,6 +1020,51 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
         data.update(link_data)
         
         return data
+    
+    def _extract_tipo_price(
+        self, 
+        page: PlaywrightPage, 
+        item_index: int
+    ) -> dict:
+        """Extract IS_CRI_CRA (tipo) from paragraph in price view.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        item_index : int
+            The index of the item (1-based for articles).
+        
+        Returns
+        -------
+        dict
+            Dictionary with IS_CRI_CRA.
+        """
+        result = {
+            "IS_CRI_CRA": None
+        }
+        
+        try:
+            # Na view de preços, o tipo está em um <p> dentro do article
+            xpath_tipo = (
+                f'//*[@id="__next"]/main/div/div/div/div/div[3]'
+                f'/article[{item_index}]/div[1]/div[1]/p'
+            )
+            element = page.locator(f'xpath={xpath_tipo}').first
+            
+            if element.count() > 0 and element.is_visible(timeout=2000):
+                tipo_texto = element.inner_text().strip()
+                if tipo_texto:
+                    result["IS_CRI_CRA"] = tipo_texto
+                    
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'Error extracting IS_CRI_CRA for item {item_index}: {e}', 
+                "warning"
+            )
+        
+        return result
     
     def _extract_pu_indicativo(
         self, 
