@@ -168,8 +168,7 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False)
             page = browser.new_page()
-
-            # Se end_page não foi especificado, detectar automaticamente
+            
             if self.end_page is None:
                 self.cls_create_log.log_message(
                     self.logger, 
@@ -177,7 +176,6 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
                     "info"
                 )
                 
-                # Navegar para a primeira página para detectar o total
                 url = f"{self.base_url}?size=100&page={self.start_page}"
                 page.goto(url)
                 page.wait_for_timeout(timeout_ms)
@@ -206,8 +204,7 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
                 url = f"{self.base_url}?size=100&page={page_num}"
                 page.goto(url)
                 page.wait_for_timeout(timeout_ms)
-
-                # Encontrar todos os elementos de CRI/CRA
+                
                 elementos_titulo = page.query_selector_all('[id^="item-title-"]')
                 
                 list_page_data: list[dict[str, Union[str, int, float, date]]] = []
@@ -261,15 +258,12 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
             xpath_total_pages = '//*[@id="pagination"]/div[3]/span/span'
             element = page.locator(f'xpath={xpath_total_pages}').first
             
-            if element.count() > 0 and element.is_visible(timeout=5000):
+            if element.count() > 0 and element.is_visible(timeout=5_000):
                 total_pages_text = element.inner_text().strip()
-                # O texto pode ser algo como "de 45" ou apenas "45"
-                # Extrair apenas o número
-                import re
                 match = re.search(r'(\d+)', total_pages_text)
                 if match:
                     total_pages = int(match.group(1))
-                    return total_pages - 1  # Subtrair 1 porque a paginação começa em 0
+                    return total_pages - 1
                     
         except Exception as e:
             self.cls_create_log.log_message(
@@ -278,7 +272,6 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
                 "warning"
             )
         
-        # Se não conseguir detectar, retorna o start_page como fallback
         return self.start_page
     
     def _extract_cri_cra_data(
@@ -301,16 +294,13 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
             Dictionary containing extracted CRI/CRA data.
         """
         data = {}
-
-        # Extrair CODIGO_EMISSAO e NOME_EMISSOR do título
+        
         titulo_data = self._extract_titulo_info(page, id_number)
         data.update(titulo_data)
-
-        # Extrair IS_CRI_CRA (tipo)
+        
         tipo_data = self._extract_tipo(page, id_number)
         data.update(tipo_data)
-
-        # Mapeamento dos campos com seus seletores
+        
         xpath_mapping = {
             'DEVEDOR': f'[id="cri-cra-item-devedor-{id_number}"] dd',
             'SERIE_EMISSAO': f'[id="cri-cra-item-serie-emissao-{id_number}"] dd',
@@ -336,8 +326,7 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
                     "warning"
                 )
                 data[field_name] = None
-        
-        # Extrair PU_INDICATIVO e LINK usando XPath
+                
         pu_link_data = self._extract_pu_and_link(page, id_number)
         data.update(pu_link_data)
         
@@ -368,7 +357,6 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
         }
         
         try:
-            # Extrair CODIGO_EMISSAO de span[1]
             xpath_codigo = f'//*[@id="item-title-{id_number}"]/span/span[1]'
             element_codigo = page.locator(f'xpath={xpath_codigo}').first
             
@@ -376,8 +364,7 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
                 codigo_texto = element_codigo.inner_text().strip()
                 if codigo_texto:
                     result["CODIGO_EMISSAO"] = codigo_texto
-            
-            # Extrair NOME_EMISSOR de span[3]
+                    
             xpath_nome = f'//*[@id="item-title-{id_number}"]/span/span[3]'
             element_nome = page.locator(f'xpath={xpath_nome}').first
             
@@ -465,18 +452,14 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
             element = page.locator(f'xpath={xpath_link}').first
             
             if element.count() > 0:
-                # Extrair o texto do PU
                 pu_text = element.inner_text().strip()
                 result["PU_INDICATIVO"] = pu_text if pu_text else None
                 
-                # Extrair o href e remover '/precos'
                 href = element.get_attribute('href')
                 if href:
-                    # Remover '/precos' do final se existir
                     if href.endswith('/precos'):
-                        href = href[:-7]  # Remove os últimos 7 caracteres ('/precos')
-                    
-                    # Construir URL completo se for relativo
+                        href = href[:-7]
+                        
                     if href.startswith('/'):
                         result["LINK_CARACTERISTICAS_INDIVIDUAIS"] = \
                             urljoin('https://data.anbima.com.br', href)
@@ -533,11 +516,9 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
         
         df_ = pd.DataFrame(raw_data)
         
-        # Remover coluna de paginação se existir
         if 'pagina' in df_.columns:
             df_ = df_.drop('pagina', axis=1)
-        
-        # Tratar datas vazias
+            
         for col_ in ["DATA_EMISSAO", "DATA_VENCIMENTO"]:
             if col_ in df_.columns:
                 df_[col_] = df_[col_].apply(
@@ -700,8 +681,7 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False)
             page = browser.new_page()
-
-            # Se end_page não foi especificado, detectar automaticamente
+            
             if self.end_page is None:
                 self.cls_create_log.log_message(
                     self.logger, 
@@ -709,12 +689,10 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                     "info"
                 )
                 
-                # Navegar para a view de preços para detectar o total
                 url = f"{self.base_url}?view=precos&page={self.start_page}&q=&size=100"
                 page.goto(url)
                 page.wait_for_timeout(timeout_ms)
                 
-                # Clicar no botão Preços para ativar a view
                 self._click_precos_button(page, timeout_ms)
                 
                 self.end_page = self._get_total_pages(page)
@@ -743,13 +721,10 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                 page.goto(url)
                 page.wait_for_timeout(timeout_ms)
                 
-                # Clicar no botão Preços para garantir que a view está ativa
                 self._click_precos_button(page, timeout_ms)
                 
-                # Extrair DATA_REFERENCIA da página
                 data_referencia = self._extract_data_referencia(page)
-
-                # Encontrar todos os articles de preços
+                
                 price_articles = page.query_selector_all(
                     'xpath=//*[@id="__next"]/main/div/div/div/div/div[3]/article'
                 )
@@ -805,13 +780,14 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
             Timeout in milliseconds.
         """
         try:
-            # Método 1: Tentar clicar usando o XPath específico
-            xpath_button = '//*[@id="__next"]/main/div/div/div/div/div[1]/div[2]/div[2]/div/div/button[1]'
+            xpath_button = """
+            //*[@id="__next"]/main/div/div/div/div/div[1]/div[2]/div[2]/div/div/button[1]
+            """
             button_xpath = page.locator(f'xpath={xpath_button}').first
             
-            if button_xpath.count() > 0 and button_xpath.is_visible(timeout=5000):
+            if button_xpath.count() > 0 and button_xpath.is_visible(timeout=5_000):
                 button_xpath.click()
-                page.wait_for_timeout(2000)  # Aguardar 2 segundos após o clique
+                page.wait_for_timeout(2_000)
                 
                 self.cls_create_log.log_message(
                     self.logger, 
@@ -827,13 +803,12 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
             )
         
         try:
-            # Método 2: Tentar usando o seletor de classe com filtro de texto
             button_selector = 'button.anbima-ui-button--secondary'
             button = page.locator(button_selector).filter(has_text="Preços").first
             
-            if button.count() > 0 and button.is_visible(timeout=5000):
+            if button.count() > 0 and button.is_visible(timeout=5_000):
                 button.click()
-                page.wait_for_timeout(2000)  # Aguardar 2 segundos após o clique
+                page.wait_for_timeout(2_000)
                 
                 self.cls_create_log.log_message(
                     self.logger, 
@@ -849,12 +824,11 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
             )
         
         try:
-            # Método 3: Tentar usar aria-label ou texto visível
             button_text = page.get_by_role("button", name="Preços").first
             
-            if button_text.count() > 0 and button_text.is_visible(timeout=5000):
+            if button_text.count() > 0 and button_text.is_visible(timeout=5_000):
                 button_text.click()
-                page.wait_for_timeout(2000)  # Aguardar 2 segundos após o clique
+                page.wait_for_timeout(2_000)
                 
                 self.cls_create_log.log_message(
                     self.logger, 
@@ -869,7 +843,6 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                 "warning"
             )
         
-        # Se todos os métodos falharem
         self.cls_create_log.log_message(
             self.logger, 
             '❌ Could not click Preços button with any method', 
@@ -893,12 +866,12 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
             xpath_total_pages = '//*[@id="pagination"]/div[3]/span/span'
             element = page.locator(f'xpath={xpath_total_pages}').first
             
-            if element.count() > 0 and element.is_visible(timeout=5000):
+            if element.count() > 0 and element.is_visible(timeout=5_000):
                 total_pages_text = element.inner_text().strip()
                 match = re.search(r'(\d+)', total_pages_text)
                 if match:
                     total_pages = int(match.group(1))
-                    return total_pages - 1  # Subtrair 1 porque a paginação começa em 0
+                    return total_pages - 1
                     
         except Exception as e:
             self.cls_create_log.log_message(
@@ -970,7 +943,6 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
             f'//*[@id="__next"]/main/div/div/div/div/div[3]/article[{item_index}]'
         )
         
-        # Mapeamento dos campos com seus XPaths relativos
         xpath_mapping = {
             'CODIGO_EMISSAO': f'{base_xpath}/div[1]/div[1]/h2/a/span[1]',
             'NOME_DEVEDOR_ESTENDIDO': f'{base_xpath}/div[1]/div[1]/h2/a/span[2]/span[2]',
@@ -1006,16 +978,13 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                     "warning"
                 )
                 data[field_name] = None
-        
-        # Extrair IS_CRI_CRA (tipo) usando o mesmo índice do article
+                
         tipo_data = self._extract_tipo_price(page, item_index)
         data.update(tipo_data)
         
-        # Extrair PU_INDICATIVO (texto do link)
         pu_indicativo_data = self._extract_pu_indicativo(page, item_index, base_xpath)
         data.update(pu_indicativo_data)
         
-        # Extrair LINK_CARACTERISTICAS_INDIVIDUAIS (href)
         link_data = self._extract_link(page, item_index, base_xpath)
         data.update(link_data)
         
@@ -1045,14 +1014,13 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
         }
         
         try:
-            # Na view de preços, o tipo está em um <p> dentro do article
             xpath_tipo = (
                 f'//*[@id="__next"]/main/div/div/div/div/div[3]'
                 f'/article[{item_index}]/div[1]/div[1]/p'
             )
             element = page.locator(f'xpath={xpath_tipo}').first
             
-            if element.count() > 0 and element.is_visible(timeout=2000):
+            if element.count() > 0 and element.is_visible(timeout=2_000):
                 tipo_texto = element.inner_text().strip()
                 if tipo_texto:
                     result["IS_CRI_CRA"] = tipo_texto
@@ -1138,7 +1106,6 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
             if element.count() > 0:
                 href = element.get_attribute('href')
                 if href:
-                    # Construir URL completo se for relativo
                     if href.startswith('/'):
                         result["LINK_CARACTERISTICAS_INDIVIDUAIS"] = \
                             urljoin('https://data.anbima.com.br', href)
@@ -1195,11 +1162,9 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
         
         df_ = pd.DataFrame(raw_data)
         
-        # Remover coluna de paginação se existir
         if 'pagina' in df_.columns:
             df_ = df_.drop('pagina', axis=1)
-        
-        # Tratar datas vazias
+            
         for col_ in ["DATA_REFERENCIA", "DATA_EMISSAO", "DATA_VENCIMENTO", 
                      "DATA_REFERENCIA_NTNB"]:
             if col_ in df_.columns:
@@ -1385,7 +1350,6 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
             The parsed CSV content.
         """
         try:
-            # O arquivo vem em formato CSV separado por ponto e vírgula
             content = resp_req.text
             
             self.cls_create_log.log_message(
@@ -1421,10 +1385,8 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
             The transformed DataFrame.
         """
         try:
-            # Parse o arquivo CSV
             csv_content = self.parse_raw_file(raw_data)
             
-            # Ler o CSV - o arquivo usa ponto e vírgula como separador
             df_raw = pd.read_csv(
                 csv_content,
                 sep=';',
@@ -1438,13 +1400,11 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
                 "info"
             )
             
-            # Criar o mapeamento baseado nas colunas reais do arquivo
             column_mapping = {}
             
             for col in df_raw.columns:
                 col_clean = col.strip()
                 
-                # DATA_REFERENCIA deve ser a primeira coluna "Data de Referência"
                 if 'Data de Refer' in col_clean and 'NTN' not in col_clean:
                     column_mapping[col] = 'DATA_REFERENCIA'
                 elif 'Risco de Cr' in col_clean:
@@ -1472,7 +1432,6 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
                 elif col_clean.strip() in ['PU', ' PU', 'PU ']:
                     column_mapping[col] = 'PU'
                 elif '% PU Par' in col_clean and '% VNE' in col_clean:
-                    # Manter a coluna combinada
                     column_mapping[col] = 'PCT_PU_PAR_PCT_VNE'
                 elif 'Duration' in col_clean:
                     column_mapping[col] = 'DURATION'
@@ -1487,18 +1446,13 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
                 "info"
             )
             
-            # Renomear colunas
             df_ = df_raw.rename(columns=column_mapping).copy()
-            
-            # Lista de colunas esperadas (17 colunas)
             expected_columns = [
                 'DATA_REFERENCIA', 'RISCO_CREDITO', 'EMISSOR', 'SERIE', 
                 'EMISSAO', 'CODIGO', 'VENCIMENTO', 'INDICE_CORRECAO',
                 'TAXA_COMPRA', 'TAXA_VENDA', 'TAXA_INDICATIVA', 'DESVIO_PADRAO',
                 'PU', 'PCT_PU_PAR_PCT_VNE', 'DURATION', 'DATA_REFERENCIA_NTNB', 'PCT_REUNE'
             ]
-            
-            # Verificar colunas faltantes
             missing_columns = [col for col in expected_columns if col not in df_.columns]
             
             if missing_columns:
@@ -1508,30 +1462,24 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
                     "warning"
                 )
                 
-                # Adicionar colunas faltantes com valores None
                 for col in missing_columns:
                     df_[col] = None
-            
-            # Selecionar apenas as colunas esperadas na ordem correta
+                    
             df_ = df_[expected_columns].copy()
             
-            # Converter valores percentuais que estão como string
             percentage_columns = ['TAXA_COMPRA', 'TAXA_VENDA', 'TAXA_INDICATIVA', 
                                  'DESVIO_PADRAO', 'PCT_REUNE']
             
             for col in percentage_columns:
                 if col in df_.columns:
                     df_[col] = df_[col].astype(str).str.replace('%', '').str.strip()
-            
-            # Para PCT_PU_PAR_PCT_VNE, apenas remover espaços extras
+                    
             if 'PCT_PU_PAR_PCT_VNE' in df_.columns:
                 df_['PCT_PU_PAR_PCT_VNE'] = df_['PCT_PU_PAR_PCT_VNE'].astype(str).str.strip()
-            
-            # Tratar datas vazias
+                
             date_columns = ['DATA_REFERENCIA', 'VENCIMENTO', 'DATA_REFERENCIA_NTNB']
             for col in date_columns:
                 if col in df_.columns:
-                    # Usar uma função que trata cada valor individualmente
                     def clean_date(val):
                         if pd.isna(val):
                             return '01/01/2100'
