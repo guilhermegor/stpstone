@@ -20,10 +20,18 @@ from stpstone.ingestion.abc.ingestion_abc import (
     ContentParser,
     CoreIngestion,
 )
+from stpstone.transformations.validation.metaclass_type_checker import type_checker
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
+
+
+class CoordinatorResult(TypedDict):
+    """Coordinator Result."""
+
+    names: Optional[str]
+    cnpjs: Optional[str]
 
 
 class ResultDocumentRecord(TypedDict):
@@ -202,7 +210,8 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
 
             self.cls_create_log.log_message(
                 self.logger, 
-                f"🚀 Starting CRI/CRA scraping from pages {self.start_page} to {self.end_page}...", 
+                "🚀 Starting CRI/CRA scraping from pages "
+                f"{self.start_page} to {self.end_page}...", 
                 "info"
             )
             
@@ -544,7 +553,6 @@ class AnbimaDataCRICRACharacteristics(ABCIngestionOperations):
 class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
     """Anbima CRI/CRA prices ingestion class."""
     
-
     def __init__(
         self, 
         date_ref: Optional[date] = None, 
@@ -742,7 +750,7 @@ class AnbimaDataCRICRAPricesWS(ABCIngestionOperations):
                 )
                 
                 list_page_data: list[dict[str, Union[str, int, float, date]]] = []
-                for idx, article in enumerate(price_articles):
+                for idx, _ in enumerate(price_articles):
                     try:
                         price_data = self._extract_price_data(
                             page, idx + 1, data_referencia
@@ -1263,7 +1271,7 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
                 "DATA_REFERENCIA": "date",
                 "RISCO_CREDITO": str,
                 "EMISSOR": str,
-                "SERIE": str,
+                "SERIE": str, # codespell:ignore
                 "EMISSAO": str,
                 "CODIGO": str,
                 "VENCIMENTO": "date",
@@ -1492,7 +1500,20 @@ class AnbimaDataCRICRAPricesFile(ABCIngestionOperations):
             date_columns = ['DATA_REFERENCIA', 'VENCIMENTO', 'DATA_REFERENCIA_NTNB']
             for col in date_columns:
                 if col in df_.columns:
-                    def clean_date(val):
+                    @type_checker
+                    def clean_date(val: Any) -> str: # noqa ANN401: typing.Any not allowed
+                        """Clean date values, replacing invalids with '01/01/2100'.
+                        
+                        Parameters
+                        ----------
+                        val : Any
+                            The value to clean.
+                        
+                        Returns
+                        -------
+                        str
+                            The cleaned date value
+                        """
                         if pd.isna(val):
                             return '01/01/2100'
                         str_val = str(val).strip()
@@ -1710,7 +1731,8 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
 
             self.cls_create_log.log_message(
                 self.logger, 
-                f"🚀 Starting CRI/CRA characteristics scraping for {len(self.list_asset_codes)} assets...", 
+                "🚀 Starting CRI/CRA characteristics scraping for "
+                f"{len(self.list_asset_codes)} assets...", 
                 "info"
             )
             
@@ -1789,44 +1811,44 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
             'ISIN': '//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd',
             'DEVEDOR': '//*[@id="root"]/main/div[1]/div/div/div/dl[2]/dd',
             'SECURITIZADORA': '//*[@id="root"]/main/div[1]/div/div/div/dl[3]/dd',
-            'NOME_OPERACAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[1]/span[2]',
-            'SERIE_EMISSAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[2]/span[2]',
-            'DATA_EMISSAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[3]/span[2]',
-            'DATA_VENCIMENTO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[4]/span[2]',
-            'REMUNERACAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[5]/span[2]',
-            'TAXA_INDICATIVA': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[1]/p[2]',
-            'PU_INDICATIVO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[2]/p[2]',
-            'PU_PAR': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[3]/p[2]',
-            'SERIE_ATIVO': '//*[@id="root"]/main/div[3]/main/div/div[1]/article[1]/article/section/div/div[1]/h2',
+            'NOME_OPERACAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[1]/span[2]', # noqa E501: line too long
+            'SERIE_EMISSAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[2]/span[2]', # noqa E501: line too long
+            'DATA_EMISSAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[3]/span[2]', # noqa E501: line too long
+            'DATA_VENCIMENTO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[4]/span[2]', # noqa E501: line too long
+            'REMUNERACAO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[1]/li[5]/span[2]', # noqa E501: line too long
+            'TAXA_INDICATIVA': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[1]/p[2]', # noqa E501: line too long
+            'PU_INDICATIVO': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[2]/p[2]', # noqa E501: line too long
+            'PU_PAR': '//*[@id="root"]/main/div[3]/main/div/div[2]/div/article/article/section/div/ul[2]/li[3]/p[2]', # noqa E501: line too long
+            'SERIE_ATIVO': '//*[@id="root"]/main/div[3]/main/div/div[1]/article[1]/article/section/div/div[1]/h2', # noqa E501: line too long
             'REMUNERACAO_2': '//*[@id="output__container--remuneracao"]/div/span',
-            'DATA_INICIO_RENTABILIDADE': '//*[@id="output__container--dataInicioRentabilidade"]/div/span',
+            'DATA_INICIO_RENTABILIDADE': '//*[@id="output__container--dataInicioRentabilidade"]/div/span', # noqa E501: line too long
             'EXPRESSAO_PAPEL': '//*[@id="output__container--expressaoPapel"]/div/span',
-            'VOLUME_SERIE_DATA_EMISSAO': '//*[@id="output__container--volumeSerieEmissao"]/div/span',
-            'QUANTIDADE_SERIE_DATA_EMISSAO': '//*[@id="output__container--quantidadeSerieEmissao"]/div/span',
+            'VOLUME_SERIE_DATA_EMISSAO': '//*[@id="output__container--volumeSerieEmissao"]/div/span', # noqa E501: line too long
+            'QUANTIDADE_SERIE_DATA_EMISSAO': '//*[@id="output__container--quantidadeSerieEmissao"]/div/span', # noqa E501: line too long
             'VNE': '//*[@id="output__container--vne"]/div/span',
             'VNA': '//*[@id="output__container--vna"]/div/span/a',
             'PRAZO_EMISSAO': '//*[@id="output__container--prazoEmissao"]/div/span',
             'PRAZO_REMANESCENTE': '//*[@id="output__container--prazoRemanescente"]/div/span',
             'RESGATE_ANTECIPADO': '//*[@id="output__container--resgateAntecipado"]/div/span',
             'ISIN_2': '//*[@id="output__container--isin"]/div/span',
-            'DATA_PROXIMO_EVENTO_AGENDA': '//*[@id="output__container--dataProximoEventoAgenda"]/div/span/a',
+            'DATA_PROXIMO_EVENTO_AGENDA': '//*[@id="output__container--dataProximoEventoAgenda"]/div/span/a', # noqa E501: line too long
             'CLASSE_ATIVO': '//*[@id="output__container--classe"]/div/span',
             'CONCENTRACAO': '//*[@id="output__container--concentracao"]/div/span',
             'CATEGORIA': '//*[@id="output__container--categoria"]/div/span',
             'SETOR': '//*[@id="output__container--setor"]/div/span',
             'TIPO_LASTRO': '//*[@id="output__container--tipoLastro"]/div/span',
-            'NUMERO_EMISSAO': '//*[@id="root"]/main/div[3]/main/div/div[1]/article[2]/article/section/div/div[1]/h2',
+            'NUMERO_EMISSAO': '//*[@id="root"]/main/div[3]/main/div/div[1]/article[2]/article/section/div/div[1]/h2', # noqa E501: line too long
             'DEVEDOR_EMISSAO': '//*[@id="output__container--devedor"]/div/span',
             'CEDENTE': '//*[@id="output__container--cedente"]/div/span',
-            'NOME_SECURITIZADORA': '//*[@id="output__container--securitizadora"]/div/span/div/span[1]',
-            'CNPJ_SECURITIZADORA': '//*[@id="output__container--securitizadora"]/div/span/div/span[2]',
+            'NOME_SECURITIZADORA': '//*[@id="output__container--securitizadora"]/div/span/div/span[1]', # noqa E501: line too long
+            'CNPJ_SECURITIZADORA': '//*[@id="output__container--securitizadora"]/div/span/div/span[2]', # noqa E501: line too long
             'QUANTIDADE_EMISSAO': '//*[@id="output__container--quantidadeEmissao"]/div/span',
             'VOLUME_EMISSAO': '//*[@id="output__container--volumeEmissao"]/div/span',
             'TIPO_EMISSAO': '//*[@id="output__container--tipo"]/div/span',
-            'NOME_COORDENADOR_LIDER': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[1]',
-            'CNPJ_COORDENADOR_LIDER': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[2]',
-            'NOME_AGENTE_FIDUCIARIO': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[1]',
-            'CNPJ_AGENTE_FIDUCIARIO': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[2]',
+            'NOME_COORDENADOR_LIDER': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[1]', # noqa E501: line too long
+            'CNPJ_COORDENADOR_LIDER': '//*[@id="output__container--coordenadorLider"]/div/span/div/span[2]', # noqa E501: line too long
+            'NOME_AGENTE_FIDUCIARIO': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[1]', # noqa E501: line too long
+            'CNPJ_AGENTE_FIDUCIARIO': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[2]', # noqa E501: line too long
         }
         
         for field_name, xpath in xpath_mapping.items():
@@ -1882,7 +1904,7 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
         self, 
         page: PlaywrightPage, 
         asset_code: str
-    ) -> dict[str, Optional[str]]:
+    ) -> CoordinatorResult:
         """Extract all coordinators (names and CNPJs).
         
         Parameters
@@ -1894,10 +1916,10 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
         
         Returns
         -------
-        dict[str, Optional[str]]
+        CoordinatorResult
             Dictionary with 'names' and 'cnpjs' keys containing pipe-separated values.
         """
-        result = {'names': None, 'cnpjs': None}
+        result: CoordinatorResult = {'names': None, 'cnpjs': None}
         
         try:
             coordinator_containers = page.locator(
@@ -1907,8 +1929,8 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
             if not coordinator_containers:
                 return result
             
-            names = []
-            cnpjs = []
+            names: list[str] = []
+            cnpjs: list[str] = []
             
             for idx, container in enumerate(coordinator_containers, start=1):
                 try:
@@ -2218,7 +2240,6 @@ class AnbimaDataCRICRADocuments(ABCIngestionOperations):
         cod_ativo = self._extract_cod_ativo(page, asset_code)
         is_cri_cra = self._extract_is_cri_cra(page)
         
-        # Verificar se há documentos na página
         check_no_docs = self._check_no_documents(page)
         if check_no_docs:
             self.cls_create_log.log_message(
@@ -2228,7 +2249,6 @@ class AnbimaDataCRICRADocuments(ABCIngestionOperations):
             )
             return []
         
-        # Encontrar todas as seções de documentos (articles)
         document_sections = self._find_document_sections(page, cod_ativo)
         
         if not document_sections:
@@ -2263,13 +2283,11 @@ class AnbimaDataCRICRADocuments(ABCIngestionOperations):
             The extracted asset code.
         """
         with suppress(Exception):
-            # Tenta extrair apenas o texto do código (sem o label CRI/CRA)
             codigo_element = page.locator(
                 'xpath=//*[@id="root"]/main/div[1]/div/div/h1'
             ).first
             if codigo_element.is_visible(timeout=5000):
                 full_text = codigo_element.inner_text().strip()
-                # Remove o label CRI/CRA se presente
                 codigo_text = full_text.split('\n')[0].strip() if '\n' in full_text else full_text
                 return codigo_text
         return fallback_code
@@ -2380,13 +2398,8 @@ class AnbimaDataCRICRADocuments(ABCIngestionOperations):
             List of document records extracted from this section.
         """
         try:
-            # Extrair nome da seção
             secao = self._extract_section_name(page, section_idx)
-            
-            # Extrair subseção (se existir)
             subsecao = self._extract_subsection_name(page, section_idx)
-            
-            # Encontrar todos os itens de documentos (li elements)
             document_items = section.locator(
                 'xpath=.//article/section/div[2]/ul/li'
             ).all()
@@ -2511,10 +2524,7 @@ class AnbimaDataCRICRADocuments(ABCIngestionOperations):
             List of document records (one per link).
         """
         try:
-            # Extrair nome do documento
             nome_documento = self._extract_document_name(page, section_idx, item_idx)
-            
-            # Encontrar todos os links dentro deste item
             link_elements = item.locator('xpath=.//ul/li/a').all()
             
             if len(link_elements) == 0:
@@ -2537,12 +2547,9 @@ class AnbimaDataCRICRADocuments(ABCIngestionOperations):
             
             list_documents: list[dict] = []
             for link_idx, link_element in enumerate(link_elements, start=1):
-                # Extrair data de divulgação
                 data_divulgacao = self._extract_document_date(
                     page, section_idx, item_idx, link_idx
                 )
-                
-                # Extrair link
                 link_documento = self._extract_link_url(
                     link_element, page, section_idx, item_idx, link_idx
                 )
@@ -4503,53 +4510,3 @@ class AnbimaDataCRICRAEvents(ABCIngestionOperations):
                 text = element.inner_text().strip()
                 return text if text else None
         return None
-    
-    def parse_raw_file(
-        self, 
-        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
-    ) -> StringIO:
-        """Parse the raw file content.
-        
-        This method is kept for compatibility but not used in web scraping.
-        
-        Parameters
-        ----------
-        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-            The response object.
-        
-        Returns
-        -------
-        StringIO
-            The parsed content.
-        """
-        return StringIO()
-    
-    def transform_data(
-        self, 
-        raw_data: list
-    ) -> pd.DataFrame:
-        """Transform scraped PU Indicativo prices data into a DataFrame.
-        
-        Parameters
-        ----------
-        raw_data : list
-            The scraped prices data list.
-        
-        Returns
-        -------
-        pd.DataFrame
-            The transformed DataFrame.
-        """
-        if not raw_data:
-            return pd.DataFrame()
-        
-        df_ = pd.DataFrame(raw_data)
-        
-        for col_ in ["DATA_REFERENCIA", "DATA_REFERENCIA_NTNB"]:
-            if col_ in df_.columns:
-                df_[col_] = df_[col_].apply(
-                    lambda x: x.replace("-", "01/01/2100") 
-                        if x and isinstance(x, str) else "01/01/2100"
-                )
-        
-        return df_
