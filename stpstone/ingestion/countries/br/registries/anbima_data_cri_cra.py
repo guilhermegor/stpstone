@@ -1744,7 +1744,8 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
 
         self.cls_create_log.log_message(
             self.logger, 
-            f"💾 CRI/CRA characteristics scraping finished. Total: {len(list_characteristics_data)} assets processed.", 
+            "💾 CRI/CRA characteristics scraping finished. "
+            f"Total: {len(list_characteristics_data)} assets processed.", 
             "info"
         )
         
@@ -1770,8 +1771,7 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
             Dictionary containing extracted characteristics data.
         """
         data = {"COD_ATIVO": asset_code}
-
-        # Basic XPath mappings for single fields
+        
         xpath_mapping = {
             'IS_CRI_CRA': '//*[@id="root"]/main/div[1]/div/div/h1/span/label',
             'ISIN': '//*[@id="root"]/main/div[1]/div/div/div/dl[1]/dd',
@@ -1816,12 +1816,10 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
             'NOME_AGENTE_FIDUCIARIO': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[1]',
             'CNPJ_AGENTE_FIDUCIARIO': '//*[@id="output__container--agenteFiduciario"]/div/span/div/span[2]',
         }
-
-        # Extract single fields
+        
         for field_name, xpath in xpath_mapping.items():
             data[field_name] = self._extract_single_field(page, xpath, field_name, asset_code)
-        
-        # Extract multiple coordinators
+            
         coordinators_data = self._extract_coordinators(page, asset_code)
         data['NOME_COORDENADORES'] = coordinators_data['names']
         data['CNPJ_COORDENADORES'] = coordinators_data['cnpjs']
@@ -1890,7 +1888,6 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
         result = {'names': None, 'cnpjs': None}
         
         try:
-            # Find all coordinator containers
             coordinator_containers = page.locator(
                 'xpath=//*[@id="output__container--coordenadores"]/div/span/div'
             ).all()
@@ -1903,14 +1900,12 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
             
             for idx, container in enumerate(coordinator_containers, start=1):
                 try:
-                    # Extract name
                     name_element = container.locator('xpath=./span[1]').first
                     if name_element.count() > 0 and name_element.is_visible(timeout=2_000):
                         name = name_element.inner_text().strip()
                         if name:
                             names.append(name)
                     
-                    # Extract CNPJ
                     cnpj_element = container.locator('xpath=./span[2]').first
                     if cnpj_element.count() > 0 and cnpj_element.is_visible(timeout=2_000):
                         cnpj = cnpj_element.inner_text().strip()
@@ -1924,7 +1919,6 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
                         "warning"
                     )
             
-            # Join with pipe separator
             if names:
                 result['names'] = ' | '.join(names)
             if cnpjs:
@@ -1986,7 +1980,6 @@ class AnbimaDataCRICRAIndividualCharacteristics(ABCIngestionOperations):
         
         df_ = pd.DataFrame(raw_data)
         
-        # Handle date columns
         date_columns = [
             'DATA_EMISSAO',
             'DATA_VENCIMENTO',
