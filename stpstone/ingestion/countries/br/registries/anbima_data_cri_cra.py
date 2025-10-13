@@ -3427,25 +3427,45 @@ class AnbimaDataCRICRAPUHistorico(ABCIngestionOperations):
                 )
                 
                 try:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"Fetching historic PV for {asset_code}...", 
-                        "info"
-                    )
+                    url = f"{self.base_url}/{asset_code}/precos?page=1&size=100"
+                    page.goto(url)
+                    page.wait_for_timeout(timeout_ms)
                     
-                    current_url = \
-                        f"{self.base_url}/{asset_code}/precos?page=1&size=100"
-                    
-                    prices_data = self._extract_pu_historico_prices(
-                        page, asset_code, current_url
-                    )
-                    list_prices_data.extend(prices_data)
+                    total_pages = self._get_total_pages(page)
                     
                     self.cls_create_log.log_message(
                         self.logger, 
-                        f"✅ Extracted {len(prices_data)} price records from page", 
+                        f"Found {total_pages} pages for {asset_code}", 
                         "info"
                     )
+                    
+                    for page_num in range(1, total_pages + 1):
+                        self.cls_create_log.log_message(
+                            self.logger, 
+                            f"Fetching page {page_num}/{total_pages} for {asset_code}...", 
+                            "info"
+                        )
+                        
+                        current_url = \
+                            f"{self.base_url}/{asset_code}/precos?page={page_num}&size=100"
+                        
+                        if page_num > 1:
+                            page.goto(current_url)
+                            page.wait_for_timeout(timeout_ms)
+                        
+                        prices_data = self._extract_pu_historico_prices(
+                            page, asset_code, current_url
+                        )
+                        list_prices_data.extend(prices_data)
+                        
+                        self.cls_create_log.log_message(
+                            self.logger, 
+                            f"✅ Extracted {len(prices_data)} price records from page {page_num}", 
+                            "info"
+                        )
+                        
+                        if page_num < total_pages:
+                            time.sleep(randint(1, 3))  # noqa S311
                     
                     self.cls_create_log.log_message(
                         self.logger, 
@@ -3472,6 +3492,37 @@ class AnbimaDataCRICRAPUHistorico(ABCIngestionOperations):
         )
         
         return list_prices_data
+
+    def _get_total_pages(self, page: PlaywrightPage) -> int:
+        """Get the total number of pages from pagination.
+        
+        Parameters
+        ----------
+        page : PlaywrightPage
+            The Playwright page object.
+        
+        Returns
+        -------
+        int
+            The total number of pages, defaults to 1 if not found.
+        """
+        try:
+            pagination_element = page.locator(
+                'xpath=//*[@id="pagination"]/div[3]/span/a'
+            ).last
+            
+            if pagination_element.is_visible(timeout=5000):
+                last_page_text = pagination_element.inner_text().strip()
+                total_pages = int(last_page_text)
+                return total_pages
+        except Exception as e:
+            self.cls_create_log.log_message(
+                self.logger, 
+                f'Could not determine total pages, defaulting to 1: {e}', 
+                "warning"
+            )
+        
+        return 1
     
     def _extract_pu_historico_prices(
         self, 
