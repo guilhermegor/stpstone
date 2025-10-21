@@ -1,310 +1,287 @@
-### CVM DATA - https://dados.cvm.gov.br/dados
+"""Enhanced implementation of CVM Data ingestion.
 
-from io import StringIO
-from typing import Any, Dict
+CVM stands for "Comissão de Valores Mobiliários" (Securities and Exchange Commission of Brazil).
+"""
 
-import numpy as np
+from datetime import date
+from io import BytesIO, StringIO
+from logging import Logger
+from typing import Optional, Union
+
+import backoff
 import pandas as pd
+from playwright.sync_api import Page as PlaywrightPage
+import requests
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
+from stpstone.ingestion.abc.ingestion_abc import (
+    ABCIngestionOperations,
+    ContentParser,
+    CoreIngestion,
+)
+from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
-class CVMDATA:
-
+class FIFDailyInfos(ABCIngestionOperations):
+    """Liquid funds daily infos from CVM Data - concrete implementation."""
+    
     def __init__(
-        self,
-        str_host_cvm:str='https://dados.cvm.gov.br/dados/',
-        logger:object=None,
-        str_dt_error:str='2100-01-01',
-        str_format_dt_input:str='YYYY-MM-DD',
-        int_val_err:int=0,
-        dict_fund_class_subclass_register:Dict[str, Any]=None
-    ):
-        self.str_host_cvm = str_host_cvm
+        self, 
+        date_ref: Optional[date] = None, 
+        logger: Optional[Logger] = None,
+        cls_db: Optional[Session] = None,
+    ) -> None:
+        """Initialize the ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+        
+        Returns
+        -------
+        None
+        """
+        super().__init__(cls_db=cls_db)
+        CoreIngestion.__init__(self)
+        ContentParser.__init__(self)
+
         self.logger = logger
-        self.str_dt_error = str_dt_error
-        self.str_format_dt_input = str_format_dt_input
-        self.int_val_err = int_val_err
-        self.dict_fund_class_subclass_register = self.funds_classes_subclasses_register_raw \
-            if dict_fund_class_subclass_register is None else dict_fund_class_subclass_register
-
-    @property
-    def funds_register(
+        self.cls_db = cls_db
+        self.cls_dir_files_management = DirFilesManagement()
+        self.cls_dates_current = DatesCurrent()
+        self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        
+        # Format URL with year and month (YYYYMM)
+        str_date_fmt = self.date_ref.strftime("%Y%m")
+        self.url = f"https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{str_date_fmt}.zip"
+    
+    def run(
         self,
-        str_app:str='FI/CAD/DADOS/cad_fi.csv'
-    ):
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = True,
+        bool_insert_or_ignore: bool = False, 
+        str_table_name: str = "br_cvm_data"
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+        
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Whether to verify the SSL certificate, by default True
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False
+        str_table_name : str, optional
+            The name of the table, by default "br_cvm_data"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # url
-        url = f'{self.str_host_cvm}{str_app}'
-        # read the csv file from the url into a pandas dataframe
-        reader = pd.read_csv(url, sep=';', encoding='latin1', decimal='.', thousands=',')
-        df_funds_register = pd.DataFrame(reader)
-        # validate the content of dataframe
-        if (df_funds_register.empty == True) \
-            and (self.logger is not None):
-            CreateLog().log_message(
-                self.logger, 
-                'Error reading funds register within url: {}'.format(url), 
-                "error"
+        resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+        file, file_name = self.parse_raw_file(resp_req)
+        df_ = self.transform_data(file=file)
+        df_ = self.standardize_dataframe(
+            df_=df_, 
+            date_ref=self.date_ref,
+            dict_dtypes={
+                "TP_FUNDO_CLASSE": str,
+                "CNPJ_FUNDO_CLASSE": str,
+                "ID_SUBCLASSE": str,
+                "DT_COMPTC": "date",
+                "VL_TOTAL": float,
+                "VL_QUOTA": float,
+                "VL_PATRIM_LIQ": float,
+                "CAPTC_DIA": float,
+                "RESG_DIA": float,
+                "NR_COTST": int,
+                "FILE_NAME": "category",
+            }, 
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db, 
+                str_table_name=str_table_name, 
+                df_=df_, 
+                bool_insert_or_ignore=bool_insert_or_ignore
             )
-            raise Exception('Error reading funds register within url: {}'.format(url))
-        elif df_funds_register.empty == True:
-            raise Exception('Error reading funds register within url: {}'.format(url))
-        # fill na values
-        list_cols = list(df_funds_register.columns)
-        list_cols_dts = [
-            'DT_REG',
-            'DT_CONST',
-            'DT_CANCEL',
-            'DT_INI_SIT',
-            'DT_INI_ATIV',
-            'DT_INI_EXERC',
-            'DT_FIM_EXERC',
-            'DT_INI_CLASSE',
-            'DT_PATRIM_LIQ'
-        ]
-        for col_dt in list_cols_dts:
-            df_funds_register[col_dt] = df_funds_register[col_dt].fillna(self.str_dt_error)
-        for col_ in [c for c in list_cols if c not in list_cols_dts]:
-            df_funds_register[col_] = df_funds_register[col_].fillna(self.int_val_err)
-        # changing coumn datatypes
-        df_funds_register = df_funds_register.astype({
-            'TP_FUNDO': 'category',
-            'CNPJ_FUNDO': str,
-            'DENOM_SOCIAL': str,
-            'CD_CVM': np.int64,
-            'DT_REG': str,
-            'DT_CONST': str,
-            'CD_CVM': int,
-            'DT_CANCEL': str,
-            'SIT': str,
-            'DT_INI_SIT': str,
-            'DT_INI_ATIV': str,
-            'DT_INI_EXERC': str,
-            'DT_FIM_EXERC': str,
-            'CLASSE': str,
-            'DT_INI_CLASSE': str,
-            'RENTAB_FUNDO': str,
-            'CONDOM': str,
-            'FUNDO_COTAS': str,
-            'FUNDO_EXCLUSIVO': str,
-            'TRIB_LPRAZO': str,
-            'PUBLICO_ALVO' : str,
-            'ENTID_INVEST': str,
-            'TAXA_PERFM': str,
-            'INF_TAXA_PERFM': str,
-            'TAXA_ADM': str,
-            'INF_TAXA_ADM': str,
-            'VL_PATRIM_LIQ': float,
-            'DT_PATRIM_LIQ': str,
-            'DIRETOR': str,
-            'CNPJ_ADMIN': str,
-            'ADMIN': str,
-            'PF_PJ_GESTOR': str,
-            'CPF_CNPJ_GESTOR': str,
-            'CNPJ_AUDITOR': str,
-            'AUDITOR': str,
-            'CNPJ_CUSTODIANTE': str,
-            'CUSTODIANTE': str,
-            'CNPJ_CONTROLADOR': str,
-            'CONTROLADOR': str,
-            'INVEST_CEMPR_EXTER': str,
-            'CLASSE_ANBIMA': str
-        })
-        for col_dt in list_cols_dts:
-            df_funds_register[col_dt] = [
-                DatesBRAnbima().str_date_to_datetime(d, self.str_format_dt_input)
-                for d in df_funds_register[col_dt]
-            ]
-        # return the dataframe
-        return df_funds_register
+        else:
+            return df_
 
-    @property
-    def funds_classes_subclasses_register_raw(
-        self,
-        str_app:str='FI/CAD/DADOS/registro_fundo_classe.zip'
-    ):
+    @backoff.on_exception(
+        backoff.expo, 
+        requests.exceptions.HTTPError, 
+        max_time=60
+    )
+    def get_response(
+        self, 
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0), 
+        bool_verify: bool = True
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+        """Return a response object with the ZIP file content.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            The timeout, by default (12.0, 21.0)
+        bool_verify : bool, optional
+            Verify the SSL certificate, by default True
+        
+        Returns
+        -------
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # setting variables
-        dict_ = dict()
-        # url
-        url = f'{self.str_host_cvm}{str_app}'
-        # downloading zip file into memory
-        list_main_zip = DirFilesManagement().get_zip_from_web_in_memory(
-            url,
-            bool_io_interpreting=False,
-            bool_verify=False
+        self.cls_create_log.log_message(
+            self.logger,
+            f"Fetching data from URL: {self.url}",
+            "info"
         )
-        # iterate through files in the ZIP
-        for file_info in list_main_zip:
-            #   extracting csv files
-            if file_info.name.endswith('.csv'):
-                dict_[file_info.name] = file_info.read()
-        return dict_
+        
+        resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
+        resp_req.raise_for_status()
+        
+        self.cls_create_log.log_message(
+            self.logger,
+            f"Successfully fetched {len(resp_req.content)} bytes from CVM",
+            "info"
+        )
+        
+        return resp_req
+    
+    def parse_raw_file(
+        self, 
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver]
+    ) -> tuple[StringIO, str]:
+        """Parse the raw ZIP file content in memory and extract CSV.
+        
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response object.
+        
+        Returns
+        -------
+        tuple[StringIO, str]
+            The parsed CSV content as StringIO and the filename.
 
-    def funds_raw_infos(
-        self,
-        key_file_name,
-        list_cols_dts,
-        dict_cols_types
-    ):
+        Raises
+        ------
+        ValueError
+            If no CSV files found in the ZIP archive.
         """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
+        self.cls_create_log.log_message(
+            self.logger,
+            "Extracting CSV from ZIP file in memory",
+            "info"
+        )
+        
+        files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
+            BytesIO(resp_req.content)
+        )
+        
+        if not files_list:
+            raise ValueError("No files found in the downloaded ZIP content")
+        
+        csv_file_content = None
+        csv_filename = None
+        
+        for file_content, filename in files_list:
+            if filename.lower().endswith('.csv'):
+                csv_file_content = file_content
+                csv_filename = filename
+                break
+        
+        if csv_file_content is None:
+            raise ValueError("No CSV file found in the downloaded ZIP")
+        
+        self.cls_create_log.log_message(
+            self.logger,
+            f"Found CSV file: {csv_filename}",
+            "info"
+        )
+        
+        if isinstance(csv_file_content, BytesIO):
+            try:
+                content_str = csv_file_content.getvalue().decode("utf-8")
+                csv_file_content = StringIO(content_str)
+            except UnicodeDecodeError:
+                try:
+                    content_str = csv_file_content.getvalue().decode("latin-1")
+                    csv_file_content = StringIO(content_str)
+                except UnicodeDecodeError:
+                    try:
+                        content_str = csv_file_content.getvalue().decode("cp1252")
+                        csv_file_content = StringIO(content_str)
+                    except UnicodeDecodeError:
+                        content_str = csv_file_content.getvalue().decode("utf-8", errors="replace")
+                        csv_file_content = StringIO(content_str)
+        
+        elif isinstance(csv_file_content, str):
+            csv_file_content = StringIO(csv_file_content)
+        
+        elif not isinstance(csv_file_content, StringIO):
+            content_str = str(csv_file_content)
+            csv_file_content = StringIO(content_str)
+        
+        self.cls_create_log.log_message(
+            self.logger,
+            f"Successfully parsed CSV content from {csv_filename}",
+            "info"
+        )
+        
+        return csv_file_content, csv_filename
+    
+    def transform_data(
+        self, 
+        file: StringIO
+    ) -> pd.DataFrame:
+        """Transform the CSV content into a DataFrame.
+        
+        Parameters
+        ----------
+        file : StringIO
+            The parsed CSV content.
+        
+        Returns
+        -------
+        pd.DataFrame
+            The transformed DataFrame with CVM fund data.
         """
-        # assuming self.dict_fund_class_subclass_register[key_file_name] is a bytes object
-        file_data = self.dict_fund_class_subclass_register[key_file_name]
-        # trying to decode with 'ISO-8859-1' or 'latin1' encoding
-        try:
-            file_data_str = StringIO(file_data.decode('utf-8'))
-        except UnicodeDecodeError:
-            file_data_str = StringIO(file_data.decode('ISO-8859-1'))
-        # reading csv
-        df_ = pd.read_csv(file_data_str, delimiter=';')
-        # fill na values
-        list_cols = list(df_.columns)
-        for col_dt in list_cols_dts:
-            df_[col_dt] = df_[col_dt].fillna(self.str_dt_error)
-        for col_ in [c for c in list_cols if c not in list_cols_dts]:
-            df_[col_] = df_[col_].fillna(self.int_val_err)
-        # changing datatypes
-        df_ = df_.astype(dict_cols_types)
-        for col_dt in list_cols_dts:
-            df_[col_dt] = [
-                DatesBRAnbima().str_date_to_datetime(d, self.str_format_dt_input)
-                for d in df_[col_dt]
-            ]
-        # return the dataframe
+        self.cls_create_log.log_message(
+            self.logger,
+            "Transforming CSV data into DataFrame",
+            "info"
+        )
+        
+        df_ = pd.read_csv(file, sep=";")
+        
+        self.cls_create_log.log_message(
+            self.logger,
+            f"Successfully loaded {len(df_)} rows and {len(df_.columns)} columns",
+            "info"
+        )
+        
+        file_date_str = self.date_ref.strftime("%Y%m")
+        df_["FILE_NAME"] = f"inf_diario_fi_{file_date_str}.csv"
+        
         return df_
-
-    @property
-    def funds_classes(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        # getting dataframe with funds
-        df_funds_classes = self.funds_raw_infos(
-            'registro_classe.csv',
-            [
-                'Data_Registro',
-                'Data_Constituicao',
-                'Data_Inicio',
-            ],
-            {
-                'ID_Registro_Fundo': np.int64,
-                'ID_Registro_Classe': np.int64,
-                'CNPJ_Classe': str,
-                'Codigo_CVM': np.int64,
-                'Data_Registro': str,
-                'Data_Constituicao': str,
-                'Data_Inicio': str,
-                'Tipo_Classe': str,
-                'Denominacao_Social': str,
-                'Situacao': str,
-                'Classificacao': str,
-                'Indicador_Desempenho': str,
-                'Classe_Cotas': str,
-                'Classificacao_Anbima': str,
-                'Tributacao_Longo_Prazo': str,
-                'Entidade_Investimento': str,
-                'Permitido_Aplicacao_CemPorCento_Exterior': str,
-                'Classe_ESG': str,
-                'Forma_Condominio': str,
-                'Exclusivo': str,
-                'Publico_Alvo': str,
-                'CNPJ_Auditor': str,
-                'Auditor': str,
-                'CNPJ_Custodiante': str,
-                'Custodiante': str,
-                'CNPJ_Controlador': str,
-                'Controlador': str
-            }
-        )
-        # return the dataframe
-        return df_funds_classes
-
-    @property
-    def funds_register_2(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        df_funds_register = self.funds_raw_infos(
-            'registro_fundo.csv',
-            [
-                'Data_Registro',
-                'Data_Constituicao',
-                'Data_Cancelamento',
-                'Data_Inicio_Situacao',
-                'Data_Adaptacao_RCVM175',
-                'Data_Inicio_Exercicio_Social',
-                'Data_Fim_Exercicio_Social',
-                'Data_Patrimonio_Liquido'
-            ],
-            {
-                'ID_Registro_Fundo': np.int64,
-                'CNPJ_Fundo': str,
-                'Codigo_CVM': np.int64,
-                'Data_Registro': str,
-                'Data_Constituicao': str,
-                'Tipo_Fundo': str,
-                'Denominacao_Social': str,
-                'Data_Cancelamento': str,
-                'Situacao': str,
-                'Data_Inicio_Situacao': str,
-                'Data_Adaptacao_RCVM175': str,
-                'Data_Inicio_Exercicio_Social': str,
-                'Data_Fim_Exercicio_Social': str,
-                'Patrimonio_Liquido': np.float64,
-                'Data_Patrimonio_Liquido': str,
-                'Diretor': str,
-                'CNPJ_Administrador': str,
-                'Administrador': str,
-                'Tipo_Pessoa_Gestor': str,
-                'CPF_CNPJ_Gestor': str,
-                'Gestor': str
-            }
-        )
-        return df_funds_register
-
-    @property
-    def funds_subclasses(self):
-        """
-        DOCSTRING:
-        INPUTS:
-        OUTPUTS:
-        """
-        df_funds_subclasses = self.funds_raw_infos(
-            'registro_subclasse.csv',
-            [
-                'Data_Constituicao',
-                'Data_Inicio'
-            ],
-            {
-                'ID_Registro_Classe': np.int64,
-                'ID_Subclasse': str,
-                'Codigo_CVM': pd.Int64Dtype(),
-                'Data_Constituicao': str,
-                'Data_Inicio': str,
-                'Denominacao_Social': str,
-                'Situacao': str,
-                'Forma_Condominio': str,
-                'Exclusivo': str,
-                'Publico_Alvo': str
-            }
-        )
-        return df_funds_subclasses
