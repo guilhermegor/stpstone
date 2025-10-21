@@ -4,6 +4,7 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
     FIFCDA,
     FIFDailyInfos,
     FIFMonthlyProfile,
+    FIFStatement,
 )
 
 
@@ -29,12 +30,23 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 # df_.info()
 
 
-cls_ = FIFCDA(
+# cls_ = FIFCDA(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None,
+# )
+
+# df_ = cls_.run()
+# print(f"DF CVM CDA: \n{df_}")
+# df_.info()
+
+
+cls_ = FIFStatement(
     date_ref=None, 
     logger=None, 
     cls_db=None,
 )
 
 df_ = cls_.run()
-print(f"DF CVM CDA: \n{df_}")
+print(f"DF CVM STATEMENT: \n{df_}")
 df_.info()
