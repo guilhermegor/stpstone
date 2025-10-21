@@ -1,6 +1,10 @@
 """Example of how to use FIFDailyInfos class to ingest data from CVM."""
 
-from stpstone.ingestion.countries.br.registries.cvm_data import FIFDailyInfos, FIFMonthlyProfile
+from stpstone.ingestion.countries.br.registries.cvm_data import (
+    FIFCDA,
+    FIFDailyInfos,
+    FIFMonthlyProfile,
+)
 
 
 # cls_ = FIFDailyInfos(
@@ -14,12 +18,23 @@ from stpstone.ingestion.countries.br.registries.cvm_data import FIFDailyInfos, F
 # df_.info()
 
 
-cls_ = FIFMonthlyProfile(
+# cls_ = FIFMonthlyProfile(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None,
+# )
+
+# df_ = cls_.run()
+# print(f"DF CVM MONTHLY PROFILE: \n{df_}")
+# df_.info()
+
+
+cls_ = FIFCDA(
     date_ref=None, 
     logger=None, 
     cls_db=None,
 )
 
 df_ = cls_.run()
-print(f"DF CVM MONTHLY PROFILE: \n{df_}")
+print(f"DF CVM CDA: \n{df_}")
 df_.info()
