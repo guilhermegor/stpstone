@@ -4,6 +4,7 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
     FIFCADFI,
     FIFCDA,
     CVMDataBanksRegistry,
+    CVMDataDistributionOffers,
     FIFDailyInfos,
     FIFFactSheet,
     FIFMonthlyProfile,
@@ -89,11 +90,22 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 # df_.info()
 
 
-cls_ = CVMDataBanksRegistry(
+# cls_ = CVMDataBanksRegistry(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None,
+# )
+# df_ = cls_.run()
+# print(f"DF CVM DATA BANKS REGISTRY: \n{df_}")
+# df_.info()
+
+
+cls_ = CVMDataDistributionOffers(
     date_ref=None, 
     logger=None, 
     cls_db=None,
 )
+
 df_ = cls_.run()
-print(f"DF CVM DATA BANKS REGISTRY: \n{df_}")
+print(f"DF CVM DATA DISTRIBUTION OFFERS: \n{df_}")
 df_.info()
