@@ -3,6 +3,7 @@
 from stpstone.ingestion.countries.br.registries.cvm_data import (
     FIFCADFI,
     FIFCDA,
+    CVMDataBanksRegistry,
     FIFDailyInfos,
     FIFFactSheet,
     FIFMonthlyProfile,
@@ -77,12 +78,22 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 # df_.info()
 
 
-cls_ = FIFCADFI(
+# cls_ = FIFCADFI(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None,
+# )
+
+# df_ = cls_.run()
+# print(f"DF CVM CADFI: \n{df_}")
+# df_.info()
+
+
+cls_ = CVMDataBanksRegistry(
     date_ref=None, 
     logger=None, 
     cls_db=None,
 )
-
 df_ = cls_.run()
-print(f"DF CVM CADFI: \n{df_}")
+print(f"DF CVM DATA BANKS REGISTRY: \n{df_}")
 df_.info()
