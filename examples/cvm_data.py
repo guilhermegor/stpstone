@@ -1,6 +1,7 @@
 """Example of how to use FIFDailyInfos class to ingest data from CVM."""
 
 from stpstone.ingestion.countries.br.registries.cvm_data import (
+    FIFCADFI,
     FIFCDA,
     FIFDailyInfos,
     FIFFactSheet,
@@ -65,12 +66,23 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 # df_.info()
 
 
-cls_ = FIFPortfolio(
+# cls_ = FIFPortfolio(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None,
+# )
+
+# df_ = cls_.run()
+# print(f"DF CVM PORTFOLIO: \n{df_}")
+# df_.info()
+
+
+cls_ = FIFCADFI(
     date_ref=None, 
     logger=None, 
     cls_db=None,
 )
 
 df_ = cls_.run()
-print(f"DF CVM PORTFOLIO: \n{df_}")
+print(f"DF CVM CADFI: \n{df_}")
 df_.info()
