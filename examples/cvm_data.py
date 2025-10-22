@@ -5,6 +5,7 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
     FIFDailyInfos,
     FIFFactSheet,
     FIFMonthlyProfile,
+    FIFPortfolio,
     FIFStatement,
 )
 
@@ -53,12 +54,23 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 # df_.info()
 
 
-cls_ = FIFFactSheet(
+# cls_ = FIFFactSheet(
+#     date_ref=None, 
+#     logger=None, 
+#     cls_db=None,
+# )
+
+# df_ = cls_.run()
+# print(f"DF CVM FACT SHEET: \n{df_}")
+# df_.info()
+
+
+cls_ = FIFPortfolio(
     date_ref=None, 
     logger=None, 
     cls_db=None,
 )
 
 df_ = cls_.run()
-print(f"DF CVM FACT SHEET: \n{df_}")
+print(f"DF CVM PORTFOLIO: \n{df_}")
 df_.info()
