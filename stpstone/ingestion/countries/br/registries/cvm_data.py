@@ -529,11 +529,6 @@ class FIFMonthlyProfile(ABCIngestionOperations):
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
 			The HTTP response object containing CSV data.
-			
-		Raises
-		------
-		HTTPError
-			If the HTTP request fails after all retry attempts.
 		"""
 		self.cls_create_log.log_message(
 			self.logger,
@@ -643,13 +638,6 @@ class FIFMonthlyProfile(ABCIngestionOperations):
 		-------
 		pd.DataFrame
 			Transformed DataFrame with CVM monthly profile data and metadata.
-			
-		Raises
-		------
-		pd.errors.EmptyDataError
-			If the CSV file is empty.
-		pd.errors.ParserError
-			If the CSV format is invalid.
 		"""
 		self.cls_create_log.log_message(
 			self.logger,
@@ -829,11 +817,6 @@ class FIFCDA(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing ZIP data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -898,7 +881,7 @@ class FIFCDA(ABCIngestionOperations):
                 self.cls_create_log.log_message(
                     self.logger,
                     f"Skipping non-CSV file: {filename}",
-                    "debug"
+                    "info"
                 )
                 continue
             
@@ -958,7 +941,7 @@ class FIFCDA(ABCIngestionOperations):
                     self.cls_create_log.log_message(
                         self.logger,
                         f"Successfully decoded {filename} with {encoding} encoding",
-                        "debug"
+                        "info"
                     )
                     return StringIO(content_str)
                 except UnicodeDecodeError:
@@ -996,10 +979,6 @@ class FIFCDA(ABCIngestionOperations):
             
         Raises
         ------
-        pd.errors.EmptyDataError
-            If any CSV file is empty.
-        pd.errors.ParserError
-            If any CSV format is invalid.
         ValueError
             If no valid data could be loaded from any file.
         """
@@ -1317,11 +1296,6 @@ class FIFStatement(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing CSV data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -1431,13 +1405,6 @@ class FIFStatement(ABCIngestionOperations):
         -------
         pd.DataFrame
             Transformed DataFrame with CVM statement data and metadata.
-            
-        Raises
-        ------
-        pd.errors.EmptyDataError
-            If the CSV file is empty.
-        pd.errors.ParserError
-            If the CSV format is invalid.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -1672,11 +1639,6 @@ class FIFFactSheet(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing ZIP data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -1817,7 +1779,7 @@ class FIFFactSheet(ABCIngestionOperations):
                     self.cls_create_log.log_message(
                         self.logger,
                         f"Successfully decoded {filename} with {encoding} encoding",
-                        "debug"
+                        "info"
                     )
                     return StringIO(content_str)
                 except UnicodeDecodeError:
@@ -1851,13 +1813,6 @@ class FIFFactSheet(ABCIngestionOperations):
         -------
         pd.DataFrame
             Transformed DataFrame with CVM fact sheet data and metadata.
-            
-        Raises
-        ------
-        pd.errors.EmptyDataError
-            If the CSV file is empty.
-        pd.errors.ParserError
-            If the CSV format is invalid.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -2044,11 +1999,6 @@ class FIFPortfolio(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing ZIP data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -2187,7 +2137,7 @@ class FIFPortfolio(ABCIngestionOperations):
                     self.cls_create_log.log_message(
                         self.logger,
                         f"Successfully decoded {filename} with {encoding} encoding",
-                        "debug"
+                        "info"
                     )
                     return StringIO(content_str)
                 except UnicodeDecodeError:
@@ -2221,13 +2171,6 @@ class FIFPortfolio(ABCIngestionOperations):
         -------
         pd.DataFrame
             Transformed DataFrame with CVM portfolio composition data and metadata.
-            
-        Raises
-        ------
-        pd.errors.EmptyDataError
-            If the CSV file is empty.
-        pd.errors.ParserError
-            If the CSV format is invalid.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -2369,7 +2312,7 @@ class FIFCADFI(ABCIngestionOperations):
                 "DT_INI_ATIV": "date",
                 "DT_INI_EXERC": "date",
                 "DT_FIM_EXERC": "date",
-                "CLASSE": str,
+                "CLASSE": str, # codespell:ignore
                 "DT_INI_CLASSE": "date",
                 "RENTAB_FUNDO": str,
                 "CONDOM": str,
@@ -2441,11 +2384,6 @@ class FIFCADFI(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing CSV data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -2555,13 +2493,6 @@ class FIFCADFI(ABCIngestionOperations):
         -------
         pd.DataFrame
             Transformed DataFrame with CVM fund registration data and metadata.
-            
-        Raises
-        ------
-        pd.errors.EmptyDataError
-            If the CSV file is empty.
-        pd.errors.ParserError
-            If the CSV format is invalid.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -2774,11 +2705,6 @@ class CVMDataBanksRegistry(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing ZIP data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -2867,7 +2793,6 @@ class CVMDataBanksRegistry(ABCIngestionOperations):
             raise ValueError("Financial intermediaries file cad_intermed.csv not found in "
                              "the downloaded ZIP")
         
-        # Decode the CSV content
         csv_string_io = self._decode_csv_content(intermed_csv_file, intermed_filename)
         
         self.cls_create_log.log_message(
@@ -2915,7 +2840,7 @@ class CVMDataBanksRegistry(ABCIngestionOperations):
                     self.cls_create_log.log_message(
                         self.logger,
                         f"Successfully decoded {filename} with {encoding} encoding",
-                        "debug"
+                        "info"
                     )
                     return StringIO(content_str)
                 except UnicodeDecodeError:
@@ -2950,13 +2875,6 @@ class CVMDataBanksRegistry(ABCIngestionOperations):
         -------
         pd.DataFrame
             Transformed DataFrame with CVM financial intermediaries data and metadata.
-            
-        Raises
-        ------
-        pd.errors.EmptyDataError
-            If the CSV file is empty.
-        pd.errors.ParserError
-            If the CSV format is invalid.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -3140,7 +3058,7 @@ class CVMDataDistributionOffers(ABCIngestionOperations):
                 "DATA_ENCERRAMENTO_OFERTA": "date",
                 "EMISSAO": str,
                 "CLASSE_ATIVO": str,
-                "SERIE": str,
+                "SERIE": str, # codespell:ignore
                 "ESPECIE_ATIVO": str,
                 "FORMA_ATIVO": str,
                 "DATA_EMISSAO": "date",
@@ -3235,11 +3153,6 @@ class CVMDataDistributionOffers(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             The HTTP response object containing ZIP data.
-            
-        Raises
-        ------
-        HTTPError
-            If the HTTP request fails after all retry attempts.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -3374,7 +3287,7 @@ class CVMDataDistributionOffers(ABCIngestionOperations):
                     self.cls_create_log.log_message(
                         self.logger,
                         f"Successfully decoded {filename} with {encoding} encoding",
-                        "debug"
+                        "info"
                     )
                     return StringIO(content_str)
                 except UnicodeDecodeError:
@@ -3410,13 +3323,6 @@ class CVMDataDistributionOffers(ABCIngestionOperations):
         -------
         pd.DataFrame
             Transformed DataFrame with CVM distribution offers data and metadata.
-            
-        Raises
-        ------
-        pd.errors.EmptyDataError
-            If the CSV file is empty.
-        pd.errors.ParserError
-            If the CSV format is invalid.
         """
         self.cls_create_log.log_message(
             self.logger,
@@ -3491,7 +3397,7 @@ class CVMDataDistributionOffers(ABCIngestionOperations):
             self.cls_create_log.log_message(
                 self.logger,
                 f"Financial summary: Total offer value = {total_offer_value:,.2f}, "
-                "Average offer value = {avg_offer_value:,.2f}",
+                f"Average offer value = {avg_offer_value:,.2f}",
                 "info"
             )
         
