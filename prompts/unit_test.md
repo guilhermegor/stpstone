@@ -11,9 +11,10 @@ Generate comprehensive unit tests for the provided Python module using pytest. C
 - **Indentation**: Use tabs (4 spaces equivalent)
 - **Target Python version**: 3.9+
 - **Quote style**: Double quotes
+- **Imported but unused**: please avoid F401 Ruff violation
 - **Type hints**:
 1. Avoid `Any` type hint whenever possible; use specific types
-2. Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid ruff linting raising warnings
+2. Avoid `typing import Dict, Tuple, List` and affiliated, please resort to primitive ones, like dict, tuple, list, which would avoid Ruff linting raising warnings
 3. Use from numpy.typing import NDArray, NDArray[...] (e.g. NDArray[np.float64]) instead of np.ndarray for type hints
 4. Use class Return<method_name>(TypedDict) for dictionaries typing (import from typing import TypedDict)
 5. Add type hints to every method, function and whenever is possible
@@ -71,12 +72,12 @@ def test_init_with_valid_inputs() -> None:
     assert comparator.a == 5
     assert comparator.b == 10
 ```
-- **Comments**: Use lowercase (not docstrings)
+- **Comments**: Use lowercase (not in docstrings)
 - **Import organization**: Follow isort with single-line imports when logical
 
 ### Test Quality Standards
 - **100% code coverage**: All functions, classes and methods
-- **Zero ruff violations**: Code must pass all ruff checks without warnings
+- **Zero Ruff violations**: Code must pass all Ruff checks without warnings
 - **Fallback testing**: Include tests for fallback mechanisms and error recovery
 - **Reload logic**: Test module reloading scenarios when applicable
 - **Non Optional variables**: check if, for variables that haven not the Optional[...] type, a TypeError is raised, due to TypeChecker metaclass usage / type_checker decorator, with a text that matches with "must be of type"
@@ -941,6 +942,34 @@ run_method = getattr(instance, 'run')  # B009 violation
 
 # correct - use direct attribute access
 run_method = instance.run  # no violation
+
+# pandas dataframe declaration
+# incorrect - use of generic variable `df` (avoid Ruff PD901 violation)
+df = b3_instance.transform_data(file=empty_content)
+
+# correct - use df_
+df_ = b3_instance.transform_data(file=empty_content)
+
+# when declaring a test token, please add a noqa S105 possible hardcoded password assigned
+# incorrect
+b3_instance.token = "test_token"
+
+# correct
+b3_instance.token = "test_token" # noqa S105: possible hardcoded password assigned
+
+# use a single `with` statement with multiple contexts instead of nested `with` statements
+# incorrect - SIM117 Ruff violation
+with pytest.raises(ValueError, match="Token not available\\. Call get_token\\(\\) first\\."):
+        # Mock backoff to prevent retry delays
+        with pytest.MonkeyPatch().context() as m:
+            m.setattr("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
+            b3_instance.get_response(timeout=(12.0, 12.0), bool_verify=False)
+
+# correct
+with pytest.raises(ValueError, match="Token not available\\. Call get_token\\(\\) first\\."), \
+    pytest.MonkeyPatch().context() as m:
+    m.setattr("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
+    b3_instance.get_response(timeout=(12.0, 12.0), bool_verify=False)
 
 # string assertions
 assert "substring" in result

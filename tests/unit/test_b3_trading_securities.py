@@ -10,7 +10,6 @@ Tests the B3 Instruments ingestion functionality with various input scenarios in
 from datetime import date
 from io import StringIO
 from logging import Logger
-import sys
 from typing import Union
 from unittest.mock import MagicMock
 
@@ -31,7 +30,13 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 # --------------------------
 @pytest.fixture
 def mock_response() -> Response:
-    """Mock Response object with sample content."""
+    """Mock Response object with sample content.
+    
+    Returns
+    -------
+    Response
+        Mocked Response object
+    """
     response = MagicMock(spec=Response)
     response.content = b"Sample content"
     response.status_code = 200
@@ -42,25 +47,59 @@ def mock_response() -> Response:
 
 @pytest.fixture
 def mock_db_session(mocker: MockerFixture) -> object:
-    """Mock database session."""
+    """Mock database session.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest-mock fixture
+    
+    Returns
+    -------
+    object
+        Mocked database session object
+    """
     return mocker.patch("sqlalchemy.orm.sessionmaker")
 
 
 @pytest.fixture
 def sample_date() -> date:
-    """Fixture providing a sample date."""
+    """Fixture providing a sample date.
+    
+    Returns
+    -------
+    date
+        Sample date object
+    """
     return date(2025, 10, 21)
 
 
 @pytest.fixture
 def b3_instance(sample_date: date) -> B3Instruments:
-    """Fixture providing a B3Instruments instance."""
+    """Fixture providing a B3Instruments instance.
+    
+    Parameters
+    ----------
+    sample_date : date
+        Sample date for initialization.
+    
+    Returns
+    -------
+    B3Instruments
+        Initialized B3Instruments instance
+    """
     return B3Instruments(date_ref=sample_date)
 
 
 @pytest.fixture
 def sample_csv_content() -> StringIO:
-    """Fixture providing sample CSV content."""
+    """Fixture providing sample CSV content.
+    
+    Returns
+    -------
+    StringIO
+        Sample CSV content as StringIO object
+    """
     content = """header1;header2
 skip_row;skip_row
 2023-10-21;TEST1;ASST1;DESC1;SGMT1;MKT1;CAT1;2024-10-21;CODE1;2023-01-01;2023-12-31;BASE1;CRIT1;PT1;IND1;ISIN1;CFI1;2023-02-01;2023-02-28;OPT1;15;100;1000;USD;DLVRY1;5;10;15;PRICE1;20;SD1;SYM1;SD2;SYM2;2.5;100.0;STYLE1;VAL1;PRM1;2023-03-01;ID1;1000;30;SERIES1;FLAG1;IND2;SPEC1;NAME1;2023-04-01;TRTM1;1000000.0;GOV1"""
@@ -78,6 +117,11 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
     - The B3Instruments instance is initialized correctly
     - Attributes are set as expected
     - Date reference is properly assigned or defaults to previous working day
+
+    Parameters
+    ----------
+    sample_date : date
+        Sample date for initialization
 
     Returns
     -------
@@ -101,6 +145,11 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
     - Default date is set to previous working day
     - Other attributes are initialized correctly
 
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest mocker for patching
+
     Returns
     -------
     None
@@ -114,7 +163,11 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
     assert isinstance(instance.cls_dir_files_management, DirFilesManagement)
 
 
-def test_get_token_success(mock_response: Response, b3_instance: B3Instruments, mocker: MockerFixture) -> None:
+def test_get_token_success(
+    mock_response: Response, 
+    b3_instance: B3Instruments, 
+    mocker: MockerFixture
+) -> None:
     """Test successful token retrieval.
 
     Verifies
@@ -122,6 +175,15 @@ def test_get_token_success(mock_response: Response, b3_instance: B3Instruments, 
     - Token is retrieved successfully
     - HTTP request is made with correct parameters
     - Response JSON is returned
+
+    Parameters
+    ----------
+    mock_response : Response
+        Mocked response object
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+    mocker : MockerFixture
+        Pytest mocker for patching
 
     Returns
     -------
@@ -142,18 +204,26 @@ def test_get_response_no_token(b3_instance: B3Instruments) -> None:
     - ValueError is raised when token is None
     - Error message is correct
 
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+
     Returns
     -------
     None
     """
-    with pytest.raises(ValueError, match="Token not available\\. Call get_token\\(\\) first\\."):
-        # Mock backoff to prevent retry delays
-        with pytest.MonkeyPatch().context() as m:
-            m.setattr("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
-            b3_instance.get_response(timeout=(12.0, 12.0), bool_verify=False)
+    with pytest.raises(ValueError, match="Token not available\\. Call get_token\\(\\) first\\."), \
+        pytest.MonkeyPatch().context() as m:
+        m.setattr("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
+        b3_instance.get_response(timeout=(12.0, 12.0), bool_verify=False)
 
 
-def test_get_response_success(mock_response: Response, b3_instance: B3Instruments, mocker: MockerFixture) -> None:
+def test_get_response_success(
+    mock_response: Response, 
+    b3_instance: B3Instruments, 
+    mocker: MockerFixture
+) -> None:
     """Test successful response retrieval.
 
     Verifies
@@ -162,11 +232,20 @@ def test_get_response_success(mock_response: Response, b3_instance: B3Instrument
     - HTTP request is made with correct parameters
     - Response object is returned
 
+    Parameters
+    ----------
+    mock_response : Response
+        Mocked response object
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+    mocker : MockerFixture
+        Pytest mocker for patching
+
     Returns
     -------
     None
     """
-    b3_instance.token = "test_token"
+    b3_instance.token = "test_token" # noqa S105: possible hardcoded password
     mocker.patch("requests.get", return_value=mock_response)
     
     # Mock backoff to prevent retry delays
@@ -177,13 +256,26 @@ def test_get_response_success(mock_response: Response, b3_instance: B3Instrument
     mock_response.raise_for_status.assert_called_once()
 
 
-def test_parse_raw_file(mock_response: Response, b3_instance: B3Instruments, mocker: MockerFixture) -> None:
+def test_parse_raw_file(
+    mock_response: Response, 
+    b3_instance: B3Instruments, 
+    mocker: MockerFixture
+) -> None:
     """Test parsing of raw file content.
 
     Verifies
     --------
     - get_file method is called with correct response
     - StringIO object is returned
+
+    Parameters
+    ----------
+    mock_response : Response
+        Mocked response object
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+    mocker : MockerFixture
+        Pytest mocker for patching
 
     Returns
     -------
@@ -205,19 +297,31 @@ def test_transform_data(sample_csv_content: StringIO, b3_instance: B3Instruments
     - Column names are correctly assigned
     - Data types are correctly interpreted
 
+    Parameters
+    ----------
+    sample_csv_content : StringIO
+        Sample CSV content as StringIO object
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+
     Returns
     -------
     None
     """
-    df = b3_instance.transform_data(file=sample_csv_content)
-    assert isinstance(df, pd.DataFrame)
-    assert len(df) == 1
-    assert df["TCKR_SYMB"].iloc[0] == "TEST1"
-    assert df["CTRCT_MLTPLR"].iloc[0] == 15  # Changed from 1.5 to 15 based on test failure
-    assert df["ASST_QTN_QTY"].iloc[0] == 100
+    df_ = b3_instance.transform_data(file=sample_csv_content)
+    assert isinstance(df_, pd.DataFrame)
+    assert len(df_) == 1
+    assert df_["TCKR_SYMB"].iloc[0] == "TEST1"
+    assert df_["CTRCT_MLTPLR"].iloc[0] == 15  # Changed from 1.5 to 15 based on test failure
+    assert df_["ASST_QTN_QTY"].iloc[0] == 100
 
 
-def test_run_with_db(mock_response: Response, b3_instance: B3Instruments, mocker: MockerFixture, mock_db_session: object) -> None:
+def test_run_with_db(
+    mock_response: Response, 
+    b3_instance: B3Instruments, 
+    mocker: MockerFixture, 
+    mock_db_session: object
+) -> None:
     """Test run method with database session.
 
     Verifies
@@ -225,6 +329,17 @@ def test_run_with_db(mock_response: Response, b3_instance: B3Instruments, mocker
     - Full ingestion pipeline with database insertion
     - No DataFrame is returned
     - Database insertion is called with correct parameters
+
+    Parameters
+    ----------
+    mock_response : Response
+        Mocked response object
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+    mocker : MockerFixture
+        Pytest mocker for patching
+    mock_db_session : object
+        Mocked database session object
 
     Returns
     -------
@@ -238,8 +353,10 @@ def test_run_with_db(mock_response: Response, b3_instance: B3Instruments, mocker
     mocker.patch.object(b3_instance, "get_token", return_value={"token": "test_token"})
     mocker.patch.object(b3_instance, "get_response", return_value=mock_response)
     mocker.patch.object(b3_instance, "parse_raw_file", return_value=StringIO("test content"))
-    mocker.patch.object(b3_instance, "transform_data", return_value=pd.DataFrame({"TCKR_SYMB": ["TEST"]}))
-    mocker.patch.object(b3_instance, "standardize_dataframe", return_value=pd.DataFrame({"TCKR_SYMB": ["TEST"]}))
+    mocker.patch.object(b3_instance, "transform_data", return_value=pd.DataFrame(
+        {"TCKR_SYMB": ["TEST"]}))
+    mocker.patch.object(b3_instance, "standardize_dataframe", return_value=pd.DataFrame(
+        {"TCKR_SYMB": ["TEST"]}))
     mocker.patch.object(b3_instance, "insert_table_db")
     
     result = b3_instance.run()
@@ -247,7 +364,11 @@ def test_run_with_db(mock_response: Response, b3_instance: B3Instruments, mocker
     b3_instance.insert_table_db.assert_called_once()
 
 
-def test_run_without_db(mock_response: Response, b3_instance: B3Instruments, mocker: MockerFixture) -> None:
+def test_run_without_db(
+    mock_response: Response, 
+    b3_instance: B3Instruments, 
+    mocker: MockerFixture
+) -> None:
     """Test run method without database session.
 
     Verifies
@@ -255,6 +376,15 @@ def test_run_without_db(mock_response: Response, b3_instance: B3Instruments, moc
     - Full ingestion pipeline without database
     - Transformed DataFrame is returned
     - No database insertion is attempted
+
+    Parameters
+    ----------
+    mock_response : Response
+        Mocked response object
+    b3_instance : B3Instruments
+        Initialized B3Instruments instance
+    mocker : MockerFixture
+        Pytest mocker for patching
 
     Returns
     -------
@@ -281,7 +411,12 @@ def test_run_without_db(mock_response: Response, b3_instance: B3Instruments, moc
     (10.0, 20.0),
     (10, 20),
 ])
-def test_timeout_variations(b3_instance: B3Instruments, mock_response: Response, mocker: MockerFixture, timeout: Union[int, float, tuple]) -> None:
+def test_timeout_variations(
+    b3_instance: B3Instruments, 
+    mock_response: Response, 
+    mocker: MockerFixture, 
+    timeout: Union[int, float, tuple]
+) -> None:
     """Test various timeout configurations.
 
     Parameters
@@ -310,7 +445,10 @@ def test_timeout_variations(b3_instance: B3Instruments, mock_response: Response,
     (10.0, -1.0),
     "invalid",
 ])
-def test_invalid_timeout(b3_instance: B3Instruments, invalid_timeout: Union[int, float, tuple, str]) -> None:
+def test_invalid_timeout(
+    b3_instance: B3Instruments, 
+    invalid_timeout: Union[int, float, tuple, str]
+) -> None:
     """Test invalid timeout values.
 
     Parameters
@@ -328,13 +466,26 @@ def test_invalid_timeout(b3_instance: B3Instruments, invalid_timeout: Union[int,
         b3_instance.get_token(timeout=invalid_timeout, bool_verify=False)
 
 
-def test_bool_verify_handling(b3_instance: B3Instruments, mock_response: Response, mocker: MockerFixture) -> None:
+def test_bool_verify_handling(
+    b3_instance: B3Instruments, 
+    mock_response: Response, 
+    mocker: MockerFixture
+) -> None:
     """Test SSL verification handling.
 
     Verifies
     --------
     - Both True and False bool_verify values are handled correctly
     - Request is made with correct verify parameter
+
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        B3Instruments instance
+    mock_response : Response
+        Mocked response object
+    mocker : MockerFixture
+        Pytest mock fixture
 
     Returns
     -------
@@ -353,11 +504,17 @@ def test_reload_module(b3_instance: B3Instruments, mocker: MockerFixture) -> Non
     - Module can be reloaded without errors
     - Instance state is preserved after reload
 
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        B3Instruments instance
+    mocker : MockerFixture
+        Pytest mock fixture
+
     Returns
     -------
     None
     """
-    import importlib
     original_date = b3_instance.date_ref
     
     # Mock the reload to avoid actual module reload issues
@@ -369,13 +526,26 @@ def test_reload_module(b3_instance: B3Instruments, mocker: MockerFixture) -> Non
     assert isinstance(new_instance.cls_dir_files_management, DirFilesManagement)
 
 
-def test_empty_response(mock_response: Response, b3_instance: B3Instruments, mocker: MockerFixture) -> None:
+def test_empty_response(
+    mock_response: Response, 
+    b3_instance: B3Instruments, 
+    mocker: MockerFixture
+) -> None:
     """Test handling of empty response content.
 
     Verifies
     --------
     - Empty response is handled appropriately
     - parse_raw_file can process empty content
+
+    Parameters
+    ----------
+    mock_response : Response
+        Mocked response object
+    b3_instance : B3Instruments
+        B3Instruments instance
+    mocker : MockerFixture
+        Pytest mock fixture
 
     Returns
     -------
@@ -384,7 +554,7 @@ def test_empty_response(mock_response: Response, b3_instance: B3Instruments, moc
     mock_response.content = b""
     mocker.patch("requests.get", return_value=mock_response)
     mocker.patch.object(b3_instance, "get_file", return_value=StringIO(""))
-    b3_instance.token = "test_token"
+    b3_instance.token = "test_token" # noqa S105: possible hardcoded password
     file = b3_instance.parse_raw_file(resp_req=mock_response)
     assert isinstance(file, StringIO)
 
@@ -396,6 +566,11 @@ def test_invalid_response_type(b3_instance: B3Instruments) -> None:
     --------
     - Invalid response type raises appropriate error
     - Type checking is enforced
+
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        B3Instruments instance
 
     Returns
     -------
@@ -413,11 +588,18 @@ def test_column_names_validation(sample_csv_content: StringIO, b3_instance: B3In
     - All expected columns are present in the transformed DataFrame
     - Column count matches expected
 
+    Parameters
+    ----------
+    sample_csv_content : StringIO
+        Sample CSV content as StringIO object
+    b3_instance : B3Instruments
+        B3Instruments instance
+
     Returns
     -------
     None
     """
-    df = b3_instance.transform_data(file=sample_csv_content)
+    df_ = b3_instance.transform_data(file=sample_csv_content)
     expected_columns = [
         "RPT_DT", "TCKR_SYMB", "ASST", "ASST_DESC", "SGMT_NM", "MKT_NM", "SCTY_CTGY_NM",
         "XPRTN_DT", "XPRTN_CD", "TRADG_START_DT", "TRADG_END_DT", "BASE_CD", "CONVS_CRIT_NM",
@@ -431,8 +613,8 @@ def test_column_names_validation(sample_csv_content: StringIO, b3_instance: B3In
         "CRPN_NM", "CORP_ACTN_START_DT", "CTDY_TRTMNT_TP_NM", "MKT_CPTLSTN",
         "CORP_GOVN_LVL_NM"
     ]
-    assert list(df.columns) == expected_columns
-    assert len(df.columns) == 52  # Changed from 51 to 52 based on test failure
+    assert list(df_.columns) == expected_columns
+    assert len(df_.columns) == 52  # Changed from 51 to 52 based on test failure
 
 
 # Additional tests to cover edge cases
@@ -443,6 +625,13 @@ def test_get_token_network_error(b3_instance: B3Instruments, mocker: MockerFixtu
     --------
     - Network errors are properly handled
     - Backoff mechanism is triggered
+
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        B3Instruments instance
+    mocker : MockerFixture
+        Pytest mock fixture
     
     Returns
     -------
@@ -464,12 +653,19 @@ def test_get_response_timeout(b3_instance: B3Instruments, mocker: MockerFixture)
     --------
     - Timeout errors are properly handled
     - Backoff mechanism is triggered
+
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        B3Instruments instance
+    mocker : MockerFixture
+        Pytest mock fixture
     
     Returns
     -------
     None
     """
-    b3_instance.token = "test_token"
+    b3_instance.token = "test_token" # noqa S105: possible hardcoded password
     mocker.patch("requests.get", side_effect=requests.exceptions.Timeout("Request timeout"))
     
     # Mock backoff to prevent retry delays
@@ -486,6 +682,11 @@ def test_transform_data_empty_file(b3_instance: B3Instruments) -> None:
     --------
     - Empty CSV file results in empty DataFrame
     - Column structure is maintained
+
+    Parameters
+    ----------
+    b3_instance : B3Instruments
+        B3Instruments instance
     
     Returns
     -------
@@ -494,7 +695,7 @@ def test_transform_data_empty_file(b3_instance: B3Instruments) -> None:
     empty_content = StringIO("""header1;header2
 skip_row;skip_row""")
     
-    df = b3_instance.transform_data(file=empty_content)
-    assert isinstance(df, pd.DataFrame)
-    assert len(df) == 0
-    assert len(df.columns) == 52  # All expected columns should be present
+    df_ = b3_instance.transform_data(file=empty_content)
+    assert isinstance(df_, pd.DataFrame)
+    assert len(df_) == 0
+    assert len(df_.columns) == 52  # All expected columns should be present

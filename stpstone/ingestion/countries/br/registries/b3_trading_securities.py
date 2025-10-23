@@ -224,6 +224,11 @@ class B3Instruments(ABCIngestionOperations):
         -------
         Union[Response, PlaywrightPage, SeleniumWebDriver]
             A response object.
+
+        Raises
+        ------
+        ValueError
+            If the token is not available.
         """
         if not self.token:
             raise ValueError("Token not available. Call get_token() first.")
