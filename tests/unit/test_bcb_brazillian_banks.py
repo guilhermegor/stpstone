@@ -11,12 +11,11 @@ from datetime import date
 from io import BytesIO
 import sys
 from typing import Optional, Union
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
-import requests  # ADD THIS IMPORT
 from requests import Response
 
 from stpstone.ingestion.countries.br.registries.bcb_brazillian_banks import (
@@ -55,7 +54,7 @@ def mock_response() -> Response:
     """
     response = MagicMock(spec=Response)
     # Create a minimal valid PDF content
-    pdf_content = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\nxref\n0 1\n0000000000 65535 f \ntrailer\n<< /Root 1 0 R /Size 1 >>\nstartxref\n0\n%%EOF"
+    pdf_content = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\nxref\n0 1\n0000000000 65535 f \ntrailer\n<< /Root 1 0 R /Size 1 >>\nstartxref\n0\n%%EOF" # noqa E501: line too long
     response.content = pdf_content
     response.status_code = 200
     response.raise_for_status = MagicMock()
@@ -72,7 +71,7 @@ def mock_pdf_content() -> BytesIO:
         Mocked BytesIO object with sample PDF content
     """
     # Create a minimal valid PDF content
-    pdf_content = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\nxref\n0 1\n0000000000 65535 f \ntrailer\n<< /Root 1 0 R /Size 1 >>\nstartxref\n0\n%%EOF"
+    pdf_content = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\nxref\n0 1\n0000000000 65535 f \ntrailer\n<< /Root 1 0 R /Size 1 >>\nstartxref\n0\n%%EOF" # noqa E501: line too long
     return BytesIO(pdf_content)
 
 
@@ -94,7 +93,7 @@ def mock_pdfplumber(mocker: MockerFixture) -> object:
     mock_page = mocker.MagicMock()
     mock_page.extract_tables.return_value = [[
         ["COD_COMPENSAÇÃO", "CNPJ", "NOME_INSTITUIÇÃO", "SEGMENTO"],
-        ["001", "12345678901234", "Banco Teste", "Banco Comercial"],
+        ["001", "12345678901234", "Banco Teste", "Banco Comercial"], # codespell:ignore
         ["002", "98765432109876", "Banco Teste 2", "Banco Múltiplo"]
     ]]
     mock_pdf.pages = [mock_page]
@@ -131,7 +130,7 @@ def sample_dataframe() -> pd.DataFrame:
         "COD_COMPENSACAO": ["001", "002"],
         "CNPJ": ["12345678901234", "98765432109876"],
         "NOME_INSTITUICAO": ["Banco Teste", "Banco Teste 2"],
-        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"]
+        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"] # codespell:ignore
     })
 
 
@@ -186,7 +185,8 @@ def test_init_with_default_date(mocker: MockerFixture) -> None:
     -------
     None
     """
-    mock_date = mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2025, 10, 21))
+    mock_date = mocker.patch.object(DatesBRAnbima, "add_working_days", 
+                                    return_value=date(2025, 10, 21))
     instance = BCBBanksCodesCompensation()
     assert instance.date_ref == date(2025, 10, 21)
     mock_date.assert_called_once()
@@ -307,10 +307,11 @@ def test_transform_data(mock_pdf_content: BytesIO, mocker: MockerFixture) -> Non
         "COD_COMPENSAÇÃO": ["001", "002"],
         "CNPJ": ["12345678901234", "98765432109876"],
         "NOME_INSTITUIÇÃO": ["Banco Teste", "Banco Teste 2"],
-        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"]
+        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"] # codespell:ignore
     })
     
-    mocker.patch.object(BCBBanksCodesCompensation, "pdf_doc_tables_response", return_value=input_df)
+    mocker.patch.object(BCBBanksCodesCompensation, "pdf_doc_tables_response", 
+                        return_value=input_df)
     instance = BCBBanksCodesCompensation()
     result = instance.transform_data(mock_pdf_content)
     
@@ -320,7 +321,11 @@ def test_transform_data(mock_pdf_content: BytesIO, mocker: MockerFixture) -> Non
     assert result.notna().all().all()
 
 
-def test_run_without_db(mock_response: Response, mock_pdf_content: BytesIO, mocker: MockerFixture) -> None:
+def test_run_without_db(
+    mock_response: Response, 
+    mock_pdf_content: BytesIO, 
+    mocker: MockerFixture
+) -> None:
     """Test run method without database session.
 
     Verifies
@@ -344,18 +349,20 @@ def test_run_without_db(mock_response: Response, mock_pdf_content: BytesIO, mock
     """
     mocker.patch("requests.get", return_value=mock_response)
     mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
-    mocker.patch.object(BCBBanksCodesCompensation, "parse_raw_file", return_value=mock_pdf_content)
+    mocker.patch.object(BCBBanksCodesCompensation, "parse_raw_file", 
+                        return_value=mock_pdf_content)
     
     # Mock transform_data to return properly formatted data
     transformed_df = pd.DataFrame({
         "COD_COMPENSACAO": ["001", "002"],
         "CNPJ": ["12345678901234", "98765432109876"],
         "NOME_INSTITUICAO": ["Banco Teste", "Banco Teste 2"],
-        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"]
+        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"] # codespell:ignore
     })
     
     mocker.patch.object(BCBBanksCodesCompensation, "transform_data", return_value=transformed_df)
-    mocker.patch.object(BCBBanksCodesCompensation, "standardize_dataframe", return_value=transformed_df)
+    mocker.patch.object(BCBBanksCodesCompensation, "standardize_dataframe", 
+                        return_value=transformed_df)
     
     instance = BCBBanksCodesCompensation()
     result = instance.run()
@@ -364,7 +371,11 @@ def test_run_without_db(mock_response: Response, mock_pdf_content: BytesIO, mock
     pd.testing.assert_frame_equal(result, transformed_df)
 
 
-def test_run_with_db(mock_response: Response, mock_pdf_content: BytesIO, mocker: MockerFixture) -> None:
+def test_run_with_db(
+    mock_response: Response, 
+    mock_pdf_content: BytesIO, 
+    mocker: MockerFixture
+) -> None:
     """Test run method with database session.
 
     Verifies
@@ -395,11 +406,12 @@ def test_run_with_db(mock_response: Response, mock_pdf_content: BytesIO, mocker:
         "COD_COMPENSACAO": ["001", "002"],
         "CNPJ": ["12345678901234", "98765432109876"],
         "NOME_INSTITUICAO": ["Banco Teste", "Banco Teste 2"],
-        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"]
+        "SEGMENTO": ["Banco Comercial", "Banco Múltiplo"] # codespell:ignore
     })
     
     mocker.patch.object(BCBBanksCodesCompensation, "transform_data", return_value=transformed_df)
-    mocker.patch.object(BCBBanksCodesCompensation, "standardize_dataframe", return_value=transformed_df)
+    mocker.patch.object(BCBBanksCodesCompensation, "standardize_dataframe", 
+                        return_value=transformed_df)
     mock_insert = mocker.patch.object(BCBBanksCodesCompensation, "insert_table_db")
     
     instance = BCBBanksCodesCompensation(cls_db=mock_db)
@@ -421,7 +433,11 @@ def test_run_with_db(mock_response: Response, mock_pdf_content: BytesIO, mocker:
     (12.0, 21.0),
     (10, 15)
 ])
-def test_run_timeout_variations(timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]], mock_response: Response, mocker: MockerFixture) -> None:
+def test_run_timeout_variations(
+    timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]], 
+    mock_response: Response, 
+    mocker: MockerFixture
+) -> None:
     """Test run method with various timeout values.
 
     Verifies
@@ -461,7 +477,11 @@ def test_run_timeout_variations(timeout: Optional[Union[int, float, tuple[float,
     123,
     None
 ])
-def test_parse_raw_file_invalid_input(invalid_input: Union[str, int, None], bcb_instance: BCBBanksCodesCompensation, mocker: MockerFixture) -> None:
+def test_parse_raw_file_invalid_input(
+    invalid_input: Union[str, int, None], 
+    bcb_instance: BCBBanksCodesCompensation, 
+    mocker: MockerFixture
+) -> None:
     """Test parse_raw_file with invalid inputs.
 
     Verifies
@@ -488,7 +508,10 @@ def test_parse_raw_file_invalid_input(invalid_input: Union[str, int, None], bcb_
         bcb_instance.parse_raw_file(invalid_input)
 
 
-def test_pdf_doc_tables_response_empty_pdf(mock_pdf_content: BytesIO, mocker: MockerFixture) -> None:
+def test_pdf_doc_tables_response_empty_pdf(
+    mock_pdf_content: BytesIO, 
+    mocker: MockerFixture
+) -> None:
     """Test pdf_doc_tables_response with empty PDF.
 
     Verifies
@@ -537,7 +560,8 @@ def test_transform_data_empty_input(mock_pdf_content: BytesIO, mocker: MockerFix
     """
     # Create an empty DataFrame with the expected column structure to avoid string accessor issues
     empty_df = pd.DataFrame(columns=["COD_COMPENSAÇÃO", "CNPJ", "NOME_INSTITUIÇÃO", "SEGMENTO"])
-    mocker.patch.object(BCBBanksCodesCompensation, "pdf_doc_tables_response", return_value=empty_df)
+    mocker.patch.object(BCBBanksCodesCompensation, "pdf_doc_tables_response", 
+                        return_value=empty_df)
     instance = BCBBanksCodesCompensation()
     result = instance.transform_data(mock_pdf_content)
     assert isinstance(result, pd.DataFrame)

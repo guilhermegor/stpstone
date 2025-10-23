@@ -160,6 +160,11 @@ class BCBBanksCodesCompensation(ABCIngestionOperations):
         -------
         BytesIO
             The parsed PDF content as BytesIO.
+
+        Raises
+        ------
+        AttributeError
+            If the response object does not have the 'content' attribute.
         """
         if hasattr(resp_req, 'content'):
             return BytesIO(resp_req.content)
