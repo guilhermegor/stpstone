@@ -197,6 +197,17 @@ class BMFInterestRates(ABCIngestionOperations):
         xpath_td: str = """
         //table[starts-with(@id, "tb_principal")]//td[contains(@class, "tabelaConteudo")]
         """
+
+        html_root = self.cls_html_handler.lxml_parser(resp_req=resp_req)
+        list_td = self.cls_html_handler.lxml_xpath(html_content=html_root, str_xpath=xpath_td)
+        list_td = [float(x.text.strip().replace(",", ".")) for x in list_td]
+        list_ser = self._pair_headers_with_data(list_data=list_td)
+        return list_ser
+    
+    def _pair_headers_with_data(
+        self,
+        list_data: list[float]
+    ) -> list[dict[str, float]]:
         list_th: list[str] = [
             "DIAS_CORRIDOS", 
             "DI_PRE_252", 
@@ -207,6 +218,15 @@ class BMFInterestRates(ABCIngestionOperations):
             "DOLAR_PRE_252", 
             "DOLAR_PRE_360", 
             "REAL_EURO_PRECO",
+        ]
+        list_td = list_data[0:1 * 9 * (281 - 3)]
+        list_ser = self.cls_dict_handler.pair_headers_with_data(
+            list_headers=list_th, 
+            list_data=list_td
+        )
+        df_1 = pd.DataFrame(list_ser)
+
+        list_th: list[str] = [
             "DIAS_CORRIDOS",
             "DI_EURO_360", 
             "TBF_PRE_252",
@@ -216,6 +236,15 @@ class BMFInterestRates(ABCIngestionOperations):
             "DI_DOLAR_360",
             "CUPOM_CAMBIAL_OC1_360",
             "CUPOM_LIMPO_360",
+        ]
+        list_td = list_data[1 * 9 * (281 - 3):2 * 9 * (281 - 3)]
+        list_ser = self.cls_dict_handler.pair_headers_with_data(
+            list_headers=list_th, 
+            list_data=list_td
+        )
+        df_2 = pd.DataFrame(list_ser)
+        
+        list_th: list[str] = [
             "DIAS_CORRIDOS", 
             "REAL_DOLAR_PRECO", 
             "IBRX_50", 
@@ -225,21 +254,33 @@ class BMFInterestRates(ABCIngestionOperations):
             "AJUSTE_PRE_252", 
             "AJUSTE_PRE_360", 
             "AJUSTE_CUPOM_360",
+        ]
+        list_td = list_data[2 * 9 * (281 - 3):3 * 9 * (281 - 3)]
+        list_ser = self.cls_dict_handler.pair_headers_with_data(
+            list_headers=list_th, 
+            list_data=list_td
+        )
+        df_3 = pd.DataFrame(list_ser)
+        
+        list_th: list[str] = [
             "DIAS_CORRIDOS", 
             "REAL_IENE_PRECO", 
             "SPEAD_LIBOR_EURO_DOLAR_TAXA", 
             "LIBOR_360",
         ]
-
-        html_root = self.cls_html_handler.lxml_parser(resp_req=resp_req)
-        list_td = self.cls_html_handler.lxml_xpath(html_content=html_root, str_xpath=xpath_td)
-        list_td = [float(x.text.strip().replace(",", ".")) for x in list_td]
+        list_td = list_data[3 * 9 * (281 - 3):]
         list_ser = self.cls_dict_handler.pair_headers_with_data(
             list_headers=list_th, 
             list_data=list_td
         )
-        
+        df_4 = pd.DataFrame(list_ser)
+
+        df_ = pd.merge(df_1, df_2, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+        df_ = pd.merge(df_, df_3, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+        df_ = pd.merge(df_, df_4, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+        list_ser = df_.to_dict("records")
         return list_ser
+
     
     def transform_data(
         self, 
