@@ -13,7 +13,7 @@ from pathlib import Path
 import re
 from typing import Any, Literal, Optional, TypedDict, Union
 
-from playwright.sync_api import PlaywrightPage, sync_playwright
+from playwright.sync_api import Page, sync_playwright
 import requests
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -905,7 +905,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         
     def extract_data_from_xpath_mapping(
         self,
-        page: PlaywrightPage,
+        page: Page,
         xpath_mapping: dict[str, str],
         row_idx: Optional[int] = None,
         text_part_idx: Optional[int] = None,
@@ -919,7 +919,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         
         Parameters
         ----------
-        page : PlaywrightPage
+        page : Page
             The Playwright page object to extract data from.
         xpath_mapping : dict[str, str]
             Dictionary mapping field names to their XPath/CSS selectors.
@@ -1092,7 +1092,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
     
     def extract_multiple_rows(
         self,
-        page: PlaywrightPage,
+        page: Page,
         xpath_mapping: dict[str, str],
         start_idx: int = 1,
         end_idx: Optional[int] = None,
@@ -1108,7 +1108,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         
         Parameters
         ----------
-        page : PlaywrightPage
+        page : Page
             The Playwright page object to extract data from.
         xpath_mapping : dict[str, str]
             Dictionary mapping field names to XPath/CSS selectors with {}
