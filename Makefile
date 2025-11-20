@@ -24,6 +24,8 @@ init_venv:
 	@poetry install
 	@echo "Virtual environment created in ./.venv"
 	@echo "Poetry project installed"
+	@poetry run playwright install
+	@echo "Playwright installed"
 
 update_venv:
 	@poetry update
