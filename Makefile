@@ -14,13 +14,17 @@ export_deps:
 # -------------------
 # DEV ENVIRONMENT
 # -------------------
-.PHONY: install update
+.PHONY: init_venv update_venv
 
-install:
+init_venv:
+	@pyenv install 3.9.22 -s
+	@pyenv local 3.9.22
+	@python -m pip install --upgrade pip
+	@python -m pip install -r requirements.txt
 	@poetry install
 	@echo "Poetry project installed"
 
-update:
+update_venv:
 	@poetry update
 	@echo "Poetry project updated"
 
@@ -176,8 +180,8 @@ help:
 	@echo "  export_deps          - Export project dependencies"
 	@echo ""
 	@echo "Dev Environment:"
-	@echo "  install              - Install virtual environment dependencies"
-	@echo "  update               - Update virtual environment dependencies"
+	@echo "  init_venv              - Install virtual environment dependencies"
+	@echo "  update_venv               - Update virtual environment dependencies"
 	@echo "  python_path          - Export Python path"
 	@echo "  run_script           - Run Python script in virtual environment"
 	@echo ""
