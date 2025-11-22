@@ -20,6 +20,7 @@ init_venv:
 	@pyenv install 3.9.22 -s
 	@pyenv local 3.9.22
 	@python -m pip install --upgrade pip
+	@python -m pip install -r requirements.txt
 	@poetry config virtualenvs.in-project true --local
 	@poetry install
 	@echo "Virtual environment created in ./.venv"
