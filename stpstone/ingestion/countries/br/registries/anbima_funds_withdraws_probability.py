@@ -37,7 +37,24 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         cls_db: Optional[Session] = None,
         headless: bool = True,
     ) -> None:
-        """Initialize the ANBIMA Redemption Probability Matrix ingestion class."""
+        """Initialize the ANBIMA Redemption Probability Matrix ingestion class.
+        
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            Reference date for data retrieval. If None, defaults to 66 working days before current 
+            date, by default None
+        logger : Optional[Logger], optional
+            Logger instance for logging messages, by default None
+        cls_db : Optional[Session], optional
+            Database session/connection instance, by default None
+        headless : bool, optional
+            Whether to run the browser in headless mode, by default True
+
+        Returns
+        -------
+        None
+        """
         super().__init__(cls_db=cls_db)
         CoreIngestion.__init__(self)
         ContentParser.__init__(self)
@@ -57,7 +74,12 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         self._initialize_target_dates()
     
     def _initialize_target_dates(self) -> None:
-        """Initialize target month and year from date_ref."""
+        """Initialize target month and year from date_ref.
+        
+        Returns
+        -------
+        None
+        """
         target_month = self.date_ref.strftime('%B').capitalize()
         target_year = str(self.date_ref.year)
         
@@ -77,7 +99,23 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         bool_insert_or_ignore: bool = False, 
         str_table_name: str = "br_anbima_redemption_probability_matrix"
     ) -> Optional[pd.DataFrame]:
-        """Run the ingestion process."""
+        """Run the ingestion process.
+        
+        Parameters
+        ----------
+        timeout_ms : int, optional
+            Timeout for web requests in milliseconds, by default 180000
+        bool_insert_or_ignore : bool, optional
+            Whether to insert data into the database or return DataFrame, by default False
+        str_table_name : str, optional
+            Name of the database table for insertion, by default 
+            "br_anbima_redemption_probability_matrix"
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            DataFrame containing the data if bool_insert_or_ignore is False, None otherwise
+        """
         self.cls_create_log.log_message(
             self.logger, 
             f"🚀 Starting ANBIMA Redemption Probability Matrix scraping for date: {self.date_ref}", 
@@ -86,7 +124,8 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         
         self.cls_create_log.log_message(
             self.logger, 
-            f"🎯 Target: {self.date_ref.strftime('%d/%m/%Y')} ({self.target_month_pt} {self.target_year})", 
+            f"🎯 Target: {self.date_ref.strftime('%d/%m/%Y')} "
+            f"({self.target_month_pt} {self.target_year})", 
             "info"
         )
         
@@ -133,10 +172,20 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         self, 
         timeout_ms: int = 180000,
     ) -> pd.DataFrame:
-        """Scrape ANBIMA redemption probability matrix data using Playwright."""
+        """Scrape ANBIMA redemption probability matrix data using Playwright.
+        
+        Parameters
+        ----------
+        timeout_ms : int, optional
+            Timeout for web requests in milliseconds, by default 180000
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the data
+        """
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=self.headless)
-            download_dir = tempfile.mkdtemp()
             
             context = browser.new_context(
                 viewport={'width': 1920, 'height': 1080},
@@ -147,28 +196,24 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             page = context.new_page()
             
             try:
-                # Initialize browser and load page
                 iframe = self._initialize_browser(page, timeout_ms)
                 if not iframe:
                     return pd.DataFrame()
                 
-                # Select target month
                 if not self._select_month(iframe):
                     self.cls_create_log.log_message(
                         self.logger, 
                         "⚠ Continuing with current month selection", 
                         "warning"
                     )
-                
-                # Select target year
+                    
                 if not self._select_year(iframe):
                     self.cls_create_log.log_message(
                         self.logger, 
                         "⚠ Continuing with current year selection", 
                         "warning"
                     )
-                
-                # Wait for data refresh
+                    
                 self.cls_create_log.log_message(
                     self.logger, 
                     "⏳ Waiting for Power BI to refresh data...", 
@@ -176,12 +221,10 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 )
                 time.sleep(10)
                 
-                # Download data
                 csv_data = self._download_data(page, iframe, timeout_ms)
                 if not csv_data:
                     return pd.DataFrame()
                 
-                # Process CSV data
                 df = self._process_csv_data(csv_data)
                 
                 return df
@@ -202,6 +245,13 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         timeout_ms: int
     ) -> Optional[Frame]:
         """Initialize browser and load the target page.
+
+        Parameters
+        ----------
+        page : PlaywrightPage
+            Playwright page object
+        timeout_ms : int
+            Timeout for web requests in milliseconds
         
         Returns
         -------
@@ -247,6 +297,11 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
 
     def _select_month(self, iframe: Frame) -> bool:
         """Select target month in the Power BI interface.
+
+        Parameters
+        ----------
+        iframe : Frame
+            Power BI iframe context
         
         Returns
         -------
@@ -273,7 +328,8 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 )
                 return False
             
-            current_month = month_dropdown.query_selector('.slicer-restatement').inner_text().strip()
+            current_month = month_dropdown.query_selector(
+                '.slicer-restatement').inner_text().strip()
             self.cls_create_log.log_message(
                 self.logger, 
                 f"Current month: {current_month}", 
@@ -294,11 +350,9 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 "info"
             )
             
-            # Open dropdown
             month_dropdown.click()
             time.sleep(2)
             
-            # Find and click target month
             month_found = self._find_and_click_option(
                 iframe, 
                 self.target_month_pt,
@@ -308,8 +362,8 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             )
             
             if month_found:
-                # Verify selection
-                new_month = month_dropdown.query_selector('.slicer-restatement').inner_text().strip()
+                new_month = month_dropdown.query_selector(
+                    '.slicer-restatement').inner_text().strip()
                 if new_month == self.target_month_pt:
                     self.cls_create_log.log_message(
                         self.logger, 
@@ -363,7 +417,8 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 )
                 return False
             
-            current_year = year_dropdown.query_selector('.slicer-restatement').inner_text().strip()
+            current_year = year_dropdown.query_selector(
+                '.slicer-restatement').inner_text().strip()
             self.cls_create_log.log_message(
                 self.logger, 
                 f"Current year: {current_year}", 
@@ -384,21 +439,19 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 "info"
             )
             
-            # Open dropdown
             year_dropdown.click()
             time.sleep(2)
             
-            # Find and click target year
             year_found = self._find_and_click_option(
                 iframe, 
                 self.target_year,
-                [str(year) for year in range(2000, 2031)],  # Expected years range
+                [str(year) for year in range(2000, 2031)],
                 "year"
             )
             
             if year_found:
-                # Verify selection
-                new_year = year_dropdown.query_selector('.slicer-restatement').inner_text().strip()
+                new_year = year_dropdown.query_selector(
+                    '.slicer-restatement').inner_text().strip()
                 if new_year == self.target_year:
                     self.cls_create_log.log_message(
                         self.logger, 
@@ -450,10 +503,8 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             True if option was found and clicked, False otherwise
         """
         try:
-            # Wait for dropdown to fully open
             time.sleep(2)
             
-            # Find ALL visible elements with target values
             all_elements = iframe.query_selector_all('*')
             options_found = []
             
@@ -472,7 +523,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 "info"
             )
             
-            # Look for our target value
+            # look for our target value
             for option_text, elem in options_found:
                 if option_text == target_value:
                     self.cls_create_log.log_message(
@@ -481,7 +532,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                         "info"
                     )
                     
-                    # Try multiple click methods
+                    # try multiple click methods
                     try:
                         elem.click()
                         time.sleep(2)
@@ -508,7 +559,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                                 "warning"
                             )
             
-            # Method 2: If still not found, use coordinate clicking
+            # method 2: If still not found, use coordinate clicking
             self.cls_create_log.log_message(
                 self.logger, 
                 f"Trying coordinate-based selection for {option_type}...", 
@@ -519,7 +570,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                     try:
                         box = elem.bounding_box()
                         if box:
-                            # Click at the center of the element
                             iframe.click('body', position={
                                 'x': box['x'] + box['width']/2, 
                                 'y': box['y'] + box['height']/2
@@ -625,7 +675,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         Optional[Frame]
             Download button element or None if not found
         """
-        # Approach 1: Direct text search
+        # method 1: direct text search
         try:
             download_button = iframe.query_selector('text="Download base consolidada"')
             if download_button and download_button.is_visible():
@@ -638,7 +688,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         except:
             pass
         
-        # Approach 2: Search by partial text
+        # method 2: search by partial text
         try:
             all_elements = iframe.query_selector_all('*')
             for elem in all_elements:
@@ -684,7 +734,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         )
         
         try:
-            # Try different encodings
             encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'cp1252']
             csv_text = None
             
@@ -708,9 +757,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 )
                 return pd.DataFrame()
             
-            # Parse CSV
             try:
-                # First, let's check if it's a single-column CSV
                 lines = csv_text.strip().split('\n')
                 if len(lines) > 0 and len(lines[0].split(';')) == 1:
                     self.cls_create_log.log_message(
@@ -718,9 +765,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                         "⚠ CSV appears to have all data in one column, fixing...", 
                         "warning"
                     )
-                    # Split the single column into multiple columns
                     df = pd.DataFrame([line.split(',') for line in lines])
-                    # Set the first row as column names
                     df.columns = df.iloc[0]
                     df = df[1:]
                     self.cls_create_log.log_message(
@@ -729,7 +774,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                         "info"
                     )
                 else:
-                    # Normal parsing with semicolon delimiter
                     df = pd.read_csv(
                         io.StringIO(csv_text),
                         sep=';',
@@ -747,7 +791,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                     f"⚠ First parse attempt failed: {e}", 
                     "warning"
                 )
-                # Try comma delimiter as fallback
+                
                 try:
                     df = pd.read_csv(io.StringIO(csv_text), sep=',')
                     self.cls_create_log.log_message(
@@ -774,7 +818,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 "info"
             )
             
-            # Check if we got the right date
             date_cols = [col for col in df.columns if 'data' in col.lower()]
             if date_cols and len(df) > 0:
                 first_date = df[date_cols[0]].iloc[0]
@@ -822,11 +865,10 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         
         df_ = raw_data.copy()
         
-        # Ensure numeric columns are properly formatted
         if 'valor' in df_.columns:
             if df_['valor'].dtype == 'object':
                 try:
-                    # Handle Brazilian number format: 1.000,00 -> 1000.00
+                    # handle brazilian number format: 1.000,00 -> 1000.00
                     df_['valor'] = (
                         df_['valor']
                         .astype(str)
@@ -845,8 +887,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                         f"⚠ Could not process numeric column: valor - {e}", 
                         "warning"
                     )
-        
-        # Ensure prazo is numeric
+                    
         if 'prazo' in df_.columns:
             if df_['prazo'].dtype == 'object':
                 try:
