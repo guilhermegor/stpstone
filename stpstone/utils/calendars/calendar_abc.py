@@ -490,7 +490,8 @@ class DateManipulation(CalendarCore):
             "YYYYMMDD": "%Y%m%d",
             "MM-DD-YYYY": "%m-%d-%Y",
             "DD/MM/YY": "%d/%m/%y",
-            "DD.MM.YY": "%d.%m.%y"
+            "DD.MM.YY": "%d.%m.%y",
+            "YYYY/MM/DD": "%Y/%m/%d",
         }
         
         if format_input not in format_map or format_input is None:
