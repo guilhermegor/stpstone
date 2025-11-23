@@ -1,7 +1,10 @@
-"""
-Implementation of Anbima Redemption Probability Matrix ingestion instance.
+"""Implementation of Anbima Redemption Probability Matrix ingestion instance.
+
+This module provides web scraping functionality for extracting redemption probability matrix data 
+from ANBIMA's Power BI dashboard using Playwright.
 """
 
+from contextlib import suppress
 from datetime import date
 import io
 from io import StringIO
@@ -70,7 +73,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         self.base_url = "https://www.anbima.com.br/pt_br/autorregular/matriz-de-probabilidade-de-resgates.htm"
         self.headless = headless
         
-        # Initialize target month and year
         self._initialize_target_dates()
     
     def _initialize_target_dates(self) -> None:
@@ -118,7 +120,8 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         """
         self.cls_create_log.log_message(
             self.logger, 
-            f"🚀 Starting ANBIMA Redemption Probability Matrix scraping for date: {self.date_ref}", 
+            "🚀 Starting ANBIMA Redemption Probability Matrix "
+            f"scraping for date: {self.date_ref}", 
             "info"
         )
         
@@ -146,7 +149,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             dict_dtypes={
                 "data": "date",
                 "periodo": str,
-                "classe": str,
+                "classe": str, # codespell:ignore
                 "segmento_investidor": str,
                 "tipo_metodologia": str,
                 "metrica": str,
@@ -225,9 +228,9 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 if not csv_data:
                     return pd.DataFrame()
                 
-                df = self._process_csv_data(csv_data)
+                df_ = self._process_csv_data(csv_data)
                 
-                return df
+                return df_
                 
             except Exception as e:
                 self.cls_create_log.log_message(
@@ -391,6 +394,11 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
 
     def _select_year(self, iframe: Frame) -> bool:
         """Select target year in the Power BI interface.
+
+        Parameters
+        ----------
+        iframe : Frame
+            Power BI iframe context
         
         Returns
         -------
@@ -509,13 +517,11 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             options_found = []
             
             for elem in all_elements:
-                try:
+                with suppress(Exception):
                     if elem.is_visible():
                         text = elem.inner_text().strip()
                         if text in expected_values:
                             options_found.append((text, elem))
-                except:
-                    continue
             
             self.cls_create_log.log_message(
                 self.logger, 
@@ -523,7 +529,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 "info"
             )
             
-            # look for our target value
+            # method 1: look for our target value
             for option_text, elem in options_found:
                 if option_text == target_value:
                     self.cls_create_log.log_message(
@@ -542,7 +548,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                             "info"
                         )
                         return True
-                    except:
+                    except Exception:
                         try:
                             elem.click(force=True)
                             time.sleep(2)
@@ -610,6 +616,15 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         timeout_ms: int
     ) -> Optional[bytes]:
         """Download the data file.
+
+        Parameters
+        ----------
+        page : PlaywrightPage
+            Playwright page object
+        iframe : Frame
+            Power BI iframe context
+        timeout_ms : int
+            Timeout for web requests in milliseconds
         
         Returns
         -------
@@ -669,6 +684,11 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
 
     def _find_download_button(self, iframe: Frame) -> Optional[Frame]:
         """Find the download button in the Power BI interface.
+
+        Parameters
+        ----------
+        iframe : Frame
+            Power BI iframe context
         
         Returns
         -------
@@ -676,7 +696,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             Download button element or None if not found
         """
         # method 1: direct text search
-        try:
+        with suppress(Exception):
             download_button = iframe.query_selector('text="Download base consolidada"')
             if download_button and download_button.is_visible():
                 self.cls_create_log.log_message(
@@ -685,14 +705,12 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                     "info"
                 )
                 return download_button
-        except:
-            pass
         
         # method 2: search by partial text
-        try:
+        with suppress(Exception):
             all_elements = iframe.query_selector_all('*')
             for elem in all_elements:
-                try:
+                with suppress(Exception):
                     if elem.is_visible():
                         text = elem.inner_text().strip()
                         if 'Download' in text and 'consolidada' in text.lower():
@@ -702,10 +720,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                                 "info"
                             )
                             return elem
-                except:
-                    continue
-        except:
-            pass
         
         self.cls_create_log.log_message(
             self.logger, 
@@ -738,7 +752,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             csv_text = None
             
             for encoding in encodings:
-                try:
+                with suppress(Exception):
                     csv_text = csv_data.decode(encoding)
                     self.cls_create_log.log_message(
                         self.logger, 
@@ -746,8 +760,6 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                         "info"
                     )
                     break
-                except:
-                    continue
             
             if csv_text is None:
                 self.cls_create_log.log_message(
@@ -765,16 +777,16 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                         "⚠ CSV appears to have all data in one column, fixing...", 
                         "warning"
                     )
-                    df = pd.DataFrame([line.split(',') for line in lines])
-                    df.columns = df.iloc[0]
-                    df = df[1:]
+                    df_ = pd.DataFrame([line.split(',') for line in lines])
+                    df_.columns = df_.iloc[0]
+                    df_ = df_[1:]
                     self.cls_create_log.log_message(
                         self.logger, 
                         "✓ Fixed single-column CSV", 
                         "info"
                     )
                 else:
-                    df = pd.read_csv(
+                    df_ = pd.read_csv(
                         io.StringIO(csv_text),
                         sep=';',
                         decimal=',',
@@ -793,7 +805,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
                 )
                 
                 try:
-                    df = pd.read_csv(io.StringIO(csv_text), sep=',')
+                    df_ = pd.read_csv(io.StringIO(csv_text), sep=',')
                     self.cls_create_log.log_message(
                         self.logger, 
                         "✓ Parsed with comma delimiter", 
@@ -809,18 +821,18 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             
             self.cls_create_log.log_message(
                 self.logger, 
-                f"✓ Parsed {len(df)} rows, {len(df.columns)} columns", 
+                f"✓ Parsed {len(df_)} rows, {len(df_.columns)} columns", 
                 "info"
             )
             self.cls_create_log.log_message(
                 self.logger, 
-                f"✓ Columns: {list(df.columns)}", 
+                f"✓ Columns: {list(df_.columns)}", 
                 "info"
             )
             
-            date_cols = [col for col in df.columns if 'data' in col.lower()]
-            if date_cols and len(df) > 0:
-                first_date = df[date_cols[0]].iloc[0]
+            date_cols = [col for col in df_.columns if 'data' in col.lower()]
+            if date_cols and len(df_) > 0:
+                first_date = df_[date_cols[0]].iloc[0]
                 self.cls_create_log.log_message(
                     self.logger, 
                     f"📅 First date in data: {first_date}", 
@@ -829,11 +841,11 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
             
             self.cls_create_log.log_message(
                 self.logger, 
-                f"✅ SUCCESS! Final shape: {df.shape}", 
+                f"✅ SUCCESS! Final shape: {df_.shape}", 
                 "info"
             )
             
-            return df
+            return df_
             
         except Exception as e:
             self.cls_create_log.log_message(
@@ -850,11 +862,32 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         """Parse the raw file content.
         
         This method is kept for compatibility but not used in web scraping.
+
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The response or page object from the request.
+
+        Returns
+        -------
+        StringIO
+            The parsed content.
         """
         return StringIO()
 
     def transform_data(self, raw_data: pd.DataFrame) -> pd.DataFrame:
-        """Transform scraped data into a standardized DataFrame."""
+        """Transform scraped data into a standardized DataFrame.
+        
+        Parameters
+        ----------
+        raw_data : pd.DataFrame
+            Raw DataFrame obtained from scraping
+        
+        Returns
+        -------
+        pd.DataFrame
+            Transformed DataFrame
+        """
         if raw_data.empty:
             self.cls_create_log.log_message(
                 self.logger, 
@@ -865,44 +898,44 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         
         df_ = raw_data.copy()
         
-        if 'valor' in df_.columns:
-            if df_['valor'].dtype == 'object':
-                try:
-                    # handle brazilian number format: 1.000,00 -> 1000.00
-                    df_['valor'] = (
-                        df_['valor']
-                        .astype(str)
-                        .str.replace('.', '', regex=False)
-                        .str.replace(',', '.', regex=False)
-                        .astype(float)
-                    )
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        "✓ Processed numeric column: valor", 
-                        "info"
-                    )
-                except Exception as e:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"⚠ Could not process numeric column: valor - {e}", 
-                        "warning"
-                    )
-                    
-        if 'prazo' in df_.columns:
-            if df_['prazo'].dtype == 'object':
-                try:
-                    df_['prazo'] = pd.to_numeric(df_['prazo'], errors='coerce')
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        "✓ Processed numeric column: prazo", 
-                        "info"
-                    )
-                except Exception as e:
-                    self.cls_create_log.log_message(
-                        self.logger, 
-                        f"⚠ Could not process numeric column: prazo - {e}", 
-                        "warning"
-                    )
+        if 'valor' in df_.columns \
+            and df_['valor'].dtype == 'object':
+            try:
+                # handle brazilian number format: 1.000,00 -> 1000.00
+                df_['valor'] = (
+                    df_['valor']
+                    .astype(str)
+                    .str.replace('.', '', regex=False)
+                    .str.replace(',', '.', regex=False)
+                    .astype(float)
+                )
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    "✓ Processed numeric column: valor", 
+                    "info"
+                )
+            except Exception as e:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"⚠ Could not process numeric column: valor - {e}", 
+                    "warning"
+                )
+                
+        if 'prazo' in df_.columns \
+            and df_['prazo'].dtype == 'object':
+            try:
+                df_['prazo'] = pd.to_numeric(df_['prazo'], errors='coerce')
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    "✓ Processed numeric column: prazo", 
+                    "info"
+                )
+            except Exception as e:
+                self.cls_create_log.log_message(
+                    self.logger, 
+                    f"⚠ Could not process numeric column: prazo - {e}", 
+                    "warning"
+                )
         
         self.cls_create_log.log_message(
             self.logger, 

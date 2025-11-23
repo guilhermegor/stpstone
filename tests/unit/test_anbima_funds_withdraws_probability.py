@@ -8,12 +8,10 @@ Tests the ANBIMA redemption probability matrix ingestion functionality including
 - Database integration
 """
 
-from datetime import date, datetime
+from datetime import date
 import io
 from logging import Logger
-from pathlib import Path
-import tempfile
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, mock_open, patch
 
 import pandas as pd
@@ -28,8 +26,6 @@ from stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probabili
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
-from stpstone.utils.loggs.create_logs import CreateLog
-from stpstone.utils.parsers.folders import DirFilesManagement
 
 
 # --------------------------
@@ -108,7 +104,10 @@ def sample_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def anbima_instance(mock_logger: MagicMock, sample_date: date) -> Any:
+def anbima_instance(
+    mock_logger: MagicMock, 
+    sample_date: date
+) -> Any: # noqa ANN401: typing.Any is not allowed
     """Fixture providing AnbimaFundsRedemptionProbabilityMatrix instance.
 
     Parameters
@@ -133,7 +132,10 @@ def anbima_instance(mock_logger: MagicMock, sample_date: date) -> Any:
 
 
 @pytest.fixture
-def anbima_instance_with_db(mock_logger: MagicMock, mock_db_session: MagicMock) -> Any:
+def anbima_instance_with_db(
+    mock_logger: MagicMock, 
+    mock_db_session: MagicMock
+) -> Any: # noqa ANN401: typing.Any is not allowed
     """Fixture providing AnbimaFundsRedemptionProbabilityMatrix instance with DB.
 
     Parameters
@@ -225,7 +227,11 @@ class TestInitialization:
             assert instance.target_month_pt == "Outubro"
             assert instance.target_year == "2023"
 
-    def test_init_with_database_session(self, mock_logger: MagicMock, mock_db_session: MagicMock) -> None:
+    def test_init_with_database_session(
+        self, 
+        mock_logger: MagicMock, 
+        mock_db_session: MagicMock
+    ) -> None:
         """Test initialization with database session.
 
         Verifies
@@ -288,7 +294,7 @@ class TestInitialization:
 
         for test_date_, expected_month in test_cases:
             with patch.object(DatesBRAnbima, 'add_working_days', return_value=test_date_), \
-                 patch.object(DatesCurrent, 'curr_date', return_value=date(2023, 12, 20)):
+                patch.object(DatesCurrent, 'curr_date', return_value=date(2023, 12, 20)):
                 instance = AnbimaFundsRedemptionProbabilityMatrix(
                     date_ref=test_date_,
                     logger=mock_logger
@@ -305,7 +311,9 @@ class TestRunMethod:
     """Test cases for the run method."""
 
     def test_run_success_with_dataframe_return(
-        self, anbima_instance: Any, sample_dataframe: pd.DataFrame
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_dataframe: pd.DataFrame
     ) -> None:
         """Test successful run returning DataFrame.
 
@@ -327,8 +335,9 @@ class TestRunMethod:
         None
         """
         with patch.object(anbima_instance, 'get_response', return_value=sample_dataframe), \
-             patch.object(anbima_instance, 'transform_data', return_value=sample_dataframe), \
-             patch.object(anbima_instance, 'standardize_dataframe', return_value=sample_dataframe):
+            patch.object(anbima_instance, 'transform_data', return_value=sample_dataframe), \
+            patch.object(anbima_instance, 'standardize_dataframe', 
+                        return_value=sample_dataframe):
 
             result = anbima_instance.run(bool_insert_or_ignore=False)
 
@@ -339,7 +348,9 @@ class TestRunMethod:
             anbima_instance.standardize_dataframe.assert_called_once()
 
     def test_run_success_with_database_insert(
-        self, anbima_instance_with_db: Any, sample_dataframe: pd.DataFrame
+        self, 
+        anbima_instance_with_db: Any, # noqa ANN401: typing.Any is not allowed
+        sample_dataframe: pd.DataFrame
     ) -> None:
         """Test successful run with database insertion.
 
@@ -360,9 +371,12 @@ class TestRunMethod:
         -------
         None
         """
-        with patch.object(anbima_instance_with_db, 'get_response', return_value=sample_dataframe), \
-             patch.object(anbima_instance_with_db, 'transform_data', return_value=sample_dataframe), \
-             patch.object(anbima_instance_with_db, 'standardize_dataframe', return_value=sample_dataframe), \
+        with patch.object(anbima_instance_with_db, 'get_response', 
+                          return_value=sample_dataframe), \
+             patch.object(anbima_instance_with_db, 'transform_data', 
+                          return_value=sample_dataframe), \
+             patch.object(anbima_instance_with_db, 'standardize_dataframe', 
+                          return_value=sample_dataframe), \
              patch.object(anbima_instance_with_db, 'insert_table_db') as mock_insert:
 
             result = anbima_instance_with_db.run(bool_insert_or_ignore=True)
@@ -375,7 +389,10 @@ class TestRunMethod:
                 bool_insert_or_ignore=True
             )
 
-    def test_run_no_data_retrieved(self, anbima_instance: Any) -> None:
+    def test_run_no_data_retrieved(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test run when no data is retrieved.
 
         Verifies
@@ -406,7 +423,11 @@ class TestRunMethod:
                 "error"
             )
 
-    def test_run_custom_parameters(self, anbima_instance: Any, sample_dataframe: pd.DataFrame) -> None:
+    def test_run_custom_parameters(
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_dataframe: pd.DataFrame
+    ) -> None:
         """Test run with custom parameters.
 
         Verifies
@@ -426,8 +447,8 @@ class TestRunMethod:
         None
         """
         with patch.object(anbima_instance, 'get_response', return_value=sample_dataframe), \
-             patch.object(anbima_instance, 'transform_data', return_value=sample_dataframe), \
-             patch.object(anbima_instance, 'standardize_dataframe', return_value=sample_dataframe):
+            patch.object(anbima_instance, 'transform_data', return_value=sample_dataframe), \
+            patch.object(anbima_instance, 'standardize_dataframe', return_value=sample_dataframe):
 
             anbima_instance.run(
                 timeout_ms=300000,
@@ -445,7 +466,10 @@ class TestGetResponse:
     """Test cases for the get_response method."""
 
     def test_get_response_success(
-        self, anbima_instance: Any, sample_csv_data: bytes, sample_dataframe: pd.DataFrame
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_csv_data: bytes, 
+        sample_dataframe: pd.DataFrame
     ) -> None:
         """Test successful data retrieval.
 
@@ -473,14 +497,16 @@ class TestGetResponse:
         mock_browser = MagicMock()
         mock_context = MagicMock()
 
-        with patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
-             patch.object(anbima_instance, '_initialize_browser', return_value=mock_frame), \
-             patch.object(anbima_instance, '_select_month', return_value=True), \
-             patch.object(anbima_instance, '_select_year', return_value=True), \
-             patch.object(anbima_instance, '_download_data', return_value=sample_csv_data), \
-             patch.object(anbima_instance, '_process_csv_data', return_value=sample_dataframe):
+        with patch('stpstone.ingestion.countries.br.registries.' \
+                   'anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
+            patch.object(anbima_instance, '_initialize_browser', return_value=mock_frame), \
+            patch.object(anbima_instance, '_select_month', return_value=True), \
+            patch.object(anbima_instance, '_select_year', return_value=True), \
+            patch.object(anbima_instance, '_download_data', return_value=sample_csv_data), \
+            patch.object(anbima_instance, '_process_csv_data', return_value=sample_dataframe):
 
-            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = \
+                mock_browser
             mock_browser.new_context.return_value = mock_context
             mock_context.new_page.return_value = mock_page
 
@@ -493,7 +519,10 @@ class TestGetResponse:
             anbima_instance._download_data.assert_called_once()
             anbima_instance._process_csv_data.assert_called_once_with(sample_csv_data)
 
-    def test_get_response_browser_initialization_fails(self, anbima_instance: Any) -> None:
+    def test_get_response_browser_initialization_fails(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test get_response when browser initialization fails.
 
         Verifies
@@ -514,11 +543,13 @@ class TestGetResponse:
         mock_context = MagicMock()
         mock_page = MagicMock()
         
-        with patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
-             patch.object(anbima_instance, '_initialize_browser', return_value=None), \
-             patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
+        with patch('stpstone.ingestion.countries.br.registries' \
+                   + '.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
+            patch.object(anbima_instance, '_initialize_browser', return_value=None), \
+            patch.object(anbima_instance.cls_create_log, 'log_message'):
 
-            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = \
+                mock_browser
             mock_browser.new_context.return_value = mock_context
             mock_context.new_page.return_value = mock_page
 
@@ -529,7 +560,10 @@ class TestGetResponse:
             mock_browser.close.assert_called_once()
 
     def test_get_response_month_selection_fails(
-        self, anbima_instance: Any, sample_csv_data: bytes, sample_dataframe: pd.DataFrame
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_csv_data: bytes, 
+        sample_dataframe: pd.DataFrame
     ) -> None:
         """Test get_response when month selection fails but continues.
 
@@ -556,15 +590,17 @@ class TestGetResponse:
         mock_context = MagicMock()
         mock_page = MagicMock()
 
-        with patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
-             patch.object(anbima_instance, '_initialize_browser', return_value=mock_frame), \
-             patch.object(anbima_instance, '_select_month', return_value=False), \
-             patch.object(anbima_instance, '_select_year', return_value=True), \
-             patch.object(anbima_instance, '_download_data', return_value=sample_csv_data), \
-             patch.object(anbima_instance, '_process_csv_data', return_value=sample_dataframe), \
-             patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
+        with patch('stpstone.ingestion.countries.br.registries' \
+                   '.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
+            patch.object(anbima_instance, '_initialize_browser', return_value=mock_frame), \
+            patch.object(anbima_instance, '_select_month', return_value=False), \
+            patch.object(anbima_instance, '_select_year', return_value=True), \
+            patch.object(anbima_instance, '_download_data', return_value=sample_csv_data), \
+            patch.object(anbima_instance, '_process_csv_data', return_value=sample_dataframe), \
+            patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
 
-            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = \
+                mock_browser
             mock_browser.new_context.return_value = mock_context
             mock_context.new_page.return_value = mock_page
 
@@ -577,7 +613,10 @@ class TestGetResponse:
                 "warning"
             )
 
-    def test_get_response_download_fails(self, anbima_instance: Any) -> None:
+    def test_get_response_download_fails(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test get_response when data download fails.
 
         Verifies
@@ -599,13 +638,15 @@ class TestGetResponse:
         mock_context = MagicMock()
         mock_page = MagicMock()
 
-        with patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
-             patch.object(anbima_instance, '_initialize_browser', return_value=mock_frame), \
-             patch.object(anbima_instance, '_select_month', return_value=True), \
-             patch.object(anbima_instance, '_select_year', return_value=True), \
-             patch.object(anbima_instance, '_download_data', return_value=None):
+        with patch('stpstone.ingestion.countries.br.registries' \
+            + '.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
+            patch.object(anbima_instance, '_initialize_browser', return_value=mock_frame), \
+            patch.object(anbima_instance, '_select_month', return_value=True), \
+            patch.object(anbima_instance, '_select_year', return_value=True), \
+            patch.object(anbima_instance, '_download_data', return_value=None):
 
-            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = \
+                mock_browser
             mock_browser.new_context.return_value = mock_context
             mock_context.new_page.return_value = mock_page
 
@@ -613,7 +654,10 @@ class TestGetResponse:
 
             assert result.empty
 
-    def test_get_response_exception_handling(self, anbima_instance: Any) -> None:
+    def test_get_response_exception_handling(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test get_response exception handling.
 
         Verifies
@@ -635,11 +679,14 @@ class TestGetResponse:
         mock_context = MagicMock()
         mock_page = MagicMock()
         
-        with patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
-             patch.object(anbima_instance, '_initialize_browser', side_effect=Exception("Test error")), \
-             patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
+        with patch('stpstone.ingestion.countries.br.registries' \
+            + '.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
+            patch.object(anbima_instance, '_initialize_browser', 
+                         side_effect=Exception("Test error")), \
+            patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
 
-            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = \
+                mock_browser
             mock_browser.new_context.return_value = mock_context
             mock_context.new_page.return_value = mock_page
 
@@ -660,7 +707,10 @@ class TestGetResponse:
 class TestBrowserInitialization:
     """Test cases for browser initialization methods."""
 
-    def test_initialize_browser_success(self, anbima_instance: Any) -> None:
+    def test_initialize_browser_success(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test successful browser initialization.
 
         Verifies
@@ -696,7 +746,10 @@ class TestBrowserInitialization:
         )
         mock_page.query_selector.assert_called_with('iframe[src*="powerbi.com"]')
 
-    def test_initialize_browser_iframe_not_found(self, anbima_instance: Any) -> None:
+    def test_initialize_browser_iframe_not_found(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test browser initialization when iframe not found.
 
         Verifies
@@ -727,7 +780,10 @@ class TestBrowserInitialization:
                 "error"
             )
 
-    def test_initialize_browser_navigation_fails(self, anbima_instance: Any) -> None:
+    def test_initialize_browser_navigation_fails(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test browser initialization when navigation fails.
 
         Verifies
@@ -764,7 +820,10 @@ class TestBrowserInitialization:
 class TestSelectionMethods:
     """Test cases for month and year selection methods."""
 
-    def test_select_month_success(self, anbima_instance: Any) -> None:
+    def test_select_month_success(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test successful month selection.
 
         Verifies
@@ -801,7 +860,10 @@ class TestSelectionMethods:
             )
             anbima_instance._find_and_click_option.assert_called_once()
 
-    def test_select_month_already_correct(self, anbima_instance: Any) -> None:
+    def test_select_month_already_correct(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test month selection when already on correct month.
 
         Verifies
@@ -836,7 +898,10 @@ class TestSelectionMethods:
                 "info"
             )
 
-    def test_select_month_dropdown_not_found(self, anbima_instance: Any) -> None:
+    def test_select_month_dropdown_not_found(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test month selection when dropdown not found.
 
         Verifies
@@ -866,7 +931,10 @@ class TestSelectionMethods:
                 "error"
             )
 
-    def test_select_year_success(self, anbima_instance: Any) -> None:
+    def test_select_year_success(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test successful year selection.
 
         Verifies
@@ -903,7 +971,10 @@ class TestSelectionMethods:
             )
             anbima_instance._find_and_click_option.assert_called_once()
 
-    def test_find_and_click_option_success(self, anbima_instance: Any) -> None:
+    def test_find_and_click_option_success(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test successful option finding and clicking.
 
         Verifies
@@ -936,7 +1007,10 @@ class TestSelectionMethods:
         assert result is True
         mock_element.click.assert_called_once()
 
-    def test_find_and_click_option_force_click(self, anbima_instance: Any) -> None:
+    def test_find_and_click_option_force_click(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test option clicking with force method.
 
         Verifies
@@ -969,7 +1043,10 @@ class TestSelectionMethods:
         assert mock_element.click.call_count == 2
         mock_element.click.assert_called_with(force=True)
 
-    def test_find_and_click_option_coordinate_click(self, anbima_instance: Any) -> None:
+    def test_find_and_click_option_coordinate_click(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test option clicking with coordinate method.
 
         Verifies
@@ -1003,7 +1080,10 @@ class TestSelectionMethods:
         assert result is True
         mock_frame.click.assert_called_once()
 
-    def test_find_and_click_option_not_found(self, anbima_instance: Any) -> None:
+    def test_find_and_click_option_not_found(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test option finding when target not found.
 
         Verifies
@@ -1046,7 +1126,11 @@ class TestSelectionMethods:
 class TestDownloadMethods:
     """Test cases for data download methods."""
 
-    def test_download_data_success(self, anbima_instance: Any, sample_csv_data: bytes) -> None:
+    def test_download_data_success(
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_csv_data: bytes
+    ) -> None:
         """Test successful data download.
 
         Verifies
@@ -1074,8 +1158,12 @@ class TestDownloadMethods:
         mock_download.suggested_filename = "test_data.csv"
         mock_download.save_as.return_value = None
 
-        with patch.object(anbima_instance, '_find_download_button', return_value=mock_download_button), \
-             patch('tempfile.mkdtemp', return_value='/tmp/test'), \
+        with patch.object(anbima_instance, '_find_download_button', 
+                          return_value=mock_download_button), \
+             patch(
+                'tempfile.mkdtemp', 
+                return_value='/tmp/test' # noqa S108: use of temp file path is safe in testing
+            ), \
              patch('builtins.open', mock_open(read_data=sample_csv_data)), \
              patch.object(mock_page, 'expect_download') as mock_expect:
 
@@ -1087,7 +1175,10 @@ class TestDownloadMethods:
             mock_download_button.click.assert_called_with(force=True)
             mock_download.save_as.assert_called_once()
 
-    def test_download_data_button_not_found(self, anbima_instance: Any) -> None:
+    def test_download_data_button_not_found(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test download when button not found.
 
         Verifies
@@ -1112,7 +1203,10 @@ class TestDownloadMethods:
 
             assert result is None
 
-    def test_download_data_fails(self, anbima_instance: Any) -> None:
+    def test_download_data_fails(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test download when process fails.
 
         Verifies
@@ -1133,9 +1227,11 @@ class TestDownloadMethods:
         mock_frame = MagicMock(spec=Frame)
         mock_download_button = MagicMock()
 
-        with patch.object(anbima_instance, '_find_download_button', return_value=mock_download_button), \
-             patch.object(mock_page, 'expect_download', side_effect=Exception("Download failed")), \
-             patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
+        with patch.object(
+            anbima_instance, '_find_download_button', return_value=mock_download_button), \
+            patch.object(mock_page, 'expect_download', 
+                         side_effect=Exception("Download failed")), \
+            patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
 
             result = anbima_instance._download_data(mock_page, mock_frame, 60000)
 
@@ -1146,7 +1242,10 @@ class TestDownloadMethods:
                 "error"
             )
 
-    def test_find_download_button_by_text(self, anbima_instance: Any) -> None:
+    def test_find_download_button_by_text(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test download button finding by exact text.
 
         Verifies
@@ -1174,7 +1273,10 @@ class TestDownloadMethods:
         assert result == mock_button
         mock_frame.query_selector.assert_called_with('text="Download base consolidada"')
 
-    def test_find_download_button_by_partial_text(self, anbima_instance: Any) -> None:
+    def test_find_download_button_by_partial_text(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test download button finding by partial text.
 
         Verifies
@@ -1204,7 +1306,10 @@ class TestDownloadMethods:
 
         assert result == mock_button
 
-    def test_find_download_button_not_found(self, anbima_instance: Any) -> None:
+    def test_find_download_button_not_found(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test download button not found.
 
         Verifies
@@ -1237,7 +1342,11 @@ class TestDownloadMethods:
 class TestDataProcessing:
     """Test cases for data processing methods."""
 
-    def test_process_csv_data_success(self, anbima_instance: Any, sample_csv_data: bytes) -> None:
+    def test_process_csv_data_success(
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_csv_data: bytes
+    ) -> None:
         """Test successful CSV data processing.
 
         Verifies
@@ -1272,7 +1381,10 @@ class TestDataProcessing:
                 "info"
             )
 
-    def test_process_csv_data_encoding_fallback(self, anbima_instance: Any) -> None:
+    def test_process_csv_data_encoding_fallback(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test CSV processing with encoding fallback.
 
         Verifies
@@ -1300,7 +1412,10 @@ class TestDataProcessing:
             # Check that some encoding was used successfully
             assert any("decoded" in str(call).lower() for call in mock_log.call_args_list)
 
-    def test_process_csv_data_single_column_fix(self, anbima_instance: Any) -> None:
+    def test_process_csv_data_single_column_fix(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test CSV processing with single column fix.
 
         Verifies
@@ -1318,9 +1433,11 @@ class TestDataProcessing:
         -------
         None
         """
-        single_column_data = """data,periodo,classe,segmento_investidor,tipo_metodologia,metrica,prazo,valor
-2023-10-15,Mensal,Renda Variável,Varejo,Probabilidade,Resgate,30,0.1234
-2023-10-15,Mensal,Renda Fixa,Institucional,Probabilidade,Resgate,60,0.5678""".encode('utf-8')
+        single_column_data = \
+            """data,periodo,classe,segmento_investidor,tipo_metodologia,metrica,prazo,valor
+            2023-10-15,Mensal,Renda Variável,Varejo,Probabilidade,Resgate,30,0.1234
+            2023-10-15,Mensal,Renda Fixa,Institucional,Probabilidade,Resgate,60,0.5678"""
+        single_column_data = single_column_data.encode('utf-8') # noqa UP012: unnecessary utf-8 `encoding` argument to `encode`
 
         with patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
             result = anbima_instance._process_csv_data(single_column_data)
@@ -1330,7 +1447,10 @@ class TestDataProcessing:
             assert any("single column" in str(call).lower() or "one column" in str(call).lower() 
                       for call in mock_log.call_args_list)
 
-    def test_process_csv_data_delimiter_fallback(self, anbima_instance: Any) -> None:
+    def test_process_csv_data_delimiter_fallback(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test CSV processing with delimiter fallback.
 
         Verifies
@@ -1350,13 +1470,16 @@ class TestDataProcessing:
         """
         comma_data = """data,periodo,classe,valor
 2023-10-15,Mensal,Renda Variável,0.1234
-2023-10-15,Mensal,Renda Fixa,0.5678""".encode('utf-8')
+2023-10-15,Mensal,Renda Fixa,0.5678""".encode('utf-8') # noqa UP012: unnecessary utf-8 `encoding` argument to `encode`
 
         result = anbima_instance._process_csv_data(comma_data)
 
         assert isinstance(result, pd.DataFrame)
 
-    def test_process_csv_data_all_methods_fail(self, anbima_instance: Any) -> None:
+    def test_process_csv_data_all_methods_fail(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test CSV processing when all methods fail.
 
         Verifies
@@ -1382,7 +1505,11 @@ class TestDataProcessing:
         # It may be empty or have unexpected structure, but doesn't crash
         assert isinstance(result, pd.DataFrame)
 
-    def test_transform_data_success(self, anbima_instance: Any, sample_dataframe: pd.DataFrame) -> None:
+    def test_transform_data_success(
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_dataframe: pd.DataFrame
+    ) -> None:
         """Test successful data transformation.
 
         Verifies
@@ -1414,7 +1541,10 @@ class TestDataProcessing:
                 "info"
             )
 
-    def test_transform_data_empty(self, anbima_instance: Any) -> None:
+    def test_transform_data_empty(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test transformation of empty DataFrame.
 
         Verifies
@@ -1443,7 +1573,10 @@ class TestDataProcessing:
                 "warning"
             )
 
-    def test_transform_data_numeric_conversion_error(self, anbima_instance: Any) -> None:
+    def test_transform_data_numeric_conversion_error(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test transformation with numeric conversion error.
 
         Verifies
@@ -1467,7 +1600,7 @@ class TestDataProcessing:
             'prazo': ['not_a_number', '30']
         })
 
-        with patch.object(anbima_instance.cls_create_log, 'log_message') as mock_log:
+        with patch.object(anbima_instance.cls_create_log, 'log_message'):
             result = anbima_instance.transform_data(problematic_df)
 
             assert isinstance(result, pd.DataFrame)
@@ -1481,7 +1614,10 @@ class TestDataProcessing:
 class TestCompatibilityMethods:
     """Test cases for compatibility methods."""
 
-    def test_parse_raw_file_playwright(self, anbima_instance: Any) -> None:
+    def test_parse_raw_file_playwright(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test parse_raw_file with Playwright page.
 
         Verifies
@@ -1504,7 +1640,10 @@ class TestCompatibilityMethods:
 
         assert isinstance(result, io.StringIO)
 
-    def test_parse_raw_file_selenium(self, anbima_instance: Any) -> None:
+    def test_parse_raw_file_selenium(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test parse_raw_file with Selenium webdriver.
 
         Verifies
@@ -1527,7 +1666,10 @@ class TestCompatibilityMethods:
 
         assert isinstance(result, io.StringIO)
 
-    def test_parse_raw_file_response(self, anbima_instance: Any) -> None:
+    def test_parse_raw_file_response(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test parse_raw_file with requests Response.
 
         Verifies
@@ -1606,7 +1748,10 @@ class TestErrorHandling:
 
             assert instance.logger is None
 
-    def test_run_with_exception_during_scraping(self, anbima_instance: Any) -> None:
+    def test_run_with_exception_during_scraping(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test run when scraping raises exception.
 
         Verifies
@@ -1629,7 +1774,10 @@ class TestErrorHandling:
 
             assert result is None
 
-    def test_transform_data_with_missing_columns(self, anbima_instance: Any) -> None:
+    def test_transform_data_with_missing_columns(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test transformation with missing expected columns.
 
         Verifies
@@ -1658,7 +1806,11 @@ class TestErrorHandling:
         assert isinstance(result, pd.DataFrame)
         assert len(result) == 1
 
-    def test_download_with_temp_file_cleanup(self, anbima_instance: Any, sample_csv_data: bytes) -> None:
+    def test_download_with_temp_file_cleanup(
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_csv_data: bytes
+    ) -> None:
         """Test download with temporary file cleanup.
 
         Verifies
@@ -1688,14 +1840,19 @@ class TestErrorHandling:
 
         # Create a mock Path object that behaves correctly
         mock_path = MagicMock()
-        mock_path.__str__ = lambda self: "/tmp/test/test_data.csv"
-        mock_path.__fspath__ = lambda self: "/tmp/test/test_data.csv"
+        mock_path.__str__ = lambda self: "/tmp/test/test_data.csv" # noqa S108: probable insecure usage of temporary file
+        mock_path.__fspath__ = lambda self: "/tmp/test/test_data.csv" # noqa S108: probable insecure usage of temporary file
         
-        with patch.object(anbima_instance, '_find_download_button', return_value=mock_download_button), \
-             patch('tempfile.mkdtemp', return_value='/tmp/test') as mock_mkdtemp, \
-             patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.Path') as mock_path_class, \
-             patch('builtins.open', mock_open(read_data=sample_csv_data)), \
-             patch.object(mock_page, 'expect_download') as mock_expect:
+        with patch.object(
+            anbima_instance, '_find_download_button', return_value=mock_download_button), \
+            patch(
+                 'tempfile.mkdtemp', 
+                 return_value='/tmp/test' # noqa S108: probable insecure usage of temporary file
+            ) as mock_mkdtemp, \
+            patch('stpstone.ingestion.countries.br.registries' \
+                + '.anbima_funds_withdraws_probability.Path') as mock_path_class, \
+            patch('builtins.open', mock_open(read_data=sample_csv_data)), \
+            patch.object(mock_page, 'expect_download') as mock_expect:
 
             mock_expect.return_value.__enter__.return_value.value = mock_download
             
@@ -1718,7 +1875,10 @@ class TestErrorHandling:
             # Result should be the CSV data
             assert result == sample_csv_data
 
-    def test_month_selection_with_special_characters(self, anbima_instance: Any) -> None:
+    def test_month_selection_with_special_characters(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test month selection handling of special characters.
 
         Verifies
@@ -1752,7 +1912,10 @@ class TestErrorHandling:
 class TestPerformance:
     """Test cases for performance and resource management."""
 
-    def test_browser_always_closed(self, anbima_instance: Any) -> None:
+    def test_browser_always_closed(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test browser is always closed even on exceptions.
 
         Verifies
@@ -1773,10 +1936,14 @@ class TestPerformance:
         mock_context = MagicMock()
         mock_page = MagicMock()
 
-        with patch('stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability.sync_playwright') as mock_playwright, \
-             patch.object(anbima_instance, '_initialize_browser', side_effect=Exception("Test error")):
+        with patch(
+            'stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability' \
+            + '.sync_playwright') as mock_playwright, \
+             patch.object(anbima_instance, '_initialize_browser', 
+                          side_effect=Exception("Test error")):
 
-            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = mock_browser
+            mock_playwright.return_value.__enter__.return_value.chromium.launch.return_value = \
+                mock_browser
             mock_browser.new_context.return_value = mock_context
             mock_context.new_page.return_value = mock_page
 
@@ -1785,7 +1952,11 @@ class TestPerformance:
             assert result.empty
             mock_browser.close.assert_called_once()
 
-    def test_temp_directory_cleanup(self, anbima_instance: Any, sample_csv_data: bytes) -> None:
+    def test_temp_directory_cleanup(
+        self, 
+        anbima_instance: Any, # noqa ANN401: typing.Any is not allowed
+        sample_csv_data: bytes
+    ) -> None:
         """Test temporary directory usage and cleanup.
 
         Verifies
@@ -1812,8 +1983,11 @@ class TestPerformance:
 
         mock_download.suggested_filename = "test_data.csv"
 
-        with patch.object(anbima_instance, '_find_download_button', return_value=mock_download_button), \
-             patch('tempfile.mkdtemp', return_value='/tmp/test') as mock_mkdtemp, \
+        with patch.object(
+            anbima_instance, '_find_download_button', return_value=mock_download_button), \
+            patch('tempfile.mkdtemp', 
+                return_value='/tmp/test' # noqa S108: probable insecure usage of temporary file
+            ) as mock_mkdtemp, \
              patch('builtins.open', mock_open(read_data=sample_csv_data)), \
              patch.object(mock_page, 'expect_download') as mock_expect:
 
@@ -1823,7 +1997,10 @@ class TestPerformance:
 
             mock_mkdtemp.assert_called_once()
 
-    def test_memory_efficient_data_processing(self, anbima_instance: Any) -> None:
+    def test_memory_efficient_data_processing(
+        self, 
+        anbima_instance: Any # noqa ANN401: typing.Any is not allowed
+    ) -> None:
         """Test memory efficiency in data processing.
 
         Verifies
