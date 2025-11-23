@@ -1,9 +1,9 @@
 [codespell]
-# skip specific file types
-skip = *.po,*.csv,*.json,*.xml,*.txt
+# skip specific file types and test files with Portuguese data
+skip = *.po,*.csv,*.json,*.xml,*.txt,.git,*.pyc,__pycache__,*.egg-info,.pytest_cache,.ruff_cache,node_modules,tests/unit/test_anbima_funds_withdraws_probability.py
 # count the number of spelling errors
 count =
 # set quiet level to suppress certain messages
 quiet-level = 3
-# ignore specific words
+# ignore specific words (global across all files)
 ignore-words-list = nd,fpr,strat,enty,filetest,nome,ZAR,fro,hsi,HSI,WEGE,zar,SMLL
