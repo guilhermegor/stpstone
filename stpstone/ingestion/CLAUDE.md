@@ -24,6 +24,45 @@ If the source genuinely does not fit any of these, create a new subfolder with a
 - Lowercase words separated by underscores: `b3_futures_closing_adj.py`
 - No duplicate filenames anywhere under `stpstone/ingestion/`
 - Test file name must mirror the module exactly: `tests/unit/test_b3_futures_closing_adj.py`
+- Examples file name must mirror the module exactly: `examples/b3_futures_closing_adj.py`
+
+Every new module requires **three files** created together:
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `<module_name>.py` | `stpstone/ingestion/countries/<country>/<domain>/` | Implementation |
+| `test_<module_name>.py` | `tests/unit/` | Unit tests |
+| `<module_name>.py` | `examples/` | Runnable usage example |
+
+## Examples File
+
+Each examples file must live under `examples/` at the repository root and share the exact filename of its module (no `test_` prefix).
+
+Template:
+
+```python
+"""<Human-readable title of what the data source provides>."""
+
+from stpstone.ingestion.countries.<country>.<domain>.<module_name> import <ClassName>
+
+
+cls_ = <ClassName>(
+    date_ref=None,
+    logger=None,
+    cls_db=None,
+)
+
+df_ = cls_.run()
+print(f"DF <HUMAN READABLE LABEL>: \n{df_}")
+df_.info()
+```
+
+Rules:
+- Module docstring: one sentence, title-cased description of the data source, no period.
+- Instantiate with all optional parameters set to `None` (demonstrates the zero-config path).
+- Always call `.run()` and print both the DataFrame and `.info()`.
+- No hard-coded dates, credentials, or environment-specific paths.
+- No `if __name__ == "__main__"` guard — the file is meant to be run directly.
 
 ## Class Scaffolding
 
