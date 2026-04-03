@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash(git diff*), Bash(git diff --staged*), Bash(git status*), Bash(git log*), Bash(git add*), Bash(git commit*), Bash(git push*), Bash(find .claude/*), Read, Glob, Grep
 description: Stage changes and create a conventional commit with structured message
 argument-hint: <type> [scope] - e.g. feat auth | fix rounding | refactor ingestion
 ---
