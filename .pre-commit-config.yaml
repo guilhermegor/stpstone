@@ -49,7 +49,7 @@ repos:
           - commit-msg
           - manual
         always_run: true
-  
+
   # module decoupled from ruff, due to DAR absence
   - repo: https://github.com/PyCQA/pydocstyle
     rev: 6.3.0
@@ -59,7 +59,7 @@ repos:
         args:
           - --convention=numpy
           - --select=D412,D417,DAR # missing returns, missing params, docstring argument checks
-  
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.13
     hooks:
@@ -67,7 +67,7 @@ repos:
         name: ruff check
         args:
           - --config=ruff.toml
-  
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
@@ -92,13 +92,6 @@ repos:
         types:
           - file
 
-      - id: export-dependencies
-        name: export dependencies
-        entry: bash bin/export_deps.sh
-        language: system
-        types:
-          - file
-        pass_filenames: false
 
       - id: unit-tests
         name: checking unit tests
@@ -124,7 +117,7 @@ repos:
           - python
         pass_filenames: false
         verbose: true
-      
+
       - id: coverage-badge
         name: coverage badge
         entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage-badge -o coverage.svg -f"
@@ -132,7 +125,7 @@ repos:
         types:
           - python
         pass_filenames: false
-      
+
       - id: check-urls
         name: check urls in docstrings
         entry: bash bin/test_urls_docstrings.sh

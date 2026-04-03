@@ -1,22 +1,11 @@
 # -------------------
-# VSCODE CONFIG
-# -------------------
-.PHONY: vscode_init export_deps
-
-vscode_init:
-	@bash bin/vscode_keybindings.sh
-	@bash bin/vscode_extensions.sh
-
-export_deps:
-	@bash bin/export_deps.sh
-
-
-# -------------------
 # DEV ENVIRONMENT
 # -------------------
-.PHONY: init_venv update_venv
+.PHONY: venv update_venv precommit
 
-init_venv:
+init: venv precommit
+
+venv:
 	@pyenv install 3.9.22 -s
 	@pyenv local 3.9.22
 	@python -m pip install --upgrade pip
@@ -31,6 +20,10 @@ init_venv:
 update_venv:
 	@poetry update
 	@echo "Poetry project updated"
+
+precommit:
+	@poetry run pre-commit install
+	@poetry run pre-commit install --hook-type commit-msg
 
 
 # -------------------
@@ -61,55 +54,6 @@ test_urls_docstrings:
 
 fix_playwright:
 	@bash bin/fix_playwright.sh
-
-
-# -------------------
-# GIT OPERATIONS
-# -------------------
-.PHONY: precommit_update git_pull_force git_merge_branches git_create_branch_from_main \
-        git_delete_branch_tag git_delete_dev_branches git_update_branch_with_main
-
-precommit_update:
-	@poetry run pre-commit install
-	@poetry run pre-commit install --hook-type commit-msg
-
-git_pull_force:
-	@bash bin/git_pull_force.sh
-
-git_merge_branches:
-	@bash bin/git_merge_branches.sh
-
-git_create_branch_from_main:
-	@bash bin/git_create_branch_from_main.sh
-
-git_delete_branch_tag:
-	@bash bin/git_delete_branch_tag.sh
-
-git_delete_dev_branches:
-	@bash bin/git_delete_dev_branches.sh
-
-git_update_branch_with_main:
-	@bash bin/git_update_branch_with_main.sh -b $(BRANCH) $(if $(FORCE),--force)
-
-
-# -------------------
-# GITHUB ACTIONS
-# -------------------
-.PHONY: create_ssh_key gh_status gh_protect_main gh_set_pypi_secret
-
-create_ssh_key:
-	@bash bin/create_ssh_key.sh
-
-gh_status:
-	@bash bin/gh_status.sh
-
-gh_protect_main: gh_status
-	@bash bin/gh_protect_main.sh
-
-gh_set_pypi_secret:
-	@bash bin/gh_set_pypi_secret.sh
-	@echo -e "\033[0;34m[i]\033[0m Checking GitHub secrets..."
-	@gh secret list
 
 
 # -------------------
@@ -179,13 +123,11 @@ concrete_creator_ingestion:
 help:
 	@echo "Available targets:"
 	@echo ""
-	@echo "VSCode Configuration:"
-	@echo "  vscode_init          s- Initialize VSCode settings and extensions"
-	@echo "  export_deps          - Export project dependencies"
-	@echo ""
 	@echo "Dev Environment:"
-	@echo "  init_venv            - Install virtual environment dependencies"
+	@echo "  init                 - Set up virtualenv and install pre-commit hooks"
+	@echo "  venv                 - Install virtual environment dependencies"
 	@echo "  update_venv          - Update virtual environment dependencies"
+	@echo "  precommit            - Install pre-commit hooks"
 	@echo "  python_path          - Export Python path"
 	@echo "  run_script           - Run Python script in virtual environment"
 	@echo ""
@@ -196,15 +138,6 @@ help:
 	@echo "  test_feat MODULE=... - Test specific feature module"
 	@echo "  test_urls_docstrings - Test URL docstrings"
 	@echo "  fix_playwright       - Fix Playwright installation"
-	@echo ""
-	@echo "Git Operations:"
-	@echo "  precommit_update            - Update pre-commit hooks"
-	@echo "  git_pull_force              - Force pull from remote"
-	@echo "  git_merge_branches          - Merge branches"
-	@echo "  git_create_branch_from_main - Create new branch from main"
-	@echo "  git_delete_branch_tag       - Delete branch/tag"
-	@echo "  git_delete_dev_branches     - Delete development branches"
-	@echo "  git_update_branch_with_main BRANCH=... [FORCE=1] - Update branch with main"
 	@echo ""
 	@echo "Package Management:"
 	@echo "  package_tree         - Generate package tree structure"
