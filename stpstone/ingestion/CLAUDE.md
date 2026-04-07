@@ -245,9 +245,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
 
 ## Method Ordering: Top-Down Call Order
 
-Within every class, methods must be ordered so that the **caller appears above the callee**. This means `run` (the entry point) comes first, then `get_response`, then `parse_raw_file`, then `transform_data`. Validation helpers (`_validate_*`) go immediately before the method that calls them, or at the bottom of the class if shared.
+Within every class, methods must be ordered so that the **caller appears above the callee**. This means `run` (the entry point) comes first, then `get_response`, then `parse_raw_file`, then `transform_data`.
 
-This is not the same as the Dependency Inversion Principle (which is about depending on abstractions). The correct term for this rule is **top-down reading order** — reading the file from top to bottom follows the logical execution flow.
+Dunder methods (`__init__`, `__repr__`, `__eq__`, etc.) go first as the class preamble. Everything after follows call order — no exceptions. Validation helpers (`_validate_*`) follow the same rule: each goes immediately before the earliest method that calls it.
 
 ## Code Style
 
