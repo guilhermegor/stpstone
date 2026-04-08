@@ -251,8 +251,6 @@ Dunder methods (`__init__`, `__repr__`, `__eq__`, etc.) go first as the class pr
 
 ## Code Style
 
-Full rules are in `prompts/refactoring.md`. Key points for ingestion modules:
-
 - Line length: 99 characters; indentation: 4 spaces (no tabs)
 - Double quotes everywhere; single quotes only inside docstrings
 - Docstrings: NumPy style, 79-char line limit, imperative mood, period at end of first line
@@ -264,8 +262,6 @@ Full rules are in `prompts/refactoring.md`. Key points for ingestion modules:
 - No commented-out code; no implicit `Any`
 
 ## Tests
-
-Full rules are in `prompts/unit_test.md`. Key points:
 
 - File: `tests/unit/test_<exact_module_filename>.py` — no duplicate filenames allowed
 - Cover: `__init__`, `run` (with and without `cls_db`), `get_response` (success, HTTP error, timeout variants), `parse_raw_file` (valid + invalid types), `transform_data` (normal + empty input), and module reload
