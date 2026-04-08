@@ -1,6 +1,6 @@
 """Brazilian IRS (Receita Federal) Companies (Empresas) Open Data."""
 
-from stpstone.ingestion.countries.br.taxation.irsbr_records import IRSBRCompanies
+from stpstone.ingestion.countries.br.taxation.irsbr_companies import IRSBRCompanies
 
 
 cls_ = IRSBRCompanies(

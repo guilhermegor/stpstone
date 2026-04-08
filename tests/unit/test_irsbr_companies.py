@@ -19,7 +19,7 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.taxation.irsbr_records import (
+from stpstone.ingestion.countries.br.taxation.irsbr_companies import (
 	_COLUMN_NAMES,
 	_NUM_FILES,
 	IRSBRCompanies,
@@ -622,10 +622,10 @@ def test_reload_module() -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.taxation.irsbr_records
+	import stpstone.ingestion.countries.br.taxation.irsbr_companies
 
 	original_instance = IRSBRCompanies(date_ref=date(2025, 3, 15))
-	importlib.reload(stpstone.ingestion.countries.br.taxation.irsbr_records)
+	importlib.reload(stpstone.ingestion.countries.br.taxation.irsbr_companies)
 	new_instance = IRSBRCompanies(date_ref=date(2025, 3, 15))
 	assert new_instance.date_ref == original_instance.date_ref
 	assert new_instance.year_month == original_instance.year_month
