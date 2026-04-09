@@ -118,6 +118,3 @@ YAML_US_ETFDB_VETTAFI = reading_yaml(
 YAML_WW_RATINGS_CORP_S_AND_P = reading_yaml(
     os.path.join(root_path, "countries/ww/registries/ratings_corp_spglobal.yaml"))
 
-# * taxation
-# BR
-YAML_IRSBR = reading_yaml(os.path.join(root_path, "countries/br/taxation/irsbr.yaml"))
