@@ -9,7 +9,6 @@ Tests the ingestion functionality with various scenarios including:
 """
 
 from datetime import date
-from io import StringIO
 from typing import Union
 from unittest.mock import MagicMock, patch
 

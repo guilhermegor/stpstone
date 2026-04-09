@@ -9,7 +9,6 @@ Tests the ingestion functionality with various scenarios including:
 """
 
 from datetime import date
-from io import StringIO
 from typing import Union
 from unittest.mock import MagicMock, patch
 
@@ -321,7 +320,7 @@ def test_transform_data_filters_revogada(yahii_instance: YahiiMinWage) -> None:
 		"R$ 200,00",
 	]
 	df_ = yahii_instance.transform_data(list_td)
-	assert "REVOGADA" not in df_["DATA"].astype(str).values
+	assert "REVOGADA" not in df_["DATA"].astype(str).to_numpy()
 
 
 def test_run_without_db(

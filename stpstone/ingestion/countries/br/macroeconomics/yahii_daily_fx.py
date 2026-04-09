@@ -54,8 +54,8 @@ class YahiiDailyFX(ABCIngestionOperations):
 
 		Parameters
 		----------
-		str_currency : Literal["usd", "eur"], optional
-			The currency pair to fetch, by default "usd".
+		str_currency : Literal['usd', 'eur']
+			The currency pair to fetch, by default 'usd'.
 		date_ref : Optional[date], optional
 			The date of reference, by default None.
 		logger : Optional[Logger], optional

@@ -270,3 +270,18 @@ Dunder methods (`__init__`, `__repr__`, `__eq__`, etc.) go first as the class pr
 - For non-`Optional` parameters, assert that passing the wrong type raises `TypeError` with a message matching `"must be of type"`
 - Section headers in test files: `# --------------------------` comment blocks separating `Fixtures` from `Tests`
 - Use `pytest.fixture` for reusable instances; use `@pytest.mark.parametrize` for input variations
+
+## Final Verification
+
+After implementing or refactoring any ingestion module, run:
+
+```bash
+make test_feat MODULE=<module_filename_without_extension>
+```
+
+This runs codespell, ruff (lint + format), type hint/docstring consistency checks, and pytest in sequence. The module must pass all checks before committing. Common issues caught by this recipe:
+
+- Unused imports (`F401`)
+- `.values` instead of `.to_numpy()` (`PD011`)
+- Docstring type not matching type hint exactly (quote style, `, optional` suffix)
+- `Literal` types in docstrings must use single quotes to match Python's repr
