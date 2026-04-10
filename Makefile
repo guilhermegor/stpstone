@@ -1,7 +1,7 @@
 # -------------------
 # DEV ENVIRONMENT
 # -------------------
-.PHONY: venv update_venv precommit
+.PHONY: venv update_venv precommit claude_login
 
 init: venv precommit
 
@@ -24,6 +24,9 @@ update_venv:
 precommit:
 	@poetry run pre-commit install
 	@poetry run pre-commit install --hook-type commit-msg
+
+claude_login:
+	@bash bin/claude_login.sh
 
 
 # -------------------
@@ -125,6 +128,7 @@ help:
 	@echo ""
 	@echo "Dev Environment:"
 	@echo "  init                 - Set up virtualenv and install pre-commit hooks"
+	@echo "  claude_login         - Authenticate with Claude Code using .env credentials"
 	@echo "  venv                 - Install virtual environment dependencies"
 	@echo "  update_venv          - Update virtual environment dependencies"
 	@echo "  precommit            - Install pre-commit hooks"
