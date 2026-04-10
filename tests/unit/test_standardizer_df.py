@@ -1,9 +1,8 @@
-"""Unit tests for DFStandardization and DFStandardizationML classes.
+"""Unit tests for DFStandardization class.
 
 Tests the DataFrame standardization functionality with various input scenarios including:
 - Initialization with valid and invalid inputs
 - DataFrame cleaning and transformation methods
-- Machine learning-specific transformations
 - Edge cases, error conditions, and type validation
 """
 
@@ -18,10 +17,7 @@ import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 
-from stpstone.transformations.standardization.standardizer_df import (
-    DFStandardization,
-    DFStandardizationML,
-)
+from stpstone.transformations.standardization.standardizer_df import DFStandardization
 
 
 # --------------------------
@@ -87,28 +83,6 @@ def standardization_instance(valid_dict_dtypes: dict[str, Any]) -> DFStandardiza
     )
 
 
-@pytest.fixture
-def ml_standardization_instance(valid_dict_dtypes: dict[str, Any]) -> DFStandardizationML:
-    """Fixture providing a DFStandardizationML instance.
-
-    Parameters
-    ----------
-    valid_dict_dtypes : dict[str, Any]
-        Dictionary of valid data types from fixture
-
-    Returns
-    -------
-    DFStandardizationML
-        Initialized DFStandardizationML instance
-    """
-    return DFStandardizationML(
-        dict_dtypes=valid_dict_dtypes,
-        str_fmt_dt="YYYY-MM-DD",
-        str_dt_fillna="2099-12-31",
-        str_data_fillna="-99999",
-    )
-
-
 # --------------------------
 # Tests for DFStandardization
 # --------------------------
@@ -153,7 +127,7 @@ def test_init_valid_input(valid_dict_dtypes: dict[str, Any]) -> None:
 
 def test_init_empty_dict_dtypes() -> None:
     """Test initialization with empty dict_dtypes raises ValueError.
-    
+
     Parameters
     ----------
     None
@@ -168,7 +142,7 @@ def test_init_empty_dict_dtypes() -> None:
 
 def test_check_if_empty_empty_df(standardization_instance: DFStandardization) -> None:
     """Test check_if_empty with empty DataFrame raises ValueError.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -188,7 +162,7 @@ def test_check_if_empty_non_empty_df(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test check_if_empty with non-empty DataFrame.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -210,7 +184,7 @@ def test_clean_encoding_issues(
     mocker: MockerFixture,
 ) -> None:
     """Test clean_encoding_issues method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -226,7 +200,7 @@ def test_clean_encoding_issues(
     """
     mocker.patch(
         "stpstone.utils.parsers.str.StrHandler.remove_diacritics",
-        side_effect=lambda x: x.replace("Á", "A").replace("ó", "o").replace("Ç", "C") 
+        side_effect=lambda x: x.replace("Á", "A").replace("ó", "o").replace("Ç", "C")
         if isinstance(x, str) else x,
     )
     df_ = sample_df.copy()
@@ -234,7 +208,7 @@ def test_clean_encoding_issues(
     result = standardization_instance.clean_encoding_issues(df_)
     assert result["name"].tolist() == ["Alice", "Bob", "", "Charlie"]
     pd.testing.assert_series_equal(
-        result["numeric"], 
+        result["numeric"],
         pd.Series([10.5, 20.3, np.nan, 30.1], name="numeric")
     )
 
@@ -244,7 +218,7 @@ def test_columns_names_case(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test coluns_names_case method with valid case conversion.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -270,7 +244,7 @@ def test_columns_names_case_invalid(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test coluns_names_case with invalid case types.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -294,7 +268,7 @@ def test_limit_columns_to_dtypes(
     mocker: MockerFixture,
 ) -> None:
     """Test limit_columns_to_dtypes method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -322,7 +296,7 @@ def test_delete_empty_rows(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test delete_empty_rows method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -346,7 +320,7 @@ def test_filler(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test filler method with various fill strategies.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -370,7 +344,7 @@ def test_filler_invalid_strategy(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test filler method with invalid fill strategy.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -392,7 +366,7 @@ def test_replace_num_delimiters(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test replace_num_delimiters method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -416,7 +390,7 @@ def test_change_dtypes(
     mocker: MockerFixture,
 ) -> None:
     """Test change_dtypes method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -453,7 +427,7 @@ def test_strip_hidden_characters(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test strip_hidden_characters method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -476,7 +450,7 @@ def test_strip_data(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test strip_data method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -496,7 +470,7 @@ def test_strip_data(
 
 def test_remove_duplicated_cols(standardization_instance: DFStandardization) -> None:
     """Test remove_duplicated_cols method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -525,7 +499,7 @@ def test_data_remove_dupl(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test data_remove_dupl method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -550,7 +524,7 @@ def test_pipeline(
     mocker: MockerFixture,
 ) -> None:
     """Test pipeline method.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -583,183 +557,11 @@ def test_pipeline(
 
 
 # --------------------------
-# Tests for DFStandardizationML
-# --------------------------
-def test_handle_outliers_iqr(
-    ml_standardization_instance: DFStandardizationML,
-    sample_df: pd.DataFrame,
-) -> None:
-    """Test handle_outliers method with IQR method.
-    
-    Parameters
-    ----------
-    ml_standardization_instance : DFStandardizationML
-        The DFStandardizationML instance to test
-    sample_df : pd.DataFrame
-        The DataFrame to test
-
-    Returns
-    -------
-    None
-    """
-    df_ = sample_df.copy()
-    df_["numeric"] = [10.5, 20.3, 100.0, 30.1]  # introduce outlier
-    df_["numeric"] = df_["numeric"].fillna(df_["numeric"].mean())
-    result = ml_standardization_instance.handle_outliers(df_, method="iqr")
-    q1, q3 = df_["numeric"].quantile([0.25, 0.75])
-    iqr = q3 - q1
-    upper_bound = q3 + 1.5 * iqr
-    assert result["numeric"].iloc[2] == pytest.approx(upper_bound, rel=1e-3)
-    assert result["name"].dtype == "object"
-
-
-def test_handle_outliers_zscore(
-    ml_standardization_instance: DFStandardizationML,
-    sample_df: pd.DataFrame,
-) -> None:
-    """Test handle_outliers method with z-score method.
-    
-    Parameters
-    ----------
-    ml_standardization_instance : DFStandardizationML
-        The DFStandardizationML instance to test
-    sample_df : pd.DataFrame
-        The DataFrame to test
-
-    Returns
-    -------
-    None
-    """
-    df_ = sample_df.copy()
-    df_["numeric"] = [10.5, 20.3, 100.0, 30.1]  # introduce outlier
-    df_["numeric"] = df_["numeric"].fillna(df_["numeric"].mean())
-    result = ml_standardization_instance.handle_outliers(df_, method="zscore")
-    mean, std = df_["numeric"].mean(), df_["numeric"].std(ddof=1)
-    _ = mean + 3 * std
-    # since 100.0 is within mean ± 3 * std, it should not be clipped
-    assert result["numeric"].iloc[2] == pytest.approx(100.0, rel=1e-3)
-    assert result["name"].dtype == "object"
-
-
-def test_scale_numeric_data_minmax(
-    ml_standardization_instance: DFStandardizationML,
-    sample_df: pd.DataFrame,
-) -> None:
-    """Test scale_numeric_data method with minmax scaling.
-    
-    Parameters
-    ----------
-    ml_standardization_instance : DFStandardizationML
-        The DFStandardizationML instance to test
-    sample_df : pd.DataFrame
-        The DataFrame to test
-
-    Returns
-    -------
-    None
-    """
-    result = ml_standardization_instance.scale_numeric_data(sample_df, method="minmax")
-    assert result["numeric"].min() >= 0
-    assert result["numeric"].max() <= 1
-    assert not result["numeric"].isna().any()
-    assert result["name"].dtype == "object"
-
-
-def test_scale_numeric_data_standard(
-    ml_standardization_instance: DFStandardizationML,
-    sample_df: pd.DataFrame,
-) -> None:
-    """Test scale_numeric_data method with standard scaling.
-    
-    Parameters
-    ----------
-    ml_standardization_instance : DFStandardizationML
-        The DFStandardizationML instance to test
-    sample_df : pd.DataFrame
-        The DataFrame to test
-
-    Returns
-    -------
-    None
-    """
-    df_ = sample_df.copy()
-    df_["numeric"] = df_["numeric"].fillna(0)  # fill NaN before scaling
-    result = ml_standardization_instance.scale_numeric_data(df_, method="standard")
-    assert pytest.approx(result["numeric"].mean(), abs=1e-6) == 0
-    assert pytest.approx(result["numeric"].std(ddof=1), abs=1e-6) == 1.1547005383792517
-    assert not result["numeric"].isna().any()
-    assert result["name"].dtype == "object"
-
-
-def test_scale_numeric_data_invalid_method(
-    ml_standardization_instance: DFStandardizationML,
-    sample_df: pd.DataFrame,
-) -> None:
-    """Test scale_numeric_data with invalid scaling method.
-    
-    Parameters
-    ----------
-    ml_standardization_instance : DFStandardizationML
-        The DFStandardizationML instance to test
-    sample_df : pd.DataFrame
-        The DataFrame to test
-
-    Returns
-    -------
-    None
-    """
-    with pytest.raises(TypeError, match="method must be one of"):
-        ml_standardization_instance.scale_numeric_data(sample_df, method="invalid")
-
-
-def test_pipeline_ml(
-    ml_standardization_instance: DFStandardizationML,
-    sample_df: pd.DataFrame,
-    mocker: MockerFixture,
-) -> None:
-    """Test pipeline_ml method.
-    
-    Parameters
-    ----------
-    ml_standardization_instance : DFStandardizationML
-        The DFStandardizationML instance to test
-    sample_df : pd.DataFrame
-        The DataFrame to test
-    mocker : MockerFixture
-        Pytest mocker fixture
-
-    Returns
-    -------
-    None
-    """
-    mocker.patch(
-        "stpstone.utils.calendars.calendar_br.DatesBRAnbima.str_date_to_datetime",
-        side_effect=lambda x, y: datetime.strptime(x, "%Y-%m-%d")\
-            .replace(tzinfo=zoneinfo.ZoneInfo("UTC"))
-        if pd.notna(x) and x != "2099-12-31"
-        else datetime(2099, 12, 31, tzinfo=zoneinfo.ZoneInfo("UTC")),
-    )
-    df_ = sample_df.copy()
-    df_["id"] = df_["id"].fillna(0)  # fill NaN to allow int64 conversion
-    df_["numeric"] = df_["numeric"].fillna(0)  # fill NaN for scaling
-    df_["date"] = df_["date"].fillna("2099-12-31")  # fill None for date column
-    df_ = ml_standardization_instance.replace_num_delimiters(df_)
-    result = ml_standardization_instance.pipeline_ml(
-        df_,
-        method_handle_outliers="iqr",
-        method_scale_numeric_data="minmax",
-    )
-    assert result["numeric"].min() >= 0
-    assert result["numeric"].max() <= 1
-    assert isinstance(result["date"].iloc[0], datetime)
-
-
-# --------------------------
 # Edge Cases and Error Conditions
 # --------------------------
 def test_empty_columns_list(standardization_instance: DFStandardization) -> None:
     """Test handling of DataFrame with no columns.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -779,7 +581,7 @@ def test_none_values_in_columns(
     sample_df: pd.DataFrame,
 ) -> None:
     """Test handling of None values in columns.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -802,7 +604,7 @@ def test_type_checker_decorator(
     mocker: MockerFixture,
 ) -> None:
     """Test type_checker decorator for clean_cell function.
-    
+
     Parameters
     ----------
     standardization_instance : DFStandardization
@@ -816,7 +618,7 @@ def test_type_checker_decorator(
     """
     mocker.patch(
         "stpstone.utils.parsers.str.StrHandler.remove_diacritics",
-        side_effect=lambda x: x.replace("Á", "A").replace("ó", "o").replace("Ç", "C") 
+        side_effect=lambda x: x.replace("Á", "A").replace("ó", "o").replace("Ç", "C")
         if isinstance(x, str) else x,
     )
     df_ = pd.DataFrame({"test": ["test"]})
@@ -833,7 +635,7 @@ def test_type_checker_decorator(
 # --------------------------
 def test_module_reload(mocker: MockerFixture) -> None:
     """Test module reload behavior.
-    
+
     Parameters
     ----------
     mocker : MockerFixture
