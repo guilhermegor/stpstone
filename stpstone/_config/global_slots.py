@@ -1,3 +1,5 @@
+"""Global YAML configuration slots for ingestion modules."""
+
 import os
 
 from stpstone.utils.parsers.yaml import reading_yaml
@@ -62,7 +64,8 @@ YAML_BR_PTAX_BCB = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/ptax_bcb.yaml"))
 YAML_ANBIMA_FORECASTS = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/anbima_pmi_forecasts.yaml"))
-YAML_YAHII_RATES = reading_yaml(os.path.join(root_path, "countries/br/macroeconomics/yahii_rates.yaml"))
+YAML_YAHII_RATES = reading_yaml(
+    os.path.join(root_path, "countries/br/macroeconomics/yahii_rates.yaml"))
 YAML_SIDRA_IBGE = reading_yaml(
     os.path.join(root_path, "countries/br/macroeconomics/sidra_ibge.yaml"))
 YAML_SGS_BCB = reading_yaml(
@@ -105,8 +108,6 @@ YAML_ANBIMA_DATA_DEBENTURES = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_debentures.yaml"))
 YAML_ANBIMA_DATA_API = reading_yaml(
     os.path.join(root_path, "countries/br/registries/anbima_data_api.yaml"))
-YAML_MAIS_RETORNO_FUNDS = reading_yaml(
-    os.path.join(root_path, "countries/br/registries/mais_retorno_instruments.yaml"))
 # US
 YAML_US_SLICKCHARTS_INDEXES_COMPONENTS = reading_yaml(
     os.path.join(root_path, "countries/us/registries/slickcharts_indexes_components.yaml"))
@@ -115,4 +116,3 @@ YAML_US_ETFDB_VETTAFI = reading_yaml(
 # WW
 YAML_WW_RATINGS_CORP_S_AND_P = reading_yaml(
     os.path.join(root_path, "countries/ww/registries/ratings_corp_spglobal.yaml"))
-
