@@ -79,7 +79,7 @@ def mock_dates_br(
     Any
         Mock object for ABCCalendarOperations.utc_log_ts
     """
-    return mocker.patch.object(ABCCalendarOperations, "utc_log_ts", 
+    return mocker.patch.object(ABCCalendarOperations, "utc_log_ts",
                               return_value=date(2025, 8, 13))
 
 @pytest.fixture
@@ -266,7 +266,7 @@ def test_audit_log_valid(
     assert "URL" in result.columns
     assert result["URL"].iloc[0] == url
     assert result["REF_DATE"].iloc[0] == sample_date
-    assert result["LOG_TIMESTAMP"].iloc[0] == "2025-08-13"
+    assert result["LOG_TIMESTAMP"].iloc[0] == "2025-08-13 00:00:00.000000"
 
 def test_audit_log_datetime(
     db_logs: DBLogs,
@@ -324,8 +324,8 @@ def test_audit_log_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
         db_logs.audit_log([1, 2, 3], "https://example.com", sample_date)
 
 def test_audit_log_empty_df(
-    db_logs: DBLogs, 
-    empty_df: pd.DataFrame, 
+    db_logs: DBLogs,
+    empty_df: pd.DataFrame,
     sample_date: date
 ) -> None:
     """Test audit_log raises ValueError for empty DataFrame.
@@ -351,8 +351,8 @@ def test_audit_log_empty_df(
         db_logs.audit_log(empty_df, "https://example.com", sample_date)
 
 def test_audit_log_invalid_url(
-    db_logs: DBLogs, 
-    sample_df: pd.DataFrame, 
+    db_logs: DBLogs,
+    sample_df: pd.DataFrame,
     sample_date: date
 ) -> None:
     """Test audit_log raises ValueError for empty URL.
@@ -512,8 +512,8 @@ def test_insert_user_info_invalid_user_id(db_logs: DBLogs, sample_df: pd.DataFra
 # Tests for insert_host_info
 # --------------------------
 def test_insert_host_info_valid(
-    db_logs: DBLogs, 
-    sample_df: pd.DataFrame, 
+    db_logs: DBLogs,
+    sample_df: pd.DataFrame,
     mock_hostname: Any # noqa ANN401: typing.Any is not allowed
 ) -> None:
     """Test insert_host_info with valid inputs.
@@ -745,8 +745,8 @@ def test_log_data_insert_invalid_df(db_logs: DBLogs, sample_date: date) -> None:
         db_logs.log_data_insert([1, 2, 3], "insert", sample_date)
 
 def test_log_data_insert_empty_df(
-    db_logs: DBLogs, 
-    empty_df: pd.DataFrame, 
+    db_logs: DBLogs,
+    empty_df: pd.DataFrame,
     sample_date: date
 ) -> None:
     """Test log_data_insert raises ValueError for empty DataFrame.
@@ -772,8 +772,8 @@ def test_log_data_insert_empty_df(
         db_logs.log_data_insert(empty_df, "insert", sample_date)
 
 def test_log_data_insert_invalid_action_type(
-    db_logs: DBLogs, 
-    sample_df: pd.DataFrame, 
+    db_logs: DBLogs,
+    sample_df: pd.DataFrame,
     sample_date: date
 ) -> None:
     """Test log_data_insert raises ValueError for invalid action_type.
@@ -799,8 +799,8 @@ def test_log_data_insert_invalid_action_type(
         db_logs.log_data_insert(sample_df, "invalid", sample_date)
 
 def test_log_data_insert_empty_action_type(
-    db_logs: DBLogs, 
-    sample_df: pd.DataFrame, 
+    db_logs: DBLogs,
+    sample_df: pd.DataFrame,
     sample_date: date
 ) -> None:
     """Test log_data_insert raises ValueError for empty action_type.

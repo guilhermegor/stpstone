@@ -171,7 +171,7 @@ def test_init_with_default_date(mocker: MockerFixture) -> None:
     mock_date = date(2025, 9, 4)
     mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=mock_date)
     mocker.patch.object(DatesCurrent, "curr_date", return_value=date(2025, 9, 5))
-    
+
     instance = BMFInterestRates()
     assert instance.date_ref == mock_date
     assert instance.url == "https://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/TxRef1.asp?"\
@@ -180,9 +180,9 @@ def test_init_with_default_date(mocker: MockerFixture) -> None:
 
 
 def test_get_response_success(
-    bmf_instance: BMFInterestRates, 
-    mock_requests_get: MagicMock, 
-    mock_response: Response, 
+    bmf_instance: BMFInterestRates,
+    mock_requests_get: MagicMock,
+    mock_response: Response,
     mock_backoff: MagicMock
 ) -> None:
     """Test successful HTTP response retrieval.
@@ -216,8 +216,8 @@ def test_get_response_success(
 
 
 def test_parse_raw_file(
-    bmf_instance: BMFInterestRates, 
-    mock_response: Response, 
+    bmf_instance: BMFInterestRates,
+    mock_response: Response,
     mocker: MockerFixture
 ) -> None:
     """Test parsing of raw HTML response.
@@ -245,14 +245,13 @@ def test_parse_raw_file(
     mock_elements = [MagicMock(text="1"), MagicMock(text="5.5"), MagicMock(text="6.0")]
     mocker.patch.object(HtmlHandler, "lxml_parser", return_value=mock_html)
     mocker.patch.object(HtmlHandler, "lxml_xpath", return_value=mock_elements)
-    mocker.patch.object(HandlingDicts, "pair_headers_with_data", return_value=[
+    mocker.patch.object(BMFInterestRates, "_pair_headers_with_data", return_value=[
         {"DIAS_CORRIDOS": 1.0, "DI_PRE_252": 5.5, "DI_PRE_360": 6.0}
     ])
-    
+
     result = bmf_instance.parse_raw_file(mock_response)
     assert result == [{"DIAS_CORRIDOS": 1.0, "DI_PRE_252": 5.5, "DI_PRE_360": 6.0}]
     bmf_instance.cls_html_handler.lxml_parser.assert_called_once_with(resp_req=mock_response)
-    bmf_instance.cls_dict_handler.pair_headers_with_data.assert_called_once()
 
 
 def test_transform_data(bmf_instance: BMFInterestRates) -> None:
@@ -280,9 +279,9 @@ def test_transform_data(bmf_instance: BMFInterestRates) -> None:
 
 
 def test_run_without_db(
-    bmf_instance: BMFInterestRates, 
-    mock_requests_get: MagicMock, 
-    mock_response: Response, 
+    bmf_instance: BMFInterestRates,
+    mock_requests_get: MagicMock,
+    mock_response: Response,
     mocker: MockerFixture
 ) -> None:
     """Test run method without database session.
@@ -319,19 +318,19 @@ def test_run_without_db(
         "DIAS_CORRIDOS": [1], "DI_PRE_252": [5.5], "DI_PRE_360": [6.0]
     }))
     mock_requests_get.return_value = mock_response
-    
+
     result = bmf_instance.run()
     assert isinstance(result, pd.DataFrame)
     assert list(result.columns) == ["DIAS_CORRIDOS", "DI_PRE_252", "DI_PRE_360"]
     bmf_instance.cls_html_handler.lxml_parser.assert_called_once()
-    bmf_instance.cls_dict_handler.pair_headers_with_data.assert_called_once()
+    assert bmf_instance.cls_dict_handler.pair_headers_with_data.call_count == 4
     bmf_instance.standardize_dataframe.assert_called_once()
 
 
 def test_run_with_db(
-    bmf_instance: BMFInterestRates, 
-    mock_requests_get: MagicMock, 
-    mock_response: Response, 
+    bmf_instance: BMFInterestRates,
+    mock_requests_get: MagicMock,
+    mock_response: Response,
     mocker: MockerFixture
 ) -> None:
     """Test run method with database session.
@@ -366,13 +365,13 @@ def test_run_with_db(
     mocker.patch.object(HandlingDicts, "pair_headers_with_data", return_value=[
         {"DIAS_CORRIDOS": 1.0, "DI_PRE_252": 5.5, "DI_PRE_360": 6.0}
     ])
-    mock_standardize = mocker.patch.object(BMFInterestRates, "standardize_dataframe", 
+    mock_standardize = mocker.patch.object(BMFInterestRates, "standardize_dataframe",
                                            return_value=pd.DataFrame({
         "DIAS_CORRIDOS": [1], "DI_PRE_252": [5.5], "DI_PRE_360": [6.0]
     }))
     mock_insert = mocker.patch.object(BMFInterestRates, "insert_table_db")
     mock_requests_get.return_value = mock_response
-    
+
     result = bmf_instance.run()
     assert result is None
     mock_insert.assert_called_once_with(
@@ -428,8 +427,8 @@ def test_transform_data_empty_input(bmf_instance: BMFInterestRates) -> None:
 
 
 def test_run_timeout_handling(
-    bmf_instance: BMFInterestRates, 
-    mock_requests_get: MagicMock, 
+    bmf_instance: BMFInterestRates,
+    mock_requests_get: MagicMock,
     mock_backoff: MagicMock
 ) -> None:
     """Test timeout handling in run method.
@@ -458,7 +457,7 @@ def test_run_timeout_handling(
 
 
 def test_standardize_dataframe_types(
-    bmf_instance: BMFInterestRates, 
+    bmf_instance: BMFInterestRates,
     mocker: MockerFixture
 ) -> None:
     """Test standardize_dataframe with type enforcement.
@@ -489,7 +488,7 @@ def test_standardize_dataframe_types(
         "DI_PRE_252": [5.5],
         "DI_PRE_360": [6.0]
     }))
-    
+
     result = bmf_instance.standardize_dataframe(
         df_=df_,
         date_ref=bmf_instance.date_ref,

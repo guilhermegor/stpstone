@@ -11,8 +11,13 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pandas as pd
-from pyodbc import Connection
 import pytest
+
+
+try:
+    from pyodbc import Connection
+except ImportError:
+    pytest.skip("pyodbc not available (libodbc.so.2 missing)", allow_module_level=True)
 
 from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
@@ -354,7 +359,7 @@ class TestCreateConnection:
         None
         """
         valid_db_config["driver_sql"] = "{SQL Server}"
-        
+
         with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
             as mock_connect:
             mock_conn = Mock()
@@ -362,13 +367,13 @@ class TestCreateConnection:
             mock_connect.return_value = mock_conn
             mock_conn.cursor.return_value = mock_cursor
             mock_cursor.execute.return_value = None
-            
+
             db = SqlServerDB(**valid_db_config)
-            
+
             # Test _create_connection directly after initialization
             mock_connect.reset_mock()
             db._create_connection()
-            
+
             expected_conn_str = (
                 f"Driver={{SQL Server}};"
                 f"Server={valid_db_config['server']};"
@@ -394,7 +399,7 @@ class TestCreateConnection:
         Returns
         -------
         None
-        """        
+        """
         with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect") \
             as mock_connect:
             mock_conn = Mock()
@@ -402,13 +407,13 @@ class TestCreateConnection:
             mock_connect.return_value = mock_conn
             mock_conn.cursor.return_value = mock_cursor
             mock_cursor.execute.return_value = None
-            
+
             db = SqlServerDB(**valid_db_config)
-            
+
             # Test _create_connection directly after initialization
             mock_connect.reset_mock()
             db._create_connection()
-            
+
             expected_conn_str = (
                 f"Driver={{ODBC Driver 17 for SQL Server}};"
                 f"Server={valid_db_config['server']};"
@@ -446,10 +451,10 @@ class TestCreateConnection:
             mock_connect.return_value = mock_conn
             mock_conn.cursor.return_value = mock_cursor
             mock_cursor.execute.return_value = None
-            
+
             db = SqlServerDB(**valid_db_config)
             db.driver_sql = "unknown_driver"
-            
+
             with pytest.raises(ValueError) as excinfo:
                 db._create_connection()
             assert "Driver SQL not identified" in str(excinfo.value)
@@ -462,8 +467,8 @@ class TestExecute:
     """Test cases for execute method."""
 
     def test_execute_valid_query(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test execute with valid query.
@@ -484,20 +489,20 @@ class TestExecute:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             test_query = "SELECT * FROM test_table"
-            
+
             # Reset mock to ignore the initialization call
             mock_connection.cursor().execute.reset_mock()
-            
+
             db.execute(test_query)
             mock_connection.cursor().execute.assert_called_once_with(test_query)
 
     def test_execute_empty_query(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test execute with empty query raises ValueError.
@@ -518,17 +523,17 @@ class TestExecute:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
-            
+
             with pytest.raises(ValueError) as excinfo:
                 db.execute("")
             assert "Query cannot be empty" in str(excinfo.value)
 
     def test_execute_sql_composable(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test execute with SQLComposable object.
@@ -549,14 +554,14 @@ class TestExecute:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
             mock_sql_composable = Mock(spec=SQLComposable)
-            
+
             # Reset mock to ignore the initialization call
             mock_connection.cursor().execute.reset_mock()
-            
+
             db.execute(mock_sql_composable)
             mock_connection.cursor().execute.assert_called_once_with(mock_sql_composable)
 
@@ -568,9 +573,9 @@ class TestRead:
     """Test cases for read method."""
 
     def test_read_valid_query(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
         sample_query_result: pd.DataFrame
     ) -> None:
         """Test read with valid query.
@@ -593,21 +598,21 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result) as mock_read_sql:
             db = SqlServerDB(**valid_db_config)
             test_query = "SELECT * FROM test_table"
-            
+
             result = db.read(test_query)
             mock_read_sql.assert_called_once_with(test_query, con=mock_connection)
             assert isinstance(result, pd.DataFrame)
             assert len(result) == 3
 
     def test_read_with_type_conversion(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
         sample_query_result: pd.DataFrame
     ) -> None:
         """Test read with type conversion.
@@ -630,24 +635,24 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result):
-            
+
             # Mock the astype method
             sample_query_result.astype = Mock(return_value=sample_query_result)
-            
+
             db = SqlServerDB(**valid_db_config)
             type_dict = {"id": "str", "name": "category"}
-            
+
             _ = db.read("SELECT * FROM test_table", dict_type_cols=type_dict)
             sample_query_result.astype.assert_called_once_with(type_dict)
 
     def test_read_with_date_conversion(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
-        sample_query_result: pd.DataFrame, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
+        sample_query_result: pd.DataFrame,
         mock_dates_br: Mock
     ) -> None:
         """Test read with date conversion.
@@ -672,25 +677,25 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection), \
             patch("pandas.read_sql", return_value=sample_query_result), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver_db.ABCCalendarOperations", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.ABCCalendarOperations",
                   return_value=mock_dates_br):
                     db = SqlServerDB(**valid_db_config)
                     date_cols = ["date_col"]
                     date_format = "%Y-%m-%d"
-                    
+
                     _ = db.read(
-                        "SELECT * FROM test_table", 
-                        list_cols_dt=date_cols, 
+                        "SELECT * FROM test_table",
+                        list_cols_dt=date_cols,
                         str_fmt_dt=date_format
                     )
                     assert mock_dates_br.str_date_to_datetime.call_count == 3
 
     def test_read_empty_query(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test read with empty query raises ValueError.
@@ -711,17 +716,17 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
-            
+
             with pytest.raises(ValueError) as excinfo:
                 db.read("")
             assert "Query cannot be empty" in str(excinfo.value)
 
     def test_read_incomplete_date_params(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test read with incomplete date parameters raises ValueError.
@@ -742,20 +747,20 @@ class TestRead:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection):
             db = SqlServerDB(**valid_db_config)
-            
+
             # test with only list_cols_dt
             with pytest.raises(
-                ValueError, 
+                ValueError,
                 match="Both list_cols_dt and str_fmt_dt must be provided or None"
             ):
                 db.read("SELECT * FROM test_table", list_cols_dt=["date_col"])
-            
+
             # test with only str_fmt_dt
             with pytest.raises(
-                ValueError, 
+                ValueError,
                 match="Both list_cols_dt and str_fmt_dt must be provided or None"
             ):
                 db.read("SELECT * FROM test_table", str_fmt_dt="%Y-%m-%d")
@@ -768,9 +773,9 @@ class TestInsert:
     """Test cases for insert method."""
 
     def test_insert_valid_data(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
         mock_json_files: Mock
     ) -> None:
         """Test insert with valid data.
@@ -794,28 +799,28 @@ class TestInsert:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles",
                   return_value=mock_json_files), \
             patch("pandas.DataFrame.to_sql") as mock_to_sql:
                 db = SqlServerDB(**valid_db_config)
                 test_data = [{"col1": "val1", "col2": "val2"}]
                 table_name = "test_table"
-                
+
                 db.insert(test_data, table_name)
                 mock_json_files.normalize_json_keys.assert_called_once_with(test_data)
                 mock_to_sql.assert_called_once_with(
-                    table_name, 
-                    mock_connection, 
-                    if_exists="append", 
+                    table_name,
+                    mock_connection,
+                    if_exists="append",
                     index=False
                 )
                 mock_connection.commit.assert_called_once()
 
     def test_insert_empty_data(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test insert with empty data does nothing.
@@ -836,20 +841,20 @@ class TestInsert:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                    return_value=mock_connection), \
              patch("pandas.DataFrame.to_sql") as mock_to_sql:
             db = SqlServerDB(**valid_db_config)
-            
+
             # should not raise any exception and should return early
             db.insert([], "test_table")
-            
+
             # to_sql should not be called for empty data
             mock_to_sql.assert_not_called()
 
     def test_insert_empty_table_name(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test insert with empty table name raises ValueError.
@@ -871,19 +876,19 @@ class TestInsert:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
             test_data = [{"col1": "val1"}]
-            
+
             with pytest.raises(ValueError, match="Table name cannot be empty"):
                 db.insert(test_data, "")
 
     def test_insert_with_insert_or_ignore(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
         mock_json_files: Mock
     ) -> None:
         """Test insert with insert_or_ignore flag.
@@ -907,21 +912,21 @@ class TestInsert:
         None
         """
         with patch(
-                "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+                "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                 return_value=mock_connection), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles",
                 return_value=mock_json_files), \
             patch("pandas.read_sql") as mock_read_sql, \
             patch("pandas.DataFrame.to_sql") as mock_to_sql:
                 # mock existing data
                 existing_df = pd.DataFrame({"col1": ["existing_val"]})
                 mock_read_sql.return_value = existing_df
-                
+
                 db = SqlServerDB(**valid_db_config)
                 test_data = [{"col1": "new_val"}, {"col1": "existing_val"}]
-                
+
                 db.insert(test_data, "test_table", bool_insert_or_ignore=True)
-                
+
                 # Check that to_sql was called
                 assert mock_to_sql.called
                 # Get the call arguments - the first argument to to_sql is the table name
@@ -933,9 +938,9 @@ class TestInsert:
                     assert table_name == "test_table"
 
     def test_insert_failure_rollback(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
         mock_json_files: Mock
     ) -> None:
         """Test insert failure triggers rollback.
@@ -959,14 +964,14 @@ class TestInsert:
         -------
         None
         """
-        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+        with patch("stpstone.utils.connections.databases.sql.sqlserver_db.connect",
                 return_value=mock_connection), \
-            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
+            patch("stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles",
                 return_value=mock_json_files), \
             patch("pandas.DataFrame.to_sql", side_effect=Exception("Insert failed")):
                 db = SqlServerDB(**valid_db_config)
                 test_data = [{"col1": "val1"}]
-                
+
                 with pytest.raises(Exception) as excinfo:
                     db.insert(test_data, "test_table")
                 assert "Insert failed" in str(excinfo.value)
@@ -981,8 +986,8 @@ class TestClose:
     """Test cases for close method."""
 
     def test_close_connection(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test close method.
@@ -1004,7 +1009,7 @@ class TestClose:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -1019,8 +1024,8 @@ class TestBackupMethods:
     """Test cases for backup-related methods."""
 
     def test_backup_not_implemented(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test backup method raises NotImplementedError.
@@ -1042,18 +1047,18 @@ class TestBackupMethods:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
-            
+
             with pytest.raises(NotImplementedError) as excinfo:
                 db.backup("/backup/path")
             assert "Backup functionality not implemented for SQL Server" in str(excinfo.value)
 
     def test_check_bkp_tool_returns_false(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test check_bkp_tool returns False.
@@ -1075,7 +1080,7 @@ class TestBackupMethods:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
@@ -1090,8 +1095,8 @@ class TestABCDatabaseCompliance:
     """Test cases for ABCDatabase interface compliance."""
 
     def test_implements_abc_methods(
-        self, 
-        valid_db_config: dict[str, Any], 
+        self,
+        valid_db_config: dict[str, Any],
         mock_connection: Mock
     ) -> None:
         """Test class implements all ABCDatabase methods.
@@ -1113,11 +1118,11 @@ class TestABCDatabaseCompliance:
         None
         """
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
             return_value=mock_connection
         ):
             db = SqlServerDB(**valid_db_config)
-            
+
             # check that all abstract methods are implemented
             assert hasattr(db, "execute")
             assert hasattr(db, "read")
@@ -1125,7 +1130,7 @@ class TestABCDatabaseCompliance:
             assert hasattr(db, "close")
             assert hasattr(db, "backup")
             assert hasattr(db, "check_bkp_tool")
-            
+
             # check they are callable
             assert callable(db.execute)
             assert callable(db.read)
@@ -1142,7 +1147,7 @@ class TestErrorLogging:
     """Test cases for error logging functionality."""
 
     def test_error_logging_on_connection_failure(
-        self, 
+        self,
         valid_db_config: dict[str, Any]
     ) -> None:
         """Test error logging on connection failure.
@@ -1170,10 +1175,10 @@ class TestErrorLogging:
                 mock_log_instance = MagicMock()
                 mock_create_log.return_value = mock_log_instance
                 mock_connect.side_effect = Exception("Connection failed")
-                
+
                 with pytest.raises(ConnectionError):
                     SqlServerDB(**valid_db_config)
-                
+
                 mock_log_instance.log_message.assert_called_once()
                 call_args = mock_log_instance.log_message.call_args
                 # The log_message is called with (logger, message, level)
@@ -1181,11 +1186,11 @@ class TestErrorLogging:
                 logger_arg, message_arg, level_arg = call_args[0]
                 assert level_arg == "error"
                 assert "Error connecting to database" in message_arg
-    
+
     def test_error_logging_on_insert_failure(
-        self, 
-        valid_db_config: dict[str, Any], 
-        mock_connection: Mock, 
+        self,
+        valid_db_config: dict[str, Any],
+        mock_connection: Mock,
         mock_json_files: Mock
     ) -> None:
         """Test error logging on insert failure.
@@ -1211,13 +1216,13 @@ class TestErrorLogging:
         # Create a logger mock to ensure logging is triggered
         mock_logger = Mock()
         valid_db_config["logger"] = mock_logger
-        
+
         with patch(
-            "stpstone.utils.connections.databases.sql.sqlserver_db.connect", 
+            "stpstone.utils.connections.databases.sql.sqlserver_db.connect",
             return_value=mock_connection
         ), \
             patch(
-                "stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles", 
+                "stpstone.utils.connections.databases.sql.sqlserver_db.JsonFiles",
                 return_value=mock_json_files
             ), \
             patch(
@@ -1226,13 +1231,13 @@ class TestErrorLogging:
             patch("pandas.DataFrame.to_sql", side_effect=Exception("Insert failed")):
                 mock_log_instance = MagicMock()
                 mock_create_log.return_value = mock_log_instance
-                
+
                 db = SqlServerDB(**valid_db_config)
                 test_data = [{"col1": "val1"}]
-                
+
                 with pytest.raises(Exception): # noqa B017: raises blind exception
                     db.insert(test_data, "test_table")
-                
+
                 mock_log_instance.log_message.assert_called_once()
                 call_args = mock_log_instance.log_message.call_args
                 # The log_message is called with (logger, message, level)

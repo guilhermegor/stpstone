@@ -11,8 +11,13 @@ from typing import Optional, Union
 from unittest.mock import ANY, Mock, patch
 
 import pandas as pd
-import pyodbc as pyo
 import pytest
+
+
+try:
+    import pyodbc as pyo
+except ImportError:
+    pytest.skip("pyodbc not available (libodbc.so.2 missing)", allow_module_level=True)
 
 from stpstone.utils.connections.databases.spark.databricks_dsn import Databricks
 
@@ -74,7 +79,7 @@ def databricks_instance(valid_query: str, valid_dsns: list[str], mock_logger: Mo
     Databricks
         Initialized Databricks instance
     """
-    return Databricks(str_query=valid_query, list_dsns=valid_dsns, logger=mock_logger, 
+    return Databricks(str_query=valid_query, list_dsns=valid_dsns, logger=mock_logger,
                       max_error_attempts=3)
 
 
@@ -112,7 +117,7 @@ def test_init_valid_params(valid_query: str, valid_dsns: list[str], mock_logger:
 
 @pytest.mark.parametrize("invalid_query", [None, "", 123, []])
 def test_init_invalid_query(
-    invalid_query: Optional[Union[str, int, list]], 
+    invalid_query: Optional[Union[str, int, list]],
     valid_dsns: list[str]
 ) -> None:
     """Test initialization with invalid query parameter.
@@ -143,7 +148,7 @@ def test_init_invalid_query(
 
 @pytest.mark.parametrize("invalid_dsns", [None, [], 123, "not_a_list"])
 def test_init_invalid_dsns(
-    invalid_dsns: Optional[Union[list, int, str]], 
+    invalid_dsns: Optional[Union[list, int, str]],
     valid_query: str
 ) -> None:
     """Test initialization with invalid DSN list.
@@ -174,8 +179,8 @@ def test_init_invalid_dsns(
 
 @pytest.mark.parametrize("invalid_attempts", [0, -1, "not_an_int"])
 def test_init_invalid_max_attempts(
-    invalid_attempts: Union[int, str], 
-    valid_query: str, 
+    invalid_attempts: Union[int, str],
+    valid_query: str,
     valid_dsns: list[str]
 ) -> None:
     """Test initialization with invalid max_error_attempts.
@@ -200,11 +205,11 @@ def test_init_invalid_max_attempts(
     """
     if isinstance(invalid_attempts, int):
         with pytest.raises(ValueError, match="max_error_attempts must be a positive integer"):
-            Databricks(str_query=valid_query, list_dsns=valid_dsns, 
+            Databricks(str_query=valid_query, list_dsns=valid_dsns,
                        max_error_attempts=invalid_attempts)
     else:
         with pytest.raises(TypeError, match="max_error_attempts must be of type int"):
-            Databricks(str_query=valid_query, list_dsns=valid_dsns, 
+            Databricks(str_query=valid_query, list_dsns=valid_dsns,
                        max_error_attempts=invalid_attempts)
 
 
@@ -233,7 +238,7 @@ def test_validate_dsn_conn_valid(databricks_instance: Databricks) -> None:
 
 @pytest.mark.parametrize("invalid_dsn", [None, "", 123, []])
 def test_validate_dsn_conn_invalid(
-    databricks_instance: Databricks, 
+    databricks_instance: Databricks,
     invalid_dsn: Optional[Union[str, int, list]]
 ) -> None:
     """Test DSN connection string validation with invalid inputs.
@@ -287,7 +292,7 @@ def test_validate_int_timeout_valid(databricks_instance: Databricks) -> None:
 
 @pytest.mark.parametrize("invalid_timeout", [0, -1, "not_an_int", None])
 def test_validate_int_timeout_invalid(
-    databricks_instance: Databricks, 
+    databricks_instance: Databricks,
     invalid_timeout: Optional[Union[int, str]]
 ) -> None:
     """Test timeout validation with invalid inputs.
@@ -377,7 +382,7 @@ def test_conn_dsn_databricks_failure(mock_connect: Mock, databricks_instance: Da
 # --------------------------
 @patch("pandas.read_sql")
 def test_fetch_data_from_databricks_success(
-    mock_read_sql: Mock, 
+    mock_read_sql: Mock,
     databricks_instance: Databricks
 ) -> None:
     """Test successful query execution and data fetching.
@@ -430,7 +435,7 @@ def test_fetch_data_from_databricks_none_connection(databricks_instance: Databri
 
 @patch("pandas.read_sql")
 def test_fetch_data_from_databricks_sql_error(
-    mock_read_sql: Mock, 
+    mock_read_sql: Mock,
     databricks_instance: Databricks
 ) -> None:
     """Test query execution with SQL error.
@@ -459,7 +464,7 @@ def test_fetch_data_from_databricks_sql_error(
 
 @patch("pandas.read_sql")
 def test_fetch_data_from_databricks_unexpected_error(
-    mock_read_sql: Mock, 
+    mock_read_sql: Mock,
     databricks_instance: Databricks
 ) -> None:
     """Test query execution with unexpected error.
@@ -572,22 +577,22 @@ def test_conn_databricks_timeout(
     """
     mock_connection = Mock(spec=pyo.Connection)
     mock_conn_dsn.return_value = mock_connection
-    
+
     # Create a custom TimeoutError to match what the code expects
     class TimeoutError(Exception):
         pass
-    
+
     # Mock the timer to immediately call the timeout handler
     def mock_timer_side_effect(timeout: int, handler: Callable) -> Timer:
         """Mock the Timer class to immediately call the timeout handler.
-        
+
         Parameters
         ----------
         timeout : int
             Timeout duration in seconds
         handler : Callable
             Timeout handler function
-        
+
         Returns
         -------
         Timer
@@ -597,12 +602,12 @@ def test_conn_databricks_timeout(
         timer_mock.start.side_effect = handler  # Call handler immediately when start() is called
         timer_mock.cancel = Mock()
         return timer_mock
-    
+
     with patch("threading.Timer", side_effect=mock_timer_side_effect):
         result = databricks_instance.conn_databricks(int_max_wait=10)
         assert result == "CONNECTION TIMEOUT EXPIRED"
         assert mock_conn_dsn.call_count == len(databricks_instance.list_dsns)
-        
+
         # Check that timeout-specific message was logged for each DSN
         for dsn in databricks_instance.list_dsns:
             mock_log_message.assert_any_call(
@@ -610,7 +615,7 @@ def test_conn_databricks_timeout(
                 f"Connection could not be established in the DSN {dsn} due to timeout",
                 "warning"
             )
-        
+
         # Also check the final error message
         mock_log_message.assert_any_call(
             databricks_instance.logger,
@@ -692,7 +697,7 @@ def test_conn_databricks_kill_process(
     """
     mock_conn_dsn.side_effect = pyo.Error("Connection failed")
     with pytest.raises(ValueError, match="Connection to Databricks could not be established"):
-        databricks_instance.conn_databricks(int_max_wait=10, 
+        databricks_instance.conn_databricks(int_max_wait=10,
                                             bool_kill_process_when_databricks_down=True)
     mock_log_message.assert_any_call(
         databricks_instance.logger,
@@ -828,8 +833,8 @@ def test_retrieve_query_data_all_fail(
 # Tests for reload logic
 # --------------------------
 def test_module_reload(
-    databricks_instance: Databricks, 
-    valid_query: str, 
+    databricks_instance: Databricks,
+    valid_query: str,
     valid_dsns: list[str]
 ) -> None:
     """Test module reloading behavior.

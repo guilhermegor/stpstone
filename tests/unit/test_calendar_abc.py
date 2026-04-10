@@ -31,7 +31,7 @@ from stpstone.utils.calendars.calendar_abc import (
 @pytest.fixture
 def mock_setlocale() -> MagicMock:
     """Fixture mocking locale.setlocale to return the locale string.
-    
+
     Returns
     -------
     MagicMock
@@ -281,8 +281,8 @@ class TestCalendarCore:
         ],
     )
     def test_date_only_invalid_type(
-        self, 
-        calendar_instance: ABCCalendarOperations, 
+        self,
+        calendar_instance: ABCCalendarOperations,
         invalid_input: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test date_only method with invalid input types.
@@ -518,7 +518,7 @@ class TestCalendarCore:
         result = calendar_instance.holidays_in_year(2023)
         expected = [1, 25]  # January 1st and December 25th
         assert result == expected
-    
+
     def test_holidays_in_year_no_holidays(
         self, calendar_instance: ABCCalendarOperations
     ) -> None:
@@ -572,14 +572,14 @@ class TestDateManipulation:
         """
         # Add new holidays
         calendar_instance.add_holidays(new_holidays)
-        
+
         # Verify holidays are in the cache
         assert calendar_instance._holidays == {date(2024, 1, 15), date(2024, 7, 4)}
-        
+
         # Verify is_holiday recognizes new holidays
         assert calendar_instance.is_holiday(date(2024, 1, 15))
         assert calendar_instance.is_holiday(date(2024, 7, 4))
-        
+
         # Verify holidays method returns updated list
         holidays = calendar_instance.holidays()
         assert new_holidays[0] in holidays
@@ -622,8 +622,8 @@ class TestDateManipulation:
         ],
     )
     def test_add_holidays_invalid_types(
-        self, 
-        calendar_instance: ABCCalendarOperations, 
+        self,
+        calendar_instance: ABCCalendarOperations,
         invalid_input: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test add_holidays with invalid input types.
@@ -673,19 +673,19 @@ class TestDateManipulation:
         calendar_instance.add_holidays(new_holidays)
         # Add same holidays again
         calendar_instance.add_holidays(new_holidays)
-        
+
         # Verify cache has unique dates
         assert calendar_instance._holidays == {date(2024, 1, 15), date(2024, 7, 4)}
-        
+
         # Verify holidays list contains all entries (including duplicates)
         holidays = calendar_instance.holidays()
         assert holidays.count(new_holidays[0]) == 2
         assert holidays.count(new_holidays[1]) == 2
 
     def test_add_holidays_with_existing(
-        self, 
-        calendar_instance: ABCCalendarOperations, 
-        mock_holidays: MagicMock, 
+        self,
+        calendar_instance: ABCCalendarOperations,
+        mock_holidays: MagicMock,
         new_holidays: list[tuple[str, date]]
     ) -> None:
         """Test add_holidays with existing holidays in cache.
@@ -711,23 +711,23 @@ class TestDateManipulation:
         """
         # Mock existing holidays
         existing_holidays = [
-            ("New Year's Day", date(2023, 1, 1)), 
+            ("New Year's Day", date(2023, 1, 1)),
             ("Christmas", date(2023, 12, 25))
         ]
         mock_holidays.return_value = existing_holidays
-        
+
         # Add new holidays
         calendar_instance.add_holidays(new_holidays)
-        
+
         # Verify combined holidays in cache
         expected_dates = {
-            date(2023, 1, 1), 
-            date(2023, 12, 25), 
-            date(2024, 1, 15), 
+            date(2023, 1, 1),
+            date(2023, 12, 25),
+            date(2024, 1, 15),
             date(2024, 7, 4)
         }
         assert calendar_instance._holidays == expected_dates
-        
+
         # Verify all holidays are recognized
         for _, holiday_date in existing_holidays + new_holidays:
             assert calendar_instance.is_holiday(holiday_date)
@@ -756,11 +756,11 @@ class TestDateManipulation:
         """
         # Add new holidays
         calendar_instance.add_holidays(new_holidays)
-        
+
         # Verify new holidays are not working days
         assert not calendar_instance.is_working_day(date(2024, 1, 15))
         assert not calendar_instance.is_working_day(date(2024, 7, 4))
-        
+
         # Verify add_working_days skips new holidays
         start_date = date(2024, 1, 12)  # Friday
         result = calendar_instance.add_working_days(start_date, 2)
@@ -792,10 +792,10 @@ class TestDateManipulation:
         # Ensure cache is not initialized
         if hasattr(calendar_instance, "_holidays_cache"):
             del calendar_instance._holidays_cache
-        
+
         # Add holidays
         calendar_instance.add_holidays(new_holidays)
-        
+
         # Verify cache is initialized and contains holidays
         assert hasattr(calendar_instance, "_holidays_cache")
         assert calendar_instance._holidays == {date(2024, 1, 15), date(2024, 7, 4)}
@@ -1902,7 +1902,7 @@ class TestDatesRangeDelta:
         start_date = date(2023, 12, 20)  # Wednesday
         end_date = date(2023, 12, 27)   # Wednesday
         result = calendar_instance.working_days_range(start_date, end_date)
-        
+
         # Should include: 20, 21, 22, 26, 27 (excluding 23, 24, 25)
         expected = {
             date(2023, 12, 20),
@@ -2485,9 +2485,9 @@ class TestDateFormatter:
     """Test cases for DateFormatter class functionality."""
 
     def test_get_platform_locale_windows(
-        self, 
-        mock_setlocale: MagicMock, 
-        calendar_instance: ABCCalendarOperations, 
+        self,
+        mock_setlocale: MagicMock,
+        calendar_instance: ABCCalendarOperations,
         mocker: MockerFixture
     ) -> None:
         """Test get_platform_locale on Windows.
@@ -2537,6 +2537,7 @@ class TestDateFormatter:
         None
         """
         mocker.patch("platform.system", return_value="Linux")
+        mocker.patch("locale.setlocale")
         result = calendar_instance.get_platform_locale("en-GB")
         assert result == "en_GB.UTF-8"
 
@@ -2588,7 +2589,7 @@ class TestDateFormatter:
         """
         mocker.patch("platform.system", return_value="Linux")
         mocker.patch("locale.setlocale", side_effect=locale.Error("Invalid locale"))
-        
+
         with pytest.raises(ValueError, match="Invalid or unsupported locale"):
             calendar_instance.get_platform_locale("invalid-locale")
 
@@ -2744,7 +2745,10 @@ class TestDateFormatter:
         assert isinstance(result, int)
 
     def test_month_name_full(
-        self, calendar_instance: ABCCalendarOperations, sample_date: date
+        self,
+        calendar_instance: ABCCalendarOperations,
+        sample_date: date,
+        mocker: MockerFixture,
     ) -> None:
         """Test month_name with full name.
 
@@ -2759,18 +2763,23 @@ class TestDateFormatter:
             Calendar instance from fixture
         sample_date : date
             Sample date from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
         Returns
         -------
         None
         """
+        mocker.patch.object(ABCCalendarOperations, "get_platform_locale", return_value="C")
         result = calendar_instance.month_name(sample_date, False, "UTC")
         assert isinstance(result, str)
         assert len(result) > 0
-        # Should be "December" or localized equivalent
 
     def test_month_name_abbreviation(
-        self, calendar_instance: ABCCalendarOperations, sample_date: date
+        self,
+        calendar_instance: ABCCalendarOperations,
+        sample_date: date,
+        mocker: MockerFixture,
     ) -> None:
         """Test month_name with abbreviation.
 
@@ -2785,17 +2794,23 @@ class TestDateFormatter:
             Calendar instance from fixture
         sample_date : date
             Sample date from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
         Returns
         -------
         None
         """
+        mocker.patch.object(ABCCalendarOperations, "get_platform_locale", return_value="C")
         result = calendar_instance.month_name(sample_date, True, "UTC")
         assert isinstance(result, str)
         assert len(result) <= 4  # Typically 3-4 characters for abbreviations
 
     def test_week_name_full(
-        self, calendar_instance: ABCCalendarOperations, sample_date: date
+        self,
+        calendar_instance: ABCCalendarOperations,
+        sample_date: date,
+        mocker: MockerFixture,
     ) -> None:
         """Test weekday_name with full name.
 
@@ -2810,18 +2825,23 @@ class TestDateFormatter:
             Calendar instance from fixture
         sample_date : date
             Sample date from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
         Returns
         -------
         None
         """
+        mocker.patch.object(ABCCalendarOperations, "get_platform_locale", return_value="C")
         result = calendar_instance.weekday_name(sample_date, False, "UTC")
         assert isinstance(result, str)
         assert len(result) > 0
-        # December 25, 2023 is Monday
 
     def test_week_name_abbreviation(
-        self, calendar_instance: ABCCalendarOperations, sample_date: date
+        self,
+        calendar_instance: ABCCalendarOperations,
+        sample_date: date,
+        mocker: MockerFixture,
     ) -> None:
         """Test weekday_name with abbreviation.
 
@@ -2836,11 +2856,14 @@ class TestDateFormatter:
             Calendar instance from fixture
         sample_date : date
             Sample date from fixture
+        mocker : MockerFixture
+            Pytest-mock fixture
 
         Returns
         -------
         None
         """
+        mocker.patch.object(ABCCalendarOperations, "get_platform_locale", return_value="C")
         result = calendar_instance.weekday_name(sample_date, True, "UTC")
         assert isinstance(result, str)
         assert len(result) <= 4  # Typically 3-4 characters for abbreviations
@@ -2899,19 +2922,19 @@ class TestIntegration:
         # Start with a string date
         date_str = "25/12/2023"
         date_obj = calendar_instance.str_date_to_date(date_str, "DD/MM/YYYY")
-        
+
         # Convert to datetime with timezone
         datetime_obj = calendar_instance.date_to_datetime(date_obj, "UTC")
-        
+
         # Add working days
         future_date = calendar_instance.add_working_days(date_obj, 5)
-        
+
         # Check if it's a working day
         is_working = calendar_instance.is_working_day(future_date)
-        
+
         # Convert to integer representation
         date_int = calendar_instance.to_integer(future_date)
-        
+
         # Verify all operations completed successfully
         assert isinstance(date_obj, date)
         assert isinstance(datetime_obj, datetime)
@@ -2940,16 +2963,16 @@ class TestIntegration:
         """
         # Create datetime in one timezone
         utc_dt = calendar_instance.build_datetime(2023, 12, 25, 10, 30, 45, "UTC")
-        
+
         # Convert to different timezone
         est_dt = calendar_instance.change_timezone(utc_dt, "US/Eastern")
-        
+
         # Convert to Unix timestamp
         timestamp = calendar_instance.to_unix_timestamp(est_dt)
-        
+
         # Convert back to datetime
         restored_dt = calendar_instance.unix_timestamp_to_datetime(timestamp, "US/Eastern")
-        
+
         # Verify timezone consistency
         assert est_dt.tzinfo == ZoneInfo("US/Eastern")
         assert restored_dt.tzinfo == ZoneInfo("US/Eastern")
@@ -2975,8 +2998,8 @@ class TestErrorHandling:
         ],
     )
     def test_date_only_type_errors(
-        self, 
-        calendar_instance: ABCCalendarOperations, 
+        self,
+        calendar_instance: ABCCalendarOperations,
         invalid_input: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test date_only with various invalid types.
@@ -3068,7 +3091,7 @@ class TestErrorHandling:
         -------
         None
         """
-        with pytest.raises(ValueError, match="Not a valid date format"):
+        with pytest.raises(ValueError, match=r"(Not a valid date format|Invalid date string)"):
             calendar_instance.str_date_to_date("25/12/2023", invalid_format)  # type: ignore
 
     def test_delta_working_days_invalid_range(

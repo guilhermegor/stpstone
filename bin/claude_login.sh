@@ -27,7 +27,7 @@ LOG_FILE="${PROJECT_ROOT}/claude_login_$(date +%Y%m%d_%H%M%S).log"
 print_status() {
 	local status="$1"
 	local message="$2"
-	
+
 	case "$status" in
 		"success")
 			echo -e "${GREEN}[✓]${NC} ${message}"
@@ -53,7 +53,7 @@ print_status() {
 			echo -e "[ ] ${message}"
 			;;
 	esac
-	
+
 	# Log to file
 	echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$status] $message" >> "$LOG_FILE"
 }
@@ -64,11 +64,11 @@ print_status() {
 
 check_env_file() {
 	print_status "info" "Checking for .env file at ${ENV_FILE}..."
-	
+
 	if [[ ! -f "${ENV_FILE}" ]]; then
 		print_status "error" ".env file not found"
 		print_status "info" "Creating .env from template..."
-		
+
 		if [[ -f "${ENV_EXAMPLE}" ]]; then
 			cp "${ENV_EXAMPLE}" "${ENV_FILE}"
 			print_status "success" ".env file created from .env.example"
@@ -82,23 +82,23 @@ check_env_file() {
 			return 1
 		fi
 	fi
-	
+
 	print_status "success" ".env file found"
 	return 0
 }
 
 load_credentials() {
 	print_status "info" "Loading credentials from .env file..."
-	
+
 	# Source the .env file
 	set -a
 	# shellcheck source=/dev/null
 	source "${ENV_FILE}"
 	set +a
-	
+
 	# Validate required credentials
 	local missing_creds=0
-	
+
 	if [[ -z "${CLAUDE_API_KEY:-}" ]]; then
 		print_status "error" "CLAUDE_API_KEY is not set in .env file"
 		missing_creds=1
@@ -107,24 +107,24 @@ load_credentials() {
 		local masked_key="${CLAUDE_API_KEY:0:8}...${CLAUDE_API_KEY: -4}"
 		print_status "config" "CLAUDE_API_KEY found: ${masked_key}"
 	fi
-	
+
 	if [[ -n "${CLAUDE_ORG_ID:-}" ]]; then
 		print_status "config" "CLAUDE_ORG_ID found: ${CLAUDE_ORG_ID}"
 	fi
-	
+
 	if [[ -n "${CLAUDE_EMAIL:-}" ]]; then
 		print_status "config" "CLAUDE_EMAIL found: ${CLAUDE_EMAIL}"
 	else
 		print_status "warning" "CLAUDE_EMAIL is not set (may be optional)"
 	fi
-	
+
 	if [[ ${missing_creds} -eq 1 ]]; then
 		print_status "error" "Missing required credentials"
 		print_status "info" "Please update your .env file with CLAUDE_API_KEY"
 		print_status "info" "See .env.example for reference"
 		return 1
 	fi
-	
+
 	print_status "success" "Credentials loaded successfully"
 	return 0
 }
@@ -135,51 +135,81 @@ load_credentials() {
 
 authenticate_with_credentials() {
 	print_status "section" "AUTHENTICATING WITH STORED CREDENTIALS"
-	
-	# Export environment variables for the CLI
+
+	# Export environment variables for the CLI and API usage
 	export ANTHROPIC_API_KEY="${CLAUDE_API_KEY}"
 	print_status "success" "Environment variable set: ANTHROPIC_API_KEY"
-	
+
 	if [[ -n "${CLAUDE_ORG_ID:-}" ]]; then
 		export ANTHROPIC_ORG_ID="${CLAUDE_ORG_ID}"
 		print_status "success" "Environment variable set: ANTHROPIC_ORG_ID"
 	fi
-	
+
 	# Check if claude CLI is available
 	if ! command -v claude &> /dev/null; then
 		print_status "warning" "Claude CLI not found in PATH"
 		print_status "info" "API key is available in environment variables"
-		print_status "info" "You can use the Anthropic API directly"
-		print_status "success" "Credentials ready for use"
+		print_status "info" "You can use the Anthropic API directly in Python/scripts"
+		print_status "success" "Credentials ready for programmatic use"
 		return 0
 	fi
-	
-	print_status "info" "Claude CLI detected, attempting authentication..."
-	
-	# Attempt to authenticate using the CLI
-	if claude auth login --api-key "${CLAUDE_API_KEY}" 2>/dev/null; then
-		print_status "success" "Successfully authenticated with Claude Code CLI"
-		return 0
+
+	print_status "info" "Claude CLI detected (v2.x)"
+	print_status "section" "IMPORTANT: CLI Authentication"
+
+	echo
+	print_status "warning" "The Claude CLI uses separate authentication from the API key"
+	print_status "info" "Your .env file sets ANTHROPIC_API_KEY for Python/API usage"
+	print_status "info" "The CLI requires interactive login with your Claude account"
+	echo
+
+	# Show CLI authentication instructions
+	print_status "config" "To authenticate the Claude CLI, run:"
+	echo
+	echo -e "  ${GREEN}claude auth login${NC}"
+	echo
+	print_status "info" "When prompted:"
+	echo -e "  • Use your ${CYAN}Claude account credentials${NC} (email/password or SSO)"
+	echo -e "  • ${YELLOW}NOT${NC} the API key from .env"
+	echo
+
+	# Offer to run it now
+	read -p "$(echo -e "${CYAN}[?]${NC} Run 'claude auth login' now? (y/N): ")" -n 1 -r
+	echo
+
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		print_status "info" "Starting interactive CLI authentication..."
+		echo
+
+		if claude auth login; then
+			print_status "success" "Successfully authenticated Claude CLI"
+		else
+			print_status "warning" "CLI authentication was cancelled or failed"
+			print_status "info" "You can retry later with: claude auth login"
+		fi
 	else
-		print_status "warning" "CLI authentication failed"
-		print_status "info" "API key is still available in environment variables"
-		print_status "success" "You can use the API key directly in your code"
-		return 0
+		print_status "info" "Skipped CLI authentication"
+		print_status "info" "Run 'claude auth login' when ready"
 	fi
+
+	echo
+	print_status "success" "Environment variables are set for Python SDK and API usage"
+
+	return 0
 }
 
 standard_login() {
 	print_status "section" "STANDARD LOGIN PROCESS"
-	
+
 	if ! command -v claude &> /dev/null; then
 		print_status "error" "Claude CLI not found in PATH"
 		print_status "info" "Alternative: Set CLAUDE_API_KEY in .env file"
 		print_status "info" "Get your API key from: https://console.anthropic.com/settings/keys"
 		return 1
 	fi
-	
+
 	print_status "info" "Opening interactive login..."
-	
+
 	if claude auth login; then
 		print_status "success" "Successfully logged in to Claude Code"
 		return 0
@@ -197,13 +227,13 @@ standard_login() {
 main() {
 	print_status "section" "CLAUDE CODE AUTHENTICATION"
 	print_status "info" "Log file: ${LOG_FILE}"
-	
+
 	# Step 1: Check if .env file exists
 	if ! check_env_file; then
 		print_status "error" "Cannot proceed without .env file"
 		exit 1
 	fi
-	
+
 	# Step 2: Try to load credentials from .env
 	if load_credentials; then
 		# Step 3: Authenticate using credentials
@@ -214,7 +244,7 @@ main() {
 		else
 			print_status "warning" "Credential-based authentication incomplete"
 			print_status "info" "Attempting standard login process..."
-			
+
 			if standard_login; then
 				exit 0
 			else
@@ -225,7 +255,7 @@ main() {
 		# Step 4: Fall back to standard login
 		print_status "warning" "Credential validation failed"
 		print_status "info" "Attempting standard login process..."
-		
+
 		if standard_login; then
 			exit 0
 		else

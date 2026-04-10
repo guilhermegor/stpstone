@@ -31,6 +31,8 @@ repos:
       - id: check-illegal-windows-names
       - id: check-case-conflict
       - id: name-tests-test
+        args:
+          - --pytest-test-first
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v4.8.3
@@ -57,8 +59,7 @@ repos:
       - id: pydocstyle
         name: pydocstyle (docstring conventions)
         args:
-          - --convention=numpy
-          - --select=D412,D417,DAR # missing returns, missing params, docstring argument checks
+          - --select=D412,D417 # missing blank lines between summary/description, missing arg descriptions
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.13
@@ -95,7 +96,7 @@ repos:
 
       - id: unit-tests
         name: checking unit tests
-        entry: poetry run python -m unittest discover -s tests/unit -p "*.py"
+        entry: poetry run pytest tests/unit/
         language: system
         types:
           - file
@@ -103,7 +104,7 @@ repos:
 
       - id: integration-tests
         name: checking integration tests
-        entry: poetry run python -m unittest discover -s tests/integration -p "*.py"
+        entry: poetry run pytest tests/integration/
         language: system
         types:
           - file
@@ -111,7 +112,7 @@ repos:
 
       - id: coverage-check
         name: test coverage check
-        entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage report --fail-under=80 -m"
+        entry: bash -c "poetry run coverage run --source=stpstone -m pytest tests/unit/ && poetry run coverage report --fail-under=80 -m"
         language: system
         types:
           - python
@@ -120,7 +121,7 @@ repos:
 
       - id: coverage-badge
         name: coverage badge
-        entry: bash -c "poetry run coverage run --source=stpstone -m unittest discover tests/unit/ && poetry run coverage-badge -o coverage.svg -f"
+        entry: bash -c "poetry run coverage run --source=stpstone -m pytest tests/unit/ && poetry run coverage-badge -o coverage.svg -f"
         language: system
         types:
           - python

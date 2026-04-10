@@ -132,6 +132,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Claude Code authentication logs
+claude_login_*.log
+
 # Spyder project settings
 .spyderproject
 .spyproject
