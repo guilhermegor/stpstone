@@ -1,63 +1,215 @@
-from datetime import datetime
+"""World Government Bonds sovereign spreads, ratings, and CDS data ingestion."""
+
+from datetime import date
 from logging import Logger
-from time import sleep
-from typing import List, Optional
+from typing import Any, Optional, Union
 
 import pandas as pd
-from requests import Response
-from sqlalchemy.orm import Session
+from playwright.sync_api import Page as PlaywrightPage
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
-from stpstone._config.global_slots import YAML_WW_RATINGS_AGENCIES, YAML_WW_WORLD_GOV_BONDS
-from stpstone.ingestion.abc.requests import ABCRequests
+from stpstone.ingestion.abc.ingestion_abc import (
+    ABCIngestionOperations,
+    ContentParser,
+    CoreIngestion,
+)
+from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
+from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.dicts import HandlingDicts
-from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.numbers import NumHandler
 from stpstone.utils.webdriver_tools.playwright_wd import PlaywrightScraper
 
 
-class WorldGovBonds(ABCRequests):
+_RATINGS_AGENCIES_LIST: list[str] = [
+    "AAA", "AA+", "AA", "AA-", "A+", "A", "A-",
+    "BBB+", "BBB", "BBB-", "BB+", "BB", "BB-",
+    "B+", "B", "B-", "CCC+", "CCC", "CCC-", "CC", "C", "D", "SD", "NR",
+    "Aaa", "Aa1", "Aa2", "Aa3", "A1", "A2", "A3",
+    "Baa1", "Baa2", "Baa3", "Ba1", "Ba2", "Ba3",
+    "B1", "B2", "B3", "Caa1", "Caa2", "Caa3", "Ca", "WR",
+    "RD",
+]
+
+
+class _WorldGovBondsBase(ABCIngestionOperations):
+    """Base class with shared Playwright scraping logic for World Government Bonds sources."""
+
+    _BASE_HOST = "https://www.worldgovernmentbonds.com/"
+    _PATH: str = ""
+    _TABLE_NAME: str = ""
+    _DTYPES: dict[str, Any] = {}
+    _XPATH: str = ""
+    _TRIM_LAST: bool = False
 
     def __init__(
         self,
-        session: Optional[Session] = None,
-        date_ref: datetime = DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 1),
-        cls_db: Optional[Session] = None,
+        date_ref: Optional[date] = None,
         logger: Optional[Logger] = None,
-        token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None
+        cls_db: Optional[Session] = None,
     ) -> None:
-        super().__init__(
-            dict_metadata=YAML_WW_WORLD_GOV_BONDS,
-            session=session,
-            date_ref=date_ref,
-            cls_db=cls_db,
-            logger=logger,
-            token=token,
-            list_slugs=list_slugs
-        )
-        self.session = session
-        self.date_ref = date_ref
-        self.cls_db = cls_db
+        """Initialize the base ingestion class.
+
+        Parameters
+        ----------
+        date_ref : Optional[date], optional
+            The date of reference, by default None.
+        logger : Optional[Logger], optional
+            The logger, by default None.
+        cls_db : Optional[Session], optional
+            The database session, by default None.
+
+        Returns
+        -------
+        None
+        """
+        super().__init__(cls_db=cls_db)
+        CoreIngestion.__init__(self)
+        ContentParser.__init__(self)
+
         self.logger = logger
-        self.list_slugs = list_slugs
+        self.cls_db = cls_db
+        self.cls_dir_files_management = DirFilesManagement()
+        self.cls_dates_current = DatesCurrent()
+        self.cls_create_log = CreateLog()
+        self.cls_dates_br = DatesBRAnbima()
+        self.date_ref = date_ref or \
+            self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+        self.url = f"{self._BASE_HOST}{self._PATH}"
 
-    def treat_list_td(self, list_td: List[str]) -> List[str]:
+    def run(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = False,
+        bool_insert_or_ignore: bool = False,
+        str_table_name: Optional[str] = None,
+    ) -> Optional[pd.DataFrame]:
+        """Run the ingestion process.
+
+        If the database session is provided, the data is inserted into the database.
+        Otherwise, the transformed DataFrame is returned.
+
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            Unused; kept for interface consistency, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Unused; kept for interface consistency, by default False.
+        bool_insert_or_ignore : bool, optional
+            Whether to insert or ignore the data, by default False.
+        str_table_name : Optional[str], optional
+            The name of the table, by default the class-level _TABLE_NAME.
+
+        Returns
+        -------
+        Optional[pd.DataFrame]
+            The transformed DataFrame.
         """
-        Processes the list of table data cells to insert "N/A" for countries without ratings.
+        str_table_name = str_table_name or self._TABLE_NAME
+        df_ = self.transform_data(resp_req=None)
+        df_ = self.standardize_dataframe(
+            df_=df_,
+            date_ref=self.date_ref,
+            dict_dtypes=self._DTYPES,
+            cols_to_case="upper_constant",
+            str_fmt_dt="YYYY-MM-DD",
+            url=self.url,
+        )
+        if self.cls_db:
+            self.insert_table_db(
+                cls_db=self.cls_db,
+                str_table_name=str_table_name,
+                df_=df_,
+                bool_insert_or_ignore=bool_insert_or_ignore,
+            )
+        else:
+            return df_
 
-        The rule is: After a country name, if the next item is a numeric value (like '9.88%' or '0.0988'),
-        insert "N/A" between them to represent missing rating.
+    def get_response(
+        self,
+        timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+        bool_verify: bool = False,
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+        """Not used directly; Playwright navigation occurs inside transform_data.
 
-        Args:
-            list_td: List of strings representing table data cells
+        Parameters
+        ----------
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+            Unused; kept for interface consistency, by default (12.0, 21.0).
+        bool_verify : bool, optional
+            Unused; kept for interface consistency, by default False.
 
-        Returns:
-            Processed list with "N/A" inserted where needed
+        Returns
+        -------
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
+            None (Playwright is managed inside transform_data).
         """
-        list_ratings_agencies = ListHandler().extend_lists(
-            *YAML_WW_RATINGS_AGENCIES["credit_ratings"].values())
-        list_ = []
+        return None  # type: ignore[return-value]
+
+    def parse_raw_file(
+        self,
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
+    ) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
+        """Pass through; scraping is handled entirely in transform_data.
+
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            Ignored.
+
+        Returns
+        -------
+        Union[Response, PlaywrightPage, SeleniumWebDriver]
+            The same value, unchanged.
+        """
+        return resp_req
+
+    def transform_data(
+        self,
+        resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
+    ) -> pd.DataFrame:
+        """Navigate with Playwright, scrape the target XPath, and build a DataFrame.
+
+        Parameters
+        ----------
+        resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+            Ignored; Playwright manages the browser session internally.
+
+        Returns
+        -------
+        pd.DataFrame
+            The scraped DataFrame.
+        """
+        list_td: list[str] = []
+        scraper = PlaywrightScraper(bool_headless=True, int_default_timeout=100_000)
+        with scraper.launch():
+            if scraper.navigate(self.url):
+                list_td = scraper.get_list_data(self._XPATH, selector_type="xpath")
+        list_td = self._treat_list_td(list_td)
+        if self._TRIM_LAST:
+            list_td = list_td[:-1]
+        list_ser = HandlingDicts().pair_headers_with_data(list(self._DTYPES.keys()), list_td)
+        return pd.DataFrame(list_ser)
+
+    def _treat_list_td(self, list_td: list[str]) -> list[Any]:
+        """Insert 'N/A' placeholders for countries missing a credit rating.
+
+        The rule: after a country name, if the next item is numeric (e.g. '9.88%'),
+        insert 'N/A' between them to represent a missing rating.
+
+        Parameters
+        ----------
+        list_td : list[str]
+            Raw list of table data cell strings.
+
+        Returns
+        -------
+        list[Any]
+            Processed list with 'N/A' inserted where ratings are absent.
+        """
+        list_: list[Any] = []
         i = 0
         n = len(list_td)
         while i < n:
@@ -65,39 +217,72 @@ class WorldGovBonds(ABCRequests):
             item_processed = NumHandler().transform_to_float(list_td[i], int_precision=6)
             list_.append(item_processed)
             bool_country_name = (
-                isinstance(item_curr, str) and
-                not any(c.isdigit() for c in item_curr) and
-                not item_curr.endswith('%') and
-                item_curr != "N/A" and
-                item_curr not in list_ratings_agencies
+                isinstance(item_curr, str)
+                and not any(c.isdigit() for c in item_curr)
+                and not item_curr.endswith("%")
+                and item_curr != "N/A"
+                and item_curr not in _RATINGS_AGENCIES_LIST
             )
-            if bool_country_name:
-                if i + 1 < n:
-                    next_item = list_td[i+1]
-                    bool_next_numeric = (
-                        (isinstance(next_item, str) and next_item.endswith('%'))
-                        or (isinstance(NumHandler().transform_to_float(next_item, int_precision=6),
-                                       (int, float)))
+            if bool_country_name and i + 1 < n:
+                next_item = list_td[i + 1]
+                bool_next_numeric = (
+                    (isinstance(next_item, str) and next_item.endswith("%"))
+                    or isinstance(
+                        NumHandler().transform_to_float(next_item, int_precision=6),
+                        (int, float),
                     )
-                    if bool_next_numeric:
-                        list_.append("N/A")
+                )
+                if bool_next_numeric:
+                    list_.append("N/A")
             i += 1
         return list_
 
-    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        source = self.get_query_params(resp_req.url, "source")
-        list_th = list(YAML_WW_WORLD_GOV_BONDS[source]["dtypes"].keys())
-        scraper = PlaywrightScraper(
-            bool_headless=True,
-            int_default_timeout=100_000
-        )
-        with scraper.launch():
-            if scraper.navigate(resp_req.url):
-                list_td = scraper.get_list_data(
-                    YAML_WW_WORLD_GOV_BONDS[source]["xpaths"]["list_td"],
-                    selector_type="xpath"
-                )
-        list_td = self.treat_list_td(list_td)
-        if source == "sovereign_cds": list_td = list_td[:-1]
-        list_ser = HandlingDicts().pair_headers_with_data(list_th, list_td)
-        return pd.DataFrame(list_ser)
+
+class WorldGovBondsSovereignSpreads(_WorldGovBondsBase):
+    """World Government Bonds sovereign bond spreads ingestion class."""
+
+    _PATH = ""
+    _TABLE_NAME = "ww_wgb_sovereign_spreads"
+    _XPATH = "//table[@class='homeBondTable sortable w3-table money pd44 -f15']//td"
+    _DTYPES = {
+        "COUNTRY": str,
+        "RATING_SP": str,
+        "10Y_BOND_YIELD": float,
+        "BANK_RATE": float,
+        "SPREAD_VS_BUND": float,
+        "SPREAD_VS_TNOTE": float,
+        "SPREAD_VS_BANK_RATE": float,
+    }
+
+
+class WorldGovBondsCountriesRatings(_WorldGovBondsBase):
+    """World Government Bonds country credit ratings ingestion class."""
+
+    _PATH = "world-credit-ratings/"
+    _TABLE_NAME = "ww_wgb_countries_ratings"
+    _XPATH = "//table[@class='home-rating-table sortable w3-table money pd44 -f15']//td"
+    _DTYPES = {
+        "COUNTRY": str,
+        "SP": "category",
+        "MOODYS": "category",
+        "FITCH": "category",
+        "DBRS": "category",
+    }
+
+
+class WorldGovBondsSovereignCds(_WorldGovBondsBase):
+    """World Government Bonds sovereign CDS spreads ingestion class."""
+
+    _PATH = "sovereign-cds/"
+    _TABLE_NAME = "ww_wgb_sovereign_cds"
+    _XPATH = "//table[@class='w3-table sortable money pd44 -f14']//td"
+    _TRIM_LAST = True
+    _DTYPES = {
+        "COUNTRY": str,
+        "RATING_SP": str,
+        "5Y_CDS": float,
+        "DELTA_1M": float,
+        "DELTA_6M": float,
+        "IMPLIED_PROB_DEFAULT_PD": float,
+        "DATE": str,
+    }

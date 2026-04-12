@@ -18,11 +18,11 @@ print_error() {
 get_cache() {
     local url="$1"
     local cache_file="${CACHE_DIR}/$(echo -n "$url" | md5sum | cut -d' ' -f1)"
-    
+
     if [[ -f "$cache_file" ]]; then
         local timestamp=$(stat -c %Y "$cache_file")
         local now=$(date +%s)
-        
+
         if (( now - timestamp < CACHE_TTL )); then
             cat "$cache_file"
             return 0
@@ -42,15 +42,15 @@ set_cache() {
 check_url() {
     local url="$1"
     local status_code
-    
+
     # First try to get from cache
     if status_code=$(get_cache "$url"); then
         echo "$status_code"
         return
     fi
-    
+
     local user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    
+
     # Known problematic domains that block automated requests but are valid URLs
     local problematic_domains=(
         "platform.openai.com"
@@ -59,6 +59,7 @@ check_url() {
         "b3.com.br"
         "line.bvmfnet.com.br"
         "reuters.com"
+        "investing.com"
         "code.activestate.com"
         "exceltip.com"
         "chromedriver.chromium.org"
@@ -70,7 +71,7 @@ check_url() {
         "download.bmfbovespa.com.br"
         "geeksforgeeks.org"
     )
-    
+
     # Check if URL is from a problematic domain
     for domain in "${problematic_domains[@]}"; do
         if [[ "$url" == *"$domain"* ]]; then
@@ -82,7 +83,7 @@ check_url() {
             fi
         fi
     done
-    
+
     # Try multiple methods to get a proper status code
     # Method 1: HEAD request with User-Agent and additional headers
     status_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 --head \
@@ -92,7 +93,7 @@ check_url() {
         -H "Accept-Encoding: gzip, deflate" \
         -H "Connection: keep-alive" \
         "$url" 2>/dev/null)
-    
+
     # Method 2: If HEAD fails or returns 403/405, try GET with full browser headers
     if [[ -z "$status_code" || "$status_code" -eq 403 || "$status_code" -eq 405 ]]; then
         status_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
@@ -104,19 +105,19 @@ check_url() {
             -H "Upgrade-Insecure-Requests: 1" \
             "$url" 2>/dev/null)
     fi
-    
+
     # Method 3: If still getting 403, try with wget as fallback
     if [[ "$status_code" -eq 403 ]]; then
         if wget --spider --timeout=10 --user-agent="$user_agent" "$url" >/dev/null 2>&1; then
             status_code="200"
         fi
     fi
-    
+
     # Cache successful responses
     if [[ "$status_code" =~ ^2 ]]; then
         set_cache "$url" "$status_code"
     fi
-    
+
     echo "$status_code"
 }
 
@@ -128,7 +129,7 @@ clean_cache() {
 # Main function to process Python files
 process_python_files() {
     clean_cache # Clean old cache entries at start
-    
+
     local root_dir="${1:-.}"
     declare -A processed_urls
     local has_errors=0
@@ -139,9 +140,21 @@ process_python_files() {
 
         while IFS= read -r line; do
             ((line_num++))
-            
+
             # Detect docstring start/end
-            if [[ "$line" =~ ^\ *[\"\']{3} ]]; then
+            if [[ "$line" =~ ^[[:space:]]*\"\"\" ]]; then
+                after_open="${line#*\"\"\"}"
+                if [[ "$in_docstring" == false && "$after_open" == *\"\"\"* ]]; then
+                    continue  # Single-line docstring — skip without toggling
+                fi
+                [[ "$in_docstring" == true ]] && in_docstring=false || in_docstring=true
+                continue
+            fi
+            if [[ "$line" =~ ^[[:space:]]*\'\'\' ]]; then
+                after_open="${line#*\'\'\'}"
+                if [[ "$in_docstring" == false && "$after_open" == *\'\'\'* ]]; then
+                    continue  # Single-line docstring — skip without toggling
+                fi
                 [[ "$in_docstring" == true ]] && in_docstring=false || in_docstring=true
                 continue
             fi
@@ -150,14 +163,14 @@ process_python_files() {
             if [[ "$in_docstring" == true ]]; then
                 while [[ "$line" =~ (https?://[a-zA-Z0-9./?=_%:-]+[a-zA-Z0-9./?=_%:-]) ]]; do
                     url="${BASH_REMATCH[1]}"
-                    
+
                     # Skip if we've already processed this URL
                     if [[ -n "${processed_urls[$url]}" ]]; then
                         line="${line#*$url}"
                         continue
                     fi
                     processed_urls["$url"]=1
-                    
+
                     # Skip partial/incomplete URLs
                     if [[ "$url" =~ (https?://[^/]+)$ ]]; then
                         line="${line#*$url}"
@@ -165,7 +178,7 @@ process_python_files() {
                     fi
 
                     status_code=$(check_url "$url")
-                    
+
                     # Only print errors
                     if [[ -z "$status_code" ]]; then
                         print_error "Failed to access URL in $file (line $line_num): $url"
@@ -177,7 +190,7 @@ process_python_files() {
                         print_error "URL problem ($status_code) in $file (line $line_num): $url"
                         has_errors=1
                     fi
-                    
+
                     line="${line#*$url}"
                 done
             fi
