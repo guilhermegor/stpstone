@@ -169,9 +169,9 @@ class TestAnbimaDataIMAGeral:
 
     @pytest.fixture
     def instance(
-        self, 
-        sample_date: date, 
-        mock_logger: MagicMock, 
+        self,
+        sample_date: date,
+        mock_logger: MagicMock,
         mock_db_session: MagicMock
     ) -> AnbimaDataIMAGeral:
         """Fixture providing AnbimaDataIMAGeral instance.
@@ -247,9 +247,9 @@ class TestAnbimaDataIMAGeral:
         assert instance.url.endswith("IMAGERAL-HISTORICO.xls")
 
     def test_get_response_success(
-        self, 
-        instance: AnbimaDataIMAGeral, 
-        mock_requests_get: MagicMock, 
+        self,
+        instance: AnbimaDataIMAGeral,
+        mock_requests_get: MagicMock,
         mock_response: Response
     ) -> None:
         """Test successful response retrieval.
@@ -280,8 +280,8 @@ class TestAnbimaDataIMAGeral:
         mock_response.raise_for_status.assert_called_once()
 
     def test_parse_raw_file(
-        self, 
-        instance: AnbimaDataIMAGeral, 
+        self,
+        instance: AnbimaDataIMAGeral,
         mock_response: Response
     ) -> None:
         """Test parsing of raw file content.
@@ -351,7 +351,6 @@ class TestAnbimaDataIMAGeral:
         result = instance.transform_data("https://example.com/test.xls")
         pd.read_excel.assert_called_once_with(
             "https://example.com/test.xls",
-            skiprows=0,
             engine="openpyxl",
             names=[
                 "INDICE",
@@ -370,11 +369,11 @@ class TestAnbimaDataIMAGeral:
         assert result.equals(mock_df)
 
     def test_run_without_db(
-        self, 
-        instance_no_db: AnbimaDataIMAGeral, 
-        mock_requests_get: MagicMock, 
-        mock_response: Response, 
-        sample_dataframe: pd.DataFrame, 
+        self,
+        instance_no_db: AnbimaDataIMAGeral,
+        mock_requests_get: MagicMock,
+        mock_response: Response,
+        sample_dataframe: pd.DataFrame,
         mocker: MockerFixture
     ) -> None:
         """Test run method without database session.
@@ -413,11 +412,11 @@ class TestAnbimaDataIMAGeral:
         instance_no_db.standardize_dataframe.assert_called_once()
 
     def test_run_with_db(
-        self, 
-        instance: AnbimaDataIMAGeral, 
-        mock_requests_get: MagicMock, 
-        mock_response: Response, 
-        sample_dataframe: pd.DataFrame, 
+        self,
+        instance: AnbimaDataIMAGeral,
+        mock_requests_get: MagicMock,
+        mock_response: Response,
+        sample_dataframe: pd.DataFrame,
         mocker: MockerFixture
     ) -> None:
         """Test run method with database session.
@@ -458,6 +457,50 @@ class TestAnbimaDataIMAGeral:
             bool_insert_or_ignore=False
         )
 
+    def test_run_with_db_default_table_name(
+        self,
+        instance: AnbimaDataIMAGeral,
+        mock_requests_get: MagicMock,
+        mock_response: Response,
+        sample_dataframe: pd.DataFrame,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test that run resolves the class-default table name when none is passed.
+
+        Verifies
+        --------
+        - insert_table_db receives the class-level _TABLE_NAME when str_table_name is ""
+
+        Parameters
+        ----------
+        instance : AnbimaDataIMAGeral
+            Initialized instance
+        mock_requests_get : MagicMock
+            Mocked requests.get
+        mock_response : Response
+            Mocked response object
+        sample_dataframe : pd.DataFrame
+            Sample DataFrame for testing
+        mocker : MockerFixture
+            Pytest-mock fixture for creating mocks
+
+        Returns
+        -------
+        None
+        """
+        mock_requests_get.return_value = mock_response
+        mocker.patch.object(instance, "transform_data", return_value=sample_dataframe)
+        mocker.patch.object(instance, "standardize_dataframe", return_value=sample_dataframe)
+        mocker.patch.object(instance, "insert_table_db")
+        result = instance.run(str_table_name="")
+        assert result is None
+        instance.insert_table_db.assert_called_once_with(
+            cls_db=instance.cls_db,
+            str_table_name="br_anbima_data_indexes_ima_geral",
+            df_=sample_dataframe,
+            bool_insert_or_ignore=False,
+        )
+
     def test_run_invalid_timeout(self, instance: AnbimaDataIMAGeral) -> None:
         """Test run method with invalid timeout.
 
@@ -485,9 +528,9 @@ class TestAnbimaDataIDAGeral:
 
     @pytest.fixture
     def instance(
-        self, 
-        sample_date: date, 
-        mock_logger: MagicMock, 
+        self,
+        sample_date: date,
+        mock_logger: MagicMock,
         mock_db_session: MagicMock
     ) -> AnbimaDataIDAGeral:
         """Fixture providing AnbimaDataIDAGeral instance.
@@ -556,7 +599,6 @@ class TestAnbimaDataIDAGeral:
         result = instance.transform_data("https://example.com/test.xls")
         pd.read_excel.assert_called_once_with(
             "https://example.com/test.xls",
-            skiprows=0,
             engine="openpyxl",
             names=[
                 "INDICE",
@@ -581,9 +623,9 @@ class TestAnbimaDataIDALIQGeral:
 
     @pytest.fixture
     def instance(
-        self, 
-        sample_date: date, 
-        mock_logger: MagicMock, 
+        self,
+        sample_date: date,
+        mock_logger: MagicMock,
         mock_db_session: MagicMock
     ) -> AnbimaDataIDALIQGeral:
         """Fixture providing AnbimaDataIDALIQGeral instance.
@@ -602,12 +644,12 @@ class TestAnbimaDataIDALIQGeral:
         AnbimaDataIDALIQGeral
             Initialized instance
         """
-        return AnbimaDataIDALIQGeral(date_ref=sample_date, logger=mock_logger, 
+        return AnbimaDataIDALIQGeral(date_ref=sample_date, logger=mock_logger,
                                      cls_db=mock_db_session)
 
     def test_init_with_valid_inputs(
-        self, 
-        instance: AnbimaDataIDALIQGeral, 
+        self,
+        instance: AnbimaDataIDALIQGeral,
         sample_date: date
     ) -> None:
         """Test initialization with valid inputs.
@@ -633,8 +675,8 @@ class TestAnbimaDataIDALIQGeral:
         assert instance.url.endswith("IDALIQGERAL-HISTORICO.xls")
 
     def test_transform_data(
-        self, 
-        instance: AnbimaDataIDALIQGeral, 
+        self,
+        instance: AnbimaDataIDALIQGeral,
         mocker: MockerFixture
     ) -> None:
         """Test data transformation into DataFrame.
@@ -661,7 +703,6 @@ class TestAnbimaDataIDALIQGeral:
         result = instance.transform_data("https://example.com/test.xls")
         pd.read_excel.assert_called_once_with(
             "https://example.com/test.xls",
-            skiprows=0,
             engine="openpyxl",
             names=[
                 "INDICE",
@@ -686,9 +727,9 @@ class TestAnbimaDataIDKAPre1A:
 
     @pytest.fixture
     def instance(
-        self, 
-        sample_date: date, 
-        mock_logger: MagicMock, 
+        self,
+        sample_date: date,
+        mock_logger: MagicMock,
         mock_db_session: MagicMock
     ) -> AnbimaDataIDKAPre1A:
         """Fixture providing AnbimaDataIDKAPre1A instance.
@@ -707,12 +748,12 @@ class TestAnbimaDataIDKAPre1A:
         AnbimaDataIDKAPre1A
             Initialized instance
         """
-        return AnbimaDataIDKAPre1A(date_ref=sample_date, logger=mock_logger, 
+        return AnbimaDataIDKAPre1A(date_ref=sample_date, logger=mock_logger,
                                    cls_db=mock_db_session)
 
     def test_init_with_valid_inputs(
-        self, 
-        instance: AnbimaDataIDKAPre1A, 
+        self,
+        instance: AnbimaDataIDKAPre1A,
         sample_date: date
     ) -> None:
         """Test initialization with valid inputs.
@@ -762,7 +803,6 @@ class TestAnbimaDataIDKAPre1A:
         result = instance.transform_data("https://example.com/test.xls")
         pd.read_excel.assert_called_once_with(
             "https://example.com/test.xls",
-            skiprows=0,
             engine="openpyxl",
             names=[
                 "INDICE",
@@ -793,11 +833,11 @@ def test_module_reload() -> None:
     None
     """
     importlib.reload(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"])
-    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"], 
+    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"],
                    "AnbimaDataIMAGeral")
-    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"], 
+    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"],
                    "AnbimaDataIDAGeral")
-    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"], 
+    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"],
                    "AnbimaDataIDALIQGeral")
-    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"], 
+    assert hasattr(sys.modules["stpstone.ingestion.countries.br.exchange.anbima_data_indexes"],
                    "AnbimaDataIDKAPre1A")
