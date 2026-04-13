@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 from openai.types.chat import ChatCompletion
 import pytest
 
-from stpstone.utils.llms.gpt import GPT
+from stpstone.utils.llms.gpt.gpt import GPT
 
 
 class TestGPT:
@@ -126,7 +126,7 @@ class TestGPT:
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             
             assert gpt.api_key == valid_init_params["api_key"]
@@ -169,7 +169,7 @@ class TestGPT:
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             valid_init_params["api_key"] = api_key
             with pytest.raises(type_error):
                 GPT(**valid_init_params)
@@ -207,7 +207,7 @@ class TestGPT:
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             valid_init_params["str_model"] = model
             with pytest.raises(type_error):
                 GPT(**valid_init_params)
@@ -235,7 +235,7 @@ class TestGPT:
         mock_openai_client : MagicMock
             Mocked OpenAI client from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             valid_init_params["int_max_tokens"] = max_tokens
             with pytest.raises(ValueError) as excinfo:
                 GPT(**valid_init_params)
@@ -268,7 +268,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -305,7 +305,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_image_prompt)
             
@@ -342,7 +342,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(mixed_prompt)
             
@@ -375,7 +375,7 @@ class TestGPT:
         mock_chat_completion : MagicMock
             Mocked ChatCompletion from fixture
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -412,7 +412,7 @@ class TestGPT:
             Mocked ChatCompletion from fixture
         """
         valid_init_params["str_context"] = None
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -448,7 +448,7 @@ class TestGPT:
             Mocked ChatCompletion from fixture
         """
         valid_init_params["bool_stream"] = True
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             result = gpt.run_prompt(sample_text_prompt)
             
@@ -500,7 +500,7 @@ class TestGPT:
         -------
         None
         """
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             
             with pytest.raises(type_error, match=excinfo):
@@ -529,7 +529,7 @@ class TestGPT:
             Sample text prompt from fixture
         """
         mock_openai_client.chat.completions.create.side_effect = Exception("API error")
-        with patch("stpstone.utils.llms.gpt.OpenAI", return_value=mock_openai_client):
+        with patch("stpstone.utils.llms.gpt.gpt.OpenAI", return_value=mock_openai_client):
             gpt = GPT(**valid_init_params)
             
             with pytest.raises(Exception, match="API error"):
