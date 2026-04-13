@@ -62,8 +62,7 @@ fix_playwright:
 # -------------------
 # PACKAGE MANAGEMENT
 # -------------------
-.PHONY: package_tree bump_version clean_builds install_dist_locally test_dist \
-        publish_test_pypi check_test_pypi check_pypi
+.PHONY: package_tree bump_version clean_builds install_dist_locally test_dist
 
 package_tree:
 	@poetry run python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
@@ -87,36 +86,6 @@ install_dist_locally:
 
 test_dist:
 	@bash bin/test_dist.sh
-
-publish_test_pypi: clean_builds
-	@yes | bash bin/test_dist.sh
-	@bash bin/test_pypi_publish.sh
-
-check_test_pypi:
-	@bash bin/docker_init.sh
-	@docker build -f containers/check_test_pypi -t stpstone-test .
-	@docker run -it --rm stpstone-test
-
-check_pypi:
-	@bash bin/docker_init.sh
-	@read -p "Enter stpstone version to test (leave empty for latest): " version; \
-	if [ -z "$$version" ]; then \
-		echo "Testing latest version"; \
-		docker build -f containers/check_pypi -t stpstone .; \
-	else \
-		echo "Testing version $$version"; \
-		docker build -f containers/check_pypi --build-arg STPSTONE_VERSION=$$version -t stpstone .; \
-	fi
-	@docker run -it --rm stpstone
-
-
-# -------------------
-# INGESTION CREATORS
-# -------------------
-.PHONY: concrete_creator_ingestion
-
-concrete_creator_ingestion:
-	@bash bin/concrete_creator_ingestion.sh
 
 # -------------------
 # HELP
@@ -149,9 +118,3 @@ help:
 	@echo "  clean_builds         - Clean build artifacts"
 	@echo "  install_dist_locally - Install local distribution"
 	@echo "  test_dist            - Test distribution"
-	@echo "  publish_test_pypi    - Publish to test PyPI"
-	@echo "  check_test_pypi      - Check test PyPI package"
-	@echo "  check_pypi           - Check PyPI package (interactive version selection)"
-	@echo ""
-	@echo "Ingestion Creators:"
-	@echo "  concrete_creator_ingestion - Create concrete creator ingestion files"
