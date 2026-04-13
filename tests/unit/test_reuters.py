@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from requests.exceptions import RequestException
 
-from stpstone.utils.providers.ww.reuters import Reuters
+from stpstone.utils.providers.ww.reuters.reuters import Reuters
 
 
 class TestReuters:
