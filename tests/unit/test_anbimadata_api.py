@@ -18,10 +18,10 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import exceptions
 
-from stpstone._config.global_slots import YAML_ANBIMA_DATA_API
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.str import StrHandler
-from stpstone.utils.providers.br.anbimadata_api import AnbimaDataFunds, AnbimaDataGen
+from stpstone.utils.providers.br.anbimadata_api.anbimadata_api_funds import AnbimaDataFunds
+from stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen import AnbimaDataGen
 
 
 # --------------------------
@@ -62,7 +62,9 @@ def mock_requests(mocker: MockerFixture) -> object:
     object
         Mocked requests.request function
     """
-    return mocker.patch("stpstone.utils.providers.br.anbimadata_api.request")
+    return mocker.patch(
+		"stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.request"
+	)
 
 
 @pytest.fixture
@@ -122,20 +124,20 @@ def sample_funds_json() -> list[dict[str, str]]:
         Sample JSON data for funds
     """
     return [
-        {
-            YAML_ANBIMA_DATA_API["key_content"]: [
-                {
-                    "fund_code": "123",
-                    "fund_name": "Test Fund",
-                    "inception_date": "2023-01-01",
-                    "update_timestamp": "2023-01-01T12:00:00Z",
-                    "subclasses": [
-                        {"subclass_code": "SC1", "subclass_name": "Subclass 1"}
-                    ],
-                }
-            ]
-        }
-    ]
+		{
+			"content": [
+				{
+					"fund_code": "123",
+					"fund_name": "Test Fund",
+					"inception_date": "2023-01-01",
+					"update_timestamp": "2023-01-01T12:00:00Z",
+					"subclasses": [
+						{"subclass_code": "SC1", "subclass_name": "Subclass 1"}
+					],
+				}
+			]
+		}
+	]
 
 
 @pytest.fixture
@@ -190,9 +192,9 @@ class TestAnbimaDataGen:
         None
         """
         mocker.patch(
-            "stpstone.utils.providers.br.anbimadata_api.AnbimaDataGen.access_token",
-            return_value={"access_token": "test_token"}
-        )
+			"stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.AnbimaDataGen.access_token",
+			return_value={"access_token": "test_token"},
+		)
         gen = AnbimaDataGen(
             str_client_id="client",
             str_client_secret="secret", # noqa S106: possible hardcoded password
@@ -204,7 +206,7 @@ class TestAnbimaDataGen:
         assert gen.str_host == "https://api-sandbox.anbima.com.br/"
         assert gen.int_chunk == 500
         assert gen.str_token == "test_token" # noqa S106: possible hardcoded password
-    
+
     @pytest.mark.parametrize(
         "client_id,client_secret,env,chunk,expected_error,match",
         [
@@ -255,9 +257,9 @@ class TestAnbimaDataGen:
         None
         """
         mocker.patch(
-            "stpstone.utils.providers.br.anbimadata_api.AnbimaDataGen.access_token",
-            side_effect=ValueError("Failed to retrieve access token")
-        )
+			"stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.AnbimaDataGen.access_token",
+			side_effect=ValueError("Failed to retrieve access token"),
+		)
         with pytest.raises(expected_error, match=match):
             AnbimaDataGen(
                 str_client_id=client_id,
@@ -304,9 +306,9 @@ class TestAnbimaDataGen:
         )
 
     def test_access_token_success_retrieve_test(
-        self, 
-        anbima_gen: AnbimaDataGen, 
-        mock_requests: object, 
+        self,
+        anbima_gen: AnbimaDataGen,
+        mock_requests: object,
         mocker: MockerFixture
     ) -> None:
         """Test successful access dev token retrieval.
@@ -337,10 +339,10 @@ class TestAnbimaDataGen:
             == "test_token" # noqa S105: possible hardcoded password
 
     def test_generic_request_success(
-        self, 
-        anbima_gen: AnbimaDataGen, 
-        mock_requests: object, 
-        mock_response_ok: object, 
+        self,
+        anbima_gen: AnbimaDataGen,
+        mock_requests: object,
+        mock_response_ok: object,
         mocker: MockerFixture
     ) -> None:
         """Test successful generic API request.
@@ -365,7 +367,7 @@ class TestAnbimaDataGen:
         -------
         None
         """
-        mocker.patch.object(anbima_gen, "access_token", 
+        mocker.patch.object(anbima_gen, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = [{"key": "value"}]
         mock_requests.return_value = mock_response_ok
@@ -444,11 +446,11 @@ class TestAnbimaDataFunds:
     """Test cases for AnbimaDataFunds class."""
 
     def test_funds_raw_success(
-        self, 
-        anbima_funds: AnbimaDataFunds, 
-        mock_requests: object, 
-        mock_response_ok: object, 
-        sample_funds_json: list[dict[str, str]], 
+        self,
+        anbima_funds: AnbimaDataFunds,
+        mock_requests: object,
+        mock_response_ok: object,
+        sample_funds_json: list[dict[str, str]],
         mocker: MockerFixture
     ) -> None:
         """Test successful funds_raw method.
@@ -475,7 +477,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = sample_funds_json
         mock_requests.return_value = mock_response_ok
@@ -494,7 +496,7 @@ class TestAnbimaDataFunds:
             data=None,
             timeout=(200, 200),
         )
-    
+
     def test_funds_trt_invalid_content(
         self,
         anbima_funds: AnbimaDataFunds,
@@ -524,13 +526,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        invalid_json = [
-            {
-                YAML_ANBIMA_DATA_API["key_content"]: [
-                    {"fund_code": 123}  # invalid type
-                ]
-            }
-        ]
+        invalid_json = [{"content": [{"fund_code": 123}]}]  # invalid type
         mock_response_ok.json.return_value = invalid_json
         mock_requests.return_value = mock_response_ok
         mocker.patch.object(anbima_funds, "funds_raw", return_value=invalid_json)
@@ -538,11 +534,11 @@ class TestAnbimaDataFunds:
             anbima_funds.funds_trt(int_pg=0)
 
     def test_fund_raw_success(
-        self, 
-        anbima_funds: AnbimaDataFunds, 
-        mock_requests: object, 
-        mock_response_ok: object, 
-        sample_fund_json: dict[str, Any], 
+        self,
+        anbima_funds: AnbimaDataFunds,
+        mock_requests: object,
+        mock_response_ok: object,
+        sample_fund_json: dict[str, Any],
         mocker: MockerFixture
     ) -> None:
         """Test successful fund_raw method.
@@ -571,7 +567,7 @@ class TestAnbimaDataFunds:
         """
         mock_response_ok.json.return_value = sample_fund_json
         mock_requests.return_value = mock_response_ok
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_requests.reset_mock()
         result = anbima_funds.fund_raw(str_code_fnd="123")
@@ -588,7 +584,7 @@ class TestAnbimaDataFunds:
             data=None,
             timeout=(200, 200),
         )
-    
+
     def test_fund_trt_invalid_data(
         self,
         anbima_funds: AnbimaDataFunds,
@@ -622,14 +618,14 @@ class TestAnbimaDataFunds:
         mock_response_ok.json.return_value = invalid_json
         mock_requests.return_value = mock_response_ok
         mocker.patch.object(anbima_funds, "fund_raw", return_value=invalid_json)
-        with pytest.raises(ValueError, match="Missing expected columns in DataFrame"):
+        with pytest.raises(ValueError, match="Invalid data type for fund"):
             anbima_funds.fund_trt(list_code_fnds=["123"])
 
     def test_fund_hist_success(
-        self, 
-        anbima_funds: AnbimaDataFunds, 
-        mock_requests: object, 
-        mock_response_ok: object, 
+        self,
+        anbima_funds: AnbimaDataFunds,
+        mock_requests: object,
+        mock_response_ok: object,
         mocker: MockerFixture
     ) -> None:
         """Test successful fund_hist method.
@@ -656,7 +652,7 @@ class TestAnbimaDataFunds:
         """
         mock_response_ok.json.return_value = [{"date": "2023-01-01"}]
         mock_requests.return_value = mock_response_ok
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_requests.reset_mock()
         result = anbima_funds.fund_hist(str_code_class="C1")
@@ -675,10 +671,10 @@ class TestAnbimaDataFunds:
         )
 
     def test_segment_investor_success(
-        self, 
-        anbima_funds: AnbimaDataFunds, 
-        mock_requests: object, 
-        mock_response_ok: object, 
+        self,
+        anbima_funds: AnbimaDataFunds,
+        mock_requests: object,
+        mock_response_ok: object,
         mocker: MockerFixture
     ) -> None:
         """Test successful segment_investor method.
@@ -703,7 +699,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", return_value={"access_token": 
+        mocker.patch.object(anbima_funds, "access_token", return_value={"access_token":
                                                                         "test_token"})
         mock_response_ok.json.return_value = [{"segment": "Retail"}]
         mock_requests.return_value = mock_response_ok
@@ -722,12 +718,12 @@ class TestAnbimaDataFunds:
             data=None,
             timeout=(200, 200),
         )
-    
+
     def test_time_series_fund_success(
-        self, 
-        anbima_funds: AnbimaDataFunds, 
-        mock_requests: object, 
-        mock_response_ok: object, 
+        self,
+        anbima_funds: AnbimaDataFunds,
+        mock_requests: object,
+        mock_response_ok: object,
         mocker: MockerFixture
     ) -> None:
         """Test successful time_series_fund method.
@@ -754,10 +750,10 @@ class TestAnbimaDataFunds:
         """
         mock_response_ok.json.return_value = [{"value": 100.0}]
         mock_requests.return_value = mock_response_ok
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_requests.reset_mock()
-        result = anbima_funds.time_series_fund(str_date_inf="2023-01-01", 
+        result = anbima_funds.time_series_fund(str_date_inf="2023-01-01",
                                                str_date_sup="2023-12-31", str_code_class="C1")
         assert result == [{"value": 100.0}]
         mock_requests.assert_called_once_with(
@@ -778,10 +774,10 @@ class TestAnbimaDataFunds:
         )
 
     def test_funds_financials_dt_success(
-        self, 
-        anbima_funds: AnbimaDataFunds, 
-        mock_requests: object, 
-        mock_response_ok: object, 
+        self,
+        anbima_funds: AnbimaDataFunds,
+        mock_requests: object,
+        mock_response_ok: object,
         mocker: MockerFixture
     ) -> None:
         """Test successful funds_financials_dt method.
@@ -806,7 +802,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = [{"financials": "data"}]
         mock_requests.return_value = mock_response_ok
@@ -855,7 +851,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = [{"registration": "data"}]
         mock_requests.return_value = mock_response_ok
@@ -904,7 +900,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = [{"name": "Institution"}]
         mock_requests.return_value = mock_response_ok
@@ -953,7 +949,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = [{"ein": "123456"}]
         mock_requests.return_value = mock_response_ok
@@ -1002,7 +998,7 @@ class TestAnbimaDataFunds:
         -------
         None
         """
-        mocker.patch.object(anbima_funds, "access_token", 
+        mocker.patch.object(anbima_funds, "access_token",
                             return_value={"access_token": "test_token"})
         mock_response_ok.json.return_value = [{"note": "Note"}]
         mock_requests.return_value = mock_response_ok
@@ -1040,5 +1036,9 @@ class TestAnbimaDataFunds:
         None
         """
         original_token = anbima_funds.str_token
-        importlib.reload(sys.modules["stpstone.utils.providers.br.anbimadata_api"])
+        importlib.reload(
+			sys.modules[
+				"stpstone.utils.providers.br.anbimadata_api.anbimadata_api_funds"
+			]
+		)
         assert anbima_funds.str_token == original_token
