@@ -179,7 +179,7 @@ All existing `tests/unit/test_<feature>.py` files are updated:
 | `from stpstone.utils.providers.br.margin_simulator_b3 import MarginSimulatorB3, ResultReferenceData` | `from stpstone.utils.providers.br.margin_simulator_b3.margin_simulator_b3 import MarginSimulatorB3` and `from stpstone.utils.providers.br.margin_simulator_b3._dto import ResultReferenceData` |
 | `from stpstone.utils.providers.ww.reuters import Reuters` | `from stpstone.utils.providers.ww.reuters.reuters import Reuters` |
 | `from stpstone.utils.llms.gpt import GPT` | `from stpstone.utils.llms.gpt.gpt import GPT` |
-| MT5 import (to be confirmed from test file) | `from stpstone.utils.trading_platforms.mt5.mt5 import MT5` |
+| `from stpstone.utils.trading_platforms.mt5 import MT5` | `from stpstone.utils.trading_platforms.mt5.mt5 import MT5` |
 
 ---
 
