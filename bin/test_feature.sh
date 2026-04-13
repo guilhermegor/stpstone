@@ -6,6 +6,8 @@ declare -a EXCLUDE_PATTERNS=(
     "tests/performance/*"
     "stpstone/utils/parsers/mock_exclusion_example.py"
     "stpstone/transformations/validation/metaclass_type_checker.py"
+    # Type safety is enforced by the dedicated Pydantic models in _models_monthly_report_cvm.py
+    "stpstone/filings/br/monthly_report_cvm.py"
 )
 
 # list of classes considered to have TypeChecker

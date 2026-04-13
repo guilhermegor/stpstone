@@ -37,7 +37,6 @@ make install_dist_locally   # Build and install locally
 
 ```
 stpstone/
-├── _config/           # YAML-based metadata for each data source
 ├── analytics/         # Quantitative models: derivatives pricing (Black-Scholes),
 │                      #   probability distributions, portfolio optimization, risk
 ├── ingestion/
@@ -54,8 +53,6 @@ All data-source classes inherit from `ABCRequests` (in `ingestion/abc/requests.p
 - `parse_raw_file()` — parse response to DataFrame
 - `handle_data_transformation()` — clean/standardize
 - `req_trt_injection()` — optional override for custom transformation logic
-
-Configuration for each source lives in a YAML file under `_config/countries/`, referenced via constants (e.g., `YAML_US_ALPHAVANTAGE`).
 
 ### Type Validation (Metaclass)
 

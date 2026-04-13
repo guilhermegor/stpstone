@@ -1,14 +1,14 @@
 """CVM Monthly Profile (Perfil Mensal) report serializer, deserializer and format converter."""
 
-import json
-import xml.sax.saxutils as saxutils
 from decimal import Decimal, InvalidOperation
-from io import StringIO
+import json
 from pathlib import Path
 from typing import Any, Optional, Union
+from xml.etree.ElementTree import Element
+import xml.sax.saxutils as saxutils
 
-import pandas as pd
 from defusedxml.ElementTree import fromstring
+import pandas as pd
 from pydantic import BaseModel
 
 from stpstone.filings.br._models_monthly_report_cvm import (
@@ -161,11 +161,6 @@ class CvmMonthlyReport:
         -------
         pd.DataFrame
             Flattened DataFrame with one row per fund class.
-
-        Raises
-        ------
-        ValueError
-            If the file cannot be parsed or does not match the expected schema.
         """
         doc = self._parse_xml_file(path)
         return pd.DataFrame([self._row_to_flat_dict(row) for row in doc.rows])
@@ -192,11 +187,6 @@ class CvmMonthlyReport:
         -------
         Optional[str]
             XML string when output_path is None, else None.
-
-        Raises
-        ------
-        ValueError
-            If the file format is not recognised or a required column is missing.
         """
         df_ = self._read_tabular(path)
         rows = [self._flat_dict_to_row(row_dict) for row_dict in df_.to_dict(orient="records")]
@@ -734,12 +724,12 @@ class CvmMonthlyReport:
             raise ValueError(f"Cannot parse XML file '{path}': {exc}") from exc
         return self._parse_xml_tree(root)
 
-    def _parse_xml_tree(self, root: Any) -> PerfilMensalDocument:
+    def _parse_xml_tree(self, root: Element) -> PerfilMensalDocument:
         """Build a PerfilMensalDocument from an ElementTree root element.
 
         Parameters
         ----------
-        root : Any
+        root : Element
             Root element from defusedxml.ElementTree.fromstring.
 
         Returns
@@ -761,12 +751,12 @@ class CvmMonthlyReport:
         ]
         return PerfilMensalDocument(header=header, rows=rows)
 
-    def _parse_xml_row(self, row_el: Any) -> PerfilMensalRow:
+    def _parse_xml_row(self, row_el: Element) -> PerfilMensalRow:
         """Build a PerfilMensalRow from a ROW_PERFIL element.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -819,12 +809,12 @@ class CvmMonthlyReport:
             inf_compl_perfil=self._opt_text(row_el, "INF_COMPL_PERFIL"),
         )
 
-    def _parse_nr_client(self, row_el: Any) -> ClientCount:
+    def _parse_nr_client(self, row_el: Element) -> ClientCount:
         """Parse the NR_CLIENT block from a ROW_PERFIL element.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -854,12 +844,12 @@ class CvmMonthlyReport:
             nr_outros_n_relac=int(self._text(nr_el, "NR_OUTROS_N_RELAC")),
         )
 
-    def _parse_distr_patrim(self, row_el: Any) -> Optional[PatrimonyDistribution]:
+    def _parse_distr_patrim(self, row_el: Element) -> Optional[PatrimonyDistribution]:
         """Parse the optional DISTR_PATRIM block from a ROW_PERFIL element.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -891,12 +881,12 @@ class CvmMonthlyReport:
             pr_outros_n_relac=self._opt_decimal(dp_el, "PR_OUTROS_N_RELAC"),
         )
 
-    def _parse_variacao_vpc(self, row_el: Any) -> Optional[VarPercValCota]:
+    def _parse_variacao_vpc(self, row_el: Element) -> Optional[VarPercValCota]:
         """Parse the optional VARIACAO_PERC_VAL_COTA block.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -922,12 +912,12 @@ class CvmMonthlyReport:
             lista_fator_primit_risco=fprs,
         )
 
-    def _parse_var_outros(self, row_el: Any) -> Optional[VarOutros]:
+    def _parse_var_outros(self, row_el: Element) -> Optional[VarOutros]:
         """Parse the optional VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS block.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -945,12 +935,12 @@ class CvmMonthlyReport:
             ),
         )
 
-    def _parse_nominal_risk(self, row_el: Any) -> Optional[NominalRiskBlock]:
+    def _parse_nominal_risk(self, row_el: Element) -> Optional[NominalRiskBlock]:
         """Parse the optional VALOR_NOC_TOT_CONTRAT_DERIV_MANT_FDO block.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -978,12 +968,12 @@ class CvmMonthlyReport:
             lista_fator_risco_noc=fnocs,
         )
 
-    def _parse_otc_list(self, row_el: Any) -> Optional[list[OtcOperation]]:
+    def _parse_otc_list(self, row_el: Element) -> Optional[list[OtcOperation]]:
         """Parse the optional LISTA_OPER_CURS_MERC_BALCAO block.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -1004,12 +994,12 @@ class CvmMonthlyReport:
             for op_el in self._findall(balcao_el, "OPER_CURS_MERC_BALCAO")
         ]
 
-    def _parse_issuers_list(self, row_el: Any) -> Optional[list[PrivateCreditIssuer]]:
+    def _parse_issuers_list(self, row_el: Element) -> Optional[list[PrivateCreditIssuer]]:
         """Parse the optional LISTA_EMISSORES_TIT_CRED_PRIV block.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -1030,12 +1020,12 @@ class CvmMonthlyReport:
             for em_el in self._findall(emit_el, "EMISSORES_TIT_CRED_PRIV")
         ]
 
-    def _parse_performance_fee(self, row_el: Any) -> Optional[PerformanceFeeDetails]:
+    def _parse_performance_fee(self, row_el: Element) -> Optional[PerformanceFeeDetails]:
         """Parse the optional RESP_VED_REGUL_COBR_TAXA_PERFORM block.
 
         Parameters
         ----------
-        row_el : Any
+        row_el : Element
             ROW_PERFIL ElementTree element.
 
         Returns
@@ -1253,19 +1243,19 @@ class CvmMonthlyReport:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _find(parent: Any, tag: str) -> Any:
+    def _find(parent: Element, tag: str) -> Element:
         """Find a required child element by local tag name, ignoring namespace.
 
         Parameters
         ----------
-        parent : Any
+        parent : Element
             Parent ElementTree element.
         tag : str
             Local XML tag name (without namespace prefix).
 
         Returns
         -------
-        Any
+        Element
             Matched child element.
 
         Raises
@@ -1280,19 +1270,19 @@ class CvmMonthlyReport:
         raise ValueError(f"Required XML element <{tag}> not found.")
 
     @staticmethod
-    def _find_opt(parent: Any, tag: str) -> Optional[Any]:
+    def _find_opt(parent: Element, tag: str) -> Optional[Element]:
         """Find an optional child element by local tag name, returning None if absent.
 
         Parameters
         ----------
-        parent : Any
+        parent : Element
             Parent ElementTree element.
         tag : str
             Local XML tag name.
 
         Returns
         -------
-        Optional[Any]
+        Optional[Element]
             Matched child element or None.
         """
         for child in parent:
@@ -1302,19 +1292,19 @@ class CvmMonthlyReport:
         return None
 
     @staticmethod
-    def _findall(parent: Any, tag: str) -> list[Any]:
+    def _findall(parent: Element, tag: str) -> list[Element]:
         """Find all child elements matching a local tag name.
 
         Parameters
         ----------
-        parent : Any
+        parent : Element
             Parent ElementTree element.
         tag : str
             Local XML tag name.
 
         Returns
         -------
-        list[Any]
+        list[Element]
             List of matched child elements.
         """
         return [
@@ -1324,12 +1314,12 @@ class CvmMonthlyReport:
         ]
 
     @staticmethod
-    def _text(parent: Any, tag: str) -> str:
+    def _text(parent: Element, tag: str) -> str:
         """Return the text content of a required child element.
 
         Parameters
         ----------
-        parent : Any
+        parent : Element
             Parent ElementTree element.
         tag : str
             Local XML tag name.
@@ -1351,12 +1341,12 @@ class CvmMonthlyReport:
         raise ValueError(f"Required XML element <{tag}> not found.")
 
     @staticmethod
-    def _opt_text(parent: Any, tag: str) -> Optional[str]:
+    def _opt_text(parent: Element, tag: str) -> Optional[str]:
         """Return the text content of an optional child element.
 
         Parameters
         ----------
-        parent : Any
+        parent : Element
             Parent ElementTree element.
         tag : str
             Local XML tag name.
@@ -1397,12 +1387,12 @@ class CvmMonthlyReport:
             raise ValueError(f"Cannot parse '{raw}' as a decimal number.") from exc
 
     @classmethod
-    def _opt_decimal(cls, parent: Any, tag: str) -> Optional[Decimal]:
+    def _opt_decimal(cls, parent: Element, tag: str) -> Optional[Decimal]:
         """Parse an optional child element's text as a CVM decimal.
 
         Parameters
         ----------
-        parent : Any
+        parent : Element
             Parent ElementTree element.
         tag : str
             Local XML tag name.
