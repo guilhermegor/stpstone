@@ -13,6 +13,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.json import JsonFiles
 from stpstone.utils.parsers.str import StrHandler
 from stpstone.utils.providers.br.anbimadata_api._dto import ReturnAccessToken
+from stpstone.utils.providers.br.anbimadata_api._ports import IAnbimaApiClient
 
 
 class AnbimaDataGen(metaclass=TypeChecker):
@@ -45,7 +46,12 @@ class AnbimaDataGen(metaclass=TypeChecker):
 		Raises
 		------
 		ValueError
-			If ``str_client_id`` or ``str_client_secret`` is empty.
+			If ``str_client_id`` or ``str_client_secret`` is empty, or if the
+			authentication request fails.
+		NotImplementedError
+			If this class does not satisfy the ``IAnbimaApiClient`` port — i.e.,
+			if the required interface methods are missing or have incompatible
+			signatures.
 		"""
 		if not str_client_id or not str_client_id.strip():
 			raise ValueError("str_client_id cannot be empty")
@@ -62,6 +68,11 @@ class AnbimaDataGen(metaclass=TypeChecker):
 		self._cls_str = StrHandler()
 		self._cls_json = JsonFiles()
 		self.str_token = self.access_token()["access_token"]
+		if not isinstance(self, IAnbimaApiClient):
+			raise NotImplementedError(
+				f"{type(self).__name__} does not satisfy the IAnbimaApiClient port — "
+				"implement access_token() and generic_request()"
+			)
 
 	def access_token(self) -> ReturnAccessToken:
 		"""Return a cached or freshly acquired OAuth access token.
