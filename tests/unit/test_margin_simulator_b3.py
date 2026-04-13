@@ -13,9 +13,9 @@ from pytest_mock import MockerFixture
 import requests
 
 from stpstone.utils.parsers.json import JsonFiles
-from stpstone.utils.providers.br.margin_simulator_b3 import (
+from stpstone.utils.providers.br.margin_simulator_b3._dto import ResultReferenceData
+from stpstone.utils.providers.br.margin_simulator_b3.margin_simulator_b3 import (
     MarginSimulatorB3,
-    ResultReferenceData,
 )
 
 
@@ -470,7 +470,7 @@ def test_reload_module(valid_payload: ResultReferenceData, mock_requests_get: Ma
     _ = MarginSimulatorB3(dict_payload=valid_payload)
     
     # Fix the module path
-    module_name = "stpstone.utils.providers.br.margin_simulator_b3"
+    module_name = "stpstone.utils.providers.br.margin_simulator_b3.margin_simulator_b3"
     if module_name in sys.modules:
         importlib.reload(sys.modules[module_name])
     

@@ -1,6 +1,8 @@
-from stpstone.utils.providers.br.margin_simulator_b3 import (
-    MarginSimulatorB3,
+from stpstone.utils.providers.br.margin_simulator_b3._dto import (
     ResultMarginSimulatorB3Payload,
+)
+from stpstone.utils.providers.br.margin_simulator_b3.margin_simulator_b3 import (
+    MarginSimulatorB3,
 )
 
 

@@ -13,7 +13,7 @@ References
 
 import pytest
 
-from stpstone.utils.providers.br.line_b3 import ConnectionApi
+from stpstone.utils.providers.br.line_b3.connection_api import ConnectionApi
 
 
 # --------------------------

@@ -25,7 +25,7 @@ if platform.system() != "Windows":
 else:
     import MetaTrader5 as mt5
 
-    from stpstone.utils.trading_platforms.mt5 import MT5
+    from stpstone.utils.trading_platforms.mt5.mt5 import MT5
 
 
 # --------------------------

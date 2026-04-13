@@ -44,7 +44,7 @@ class TestReuters:
     # Validation Tests
     # --------------------------
     def test_validate_api_key_empty(
-        self, 
+        self,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test validation raises error for empty API key.
@@ -66,7 +66,7 @@ class TestReuters:
             reuters_client._validate_api_key("")
 
     def test_validate_api_key_non_string(
-        self, 
+        self,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test validation raises error for non-string API key.
@@ -88,7 +88,7 @@ class TestReuters:
             reuters_client._validate_api_key(123)
 
     def test_validate_device_id_empty(
-        self, 
+        self,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test validation raises error for empty device ID.
@@ -110,7 +110,7 @@ class TestReuters:
             reuters_client._validate_device_id("")
 
     def test_validate_device_id_non_string(
-        self, 
+        self,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test validation raises error for non-string device ID.
@@ -132,7 +132,7 @@ class TestReuters:
             reuters_client._validate_device_id(123)
 
     def test_quotes_empty_currency(
-        self, 
+        self,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test quotes raises error for empty currency.
@@ -154,7 +154,7 @@ class TestReuters:
             reuters_client.quotes("")
 
     def test_quotes_non_string_currency(
-        self, 
+        self,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test quotes raises error for non-string currency.
@@ -174,10 +174,10 @@ class TestReuters:
         """
         with pytest.raises(TypeError, match="must be of type"):
             reuters_client.quotes(123)
-    @patch("requests.request")
+    @patch("stpstone.utils.providers.ww.reuters.reuters.request")
     def test_fetch_data_empty_response(
-        self, 
-        mock_request: MagicMock, 
+        self,
+        mock_request: MagicMock,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test fetch data with empty response.
@@ -204,10 +204,10 @@ class TestReuters:
         with pytest.raises(ValueError, match="Failed to fetch data"):
             reuters_client.fetch_data("test_app")
 
-    @patch("requests.request")
+    @patch("stpstone.utils.providers.ww.reuters.reuters.request")
     def test_fetch_data_request_failure(
-        self, 
-        mock_request: MagicMock, 
+        self,
+        mock_request: MagicMock,
         reuters_client: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test fetch data when request fails.

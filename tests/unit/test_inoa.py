@@ -16,7 +16,7 @@ import pandas as pd
 import pytest
 from requests import Response, exceptions
 
-from stpstone.utils.providers.br.inoa import AlphaTools
+from stpstone.utils.providers.br.inoa.inoa import AlphaTools
 
 
 # --------------------------
@@ -226,7 +226,7 @@ class TestGenericReq:
     """Tests for generic_req method."""
 
     def test_successful_request(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
@@ -256,14 +256,14 @@ class TestGenericReq:
         None
         """
         mock_response.json.return_value = [{"test": "data"}]
-        with patch("stpstone.utils.providers.br.inoa.request", return_value=mock_response) \
+        with patch("stpstone.utils.providers.br.inoa.inoa.request", return_value=mock_response) \
             as mock_request:
             result = alpha_tools.generic_req("POST", "test_endpoint", {"param": "value"})
             assert result == [{"test": "data"}]
             mock_request.assert_called_once()
 
     def test_request_retry_on_failure(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
@@ -298,7 +298,7 @@ class TestGenericReq:
             alpha_tools.generic_req("POST", "test_endpoint", {"param": "value"})
 
     def test_request_auth(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
@@ -327,7 +327,7 @@ class TestGenericReq:
         None
         """
         mock_response.json.return_value = [{"test": "data"}]
-        with patch("stpstone.utils.providers.br.inoa.request", return_value=mock_response) \
+        with patch("stpstone.utils.providers.br.inoa.inoa.request", return_value=mock_response) \
             as mock_request:
             alpha_tools.generic_req("POST", "test_endpoint", {"param": "value"})
             mock_request.assert_called_with(
@@ -343,7 +343,7 @@ class TestFunds:
     """Tests for funds property."""
 
     def test_successful_funds_retrieval(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
@@ -376,7 +376,7 @@ class TestFunds:
             "1": {"id": 1, "name": "Fund A", "legal_id": "A123"},
             "2": {"id": 2, "name": "Fund B", "legal_id": "B456"},
         }
-        with patch("stpstone.utils.providers.br.inoa.request", return_value=mock_response) \
+        with patch("stpstone.utils.providers.br.inoa.inoa.request", return_value=mock_response) \
             as mock_request:
             df_ = alpha_tools.funds
             assert isinstance(df_, pd.DataFrame)
@@ -386,7 +386,7 @@ class TestFunds:
             mock_request.assert_called_once()
 
     def test_funds_retrieval_failure(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
@@ -425,9 +425,9 @@ class TestQuotes:
     """Tests for quotes method."""
 
     def test_successful_quotes_retrieval(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
-        mock_response: MagicMock, 
+        mock_response: MagicMock,
         mock_dates_br: MagicMock
     ) -> None:
         """Test successful quotes data retrieval.
@@ -466,7 +466,7 @@ class TestQuotes:
                 {"fund_id": 2, "date": "2023-01-02", "status_display": "Inactive"},
             ]
         }
-        with patch("stpstone.utils.providers.br.inoa.request", return_value=mock_response) \
+        with patch("stpstone.utils.providers.br.inoa.inoa.request", return_value=mock_response) \
             as mock_request:
             df_ = alpha_tools.quotes([1, 2])
             assert isinstance(df_, pd.DataFrame)
@@ -475,7 +475,7 @@ class TestQuotes:
             mock_request.assert_called_once()
 
     def test_empty_fund_ids(
-        self, 
+        self,
         alpha_tools: Any # noqa ANN401: typing.Any is not allowed
     ) -> None:
         """Test quotes with empty fund ID list.
@@ -493,7 +493,7 @@ class TestQuotes:
             alpha_tools.quotes([])
 
     def test_quotes_retrieval_failure(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
@@ -528,7 +528,7 @@ class TestQuotes:
             alpha_tools.quotes([1, 2])
 
     def test_missing_items_key(
-        self, 
+        self,
         alpha_tools: Any, # noqa ANN401: typing.Any is not allowed
         mock_response: MagicMock
     ) -> None:
