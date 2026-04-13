@@ -112,8 +112,8 @@ class CvmMonthlyReport:
         -------
         None
         """
-        df = self._records_to_df(records)
-        df.to_csv(output_path, index=False, encoding="utf-8-sig")
+        df_ = self._records_to_df(records)
+        df_.to_csv(output_path, index=False, encoding="utf-8-sig")
 
     def to_excel(
         self,
@@ -137,8 +137,8 @@ class CvmMonthlyReport:
         -------
         None
         """
-        df = self._records_to_df(records)
-        df.to_excel(output_path, index=False)
+        df_ = self._records_to_df(records)
+        df_.to_excel(output_path, index=False)
 
     # ------------------------------------------------------------------
     # Public deserialization / conversion
@@ -198,8 +198,8 @@ class CvmMonthlyReport:
         ValueError
             If the file format is not recognised or a required column is missing.
         """
-        df = self._read_tabular(path)
-        rows = [self._flat_dict_to_row(row_dict) for row_dict in df.to_dict(orient="records")]
+        df_ = self._read_tabular(path)
+        rows = [self._flat_dict_to_row(row_dict) for row_dict in df_.to_dict(orient="records")]
         doc = PerfilMensalDocument(header=header, rows=rows)
         return self.to_xml(doc, output_path=output_path)
 

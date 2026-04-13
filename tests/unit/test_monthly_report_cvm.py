@@ -300,22 +300,22 @@ def test_to_csv_creates_file(
     out = str(tmp_path / "out.csv")
     reporter.to_csv([minimal_row], out)
     assert Path(out).exists()
-    df = pd.read_csv(out)
-    assert len(df) == 1
+    df_ = pd.read_csv(out)
+    assert len(df_) == 1
 
 
 def test_to_csv_accepts_dicts(reporter: CvmMonthlyReport, tmp_path: Path) -> None:
     out = str(tmp_path / "out.csv")
     reporter.to_csv([{"a": 1, "b": "hello"}], out)
-    df = pd.read_csv(out)
-    assert "a" in df.columns
+    df_ = pd.read_csv(out)
+    assert "a" in df_.columns
 
 
 def test_to_csv_accepts_dataframe(reporter: CvmMonthlyReport, tmp_path: Path) -> None:
     out = str(tmp_path / "out.csv")
     reporter.to_csv(pd.DataFrame([{"x": 1}]), out)
-    df = pd.read_csv(out)
-    assert "x" in df.columns
+    df_ = pd.read_csv(out)
+    assert "x" in df_.columns
 
 
 def test_to_csv_raises_on_unsupported_type(reporter: CvmMonthlyReport, tmp_path: Path) -> None:
@@ -329,8 +329,8 @@ def test_to_excel_creates_file(
     out = str(tmp_path / "out.xlsx")
     reporter.to_excel([minimal_row], out)
     assert Path(out).exists()
-    df = pd.read_excel(out)
-    assert len(df) == 1
+    df_ = pd.read_excel(out)
+    assert len(df_) == 1
 
 
 # --------------------------
@@ -343,9 +343,9 @@ def test_from_xml_returns_dataframe(
 ) -> None:
     xml_path = str(tmp_path / "doc.xml")
     reporter.to_xml(minimal_doc, output_path=xml_path)
-    df = reporter.from_xml(xml_path)
-    assert isinstance(df, pd.DataFrame)
-    assert len(df) == 1
+    df_ = reporter.from_xml(xml_path)
+    assert isinstance(df_, pd.DataFrame)
+    assert len(df_) == 1
 
 
 def test_from_xml_preserves_cnpj(
@@ -353,8 +353,8 @@ def test_from_xml_preserves_cnpj(
 ) -> None:
     xml_path = str(tmp_path / "doc.xml")
     reporter.to_xml(minimal_doc, output_path=xml_path)
-    df = reporter.from_xml(xml_path)
-    assert df["cnpj_fdo"].iloc[0] == "12345678000195"
+    df_ = reporter.from_xml(xml_path)
+    assert df_["cnpj_fdo"].iloc[0] == "12345678000195"
 
 
 def test_from_xml_raises_on_invalid_file(reporter: CvmMonthlyReport, tmp_path: Path) -> None:
@@ -376,8 +376,8 @@ def test_from_csv_excel_round_trip(
     xml_path = str(tmp_path / "doc.xml")
     csv_path = str(tmp_path / "doc.csv")
     reporter.to_xml(minimal_doc, output_path=xml_path)
-    df = reporter.from_xml(xml_path)
-    reporter.to_csv(df, csv_path)
+    df_ = reporter.from_xml(xml_path)
+    reporter.to_csv(df_, csv_path)
     rebuilt_xml = reporter.from_csv_excel(csv_path, header=minimal_header)
     assert isinstance(rebuilt_xml, str)
     assert "12345678000195" in rebuilt_xml

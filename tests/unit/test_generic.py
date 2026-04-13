@@ -93,12 +93,12 @@ def dataframe_function() -> Callable[[pd.DataFrame], pd.DataFrame]:
     Callable[[pd.DataFrame], pd.DataFrame]
         Function that adds a new column to a DataFrame
     """
-    def func(df: pd.DataFrame) -> pd.DataFrame:
+    def func(df_: pd.DataFrame) -> pd.DataFrame:
         """Add new column to DataFrame.
         
         Parameters
         ----------
-        df : pd.DataFrame
+        df_ : pd.DataFrame
             Input DataFrame
 
         Returns
@@ -106,8 +106,8 @@ def dataframe_function() -> Callable[[pd.DataFrame], pd.DataFrame]:
         pd.DataFrame
             DataFrame with new column
         """
-        df["C"] = df["A"] + df["B"]
-        return df
+        df_["C"] = df_["A"] + df_["B"]
+        return df_
     return func
 
 

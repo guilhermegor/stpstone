@@ -1324,8 +1324,8 @@ class TestAnbimaDataFundsAbout:
             
             assert isinstance(result, dict)
             assert set(result.keys()) == {"characteristics", "related", "about"}
-            assert all(isinstance(df, pd.DataFrame) for df in result.values())
-            assert all(len(df) == 1 for df in result.values())
+            assert all(isinstance(df_, pd.DataFrame) for df_ in result.values())
+            assert all(len(df_) == 1 for df_ in result.values())
 
 
 # --------------------------

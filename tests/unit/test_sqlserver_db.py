@@ -932,7 +932,7 @@ class TestInsert:
                 # Get the call arguments - the first argument to to_sql is the table name
                 call_args = mock_to_sql.call_args
                 if call_args:
-                    # to_sql is called as df.to_sql(name, con, if_exists, index)
+                    # to_sql is called as df_.to_sql(name, con, if_exists, index)
                     # So the table name is the first positional argument
                     table_name = call_args[0][0]  # First positional argument
                     assert table_name == "test_table"

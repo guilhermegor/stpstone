@@ -175,12 +175,12 @@ class FinancialReturns(metaclass=TypeChecker):
         Examples
         --------
         >>> import pandas as pd
-        >>> df = pd.DataFrame({
+        >>> df_ = pd.DataFrame({
         ...     'date': pd.date_range('2023-01-01', periods=3),
         ...     'price': [100, 110, 105]
         ... })
         >>> dd = FinancialReturns()
-        >>> result = dd.pandas_returns_from_spot_prices(df, 'price', 'date')
+        >>> result = dd.pandas_returns_from_spot_prices(df_, 'price', 'date')
         """
         # creating column with first occurrence of a ticker
         df_[col_first_occurrence_ticker] = np.where(

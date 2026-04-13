@@ -417,7 +417,7 @@ value.
         if int_dfn <= 0 or int_dfd <= 0:
             raise ValueError("Degrees of freedom must be positive")
         if int_dfn <= int_dfd:
-            raise ValueError("Numerator df must be greater than denominator df")
+            raise ValueError("Numerator df_ must be greater than denominator df_")
         if probability_func not in ("ppf", "pdf", "cdf"):
             raise ValueError("probability_func must be one of 'ppf', 'pdf', or 'cdf'")
         if probability_func == "ppf" and (float_p is None or not 0.0 <= float_p <= 1.0):

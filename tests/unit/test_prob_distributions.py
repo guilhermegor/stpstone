@@ -469,7 +469,7 @@ class TestProbabilityDistributions:
             prob_dist.f_fisher_snedecor(0, 3, 0.0, 0.95, "ppf")
         with pytest.raises(ValueError, match="Degrees of freedom must be positive"):
             prob_dist.f_fisher_snedecor(5, 0, 0.0, 0.95, "ppf")
-        with pytest.raises(ValueError, match="Numerator df must be greater than denominator df"):
+        with pytest.raises(ValueError, match="Numerator df_ must be greater than denominator df_"):
             prob_dist.f_fisher_snedecor(3, 5, 0.0, 0.95, "ppf")
 
     def test_f_fisher_snedecor_invalid_prob(

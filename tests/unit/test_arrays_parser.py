@@ -9,15 +9,15 @@ from stpstone.utils.parsers.arrays import Arrays
 class TestArrays(TestCase):
     def setUp(self):
         self.arrays = Arrays()
-        self.df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+        self.df_ = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
         self.series = pd.Series([1, 2, 3])
         self.np_array = np.array([1, 2, 3])
         self.list_data = [1.0, 2.0, 3.0]
 
     def test_to_array_matrice_with_dataframe(self):
-        result = self.arrays.to_array_matrice(self.df)
+        result = self.arrays.to_array_matrice(self.df_)
         self.assertIsInstance(result, np.ndarray)
-        np.testing.assert_array_equal(result, self.df.to_numpy())
+        np.testing.assert_array_equal(result, self.df_.to_numpy())
 
     def test_to_array_matrice_with_ndarray(self):
         result = self.arrays.to_array_matrice(self.np_array)
@@ -40,9 +40,9 @@ class TestArrays(TestCase):
         np.testing.assert_array_equal(result, self.np_array)
 
     def test_to_array_with_dataframe(self):
-        result = self.arrays.to_array(self.df)
+        result = self.arrays.to_array(self.df_)
         self.assertIsInstance(result, np.ndarray)
-        np.testing.assert_array_equal(result, self.df.to_numpy())
+        np.testing.assert_array_equal(result, self.df_.to_numpy())
 
     def test_to_array_with_series(self):
         result = self.arrays.to_array(self.series)
