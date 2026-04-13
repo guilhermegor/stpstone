@@ -10,7 +10,7 @@ not a flat `.py` file. The full required artifact set is:
 ```
 utils/<area>/<feature>/         ← feature package (no __init__.py)
 ├── _ports.py                   ← always present: Protocols / ABCs (Ports & Adapters)
-├── _dto.py                     ← present whenever a TypedDict is needed
+├── _dto.py                     ← only when a TypedDict is needed; omit if none required
 └── <feature>.py                ← one public class per file (adapter); add more as needed
 
 examples/<feature>.py           ← runnable usage example at the repo root examples/ dir
@@ -169,6 +169,15 @@ cross-checks against the `Raises` section of the enclosing function's docstring.
 raise without a matching docstring entry is reported as `❌ Raised but not documented
 exception NotImplementedError`, which fails the CI check. Class-level docstrings are
 optional but recommended for clarity when the guard lives in `__init__`.
+
+## What NOT to test
+
+- **`_ports.py`** — pure Protocols/ABCs with no runtime logic; `@runtime_checkable`
+  conformance is already checked by the adapter's own `isinstance` guard in `__init__`.
+- **`_dto.py`** — plain `TypedDict` definitions with no logic to exercise.
+
+Only files that contain a concrete class (adapter implementation) need a dedicated
+`tests/unit/test_<feature>.py` file.
 
 ## Verification
 
