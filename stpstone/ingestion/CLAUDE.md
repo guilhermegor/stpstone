@@ -17,7 +17,16 @@ Within the country folder, use the matching domain subfolder:
 | `registries` | Entity registries (companies, funds, securities listings) |
 | `taxation` | Tax tables, tax schedules, tax-related calculations |
 
-If the source genuinely does not fit any of these, create a new subfolder with a lowercase, underscore-separated name and add an `__init__.py`.
+If the source genuinely does not fit any of these, create a new subfolder with a lowercase, underscore-separated name and add an `__init__.py`. **Never add new `__init__.py` files without explicit approval** — the `make test_feat MODULE=<name>` recipe matches filenames and `__init__` will cause false matches or failures.
+
+## One Class Per Module
+
+Each source file must contain exactly **one public class**.
+
+- Public classes: one per file, named after the file (`b3_futures_closing_adj.py` → `B3FuturesClosingAdj`).
+- Private/shared base classes: allowed in their own file with a leading underscore prefix (`_b3_trading_hours_core.py`). Must not appear in the same file as a public class.
+
+**When refactoring an existing module that contains multiple classes**, split every class into its own file and also split the corresponding test file and example file to match (one test file and one example file per class module). Delete the original multi-class files after the split.
 
 ## File Naming
 
@@ -285,3 +294,5 @@ This runs codespell, ruff (lint + format), type hint/docstring consistency check
 - `.values` instead of `.to_numpy()` (`PD011`)
 - Docstring type not matching type hint exactly (quote style, `, optional` suffix)
 - `Literal` types in docstrings must use single quotes to match Python's repr
+
+**When refactoring a module that was split into multiple files**, run `make test_feat` for **each** new module name to verify every file passes independently. Do not skip this step — ruff and type-check errors are only caught per-module, not globally.
