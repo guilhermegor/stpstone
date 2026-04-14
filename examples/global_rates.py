@@ -16,7 +16,9 @@ from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager imp
 # print(session.proxies)
 
 cls_ = GlobalRates(
-    session=None, date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 3), cls_db=None
+	session=None,
+	date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 3),
+	cls_db=None,
 )
 
 # df_ = cls_.source("euribor", bool_fetch=True)

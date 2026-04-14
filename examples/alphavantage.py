@@ -4,11 +4,11 @@ from stpstone.ingestion.countries.us.exchange.alphavantage import AlphaVantageUS
 
 
 cls_ = AlphaVantageUS(
-    date_ref=None,
-    logger=None,
-    cls_db=None,
-    token=None,
-    list_slugs=["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA"],
+	date_ref=None,
+	logger=None,
+	cls_db=None,
+	token=None,
+	list_slugs=["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA"],
 )
 
 df_ = cls_.run()

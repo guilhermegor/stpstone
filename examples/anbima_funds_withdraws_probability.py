@@ -1,14 +1,14 @@
 """Example of usage of AnbimaFundsRedemptionProbabilityMatrix class."""
 
 from stpstone.ingestion.countries.br.registries.anbima_funds_withdraws_probability import (
-    AnbimaFundsRedemptionProbabilityMatrix,
+	AnbimaFundsRedemptionProbabilityMatrix,
 )
 
 
 cls_ = AnbimaFundsRedemptionProbabilityMatrix(
-    date_ref=None,
-    logger=None, 
-    cls_db=None, 
+	date_ref=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()

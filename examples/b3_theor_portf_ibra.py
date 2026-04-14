@@ -4,9 +4,9 @@ from stpstone.ingestion.countries.br.exchange.b3_theor_portf_ibra import B3Theor
 
 
 cls_ = B3TheoricalPortfolioIBRA(
-    date_ref=None,
-    logger=None,
-    cls_db=None,
+	date_ref=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()

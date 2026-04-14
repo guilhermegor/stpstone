@@ -1,47 +1,26 @@
 from stpstone.utils.providers.br.margin_simulator_b3._dto import (
-    ResultMarginSimulatorB3Payload,
+	ResultMarginSimulatorB3Payload,
 )
 from stpstone.utils.providers.br.margin_simulator_b3.margin_simulator_b3 import (
-    MarginSimulatorB3,
+	MarginSimulatorB3,
 )
 
 
-dict_payload : ResultMarginSimulatorB3Payload = \
-    {
-        "LiquidityResource": {
-            "value": 7500000000
-        },
-        "RiskPositionList": [
-            {
-                "Security": {
-                    "symbol": "DI1F35"
-                },
-                "SecurityGroup": {
-                    "positionTypeCode": 0
-                },
-                "Position": {
-                    "longQuantity": 1,
-                    "shortQuantity": 0,
-                    "longPrice": 0,
-                    "shortPrice": 0
-                }
-            }, 
-            {
-                "Security": {
-                    "symbol": "DI1F27"
-                },
-                "SecurityGroup": {
-                    "positionTypeCode": 0
-                },
-                "Position": {
-                    "longQuantity": 0,
-                    "shortQuantity": 1,
-                    "longPrice": 0,
-                    "shortPrice": 0
-                }
-            }
-        ]
-    }
+dict_payload: ResultMarginSimulatorB3Payload = {
+	"LiquidityResource": {"value": 7500000000},
+	"RiskPositionList": [
+		{
+			"Security": {"symbol": "DI1F35"},
+			"SecurityGroup": {"positionTypeCode": 0},
+			"Position": {"longQuantity": 1, "shortQuantity": 0, "longPrice": 0, "shortPrice": 0},
+		},
+		{
+			"Security": {"symbol": "DI1F27"},
+			"SecurityGroup": {"positionTypeCode": 0},
+			"Position": {"longQuantity": 0, "shortQuantity": 1, "longPrice": 0, "shortPrice": 0},
+		},
+	],
+}
 
 cls_margin_simulator_b3 = MarginSimulatorB3(dict_payload=dict_payload)
 json_margin_call = cls_margin_simulator_b3.risk_calculation()

@@ -1,21 +1,21 @@
 """Example of how to use FIFDailyInfos class to ingest data from CVM."""
 
 from stpstone.ingestion.countries.br.registries.cvm_data import (
-    FIFCADFI,
-    FIFCDA,
-    CVMDataBanksRegistry,
-    CVMDataDistributionOffers,
-    FIFDailyInfos,
-    FIFFactSheet,
-    FIFMonthlyProfile,
-    FIFPortfolio,
-    FIFStatement,
+	FIFCADFI,
+	FIFCDA,
+	CVMDataBanksRegistry,
+	CVMDataDistributionOffers,
+	FIFDailyInfos,
+	FIFFactSheet,
+	FIFMonthlyProfile,
+	FIFPortfolio,
+	FIFStatement,
 )
 
 
 # cls_ = FIFDailyInfos(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -25,8 +25,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = FIFMonthlyProfile(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -36,8 +36,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = FIFCDA(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -47,8 +47,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = FIFStatement(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -58,8 +58,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = FIFFactSheet(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -69,8 +69,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = FIFPortfolio(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -80,8 +80,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = FIFCADFI(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 
@@ -91,8 +91,8 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 # cls_ = CVMDataBanksRegistry(
-#     date_ref=None, 
-#     logger=None, 
+#     date_ref=None,
+#     logger=None,
 #     cls_db=None,
 # )
 # df_ = cls_.run()
@@ -101,9 +101,9 @@ from stpstone.ingestion.countries.br.registries.cvm_data import (
 
 
 cls_ = CVMDataDistributionOffers(
-    date_ref=None, 
-    logger=None, 
-    cls_db=None,
+	date_ref=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()

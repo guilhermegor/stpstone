@@ -8,15 +8,17 @@ from stpstone.utils.connections.netops.proxies.managers.free_proxies_manager imp
 
 
 session = YieldFreeProxy(
-    bool_new_proxy=True,
-    bool_use_timer=True,
-    float_min_ratio_times_alive_dead=0.02,
-    float_max_timeout=600
+	bool_new_proxy=True,
+	bool_use_timer=True,
+	float_min_ratio_times_alive_dead=0.02,
+	float_max_timeout=600,
 ).session
 print(session.proxies)
 
 cls_ = FuturesClosingAdjB3(
-    session=None, date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 3), cls_db=None
+	session=None,
+	date_ref=DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 3),
+	cls_db=None,
 )
 
 df_ = cls_.source("futures_closing_adj", bool_fetch=True)

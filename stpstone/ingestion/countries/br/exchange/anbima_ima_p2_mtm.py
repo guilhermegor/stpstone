@@ -57,8 +57,9 @@ class AnbimaExchangeBRIMAP2MTMs(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.url = "https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt"
 
 	def run(

@@ -1,0 +1,160 @@
+"""B3 Securities Market Government Securities Reference Prices ingestion."""
+
+from datetime import date
+from io import StringIO
+from logging import Logger
+from typing import Optional, Union
+
+import pandas as pd
+from playwright.sync_api import Page as PlaywrightPage
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
+
+from stpstone.ingestion.countries.br.exchange._b3_search_by_trading_session_base import (
+	ABCB3SearchByTradingSession,
+)
+
+
+class B3SecuritiesMarketGovernmentSecuritiesPrices(ABCB3SearchByTradingSession):
+	"""B3 Securities Market - Government Securities Reference Prices."""
+
+	def __init__(
+		self,
+		date_ref: Optional[date] = None,
+		logger: Optional[Logger] = None,
+		cls_db: Optional[Session] = None,
+	) -> None:
+		"""Initialize the B3SecuritiesMarketGovernmentSecuritiesPrices class.
+
+		Parameters
+		----------
+		date_ref : Optional[date], optional
+		    The date of reference, by default None.
+		logger : Optional[Logger], optional
+		    The logger, by default None.
+		cls_db : Optional[Session], optional
+		    The database session, by default None.
+
+		Returns
+		-------
+		None
+		"""
+		super().__init__(
+			date_ref=date_ref,
+			logger=logger,
+			cls_db=cls_db,
+			url="https://www.b3.com.br/pesquisapregao/download?filelist=PU{}.ex_",
+		)
+
+	def run(
+		self,
+		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (
+			12.0,
+			21.0,
+		),
+		bool_verify: bool = True,
+		bool_insert_or_ignore: bool = False,
+		str_fmt_dt: str = "YYYYMMDD",
+		str_table_name: str = "br_b3_securities_market_government_securities_prices",
+	) -> Optional[pd.DataFrame]:
+		"""Run the ingestion process.
+
+		Parameters
+		----------
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		    The timeout for the request, by default (12.0, 21.0).
+		bool_verify : bool, optional
+		    Whether to verify the data, by default True.
+		bool_insert_or_ignore : bool, optional
+		    Whether to insert or ignore the data, by default False.
+		str_fmt_dt : str, optional
+		    The format of the date, by default "YYYYMMDD".
+		str_table_name : str, optional
+		    The name of the table, by default
+		    "br_b3_securities_market_government_securities_prices".
+
+		Returns
+		-------
+		Optional[pd.DataFrame]
+		    The ingested data.
+		"""
+		return super().run(
+			dict_dtypes={
+				"TIPO_REGISTRO": str,
+				"CODIGO_TITULO": str,
+				"DESCRICAO_TITULO": str,
+				"DATA_EMISSAO_TITULO": "date",
+				"DATA_VENCIMENTO_TITULO": "date",
+				"VALOR_MERCADO_PU": str,
+				"VALOR_PU_CENARIO_ESTRESSE": str,
+				"VALOR_MTM_PU_D_MAIS_1": str,
+				"FILE_NAME": "category",
+			},
+			timeout=timeout,
+			bool_verify=bool_verify,
+			bool_insert_or_ignore=bool_insert_or_ignore,
+			str_fmt_dt=str_fmt_dt,
+			str_table_name=str_table_name,
+		)
+
+	def parse_raw_file(
+		self,
+		resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
+		prefix: str = "b3_securities_market_government_securities_prices_",
+		file_name: str = "b3_securities_market_government_securities_prices",
+	) -> tuple[StringIO, str]:
+		"""Parse the raw file content by executing Windows executable with Wine.
+
+		Parameters
+		----------
+		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+		    The response object.
+		prefix : str, optional
+		    The prefix of the file name, by default
+		    "b3_securities_market_government_securities_prices_".
+		file_name : str, optional
+		    The name of the file, by default "b3_securities_market_government_securities_prices".
+
+		Returns
+		-------
+		tuple[StringIO, str]
+		    The parsed content and file name.
+		"""
+		return self.parse_raw_ex_file(
+			resp_req=resp_req,
+			prefix=prefix,
+			file_name=file_name,
+		)
+
+	def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
+		"""Transform file content into a DataFrame.
+
+		Parameters
+		----------
+		file : StringIO
+		    The file content.
+		file_name : str
+		    The name of the file.
+
+		Returns
+		-------
+		pd.DataFrame
+		    The transformed DataFrame.
+		"""
+		df_ = pd.read_csv(
+			file,
+			sep=";",
+			skiprows=1,
+			names=[
+				"TIPO_REGISTRO",
+				"CODIGO_TITULO",
+				"DESCRICAO_TITULO",
+				"DATA_EMISSAO_TITULO",
+				"DATA_VENCIMENTO_TITULO",
+				"VALOR_MERCADO_PU",
+				"VALOR_PU_CENARIO_ESTRESSE",
+				"VALOR_MTM_PU_D_MAIS_1",
+			],
+		)
+		df_["FILE_NAME"] = file_name
+		return df_

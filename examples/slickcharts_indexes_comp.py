@@ -1,5 +1,5 @@
 from stpstone.ingestion.countries.us.registries.slickcharts_indexes_components import (
-    SlickChartsIndexesComponents,
+	SlickChartsIndexesComponents,
 )
 
 

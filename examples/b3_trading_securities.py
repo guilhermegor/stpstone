@@ -4,9 +4,9 @@ from stpstone.ingestion.countries.br.registries.b3_trading_securities import B3I
 
 
 cls_ = B3Instruments(
-    date_ref=None, 
-    logger=None, 
-    cls_db=None,
+	date_ref=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()

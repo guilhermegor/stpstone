@@ -1,0 +1,211 @@
+"""B3 Derivatives Market OTC Market Trades ingestion."""
+
+from datetime import date
+from io import StringIO
+from logging import Logger
+from typing import Optional, Union
+
+import pandas as pd
+from playwright.sync_api import Page as PlaywrightPage
+from requests import Response, Session
+from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
+
+from stpstone.ingestion.countries.br.exchange._b3_search_by_trading_session_base import (
+	ABCB3SearchByTradingSession,
+)
+
+
+class B3DerivativesMarketOTCMarketTrades(ABCB3SearchByTradingSession):
+	"""B3 Derivatives Market - OTC Market Trades."""
+
+	def __init__(
+		self,
+		date_ref: Optional[date] = None,
+		logger: Optional[Logger] = None,
+		cls_db: Optional[Session] = None,
+	) -> None:
+		"""Initialize the B3DerivativesMarketOTCMarketTrades class.
+
+		Parameters
+		----------
+		date_ref : Optional[date], optional
+		    The date of reference, by default None.
+		logger : Optional[Logger], optional
+		    The logger, by default None.
+		cls_db : Optional[Session], optional
+		    The database session, by default None.
+
+		Returns
+		-------
+		None
+		"""
+		super().__init__(
+			date_ref=date_ref,
+			logger=logger,
+			cls_db=cls_db,
+			url="https://www.b3.com.br/pesquisapregao/download?filelist=BE{}.ex_",
+		)
+
+	def run(
+		self,
+		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (
+			12.0,
+			21.0,
+		),
+		bool_verify: bool = True,
+		bool_insert_or_ignore: bool = False,
+		str_fmt_dt: str = "YYYY-MM-DD",
+		str_table_name: str = "br_b3_derivatives_market_otc_market_trades",
+	) -> Optional[pd.DataFrame]:
+		"""Run the ingestion process.
+
+		Parameters
+		----------
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		    The timeout, by default (12.0, 21.0).
+		bool_verify : bool, optional
+		    Whether to verify the data, by default True.
+		bool_insert_or_ignore : bool, optional
+		    Whether to insert or ignore the data, by default False.
+		str_fmt_dt : str, optional
+		    The format of the date, by default "YYYY-MM-DD".
+		str_table_name : str, optional
+		    The name of the table, by default "br_b3_derivatives_market_otc_market_trades".
+
+		Returns
+		-------
+		Optional[pd.DataFrame]
+		    The ingested data.
+		"""
+		return super().run(
+			dict_dtypes={
+				"ID_TRANSACAO": str,
+				"COMPLEMENTO_TRANSACAO": str,
+				"TIPO_REGISTRO": str,
+				"DATA_GERACAO_ARQUIVO": str,
+				"TIPO_NEGOCIACAO": str,
+				"CODIGO_MERCADORIA": str,
+				"CODIGO_MERCADO": str,
+				"DATA_BASE": str,
+				"DATA_VENCIMENTO": str,
+				"VOLUME_DIA_BRL": float,
+				"VOLUME_DIA_USD": float,
+				"QTD_CONTRATOS_ABERTO_APOS_LIQUIDACAO": float,
+				"QTD_NEGOCIOS_EFETUADOS": float,
+				"QTD_CONTRATOS_NEGOCIADOS": float,
+				"QTD_CONTRATOS_ABERTOS_ANTES_LIQUIDACAO": float,
+				"QTD_CONTRATOS_LIQUIDADOS": float,
+				"QTD_CONTRATOS_ABERTO_FINAL": float,
+				"TAXA_MEDIA_SWAP_PREMIO_MEIO_OPC_FLEX": float,
+				"SINAL_TAXA_MEDIA_PREMIO_MEDIO": str,
+				"VOLUME_ABERTO_BRL": float,
+				"VOLUME_ABERTO_USD": float,
+				"FILE_NAME": "category",
+			},
+			timeout=timeout,
+			bool_verify=bool_verify,
+			bool_insert_or_ignore=bool_insert_or_ignore,
+			str_fmt_dt=str_fmt_dt,
+			str_table_name=str_table_name,
+		)
+
+	def parse_raw_file(
+		self,
+		resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
+		prefix: str = "b3_derivatives_mkt_otc_trades_",
+		file_name: str = "b3_derivatives_market_otc_market_trades",
+	) -> tuple[StringIO, str]:
+		"""Parse the raw file content by executing Windows executable with Wine.
+
+		Parameters
+		----------
+		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
+		    The response object.
+		prefix : str, optional
+		    The prefix of the file name, by default "b3_derivatives_mkt_otc_trades_".
+		file_name : str, optional
+		    The name of the file, by default "b3_derivatives_market_otc_market_trades".
+
+		Returns
+		-------
+		tuple[StringIO, str]
+		    The parsed content and file name.
+		"""
+		return self.parse_raw_ex_file(
+			resp_req=resp_req,
+			prefix=prefix,
+			file_name=file_name,
+		)
+
+	def transform_data(self, file: StringIO, file_name: str) -> pd.DataFrame:
+		"""Transform file content into a DataFrame.
+
+		Parameters
+		----------
+		file : StringIO
+		    The file content.
+		file_name : str
+		    The name of the file.
+
+		Returns
+		-------
+		pd.DataFrame
+		    The transformed DataFrame.
+		"""
+		colspecs = [
+			(0, 6),
+			(6, 9),
+			(9, 11),
+			(11, 19),
+			(19, 21),
+			(21, 24),
+			(24, 25),
+			(25, 33),
+			(33, 41),
+			(41, 54),
+			(54, 67),
+			(67, 75),
+			(75, 83),
+			(83, 91),
+			(91, 99),
+			(99, 107),
+			(107, 115),
+			(115, 124),
+			(124, 125),
+			(125, 126),
+			(126, 148),
+			(148, 149),
+			(149, 162),
+			(162, 175),
+		]
+
+		column_names = [
+			"ID_TRANSACAO",
+			"COMPLEMENTO_TRANSACAO",
+			"TIPO_REGISTRO",
+			"DATA_GERACAO_ARQUIVO",
+			"TIPO_NEGOCIACAO",
+			"CODIGO_MERCADORIA",
+			"CODIGO_MERCADO",
+			"DATA_BASE",
+			"DATA_VENCIMENTO",
+			"VOLUME_DIA_BRL",
+			"VOLUME_DIA_USD",
+			"QTD_CONTRATOS_ABERTO_APOS_LIQUIDACAO",
+			"QTD_NEGOCIOS_EFETUADOS",
+			"QTD_CONTRATOS_NEGOCIADOS",
+			"QTD_CONTRATOS_ABERTOS_ANTES_LIQUIDACAO",
+			"QTD_CONTRATOS_LIQUIDADOS",
+			"QTD_CONTRATOS_ABERTO_FINAL",
+			"TAXA_MEDIA_SWAP_PREMIO_MEIO_OPC_FLEX",
+			"SINAL_TAXA_MEDIA_PREMIO_MEDIO",
+			"TIPO_TAXA_MEDIA",
+			"PRECO_EXERCICIO_MEDIO_OPC_FLEX",
+			"SINAL_PRECO_MEDIO_EXERCICIO",
+			"VOLUME_ABERTO_BRL",
+			"VOLUME_ABERTO_USD",
+		]
+
+		df_ = pd.read_fwf(file, colspecs=colspecs, names=column_names, header=None)
+		df_["FILE_NAME"] = file_name
+		return df_

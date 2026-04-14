@@ -1,15 +1,15 @@
 """Example for BCBQuotesBulletins."""
 
 from stpstone.ingestion.countries.br.macroeconomics.bcb_quotes_bulletins import (
-    BCBCurrenciesCodesPTAX,
-    BCBQuotesBulletins,
+	BCBCurrenciesCodesPTAX,
+	BCBQuotesBulletins,
 )
 
 
 cls_ = BCBCurrenciesCodesPTAX(
-    date_ref=None,
-    logger=None, 
-    cls_db=None,
+	date_ref=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()
@@ -18,10 +18,10 @@ df_.info()
 
 
 cls_ = BCBQuotesBulletins(
-    date_start=None,
-    date_end=None,
-    logger=None, 
-    cls_db=None,
+	date_start=None,
+	date_end=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()

@@ -1,6 +1,8 @@
 """ANBIMA Brazilian corporate bonds (debentures) OTC market data."""
 
-from stpstone.ingestion.countries.br.otc.anbima_br_corporate_bonds import AnbimaExchangeInfosBRCorporateBonds
+from stpstone.ingestion.countries.br.otc.anbima_br_corporate_bonds import (
+	AnbimaExchangeInfosBRCorporateBonds,
+)
 
 
 cls_ = AnbimaExchangeInfosBRCorporateBonds(

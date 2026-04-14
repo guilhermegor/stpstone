@@ -1,5 +1,6 @@
-from stpstone.ingestion.countries.ww.registries.ratings_corp_spglobal import \
-    RatingsCorpSPGlobalProduct
+from stpstone.ingestion.countries.ww.registries.ratings_corp_spglobal import (
+	RatingsCorpSPGlobalProduct,
+)
 
 
 cls_ = RatingsCorpSPGlobalProduct()

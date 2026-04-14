@@ -6,19 +6,19 @@ from typing import Union
 import pandas as pd
 
 from stpstone.ingestion.countries.br.registries.anbima_data_debentures import (
-    AnbimaDataDebenturesAvailable,
-    AnbimaDataDebenturesCharacteristics,
-    AnbimaDataDebenturesDocuments,
-    AnbimaDataDebenturesEvents,
-    AnbimaDataDebenturesPrices,
+	AnbimaDataDebenturesAvailable,
+	AnbimaDataDebenturesCharacteristics,
+	AnbimaDataDebenturesDocuments,
+	AnbimaDataDebenturesEvents,
+	AnbimaDataDebenturesPrices,
 )
 
 
 cls_ = AnbimaDataDebenturesEvents(
-    date_ref=None, 
-    logger=None, 
-    cls_db=None, 
-    debenture_codes=["AALM11", "ABPA11", "AAJR11"],
+	date_ref=None,
+	logger=None,
+	cls_db=None,
+	debenture_codes=["AALM11", "ABPA11", "AAJR11"],
 )
 
 df_ = cls_.run()
@@ -27,9 +27,9 @@ df_.info()
 
 
 # cls_ = AnbimaDataDebenturesPrices(
-#     date_ref=None, 
-#     logger=None, 
-#     cls_db=None, 
+#     date_ref=None,
+#     logger=None,
+#     cls_db=None,
 #     debenture_codes=["AALM11", "ABPA11", "AAJR11"],
 # )
 
@@ -39,9 +39,9 @@ df_.info()
 
 
 # cls_ = AnbimaDataDebenturesDocuments(
-#     date_ref=None, 
-#     logger=None, 
-#     cls_db=None, 
+#     date_ref=None,
+#     logger=None,
+#     cls_db=None,
 #     debenture_codes=["AALM11", "ABPA11", "AAJR11"],
 # )
 
@@ -51,9 +51,9 @@ df_.info()
 
 
 # cls_ = AnbimaDataDebenturesCharacteristics(
-#     date_ref=None, 
-#     logger=None, 
-#     cls_db=None, 
+#     date_ref=None,
+#     logger=None,
+#     cls_db=None,
 #     debenture_codes=["AALM11", "ABPA11", "AAJR11"],
 # )
 # df_ = cls_.run()
@@ -62,10 +62,10 @@ df_.info()
 
 
 # cls_ = AnbimaDataDebenturesAvailable(
-#     date_ref=None, 
-#     logger=None, 
-#     cls_db=None, 
-#     start_page=1, 
+#     date_ref=None,
+#     logger=None,
+#     cls_db=None,
+#     start_page=1,
 #     end_page=5,
 # )
 

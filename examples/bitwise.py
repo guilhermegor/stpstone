@@ -14,6 +14,6 @@ from stpstone.analytics.arithmetic.bitwise import Utilities
 
 utils = Utilities()
 print(f"Bitwise AND (3, 5) => {utils.bitwise_and(3, 5)}")  # output: 1
-print(f"Bitwise OR (3, 5) => {utils.bitwise_or(3, 5)}")    # output: 7
+print(f"Bitwise OR (3, 5) => {utils.bitwise_or(3, 5)}")  # output: 7
 print(f"Bitwise XOR (3, 5) => {utils.bitwise_xor(3, 5)}")  # output: 6
-print(f"Bitwise NOT (3) => {utils.bitwise_not(3)}")        # output: -4
+print(f"Bitwise NOT (3) => {utils.bitwise_not(3)}")  # output: -4

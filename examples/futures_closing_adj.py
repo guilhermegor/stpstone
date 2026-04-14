@@ -3,11 +3,7 @@
 from stpstone.ingestion.countries.br.exchange.b3_futures_closing_adj import B3FuturesClosingAdj
 
 
-cls_ = B3FuturesClosingAdj(
-    date_ref=None, 
-    logger=None, 
-    cls_db=None
-)
+cls_ = B3FuturesClosingAdj(date_ref=None, logger=None, cls_db=None)
 
 df_ = cls_.run()
 

@@ -1,6 +1,8 @@
 """ANBIMA Brazilian Government Treasuries secondary market data."""
 
-from stpstone.ingestion.countries.br.otc.anbima_br_treasuries import AnbimaExchangeInfosBRTreasuries
+from stpstone.ingestion.countries.br.otc.anbima_br_treasuries import (
+	AnbimaExchangeInfosBRTreasuries,
+)
 
 
 cls_ = AnbimaExchangeInfosBRTreasuries(

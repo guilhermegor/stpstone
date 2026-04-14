@@ -4,9 +4,9 @@ from stpstone.ingestion.countries.br.exchange.anbima_indexes_mtm import AnbimaIn
 
 
 cls_ = AnbimaIndexesMTM(
-    date_ref=None,
-    logger=None,
-    cls_db=None,
+	date_ref=None,
+	logger=None,
+	cls_db=None,
 )
 
 df_ = cls_.run()

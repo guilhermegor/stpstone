@@ -1,6 +1,8 @@
 """ANBIMA IMA-P2 theoretical portfolio composition data."""
 
-from stpstone.ingestion.countries.br.exchange.anbima_ima_p2_portf_comp import AnbimaIMAP2TheoreticalPortfolio
+from stpstone.ingestion.countries.br.exchange.anbima_ima_p2_portf_comp import (
+	AnbimaIMAP2TheoreticalPortfolio,
+)
 
 
 cls_ = AnbimaIMAP2TheoreticalPortfolio(
