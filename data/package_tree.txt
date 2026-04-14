@@ -126,8 +126,7 @@ stpstone
 │       └── yield_.py
 ├── ingestion
 │   ├── abc
-│   │   ├── anbima_data_ws.py
-│   │   └── requests.py
+│   │   └── anbima_data_ws.py
 │   └── countries
 │       ├── br
 │       │   ├── bylaws

@@ -40,19 +40,12 @@ stpstone/
 ├── analytics/         # Quantitative models: derivatives pricing (Black-Scholes),
 │                      #   probability distributions, portfolio optimization, risk
 ├── ingestion/
-│   ├── abc/           # ABCIngestion + ABCRequests base classes
+│   ├── abc/           # ABCIngestion base classes
 │   └── countries/     # Concrete implementations: br/, us/, ww/
 ├── transformations/   # DataFrameValidator, BrDocsValidator, DFStandardization
 └── utils/             # Shared: connections, parsers, pipelines, calendars, logging
 ```
 
-### Ingestion Pattern (ABCRequests)
-
-All data-source classes inherit from `ABCRequests` (in `ingestion/abc/requests.py`). The contract requires:
-- `get_response()` — fetch raw data (HTTP, Selenium, file)
-- `parse_raw_file()` — parse response to DataFrame
-- `handle_data_transformation()` — clean/standardize
-- `req_trt_injection()` — optional override for custom transformation logic
 
 ### Type Validation (Metaclass)
 
