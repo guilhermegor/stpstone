@@ -46,8 +46,8 @@ test_cov:
 	@poetry run coverage-badge -o coverage.svg -f
 
 test_slowest:
-	@echo "Running tests to identify the 10 slowest tests..."
-	@poetry run pytest tests/unit/ --durations=10 --tb=short
+	@echo "Running tests to identify the 20 slowest tests..."
+	@poetry run pytest tests/unit/ --durations=20 --tb=short
 
 test_feat:
 	@bash bin/test_feature.sh $(MODULE)
