@@ -86,7 +86,7 @@ jobs:
 
       - name: Run Docstring Type Consistency Check
         run: |
-          poetry run pydocstyle --convention=numpy --select=D412,D417,DAR stpstone/ tests/
+          poetry run pydocstyle --select=D412,D417,DAR --match='(stpstone|tests).*\.py' stpstone/ tests/
 
           cat << 'EOF' > check_consistency.py
           import ast
