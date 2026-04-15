@@ -12,5 +12,5 @@ cls_ = B3TheoricalPortfolioIBRX50(
 )
 
 df_ = cls_.run()
-print(f"DF B3 THEORICAL PORTFOLIO IBRX50: \n{df_}")
+print(f"DF B3 THEORETICAL PORTFOLIO IBRX50: \n{df_}")
 df_.info()
