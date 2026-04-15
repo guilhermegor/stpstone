@@ -63,12 +63,30 @@ def _ensure_anbima_cache(mocker: MockerFixture) -> None:
 	calendar-specific tests (``test_calendar_br.py``) that create
 	``DatesBRAnbima(bool_reuse_cache=False, bool_persist_cache=False)`` and
 	mock ``requests.get`` themselves.
+
+	Parameters
+	----------
+	mocker : MockerFixture
+		pytest-mock fixture providing the mocker.patch interface.
 	"""
 	from stpstone.utils.cache.cache_manager import CacheManager
 
 	_original_load = CacheManager._load_cache
 
 	def _smart_load(self: CacheManager, key: str) -> pd.DataFrame | None:
+		"""Return pre-built holidays when the ANBIMA cache key is requested.
+
+		Parameters
+		----------
+		key : str
+			Cache key being requested.
+
+		Returns
+		-------
+		pd.DataFrame | None
+			Pre-built holiday DataFrame for the ANBIMA key, or the result
+			of the original ``_load_cache`` call for all other keys.
+		"""
 		if key == "br_anbima_holidays_raw" and self.bool_reuse_cache:
 			return _ANBIMA_HOLIDAYS_RAW
 		return _original_load(self, key)
@@ -95,5 +113,10 @@ def _fast_backoff(mocker: MockerFixture) -> None:
 
 	The patch is harmless for happy-path tests — ``_next_wait`` is only called
 	when a decorated function raises an exception matching the backoff type.
+
+	Parameters
+	----------
+	mocker : MockerFixture
+		pytest-mock fixture providing the mocker.patch interface.
 	"""
 	mocker.patch("backoff._sync._next_wait", side_effect=StopIteration)

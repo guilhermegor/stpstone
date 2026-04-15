@@ -175,7 +175,7 @@ class Anbima550Listing(ABCIngestionOperations):
 		"""
 		return pd.read_csv(
 			file,
-			sep="\s+",
+			sep=r"\s+",
 			skiprows=2,
 			skipfooter=4,
 			engine="python",

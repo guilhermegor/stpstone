@@ -63,7 +63,7 @@ class HandlingTXTFiles(metaclass=TypeChecker):
         self,
         complete_path: str,
         method: Literal['r', 'w'] = "r",
-        regex: str = "[^A-Za-z0-9-.*-:-<-=-\s]+",
+        regex: str = r"[^A-Za-z0-9-.*-:-<-=-\s]+",
         non_matching_regex_characaters: str = "|"
     ) -> list[str]:
         """Generate processed lines from a text file using regex substitution.
