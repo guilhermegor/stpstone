@@ -1,6 +1,6 @@
-"""Unit tests for BCBQuotesBulletins ingestion module.
+"""Unit tests for BCBCurrenciesCodesQuotesBulletins ingestion module.
 
-Tests the ingestion functionality for BCB quotes bulletins with various scenarios:
+Tests the ingestion functionality for BCB quotes bulletins currency codes with various scenarios:
 - Initialization with valid and invalid inputs
 - Response handling and parsing
 - Data transformation and standardization
@@ -8,17 +8,17 @@ Tests the ingestion functionality for BCB quotes bulletins with various scenario
 """
 
 from datetime import date
-from io import StringIO
 from logging import Logger
 from unittest.mock import MagicMock
 
+from lxml.html import HtmlElement
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 from requests import Response, Session
 
-from stpstone.ingestion.countries.br.macroeconomics.bcb_quotes_bulletins import (
-    BCBQuotesBulletins,
+from stpstone.ingestion.countries.br.macroeconomics.bcb_currencies_codes_quotes_bulletins import (
+    BCBCurrenciesCodesQuotesBulletins,
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -46,6 +46,23 @@ def mock_response(mocker: MockerFixture) -> Response:
     response.status_code = 200
     response.raise_for_status = MagicMock()
     return response
+
+
+@pytest.fixture
+def mock_html_element(mocker: MockerFixture) -> HtmlElement:
+    """Mock HtmlElement for parsing tests.
+
+    Parameters
+    ----------
+    mocker : MockerFixture
+        Pytest mocker for creating mock objects.
+
+    Returns
+    -------
+    HtmlElement
+        Mocked HtmlElement.
+    """
+    return mocker.MagicMock(spec=HtmlElement)
 
 
 @pytest.fixture
@@ -118,34 +135,34 @@ def mock_dates_br(mocker: MockerFixture, sample_date: date) -> DatesBRAnbima:
 
 
 @pytest.fixture
-def sample_csv_content() -> StringIO:
-    """Provide sample CSV content for parsing.
+def sample_html_currencies() -> tuple[list[str], list[str]]:
+    """Provide sample currencies data for HTML parsing.
 
     Returns
     -------
-    StringIO
-        A StringIO object with sample CSV content.
+    tuple[list[str], list[str]]
+        A tuple containing two lists: names and codes.
     """
-    return StringIO(
-        """CODIGO;NOME;SIMBOLO;CODIGO_PAIS;PAIS;TIPO;DATA_EXCLUSAO_PTAX
-USD;Dolar Americano;US$;840;EUA;A;"""
+    return (
+        ["Dolar Americano", "Euro"],
+        ["USD", "EUR"],
     )
 
 
 # --------------------------
-# Tests for BCBQuotesBulletins
+# Tests for BCBCurrenciesCodesQuotesBulletins
 # --------------------------
-class TestBCBQuotesBulletins:
-    """Test cases for BCBQuotesBulletins class."""
+class TestBCBCurrenciesCodesQuotesBulletins:
+    """Test cases for BCBCurrenciesCodesQuotesBulletins class."""
 
     @pytest.fixture
-    def bcb_quotes_bulletins(
+    def bcb_currencies_codes_quotes(
         self,
         mocker: MockerFixture,
         mock_dates_current: DatesCurrent,
         mock_dates_br: DatesBRAnbima,
-    ) -> BCBQuotesBulletins:
-        """Fixture for BCBQuotesBulletins instance.
+    ) -> BCBCurrenciesCodesQuotesBulletins:
+        """Fixture for BCBCurrenciesCodesQuotesBulletins instance.
 
         Parameters
         ----------
@@ -158,44 +175,36 @@ class TestBCBQuotesBulletins:
 
         Returns
         -------
-        BCBQuotesBulletins
-            Mocked BCBQuotesBulletins.
+        BCBCurrenciesCodesQuotesBulletins
+            Mocked BCBCurrenciesCodesQuotesBulletins.
         """
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DirFilesManagement"
+            ".bcb_currencies_codes_quotes_bulletins.DirFilesManagement"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.CreateLog"
+            ".bcb_currencies_codes_quotes_bulletins.CreateLog"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.ListHandler"
+            ".bcb_currencies_codes_quotes_bulletins.HtmlHandler"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DatesCurrent",
+            ".bcb_currencies_codes_quotes_bulletins.DatesCurrent",
             return_value=mock_dates_current,
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DatesBRAnbima",
+            ".bcb_currencies_codes_quotes_bulletins.DatesBRAnbima",
             return_value=mock_dates_br,
         )
-        mocker.patch(
-            "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.BCBCurrenciesCodesPTAX"
-        )
-        mocker.patch(
-            "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.BCBCurrenciesCodesQuotesBulletins"
-        )
         mocker.patch("requests.get")
-        mocker.patch.object(BCBQuotesBulletins, "get_file")
-        mocker.patch.object(BCBQuotesBulletins, "insert_table_db")
-        mocker.patch.object(BCBQuotesBulletins, "standardize_dataframe")
-        return BCBQuotesBulletins()
+        mocker.patch.object(BCBCurrenciesCodesQuotesBulletins, "get_file")
+        mocker.patch.object(BCBCurrenciesCodesQuotesBulletins, "insert_table_db")
+        mocker.patch.object(BCBCurrenciesCodesQuotesBulletins, "standardize_dataframe")
+        return BCBCurrenciesCodesQuotesBulletins()
 
     def test_init_with_default_params(
         self,
@@ -223,41 +232,33 @@ class TestBCBQuotesBulletins:
         """
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DirFilesManagement"
+            ".bcb_currencies_codes_quotes_bulletins.DirFilesManagement"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.CreateLog"
+            ".bcb_currencies_codes_quotes_bulletins.CreateLog"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.ListHandler"
+            ".bcb_currencies_codes_quotes_bulletins.HtmlHandler"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DatesCurrent",
+            ".bcb_currencies_codes_quotes_bulletins.DatesCurrent",
             return_value=mock_dates_current,
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DatesBRAnbima",
+            ".bcb_currencies_codes_quotes_bulletins.DatesBRAnbima",
             return_value=mock_dates_br,
         )
-        mocker.patch(
-            "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.BCBCurrenciesCodesPTAX"
-        )
-        mocker.patch(
-            "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.BCBCurrenciesCodesQuotesBulletins"
-        )
 
-        instance = BCBQuotesBulletins()
-        assert instance.date_start == sample_date
-        assert instance.date_end == sample_date
+        instance = BCBCurrenciesCodesQuotesBulletins()
+        assert instance.date_ref == sample_date
+        assert "exibeFormularioConsultaBoletim" in instance.url
         assert isinstance(instance.logger, type(None))
         assert isinstance(instance.cls_db, type(None))
-        assert mock_dates_br.add_working_days.call_count == 2
+        mock_dates_br.add_working_days.assert_called_once()
 
     def test_init_with_custom_params(
         self,
@@ -282,100 +283,76 @@ class TestBCBQuotesBulletins:
         """
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DirFilesManagement"
+            ".bcb_currencies_codes_quotes_bulletins.DirFilesManagement"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.CreateLog"
+            ".bcb_currencies_codes_quotes_bulletins.CreateLog"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.ListHandler"
+            ".bcb_currencies_codes_quotes_bulletins.HtmlHandler"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DatesCurrent"
+            ".bcb_currencies_codes_quotes_bulletins.DatesCurrent"
         )
         mocker.patch(
             "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.DatesBRAnbima"
-        )
-        mocker.patch(
-            "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.BCBCurrenciesCodesPTAX"
-        )
-        mocker.patch(
-            "stpstone.ingestion.countries.br.macroeconomics"
-            ".bcb_quotes_bulletins.BCBCurrenciesCodesQuotesBulletins"
+            ".bcb_currencies_codes_quotes_bulletins.DatesBRAnbima"
         )
 
         logger = MagicMock(spec=Logger)
-        instance = BCBQuotesBulletins(
-            date_start=sample_date,
-            date_end=sample_date,
-            logger=logger,
-            cls_db=mock_session,
+        instance = BCBCurrenciesCodesQuotesBulletins(
+            date_ref=sample_date, logger=logger, cls_db=mock_session
         )
-        assert instance.date_start == sample_date
-        assert instance.date_end == sample_date
+        assert instance.date_ref == sample_date
         assert instance.logger == logger
         assert instance.cls_db == mock_session
 
-    def test_get_currencies_codes(
+    def test_get_response_success(
         self,
-        bcb_quotes_bulletins: BCBQuotesBulletins,
-        mocker: MockerFixture,
-    ) -> None:
-        """Test retrieval of currency codes.
-
-        Parameters
-        ----------
-        bcb_quotes_bulletins : BCBQuotesBulletins
-            Instance of BCBQuotesBulletins.
-        mocker : MockerFixture
-            Pytest mocker for creating mock objects.
-
-        Returns
-        -------
-        None
-        """
-        mock_df_ptax = pd.DataFrame({"CODIGO": ["USD", "EUR"]})
-        mock_df_qb = pd.DataFrame({"CODIGO_MOEDA": ["EUR", "GBP"]})
-        mocker.patch.object(
-            bcb_quotes_bulletins.cls_bcb_currencies_codes_ptax,
-            "run",
-            return_value=mock_df_ptax,
-        )
-        mocker.patch.object(
-            bcb_quotes_bulletins.cls_bcb_currencies_codes_quotes_bulletins,
-            "run",
-            return_value=mock_df_qb,
-        )
-        mocker.patch.object(
-            bcb_quotes_bulletins.cls_list_handler,
-            "extend_lists",
-            return_value=["USD", "EUR", "GBP"],
-        )
-        result = bcb_quotes_bulletins._get_currencies_codes(timeout=1000)
-        assert result == ["USD", "EUR", "GBP"]
-
-    def test_run_with_value_error(
-        self,
-        bcb_quotes_bulletins: BCBQuotesBulletins,
+        bcb_currencies_codes_quotes: BCBCurrenciesCodesQuotesBulletins,
         mock_response: Response,
-        sample_csv_content: StringIO,
         mocker: MockerFixture,
     ) -> None:
-        """Test run method handling ValueError in standardization.
+        """Test successful HTTP response retrieval.
 
         Parameters
         ----------
-        bcb_quotes_bulletins : BCBQuotesBulletins
-            Instance of BCBQuotesBulletins.
+        bcb_currencies_codes_quotes : BCBCurrenciesCodesQuotesBulletins
+            Instance of BCBCurrenciesCodesQuotesBulletins.
         mock_response : Response
             Mocked HTTP response.
-        sample_csv_content : StringIO
-            Sample CSV content.
+        mocker : MockerFixture
+            Pytest mocker for creating mock objects.
+
+        Returns
+        -------
+        None
+        """
+        mocker.patch("requests.get", return_value=mock_response)
+        result = bcb_currencies_codes_quotes.get_response(timeout=1000)
+        assert result == mock_response
+        mock_response.raise_for_status.assert_called_once()
+
+    def test_parse_raw_file(
+        self,
+        bcb_currencies_codes_quotes: BCBCurrenciesCodesQuotesBulletins,
+        mock_response: Response,
+        mock_html_element: HtmlElement,
+        mocker: MockerFixture,
+    ) -> None:
+        """Test parsing of raw HTML content.
+
+        Parameters
+        ----------
+        bcb_currencies_codes_quotes : BCBCurrenciesCodesQuotesBulletins
+            Instance of BCBCurrenciesCodesQuotesBulletins.
+        mock_response : Response
+            Mocked HTTP response.
+        mock_html_element : HtmlElement
+            Mocked HtmlElement.
         mocker : MockerFixture
             Pytest mocker for creating mock objects.
 
@@ -384,32 +361,44 @@ class TestBCBQuotesBulletins:
         None
         """
         mocker.patch.object(
-            bcb_quotes_bulletins, "get_response", return_value=mock_response
+            bcb_currencies_codes_quotes.cls_html_handler,
+            "lxml_parser",
+            return_value=mock_html_element,
         )
-        mocker.patch.object(
-            bcb_quotes_bulletins, "parse_raw_file", return_value=sample_csv_content
-        )
-        mocker.patch.object(
-            bcb_quotes_bulletins,
-            "transform_data",
-            return_value=pd.read_csv(
-                sample_csv_content,
-                sep=";",
-                names=["DATA", "CODIGO_MOEDA", "TIPO_MOEDA", "SIMBOLO_MOEDA",
-                       "TAXA_COMPRA", "TAXA_VENDA",
-                       "PARIDADE_COMPRA", "PARIDADE_VENDA"],
-                header=None,
-            ),
-        )
-        mocker.patch.object(
-            bcb_quotes_bulletins, "_get_currencies_codes", return_value=["USD"]
-        )
-        mocker.patch.object(
-            bcb_quotes_bulletins,
-            "standardize_dataframe",
-            side_effect=ValueError("Invalid format"),
-        )
+        result = bcb_currencies_codes_quotes.parse_raw_file(mock_response)
+        assert result == mock_html_element
 
-        result = bcb_quotes_bulletins.run(timeout=1000)
+    def test_transform_data(
+        self,
+        bcb_currencies_codes_quotes: BCBCurrenciesCodesQuotesBulletins,
+        mock_html_element: HtmlElement,
+        sample_html_currencies: tuple[list[str], list[str]],
+        mocker: MockerFixture,
+    ) -> None:
+        """Test transformation of HTML content to DataFrame.
+
+        Parameters
+        ----------
+        bcb_currencies_codes_quotes : BCBCurrenciesCodesQuotesBulletins
+            Instance of BCBCurrenciesCodesQuotesBulletins.
+        mock_html_element : HtmlElement
+            Mocked HtmlElement.
+        sample_html_currencies : tuple[list[str], list[str]]
+            Sample HTML content for currencies.
+        mocker : MockerFixture
+            Pytest mocker for creating mock objects.
+
+        Returns
+        -------
+        None
+        """
+        mocker.patch.object(
+            bcb_currencies_codes_quotes.cls_html_handler,
+            "lxml_xpath",
+            side_effect=sample_html_currencies,
+        )
+        result = bcb_currencies_codes_quotes.transform_data(mock_html_element)
         assert isinstance(result, pd.DataFrame)
-        assert result.empty
+        assert list(result.columns) == ["NOME_MOEDA", "CODIGO_MOEDA"]
+        assert len(result) == 2
+        assert result.iloc[0]["CODIGO_MOEDA"] == "USD"
