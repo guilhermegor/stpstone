@@ -1,5 +1,7 @@
 """Shared pytest fixtures for the unit test suite."""
 
+from __future__ import annotations
+
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
