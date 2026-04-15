@@ -18,7 +18,7 @@ import stpstone
 try:
     import tomllib  # Python 3.11+
 except ImportError:
-    import toml as tomllib  # fallback for Python ≤3.10
+    import tomli as tomllib  # type: ignore[no-redef]  # backport for Python ≤3.10
 
 
 # --------------------------
@@ -26,21 +26,15 @@ except ImportError:
 # --------------------------
 def get_package_version() -> str:
     """Get the package version from pyproject.toml.
-    
+
     Returns
     -------
     str
         The version string from pyproject.toml
     """
     pyproject_path = Path(__file__).parent.parent.parent / "pyproject.toml"
-    
-    if sys.version_info >= (3, 11):
-        with open(pyproject_path, "rb") as f:
-            pyproject = tomllib.load(f)
-    else:
-        with open(pyproject_path, encoding="utf-8") as f:
-            pyproject = tomllib.load(f)
-    
+    with open(pyproject_path, "rb") as f:
+        pyproject = tomllib.load(f)
     return pyproject["tool"]["poetry"]["version"]
 
 
