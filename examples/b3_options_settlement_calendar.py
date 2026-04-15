@@ -1,4 +1,4 @@
-"""Example of ingestion of B3 Options Settlment Calendar."""
+"""Example of ingestion of B3 Options Settlement Calendar."""
 
 from stpstone.ingestion.countries.br.exchange.b3_options_settlement_calendar import (
 	B3OptionsSettlementCalendar,
