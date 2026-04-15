@@ -83,7 +83,7 @@ class YahiiRentIndices(ABCIngestionOperations):
             "Trim.": "quarterly",
             "Quadrim.": "four_monthly",
             "Sem.": "semiannual",
-            "Anual": "annual"
+            "Anual": "annual" # codespell:ignore
         }
     
     def run(
