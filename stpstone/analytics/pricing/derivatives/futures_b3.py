@@ -29,11 +29,11 @@ class MTMFromDailySettlement(metaclass=TypeChecker):
         
         Parameters
         ----------
-        bool_persist_cache : bool, optional
+        bool_persist_cache : bool
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_reuse_cache : bool, optional
+        bool_reuse_cache : bool
             If True, caches in-memory; if False, does not cache in-memory (default: True)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger to use (default: None)
         
         Returns
@@ -2776,11 +2776,11 @@ class MTMFromRate(metaclass=TypeChecker):
         
         Parameters
         ----------
-        bool_persist_cache : bool, optional
+        bool_persist_cache : bool
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_reuse_cache : bool, optional
+        bool_reuse_cache : bool
             If True, caches in-memory; if False, does not cache in-memory (default: True)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger to use (default: None)
         
         Returns
@@ -2877,11 +2877,11 @@ class RateFromMTM(metaclass=TypeChecker):
         
         Parameters
         ----------
-        bool_persist_cache : bool, optional
+        bool_persist_cache : bool
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_reuse_cache : bool, optional
+        bool_reuse_cache : bool
             If True, caches in-memory; if False, does not cache in-memory (default: True)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger to use (default: None)
         
         Returns
@@ -3010,7 +3010,7 @@ class TSIR(metaclass=TypeChecker):
             Dictionary mapping periods to spot rates in decimal form (e.g., {1: 0.05, 2: 0.055})
             Format: {period_length: spot_rate}
             Example: {30: 0.042, 90: 0.046} for 30-day and 90-day rates
-        int_wddy : float, optional
+        int_wddy : float
             Business day count convention (default: 252 days)
             Used for converting rates to daily equivalents
 
@@ -3158,7 +3158,7 @@ class TSIR(metaclass=TypeChecker):
             Segment selection flag:
             - False: Evaluate lower polynomial segment (a coefficients)
             - True: Evaluate upper polynomial segment (b coefficients)
-        int_num_constants_cubic_spline : int, optional
+        int_num_constants_cubic_spline : int
             Total number of spline coefficients (default: 8)
             Must be even as it's split equally between lower/upper segments
 
@@ -3235,7 +3235,7 @@ class TSIR(metaclass=TypeChecker):
             - Minimum of 3 points required for cubic spline
             - Rates should be in decimal form (e.g., 0.015 for 1.5%)
 
-        bool_debug : bool, optional
+        bool_debug : bool
             Debug flag to print intermediate calculations, by default False
             When True, prints:
             - Current working day being calculated

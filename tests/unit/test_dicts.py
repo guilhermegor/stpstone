@@ -305,7 +305,7 @@ class TestDictionaryManipulation:
             ----------
             x : int
                 Value to multiply
-            y : int, optional
+            y : int
                 Multiplier, default is 2
             
             Returns

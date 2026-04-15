@@ -79,7 +79,7 @@ class DriveClassifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance for logging, by default None
         
         Returns

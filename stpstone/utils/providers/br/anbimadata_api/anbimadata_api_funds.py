@@ -95,7 +95,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 
 		Parameters
 		----------
-		int_pg : int or None, optional
+		int_pg : int or None
 			Page number.
 
 		Returns

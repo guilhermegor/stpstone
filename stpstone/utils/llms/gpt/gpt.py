@@ -99,11 +99,11 @@ class GPT(metaclass=TypeChecker):
 			The API key for accessing the OpenAI service.
 		str_model : str
 			The model name to use for generating completions.
-		int_max_tokens : int, optional
+		int_max_tokens : int
 			Maximum number of tokens for the completion (default: 100)
-		str_context : Optional[str], optional
+		str_context : Optional[str]
 			Optional context to provide to the model (default: None)
-		bool_stream : bool, optional
+		bool_stream : bool
 			Whether to stream the completion (default: False)
 
 		Notes

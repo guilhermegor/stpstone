@@ -75,11 +75,11 @@ class Operations(metaclass=TypeChecker):
 			Request parameters (default: None).
 		dict_payload : Optional[list[dict[str, Any]]], optional
 			Request payload (default: None).
-		bool_parse_dict_params_data : bool, optional
+		bool_parse_dict_params_data : bool
 			Parse parameters as JSON (default: False).
-		bool_retry_if_error : bool, optional
+		bool_retry_if_error : bool
 			Enable retry on error (default: False).
-		float_secs_sleep : Optional[float], optional
+		float_secs_sleep : Optional[float]
 			Sleep time between retries (default: None).
 		timeout : Union[tuple[float, float], float, int], optional
 			Request timeout (default: 10).

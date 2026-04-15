@@ -51,19 +51,19 @@ class MaisRetornoStats(ABCIngestionOperations):
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 			The date of reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 			The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 			The database session, by default None.
-		list_slugs : Optional[list], optional
+		list_slugs : Optional[list]
 			List of instrument slug identifiers, by default None.
-		instruments_class : Optional[str], optional
+		instruments_class : Optional[str]
 			URL segment for the instrument class (e.g. 'fii'), by default None.
-		bool_headless : bool, optional
+		bool_headless : bool
 			Whether to run the browser in headless mode, by default True.
-		int_wait_load_seconds : int, optional
+		int_wait_load_seconds : int
 			Seconds to wait for page elements to load, by default 60.
 
 		Returns
@@ -102,9 +102,9 @@ class MaisRetornoStats(ABCIngestionOperations):
 
 		Parameters
 		----------
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 			Whether to insert or ignore the data, by default False.
-		str_table_name : str, optional
+		str_table_name : str
 			The name of the table, by default 'br_mais_retorno_instruments_stats'.
 
 		Returns
@@ -145,7 +145,7 @@ class MaisRetornoStats(ABCIngestionOperations):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Verify the SSL certificate, by default True.
 
 		Returns

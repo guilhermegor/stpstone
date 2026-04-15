@@ -247,7 +247,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
             Yield discount rate (must be between 0 and 1)
         int_n : int
             Capitalization periods per year (must be positive)
-        float_delta_y : float, optional
+        float_delta_y : float
             Yield change (default: 1E-4, must be positive)
 
         Returns

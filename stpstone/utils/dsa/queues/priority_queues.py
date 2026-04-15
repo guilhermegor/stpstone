@@ -49,7 +49,7 @@ class PriorityQueue(Generic[T], metaclass=TypeChecker):
             Item to be pushed into the queue
         priority : float
             Priority of the item (higher values come out first)
-        update_priority : bool, optional
+        update_priority : bool
             Whether to update the priority of the item if it's already in the queue
 
         Returns

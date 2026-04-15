@@ -77,19 +77,19 @@ class ExploratoryDataAnalysis(metaclass=TypeChecker):
             Target column name
         max_bins : int
             Maximum number of bins to try
-        force_bin : bool, optional
+        force_bin : bool
             Whether to force binning if monotonicity fails, by default True
-        binned : bool, optional
+        binned : bool
             Whether binning was successful, by default False
-        remarks : Optional[str], optional
+        remarks : Optional[str]
             Remarks about binning process, by default None
-        name_bins : str, optional
+        name_bins : str
             Suffix for binned column name, by default "_bins"
-        remark_binned_monotonically : str, optional
+        remark_binned_monotonically : str
             Remark for successful monotonic binning, by default "binned monotonically"
-        remark_binned_forcefully : str, optional
+        remark_binned_forcefully : str
             Remark for forced binning, by default "binned forcefully"
-        remark_binned_error : str, optional
+        remark_binned_error : str
             Remark for binning failure, by default "could not bin"
 
         Returns
@@ -171,11 +171,11 @@ class ExploratoryDataAnalysis(metaclass=TypeChecker):
         ----------
         df_data : pd.DataFrame
             Dataframe to analyze
-        bins : int, optional
+        bins : int
             Number of bins for histograms, by default 58
         figsize : tuple[int, int], optional
             Figure size for plots, by default (20, 15)
-        bool_show_plots : bool, optional
+        bool_show_plots : bool
             Whether to show plots, by default True
 
         Returns

@@ -32,11 +32,11 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 		    The date of reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 		    The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 		    The database session, by default None.
 
 		Returns
@@ -77,19 +77,19 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 		    The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 		    Whether to verify the SSL certificate, by default True.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 		    Whether to insert or ignore the data, by default False.
 		dict_dtypes : Optional[dict[str, Union[str, int, float]]], optional
 		    Data types mapping, by default None.
-		str_fmt_dt : str, optional
+		str_fmt_dt : str
 		    Date format string, by default "YYYY-MM-DD".
-		cols_from_case : str, optional
+		cols_from_case : str
 		    Source column case format, by default "pascal".
-		cols_to_case : str, optional
+		cols_to_case : str
 		    Target column case format, by default "upper_constant".
-		str_table_name : str, optional
+		str_table_name : str
 		    The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
 
 		Returns
@@ -132,7 +132,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 		    The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 		    Verify the SSL certificate, by default True.
 
 		Returns

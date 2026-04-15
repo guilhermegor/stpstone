@@ -54,11 +54,11 @@ class _WorldGovBondsBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
 
         Returns
@@ -95,11 +95,11 @@ class _WorldGovBondsBase(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Unused; kept for interface consistency, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Unused; kept for interface consistency, by default False.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default False.
-        str_table_name : Optional[str], optional
+        str_table_name : Optional[str]
             The name of the table, by default the class-level _TABLE_NAME.
 
         Returns
@@ -138,7 +138,7 @@ class _WorldGovBondsBase(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Unused; kept for interface consistency, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Unused; kept for interface consistency, by default False.
 
         Returns

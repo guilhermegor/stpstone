@@ -69,7 +69,7 @@ class DBLogs(metaclass=TypeChecker):
             URL to insert into the DataFrame
         dt_db_ref : date
             Date of the database reference
-        bool_format_log_as_str : bool, optional
+        bool_format_log_as_str : bool
             Whether to format timestamp as string (default: True)
 
         Returns

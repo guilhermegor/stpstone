@@ -42,12 +42,12 @@ class FIFMonthlyProfile(ABCIngestionOperations):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference for data retrieval. If None, defaults to the
             previous working day, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance for tracking operations, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             Database session for data persistence, by default None.
 
         Returns
@@ -94,12 +94,12 @@ class FIFMonthlyProfile(ABCIngestionOperations):
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Request timeout in seconds. Can be a single value or tuple of
             (connect, read) timeouts, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify SSL certificates, by default True.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             If True, uses INSERT OR IGNORE for database operations,
             by default False.
-        str_table_name : str, optional
+        str_table_name : str
             Target database table name, by default "br_cvm_fif_monthly_profile".
 
         Returns
@@ -258,7 +258,7 @@ class FIFMonthlyProfile(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Request timeout in seconds, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify SSL certificates, by default True.
 
         Returns

@@ -108,7 +108,7 @@ class DocumentsData(metaclass=TypeChecker):
 			Document identifier.
 		doc_profile_id : str
 			New profile identifier.
-		int_rmkt_evaluation : int, optional
+		int_rmkt_evaluation : int
 			Risk market evaluation (default: 0).
 
 		Returns

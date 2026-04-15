@@ -99,7 +99,7 @@ def _make_row_element(symbol: str, holding: str, weight: str) -> MagicMock:
         ----------
         text : str
             The text content of the cell.
-        has_anchor : bool, optional
+        has_anchor : bool
             Whether the cell contains an anchor child element, by default False.
 
         Returns

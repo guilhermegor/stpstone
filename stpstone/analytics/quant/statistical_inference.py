@@ -146,7 +146,7 @@ def validate_array(
         Input array to validate.
     name : str
         Name of the array for error messages.
-    min_samples : int, optional
+    min_samples : int
         Minimum number of samples required, by default 1.
 
     Raises
@@ -259,7 +259,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             Dependent variable array, shape (n_samples,).
         list_cols_iv : list[str]
             List of independent variable names.
-        r_squared_cut : float, optional
+        r_squared_cut : float
             R-squared threshold for linearity, by default 0.8.
 
         Returns
@@ -365,7 +365,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             Dependent variable array, shape (n_samples,).
         list_cols_iv : list[str]
             List of independent variable names.
-        float_r_squared_mc_cut : float, optional
+        float_r_squared_mc_cut : float
             VIF threshold for multicollinearity, by default 0.8.
 
         Returns
@@ -417,7 +417,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             Independent variables array, shape (n_samples, n_predictors).
         array_y : NDArray[np.float64]
             Dependent variable array, shape (n_samples,).
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -548,7 +548,7 @@ class MultipleRegressionHT(metaclass=TypeChecker):
             Independent variables array, shape (n_samples, n_predictors).
         array_y : NDArray[np.float64]
             Dependent variable array, shape (n_samples,).
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -700,9 +700,9 @@ class NormalityHT(metaclass=TypeChecker):
         ----------
         array_x : NDArray[np.float64]
             Input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
-        factor_empirical_func : float, optional
+        factor_empirical_func : float
             Factor for empirical distribution function, by default 10.0.
 
         Returns
@@ -744,7 +744,7 @@ class NormalityHT(metaclass=TypeChecker):
         ----------
         array_data : NDArray[np.float64]
             Input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -797,7 +797,7 @@ class NormalityHT(metaclass=TypeChecker):
         ----------
         array_data : NDArray[np.float64]
             Input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -832,7 +832,7 @@ class NormalityHT(metaclass=TypeChecker):
         ----------
         array_data : NDArray[np.float64]
             Input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -874,7 +874,7 @@ class CorrelationHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -923,7 +923,7 @@ class CorrelationHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -972,7 +972,7 @@ class CorrelationHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1021,7 +1021,7 @@ class CorrelationHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1071,7 +1071,7 @@ class StationaryHT(metaclass=TypeChecker):
         ----------
         array_x : NDArray[np.float64]
             Time series data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1108,7 +1108,7 @@ class StationaryHT(metaclass=TypeChecker):
         ----------
         array_x : NDArray[np.float64]
             Time series data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1152,7 +1152,7 @@ class MeansHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1201,7 +1201,7 @@ class MeansHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1254,7 +1254,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1303,7 +1303,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1352,7 +1352,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1401,7 +1401,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
             First input data array.
         x2_array : NDArray[np.float64]
             Second input data array.
-        alpha : float, optional
+        alpha : float
             Significance level, by default 0.05.
 
         Returns
@@ -1447,7 +1447,7 @@ class StatisticalDistributionsHT(metaclass=TypeChecker):
         ----------
         array_data : NDArray[np.float64]
             Input data array, either raw numbers or counts of first digits (1-9).
-        bool_list_number_occurrencies : bool, optional
+        bool_list_number_occurrencies : bool
             If True, array_data contains counts of first digits; if False, raw numbers, \
                 by default False.
 
@@ -1524,7 +1524,7 @@ class IndependenceHT(metaclass=TypeChecker):
         ----------
         array_y : NDArray[np.float64]
             Contingency table array.
-        float_significance : float, optional
+        float_significance : float
             Significance level, by default 0.05.
 
         Returns

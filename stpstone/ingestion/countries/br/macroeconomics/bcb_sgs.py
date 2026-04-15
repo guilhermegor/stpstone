@@ -40,13 +40,13 @@ class BCBSGS(ABCIngestionOperations):
         ----------
         list_series_codes : Optional[list[int]]
             List of series codes to retrieve
-        date_start : Optional[date], optional
+        date_start : Optional[date]
             Start date, by default None (30 working days ago)
-        date_end : Optional[date], optional
+        date_end : Optional[date]
             End date, by default None (yesterday)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None
         """
         super().__init__(cls_db=cls_db)
@@ -91,11 +91,11 @@ class BCBSGS(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default "br_bcb_sgs"
 
         Returns
@@ -390,7 +390,7 @@ class BCBSGS(ABCIngestionOperations):
             The URL to request
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
+        bool_verify : bool
             Verify the SSL certificate, by default True
         
         Returns

@@ -35,11 +35,11 @@ class MinioClient(metaclass=TypeChecker):
             MinIO access key
         password : str
             MinIO secret key
-        endpoint : str, optional
+        endpoint : str
             MinIO server endpoint (default: "localhost:9000")
-        bool_secure : bool, optional
+        bool_secure : bool
             Whether to use HTTPS (default: True)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance for logging (default: None)
         """
         self.client = Minio(
@@ -130,7 +130,7 @@ class MinioClient(metaclass=TypeChecker):
             Path to local file to upload
         dict_metadata : Optional[dict[str, Any]], optional
             Metadata for the object (default: None)
-        content_type : Optional[str], optional
+        content_type : Optional[str]
             Content type of the object (default: None)
 
         Returns
@@ -187,9 +187,9 @@ class MinioClient(metaclass=TypeChecker):
             Length of the data in bytes
         dict_metadata : Optional[dict[str, Any]], optional
             Metadata for the object (default: None)
-        content_type : Optional[str], optional
+        content_type : Optional[str]
             Content type of the object (default: None)
-        seek_to_start : bool, optional
+        seek_to_start : bool
             Whether to seek to start of stream before upload (default: False)
 
         Returns
@@ -237,7 +237,7 @@ class MinioClient(metaclass=TypeChecker):
             Bytes data to upload
         dict_metadata : Optional[dict[str, Any]], optional
             Metadata for the object (default: None)
-        content_type : Optional[str], optional
+        content_type : Optional[str]
             Content type of the object (default: None)
 
         Returns
@@ -347,11 +347,11 @@ class MinioClient(metaclass=TypeChecker):
         ----------
         bucket_name : str
             Bucket to list objects from
-        bool_include_version : bool, optional
+        bool_include_version : bool
             Whether to include object versions (default: False)
-        prefix : Optional[str], optional
+        prefix : Optional[str]
             Prefix filter for object names (default: None)
-        recursive : bool, optional
+        recursive : bool
             Whether to list recursively (default: False)
 
         Returns

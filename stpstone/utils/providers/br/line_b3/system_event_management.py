@@ -67,11 +67,11 @@ class SystemEventManagement(metaclass=TypeChecker):
 			Start date.
 		date_end : Union[datetime, date]
 			End date.
-		str_start_time : str, optional
+		str_start_time : str
 			Start time (default: ``"00:00"``).
-		str_sup_time : str, optional
+		str_sup_time : str
 			End time (default: ``"23:59"``).
-		int_entity_type : int, optional
+		int_entity_type : int
 			Entity type (default: 3).
 
 		Returns

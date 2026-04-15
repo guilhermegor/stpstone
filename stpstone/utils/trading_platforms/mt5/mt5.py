@@ -193,7 +193,7 @@ class MT5(metaclass=TypeChecker):
 
 		Parameters
 		----------
-		market_data : bool, optional
+		market_data : bool
 			Whether to fetch market data (default: True).
 
 		Returns
@@ -386,7 +386,7 @@ class MT5(metaclass=TypeChecker):
 			Starting datetime for ticks.
 		ticks_qty : int
 			Number of ticks to retrieve.
-		type_ticks : int, optional
+		type_ticks : int
 			Type of ticks to retrieve (default: mt5.COPY_TICKS_ALL).
 
 		Returns
@@ -422,7 +422,7 @@ class MT5(metaclass=TypeChecker):
 			Starting datetime for ticks.
 		datetime_to : datetime
 			Ending datetime for ticks.
-		type_ticks : int, optional
+		type_ticks : int
 			Type of ticks to retrieve (default: mt5.COPY_TICKS_ALL).
 
 		Returns
@@ -472,7 +472,7 @@ class MT5(metaclass=TypeChecker):
 		----------
 		ticker : str
 			Ticker to get market depth for.
-		n_times : int, optional
+		n_times : int
 			Number of times to fetch market depth (default: 10).
 
 		Returns

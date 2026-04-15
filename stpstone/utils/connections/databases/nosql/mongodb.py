@@ -78,15 +78,15 @@ class MongoConn(metaclass=TypeChecker):
         
         Parameters
         ----------
-        str_host : str, optional
+        str_host : str
             Address of the MongoDB server (default: "localhost")
-        int_port : int, optional
+        int_port : int
             Port of the MongoDB server (default: 27017)
-        str_dbname : str, optional
+        str_dbname : str
             Name of the database (default: "test")
-        str_collection : str, optional
+        str_collection : str
             Name of the collection (default: "data")
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance for logging (default: None)
         """
         # Always validate inputs to ensure they are valid, even if not used

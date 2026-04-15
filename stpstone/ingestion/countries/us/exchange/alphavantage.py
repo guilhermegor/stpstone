@@ -45,15 +45,15 @@ class AlphaVantageUS(ABCIngestionOperations):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             Reference date for the ingestion run, by default None (yesterday).
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             Database session for persistence, by default None.
-        token : Optional[str], optional
+        token : Optional[str]
             AlphaVantage API key, by default None.
-        list_slugs : Optional[list[str]], optional
+        list_slugs : Optional[list[str]]
             Ticker symbols to fetch (e.g. ``["AAPL", "MSFT"]``), by default None.
 
         Returns
@@ -113,14 +113,14 @@ class AlphaVantageUS(ABCIngestionOperations):
 
         Parameters
         ----------
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default False.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Request timeout passed to ``requests.get``, by default (12.0, 21.0).
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to use INSERT OR IGNORE semantics when persisting,
             by default False.
-        str_table_name : str, optional
+        str_table_name : str
             Target database table name, by default ``"us_alphav_ohlcv_not_adjusted"``.
 
         Returns
@@ -188,7 +188,7 @@ class AlphaVantageUS(ABCIngestionOperations):
             Fully-qualified AlphaVantage query URL (from ``_build_url``).
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Request timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default False.
 
         Returns

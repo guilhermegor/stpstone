@@ -658,7 +658,7 @@ class DateTimezoneAware(DateManipulation):
             The datetime or date object to change the timezone of.
         target_tz : str
             The target timezone, by default "UTC"
-        source_tz : Optional[str], optional
+        source_tz : Optional[str]
             The source timezone, by default None
         
         Returns
@@ -690,7 +690,7 @@ class DateTimezoneAware(DateManipulation):
         ----------
         date_ : date
             The date object to convert.
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -741,7 +741,7 @@ class DateTimezoneAware(DateManipulation):
         ----------
         unix_timestamp : Union[float, int]
             The unix timestamp to convert.
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -762,7 +762,7 @@ class DateTimezoneAware(DateManipulation):
         ----------
         unix_timestamp : Union[float, int]
             The unix timestamp to convert.
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -783,7 +783,7 @@ class DateTimezoneAware(DateManipulation):
         ----------
         iso_timestamp : str
             The ISO timestamp to convert.
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -807,7 +807,7 @@ class DateTimezoneAware(DateManipulation):
         ----------
         float_date : float
             The Excel float date to convert.
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -1210,7 +1210,7 @@ class DatesRangeDelta(DateTimezoneAware):
         int_minute_end_lunch : int
             End minute of lunch.
             Default is 0.
-        list_working_days_range : Optional[list[int]], optional
+        list_working_days_range : Optional[list[int]]
             List of working days.
             Default is [0, 1, 2, 3, 4] (monday to friday).
         substr_timestamp : str
@@ -1282,7 +1282,7 @@ class DatesCurrent(DatesRangeDelta):
         
         Parameters
         ----------
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -1300,7 +1300,7 @@ class DatesCurrent(DatesRangeDelta):
         
         Parameters
         ----------
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -1321,7 +1321,7 @@ class DatesCurrent(DatesRangeDelta):
         ----------
         format_output : str
             The format to use, by default "%Y%m%d_%H%M%S"
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -1344,9 +1344,9 @@ class DateFormatter(DatesCurrent):
         
         Parameters
         ----------
-        str_locale : Optional[str], optional
+        str_locale : Optional[str]
             The locale to use, by default None
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default None
         
         Returns
@@ -1503,7 +1503,7 @@ class DateFormatter(DatesCurrent):
             The date to get the month name from.
         bool_abbreviation : bool
             Whether to return the month name or the month abbreviation, by default False
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns
@@ -1530,7 +1530,7 @@ class DateFormatter(DatesCurrent):
             The date to get the week name from.
         bool_abbreviation : bool
             Whether to return the week name or the week abbreviation, by default False
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use, by default "UTC"
         
         Returns

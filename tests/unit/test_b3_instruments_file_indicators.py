@@ -46,7 +46,7 @@ def create_mock_response(content: bytes = b"test content") -> MagicMock:
 
 	Parameters
 	----------
-	content : bytes, optional
+	content : bytes
 		Response content, by default b"test content"
 
 	Returns
@@ -341,7 +341,7 @@ class TestB3InstrumentsFileIndicators:
 			----------
 			text : str
 				Text content for mock node
-			nested_text : Optional[str], optional
+			nested_text : Optional[str]
 				Text content for nested mock node
 
 			Returns

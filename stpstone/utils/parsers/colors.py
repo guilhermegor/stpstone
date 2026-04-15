@@ -87,7 +87,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        threshold : float, optional
+        threshold : float
             Minimum dominance multiplier (default: 1.5)
 
         Returns
@@ -103,7 +103,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        threshold : float, optional
+        threshold : float
             Minimum dominance multiplier (default: 1.5)
 
         Returns
@@ -119,7 +119,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        threshold : float, optional
+        threshold : float
             Minimum dominance multiplier (default: 1.5)
 
         Returns
@@ -135,7 +135,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        min_intensity : int, optional
+        min_intensity : int
             Minimum intensity value for white (default: 230)
 
         Returns
@@ -151,7 +151,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        max_intensity : int, optional
+        max_intensity : int
             Maximum intensity value for black (default: 25)
 
         Returns
@@ -167,7 +167,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        tolerance : int, optional
+        tolerance : int
             Maximum allowed difference between components (default: 10)
 
         Returns
@@ -188,7 +188,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        threshold : float, optional
+        threshold : float
             Minimum dominance multiplier (default: 1.5)
 
         Returns
@@ -204,7 +204,7 @@ class ColorIdentifier(metaclass=TypeChecker):
 
         Parameters
         ----------
-        threshold : float, optional
+        threshold : float
             Minimum dominance multiplier (default: 1.5)
 
         Returns

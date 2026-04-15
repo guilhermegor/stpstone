@@ -264,7 +264,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to process
-        bool_lower_case : bool, optional
+        bool_lower_case : bool
             Whether to convert to lowercase first, by default True
 
         Returns
@@ -299,7 +299,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         corpus : str
             The text to process
-        patterns : str, optional
+        patterns : str
             Regex pattern matching punctuation to remove, by default r"[!.?+]"
 
         Returns
@@ -316,7 +316,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to process
-        latin_base : bool, optional
+        latin_base : bool
             Whether to only process Latin characters, by default False
 
         Returns
@@ -448,7 +448,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to encode
-        code_method : str, optional
+        code_method : str
             The encoding method, by default "ascii"
 
         Returns
@@ -486,9 +486,9 @@ class StrHandler(metaclass=TypeChecker):
 
         Parameters
         ----------
-        letters_in_alphabet : int, optional
+        letters_in_alphabet : int
             Number of letters to include, by default 21
-        first_letter_alphabet : str, optional
+        first_letter_alphabet : str
             Starting letter, by default "f"
         list_not_in_range : Optional[list]
             Letters to exclude, by default ["i", "l", "o", "p", "r", "s", "t", "w", "y"]
@@ -519,7 +519,7 @@ class StrHandler(metaclass=TypeChecker):
 
         Parameters
         ----------
-        case : str, optional
+        case : str
             Either "upper" or "lower", by default "upper"
 
         Returns
@@ -549,7 +549,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to check
-        regex_match : str, optional
+        regex_match : str
             The regex pattern, by default "^[a-zA-Z0-9_]+$"
 
         Returns
@@ -617,9 +617,9 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The input string
-        str_pattern_maintain : str, optional
+        str_pattern_maintain : str
             Regex pattern for characters to remove, by default r'[\W_]'
-        str_replace : str, optional
+        str_replace : str
             Replacement string, by default ''
 
         Returns
@@ -652,7 +652,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to check
-        bool_simple_validation : bool, optional
+        bool_simple_validation : bool
             If True, only checks first character is uppercase, by default True
 
         Returns
@@ -686,7 +686,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to split
-        re_split : str, optional
+        re_split : str
             Regex pattern for splitting, by default r"[;,\s]\s*"
 
         Returns
@@ -990,7 +990,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         str_ : str
             The string to search
-        str_pattern : str, optional
+        str_pattern : str
             The regex pattern to use, by default r"\{\{(.*?)\}\}"
 
         Returns
@@ -1034,7 +1034,7 @@ class StrHandler(metaclass=TypeChecker):
             The prefix string
         int_num : int
             The number to format
-        total_length : int, optional
+        total_length : int
             Total desired length including prefix, by default 11
 
         Returns
@@ -1061,7 +1061,7 @@ class StrHandler(metaclass=TypeChecker):
         ----------
         url : str
             The URL to parse
-        bool_include_fragment : bool, optional
+        bool_include_fragment : bool
             Whether to include fragment parameters, by default False
 
         Returns

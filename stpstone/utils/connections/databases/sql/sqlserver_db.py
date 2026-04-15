@@ -49,11 +49,11 @@ class SqlServerDB(ABCDatabase):
             Database username
         password : str
             Database password
-        timeout : int, optional
+        timeout : int
             Connection timeout in seconds (default: 7200)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance (default: None)
-        bool_singleton : bool, optional
+        bool_singleton : bool
             Whether to use a singleton connection (default: False)
         
         Returns
@@ -194,9 +194,9 @@ class SqlServerDB(ABCDatabase):
             SQL query to execute
         dict_type_cols : Optional[dict[str, Any]], optional
             Dictionary for column type conversion (default: None)
-        list_cols_dt : Optional[list[str]], optional
+        list_cols_dt : Optional[list[str]]
             List of date columns to convert (default: None)
-        str_fmt_dt : Optional[TypeDateFormatInput], optional
+        str_fmt_dt : Optional[TypeDateFormatInput]
             Date format string (default: None)
 
         Returns
@@ -244,7 +244,7 @@ class SqlServerDB(ABCDatabase):
             List of dictionaries containing data to insert
         str_table_name : str
             Target table name
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to use INSERT OR IGNORE (default: False)
 
         Raises
@@ -315,7 +315,7 @@ class SqlServerDB(ABCDatabase):
         ----------
         str_backup_dir : str
             Backup directory path
-        str_bkp_name : Optional[str], optional
+        str_bkp_name : Optional[str]
             Backup file name (default: None)
 
         Returns

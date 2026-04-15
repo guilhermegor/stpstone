@@ -26,11 +26,11 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 		    The date of reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 		    The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 		    The database session, by default None.
 
 		Returns
@@ -61,13 +61,13 @@ class B3TradableSecurityList(ABCB3SearchByTradingSession):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 		    The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 		    Whether to verify the data, by default True.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 		    Whether to insert or ignore the data, by default False.
-		str_fmt_dt : str, optional
+		str_fmt_dt : str
 		    The format of the date, by default "YYYY-MM-DD".
-		str_table_name : str, optional
+		str_table_name : str
 		    The name of the table, by default "br_b3_tradable_security_list".
 
 		Returns

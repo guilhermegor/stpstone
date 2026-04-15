@@ -16,7 +16,7 @@ class Stack(metaclass=TypeChecker):
 
     Parameters
     ----------
-    initial_capacity : int, optional
+    initial_capacity : int
         Initial capacity of the stack (default: 10)
 
     Attributes
@@ -41,7 +41,7 @@ class Stack(metaclass=TypeChecker):
 
         Parameters
         ----------
-        initial_capacity : int, optional
+        initial_capacity : int
             Initial capacity of the stack (default: 10)
         """
         self._validate_capacity(initial_capacity)

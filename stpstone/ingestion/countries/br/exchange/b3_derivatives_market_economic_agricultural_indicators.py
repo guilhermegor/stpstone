@@ -28,11 +28,11 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 		    The date of reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 		    The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 		    The database session, by default None.
 
 		Returns
@@ -63,13 +63,13 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 		    The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 		    Whether to verify the data, by default True.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 		    Whether to insert or ignore, by default False.
-		str_fmt_dt : str, optional
+		str_fmt_dt : str
 		    The format of the date, by default "YYYY-MM-DD".
-		str_table_name : str, optional
+		str_table_name : str
 		    The name of the table, by default
 		    "br_b3_derivatives_market_economic_agricultural_indicators".
 
@@ -110,9 +110,9 @@ class B3DerivativesMarketEconomicAgriculturalIndicators(ABCB3SearchByTradingSess
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
 		    The response object.
-		prefix : str, optional
+		prefix : str
 		    The prefix of the file name, by default "b3_derivatives_mkt_ec_ag_".
-		file_name : str, optional
+		file_name : str
 		    The name of the file, by default
 		    "b3_derivatives_market_economic_agricultural_indicators".
 

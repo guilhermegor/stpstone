@@ -102,7 +102,7 @@ class MockClass:
         ----------
         arg1 : str
             First argument
-        arg2 : int, optional
+        arg2 : int
             Second argument, default is 42
         
         Returns

@@ -176,13 +176,13 @@ regression-model-in-python
             Array of real numbers (features)
         array_y : np.ndarray
             Array of real numbers (target)
-        cross_validation_folds : int, optional
+        cross_validation_folds : int
             Number of cross-validation folds, by default 3
-        scoring_method : str, optional
+        scoring_method : str
             Scoring method, by default "neg_mean_squared_error"
         cross_val_model : Literal['score', 'predict'], optional
             Cross-validation model type, by default "score"
-        cross_val_model_method : str, optional
+        cross_val_model_method : str
             Cross-validation model method, by default "predict_proba"
 
         Returns
@@ -254,11 +254,11 @@ regression-model-in-python
             Array of real numbers (features)
         array_y_real_numbers : np.ndarray
             Array of real numbers (target)
-        num_cross_validation_splitting_strategy : int, optional
+        num_cross_validation_splitting_strategy : int
             Number of CV splits, by default 5
-        bool_return_train_score : bool, optional
+        bool_return_train_score : bool
             Whether to return train scores, by default True
-        bool_randomized_search : bool, optional
+        bool_randomized_search : bool
             Whether to use randomized search, by default True
 
         Returns
@@ -329,15 +329,15 @@ regression-model-in-python
             Target array
         array_x : np.ndarray
             Feature array
-        cross_validation_folds : int, optional
+        cross_validation_folds : int
             Number of CV folds, by default 3
-        scoring_method : str, optional
+        scoring_method : str
             Scoring method, by default "accuracy"
-        cross_val_model : str, optional
+        cross_val_model : str
             Cross-validation model type, by default "score"
-        key_scores : str, optional
+        key_scores : str
             Key for scores in output, by default "scores"
-        f1_score_average : str, optional
+        f1_score_average : str
             F1 score averaging method, by default "macro"
 
         Returns

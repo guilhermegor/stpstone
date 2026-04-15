@@ -37,7 +37,7 @@ class ConnectionApi(metaclass=TypeChecker):
 		Broker identification code.
 	category_code : str
 		Category classification code.
-	hostname_api_line_b3 : str, optional
+	hostname_api_line_b3 : str
 		API base URL (default: ``"https://api.line.bvmfnet.com.br"``).
 
 	Raises
@@ -68,7 +68,7 @@ class ConnectionApi(metaclass=TypeChecker):
 			Broker identification code.
 		category_code : str
 			Category classification code.
-		hostname_api_line_b3 : str, optional
+		hostname_api_line_b3 : str
 			API base URL (default: ``"https://api.line.bvmfnet.com.br"``).
 
 		Raises
@@ -147,7 +147,7 @@ class ConnectionApi(metaclass=TypeChecker):
 
 		Parameters
 		----------
-		int_max_retries : int, optional
+		int_max_retries : int
 			Maximum number of retries (default: 2).
 		timeout : Union[tuple[float, float], float, int], optional
 			Request timeout (default: 10).
@@ -196,7 +196,7 @@ class ConnectionApi(metaclass=TypeChecker):
 
 		Parameters
 		----------
-		int_max_retries : int, optional
+		int_max_retries : int
 			Maximum number of retries (default: 2).
 		timeout : Union[tuple[float, float], float, int], optional
 			Request timeout (default: 10).
@@ -287,11 +287,11 @@ class ConnectionApi(metaclass=TypeChecker):
 			Request parameters (default: None).
 		dict_payload : Optional[list[dict[str, Any]]], optional
 			Request payload (default: None).
-		bool_parse_dict_params_data : bool, optional
+		bool_parse_dict_params_data : bool
 			Parse parameters as JSON (default: False).
-		bool_retry_if_error : bool, optional
+		bool_retry_if_error : bool
 			Enable retry on error (default: False).
-		float_secs_sleep : Optional[float], optional
+		float_secs_sleep : Optional[float]
 			Sleep time between retries (default: None).
 		timeout : Union[tuple[float, float], float, int], optional
 			Request timeout (default: 10).

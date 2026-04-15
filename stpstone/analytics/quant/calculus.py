@@ -55,7 +55,7 @@ class Calculus(metaclass=TypeChecker):
             The function to differentiate.
         variable_ : Symbol
             The variable with respect to which to differentiate.
-        nth_derivative : int, optional
+        nth_derivative : int
             The order of the derivative (default is 1).
         *args_symbols : Symbol
             Additional symbols in the function.
@@ -302,11 +302,11 @@ class Calculus(metaclass=TypeChecker):
 
         Parameters
         ----------
-        step_size : float, optional
+        step_size : float
             Learning rate (default is -0.01).
-        iter : int, optional
+        iter : int
             Number of iterations (default is 1000).
-        epsilon : float, optional
+        epsilon : float
             Convergence threshold (default is 0.001).
 
         Returns

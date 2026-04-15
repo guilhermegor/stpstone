@@ -42,13 +42,13 @@ class FMPCryptoOhlcvYesterday(ABCIngestionOperations):
 		----------
 		token : str
 			FMP API key.
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 			The date of reference, by default None.
-		list_slugs : Optional[list], optional
+		list_slugs : Optional[list]
 			List of crypto symbols to fetch, by default ['BTCUSD', 'SOLUSD', 'ETHUSD'].
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 			The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 			The database session, by default None.
 
 		Returns
@@ -87,11 +87,11 @@ class FMPCryptoOhlcvYesterday(ABCIngestionOperations):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Whether to verify the SSL certificate, by default False.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 			Whether to insert or ignore the data, by default False.
-		str_table_name : str, optional
+		str_table_name : str
 			The name of the table, by default 'ww_fmp_crypto_ohlcv_yesterday'.
 
 		Returns
@@ -154,7 +154,7 @@ class FMPCryptoOhlcvYesterday(ABCIngestionOperations):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Verify the SSL certificate, by default False.
 
 		Returns

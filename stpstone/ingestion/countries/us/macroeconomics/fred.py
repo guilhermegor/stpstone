@@ -44,17 +44,17 @@ class FredUSMacro(ABCIngestionOperations):
         ----------
         api_key : str
             FRED API key for authenticating requests.
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference, by default None.
-        date_start : Optional[date], optional
+        date_start : Optional[date]
             Start date for the realtime filter, by default 60 working days before date_ref.
-        date_end : Optional[date], optional
+        date_end : Optional[date]
             End date for the realtime filter, by default 1 working day before date_ref.
-        list_slugs : Optional[list[str]], optional
+        list_slugs : Optional[list[str]]
             List of FRED series IDs to fetch, by default the standard macro set.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
 
         Returns
@@ -95,11 +95,11 @@ class FredUSMacro(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default False.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default False.
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default 'us_fred'.
 
         Returns
@@ -160,7 +160,7 @@ class FredUSMacro(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Verify the SSL certificate, by default False.
 
         Returns

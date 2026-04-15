@@ -43,7 +43,7 @@ class ConcreteIngestion(ABCIngestionOperations):
 
         Parameters
         ----------
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
 
         Returns
@@ -121,11 +121,11 @@ class ConcreteIngestion(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default True
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
 
         Returns

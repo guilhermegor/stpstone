@@ -833,7 +833,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         url : str
             The URL to fetch JSON data from. Must be a valid HTTP/HTTPS URL
             that returns JSON content.
-        timeout : Optional[int], optional
+        timeout : Optional[int]
             Request timeout in milliseconds. If None, uses the instance's
             default timeout (self.int_default_timeout). Default is None.
         cookies : Optional[Union[dict[str, str], list[dict[str, str]]]], optional
@@ -927,18 +927,18 @@ class PlaywrightScraper(metaclass=TypeChecker):
             - {} placeholder for row_idx formatting (e.g., '//table/tr[{}]/td[1]')
             - /@attribute suffix to extract attribute values (e.g., '//a/@href')
             - /text()[n] suffix to extract specific text node
-        row_idx : Optional[int], optional
+        row_idx : Optional[int]
             Row index to format into selectors with {} placeholder.
             If None, {} placeholders are not replaced. Default is None.
-        text_part_idx : Optional[int], optional
+        text_part_idx : Optional[int]
             Index of text part to extract when splitting by newline.
             Useful for elements with multiple text nodes.
             If None, uses full text. If specified, splits by '\n' and
             extracts the part at this index. Default is None.
-        timeout : int, optional
+        timeout : int
             Timeout in milliseconds for element visibility checks.
             Default is 5_000 (5 seconds).
-        logger : Optional[Any], optional
+        logger : Optional[Any]
             Logger instance for logging warnings. Default is None.
         
         Returns
@@ -1113,18 +1113,18 @@ class PlaywrightScraper(metaclass=TypeChecker):
         xpath_mapping : dict[str, str]
             Dictionary mapping field names to XPath/CSS selectors with {}
             placeholder for row index.
-        start_idx : int, optional
+        start_idx : int
             Starting row index (inclusive). Default is 1.
-        end_idx : Optional[int], optional
+        end_idx : Optional[int]
             Ending row index (inclusive). If None, extracts until no more
             elements are found. Default is None.
-        max_rows : Optional[int], optional
+        max_rows : Optional[int]
             Maximum number of rows to extract. Useful for limiting results.
             If None, no limit is applied. Default is None.
-        timeout : int, optional
+        timeout : int
             Timeout in milliseconds for element visibility checks.
             Default is 5_000 (5 seconds).
-        logger : Optional[Any], optional
+        logger : Optional[Any]
             Logger instance for logging. Default is None.
         additional_data : Optional[dict[str, Any]], optional
             Additional data to include in each row's dictionary.

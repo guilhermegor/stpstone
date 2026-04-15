@@ -84,9 +84,9 @@ class Professional(metaclass=TypeChecker):
 			Start date.
 		date_end : Union[datetime, date]
 			End date.
-		int_participant_perspective_type : int, optional
+		int_participant_perspective_type : int
 			Participant perspective type, by default 0.
-		entity_type : int, optional
+		entity_type : int
 			Entity type, by default 4.
 
 		Returns

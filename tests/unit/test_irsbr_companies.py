@@ -40,7 +40,7 @@ def _build_zip_bytes(csv_content: str, csv_filename: str = "Empresas0.csv") -> B
 	----------
 	csv_content : str
 		The raw CSV text to embed inside the archive.
-	csv_filename : str, optional
+	csv_filename : str
 		The name of the CSV entry, by default "Empresas0.csv".
 
 	Returns
@@ -71,7 +71,7 @@ def _sample_csv_rows(n: int = 3) -> str:
 
 	Parameters
 	----------
-	n : int, optional
+	n : int
 		Number of rows to generate, by default 3.
 
 	Returns

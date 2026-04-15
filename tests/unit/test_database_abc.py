@@ -112,9 +112,9 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
                 SQL query to execute
             dict_type_cols : Optional[dict[str, Any]], optional
                 Column type mapping, defaults to None
-            list_cols_dt : Optional[list[str]], optional
+            list_cols_dt : Optional[list[str]]
                 Date columns to parse, defaults to None
-            str_fmt_dt : Optional[TypeDateFormatInput], optional
+            str_fmt_dt : Optional[TypeDateFormatInput]
                 Date format string, defaults to None
 
             Returns
@@ -138,7 +138,7 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
                 Data to insert (list of dicts)
             str_table_name : str
                 Target table name
-            bool_insert_or_ignore : bool, optional
+            bool_insert_or_ignore : bool
                 If True, ignore duplicates, defaults to False
 
             Returns
@@ -167,7 +167,7 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
             ----------
             str_backup_dir : str
                 Backup directory path
-            str_bkp_name : Optional[str], optional
+            str_bkp_name : Optional[str]
                 Custom backup filename, defaults to None
 
             Returns

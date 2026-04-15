@@ -41,9 +41,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Yield to maturity (market yield)
         int_wddt : int
             Business days until maturity
-        float_fv : float, optional
+        float_fv : float
             Nominal value (default is 1000)
-        int_wddy : int, optional
+        int_wddy : int
             Business days in a year (default is 252)
 
         Returns
@@ -88,13 +88,13 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Yield to maturity (market yield)
         list_wddts : list[int]
             List of business days until maturity
-        float_fv : float, optional
+        float_fv : float
             Nominal value (default is 1000)
-        float_cpn_y : float, optional
+        float_cpn_y : float
             Nominal yield of the coupon (default is 10%)
-        int_wddy : int, optional
+        int_wddy : int
             Business days in a year (default is 252)
-        int_cpn_freq : int, optional
+        int_cpn_freq : int
             Number of days between coupons (default is 126)
 
         Returns
@@ -257,9 +257,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
         float_pr1 : float
             pr1 = (number of calendar days between purchase date and the 15th of current month) / 
           (number of calendar days between the 15th of next month and the 15th of current month)
-        int_wddy : int, optional
+        int_wddy : int
             Business days in a year (default is 252)
-        float_fv : float, optional
+        float_fv : float
             Nominal value (default is 1)
 
         Returns
@@ -297,11 +297,11 @@ class BRSovereignPricer(metaclass=TypeChecker):
         float_pr1 : float
             pr1 = (number of calendar days between purchase date and the 15th of current month) / 
           (number of calendar days between the 15th of next month and the 15th of current month)
-        float_cpn_y : float, optional
+        float_cpn_y : float
             Nominal yield of the coupon (default is 6%)
-        int_wddy : int, optional
+        int_wddy : int
             Business days in a year (default is 252)
-        int_cpn_freq : int, optional
+        int_cpn_freq : int
             Number of days between coupons (default is 126)
 
         Returns
@@ -356,9 +356,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Last available VNA for LFT
         float_selic_y_hat : float
             Projected annual Selic rate
-        int_wd_cap : int, optional
+        int_wd_cap : int
             Compounding frequency (default is 1)
-        int_wddy : int, optional
+        int_wddy : int
             Business days in a year (default is 252)
 
         Returns
@@ -409,9 +409,9 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Last available VNA
         float_selic_y_hat : float
             Projected annual Selic rate
-        int_wd_cap : int, optional
+        int_wd_cap : int
             Compounding frequency (default is 1)
-        int_wddy : int, optional
+        int_wddy : int
             Business days in a year (default is 252)
 
         Returns
@@ -439,11 +439,11 @@ class BRSovereignPricer(metaclass=TypeChecker):
             Price of the bond
         int_cddt : int
             Number of calendar days
-        float_fee : float, optional
+        float_fee : float
             Custody fee rate, by default 0.003
-        int_cddy : int, optional
+        int_cddy : int
             Number of calendar days in a year, by default 365
-        float_max_fee : float, optional
+        float_max_fee : float
             Maximum custody fee, by default 1_500_000
 
         Returns

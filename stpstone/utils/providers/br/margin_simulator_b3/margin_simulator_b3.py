@@ -32,9 +32,9 @@ class MarginSimulatorB3(metaclass=TypeChecker):
 		Payload dictionary for the B3 Margin Simulator API.
 	timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 		Request timeout (default: (12.0, 21.0)).
-	bool_verify : bool, optional
+	bool_verify : bool
 		Verify SSL certificate (default: True).
-	dict_cookies : Optional[str], optional
+	dict_cookies : Optional[str]
 		Override the default browser session cookies. When ``None`` (default)
 		the class-level ``_DEFAULT_COOKIES`` are used.
 
@@ -88,9 +88,9 @@ class MarginSimulatorB3(metaclass=TypeChecker):
 			Payload dictionary for the B3 Margin Simulator API.
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			Request timeout (default: (12.0, 21.0)).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Verify SSL certificate (default: True).
-		dict_cookies : Optional[str], optional
+		dict_cookies : Optional[str]
 			Override the default browser session cookies. When ``None`` (default)
 			the class-level ``_DEFAULT_COOKIES`` are used.
 

@@ -38,13 +38,13 @@ class AnbimaDataCRICRAPUHistorico(ABCIngestionOperations):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
-        list_asset_codes : Optional[list[str]], optional
+        list_asset_codes : Optional[list[str]]
             List of CRI/CRA asset codes to scrape prices for, by default None.
 
         Returns
@@ -83,11 +83,11 @@ class AnbimaDataCRICRAPUHistorico(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout_ms : int, optional
+        timeout_ms : int
             The timeout in milliseconds, by default 30_000
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default False
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default "br_anbimadata_cri_cra_pu_historico"
 
         Returns
@@ -131,7 +131,7 @@ class AnbimaDataCRICRAPUHistorico(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout_ms : int, optional
+        timeout_ms : int
             The timeout in milliseconds, by default 30_000
 
         Returns

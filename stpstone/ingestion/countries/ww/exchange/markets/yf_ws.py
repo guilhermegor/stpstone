@@ -41,17 +41,17 @@ class YFinanceWS(ABCIngestionOperations):
         ----------
         list_tickers : list[str]
             List of ticker symbols to download.
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference, by default None.
-        date_start : Optional[date], optional
+        date_start : Optional[date]
             Start date for the download window, by default 52 working days before date_ref.
-        date_end : Optional[date], optional
+        date_end : Optional[date]
             End date for the download window, by default 1 working day before date_ref.
-        session : Optional[Session], optional
+        session : Optional[Session]
             Optional requests session (e.g. for proxy routing), by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
 
         Returns
@@ -94,11 +94,11 @@ class YFinanceWS(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Unused; kept for interface consistency, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Unused; kept for interface consistency, by default True.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default False.
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default 'ww_yfinance_ohlcv'.
 
         Returns
@@ -128,7 +128,7 @@ class YFinanceWS(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             Unused; kept for interface consistency, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Unused; kept for interface consistency, by default True.
 
         Returns

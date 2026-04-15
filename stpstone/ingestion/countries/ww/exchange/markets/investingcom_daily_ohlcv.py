@@ -50,17 +50,17 @@ class InvestingComDailyOhlcv(ABCIngestionOperations):
 		----------
 		ticker_id : int
 			The Investing.com numeric ticker ID (obtain via InvestingComTickerId).
-		str_ticker : str, optional
+		str_ticker : str
 			The ticker symbol label, by default 'PETR4'.
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 			The date of reference, by default None.
-		date_start : Optional[date], optional
+		date_start : Optional[date]
 			The start date, by default 5 working days before date_ref.
-		date_end : Optional[date], optional
+		date_end : Optional[date]
 			The end date, by default date_ref.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 			The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 			The database session, by default None.
 
 		Returns
@@ -112,11 +112,11 @@ class InvestingComDailyOhlcv(ABCIngestionOperations):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Whether to verify the SSL certificate, by default False.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 			Whether to insert or ignore the data, by default False.
-		str_table_name : str, optional
+		str_table_name : str
 			The name of the table, by default 'ww_investingcom_daily_ohlcv'.
 
 		Returns
@@ -166,7 +166,7 @@ class InvestingComDailyOhlcv(ABCIngestionOperations):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Verify the SSL certificate, by default False.
 
 		Returns

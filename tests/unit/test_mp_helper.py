@@ -110,7 +110,7 @@ def test_mp_worker_with_keyword_args() -> None:
         ----------
         x : int
             Input value
-        multiplier : int, optional
+        multiplier : int
             Multiplier value, defaults to 1
 
         Returns

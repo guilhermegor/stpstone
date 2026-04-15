@@ -187,11 +187,11 @@ class MonteCarlo(metaclass=TypeChecker):
             Volatility of the underlying asset.
         opt_type : Literal['call', 'put']
             Option type ('call' or 'put').
-        n_simulations : int, optional
+        n_simulations : int
             Number of simulations. Default is 100,000.
-        n_steps : int, optional
+        n_steps : int
             Number of time steps. Default is 252 (1 year).
-        random_seed : Optional[int], optional
+        random_seed : Optional[int]
             Random seed for reproducibility. Default is None.
         
         Returns
@@ -334,9 +334,9 @@ class MonteCarlo(metaclass=TypeChecker):
             Type of barrier ('down-and-out' or 'up-and-out'). Default is 'down-and-out'.
         str_option_type : Optional[Literal['call', 'put']]
             Option type ('call' or 'put'). Default is 'call'.
-        n_simulations : int, optional
+        n_simulations : int
             Number of simulations. Default is 100,000.
-        n_steps : int, optional
+        n_steps : int
             Number of time steps. Default is 252 (1 year).
         
         Returns
@@ -1596,7 +1596,7 @@ class Greeks(BlackScholesMerton):
             dividend yield
         b : float
             cost of carry
-        bool_spot : bool, optional
+        bool_spot : bool
             True if s is the spot price, False if k is the strike price, by default True
 
         Returns
@@ -2958,13 +2958,13 @@ class EuropeanOptions(IterativeMethods):
             - 'fsolve': fsolve method.
             - 'scipy_optimize_minimize': scipy.optimize.minimize method.
             - 'differential_evolution': differential_evolution method.
-        tolerance : float, optional
+        tolerance : float
             Tolerance for the error, by default 1e-3.
-        epsilon : float, optional
+        epsilon : float
             Initial guess for the implied volatility, by default 1.
-        max_iter : int, optional
+        max_iter : int
             Maximum number of iterations, by default 1000.
-        orig_vol : float, optional
+        orig_vol : float
             Original volatility, by default 0.5.
         list_bounds : Optional[list[tuple[float, float]]]
             List of bounds for the implied volatility, by default [(0, 2)].
@@ -3105,7 +3105,7 @@ class EuropeanOptions(IterativeMethods):
             Dividend yield of the underlying asset.
         opt_type : Literal['call', 'put']
             Option type, either 'call' or 'put'.
-        pct_moneyness_atm : float, optional
+        pct_moneyness_atm : float
             Percentage of the moneyness that is considered ATM, by default 0.05.
 
         Returns

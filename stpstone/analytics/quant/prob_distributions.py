@@ -59,7 +59,7 @@ class ProbabilityDistributions(metaclass=TypeChecker):
         ----------
         float_p : float
             Probability of success (0 <= float_p <= 1)
-        int_num_trials : int, optional
+        int_num_trials : int
             Number of trials, by default 1
 
         Returns
@@ -244,11 +244,11 @@ class ProbabilityDistributions(metaclass=TypeChecker):
             Degrees of freedom
         probability_func : Literal['ppf', 'pdf', 'cdf'], optional
             Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
-        x_axis_inf_range : Optional[float], optional
+        x_axis_inf_range : Optional[float]
             Lower bound of x-axis range, by default None
-        x_axis_sup_range : Optional[float], optional
+        x_axis_sup_range : Optional[float]
             Upper bound of x-axis range, by default None
-        x_axis_pace : Optional[float], optional
+        x_axis_pace : Optional[float]
             Step size for x-axis range, by default None
 
         Returns
@@ -318,11 +318,11 @@ value.
             Degrees of freedom
         probability_func : Literal['ppf', 'pdf', 'cdf'], optional
             Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
-        x_axis_inf_range : Optional[float], optional
+        x_axis_inf_range : Optional[float]
             Lower bound of x-axis range, by default None
-        x_axis_sup_range : Optional[float], optional
+        x_axis_sup_range : Optional[float]
             Upper bound of x-axis range, by default None
-        x_axis_pace : Optional[float], optional
+        x_axis_pace : Optional[float]
             Step size for x-axis range, by default None
 
         Returns
@@ -390,15 +390,15 @@ value.
             Degrees of freedom denominator
         float_mu : float
             Mean value
-        float_p : Optional[float], optional
+        float_p : Optional[float]
             Probability value, by default None
         probability_func : Literal['ppf', 'pdf', 'cdf'], optional
             Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
-        x_axis_inf_range : Optional[float], optional
+        x_axis_inf_range : Optional[float]
             Lower bound of x-axis range, by default None
-        x_axis_sup_range : Optional[float], optional
+        x_axis_sup_range : Optional[float]
             Upper bound of x-axis range, by default None
-        x_axis_pace : Optional[float], optional
+        x_axis_pace : Optional[float]
             Step size for x-axis range, by default None
 
         Returns
@@ -464,9 +464,9 @@ class NormalDistribution(metaclass=TypeChecker):
         ----------
         x : float
             Input value
-        float_mu : float, optional
+        float_mu : float
             Mean, by default 0.0
-        float_sigma : float, optional
+        float_sigma : float
             Standard deviation, by default 1.0
 
         Returns
@@ -509,9 +509,9 @@ class NormalDistribution(metaclass=TypeChecker):
         ----------
         x : float
             Input value
-        float_mu : float, optional
+        float_mu : float
             Mean, by default 0.0
-        float_sigma : float, optional
+        float_sigma : float
             Standard deviation, by default 1.0
 
         Returns
@@ -528,9 +528,9 @@ class NormalDistribution(metaclass=TypeChecker):
         ----------
         float_p : float
             Probability value (0 <= float_p <= 1)
-        float_mu : float, optional
+        float_mu : float
             Mean, by default 0.0
-        float_sigma : float, optional
+        float_sigma : float
             Standard deviation, by default 1.0
 
         Returns
@@ -559,7 +559,7 @@ class NormalDistribution(metaclass=TypeChecker):
         ----------
         data : NDArray[np.float64]
             Input data array
-        confidence : float, optional
+        confidence : float
             Confidence level, by default 0.95
 
         Returns
@@ -644,9 +644,9 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        eta : float, optional
+        eta : float
             Degrees of freedom, by default 10.0
-        lam : float, optional
+        lam : float
             Skewness parameter, by default -0.1
         """
         self.eta = eta
@@ -805,7 +805,7 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        array_data : Optional[NDArray[np.float64]], optional
+        array_data : Optional[NDArray[np.float64]]
             Input values, by default None (uses DEFAULT_PDF_CDF_RANGE)
         """
         if array_data is None:
@@ -821,7 +821,7 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        array_data : Optional[NDArray[np.float64]], optional
+        array_data : Optional[NDArray[np.float64]]
             Input values, by default None (uses DEFAULT_PDF_CDF_RANGE)
         """
         if array_data is None:
@@ -837,7 +837,7 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        array_data : Optional[NDArray[np.float64]], optional
+        array_data : Optional[NDArray[np.float64]]
             Probability values, by default None (uses DEFAULT_PPF_RANGE)
         """
         if array_data is None:
@@ -857,9 +857,9 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        array_data : Optional[NDArray[np.float64]], optional
+        array_data : Optional[NDArray[np.float64]]
             Input values, by default None (uses DEFAULT_PDF_CDF_RANGE)
-        size : int, optional
+        size : int
             Sample size, by default 1000
 
         Raises
@@ -887,9 +887,9 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        theta : Optional[NDArray[np.float64]], optional
+        theta : Optional[NDArray[np.float64]]
             Parameters [eta, lambda], by default None
-        x : Optional[NDArray[np.float64]], optional
+        x : Optional[NDArray[np.float64]]
             Input data, by default None
 
         Returns

@@ -51,19 +51,19 @@ class EtfDBVettaFi(ABCIngestionOperations):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
-        list_slugs : Optional[list[str]], optional
+        list_slugs : Optional[list[str]]
             ETF ticker slugs to scrape, by default None (uses the canonical REIT list).
-        int_wait_load_seconds : int, optional
+        int_wait_load_seconds : int
             Seconds to wait for the browser to load each page, by default 10.
-        bool_headless : bool, optional
+        bool_headless : bool
             Whether to run Chrome in headless mode, by default False.
-        bool_incognito : bool, optional
+        bool_incognito : bool
             Whether to run Chrome in incognito mode, by default False.
 
         Returns
@@ -106,11 +106,11 @@ class EtfDBVettaFi(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default False.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default False.
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default "us_etfdb_vettafi_reits".
 
         Returns
@@ -182,7 +182,7 @@ class EtfDBVettaFi(ABCIngestionOperations):
             Fully-qualified URL for the ETF holdings page to scrape.
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Verify the SSL certificate, by default False.
 
         Returns

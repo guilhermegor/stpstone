@@ -59,25 +59,25 @@ class DFStandardization(metaclass=TypeChecker):
         ----------
         dict_dtypes : Optional[dict[str, Any]], optional
             Dictionary of column names and data types, by default {}.
-        cols_from_case : Optional[TypeCaseFrom], optional
+        cols_from_case : Optional[TypeCaseFrom]
             Case conversion for column names, by default None.
-        cols_to_case : Optional[TypeCaseTo], optional
+        cols_to_case : Optional[TypeCaseTo]
             Case conversion for column names, by default None.
-        list_cols_drop_dupl : list[str], optional
+        list_cols_drop_dupl : list[str]
             List of columns to drop duplicates, by default None.
-        dict_fillna_strt : TypeFillnaStrategy, optional
+        dict_fillna_strt : TypeFillnaStrategy
             Dictionary of column names and fillna values, by default None.
-        str_fmt_dt : TypeDateFormatInput, optional
+        str_fmt_dt : TypeDateFormatInput
             Date format string, by default "YYYY-MM-DD".
-        type_error_action : TypeErrorActionAsTypeDataFrame, optional
+        type_error_action : TypeErrorActionAsTypeDataFrame
             Action to take on type errors, by default "raise".
-        strategy_keep_when_dupl : TypeKeepDuplicatedDataFrame, optional
+        strategy_keep_when_dupl : TypeKeepDuplicatedDataFrame
             Strategy for keeping when duplicates, by default "first".
-        str_data_fillna : str, optional
+        str_data_fillna : str
             Fillna value for non-date columns, by default "-99999".
-        str_dt_fillna : Optional[str], optional
+        str_dt_fillna : Optional[str]
             Fillna value for date columns, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger, by default None.
 
         Returns

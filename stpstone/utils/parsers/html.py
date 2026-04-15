@@ -32,7 +32,7 @@ class HtmlHandler(metaclass=TypeChecker):
         ----------
         resp_req : Response
             HTTP response object containing HTML content
-        parser : str, optional
+        parser : str
             BeautifulSoup parser to use (default: "html.parser")
 
         Returns
@@ -126,13 +126,13 @@ class HtmlHandler(metaclass=TypeChecker):
         ----------
         html_ : str
             HTML content to parse
-        parsing_lib : str, optional
+        parsing_lib : str
             Parser to use (default: "html.parser")
-        str_body_html : str, optional
+        str_body_html : str
             Initial string to append results to (default: "")
-        join_td_character : str, optional
+        join_td_character : str
             Character to join table cells (default: "|")
-        td_size_ajust_character : str, optional
+        td_size_ajust_character : str
             Character used for padding cells (default: " ")
 
         Returns

@@ -330,23 +330,23 @@ class MarkowitzEff(metaclass=TypeChecker):
         ----------
         int_n_assets : int
             Number of assets.
-        bool_constraints : bool, optional
+        bool_constraints : bool
             Enable constraints (default is False).
-        bool_opt_possb_comb : bool, optional
+        bool_opt_possb_comb : bool
             Enable optimization of possible combinations (default is False).
-        array_min_w : Optional[NDArray[np.float64]], optional
+        array_min_w : Optional[NDArray[np.float64]]
             Minimum weights per asset (default is None).
-        nth_try : int, optional
+        nth_try : int
             Number of attempts (default is 100).
-        int_idx_val : int, optional
+        int_idx_val : int
             Index value (default is 2).
-        bool_valid_weights : bool, optional
+        bool_valid_weights : bool
             Check if weights are valid (default is False).
-        i_attempts : int, optional
+        i_attempts : int
             Number of attempts (default is 0).
-        float_atol_sum : float, optional
+        float_atol_sum : float
             Tolerance for sum of weights (default is 1e-4).
-        float_atol_w : float, optional
+        float_atol_w : float
             Tolerance for weights (default is 10000.0).
         
         Returns
@@ -498,15 +498,15 @@ class MarkowitzEff(metaclass=TypeChecker):
             Asset returns.
         float_rf : float
             Risk free rate.
-        bool_constraints : bool, optional
+        bool_constraints : bool
             Whether to apply constraints, by default False.
-        bool_opt_possb_comb : bool, optional
+        bool_opt_possb_comb : bool
             Whether to optimize the possible combinations of weights, by default False.
-        array_min_w : Optional[NDArray[np.float64]], optional
+        array_min_w : Optional[NDArray[np.float64]]
             Minimum weights, by default None.
-        nth_try : int, optional
+        nth_try : int
             Number of attempts to find a valid portfolio, by default 100.
-        int_wdy : int, optional
+        int_wdy : int
             Working days per year, by default 252.
 
         Returns
@@ -562,17 +562,17 @@ class MarkowitzEff(metaclass=TypeChecker):
             Date column.
         col_returns : str
             Returns column.
-        col_min_w : str, optional
+        col_min_w : str
             Minimum weights column, by default 'min_w'.
-        float_rf : float, optional
+        float_rf : float
             Risk free rate, by default 0.0.
-        bool_constraints : bool, optional
+        bool_constraints : bool
             Whether to apply constraints, by default False.
-        bool_opt_possb_comb : bool, optional
+        bool_opt_possb_comb : bool
             Whether to optimize the possible combinations of weights, by default False.
-        nth_try : int, optional
+        nth_try : int
             Number of attempts to find a valid portfolio, by default 100.
-        int_wdy : int, optional
+        int_wdy : int
             Working days per year, by default 252.
 
         Returns
@@ -630,11 +630,11 @@ class MarkowitzEff(metaclass=TypeChecker):
         ----------
         array_returns : NDArray[np.float64]
             Array of returns.
-        n_attempts : int, optional
+        n_attempts : int
             Number of attempts to find a valid portfolio, by default 1000.
-        bool_progress_printing_opt : bool, optional
+        bool_progress_printing_opt : bool
             Whether to print progress, by default False.
-        int_wdy : int, optional
+        int_wdy : int
             Working days per year, by default 252.
 
         Returns
@@ -707,17 +707,17 @@ class MarkowitzEff(metaclass=TypeChecker):
             Array of sigmas.
         float_rf : float
             Risk free rate.
-        col_sigma : str, optional
+        col_sigma : str
             Column name for sigma, by default 'sigma'.
-        col_mu : str, optional
+        col_mu : str
             Column name for mu, by default 'float_mu'.
-        col_w : str, optional
+        col_w : str
             Column name for weights, by default 'weights'.
-        col_sharpe : str, optional
+        col_sharpe : str
             Column name for sharpe ratio, by default 'sharpe'.
-        float_atol : float, optional
+        float_atol : float
             Tolerance, by default 1e-2.
-        int_pace_atol : int, optional
+        int_pace_atol : int
             Pace of tolerance, by default 5.
 
         Returns

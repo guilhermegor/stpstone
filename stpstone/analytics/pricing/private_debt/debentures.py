@@ -22,17 +22,17 @@ class DebenturesPricer(metaclass=TypeChecker):
 
         Parameters
         ----------
-        float_fv : float, optional
+        float_fv : float
             The face value of the debenture.
-        float_coupon_r : float, optional
+        float_coupon_r : float
             The coupon rate of the debenture.
-        int_coupon_freq : int, optional
+        int_coupon_freq : int
             The coupon frequency of the debenture.
-        int_maturity_years : int, optional
+        int_maturity_years : int
             The maturity years of the debenture.
-        float_yield : float, optional
+        float_yield : float
             The yield of the debenture.
-        float_tax_rate : float, optional
+        float_tax_rate : float
             The tax rate on the debenture's coupons.
 
         Returns
@@ -253,7 +253,7 @@ class DebenturesPricer(metaclass=TypeChecker):
             The date of the last coupon payment.
         dt_next_coupon : Optional[date]
             The date of the next coupon payment.
-        str_day_count_convention : str, optional
+        str_day_count_convention : str
             The day count convention for the calculation.
 
         Returns
@@ -317,7 +317,7 @@ class DebenturesPricer(metaclass=TypeChecker):
             The date of the last coupon payment.
         dt_next_coupon : Optional[date]
             The date of the next coupon payment.
-        str_day_count_convention : str, optional
+        str_day_count_convention : str
             The day count convention for the calculation.
 
         Returns
@@ -464,9 +464,9 @@ class DebenturesPricer(metaclass=TypeChecker):
             The call date in years.
         float_current_price : float
             The current float_price.
-        int_max_iterations : int, optional
+        int_max_iterations : int
             The maximum number of iterations.
-        float_precision : float, optional
+        float_precision : float
             The desired precision.
 
         Returns

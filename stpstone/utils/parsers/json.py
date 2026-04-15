@@ -143,11 +143,11 @@ class JsonFiles(metaclass=TypeChecker):
         ----------
         json_file : str
             JSON file to load
-        errors : str, optional
+        errors : str
             How to handle encoding errors (default: "ignore")
-        encoding : Optional[str], optional
+        encoding : Optional[str]
             File encoding (default: None)
-        decoding : Optional[str], optional
+        decoding : Optional[str]
             Decoding to apply (default: None)
 
         Returns

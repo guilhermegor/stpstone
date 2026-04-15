@@ -26,11 +26,11 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 		    The date reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 		    The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 		    The database session, by default None.
 
 		Returns
@@ -61,13 +61,13 @@ class B3RiskFormulas(ABCB3SearchByTradingSession):
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 		    The timeout value, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 		    If True, verify the data before inserting it into the database, by default True.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 		    If True, insert the data into the database, by default False.
-		str_fmt_dt : str, optional
+		str_fmt_dt : str
 		    The date format, by default "YYYY-MM-DD".
-		str_table_name : str, optional
+		str_table_name : str
 		    The table name, by default "br_b3_primitive_risk_formulas".
 
 		Returns

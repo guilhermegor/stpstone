@@ -29,11 +29,11 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore, ABCIngestionOperations):
 
         Parameters
         ----------
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
-        url : str, optional
+        url : str
             The URL, by default the ANBIMA IGPM projection page.
 
         Returns
@@ -55,11 +55,11 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore, ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Verify the SSL certificate, by default True.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Insert or ignore the data, by default False.
-        str_table_name : str, optional
+        str_table_name : str
             The table name, by default "br_anbima_igpm_forecasts_ltm".
 
         Returns
@@ -153,13 +153,13 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore, ABCIngestionOperations):
             Flat list of table data with irregular structure.
         expected_columns : list[str]
             Expected column names in order.
-        month_pattern : str, optional
+        month_pattern : str
             Regex pattern to identify month/year values.
-        date_pattern : str, optional
+        date_pattern : str
             Regex pattern to identify date values.
-        numeric_pattern : str, optional
+        numeric_pattern : str
             Regex pattern to identify numeric values.
-        missing_value : Optional[str], optional
+        missing_value : Optional[str]
             Value to use for missing columns, by default None.
 
         Returns
@@ -209,7 +209,7 @@ class AnbimaIGPMForecastsLTM(AnbimaIGPMCore, ABCIngestionOperations):
                 List of values to analyze.
             start_idx : int
                 Starting index of the sequence.
-            max_look_ahead : int, optional
+            max_look_ahead : int
                 Maximum number of values to look ahead, by default 6.
 
             Returns

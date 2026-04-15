@@ -43,7 +43,7 @@ class AlphaTools(metaclass=TypeChecker):
 		Start date for data queries.
 	date_end : datetime
 		End date for data queries.
-	str_fmt_date_output : str, optional
+	str_fmt_date_output : str
 		Format string for output dates (default: ``"YYYY-MM-DD"``).
 
 	Raises
@@ -80,7 +80,7 @@ class AlphaTools(metaclass=TypeChecker):
 			Start date for data queries.
 		date_end : datetime
 			End date for data queries.
-		str_fmt_date_output : str, optional
+		str_fmt_date_output : str
 			Format string for output dates (default: ``"YYYY-MM-DD"``).
 
 		Raises

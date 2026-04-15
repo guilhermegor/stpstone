@@ -93,7 +93,7 @@ class JobsCLI(metaclass=TypeChecker):
         ----------
         job_id : int
             Databricks job ID
-        path : str, optional
+        path : str
             Temporary file path for storing CLI outputs (default: "C:\\Temp")
 
         Returns
@@ -215,7 +215,7 @@ class JobsCLI(metaclass=TypeChecker):
 
         Parameters
         ----------
-        filename : str, optional
+        filename : str
             Output filename for run ID (default: "run_id.json")
         notebook_params : Optional[dict[str, Any]], optional
             Notebook parameters for job execution
@@ -261,7 +261,7 @@ class JobsCLI(metaclass=TypeChecker):
 
         Parameters
         ----------
-        filename : str, optional
+        filename : str
             Output filename for job metadata (default: "job_metadata.json")
 
         Returns
@@ -295,7 +295,7 @@ class JobsCLI(metaclass=TypeChecker):
 
         Parameters
         ----------
-        outside_run_id : Optional[int], optional
+        outside_run_id : Optional[int]
             External run ID to cancel, uses internal run_id if not provided
 
         Raises
@@ -318,9 +318,9 @@ class JobsCLI(metaclass=TypeChecker):
 
         Parameters
         ----------
-        filename : str, optional
+        filename : str
             Output filename for run metadata (default: "run_metadata.json")
-        outside_run_id : Optional[int], optional
+        outside_run_id : Optional[int]
             External run ID to query, uses internal run_id if not provided
 
         Returns
@@ -364,9 +364,9 @@ class JobsCLI(metaclass=TypeChecker):
 
         Parameters
         ----------
-        filename : str, optional
+        filename : str
             Output filename for run output (default: "run_output_metadata.json")
-        outside_run_id : Optional[int], optional
+        outside_run_id : Optional[int]
             External run ID to query, uses internal run_id if not provided
 
         Returns
@@ -414,7 +414,7 @@ class DbfsCLI(metaclass=TypeChecker):
         
         Parameters
         ----------
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance (default: None)
         
         Returns
@@ -452,7 +452,7 @@ class DbfsCLI(metaclass=TypeChecker):
             Source DBFS path
         path_dest : str
             Destination DBFS path
-        overwrite : bool, optional
+        overwrite : bool
             Whether to overwrite existing files (default: True)
 
         Returns
@@ -587,7 +587,7 @@ class DbfsCLI(metaclass=TypeChecker):
             Destination DBFS path
         job_id : int
             Databricks job ID to execute
-        int_seconds_wait : int, optional
+        int_seconds_wait : int
             Wait time between operations in seconds (default: 10)
 
         Returns

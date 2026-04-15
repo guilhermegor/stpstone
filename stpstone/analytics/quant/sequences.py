@@ -98,7 +98,7 @@ class TaylorSeries(metaclass=TypeChecker):
             Function to approximate
         order : int
             Order of the Taylor series (must be non-negative)
-        center : float, optional
+        center : float
             Center point of the Taylor series (default: 0.0)
 
         Raises

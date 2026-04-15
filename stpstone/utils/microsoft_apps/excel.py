@@ -217,7 +217,7 @@ class DealingExcel(metaclass=TypeChecker):
         ----------
         active_wb : object
             Active Excel workbook object
-        save : bool, optional
+        save : bool
             Whether to save before closing (default: True)
 
         Raises
@@ -1784,7 +1784,7 @@ class ExcelWriter(metaclass=TypeChecker):
             File path for the Excel file
         default_sheet_name : str
             Name of the default sheet
-        make_visible : bool, optional
+        make_visible : bool
             Whether to make Excel visible (default: False)
 
         Raises
@@ -1978,7 +1978,7 @@ class ExcelWriter(metaclass=TypeChecker):
             Row number
         data_tuple : tuple[str, ...]
             tuple of data for the row
-        start_col : int, optional
+        start_col : int
             Starting column number (default: 1)
         sheet : Optional[object]
             Target sheet (default: default sheet)
@@ -2022,7 +2022,7 @@ class ExcelWriter(metaclass=TypeChecker):
             Starting row number
         list_data_tuples : list[tuple[str, ...]]
             list of tuples containing row data
-        start_col : int, optional
+        start_col : int
             Starting column number (default: 1)
         sheet : Optional[object]
             Target sheet (default: default sheet)

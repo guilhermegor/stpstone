@@ -26,9 +26,9 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
         Path to the cache file (will be given a .pkl extension)
     cache_key : str
         Key to identify the cached method
-    bool_persist_cache : bool, optional
+    bool_persist_cache : bool
         If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-    logger : Optional[Logger], optional
+    logger : Optional[Logger]
         Logger for error messages (default: None)
 
     Attributes
@@ -63,11 +63,11 @@ class PersistentCacheDecorator(metaclass=TypeChecker):
             Path to the cache file (will be given a .pkl extension)
         cache_key : str
             Key to identify the cached method
-        bool_persist_cache : bool, optional
+        bool_persist_cache : bool
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_thread_safe : bool, optional
+        bool_thread_safe : bool
             If True, uses a thread-safe lock for cache operations (default: False)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger for error messages (default: None)
         """
         self._validate_path_cache(path_cache)

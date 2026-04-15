@@ -28,11 +28,11 @@ class RatingsCorpSPGlobal(metaclass=TypeChecker):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference forwarded to each page ingestion, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
 
         Returns

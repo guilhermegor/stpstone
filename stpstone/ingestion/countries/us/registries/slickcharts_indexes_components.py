@@ -74,13 +74,13 @@ class SlickChartsIndexesComponents(ABCIngestionOperations):
 
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             The date of reference, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger, by default None.
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
-        list_slugs : Optional[list[str]], optional
+        list_slugs : Optional[list[str]]
             The list of index slugs to scrape. Valid values are 'sp500',
             'nasdaq100', 'dowjones'. Defaults to all three when None.
 
@@ -121,11 +121,11 @@ class SlickChartsIndexesComponents(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The request timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default False.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore duplicate rows, by default False.
-        str_table_name : Optional[str], optional
+        str_table_name : Optional[str]
             Override the table name for DB insertion. When None the per-source
             table name from ``_SOURCE_CONFIG`` is used, by default None.
 
@@ -185,7 +185,7 @@ class SlickChartsIndexesComponents(ABCIngestionOperations):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The request timeout, by default (12.0, 21.0).
-        bool_verify : bool, optional
+        bool_verify : bool
             Verify the SSL certificate, by default False.
 
         Returns

@@ -112,11 +112,11 @@ class DataCleaning(metaclass=TypeChecker):
         ----------
         df_data : pd.DataFrame
             Input dataframe to split
-        test_ratio : float, optional
+        test_ratio : float
             Proportion of data for test set (default: 0.2)
-        random_seed : int, optional
+        random_seed : int
             Random seed for reproducibility (default: 42)
-        stratify_col : Optional[str], optional
+        stratify_col : Optional[str]
             Column to use for stratified splitting
 
         Returns
@@ -155,11 +155,11 @@ class DataCleaning(metaclass=TypeChecker):
             Input dataframe
         col_name : str
             Column to stratify by
-        n_splits : int, optional
+        n_splits : int
             Number of splits (default: 1)
-        test_size : float, optional
+        test_size : float
             Proportion for test set (default: 0.2)
-        random_state_seed : int, optional
+        random_state_seed : int
             Random seed (default: 42)
 
         Returns

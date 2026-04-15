@@ -74,11 +74,11 @@ class InputsClassification(metaclass=TypeChecker):
 
         Parameters
         ----------
-        database_name : str, optional
+        database_name : str
             Name of dataset to fetch, default "mnist_784"
-        version : int, optional
+        version : int
             Version of dataset, default 1
-        bool_asframe : bool, optional
+        bool_asframe : bool
             Return as pandas DataFrame if True, default False
 
         Returns
@@ -106,11 +106,11 @@ class InputsClassification(metaclass=TypeChecker):
         ----------
         array_instance : NDArray[np.float64]
             Array containing image data
-        cmap : str, optional
+        cmap : str
             Color map for display, default "binary"
-        shape : tuple, optional
+        shape : tuple
             Shape to reshape image, default (28, 28)
-        bool_axis : str, optional
+        bool_axis : str
             Show axis if "on", default "off"
         complete_saving_path : Optional[str]
             Path to save image if provided, default None
@@ -182,7 +182,7 @@ class Classification(metaclass=TypeChecker):
             Feature array
         array_y : NDArray[np.float64]
             Target array
-        int_random_state_seed : int, optional
+        int_random_state_seed : int
             Random seed, default 5
 
         Returns
@@ -238,15 +238,15 @@ class Classification(metaclass=TypeChecker):
             Feature array
         array_y : NDArray[np.float64]
             Target array
-        kernel : str, optional
+        kernel : str
             Kernel type, default "rbf"
-        float_regularization_parameter : float, optional
+        float_regularization_parameter : float
             Regularization parameter, default 1
         multiclass_classification_strategy : Literal['best', 'ovr', 'ovo'], optional
             Strategy for multiclass ("best", "ovr", "ovo"), default "best"
-        gamma : str, optional
+        gamma : str
             Kernel coefficient, default "auto"
-        int_random_state_seed : int, optional
+        int_random_state_seed : int
             Random seed, default 42
 
         Returns
@@ -305,11 +305,11 @@ class Classification(metaclass=TypeChecker):
             Feature array
         array_y : NDArray[np.float64]
             Target array
-        impurity_crit : str, optional
+        impurity_crit : str
             Splitting criterion, default "gini"
         int_max_depth : Optional[int]
             Max tree depth, default None
-        int_random_state_seed : int, optional
+        int_random_state_seed : int
             Random seed, default 42
 
         Returns
@@ -354,9 +354,9 @@ class Classification(metaclass=TypeChecker):
             Feature array
         array_y : NDArray[np.float64]
             Target array
-        n_estimators : int, optional
+        n_estimators : int
             Number of trees, default 100
-        int_random_state_seed : int, optional
+        int_random_state_seed : int
             Random seed, default 42
 
         Returns
@@ -399,7 +399,7 @@ class Classification(metaclass=TypeChecker):
             Feature array
         array_y : NDArray[np.float64]
             Target array
-        int_n_neighbors : int, optional
+        int_n_neighbors : int
             Number of neighbors, default 5
 
         Returns
@@ -441,7 +441,7 @@ class Classification(metaclass=TypeChecker):
             Target array
         array_x : NDArray[np.float64]
             Feature array
-        int_random_state_seed : int, optional
+        int_random_state_seed : int
             Random seed, default 0
 
         Returns

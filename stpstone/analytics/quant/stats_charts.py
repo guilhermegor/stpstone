@@ -151,7 +151,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Input features array
         y_vector_real_numbers : NDArray[np.float64]
             Target values array
-        c_positive_floating_point_number : float, optional
+        c_positive_floating_point_number : float
             Regularization strength (smaller values indicate stronger regularization), \
                 by default 1.0
 
@@ -195,14 +195,14 @@ class ProbStatsCharts(metaclass=TypeChecker):
         ----------
         conf_mx : NDArray[np.float64]
             Confusion matrix
-        cmap : str, optional
+        cmap : str
             Colormap name, by default "gray"
-        bool_focus_errors : bool, optional
+        bool_focus_errors : bool
             If True, normalize by row sums and fill diagonal with int_fill_non_error_values, \
                 by default True
-        complete_saving_path : Optional[str], optional
+        complete_saving_path : Optional[str]
             Path to save the plot, by default None
-        int_fill_non_error_values : int, optional
+        int_fill_non_error_values : int
             Value to fill diagonal when focusing on errors, by default 0
 
         Returns
@@ -239,7 +239,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
         ----------
         list_ser_data : list[dict[str, NDArray[np.float64]]]
             List of dictionaries containing data and labels
-        legend_position : str, optional
+        legend_position : str
             Position of the legend, by default "lower right"
 
         Returns
@@ -345,11 +345,11 @@ class ProbStatsCharts(metaclass=TypeChecker):
         ----------
         df_ : pd.DataFrame
             Input DataFrame
-        bins : Optional[int], optional
+        bins : Optional[int]
             Number of bins, by default None (calculated as sqrt of rows)
         figsize : tuple[int, int], optional
             Figure size, by default (20, 15)
-        complete_saving_path : Optional[str], optional
+        complete_saving_path : Optional[str]
             Path to save the plot, by default None
 
         Returns
@@ -408,33 +408,33 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Input features
         array_target : NDArray[np.float64]
             Target values
-        cross_validation_folds : int, optional
+        cross_validation_folds : int
             Number of cross-validation folds, by default 3
-        scoring_method : str, optional
+        scoring_method : str
             Scoring method, by default "accuracy"
-        localization_legend : str, optional
+        localization_legend : str
             Legend position, by default "center right"
-        label_precision : str, optional
+        label_precision : str
             Precision curve label, by default "Precision"
-        label_recall : str, optional
+        label_recall : str
             Recall curve label, by default "Recall"
-        line_style_precision : str, optional
+        line_style_precision : str
             Precision line style, by default "b--"
-        line_style_recall : str, optional
+        line_style_recall : str
             Recall line style, by default "g-"
-        line_width : int, optional
+        line_width : int
             Line width, by default 2
-        label_axis_x : str, optional
+        label_axis_x : str
             X-axis label, by default "Threshold"
-        label_axis_y : str, optional
+        label_axis_y : str
             Y-axis label, by default "Percentage"
-        font_size : int, optional
+        font_size : int
             Font size, by default 16
-        bool_grid : bool, optional
+        bool_grid : bool
             Show grid, by default True
         tup_fig_size : tuple[int, int], optional
             Figure size, by default (8, 4)
-        complete_saving_path : Optional[str], optional
+        complete_saving_path : Optional[str]
             Path to save the plot, by default None
 
         Returns
@@ -491,23 +491,23 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Input features
         array_target : NDArray[np.float64]
             Target values
-        cross_validation_folds : int, optional
+        cross_validation_folds : int
             Number of cross-validation folds, by default 3
-        scoring_method : str, optional
+        scoring_method : str
             Scoring method, by default "accuracy"
-        plot_title : Optional[str], optional
+        plot_title : Optional[str]
             Plot title, by default None
-        label_x_axis : str, optional
+        label_x_axis : str
             X-axis label, by default "False Positive Rate (Fall-Out)"
-        label_y_axis : str, optional
+        label_y_axis : str
             Y-axis label, by default "True Positive Rate (Recall)"
-        font_size : int, optional
+        font_size : int
             Font size, by default 16
-        bool_grid : bool, optional
+        bool_grid : bool
             Show grid, by default True
         tup_fig_size : tuple[int, int], optional
             Figure size, by default (8, 4)
-        complete_saving_path : Optional[str], optional
+        complete_saving_path : Optional[str]
             Path to save the plot, by default None
 
         Returns
@@ -565,21 +565,21 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Main title of the plot
         subtitle_vector : Optional[list[str]]
             List of subtitles for subplots, by default []
-        ncols : Optional[int], optional
+        ncols : Optional[int]
             Number of columns for subplots, by default None
-        nrows : Optional[int], optional
+        nrows : Optional[int]
             Number of rows for subplots, by default None
-        nbins : int, optional
+        nbins : int
             Number of bins, by default 100
         limits : tuple[float, float], optional
             Range for histogram, by default (-100, 100)
-        tick_label_size : int, optional
+        tick_label_size : int
             Tick label size, by default 30
         size : tuple[int, int], optional
             Figure size, by default (60, 30)
-        suptitle_fontsize : int, optional
+        suptitle_fontsize : int
             Super title font size, by default 80
-        subtitle_fontsize : int, optional
+        subtitle_fontsize : int
             Subtitle font size, by default 40
         filepath : Optional[str]
             Path to save the plot, by default "C:/Temp/Teste.png"
@@ -728,13 +728,13 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Theoretical quantiles (PPF)
         list_raw_data : NDArray[np.float64]
             Sample data
-        chart_title : Optional[str], optional
+        chart_title : Optional[str]
             Chart title, by default None
-        complete_saving_path : Optional[str], optional
+        complete_saving_path : Optional[str]
             Path to save the plot, by default None
-        bool_show_plot : bool, optional
+        bool_show_plot : bool
             Show the plot, by default True
-        j : int, optional
+        j : int
             Starting index (unused, kept for compatibility), by default 0
 
         Returns
@@ -796,33 +796,33 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Input features
         array_target : NDArray[np.float64]
             Target values
-        complete_path_save_figure : Optional[str], optional
+        complete_path_save_figure : Optional[str]
             Path to save the figure, by default None
-        float_test_size : float, optional
+        float_test_size : float
             Test set size proportion, by default 0.2
         list_axis : Optional[list[float]]
             Axis limits [xmin, xmax, ymin, ymax], by default [0, 80, 0, 3]
-        line_type_training_error : str, optional
+        line_type_training_error : str
             Training error line style, by default "r-+"
-        line_type_val_error : str, optional
+        line_type_val_error : str
             Validation error line style, by default "b-"
-        line_width_training_error : int, optional
+        line_width_training_error : int
             Training error line width, by default 2
-        line_width_val_error : int, optional
+        line_width_val_error : int
             Validation error line width, by default 3
-        label_training_error : str, optional
+        label_training_error : str
             Training error label, by default "trainig_data"
-        label_val_error : str, optional
+        label_val_error : str
             Validation error label, by default "validation_data"
-        x_label : str, optional
+        x_label : str
             X-axis label, by default "Training set size"
-        y_label : str, optional
+        y_label : str
             Y-axis label, by default "Root Mean Squared Error (RMSE)"
-        plt_label : str, optional
+        plt_label : str
             Plot title, by default "Model Perform"
-        legend_plot_position : str, optional
+        legend_plot_position : str
             Legend position, by default "upper right"
-        int_font_size : int, optional
+        int_font_size : int
             Font size, by default 14
 
         Returns
@@ -911,11 +911,11 @@ class ProbStatsCharts(metaclass=TypeChecker):
             X-axis label
         str_ylabel : str
             Y-axis label
-        complete_path_save_figure : Optional[str], optional
+        complete_path_save_figure : Optional[str]
             Path to save the figure, by default None
-        str_color_negative : str, optional
+        str_color_negative : str
             Color for negative class, by default "salmon"
-        str_color_positive : str, optional
+        str_color_positive : str
             Color for positive class, by default "dodgerblue"
 
         Returns

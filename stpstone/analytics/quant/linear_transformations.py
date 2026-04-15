@@ -152,7 +152,7 @@ class LinearAlgebra(metaclass=TypeChecker):
         ----------
         array_data : npt.NDArray[np.float64]
             Symmetric, positive-definite matrix to be decomposed.
-        bool_lower_triangle : bool, optional
+        bool_lower_triangle : bool
             If True (default), returns the lower-triangular matrix L such that A = L @ L.T.
             If False, returns the upper-triangular matrix U such that A = U.T @ U.
 

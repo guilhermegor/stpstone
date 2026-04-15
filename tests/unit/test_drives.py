@@ -31,13 +31,13 @@ def create_mock_partition(
 
     Parameters
     ----------
-    device : str, optional
+    device : str
         Device path, by default "/dev/sda1"
-    mountpoint : str, optional
+    mountpoint : str
         Mount point, by default "/"
-    fstype : str, optional
+    fstype : str
         File system type, by default "ext4"
-    opts : str, optional
+    opts : str
         Mount options, by default "rw,relatime"
 
     Returns
@@ -62,11 +62,11 @@ def create_mock_disk_usage(
 
     Parameters
     ----------
-    total : int, optional
+    total : int
         Total disk space in bytes, by default 1000000000
-    used : int, optional
+    used : int
         Used disk space in bytes, by default 500000000
-    free : int, optional
+    free : int
         Free disk space in bytes, by default 500000000
 
     Returns

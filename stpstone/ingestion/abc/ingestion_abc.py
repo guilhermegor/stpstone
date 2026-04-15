@@ -43,7 +43,7 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         
         Parameters
         ----------
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             The database session, by default None.
         
         Returns
@@ -141,11 +141,11 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
         ----------
         timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
             The timeout, by default (12.0, 21.0)
-        bool_verify : bool, optional
+        bool_verify : bool
             Whether to verify the SSL certificate, by default True
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert or ignore the data, by default True
-        str_table_name : str, optional
+        str_table_name : str
             The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>"
 
         Returns
@@ -202,27 +202,27 @@ class CoreIngestion(metaclass=TypeChecker):
             The date of reference.
         dict_dtypes : dict[str, Union[str, int, float, date, datetime]]
             The dictionary of data types.
-        bool_format_log_as_str : bool, optional
+        bool_format_log_as_str : bool
             Whether to format the log as a string, by default True.
-        cols_from_case : Optional[TypeCaseFrom], optional
+        cols_from_case : Optional[TypeCaseFrom]
             Case conversion for column names, by default None.
-        cols_to_case : Optional[TypeCaseTo], optional
+        cols_to_case : Optional[TypeCaseTo]
             Case conversion for column names, by default None.
-        list_cols_drop_dupl : Optional[list[str]], optional
+        list_cols_drop_dupl : Optional[list[str]]
             List of columns to drop duplicates, by default None.
-        dict_fillna_strt : TypeFillnaStrategy, optional
+        dict_fillna_strt : TypeFillnaStrategy
             Dictionary of fillna strategies, by default None.
-        str_fmt_dt : TypeDateFormatInput, optional
+        str_fmt_dt : TypeDateFormatInput
             Format for date columns, by default "YYYY-MM-DD".
-        type_error_action : TypeErrorActionAsTypeDataFrame, optional
+        type_error_action : TypeErrorActionAsTypeDataFrame
             Action to take when a type error occurs, by default "raise".
-        strategy_keep_when_dupl : TypeKeepDuplicatedDataFrame, optional
+        strategy_keep_when_dupl : TypeKeepDuplicatedDataFrame
             Strategy to keep when duplicates occur, by default "first".
-        str_data_fillna : str, optional
+        str_data_fillna : str
             Value to fill missing data, by default "-99999".
-        str_dt_fillna : Optional[str], optional
+        str_dt_fillna : Optional[str]
             Value to fill missing dates, by default None.
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger object, by default None.
 
         Returns
@@ -269,7 +269,7 @@ class CoreIngestion(metaclass=TypeChecker):
             The name of the table.
         df_ : pd.DataFrame
             The DataFrame to insert.
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to use INSERT OR IGNORE or INSERT WITHOUT IGNORING CONFLICTS (default: False)
 
         Returns

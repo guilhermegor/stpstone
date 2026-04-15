@@ -97,7 +97,7 @@ class Reuters(metaclass=TypeChecker):
 		----------
 		app : str
 			Application endpoint path
-		payload : dict, optional
+		payload : dict
 			Request parameters (default: empty dict)
 		method : Literal['GET', 'POST']
 			HTTP method (default: 'GET')

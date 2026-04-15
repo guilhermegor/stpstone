@@ -147,9 +147,9 @@ class PricingModels(InitialSettings):
             Down-factor in binomial models.
         opt_style : Literal['call', 'put']
             Option style, either 'call' or 'put'.
-        h_upper : float, optional
+        h_upper : float
             Upper barrier.
-        h_lower : float, optional
+        h_lower : float
             Lower barrier.
 
         Returns

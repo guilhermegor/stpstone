@@ -39,7 +39,7 @@ def initiate_logging(logger: Logger, path_log: Optional[str] = None) -> None:
     ----------
     logger : Logger
         Logger instance for logging messages
-    path_log : Optional[str], optional
+    path_log : Optional[str]
         Path for log file directory (default: None)
 
     Raises

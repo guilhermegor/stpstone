@@ -21,7 +21,7 @@ def create_mock_response(content: bytes = b"test content") -> MagicMock:
 
 	Parameters
 	----------
-	content : bytes, optional
+	content : bytes
 		Response content, by default b"test content"
 
 	Returns

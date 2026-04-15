@@ -147,11 +147,11 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        max_iter : int, optional
+        max_iter : int
             Maximum iterations (default: 1000)
-        eta : float, optional
+        eta : float
             Learning rate (default: 0.1)
-        m : int, optional
+        m : int
             Number of instances (default: 100)
         theta : Optional[np.ndarray]
             Initial theta vector (default: random initialization)
@@ -217,21 +217,21 @@ class LinearRegressions(metaclass=TypeChecker):
             Target values
         method : Literal['implemented', 'sklearn'], optional
             Implementation method (default: "sklearn")
-        n_epochs : int, optional
+        n_epochs : int
             Maximum iterations (default: 1000)
-        t0 : int, optional
+        t0 : int
             Learning schedule hyperparameter (default: 5)
-        t1 : int, optional
+        t1 : int
             Learning schedule hyperparameter (default: 50)
-        m : int, optional
+        m : int
             Number of instances (default: 100)
         theta : Optional[np.ndarray]
             Initial theta vector (default: random initialization)
-        tolerance : float, optional
+        tolerance : float
             Optimization tolerance (default: 1e-3)
-        penalty : Optional[str], optional
+        penalty : Optional[str]
             Regularization penalty (default: None)
-        eta0 : float, optional
+        eta0 : float
             Initial learning rate (default: 0.1)
 
         Returns
@@ -414,9 +414,9 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        int_degree : int, optional
+        int_degree : int
             Polynomial degree (default: 2)
-        bool_include_bias : bool, optional
+        bool_include_bias : bool
             Whether to include bias term (default: True)
 
         Returns
@@ -476,9 +476,9 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        alpha : float, optional
+        alpha : float
             Regularization strength (default: 0)
-        solver_ridge_regression : str, optional
+        solver_ridge_regression : str
             Solver to use (default: "cholesky")
 
         Returns
@@ -532,7 +532,7 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        alpha : float, optional
+        alpha : float
             Regularization strength (default: 0.1)
 
         Returns
@@ -587,9 +587,9 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        alpha : float, optional
+        alpha : float
             Regularization strength (default: 0.1)
-        l1_ratio : float, optional
+        l1_ratio : float
             L1 ratio (default: 0.5)
 
         Returns
@@ -650,7 +650,7 @@ class NonLinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        seed : Optional[int], optional
+        seed : Optional[int]
             Random seed (default: None)
 
         Returns
@@ -694,9 +694,9 @@ class NonLinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        seed : Optional[int], optional
+        seed : Optional[int]
             Random seed (default: None)
-        n_estimators : int, optional
+        n_estimators : int
             Number of trees (default: 100)
 
         Returns
@@ -746,13 +746,13 @@ class NonLinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        kernel : str, optional
+        kernel : str
             Kernel type (default: "poly")
-        int_degree : int, optional
+        int_degree : int
             Polynomial degree (default: 2)
-        c_positive_floating_point_number : float, optional
+        c_positive_floating_point_number : float
             Regularization parameter (default: 100)
-        epsilon : float, optional
+        epsilon : float
             Epsilon in epsilon-SVR model (default: 0.1)
 
         Returns
@@ -826,35 +826,35 @@ class LogLinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        c_positive_floating_point_number : float, optional
+        c_positive_floating_point_number : float
             Inverse of regularization strength (default: 1.0)
-        l1_ratio : Optional[float], optional
+        l1_ratio : Optional[float]
             ElasticNet mixing parameter (default: None)
-        int_max_iter : int, optional
+        int_max_iter : int
             Maximum iterations (default: 100)
-        solver : str, optional
+        solver : str
             Optimization solver (default: "lbfgs")
-        penalty : str, optional
+        penalty : str
             Regularization penalty (default: "l2")
-        mult_class_classifier : str, optional
+        mult_class_classifier : str
             Multiclass handling (default: "ovr")
-        float_tolerance : float, optional
+        float_tolerance : float
             Tolerance for stopping (default: 0.0001)
-        intercept_scaling : int, optional
+        intercept_scaling : int
             Intercept scaling (default: 1)
-        random_state : int, optional
+        random_state : int
             Random seed (default: 0)
-        verbose : int, optional
+        verbose : int
             Verbosity level (default: 0)
-        bool_fit_intercept : bool, optional
+        bool_fit_intercept : bool
             Whether to fit intercept (default: True)
-        bool_warm_start : bool, optional
+        bool_warm_start : bool
             Whether to reuse solution (default: False)
-        class_weight : Optional[dict], optional
+        class_weight : Optional[dict]
             Class weights (default: None)
-        bool_dual : bool, optional
+        bool_dual : bool
             Dual formulation (default: False)
-        n_jobs : Optional[int], optional
+        n_jobs : Optional[int]
             Number of CPU cores (default: None)
 
         Returns
@@ -963,21 +963,21 @@ class NonLinearEquations(metaclass=TypeChecker):
             List of (min, max) pairs for each parameter
         method : Literal['scipy', 'mystic'], optional
             Implementation method (default: "scipy")
-        max_iter : int, optional
+        max_iter : int
             Maximum iterations (default: 1000)
-        max_iterations_wo_improvement : int, optional
+        max_iterations_wo_improvement : int
             Maximum iterations without improvement (default: 100)
-        int_verbose_monitor : int, optional
+        int_verbose_monitor : int
             Verbosity interval (default: 10)
-        bool_print_convergence_messages : bool, optional
+        bool_print_convergence_messages : bool
             Whether to print convergence messages (default: False)
-        bool_print_warning_messages : bool, optional
+        bool_print_warning_messages : bool
             Whether to print warnings (default: True)
-        bool_inter_monitor : bool, optional
+        bool_inter_monitor : bool
             Whether to use verbose monitor (default: False)
-        int_size_trial_solution_population : int, optional
+        int_size_trial_solution_population : int
             Population size (default: 40)
-        tolerance : float, optional
+        tolerance : float
             Optimization tolerance (default: 5e-5)
 
         Returns
@@ -1106,7 +1106,7 @@ class NonLinearEquations(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        deg : int, optional
+        deg : int
             Degree of polynomial (default: 2)
 
         Returns

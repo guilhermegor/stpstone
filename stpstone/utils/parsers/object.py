@@ -71,9 +71,9 @@ class HandlingObjects(metaclass=TypeChecker):
         ----------
         data_object : Any
             Object to be converted (typically a string representation)
-        str_left_bound : Optional[str], optional
+        str_left_bound : Optional[str]
             Left boundary string for extraction (default: None)
-        str_right_bound : Optional[str], optional
+        str_right_bound : Optional[str]
             Right boundary string for extraction (default: None)
 
         Returns

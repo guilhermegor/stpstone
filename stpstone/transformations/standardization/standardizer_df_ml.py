@@ -116,17 +116,17 @@ class DFStandardizationML(DFStandardization):
         ----------
         df_ : pd.DataFrame
             The DataFrame to standardize.
-        method_handle_outliers : str, optional
+        method_handle_outliers : str
             The method to use for handling outliers. Default is "iqr".
-        method_scale_numeric_data : str, optional
+        method_scale_numeric_data : str
             The method to use for scaling numeric data. Default is "minmax".
-        cols_from_case : Optional[TypeCaseFrom], optional
+        cols_from_case : Optional[TypeCaseFrom]
             Case conversion for column names, by default None.
-        cols_to_case : Optional[TypeCaseTo], optional
+        cols_to_case : Optional[TypeCaseTo]
             Case conversion for column names, by default None.
-        list_cols_drop_dupl : list[str], optional
+        list_cols_drop_dupl : list[str]
             List of columns to drop duplicates, by default None.
-        str_fmt_dt : str, optional
+        str_fmt_dt : str
             Format for date columns, by default "YYYY-MM-DD".
 
         Returns

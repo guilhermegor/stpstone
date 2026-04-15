@@ -311,9 +311,9 @@ class DatesBRFebraban(ABCCalendarOperations):
 
         Parameters
         ----------
-        int_year_start : int, optional
+        int_year_start : int
             Starting year, by default (date.today() - timedelta(days=22)).year - 1
-        int_year_end : int, optional
+        int_year_end : int
             Ending year, by default (date.today() - timedelta(days=22)).year
 
         Returns

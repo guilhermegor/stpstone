@@ -69,17 +69,17 @@ class CacheManager(metaclass=TypeChecker):
         
         Parameters
         ----------
-        bool_persist_cache : bool, optional
+        bool_persist_cache : bool
             If True, saves cache to disk; if False, uses in-memory cache only (default: True)
-        bool_reuse_cache : bool, optional
+        bool_reuse_cache : bool
             If True, caches in-memory; if False, does not cache in-memory (default: True)
-        int_days_cache_expiration : int, optional
+        int_days_cache_expiration : int
             Number of days after which the cache expires (default: 1)
-        int_cache_ttl_days : int, optional
+        int_cache_ttl_days : int
             Number of days after which the cache is considered expired (default: 30)
-        path_cache_dir : Optional[str], optional
+        path_cache_dir : Optional[str]
             Path to the cache directory (default: None)
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             The logger to use (default: None)
         
         Returns

@@ -44,14 +44,14 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         
         Parameters
         ----------
-        date_ref : Optional[date], optional
+        date_ref : Optional[date]
             Reference date for data retrieval. If None, defaults to 66 working days before current 
             date, by default None
-        logger : Optional[Logger], optional
+        logger : Optional[Logger]
             Logger instance for logging messages, by default None
-        cls_db : Optional[Session], optional
+        cls_db : Optional[Session]
             Database session/connection instance, by default None
-        headless : bool, optional
+        headless : bool
             Whether to run the browser in headless mode, by default True
 
         Returns
@@ -105,11 +105,11 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         
         Parameters
         ----------
-        timeout_ms : int, optional
+        timeout_ms : int
             Timeout for web requests in milliseconds, by default 180000
-        bool_insert_or_ignore : bool, optional
+        bool_insert_or_ignore : bool
             Whether to insert data into the database or return DataFrame, by default False
-        str_table_name : str, optional
+        str_table_name : str
             Name of the database table for insertion, by default 
             "br_anbima_redemption_probability_matrix"
 
@@ -179,7 +179,7 @@ class AnbimaFundsRedemptionProbabilityMatrix(ABCIngestionOperations):
         
         Parameters
         ----------
-        timeout_ms : int, optional
+        timeout_ms : int
             Timeout for web requests in milliseconds, by default 180000
 
         Returns
