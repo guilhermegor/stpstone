@@ -11,7 +11,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_derivatives_market_list_isin_derivatives_contracts import (
+from stpstone.ingestion.countries.br.exchange.b3_derivatives_market_list_isin_derivatives_contracts import (  # noqa: E501
 	B3DerivativesMarketListISINDerivativesContracts,
 )
 

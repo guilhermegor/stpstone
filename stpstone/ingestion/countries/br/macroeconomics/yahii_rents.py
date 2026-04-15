@@ -208,9 +208,10 @@ class YahiiRentIndices(ABCIngestionOperations):
         list_records = []
         
         # Iterate through each month
-        for month_idx, month_name in enumerate(self.months, start=1):
+        for _month_idx, month_name in enumerate(self.months, start=1):
             # Try to find tables for this month
-            tables = page.locator(f'p:has-text("{month_name.upper()}/{self.year}") ~ center table').all()
+            locator = f'p:has-text("{month_name.upper()}/{self.year}") ~ center table'
+            tables = page.locator(locator).all()
             
             if not tables:
                 continue
@@ -243,14 +244,21 @@ class YahiiRentIndices(ABCIngestionOperations):
                         continue
                     
                     # Extract data for each time period
-                    for col_idx, (header_key, time_period) in enumerate(self.time_periods.items(), start=1):
+                    for col_idx, (_header_key, time_period) in enumerate(
+                        self.time_periods.items(), start=1
+                    ):
                         if col_idx < len(cells):
                             value_text = cells[col_idx].inner_text().strip()
                             
                             # Clean and convert value
                             if value_text and value_text != '-':
                                 # Remove parentheses and (-)
-                                value_text = value_text.replace('(-)', '').replace('(', '').replace(')', '').strip()
+                                value_text = (
+                                    value_text.replace('(-)', '')
+                                    .replace('(', '')
+                                    .replace(')', '')
+                                    .strip()
+                                )
                                 
                                 try:
                                     value = float(value_text.replace(',', '.'))

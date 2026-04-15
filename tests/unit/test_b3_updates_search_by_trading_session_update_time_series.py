@@ -11,7 +11,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_updates_search_by_trading_session_update_time_series import (
+from stpstone.ingestion.countries.br.exchange.b3_updates_search_by_trading_session_update_time_series import (  # noqa: E501
 	B3UpdatesSearchByTradingSessionUpdateTimeSeries,
 )
 

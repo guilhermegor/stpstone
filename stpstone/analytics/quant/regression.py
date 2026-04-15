@@ -105,7 +105,8 @@ class LinearRegressions(metaclass=TypeChecker):
 
         Returns
         -------
-        Union[NDArray[np.float64], tuple[NDArray[np.float64], NDArray[np.float64], int, NDArray[np.float64]]]
+        Union[NDArray[np.float64],
+        tuple[NDArray[np.float64], NDArray[np.float64], int, NDArray[np.float64]]]
 
         Raises
         ------

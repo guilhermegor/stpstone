@@ -95,5 +95,6 @@ allow-star-arg-any = false  # do not allow `*args` and `**kwargs` to be untyped
 
 [lint.per-file-ignores]
 "tests/**/*.py" = [
-    "S101",  # use of assert
+    "S101",   # use of assert
+    "ERA001", # section-header comments look like commented-out code to eradicate
 ]

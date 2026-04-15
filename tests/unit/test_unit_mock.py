@@ -1,3 +1,5 @@
+"""Unit tests demonstrating Protocol-based dependency injection and mocking."""
+
 from typing import Protocol
 from unittest.mock import MagicMock
 

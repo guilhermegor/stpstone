@@ -66,7 +66,8 @@ class B3TradingHoursRealDenominatedInterestRates(B3TradingHoursCore):
 		bool_insert_or_ignore : bool
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str
-			The name of the table, by default "br_b3_trading_hours_real_denominated_interest_rates".
+			The name of the table, by default
+			"br_b3_trading_hours_real_denominated_interest_rates".
 
 		Returns
 		-------

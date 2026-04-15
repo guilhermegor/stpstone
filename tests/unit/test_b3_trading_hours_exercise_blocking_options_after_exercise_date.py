@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 from requests import Response, Session
 
 from stpstone.ingestion.countries.br.exchange._b3_trading_hours_core import B3TradingHoursCore
-from stpstone.ingestion.countries.br.exchange.b3_trading_hours_exercise_blocking_options_after_exercise_date import (
+from stpstone.ingestion.countries.br.exchange.b3_trading_hours_exercise_blocking_options_after_exercise_date import (  # noqa: E501
 	B3TradingHoursExerciseBlockingOptionsAfterExerciseDate,
 )
 

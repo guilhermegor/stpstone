@@ -12,6 +12,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
+from stpstone.ingestion.countries.br.exchange.b3_instruments_file import B3InstrumentsFile
 from stpstone.ingestion.countries.br.exchange.b3_instruments_file_eqty import (
 	B3InstrumentsFileEqty,
 )

@@ -11,7 +11,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_derivatives_market_economic_agricultural_indicators import (
+from stpstone.ingestion.countries.br.exchange.b3_derivatives_market_economic_agricultural_indicators import (  # noqa: E501
 	B3DerivativesMarketEconomicAgriculturalIndicators,
 )
 

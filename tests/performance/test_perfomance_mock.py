@@ -32,7 +32,16 @@ def heavy_computation(n: int) -> int:
     (10_000, 0.01),
     (100_000, 0.1),
 ])
-def test_heavy_computation_performance(n, max_seconds):
+def test_heavy_computation_performance(n: int, max_seconds: float) -> None:
+    """Test that heavy_computation completes within the given time threshold.
+
+    Parameters
+    ----------
+    n : int
+        Upper bound passed to heavy_computation.
+    max_seconds : float
+        Maximum allowed wall-clock time in seconds.
+    """
     start = time.perf_counter()
     result = heavy_computation(n)
     elapsed = time.perf_counter() - start

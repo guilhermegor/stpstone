@@ -278,9 +278,9 @@ class BMFInterestRates(ABCIngestionOperations):
 		)
 		df_4 = pd.DataFrame(list_ser)
 
-		df_ = pd.merge(df_1, df_2, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
-		df_ = pd.merge(df_, df_3, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
-		df_ = pd.merge(df_, df_4, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+		df_ = df_1.merge(df_2, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+		df_ = df_.merge(df_3, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+		df_ = df_.merge(df_4, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
 		list_ser = df_.to_dict("records")
 		return list_ser
 

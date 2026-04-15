@@ -782,7 +782,7 @@ class ListHandler(metaclass=TypeChecker):
         regex_pattern: str,
         start_index: int = 0
     ) -> list[Any]:  # noqa ANN401: typing.Any is not allowed
-        """Insert value at every nth position if current value doesn't match regex pattern.
+        r"""Insert value at every nth position if current value doesn't match regex pattern.
         
         This method dynamically updates positions as the list grows during insertion.
         Only inserts if the value at the target position doesn't match the regex pattern.

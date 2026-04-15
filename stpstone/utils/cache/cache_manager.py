@@ -40,7 +40,7 @@ import os
 from pathlib import Path
 import pickle
 import platform
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, Optional, TypeVar
 
 import pandas as pd
 

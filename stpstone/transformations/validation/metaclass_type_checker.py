@@ -27,7 +27,6 @@ from io import BufferedIOBase, BytesIO, RawIOBase
 from logging import Logger
 from numbers import Number
 from pathlib import Path
-import sys
 from typing import (
     IO,
     Any,
@@ -226,20 +225,18 @@ def validate_type(
                           + f"got {type(value).__name__}")
         return
     
-    # Alternative check for TypedDict (more robust)
-    if sys.version_info >= (3, 8):
-        try:
-            # In Python 3.8+, we can check the __orig_bases__
-            if hasattr(expected_type, '__orig_bases__'):
-                from typing_extensions import TypedDict
-                for base in expected_type.__orig_bases__:
-                    if getattr(base, '__origin__', None) is TypedDict:
-                        if not isinstance(value, dict):
-                            raise TypeError(f"{param_name} must be a dictionary for TypedDict, "
-                                          + f"got {type(value).__name__}")
-                        return
-        except (ImportError, AttributeError):
-            pass
+    # Alternative check for TypedDict (more robust, Python 3.9+)
+    try:
+        if hasattr(expected_type, '__orig_bases__'):
+            from typing_extensions import TypedDict
+            for base in expected_type.__orig_bases__:
+                if getattr(base, '__origin__', None) is TypedDict:
+                    if not isinstance(value, dict):
+                        raise TypeError(f"{param_name} must be a dictionary for TypedDict, "
+                                      + f"got {type(value).__name__}")
+                    return
+    except (ImportError, AttributeError):
+        pass
     
     # Check if it's a TypedDict by looking at the metaclass
     try:

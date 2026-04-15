@@ -11,7 +11,7 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_securities_market_government_securities_prices import (
+from stpstone.ingestion.countries.br.exchange.b3_securities_market_government_securities_prices import (  # noqa: E501
 	B3SecuritiesMarketGovernmentSecuritiesPrices,
 )
 

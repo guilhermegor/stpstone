@@ -159,7 +159,7 @@ class IMT5(Protocol):
 		"""
 		...
 
-	def get_last_tick(self, symbol: str) -> Optional[Any]:
+	def get_last_tick(self, symbol: str) -> Optional[Any]:  # noqa: ANN401
 		"""Return the last tick for a symbol.
 
 		Parameters

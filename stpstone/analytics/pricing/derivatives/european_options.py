@@ -2950,7 +2950,8 @@ class EuropeanOptions(IterativeMethods):
             Current price of the option.
         opt_type : Literal['call', 'put']
             Option type, either 'call' or 'put'.
-        method : Literal['newton_raphson', 'bisection', 'fsolve', 'scipy_optimize_minimize', 'differential_evolution']
+        method : Literal['newton_raphson', 'bisection', 'fsolve',
+        'scipy_optimize_minimize', 'differential_evolution']
             Method to use for calculating the implied volatility, by default 'fsolve'.
             - 'newton_raphson': Newton-Raphson method.
             - 'bisection': Bisection method.

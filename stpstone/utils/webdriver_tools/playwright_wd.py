@@ -907,7 +907,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         timeout: int = 5_000,
         logger: Optional[Any] = None # noqa ANN401: typing.Any is not allowed
     ) -> dict[str, Any]: # noqa ANN401: typing.Any is not allowed
-        """Extract data from page using XPath/CSS selector mapping.
+        r"""Extract data from page using XPath/CSS selector mapping.
         
         This method generalizes the data extraction pattern used in Anbima scrapers,
         allowing flexible configuration through parameters instead of hardcoded logic.
@@ -1049,10 +1049,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
                         data[field_name] = None
                         
                 else:
-                    if xpath.startswith('//'):
-                        selector = f"xpath={xpath}"
-                    else:
-                        selector = xpath
+                    selector = f"xpath={xpath}" if xpath.startswith('//') else xpath
                     
                     element = page.locator(selector).first
                     
@@ -1093,7 +1090,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         end_idx: Optional[int] = None,
         max_rows: Optional[int] = None,
         timeout: int = 5_000,
-        logger: Optional[Any] = None,
+        logger: Optional[Any] = None,  # noqa: ANN401
         additional_data: Optional[dict[str, Any]] = None
     ) -> list[dict[str, Any]]:
         """Extract data from multiple rows using the same XPath mapping.
