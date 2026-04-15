@@ -30,7 +30,12 @@ class DatabaseClient:
 		Returns
 		-------
 		dict[str, Any]
-			User record, or raises NotImplementedError if not implemented.
+			User record.
+
+		Raises
+		------
+		NotImplementedError
+			Always; this stub must be replaced by a mock in tests.
 		"""
 		raise NotImplementedError
 
@@ -42,9 +47,10 @@ class DatabaseClient:
 		user_data : dict[str, Any]
 			User fields to persist.
 
-		Returns
-		-------
-		None
+		Raises
+		------
+		NotImplementedError
+			Always; this stub must be replaced by a mock in tests.
 		"""
 		raise NotImplementedError
 

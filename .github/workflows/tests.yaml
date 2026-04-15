@@ -169,8 +169,11 @@ jobs:
                           continue
                       if node.returns:
                           returns = ast.unparse(node.returns)
-                          if "Returns" in docstring or "returns" in docstring:
-                              doc_lines = [l.rstrip() for l in docstring.split('\n')]
+                          doc_lines = [l.rstrip() for l in docstring.split('\n')]
+                          has_returns_section = any(
+                              line.strip().lower() == "returns" for line in doc_lines
+                          )
+                          if has_returns_section:
                               found_return = False
                               for i, line in enumerate(doc_lines):
                                   if line.strip().lower() == "returns":
@@ -180,7 +183,22 @@ jobs:
                                       while j < len(doc_lines):
                                           candidate = doc_lines[j].strip()
                                           if candidate:
-                                              doc_type = candidate
+                                              type_lines = [candidate]
+                                              base_indent = len(doc_lines[j]) - len(doc_lines[j].lstrip())
+                                              k = j + 1
+                                              while k < len(doc_lines):
+                                                  nxt = doc_lines[k]
+                                                  nxt_strip = nxt.strip()
+                                                  if not nxt_strip:
+                                                      break
+                                                  nxt_indent = len(nxt) - len(nxt.lstrip())
+                                                  if nxt_indent > base_indent:
+                                                      break
+                                                  if re.match(r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References|Raises)(:)?$", nxt_strip, re.IGNORECASE):
+                                                      break
+                                                  type_lines.append(nxt_strip)
+                                                  k += 1
+                                              doc_type = " ".join(type_lines)
                                               if not compare_types(returns, doc_type):
                                                   print(f"❌ Return type mismatch in {node.name}() at line {lineno}:")
                                                   print(f"   Type hint: {returns}")
@@ -199,9 +217,27 @@ jobs:
                           if arg.annotation:
                               hint = ast.unparse(arg.annotation)
                               arg_doc_found = False
-                              for line in docstring.split('\n'):
+                              param_lines = docstring.split('\n')
+                              for li, line in enumerate(param_lines):
                                   if arg.arg in line and ":" in line:
-                                      doc_type = line.split(":")[1].strip()
+                                      type_part = line.split(":")[1].strip()
+                                      line_indent = len(line) - len(line.lstrip())
+                                      k = li + 1
+                                      while k < len(param_lines):
+                                          nxt = param_lines[k]
+                                          nxt_strip = nxt.strip()
+                                          if not nxt_strip:
+                                              break
+                                          nxt_indent = len(nxt) - len(nxt.lstrip())
+                                          if nxt_indent > line_indent:
+                                              break
+                                          if re.match(r"^[\w.]+\s*:", nxt_strip):
+                                              break
+                                          if re.match(r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References|Raises)(:)?$", nxt_strip, re.IGNORECASE):
+                                              break
+                                          type_part += " " + nxt_strip
+                                          k += 1
+                                      doc_type = type_part
                                       if not compare_types(hint, doc_type):
                                           print(f"❌ Parameter type mismatch in {node.name}({arg.arg}) at line {lineno}:")
                                           print(f"   Type hint: {hint}")
