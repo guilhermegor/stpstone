@@ -12,5 +12,5 @@ cls_ = B3DerivatiesMarketListISINCPRs(
 )
 
 df_ = cls_.run()
-print(f"DF B3 DERIVATIES MARKET LIST I S I N C P RS: \n{df_}")
+print(f"DF B3 DERIVATIVES MARKET LIST I S I N C P RS: \n{df_}")
 df_.info()
