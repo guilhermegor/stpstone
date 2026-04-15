@@ -73,10 +73,10 @@ class CvmMonthlyReport:
         ----------
         doc : PerfilMensalDocument
             Fully validated document model.
-        output_path : Optional[str], optional
+        output_path : Optional[str]
             Destination file path. If provided, the file is written and None is
             returned; otherwise the XML string is returned, by default None.
-        versao : str, optional
+        versao : str
             CVM document format version placed in the VERSAO tag, by default "4.0".
 
         Returns
@@ -179,7 +179,7 @@ class CvmMonthlyReport:
             Path to the source CSV (.csv) or Excel (.xlsx / .xls) file.
         header : DocumentHeader
             Document-level header (competency date, generation date, version).
-        output_path : Optional[str], optional
+        output_path : Optional[str]
             Destination XML file path. If given, writes the file (windows-1252)
             and returns None; otherwise returns the XML string, by default None.
 
@@ -204,7 +204,7 @@ class CvmMonthlyReport:
         ----------
         doc : PerfilMensalDocument
             Validated document model.
-        versao : str, optional
+        versao : str
             CVM document format version, by default "4.0".
 
         Returns
@@ -1192,7 +1192,7 @@ class CvmMonthlyReport:
         ----------
         flat : dict[str, Any]
             Flat dict with dot-separated keys.
-        sep : str, optional
+        sep : str
             Key separator, by default '.'.
 
         Returns

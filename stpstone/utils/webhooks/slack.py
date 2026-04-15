@@ -4,7 +4,7 @@ This module provides a class for sending messages to Slack channels via webhooks
 with customizable username and emoji icons for the messages.
 """
 
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 from requests import request
 
@@ -60,7 +60,7 @@ class WebhookSlack(metaclass=TypeChecker):
         url_webhook: str,
         id_channel: str,
         str_username: str = "webhookbot",
-        str_icon_emoji: Optional[str] = ":bricks:"
+        str_icon_emoji: str = ":bricks:"
     ) -> None:
         """Initialize WebhookSlack instance.
 
@@ -70,7 +70,7 @@ class WebhookSlack(metaclass=TypeChecker):
             Slack webhook URL
         id_channel : str
             Slack channel ID (starting with # or @)
-        str_username : str, optional
+        str_username : str
             Bot username (default: "webhookbot")
         str_icon_emoji : Optional[str]
             Emoji icon for messages (default: ":bricks:")
@@ -86,7 +86,7 @@ class WebhookSlack(metaclass=TypeChecker):
     def send_message(
         self,
         str_msg: str,
-        str_method: Literal["POST", "GET", "PUT", "DELETE"] = "POST", 
+        str_method: Literal["POST", "GET", "PUT", "DELETE"] = "POST",
         timeout: Union[tuple[float, float], float, int] = 10
     ) -> str:
         """Send message to Slack channel via webhook.
@@ -95,9 +95,9 @@ class WebhookSlack(metaclass=TypeChecker):
         ----------
         str_msg : str
             Message text to send
-        str_method : Literal['POST', 'GET', 'PUT', 'DELETE'], optional
+        str_method : Literal['POST', 'GET', 'PUT', 'DELETE']
             HTTP method to use (default: "POST")
-        timeout : Union[tuple[float, float], float, int], optional
+        timeout : Union[tuple[float, float], float, int]
             Request timeout in seconds (default: 10)
 
         Returns

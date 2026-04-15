@@ -55,9 +55,9 @@ class WebhookTeams(metaclass=TypeChecker):
         ----------
         str_msg : str
             Message content to send
-        str_title : str, optional
+        str_title : str
             Message title (default: "ROUTINE_CONCLUSION")
-        bool_print_message : bool, optional
+        bool_print_message : bool
             Whether to print message to console (default: False)
 
         Raises
