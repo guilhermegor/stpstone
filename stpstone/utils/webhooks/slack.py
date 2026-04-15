@@ -72,7 +72,7 @@ class WebhookSlack(metaclass=TypeChecker):
             Slack channel ID (starting with # or @)
         str_username : str
             Bot username (default: "webhookbot")
-        str_icon_emoji : Optional[str]
+        str_icon_emoji : str
             Emoji icon for messages (default: ":bricks:")
         """
         self._validate_url(url_webhook)

@@ -39,7 +39,7 @@ class ABCCalendar(ABC, metaclass=ABCTypeCheckerMeta):
 
         Parameters
         ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]]
             Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
@@ -72,7 +72,7 @@ class CalendarCore(ABCCalendar):
 
         Parameters
         ----------
-        timeout : Union[int, float, tuple[float, float], tuple[int, int]], optional
+        timeout : Union[int, float, tuple[float, float], tuple[int, int]]
             Timeout for HTTP request, by default (12.0, 21.0)
         
         Returns
@@ -398,7 +398,7 @@ class DateManipulation(CalendarCore):
             The minute component of the datetime.
         second : int
             The second component of the datetime.
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone component of the datetime, by default "UTC".
         
         Returns
@@ -439,7 +439,7 @@ class DateManipulation(CalendarCore):
         ----------
         date_ : TypeDatetimeDate
             A datetime or date object.
-        bool_next : bool, optional
+        bool_next : bool
             If True, returns the nearest working day after the given date; if False, 
             returns the nearest working day before the given date, by default True
         
@@ -466,7 +466,7 @@ class DateManipulation(CalendarCore):
         ----------
         str_date : str
             The string representation of the date.
-        format_input : TypeDateFormatInput, optional
+        format_input : TypeDateFormatInput
             The format of the input date string, by default "DD/MM/YYYY"
         
         Returns
@@ -515,7 +515,7 @@ class DateManipulation(CalendarCore):
         ----------
         timestamp_ : str
             The string representation of the timestamp.
-        substr_timestamp : str, optional
+        substr_timestamp : str
             The substring to split the timestamp on, by default "T"
         
         Returns
@@ -536,7 +536,7 @@ class DateManipulation(CalendarCore):
         ----------
         timestamp_ : str
             The string representation of the timestamp.
-        substr_timestamp : str, optional
+        substr_timestamp : str
             The substring to split the timestamp on, by default "T"
         
         Returns
@@ -631,9 +631,9 @@ class DateTimezoneAware(DateManipulation):
         ----------
         str_date : str
             The string representation of the date.
-        format_input : TypeDateFormatInput, optional
+        format_input : TypeDateFormatInput
             The format of the input date string, by default "DD/MM/YYYY"
-        str_timezone : Optional[str], optional
+        str_timezone : Optional[str]
             The timezone to use for the resulting datetime object, by default "UTC"
         
         Returns
@@ -656,7 +656,7 @@ class DateTimezoneAware(DateManipulation):
         ----------
         date_ : TypeDatetimeDate
             The datetime or date object to change the timezone of.
-        target_tz : str, optional
+        target_tz : str
             The target timezone, by default "UTC"
         source_tz : Optional[str], optional
             The source timezone, by default None
@@ -1018,7 +1018,7 @@ class DatesRangeDelta(DateTimezoneAware):
         ----------
         date_ : TypeDatetimeDate
             Date.
-        bool_working_days : bool, optional
+        bool_working_days : bool
             If True, the start and end date will be the nearest working day.
             Default is False.
         
@@ -1108,10 +1108,10 @@ class DatesRangeDelta(DateTimezoneAware):
             Weekday.
         n : int
             Nth.
-        bool_working_days : bool, optional
+        bool_working_days : bool
             If True, the date will be the nearest working day.
             Default is True.
-        bool_next_working_day : bool, optional
+        bool_next_working_day : bool
             If True, the date will be the next working day.
             Default is True.
         
@@ -1186,34 +1186,34 @@ class DatesRangeDelta(DateTimezoneAware):
             Start timestamp.
         timestamp_end : str
             End timestamp.
-        int_hour_start_office : int, optional
+        int_hour_start_office : int
             Start hour of office.
             Default is 8.
-        int_minute_start_office : int, optional
+        int_minute_start_office : int
             Start minute of office.
             Default is 0.
-        int_hour_end_office : int, optional
+        int_hour_end_office : int
             End hour of office.
             Default is 18.
-        int_minute_end_office : int, optional
+        int_minute_end_office : int
             End minute of office.
             Default is 0.
-        int_hour_start_lunch : int, optional
+        int_hour_start_lunch : int
             Start hour of lunch.
             Default is 12.
-        int_minute_start_lunch : int, optional
+        int_minute_start_lunch : int
             Start minute of lunch.
             Default is 0.
-        int_hour_end_lunch : int, optional
+        int_hour_end_lunch : int
             End hour of lunch.
             Default is 13.
-        int_minute_end_lunch : int, optional
+        int_minute_end_lunch : int
             End minute of lunch.
             Default is 0.
         list_working_days_range : Optional[list[int]], optional
             List of working days.
             Default is [0, 1, 2, 3, 4] (monday to friday).
-        substr_timestamp : str, optional
+        substr_timestamp : str
             Substring to remove from the timestamp.
             Default is "T".
         
@@ -1319,7 +1319,7 @@ class DatesCurrent(DatesRangeDelta):
         
         Parameters
         ----------
-        format_output : str, optional
+        format_output : str
             The format to use, by default "%Y%m%d_%H%M%S"
         str_timezone : Optional[str], optional
             The timezone to use, by default "UTC"
@@ -1437,7 +1437,7 @@ class DateFormatter(DatesCurrent):
         ----------
         date_ : TypeDatetimeDate
             The date to get the month number from.
-        bool_month_mm : bool, optional
+        bool_month_mm : bool
             Whether to return the month number or the month name, by default False
         
         Returns
@@ -1501,7 +1501,7 @@ class DateFormatter(DatesCurrent):
         ----------
         date_ : TypeDatetimeDate
             The date to get the month name from.
-        bool_abbreviation : bool, optional
+        bool_abbreviation : bool
             Whether to return the month name or the month abbreviation, by default False
         str_timezone : Optional[str], optional
             The timezone to use, by default "UTC"
@@ -1528,7 +1528,7 @@ class DateFormatter(DatesCurrent):
         ----------
         date_ : TypeDatetimeDate
             The date to get the week name from.
-        bool_abbreviation : bool, optional
+        bool_abbreviation : bool
             Whether to return the week name or the week abbreviation, by default False
         str_timezone : Optional[str], optional
             The timezone to use, by default "UTC"
