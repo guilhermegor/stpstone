@@ -463,9 +463,13 @@ def test_fetch_series_name_with_playwright_failure(
     -------
     None
     """
+    mock_ctx = MagicMock()
+    mock_ctx.__enter__ = MagicMock(return_value=None)
+    mock_ctx.__exit__ = MagicMock(return_value=False)
+    mocker.patch.object(default_bcbsgs.cls_scraper, "launch", return_value=mock_ctx)
     mocker.patch.object(default_bcbsgs.cls_scraper, "navigate", return_value=False)
     mocker.patch.object(default_bcbsgs.cls_create_log, "log_message")
-    
+
     result = default_bcbsgs._fetch_series_name_with_playwright(11)
     
     assert result is None

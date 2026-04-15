@@ -370,12 +370,14 @@ class TestB3InstrumentsFile:
 		):
 			cache_path = MagicMock()
 			cache_path.exists.return_value = True
+			cache_path.name = "instruments_240115.xml"
 			mock_get_path.return_value = cache_path
 
-			result = instance._load_from_cache()
+			result, file_name = instance._load_from_cache()
 
 			assert isinstance(result, StringIO)
 			assert result.read() == "cached xml content"
+			assert file_name == "instruments_240115.xml"
 
 	def test_load_from_cache_file_not_found(
 		self, mock_fast_operations: dict[str, MagicMock]

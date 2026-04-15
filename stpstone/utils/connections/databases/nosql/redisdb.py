@@ -107,21 +107,21 @@ class RedisClient(metaclass=TypeChecker):
             If Redis connection fails during instance creation
         """
         if not cls._instance:
+            host = kwargs.get('str_host', 'localhost') \
+                if kwargs else (args[0] if len(args) > 0 else 'localhost')
+            port = kwargs.get('int_port', 6379) \
+                if kwargs else (args[1] if len(args) > 1 else 6379)
+            decode_resp = kwargs.get('bl_decode_resp', True) \
+                if kwargs else (args[2] if len(args) > 2 else True)
             try:
-                cls._instance = super().__new__(cls)
-                # Initialize with provided arguments or defaults
-                host = kwargs.get('str_host', 'localhost') \
-                    if kwargs else (args[0] if len(args) > 0 else 'localhost')
-                port = kwargs.get('int_port', 6379) \
-                    if kwargs else (args[1] if len(args) > 1 else 6379)
-                decode_resp = kwargs.get('bl_decode_resp', True) \
-                    if kwargs else (args[2] if len(args) > 2 else True)
-                
-                cls._instance._redis_client = cls._connect(host, port, decode_resp)
-                # Store the actual configuration used
-                cls._instance.str_host = host
-                cls._instance.int_port = port
-                cls._instance.bl_decode_resp = decode_resp
+                instance = super().__new__(cls)
+                instance._redis_client = cls._connect(host, port, decode_resp)
+                instance.str_host = host
+                instance.int_port = port
+                instance.bl_decode_resp = decode_resp
+                cls._instance = instance
+            except (TypeError, ValueError):
+                raise
             except Exception as err:
                 raise RuntimeError("Failed to create Redis client instance") from err
         return cls._instance
