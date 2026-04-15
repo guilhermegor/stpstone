@@ -41,11 +41,11 @@ class B3HistoricalSigma(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -87,18 +87,18 @@ class B3HistoricalSigma(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True
+			Whether to verify the SSL certificate, by default True
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False
+			Whether to insert or ignore the data, by default False
 		str_table_name : str
-		    The name of the table, by default "br_b3_historical_sigma"
+			The name of the table, by default "br_b3_historical_sigma"
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		list_resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 		list_ser = self.parse_raw_file(list_resp_req=list_resp_req)
@@ -149,14 +149,14 @@ class B3HistoricalSigma(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Verify the SSL certificate, by default True
+			Verify the SSL certificate, by default True
 
 		Returns
 		-------
 		Union[list[Response], list[PlaywrightPage], list[SeleniumWebDriver]]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		list_: list[str] = []
 
@@ -184,18 +184,18 @@ class B3HistoricalSigma(ABCIngestionOperations):
 		Parameters
 		----------
 		fstr_url : str
-		    The URL.
+			The URL.
 		list_apps : list[str]
-		    The list of apps.
+			The list of apps.
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Verify the SSL certificate, by default True
+			Verify the SSL certificate, by default True
 
 		Returns
 		-------
 		Union[list[Response], list[PlaywrightPage], list[SeleniumWebDriver]]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		list_: list[str] = []
 
@@ -234,12 +234,12 @@ class B3HistoricalSigma(ABCIngestionOperations):
 		Parameters
 		----------
 		list_resp_req : Union[list[Response], list[PlaywrightPage], list[SeleniumWebDriver]]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		list[dict[str, Union[str, int, float]]]
-		    The parsed content.
+			The parsed content.
 		"""
 		list_ser: list[dict[str, Union[str, int, float]]] = []
 
@@ -261,12 +261,12 @@ class B3HistoricalSigma(ABCIngestionOperations):
 		Parameters
 		----------
 		list_ser : list[dict[str, Union[str, int, float]]]
-		    The list of dictionaries to transform.
+			The list of dictionaries to transform.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		df_ = pd.DataFrame(list_ser)
 		df_ = df_.drop_duplicates()

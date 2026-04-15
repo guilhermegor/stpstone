@@ -40,11 +40,11 @@ class B3FuturesClosingAdj(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -87,18 +87,18 @@ class B3FuturesClosingAdj(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True
+			Whether to verify the SSL certificate, by default True
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False
+			Whether to insert or ignore the data, by default False
 		str_table_name : str
-		    The name of the table, by default "br_b3_futures_closing_adjustments"
+			The name of the table, by default "br_b3_futures_closing_adjustments"
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 		html_root = self.parse_raw_file(resp_req)
@@ -141,14 +141,14 @@ class B3FuturesClosingAdj(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Verify the SSL certificate, by default True
+			Verify the SSL certificate, by default True
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		resp_req = requests.get(
 			self.url,
@@ -186,12 +186,12 @@ class B3FuturesClosingAdj(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		StringIO
-		    The parsed content.
+			The parsed content.
 		"""
 		return self.cls_html_handler.lxml_parser(resp_req=resp_req)
 
@@ -201,12 +201,12 @@ class B3FuturesClosingAdj(ABCIngestionOperations):
 		Parameters
 		----------
 		html_root : HtmlElement
-		    The HTML root element
+			The HTML root element
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		xpath_td: str = '//*[@id="tblDadosAjustes"]/tbody/tr/td'
 		list_th: list[str] = [

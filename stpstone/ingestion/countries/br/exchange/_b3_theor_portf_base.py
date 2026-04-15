@@ -60,11 +60,11 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -101,24 +101,24 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True.
+			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_table_name : str
-		    The name of the table; falls back to the class default when empty,
-		    by default "".
+			The name of the table; falls back to the class default when empty,
+			by default "".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 
 		Raises
 		------
 		ValueError
-		    If cls_db is set but no table name is provided.
+			If cls_db is set but no table name is provided.
 		"""
 		if self.cls_db and not (str_table_name or self._TABLE_NAME):
 			raise ValueError("str_table_name cannot be empty")
@@ -156,14 +156,14 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Verify the SSL certificate, by default True.
+			Verify the SSL certificate, by default True.
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
 		resp_req.raise_for_status()
@@ -178,12 +178,12 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		list[dict[str, Union[str, int, float]]]
-		    The parsed content.
+			The parsed content.
 		"""
 		json_ = resp_req.json()
 		list_ser = json_["results"]
@@ -206,11 +206,11 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 		Parameters
 		----------
 		list_ser : list[dict[str, Union[str, int, float]]]
-		    The parsed content.
+			The parsed content.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		return pd.DataFrame(list_ser)

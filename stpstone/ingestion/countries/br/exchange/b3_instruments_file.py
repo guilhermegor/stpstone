@@ -8,8 +8,8 @@ import shutil
 import tempfile
 from typing import Optional, Union
 
-import pandas as pd
 from bs4 import BeautifulSoup
+import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
 from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
@@ -33,11 +33,11 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -76,26 +76,26 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True.
+			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		dict_dtypes : Optional[dict[str, Union[str, int, float]]]
-		    Data types mapping, by default None.
+			Data types mapping, by default None.
 		str_fmt_dt : str
-		    Date format string, by default "YYYY-MM-DD".
+			Date format string, by default "YYYY-MM-DD".
 		cols_from_case : str
-		    Source column case format, by default "pascal".
+			Source column case format, by default "pascal".
 		cols_to_case : str
-		    Target column case format, by default "upper_constant".
+			Target column case format, by default "upper_constant".
 		str_table_name : str
-		    The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
+			The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		file, file_name = self.get_cached_or_fetch(timeout=timeout, bool_verify=bool_verify)
 		df_ = self.transform_data(file=file, file_name=file_name)
@@ -131,14 +131,14 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Verify the SSL certificate, by default True.
+			Verify the SSL certificate, by default True.
 
 		Returns
 		-------
 		tuple[StringIO, str]
-		    The XML content and file name.
+			The XML content and file name.
 		"""
 		try:
 			return self._load_from_cache()
@@ -157,12 +157,12 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Returns
 		-------
 		tuple[StringIO, str]
-		    Cached XML content and file name.
+			Cached XML content and file name.
 
 		Raises
 		------
 		ValueError
-		    If cache file is not found or fails to load.
+			If cache file is not found or fails to load.
 		"""
 		cache_path = self._get_cached_file_path()
 		if not cache_path.exists():
@@ -193,12 +193,12 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		tuple[StringIO, str]
-		    The parsed content and file name.
+			The parsed content and file name.
 		"""
 		file_io, file_name = self.cls_dir_files_management.recursive_unzip_in_memory(
 			BytesIO(resp_req.content)
@@ -222,7 +222,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		xml_content : str
-		    XML content to save.
+			XML content to save.
 
 		Returns
 		-------
@@ -251,7 +251,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Returns
 		-------
 		Path
-		    Path to the cached XML file.
+			Path to the cached XML file.
 		"""
 		filename = f"instruments_{self.date_ref.strftime('%y%m%d')}.xml"
 		return self.temp_dir / filename
@@ -269,20 +269,20 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		file : StringIO
-		    The file content.
+			The file content.
 		file_name : str
-		    The file name.
+			The file name.
 		tag_parent : str
-		    Parent tag name.
+			Parent tag name.
 		list_tags_children : Optional[list[str]]
-		    List of child tags.
+			List of child tags.
 		list_tups_attributes : Optional[list[tuple[str, str]]]
-		    List of tuples containing tag name and attribute name.
+			List of tuples containing tag name and attribute name.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		soup_xml = self.cls_xml_handler.memory_parser(file)
 		list_ser = self._get_node_info(
@@ -307,18 +307,18 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		soup_xml : BeautifulSoup
-		    Parsed XML document.
+			Parsed XML document.
 		tag_parent : str
-		    Parent tag name.
+			Parent tag name.
 		list_tags_children : list[str]
-		    List of child tags.
+			List of child tags.
 		list_tups_attributes : Optional[list[tuple[str, str]]]
-		    List of tuples containing tag name and attribute name.
+			List of tuples containing tag name and attribute name.
 
 		Returns
 		-------
 		list[dict[str, Union[str, int, float]]]
-		    List of dictionaries containing node information.
+			List of dictionaries containing node information.
 		"""
 		soup_node = self.cls_xml_handler.find_all(soup_xml=soup_xml, tag=tag_parent)
 		list_ser: list[dict[str, Union[str, int, float]]] = []

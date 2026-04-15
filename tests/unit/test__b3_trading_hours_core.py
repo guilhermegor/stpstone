@@ -30,7 +30,7 @@ def mock_response() -> Response:
 	Returns
 	-------
 	Response
-	    Mocked requests Response object with sample HTML content.
+		Mocked requests Response object with sample HTML content.
 	"""
 	response = MagicMock(spec=Response)
 	response.content = b"<html><table><tr><td>Test</td></tr></table></html>"
@@ -46,7 +46,7 @@ def mock_html_element() -> HtmlElement:
 	Returns
 	-------
 	HtmlElement
-	    Mocked lxml HtmlElement with sample table structure.
+		Mocked lxml HtmlElement with sample table structure.
 	"""
 	html = MagicMock(spec=HtmlElement)
 	html.xpath.return_value = [MagicMock(text="Test Data")]
@@ -60,7 +60,7 @@ def mock_dataframe() -> pd.DataFrame:
 	Returns
 	-------
 	pd.DataFrame
-	    Sample DataFrame with test data.
+		Sample DataFrame with test data.
 	"""
 	return pd.DataFrame({"MERCADO": ["Test"], "NEGOCIACAO_INICIO": ["09:00"]})
 
@@ -72,7 +72,7 @@ def mock_session() -> Session:
 	Returns
 	-------
 	Session
-	    Mocked SQLAlchemy Session object.
+		Mocked SQLAlchemy Session object.
 	"""
 	return MagicMock(spec=Session)
 
@@ -84,12 +84,12 @@ def b3_core(mock_session: Session) -> B3TradingHoursCore:
 	Parameters
 	----------
 	mock_session : Session
-	    Mocked database session.
+		Mocked database session.
 
 	Returns
 	-------
 	B3TradingHoursCore
-	    Instance initialized with default parameters.
+		Instance initialized with default parameters.
 	"""
 	return B3TradingHoursCore(
 		date_ref=date(2025, 9, 12), logger=None, cls_db=mock_session, url="https://example.com"
@@ -103,9 +103,9 @@ def mock_network_operations(mocker: MockerFixture, mock_response: Response) -> N
 	Parameters
 	----------
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 
 	Returns
 	-------
@@ -152,7 +152,7 @@ def test_init_default_date(mocker: MockerFixture) -> None:
 	Parameters
 	----------
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -228,15 +228,15 @@ def test_run_without_db_returns_dataframe(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 	mock_html_element : HtmlElement
-	    Mocked HtmlElement.
+		Mocked HtmlElement.
 	mock_dataframe : pd.DataFrame
-	    Mocked DataFrame.
+		Mocked DataFrame.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -273,15 +273,15 @@ def test_run_with_db_calls_insert(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 	mock_html_element : HtmlElement
-	    Mocked HtmlElement.
+		Mocked HtmlElement.
 	mock_dataframe : pd.DataFrame
-	    Mocked DataFrame.
+		Mocked DataFrame.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -317,7 +317,7 @@ def test_run_invalid_dict_dtypes(b3_core: B3TradingHoursCore) -> None:
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 
 	Returns
 	-------
@@ -333,7 +333,7 @@ def test_run_invalid_table_name_none(b3_core: B3TradingHoursCore) -> None:
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 
 	Returns
 	-------
@@ -349,7 +349,7 @@ def test_run_invalid_table_name_integer(b3_core: B3TradingHoursCore) -> None:
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 
 	Returns
 	-------
@@ -365,7 +365,7 @@ def test_run_empty_table_name_raises(b3_core: B3TradingHoursCore) -> None:
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 
 	Returns
 	-------
@@ -388,11 +388,11 @@ def test_get_response_success(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 
 	Returns
 	-------
@@ -414,9 +414,9 @@ def test_get_response_http_error(b3_core: B3TradingHoursCore, mocker: MockerFixt
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -464,7 +464,7 @@ def test_get_response_invalid_timeout_string(b3_core: B3TradingHoursCore) -> Non
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 
 	Returns
 	-------
@@ -480,7 +480,7 @@ def test_get_response_invalid_timeout_zero_tuple(b3_core: B3TradingHoursCore) ->
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 
 	Returns
 	-------
@@ -499,9 +499,9 @@ def test_get_response_invalid_bool_verify(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	invalid_verify : Union[None, str, int]
-	    Invalid bool_verify values to test.
+		Invalid bool_verify values to test.
 
 	Returns
 	-------
@@ -524,11 +524,11 @@ def test_parse_raw_file_calls_lxml_parser(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -555,11 +555,11 @@ def test_transform_data_normal(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mock_html_element : HtmlElement
-	    Mocked HtmlElement.
+		Mocked HtmlElement.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -587,9 +587,9 @@ def test_transform_data_empty_input(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -621,9 +621,9 @@ def test_transform_data_invalid_inputs(
 	Parameters
 	----------
 	b3_core : B3TradingHoursCore
-	    Instance of B3TradingHoursCore.
+		Instance of B3TradingHoursCore.
 	invalid_input : tuple
-	    Tuple of invalid input parameters.
+		Tuple of invalid input parameters.
 
 	Returns
 	-------
@@ -642,7 +642,7 @@ def test_module_reload(mocker: MockerFixture) -> None:
 	Parameters
 	----------
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------

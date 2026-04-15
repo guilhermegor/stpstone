@@ -29,11 +29,11 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -62,21 +62,21 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout value, by default (12.0, 21.0).
+			The timeout value, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the data, by default True.
+			Whether to verify the data, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_fmt_dt : str
-		    The format of the date, by default "YYYYMMDD".
+			The format of the date, by default "YYYYMMDD".
 		str_table_name : str
-		    The name of the table, by default
-		    "br_b3_derivatives_market_option_reference_premiums_isin".
+			The name of the table, by default
+			"br_b3_derivatives_market_option_reference_premiums_isin".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The ingested data.
+			The ingested data.
 		"""
 		return super().run(
 			dict_dtypes={
@@ -105,17 +105,17 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 		prefix : str
-		    The prefix for the temporary directory, by default
-		    "br_derivatives_market_option_reference_premiums_".
+			The prefix for the temporary directory, by default
+			"br_derivatives_market_option_reference_premiums_".
 		file_name : str
-		    The name of the file, by default "b3_derivatives_market_option_reference_premiums".
+			The name of the file, by default "b3_derivatives_market_option_reference_premiums".
 
 		Returns
 		-------
 		tuple[StringIO, str]
-		    The parsed content and file name.
+			The parsed content and file name.
 		"""
 		return self.parse_raw_ex_file(
 			resp_req=resp_req,
@@ -129,14 +129,14 @@ class B3DerivativesMarketListISINDerivativesContracts(ABCB3SearchByTradingSessio
 		Parameters
 		----------
 		file : StringIO
-		    The file content.
+			The file content.
 		file_name : str
-		    The name of the file.
+			The name of the file.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		colspecs = [
 			(0, 8),

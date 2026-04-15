@@ -1,7 +1,7 @@
 """Pydantic models for the CVM Monthly Profile (Perfil Mensal) regulatory report."""
 
-import re
 from decimal import Decimal
+import re
 from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator

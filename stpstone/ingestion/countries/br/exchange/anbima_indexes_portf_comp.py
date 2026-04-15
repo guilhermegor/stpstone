@@ -37,11 +37,11 @@ class AnbimaIndexesPortfComp(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -77,18 +77,18 @@ class AnbimaIndexesPortfComp(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True.
+			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_table_name : str
-		    The name of the table, by default "br_anbima_indexes_portf_comp".
+			The name of the table, by default "br_anbima_indexes_portf_comp".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 		file = self.parse_raw_file(resp_req)
@@ -142,14 +142,14 @@ class AnbimaIndexesPortfComp(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Verify the SSL certificate, by default True.
+			Verify the SSL certificate, by default True.
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
 		resp_req.raise_for_status()
@@ -164,12 +164,12 @@ class AnbimaIndexesPortfComp(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		StringIO
-		    The parsed content.
+			The parsed content.
 		"""
 		file_io: StringIO = self.get_file(resp_req=resp_req)
 		list_filtered_lines: list[str] = []
@@ -192,12 +192,12 @@ class AnbimaIndexesPortfComp(ABCIngestionOperations):
 		Parameters
 		----------
 		file : StringIO
-		    The parsed content.
+			The parsed content.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		return pd.read_csv(
 			file,

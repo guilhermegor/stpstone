@@ -5,8 +5,8 @@ from io import StringIO
 from logging import Logger
 from typing import Optional, Union
 
-import pandas as pd
 from bs4 import Tag
+import pandas as pd
 from requests import Session
 
 from stpstone.ingestion.countries.br.exchange._b3_search_by_trading_session_base import (
@@ -28,11 +28,11 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -63,24 +63,24 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the data, by default True.
+			Whether to verify the data, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_fmt_dt : str
-		    The format of the date, by default "YYYY-MM-DD".
+			The format of the date, by default "YYYY-MM-DD".
 		cols_from_case : str
-		    The source case convention for column names, by default "pascal".
+			The source case convention for column names, by default "pascal".
 		cols_to_case : str
-		    The target case convention for column names, by default "upper_constant".
+			The target case convention for column names, by default "upper_constant".
 		str_table_name : str
-		    The name of the table, by default "br_b3_instruments_fee_public_information".
+			The name of the table, by default "br_b3_instruments_fee_public_information".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The ingested data.
+			The ingested data.
 		"""
 		return super().run(
 			dict_dtypes={
@@ -114,14 +114,14 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		file : StringIO
-		    The file content.
+			The file content.
 		file_name : str
-		    The name of the file.
+			The name of the file.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		soup_xml = self.cls_xml_handler.memory_parser(file)
 		soup_node = self.cls_xml_handler.find_all(soup_xml=soup_xml, tag="EqtsFeeInf")
@@ -144,12 +144,12 @@ class B3EquitiesFeePublicInformation(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		soup_parent : Tag
-		    Parsed XML document.
+			Parsed XML document.
 
 		Returns
 		-------
 		list[dict[str, Union[str, int, float]]]
-		    List of dictionaries containing node information for each fee record.
+			List of dictionaries containing node information for each fee record.
 		"""
 		list_records: list[dict[str, Union[str, int, float]]] = []
 

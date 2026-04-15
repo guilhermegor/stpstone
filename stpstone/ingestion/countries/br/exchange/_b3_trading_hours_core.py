@@ -41,13 +41,13 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 		url : str
-		    The url, by default "FILL_ME".
+			The url, by default "FILL_ME".
 
 		Returns
 		-------
@@ -87,22 +87,22 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		dict_dtypes : dict[str, Union[str, int, float]]
-		    The data types of the columns.
+			The data types of the columns.
 		str_fmt_dt : str
-		    The date format string, by default "YYYY-MM-DD".
+			The date format string, by default "YYYY-MM-DD".
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True.
+			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_table_name : str
-		    The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
+			The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		self._validate_run(
 			dict_dtypes=dict_dtypes,
@@ -146,17 +146,17 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		dict_dtypes : dict[str, Union[str, int, float]]
-		    The data types of the columns.
+			The data types of the columns.
 		str_table_name : str
-		    The name of the table.
+			The name of the table.
 		str_fmt_dt : str
-		    The date format string.
+			The date format string.
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout.
+			The timeout.
 		bool_verify : bool
-		    Whether to verify the SSL certificate.
+			Whether to verify the SSL certificate.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data.
+			Whether to insert or ignore the data.
 
 		Returns
 		-------
@@ -165,12 +165,12 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Raises
 		------
 		TypeError
-		    If dict_dtypes is not of type dict.
-		    If str_table_name is not of type str or is empty.
-		    If str_fmt_dt is not of type str.
-		    If timeout is not a tuple of positive numbers.
-		    If bool_verify is not of type bool.
-		    If bool_insert_or_ignore is not of type bool.
+			If dict_dtypes is not of type dict.
+			If str_table_name is not of type str or is empty.
+			If str_fmt_dt is not of type str.
+			If timeout is not a tuple of positive numbers.
+			If bool_verify is not of type bool.
+			If bool_insert_or_ignore is not of type bool.
 		"""
 		if not isinstance(dict_dtypes, dict):
 			raise TypeError("dict_dtypes must be of type dict")
@@ -198,14 +198,14 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Verify the SSL certificate, by default True.
+			Verify the SSL certificate, by default True.
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		self._validate_get_reponse(timeout=timeout, bool_verify=bool_verify)
 		resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
@@ -222,9 +222,9 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout.
+			The timeout.
 		bool_verify : bool
-		    Verify the SSL certificate.
+			Verify the SSL certificate.
 
 		Returns
 		-------
@@ -233,7 +233,7 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Raises
 		------
 		TypeError
-		    If timeout is not a tuple of positive numbers or bool_verify is not of type bool.
+			If timeout is not a tuple of positive numbers or bool_verify is not of type bool.
 		"""
 		if not isinstance(timeout, tuple) or not all(
 			isinstance(t, (int, float)) and t > 0 for t in timeout
@@ -251,12 +251,12 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		StringIO
-		    The parsed content.
+			The parsed content.
 		"""
 		return self.cls_html_handler.lxml_parser(resp_req=resp_req)
 
@@ -272,18 +272,18 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		html_root : HtmlElement
-		    The root element of the HTML document.
+			The root element of the HTML document.
 		list_th : list[str]
-		    The list of table headers.
+			The list of table headers.
 		xpath_td : str
-		    The XPath expression for the table data.
+			The XPath expression for the table data.
 		na_values : str
-		    The value to use for missing data, by default "-".
+			The value to use for missing data, by default "-".
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		self._validate_transform_data(
 			html_root=html_root, list_th=list_th, xpath_td=xpath_td, na_values=na_values
@@ -309,13 +309,13 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Parameters
 		----------
 		html_root : HtmlElement
-		    The root element of the HTML document.
+			The root element of the HTML document.
 		list_th : list[str]
-		    The list of table headers.
+			The list of table headers.
 		xpath_td : str
-		    The XPath expression for the table data.
+			The XPath expression for the table data.
 		na_values : str
-		    The value to use for missing data.
+			The value to use for missing data.
 
 		Returns
 		-------
@@ -324,10 +324,10 @@ class B3TradingHoursCore(ABCIngestionOperations):
 		Raises
 		------
 		TypeError
-		    If html_root is not of type HtmlElement.
-		    If list_th is not a list of strings.
-		    If xpath_td is not of type str.
-		    If na_values is not of type str.
+			If html_root is not of type HtmlElement.
+			If list_th is not a list of strings.
+			If xpath_td is not of type str.
+			If na_values is not of type str.
 		"""
 		if not isinstance(html_root, HtmlElement):
 			raise TypeError("html_root must be of type HtmlElement")

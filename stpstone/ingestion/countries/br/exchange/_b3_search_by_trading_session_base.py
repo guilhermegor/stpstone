@@ -46,13 +46,13 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 		url : str
-		    The url of the website, by default "FILL_ME".
+			The url of the website, by default "FILL_ME".
 
 		Returns
 		-------
@@ -96,26 +96,26 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 		Parameters
 		----------
 		dict_dtypes : dict[str, Union[str, int, float]]
-		    The data types of the columns.
+			The data types of the columns.
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True.
+			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_fmt_dt : str
-		    The format of the date, by default "YYYY-MM-DD".
+			The format of the date, by default "YYYY-MM-DD".
 		cols_from_case : Optional[TypeCaseFrom]
-		    The case of the columns, by default None.
+			The case of the columns, by default None.
 		cols_to_case : Optional[TypeCaseTo]
-		    The case of the columns, by default None.
+			The case of the columns, by default None.
 		str_table_name : str
-		    The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
+			The name of the table, by default "<COUNTRY>_<SOURCE>_<TABLE_NAME>".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 		file, file_name = self.parse_raw_file(resp_req)
@@ -153,14 +153,14 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Verify the SSL certificate, by default True.
+			Verify the SSL certificate, by default True.
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		resp_req = requests.get(
 			self.url,
@@ -179,17 +179,17 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		tuple[StringIO, str]
-		    The parsed content and the name of the file.
+			The parsed content and the name of the file.
 
 		Raises
 		------
 		ValueError
-		    If no files found in the downloaded content.
+			If no files found in the downloaded content.
 		"""
 		files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
 			BytesIO(resp_req.content)
@@ -233,23 +233,23 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 		prefix : str
-		    The prefix for the temporary directory.
+			The prefix for the temporary directory.
 		file_name : str
-		    The name of the file.
+			The name of the file.
 
 		Returns
 		-------
 		tuple[StringIO, str]
-		    The parsed content and the name of the file.
+			The parsed content and the name of the file.
 
 		Raises
 		------
 		ValueError
-		    If no files found in the downloaded content.
+			If no files found in the downloaded content.
 		RuntimeError
-		    If no .ex_ file found in the downloaded content.
+			If no .ex_ file found in the downloaded content.
 		"""
 		files_list = self.cls_dir_files_management.recursive_unzip_in_memory(
 			BytesIO(resp_req.content)
@@ -420,13 +420,13 @@ class ABCB3SearchByTradingSession(ABCIngestionOperations):
 		Parameters
 		----------
 		file : StringIO
-		    The parsed content.
+			The parsed content.
 		file_name : str
-		    The name of the file.
+			The name of the file.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		return pd.read_csv(file, sep=";")

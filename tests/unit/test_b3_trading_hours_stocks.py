@@ -23,7 +23,7 @@ def mock_response() -> Response:
 	Returns
 	-------
 	Response
-	    Mocked requests Response object.
+		Mocked requests Response object.
 	"""
 	response = MagicMock(spec=Response)
 	response.content = b"<html><table><tr><td>Test</td></tr></table></html>"
@@ -39,7 +39,7 @@ def mock_html_element() -> HtmlElement:
 	Returns
 	-------
 	HtmlElement
-	    Mocked lxml HtmlElement.
+		Mocked lxml HtmlElement.
 	"""
 	html = MagicMock(spec=HtmlElement)
 	html.xpath.return_value = [MagicMock(text="Test Data")]
@@ -53,7 +53,7 @@ def mock_dataframe() -> pd.DataFrame:
 	Returns
 	-------
 	pd.DataFrame
-	    Sample DataFrame with test data.
+		Sample DataFrame with test data.
 	"""
 	return pd.DataFrame({"MERCADO": ["Test"]})
 
@@ -65,9 +65,9 @@ def mock_network(mocker: MockerFixture, mock_response: Response) -> None:
 	Parameters
 	----------
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 
 	Returns
 	-------
@@ -123,13 +123,13 @@ def test_run_returns_dataframe_without_db(
 	Parameters
 	----------
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 	mock_html_element : HtmlElement
-	    Mocked HtmlElement.
+		Mocked HtmlElement.
 	mock_dataframe : pd.DataFrame
-	    Mocked DataFrame.
+		Mocked DataFrame.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -156,13 +156,13 @@ def test_run_with_db_inserts_and_returns_none(
 	Parameters
 	----------
 	mock_response : Response
-	    Mocked Response object.
+		Mocked Response object.
 	mock_html_element : HtmlElement
-	    Mocked HtmlElement.
+		Mocked HtmlElement.
 	mock_dataframe : pd.DataFrame
-	    Mocked DataFrame.
+		Mocked DataFrame.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------
@@ -188,9 +188,9 @@ def test_transform_data_calls_super_with_correct_args(
 	Parameters
 	----------
 	mock_html_element : HtmlElement
-	    Mocked HtmlElement.
+		Mocked HtmlElement.
 	mocker : MockerFixture
-	    Pytest-mock fixture for creating mocks.
+		Pytest-mock fixture for creating mocks.
 
 	Returns
 	-------

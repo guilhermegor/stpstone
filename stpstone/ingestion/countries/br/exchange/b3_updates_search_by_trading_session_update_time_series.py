@@ -6,10 +6,10 @@ from logging import Logger
 from typing import Optional, Union
 
 import backoff
-import pandas as pd
-import requests
 from lxml.html import HtmlElement
+import pandas as pd
 from playwright.sync_api import Page as PlaywrightPage
+import requests
 from requests import Response, Session
 from selenium.webdriver.remote.webdriver import WebDriver as SeleniumWebDriver
 
@@ -39,11 +39,11 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -86,19 +86,19 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True.
+			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_table_name : str
-		    The name of the table, by default
-		    "br_b3_updates_time_series_search_by_trading_session".
+			The name of the table, by default
+			"br_b3_updates_time_series_search_by_trading_session".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 		html_root = self.parse_raw_file(resp_req)
@@ -137,14 +137,14 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0).
+			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
-		    Verify the SSL certificate, by default True.
+			Verify the SSL certificate, by default True.
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 		"""
 		resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
 		resp_req.raise_for_status()
@@ -159,12 +159,12 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		StringIO
-		    The parsed content.
+			The parsed content.
 		"""
 		return self.cls_html_handler.lxml_parser(resp_req=resp_req)
 
@@ -177,17 +177,17 @@ class B3UpdatesSearchByTradingSessionUpdateTimeSeries(ABCIngestionOperations):
 		Parameters
 		----------
 		html_root : HtmlElement
-		    The root element of the HTML document.
+			The root element of the HTML document.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 
 		Raises
 		------
 		ValueError
-		    If the table number is unexpected.
+			If the table number is unexpected.
 		"""
 		fstr_xpath_file_name_tbl1: str = (
 			'//*[@id="Form_8A68812D56B339A00156B35D5C276FEC"]'

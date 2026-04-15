@@ -27,11 +27,11 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -60,20 +60,20 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout value, by default (12.0, 21.0).
+			The timeout value, by default (12.0, 21.0).
 		bool_verify : bool
-		    Whether to verify the data, by default True.
+			Whether to verify the data, by default True.
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False.
+			Whether to insert or ignore the data, by default False.
 		str_fmt_dt : str
-		    The date format, by default "YYYY-MM-DD".
+			The date format, by default "YYYY-MM-DD".
 		str_table_name : str
-		    The table name, by default "br_b3_maximum_theoretical_margin".
+			The table name, by default "br_b3_maximum_theoretical_margin".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The DataFrame with the data.
+			The DataFrame with the data.
 		"""
 		return super().run(
 			dict_dtypes={
@@ -99,14 +99,14 @@ class B3MaximumTheoreticalMargin(ABCB3SearchByTradingSession):
 		Parameters
 		----------
 		file : StringIO
-		    The file content.
+			The file content.
 		file_name : str
-		    The file name.
+			The file name.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		df_ = pd.read_csv(
 			file,

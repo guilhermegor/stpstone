@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
-import requests
 from pytest_mock import MockerFixture
+import requests
 from requests import Response
 
 from stpstone.ingestion.countries.br.exchange.b3_standardized_instrument_groups import (

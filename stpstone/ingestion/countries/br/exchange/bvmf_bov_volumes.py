@@ -46,11 +46,11 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
 		Parameters
 		----------
 		date_ref : Optional[date]
-		    The date of reference, by default None.
+			The date of reference, by default None.
 		logger : Optional[Logger]
-		    The logger, by default None.
+			The logger, by default None.
 		cls_db : Optional[Session]
-		    The database session, by default None.
+			The database session, by default None.
 
 		Returns
 		-------
@@ -95,18 +95,18 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Whether to verify the SSL certificate, by default True
+			Whether to verify the SSL certificate, by default True
 		bool_insert_or_ignore : bool
-		    Whether to insert or ignore the data, by default False
+			Whether to insert or ignore the data, by default False
 		str_table_name : str
-		    The name of the table, by default "br_b3_volumes"
+			The name of the table, by default "br_b3_volumes"
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 		html_root = self.parse_raw_file(resp_req)
@@ -145,19 +145,19 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
 		Parameters
 		----------
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
-		    The timeout, by default (12.0, 21.0)
+			The timeout, by default (12.0, 21.0)
 		bool_verify : bool
-		    Verify the SSL certificate, by default True
+			Verify the SSL certificate, by default True
 
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    A list of response objects.
+			A list of response objects.
 
 		Raises
 		------
 		ValueError
-		    If the response is empty.
+			If the response is empty.
 		"""
 		bool_parsed_tables: bool = False
 		int_max_retries: int = 5
@@ -186,12 +186,12 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-		    The response object.
+			The response object.
 
 		Returns
 		-------
 		bs4.BeautifulSoup
-		    The parsed content.
+			The parsed content.
 		"""
 		return self.cls_html_handler.bs_parser(resp_req=resp_req)
 
@@ -201,12 +201,12 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
 		Parameters
 		----------
 		html_root : bs4.BeautifulSoup
-		    The parsed content.
+			The parsed content.
 
 		Returns
 		-------
 		pd.DataFrame
-		    The transformed DataFrame.
+			The transformed DataFrame.
 		"""
 		list_th: list[str] = [
 			"MERCADO",
@@ -232,12 +232,12 @@ class BVMFVBOVTradingVolumes(ABCIngestionOperations):
 		Parameters
 		----------
 		el : bs4.element.Tag
-		    The element to parse.
+			The element to parse.
 
 		Returns
 		-------
 		str
-		    The parsed element.
+			The parsed element.
 		"""
 		return (
 			float(el.get_text().strip().replace(".", "").replace(",", "."))
