@@ -1,4 +1,4 @@
-"""World Government Bonds sovereign spreads, ratings, and CDS data ingestion."""
+"""Base class for World Government Bonds sovereign data ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -236,53 +236,3 @@ class _WorldGovBondsBase(ABCIngestionOperations):
                     list_.append("N/A")
             i += 1
         return list_
-
-
-class WorldGovBondsSovereignSpreads(_WorldGovBondsBase):
-    """World Government Bonds sovereign bond spreads ingestion class."""
-
-    _PATH = ""
-    _TABLE_NAME = "ww_wgb_sovereign_spreads"
-    _XPATH = "//table[@class='homeBondTable sortable w3-table money pd44 -f15']//td"
-    _DTYPES = {
-        "COUNTRY": str,
-        "RATING_SP": str,
-        "10Y_BOND_YIELD": float,
-        "BANK_RATE": float,
-        "SPREAD_VS_BUND": float,
-        "SPREAD_VS_TNOTE": float,
-        "SPREAD_VS_BANK_RATE": float,
-    }
-
-
-class WorldGovBondsCountriesRatings(_WorldGovBondsBase):
-    """World Government Bonds country credit ratings ingestion class."""
-
-    _PATH = "world-credit-ratings/"
-    _TABLE_NAME = "ww_wgb_countries_ratings"
-    _XPATH = "//table[@class='home-rating-table sortable w3-table money pd44 -f15']//td"
-    _DTYPES = {
-        "COUNTRY": str,
-        "SP": "category",
-        "MOODYS": "category",
-        "FITCH": "category",
-        "DBRS": "category",
-    }
-
-
-class WorldGovBondsSovereignCds(_WorldGovBondsBase):
-    """World Government Bonds sovereign CDS spreads ingestion class."""
-
-    _PATH = "sovereign-cds/"
-    _TABLE_NAME = "ww_wgb_sovereign_cds"
-    _XPATH = "//table[@class='w3-table sortable money pd44 -f14']//td"
-    _TRIM_LAST = True
-    _DTYPES = {
-        "COUNTRY": str,
-        "RATING_SP": str,
-        "5Y_CDS": float,
-        "DELTA_1M": float,
-        "DELTA_6M": float,
-        "IMPLIED_PROB_DEFAULT_PD": float,
-        "DATE": str,
-    }
