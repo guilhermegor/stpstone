@@ -4,7 +4,7 @@ This module provides a class for sending messages to Slack channels via webhooks
 with customizable username and emoji icons for the messages.
 """
 
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 from requests import request
 
@@ -60,7 +60,7 @@ class WebhookSlack(metaclass=TypeChecker):
         url_webhook: str,
         id_channel: str,
         str_username: str = "webhookbot",
-        str_icon_emoji: str = ":bricks:"
+        str_icon_emoji: Optional[str] = ":bricks:"
     ) -> None:
         """Initialize WebhookSlack instance.
 
@@ -72,7 +72,7 @@ class WebhookSlack(metaclass=TypeChecker):
             Slack channel ID (starting with # or @)
         str_username : str, optional
             Bot username (default: "webhookbot")
-        str_icon_emoji : str, optional
+        str_icon_emoji : Optional[str]
             Emoji icon for messages (default: ":bricks:")
         """
         self._validate_url(url_webhook)
