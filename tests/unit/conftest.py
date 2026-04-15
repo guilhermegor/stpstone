@@ -1,7 +1,5 @@
 """Shared pytest fixtures for the unit test suite."""
 
-from datetime import date
-
 import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
@@ -105,11 +103,11 @@ def _fast_backoff(mocker: MockerFixture) -> None:
 
 	.. code-block:: python
 
-	    try:
-	        seconds = _next_wait(...)
-	    except StopIteration:          # ← our mock raises this
-	        _call_handlers(on_giveup, ...)
-	        raise e                     # original exception propagates
+		try:
+			seconds = _next_wait(...)
+		except StopIteration:          # ← our mock raises this
+			_call_handlers(on_giveup, ...)
+			raise e                     # original exception propagates
 
 	The patch is harmless for happy-path tests — ``_next_wait`` is only called
 	when a decorated function raises an exception matching the backoff type.
