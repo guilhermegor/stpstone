@@ -10,5 +10,5 @@ cls_ = B3TheoricalPortfolioIBRA(
 )
 
 df_ = cls_.run()
-print(f"DF B3 THEORICAL PORTFOLIO IBRA: \n{df_}")
+print(f"DF B3 THEORETICAL PORTFOLIO IBRA: \n{df_}")
 df_.info()

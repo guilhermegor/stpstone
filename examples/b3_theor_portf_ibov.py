@@ -10,5 +10,5 @@ cls_ = B3TheoricalPortfolioIBOV(
 )
 
 df_ = cls_.run()
-print(f"DF B3 THEORICAL PORTFOLIO IBOV: \n{df_}")
+print(f"DF B3 THEORETICAL PORTFOLIO IBOV: \n{df_}")
 df_.info()
