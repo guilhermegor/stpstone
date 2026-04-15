@@ -325,14 +325,12 @@ def test_make_bucket_s3error(
     -------
     None
     """
-    mock_minio.return_value.bucket_exists.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
+    mock_minio.return_value.bucket_exists.side_effect = s3err
     result = minio_client.make_bucket("test-bucket")
     mock_create_log.return_value.log_message.assert_called_once_with(
         None,
-        "Error creating bucket test-bucket: S3 operation failed; code: error, message: message, " \
-        "resource: resource, request_id: request_id, host_id: host_id",
+        f"Error creating bucket test-bucket: {s3err}",
         "critical"
     )
     assert result is False
@@ -446,17 +444,14 @@ def test_put_object_from_file_s3error(
     -------
     None
     """
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
     mock_minio.return_value.bucket_exists.return_value = False
     mock_minio.return_value.make_bucket.return_value = None
-    mock_minio.return_value.fput_object.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    mock_minio.return_value.fput_object.side_effect = s3err
     result = minio_client.put_object_from_file("test-bucket", "test-object", sample_file)
     mock_create_log.return_value.log_message.assert_called_with(
         None,
-        f"Error uploading file '{sample_file}' as 'test-object' to bucket 'test-bucket': "
-        "S3 operation failed; code: error, message: message, resource: resource, "
-        "request_id: request_id, host_id: host_id",
+        f"Error uploading file '{sample_file}' as 'test-object' to bucket 'test-bucket': {s3err}",
         "critical"
     )
     assert result is False
@@ -537,16 +532,14 @@ def test_put_object_from_stream_s3error(
     -------
     None
     """
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
     mock_minio.return_value.bucket_exists.return_value = False
     mock_minio.return_value.make_bucket.return_value = None
-    mock_minio.return_value.put_object.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    mock_minio.return_value.put_object.side_effect = s3err
     result = minio_client.put_object_from_stream("test-bucket", "test-object", sample_stream, 15)
     mock_create_log.return_value.log_message.assert_called_with(
         None,
-        "Error uploading stream as 'test-object': S3 operation failed; code: error, "
-        "message: message, resource: resource, request_id: request_id, host_id: host_id",
+        f"Error uploading stream as 'test-object': {s3err}",
         "critical"
     )
     assert result is False
@@ -663,16 +656,14 @@ def test_put_object_from_bytes_s3error(
     -------
     None
     """
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
     mock_minio.return_value.bucket_exists.return_value = False
     mock_minio.return_value.make_bucket.return_value = None
-    mock_minio.return_value.put_object.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    mock_minio.return_value.put_object.side_effect = s3err
     result = minio_client.put_object_from_bytes("test-bucket", "test-object", sample_bytes)
     mock_create_log.return_value.log_message.assert_called_with(
         None,
-        "Error uploading bytes as 'test-object': S3 operation failed; code: error, "
-        "message: message, resource: resource, request_id: request_id, host_id: host_id",
+        f"Error uploading bytes as 'test-object': {s3err}",
         "critical"
     )
     assert result is False
@@ -747,15 +738,12 @@ def test_get_object_as_bytes_s3error(
     -------
     None
     """
-    mock_minio.return_value.get_object.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
+    mock_minio.return_value.get_object.side_effect = s3err
     result = minio_client.get_object_as_bytes("test-bucket", "test-object")
     mock_create_log.return_value.log_message.assert_called_with(
         None,
-        "Error retrieving object 'test-object' from bucket 'test-bucket': "
-        "S3 operation failed; code: error, message: message, resource: resource, "
-        "request_id: request_id, host_id: host_id",
+        f"Error retrieving object 'test-object' from bucket 'test-bucket': {s3err}",
         "critical"
     )
     assert result is None
@@ -834,15 +822,13 @@ def test_get_object_to_file_s3error(
     -------
     None
     """
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
     file_path = str(tmp_path / "downloaded.txt")
-    mock_minio.return_value.fget_object.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    mock_minio.return_value.fget_object.side_effect = s3err
     result = minio_client.get_object_to_file("test-bucket", "test-object", file_path)
     mock_create_log.return_value.log_message.assert_called_with(
         None,
-        "Error downloading object 'test-object': S3 operation failed; code: error, "
-        "message: message, resource: resource, request_id: request_id, host_id: host_id",
+        f"Error downloading object 'test-object': {s3err}",
         "critical"
     )
     assert result is False
@@ -914,14 +900,12 @@ def test_list_objects_s3error(
     -------
     None
     """
-    mock_minio.return_value.list_objects.side_effect = S3Error(
-        "error", "message", "resource", "request_id", "host_id", "bucket"
-    )
+    s3err = S3Error("error", "message", "resource", "request_id", "host_id", None)
+    mock_minio.return_value.list_objects.side_effect = s3err
     result = minio_client.list_objects("test-bucket")
     mock_create_log.return_value.log_message.assert_called_with(
         None,
-        "Error listing objects in bucket 'test-bucket': S3 operation failed; code: error, "
-        "message: message, resource: resource, request_id: request_id, host_id: host_id",
+        f"Error listing objects in bucket 'test-bucket': {s3err}",
         "critical"
     )
     assert result is None

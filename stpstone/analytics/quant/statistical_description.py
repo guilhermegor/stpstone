@@ -86,15 +86,15 @@ class StatisticalDescription(metaclass=TypeChecker):
         description = stats.describe(array_data)
         mode_result = stats.mode(array_data, axis=None)
         return {
-            "nobs": description.nobs,
-            "minmax": description.minmax,
-            "mean": description.mean,
-            "median": np.median(array_data),
+            "nobs": int(description.nobs),
+            "minmax": (float(description.minmax[0]), float(description.minmax[1])),
+            "mean": float(description.mean),
+            "median": float(np.median(array_data)),
             "mode": (np.array(mode_result[0]), np.array(mode_result[1], dtype=np.int64)),
-            "variance_sample": description.variance,
+            "variance_sample": float(description.variance),
             "standard_deviation_sample": math.sqrt(description.variance),
-            "skewness": description.skewness,
-            "kurtosis": description.kurtosis
+            "skewness": float(description.skewness),
+            "kurtosis": float(description.kurtosis)
         }
 
     def standard_deviation_sample(self, array_data: NDArray[np.float64]) -> float:

@@ -310,7 +310,7 @@ class DFStandardization(metaclass=TypeChecker):
         df_ = df_.copy()
 
         for col in df_.columns:
-            if df_[col].dtype == "object":
+            if df_[col].dtype == "object" or isinstance(df_[col].dtype, pd.StringDtype):
                 try:
                     sample_data = df_[col].dropna().head(10)
 
@@ -383,7 +383,7 @@ class DFStandardization(metaclass=TypeChecker):
             The DataFrame with hidden characters stripped.
         """
         string_cols = [
-            c for c in df_.select_dtypes(include=["object", "category"]).columns
+            c for c in df_.select_dtypes(include=["object", "category", "string"]).columns
             if c not in self.list_cols_dt
         ]
 
@@ -426,7 +426,7 @@ class DFStandardization(metaclass=TypeChecker):
             The DataFrame with data stripped.
         """
         list_cols = [
-            col_ for col_ in df_.select_dtypes(["object"]).columns
+            col_ for col_ in df_.select_dtypes(["object", "string"]).columns
             if col_ not in self.list_cols_dt
         ]
         for col_ in list_cols:

@@ -269,7 +269,7 @@ class DealingPd(metaclass=TypeChecker):
             for col_date in list_col_date:
                 df_.loc[:, col_date] = pd.to_datetime(df_[col_date]).dt.date
         else:
-            df_ = df_.astype(dict(zip(list_col_date, [str] * len(list_col_date))))
+            df_ = df_.astype(dict(zip(list_col_date, [object] * len(list_col_date))))
             for index, row in df_.iterrows():
                 for col_date in list_col_date:
                     if "-" in row[col_date]:

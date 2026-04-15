@@ -381,7 +381,7 @@ def test_replace_num_delimiters(
     result = standardization_instance.replace_num_delimiters(sample_df)
     expected = [1234.56, 2345.67, 3456.78, 4567.89]
     assert result["value"].tolist() == pytest.approx(expected, rel=1e-3)
-    assert result["name"].dtype == "object"
+    assert pd.api.types.is_string_dtype(result["name"])
 
 
 def test_change_dtypes(
@@ -417,7 +417,7 @@ def test_change_dtypes(
     df_ = standardization_instance.replace_num_delimiters(df_)  # preprocess value column
     result = standardization_instance.change_dtypes(df_)
     assert result["id"].dtype == "int64"
-    assert result["name"].dtype == "object"
+    assert pd.api.types.is_string_dtype(result["name"])
     assert result["value"].dtype == "float64"
     assert isinstance(result["date"].iloc[0], datetime)
 

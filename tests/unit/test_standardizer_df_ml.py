@@ -114,7 +114,7 @@ def test_handle_outliers_iqr(
     iqr = q3 - q1
     upper_bound = q3 + 1.5 * iqr
     assert result["numeric"].iloc[2] == pytest.approx(upper_bound, rel=1e-3)
-    assert result["name"].dtype == "object"
+    assert pd.api.types.is_string_dtype(result["name"])
 
 
 def test_handle_outliers_zscore(
@@ -144,7 +144,7 @@ def test_handle_outliers_zscore(
     result = ml_standardization_instance.handle_outliers(df_, method="zscore")
     # 100.0 is within mean ± 3σ for this small dataset, so it should not be clipped
     assert result["numeric"].iloc[2] == pytest.approx(100.0, rel=1e-3)
-    assert result["name"].dtype == "object"
+    assert pd.api.types.is_string_dtype(result["name"])
 
 
 def test_scale_numeric_data_minmax(
@@ -173,7 +173,7 @@ def test_scale_numeric_data_minmax(
     assert result["numeric"].min() >= 0
     assert result["numeric"].max() <= 1
     assert not result["numeric"].isna().any()
-    assert result["name"].dtype == "object"
+    assert pd.api.types.is_string_dtype(result["name"])
 
 
 def test_scale_numeric_data_standard(
@@ -204,7 +204,7 @@ def test_scale_numeric_data_standard(
     assert pytest.approx(result["numeric"].mean(), abs=1e-6) == 0
     assert pytest.approx(result["numeric"].std(ddof=1), abs=1e-6) == 1.1547005383792517
     assert not result["numeric"].isna().any()
-    assert result["name"].dtype == "object"
+    assert pd.api.types.is_string_dtype(result["name"])
 
 
 def test_scale_numeric_data_invalid_method(

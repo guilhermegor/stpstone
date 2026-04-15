@@ -807,7 +807,6 @@ class LogLinearRegressions(metaclass=TypeChecker):
         int_max_iter: int = 100,
         solver: str = "lbfgs",
         penalty: str = "l2",
-        mult_class_classifier: str = "auto",
         float_tolerance: float = 0.0001,
         intercept_scaling: int = 1,
         random_state: int = 0,
@@ -836,8 +835,6 @@ class LogLinearRegressions(metaclass=TypeChecker):
             Optimization solver (default: "lbfgs")
         penalty : str
             Regularization penalty (default: "l2")
-        mult_class_classifier : str
-            Multiclass handling (default: "ovr")
         float_tolerance : float
             Tolerance for stopping (default: 0.0001)
         intercept_scaling : int
@@ -897,7 +894,6 @@ class LogLinearRegressions(metaclass=TypeChecker):
             intercept_scaling=intercept_scaling,
             l1_ratio=l1_ratio,
             max_iter=int_max_iter,
-            multi_class=mult_class_classifier,
             n_jobs=n_jobs,
             penalty=penalty,
             random_state=random_state,
