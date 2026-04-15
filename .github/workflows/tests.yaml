@@ -285,12 +285,17 @@ jobs:
       - name: Run Integration Tests
         run: poetry run pytest tests/integration/ -v
 
-      - name: Run Unit Tests With Coverage
+      - name: Run Unit Tests
+        run: poetry run pytest tests/unit/
+
+      - name: Run Coverage Report
+        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
         run: |
-          poetry run pytest --cov=stpstone tests/unit/ -v
+          poetry run pytest --cov=stpstone --cov-report=xml --no-header -q tests/unit/
           poetry run coverage-badge -o coverage.svg -f
 
       - name: Upload Badge
+        if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-badge-${{ matrix.python-version }}

@@ -213,6 +213,10 @@ def validate_type(
     TypeError
         If the value does not match the expected type.
     """
+    # Any means "no constraint" — skip all validation
+    if expected_type is Any:
+        return
+
     # skip type checking for Mock objects during testing
     if isinstance(value, Mock):
         return

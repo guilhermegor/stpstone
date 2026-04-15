@@ -6,16 +6,17 @@
 init: venv precommit
 
 venv:
-	@pyenv install 3.9.22 -s
-	@pyenv local 3.9.22
-	@python -m pip install --upgrade pip
-	@python -m pip install -r requirements.txt
-	@poetry config virtualenvs.in-project true --local
-	@poetry install
-	@echo "Virtual environment created in ./.venv"
-	@echo "Poetry project installed"
-	@poetry run playwright install
-	@echo "Playwright installed"
+	@PY_VERSION=$$(cat .python-version 2>/dev/null || echo "3.11.12"); \
+	pyenv install $$PY_VERSION -s; \
+	pyenv local $$PY_VERSION; \
+	python -m pip install --upgrade pip; \
+	python -m pip install -r requirements.txt; \
+	poetry config virtualenvs.in-project true --local; \
+	poetry install; \
+	echo "Virtual environment created in ./.venv"; \
+	echo "Poetry project installed"; \
+	poetry run playwright install; \
+	echo "Playwright installed"
 
 update_venv:
 	@poetry update
