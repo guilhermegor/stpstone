@@ -22,12 +22,12 @@ class Root(metaclass=TypeChecker):
 
         Parameters
         ----------
-        func : Callable[[float], float]
-            Function whose root is to be found
         a : float
             Lower bound of the interval
         b : float
             Upper bound of the interval
+        func : Callable[[float], float]
+            Function whose root is to be found
         epsilon : float
             Tolerance for stopping condition
 

@@ -331,7 +331,7 @@ class DealingOutlook(metaclass=TypeChecker):
         outlook_folder: str,
         subj_sub_string: str,
         outlook_subfolder: Optional[str] = None,
-        output: Literal["subject", "message_raw", "properties"] = "subject",
+        output: Literal['subject', 'message_raw', 'properties'] = "subject",
     ) -> Union[list[str], list[object], list[dict[str, object]]]:
         """Retrieve emails matching subject criteria with various output formats.
 

@@ -45,7 +45,7 @@ class YahiiDailyFX(ABCIngestionOperations):
 
 	def __init__(
 		self,
-		str_currency: Literal["usd", "eur"] = "usd",
+		str_currency: Literal['usd', 'eur'] = "usd",
 		date_ref: Optional[date] = None,
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,
@@ -103,7 +103,7 @@ class YahiiDailyFX(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 			Whether to verify the SSL certificate, by default False.
@@ -148,7 +148,7 @@ class YahiiDailyFX(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 			Verify the SSL certificate, by default False.

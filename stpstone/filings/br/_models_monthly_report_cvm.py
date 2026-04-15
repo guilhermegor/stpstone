@@ -113,7 +113,7 @@ class PrimitiveRiskFactor(BaseModel):
     """FATOR_PRIMIT_RISCO - one BM&FBOVESPA primitive risk factor entry."""
 
     nome_fator_primit_risco: Literal[
-        "IBOVESPA", "JUROS-PRE", "CUPOM CAMBIAL", "DOLAR", "OUTROS"
+        'IBOVESPA', 'JUROS-PRE', 'CUPOM CAMBIAL', 'DOLAR', 'OUTROS'
     ]
     cen_util: str = Field(max_length=150)
 
@@ -136,7 +136,7 @@ class NominalRiskFactor(BaseModel):
     """FATOR_RISCO_NOC - one notional derivatives risk factor (long and short legs)."""
 
     nome_fator_noc: Literal[
-        "IBOVESPA", "JUROS-PRE", "CUPOM CAMBIAL", "DOLAR", "OUTROS"
+        'IBOVESPA', 'JUROS-PRE', 'CUPOM CAMBIAL', 'DOLAR', 'OUTROS'
     ]
     val_fator_risco_noc_long: int = Field(ge=0)
     val_fator_risco_noc_short: int = Field(ge=0)
@@ -152,9 +152,9 @@ class NominalRiskBlock(BaseModel):
 class OtcOperation(BaseModel):
     """OPER_CURS_MERC_BALCAO - one top-3 OTC counterparty without central clearing."""
 
-    tp_pessoa: Literal["PF", "PJ"]
+    tp_pessoa: Literal['PF', 'PJ']
     nr_pf_pj_comitente: str
-    parte_relacionada: Literal["S", "N"]
+    parte_relacionada: Literal['S', 'N']
     valor_parte: Decimal
 
     @field_validator("nr_pf_pj_comitente")
@@ -187,9 +187,9 @@ class OtcOperation(BaseModel):
 class PrivateCreditIssuer(BaseModel):
     """EMISSORES_TIT_CRED_PRIV - one top-3 private credit issuer held by the fund class."""
 
-    tp_pessoa_emissor: Literal["PF", "PJ"]
+    tp_pessoa_emissor: Literal['PF', 'PJ']
     nr_pf_pj_emissor: str
-    parte_relacionada: Literal["S", "N"]
+    parte_relacionada: Literal['S', 'N']
     valor_parte: Decimal
 
     @field_validator("nr_pf_pj_emissor")
@@ -259,7 +259,7 @@ class PerfilMensalRow(BaseModel):
     resm_teor_vt_profrd: Optional[str] = Field(default=None, max_length=4000)
     just_sum_vt_profrd: Optional[str] = Field(default=None, max_length=4000)
     var_perc_pl: Optional[Decimal] = None
-    mod_var_utiliz: Optional[Literal["1", "2", "3"]] = None
+    mod_var_utiliz: Optional[Literal['1', '2', '3']] = None
     praz_med_cart_tit: Optional[Decimal] = None
     res_delib: Optional[str] = Field(default=None, max_length=4000)
     total_recurs_exter: Decimal
@@ -279,7 +279,7 @@ class PerfilMensalRow(BaseModel):
         default=None, max_length=3
     )
     tot_ativos_cred_priv: Decimal
-    ved_regul_cobr_taxa_perform: Optional[Literal["S", "N"]] = None
+    ved_regul_cobr_taxa_perform: Optional[Literal['S', 'N']] = None
     resp_ved_regul_cobr_taxa_perform: Optional[PerformanceFeeDetails] = None
     montante_distrib: Optional[Decimal] = None
     inf_compl_perfil: Optional[str] = Field(default=None, max_length=500)

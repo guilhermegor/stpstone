@@ -30,7 +30,7 @@ class DFStandardizationML(DFStandardization):
     def handle_outliers(
         self,
         df_: pd.DataFrame,
-        method: Literal["iqr", "zscore"] = "iqr"
+        method: Literal['iqr', 'zscore'] = "iqr"
     ) -> pd.DataFrame:
         """Handle outliers in the DataFrame.
 
@@ -38,7 +38,7 @@ class DFStandardizationML(DFStandardization):
         ----------
         df_ : pd.DataFrame
             The DataFrame to handle outliers in.
-        method : Literal['iqr', 'zscore'], optional
+        method : Literal['iqr', 'zscore']
             The method to use for handling outliers. Default is "iqr".
 
         Returns
@@ -65,7 +65,7 @@ class DFStandardizationML(DFStandardization):
     def scale_numeric_data(
         self,
         df_: pd.DataFrame,
-        method: Literal["minmax", "standard"] = "minmax"
+        method: Literal['minmax', 'standard'] = "minmax"
     ) -> pd.DataFrame:
         """Scale numeric data in the DataFrame.
 
@@ -73,7 +73,7 @@ class DFStandardizationML(DFStandardization):
         ----------
         df_ : pd.DataFrame
             The DataFrame to scale numeric data in.
-        method : Literal['minmax', 'standard'], optional
+        method : Literal['minmax', 'standard']
             The method to use for scaling numeric data. Default is "minmax".
 
         Returns

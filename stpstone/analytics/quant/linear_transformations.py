@@ -227,10 +227,10 @@ class LinearAlgebra(metaclass=TypeChecker):
         
         Parameters
         ----------
-        array_data : npt.NDArray[np.float64]
-            Array to be decomposed.
         n : int
-            Array to be decomposed.
+            Power exponent.
+        array_data : npt.NDArray[np.float64]
+            Array to raise to the given power.
         
         Returns
         -------

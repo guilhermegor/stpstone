@@ -293,7 +293,7 @@ class WWGeography(metaclass=TypeChecker):
 
     def get_continent_code_by_country_code(
         self, country_code: str
-    ) -> Optional[Literal["AF", "AS", "EU", "NA", "SA", "OC", "AN"]]:
+    ) -> Optional[Literal['AF', 'AS', 'EU', 'NA', 'SA', 'OC', 'AN']]:
         """Get continent code for a country code.
 
         Parameters

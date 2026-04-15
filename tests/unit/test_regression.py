@@ -139,12 +139,12 @@ def linear_func() -> Callable[..., float]:
 
         Parameters
         ----------
-        x : np.ndarray
-            Input array
         a : float
             Coefficient
         b : float
             Intercept
+        x : np.ndarray
+            Input array
 
         Returns
         -------

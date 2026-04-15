@@ -103,8 +103,8 @@ class ExpressionConverter(metaclass=TypeChecker):
     def __init__(
         self,
         str_expr: str,
-        str_from_type: Literal["infix", "postfix", "prefix"],
-        str_to_type: Literal["infix", "postfix", "prefix"]
+        str_from_type: Literal['infix', 'postfix', 'prefix'],
+        str_to_type: Literal['infix', 'postfix', 'prefix']
     ) -> None:
         """Initialize the expression converter with input parameters.
         

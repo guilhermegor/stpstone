@@ -40,7 +40,7 @@ class HandlingTXTFiles(metaclass=TypeChecker):
         if not self.cls_dir_files.object_exists(file_path):
             raise ValueError(f"File does not exist at path: {file_path}")
 
-    def read_file(self, complete_path: str, method: Literal["r", "w"] = "r") -> str:
+    def read_file(self, complete_path: str, method: Literal['r', 'w'] = "r") -> str:
         """Read content from a text file.
 
         Parameters
@@ -62,7 +62,7 @@ class HandlingTXTFiles(metaclass=TypeChecker):
     def generator_file(
         self,
         complete_path: str,
-        method: Literal["r", "w"] = "r",
+        method: Literal['r', 'w'] = "r",
         regex: str = "[^A-Za-z0-9-.*-:-<-=-\s]+",
         non_matching_regex_characaters: str = "|"
     ) -> list[str]:
@@ -91,7 +91,7 @@ class HandlingTXTFiles(metaclass=TypeChecker):
                 for line in f.read().splitlines()
             ]
 
-    def read_first_line(self, complete_path: str, method: Literal["r", "w"] = "r") -> str:
+    def read_first_line(self, complete_path: str, method: Literal['r', 'w'] = "r") -> str:
         """Read the first line of a text file.
 
         Parameters
@@ -138,7 +138,7 @@ class HandlingTXTFiles(metaclass=TypeChecker):
         self,
         file_complete_path: str,
         data_content: str,
-        method: Literal["r", "w"] = "w"
+        method: Literal['r', 'w'] = "w"
     ) -> bool:
         """Write content to a text file.
 

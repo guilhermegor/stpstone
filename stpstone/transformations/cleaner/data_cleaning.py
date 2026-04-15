@@ -355,7 +355,7 @@ class DataCleaning(metaclass=TypeChecker):
     def replace_nan_values(
         self,
         array_data: NDArray[np.float64],
-        strategy: Optional[Literal["mean", "median", "most_frequent"]] = None,
+        strategy: Optional[Literal['mean', 'median', 'most_frequent']] = None,
         missing_values: float = np.nan,
         n_neighbors: Optional[int] = None,
     ) -> ReturnReplaceNaNValues:
@@ -403,7 +403,7 @@ class DataCleaning(metaclass=TypeChecker):
         array_data: NDArray[np.float64],
         list_idx_target_cols: list,
         encoder_strategy: \
-            Literal["one_hot_encoder", "ordinal_encoder", "label_encoder"] = "one_hot_encoder",
+            Literal['one_hot_encoder', 'ordinal_encoder', 'label_encoder'] = "one_hot_encoder",
     ) -> ReturnConvertCartegories:
         """Convert categorical strings to numerical arrays.
 
@@ -453,7 +453,7 @@ class DataCleaning(metaclass=TypeChecker):
     def feature_scaling(
         self,
         array_data: NDArray[np.float64],
-        type_scaler: Literal["normalization", "standardisation"] = "normalization",
+        type_scaler: Literal['normalization', 'standardisation'] = "normalization",
         tup_feature_range: tuple[float, float] = (0, 1),
     ) -> ReturnFeatureScaling:
         """Scale features using specified method.

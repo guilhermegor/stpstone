@@ -20,9 +20,9 @@ from typing import Any, Callable, Literal, Optional, TypeVar, Union
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker, type_checker
 
 
-TypeFilter = TypeVar("TypeFilter", bound=Literal["equal", "not_equal", "less_than", 
-                                                 "greater_than", "less_than_or_equal_to", 
-                                                 "greater_than_or_equal_to", "isin"])
+TypeFilter = TypeVar("TypeFilter", bound=Literal['equal', 'not_equal', 'less_than', 
+                                                 'greater_than', 'less_than_or_equal_to', 
+                                                 'greater_than_or_equal_to', 'isin'])
 
 class HandlingDicts(metaclass=TypeChecker):
     """Collection of dictionary manipulation utilities."""

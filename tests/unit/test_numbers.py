@@ -48,14 +48,14 @@ class TestNumHandler:
 
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         m : int
             The multiple to generate
         ceiling : int
             The upper limit for multiples
         expected : list[int]
             Expected list of multiples
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------
@@ -81,12 +81,12 @@ class TestNumHandler:
         
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         m : int
             The multiple to generate
         ceiling : int
             The upper limit for multiples
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------
@@ -190,8 +190,6 @@ class TestNumHandler:
 
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         num : float
             The number to round up
         base : float
@@ -200,6 +198,8 @@ class TestNumHandler:
             The maximum value the new number can take
         expected : float
             Expected rounded up number
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------
@@ -229,14 +229,14 @@ class TestNumHandler:
 
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         num : Any
             The number to round up
         base : Any
             The base number to round up to
         ceiling : Any
             The maximum value the new number can take
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------
@@ -575,12 +575,12 @@ class TestNumHandler:
 
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         n : int
             The number to calculate factorial of
         expected : int
             Expected factorial
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------
@@ -598,10 +598,10 @@ class TestNumHandler:
 
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         n : int
             The number to calculate factorial of
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------
@@ -701,8 +701,6 @@ class TestNumHandler:
 
         Parameters
         ----------
-        num_handler : TypeChecker
-            Instance of NumHandler
         n : float
             The number to clamp
         minn : float
@@ -711,6 +709,8 @@ class TestNumHandler:
             Maximum value
         expected : float
             Expected clamped value
+        num_handler : TypeChecker
+            Instance of NumHandler
 
         Returns
         -------

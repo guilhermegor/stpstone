@@ -84,7 +84,7 @@ class Interpolation(metaclass=TypeChecker):
         self,
         array_x: Union[list[float], np.ndarray],
         array_y: Union[list[float], np.ndarray],
-        bc_type: Literal["natural", "clamped", "not-a-knot", "periodic"] = "natural",
+        bc_type: Literal['natural', 'clamped', 'not-a-knot', 'periodic'] = "natural",
     ) -> CubicSpline:
         """Perform cubic spline interpolation on given data points.
 

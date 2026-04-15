@@ -192,7 +192,7 @@ class SqlServerDB(ABCDatabase):
         ----------
         str_query : Union[str, SQLComposable]
             SQL query to execute
-        dict_type_cols : Optional[dict[str, Any]], optional
+        dict_type_cols : Optional[dict[str, Any]]
             Dictionary for column type conversion (default: None)
         list_cols_dt : Optional[list[str]]
             List of date columns to convert (default: None)

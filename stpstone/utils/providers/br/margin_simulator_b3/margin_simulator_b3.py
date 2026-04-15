@@ -30,7 +30,7 @@ class MarginSimulatorB3(metaclass=TypeChecker):
 	----------
 	dict_payload : ResultReferenceData
 		Payload dictionary for the B3 Margin Simulator API.
-	timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+	timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		Request timeout (default: (12.0, 21.0)).
 	bool_verify : bool
 		Verify SSL certificate (default: True).
@@ -86,7 +86,7 @@ class MarginSimulatorB3(metaclass=TypeChecker):
 		----------
 		dict_payload : ResultReferenceData
 			Payload dictionary for the B3 Margin Simulator API.
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			Request timeout (default: (12.0, 21.0)).
 		bool_verify : bool
 			Verify SSL certificate (default: True).

@@ -397,17 +397,17 @@ class TestBRSovereignPricer:
         expected: float,
     ) -> None:
         """Test custody fee calculation with normal inputs.
-        
+
         Parameters
         ----------
-        pricer : BRSovereignPricer
-            Instance of BRSovereignPricer class
         price : float
             Price of the bond
         cddt : int
             Number of calendar days
         expected : float
             Expected result
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
         """
         result = pricer.custody_fee_bmfbov(price, cddt)
         assert result == pytest.approx(expected, abs=0.01)
@@ -428,15 +428,15 @@ class TestBRSovereignPricer:
         cddt: int,
     ) -> None:
         """Test custody fee with invalid values.
-        
+
         Parameters
         ----------
-        pricer : BRSovereignPricer
-            Instance of BRSovereignPricer class
         price : float
             Price of the bond
         cddt : int
             Number of calendar days
+        pricer : BRSovereignPricer
+            Instance of BRSovereignPricer class
         """
         with pytest.raises(ValueError):
             pricer.custody_fee_bmfbov(price, cddt)

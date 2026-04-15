@@ -3142,8 +3142,8 @@ class TSIR(metaclass=TypeChecker):
         used in financial curve construction, particularly for yield curve interpolation.
 
         Mathematical Form:
-        - Lower segment (bool_sup_list=False): Σ (a_i * t^i) for i=0 to 3
-        - Upper segment (bool_sup_list=True): Σ (b_i * t^(i-4)) for i=4 to 7
+        - Lower segment (flag=False): Σ (a_i * t^i) for i=0 to 3
+        - Upper segment (flag=True): Σ (b_i * t^(i-4)) for i=4 to 7
         where t = int_nper_wd and coefficients are in list_constants_cubic_spline
 
         Parameters

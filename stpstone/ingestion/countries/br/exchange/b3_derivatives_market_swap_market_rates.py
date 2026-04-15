@@ -61,7 +61,7 @@ class B3DerivativesMarketSwapMarketRates(ABCB3SearchByTradingSession):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout for the ingestion process, by default (12.0, 21.0).
 		bool_verify : bool
 		    Whether to verify the ingestion process, by default True.

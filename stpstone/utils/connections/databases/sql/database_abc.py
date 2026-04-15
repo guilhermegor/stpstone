@@ -321,7 +321,7 @@ class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
         ----------
         str_query : str
             SQL query to execute
-        dict_type_cols : Optional[dict[str, Any]], optional
+        dict_type_cols : Optional[dict[str, Any]]
             Column type mapping, defaults to None
         list_cols_dt : Optional[list[str]]
             Date columns to parse, defaults to None

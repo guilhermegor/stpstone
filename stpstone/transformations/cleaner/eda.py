@@ -173,7 +173,7 @@ class ExploratoryDataAnalysis(metaclass=TypeChecker):
             Dataframe to analyze
         bins : int
             Number of bins for histograms, by default 58
-        figsize : tuple[int, int], optional
+        figsize : tuple[int, int]
             Figure size for plots, by default (20, 15)
         bool_show_plots : bool
             Whether to show plots, by default True

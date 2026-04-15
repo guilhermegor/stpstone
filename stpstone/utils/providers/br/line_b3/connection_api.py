@@ -149,7 +149,7 @@ class ConnectionApi(metaclass=TypeChecker):
 		----------
 		int_max_retries : int
 			Maximum number of retries (default: 2).
-		timeout : Union[tuple[float, float], float, int], optional
+		timeout : Union[tuple[float, float], float, int]
 			Request timeout (default: 10).
 
 		Returns
@@ -198,7 +198,7 @@ class ConnectionApi(metaclass=TypeChecker):
 		----------
 		int_max_retries : int
 			Maximum number of retries (default: 2).
-		timeout : Union[tuple[float, float], float, int], optional
+		timeout : Union[tuple[float, float], float, int]
 			Request timeout (default: 10).
 
 		Returns
@@ -266,7 +266,7 @@ class ConnectionApi(metaclass=TypeChecker):
 
 	def app_request(
 		self,
-		method: Literal["GET", "POST", "DELETE"],
+		method: Literal['GET', 'POST', 'DELETE'],
 		app: str,
 		dict_params: Optional[dict[str, Any]] = None,
 		dict_payload: Optional[list[dict[str, Any]]] = None,
@@ -283,9 +283,9 @@ class ConnectionApi(metaclass=TypeChecker):
 			HTTP method.
 		app : str
 			API endpoint.
-		dict_params : Optional[dict[str, Any]], optional
+		dict_params : Optional[dict[str, Any]]
 			Request parameters (default: None).
-		dict_payload : Optional[list[dict[str, Any]]], optional
+		dict_payload : Optional[list[dict[str, Any]]]
 			Request payload (default: None).
 		bool_parse_dict_params_data : bool
 			Parse parameters as JSON (default: False).
@@ -293,7 +293,7 @@ class ConnectionApi(metaclass=TypeChecker):
 			Enable retry on error (default: False).
 		float_secs_sleep : Optional[float]
 			Sleep time between retries (default: None).
-		timeout : Union[tuple[float, float], float, int], optional
+		timeout : Union[tuple[float, float], float, int]
 			Request timeout (default: 10).
 
 		Returns

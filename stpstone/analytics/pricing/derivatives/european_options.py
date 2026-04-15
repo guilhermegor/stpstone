@@ -105,7 +105,7 @@ class BlackScholesMerton(metaclass=TypeChecker):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """General option price function for European options.
 
@@ -161,7 +161,7 @@ class MonteCarlo(metaclass=TypeChecker):
         r: float, 
         t: float, 
         sigma: float,
-        opt_type: Literal["call", "put"], 
+        opt_type: Literal['call', 'put'], 
         n_simulations: int = 100_000,
         n_steps: int = 252, 
         random_seed: Optional[int] = None
@@ -485,7 +485,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Delta is the rate of change of the theoretical option value with respect to changes.
 
@@ -560,7 +560,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float, 
         delta: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Strike from delta.
 
@@ -700,7 +700,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Theta is the rate of change of the theoretical option value with respect to time.
         
@@ -940,7 +940,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Vega delta relationship.
 
@@ -1016,7 +1016,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Vega elasticity is the ratio of vega to the option price, multiplied by the volatility.
 
@@ -1059,7 +1059,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Rho.
         
@@ -1109,7 +1109,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Lambda.
         
@@ -1155,7 +1155,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Vanna.
         
@@ -1206,7 +1206,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Vanna Vol.
          
@@ -1252,7 +1252,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Charm is the rate of change of delta with respect to time.
 
@@ -2092,7 +2092,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Phi.
         
@@ -2142,7 +2142,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Carry rho.
         
@@ -2191,7 +2191,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Risk-neutral probability for ending up ITM at maturity.
         
@@ -2237,7 +2237,7 @@ class Greeks(BlackScholesMerton):
         q: float, 
         b: float, 
         p: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Strike price given a risk-neutral probability.
         
@@ -2286,7 +2286,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Zeta's sensitivity to a small change in the implied volatility.
         
@@ -2333,7 +2333,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Zeta's sensitivity to a small change in time.
         
@@ -2380,7 +2380,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Risk-neutral probability density function for the option price.
         
@@ -2425,7 +2425,7 @@ class Greeks(BlackScholesMerton):
         sigma: float, 
         q: float, 
         b: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Probability of ever getting ITM at maturity.
         
@@ -2512,7 +2512,7 @@ class IterativeMethods(Greeks):
         n: int, 
         u: float, 
         d: float, 
-        opt_type: Literal["call", "put"], 
+        opt_type: Literal['call', 'put'], 
         h_upper: Optional[float] = None, 
         h_lower: Optional[float] = None
     ) -> float:
@@ -2582,7 +2582,7 @@ class IterativeMethods(Greeks):
         t: float, 
         n: int, 
         sigma: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Cox, Ross and Rubinstein (CRR) method for European options.
         
@@ -2649,7 +2649,7 @@ class IterativeMethods(Greeks):
         t: float, 
         n: int, 
         sigma: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Jarrow and Rudd (JR) method for European options.
         
@@ -2717,7 +2717,7 @@ class IterativeMethods(Greeks):
         t: float, 
         n: int, 
         sigma: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Equal probabilities (EQP) method for European options.
         
@@ -2788,7 +2788,7 @@ class IterativeMethods(Greeks):
         t: float, 
         n: int, 
         sigma: float, 
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Trigeorgis (TRG) method for European options.
         
@@ -2869,7 +2869,7 @@ class EuropeanOptions(IterativeMethods):
         q: float, 
         b: float, 
         cp0: float,
-        opt_type: Literal["call", "put"]
+        opt_type: Literal['call', 'put']
     ) -> float:
         """Calculate the cost function to be minimized for the Newton-Raphson and other methods.
         
@@ -2919,9 +2919,9 @@ class EuropeanOptions(IterativeMethods):
         q: float, 
         b: float, 
         cp0: float, 
-        opt_type: Literal["call", "put"], 
-        method: Literal["newton_raphson", "bisection", "fsolve", "scipy_optimize_minimize", 
-                        "differential_evolution"] = "fsolve", 
+        opt_type: Literal['call', 'put'], 
+        method: Literal['newton_raphson', 'bisection', 'fsolve', 'scipy_optimize_minimize', 
+                        'differential_evolution'] = "fsolve", 
         tolerance: float = 1e-3, 
         epsilon: float = 1, 
         max_iter: int = 1000, 
@@ -2950,8 +2950,7 @@ class EuropeanOptions(IterativeMethods):
             Current price of the option.
         opt_type : Literal['call', 'put']
             Option type, either 'call' or 'put'.
-        method : Literal['newton_raphson', 'bisection', 'fsolve', 'scipy_optimize_minimize', \
-        'differential_evolution']
+        method : Literal['newton_raphson', 'bisection', 'fsolve', 'scipy_optimize_minimize', 'differential_evolution']
             Method to use for calculating the implied volatility, by default 'fsolve'.
             - 'newton_raphson': Newton-Raphson method.
             - 'bisection': Bisection method.
@@ -3084,7 +3083,7 @@ class EuropeanOptions(IterativeMethods):
         t: float, 
         sigma: float, 
         q: float,
-        opt_type: Literal["call", "put"],
+        opt_type: Literal['call', 'put'],
         pct_moneyness_atm: float = 0.05
     ) -> str:
         """Determine whether the option is ITM, ATM, or OTM based on moneyness.

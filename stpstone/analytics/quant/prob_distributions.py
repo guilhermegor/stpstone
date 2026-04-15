@@ -229,7 +229,7 @@ class ProbabilityDistributions(metaclass=TypeChecker):
         self,
         float_p: float,
         int_df: int,
-        probability_func: Literal["ppf", "pdf", "cdf"] = "ppf",
+        probability_func: Literal['ppf', 'pdf', 'cdf'] = "ppf",
         x_axis_inf_range: Optional[float] = None,
         x_axis_sup_range: Optional[float] = None,
         x_axis_pace: Optional[float] = None,
@@ -242,7 +242,7 @@ class ProbabilityDistributions(metaclass=TypeChecker):
             Probability value
         int_df : int
             Degrees of freedom
-        probability_func : Literal['ppf', 'pdf', 'cdf'], optional
+        probability_func : Literal['ppf', 'pdf', 'cdf']
             Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
         x_axis_inf_range : Optional[float]
             Lower bound of x-axis range, by default None
@@ -303,7 +303,7 @@ value.
         self,
         float_p: float,
         int_df: int,
-        probability_func: Literal["ppf", "pdf", "cdf"] = "ppf",
+        probability_func: Literal['ppf', 'pdf', 'cdf'] = "ppf",
         x_axis_inf_range: Optional[float] = None,
         x_axis_sup_range: Optional[float] = None,
         x_axis_pace: Optional[float] = None,
@@ -316,7 +316,7 @@ value.
             Probability value
         int_df : int
             Degrees of freedom
-        probability_func : Literal['ppf', 'pdf', 'cdf'], optional
+        probability_func : Literal['ppf', 'pdf', 'cdf']
             Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
         x_axis_inf_range : Optional[float]
             Lower bound of x-axis range, by default None
@@ -375,7 +375,7 @@ value.
         int_dfd: int,
         float_mu: float,
         float_p: Optional[float] = None,
-        probability_func: Literal["ppf", "pdf", "cdf"] = "ppf",
+        probability_func: Literal['ppf', 'pdf', 'cdf'] = "ppf",
         x_axis_inf_range: Optional[float] = None,
         x_axis_sup_range: Optional[float] = None,
         x_axis_pace: Optional[float] = None,
@@ -392,7 +392,7 @@ value.
             Mean value
         float_p : Optional[float]
             Probability value, by default None
-        probability_func : Literal['ppf', 'pdf', 'cdf'], optional
+        probability_func : Literal['ppf', 'pdf', 'cdf']
             Function type ('ppf', 'pdf', or 'cdf'), by default 'ppf'
         x_axis_inf_range : Optional[float]
             Lower bound of x-axis range, by default None
@@ -782,7 +782,7 @@ class HansenSkewStudent(metaclass=TypeChecker):
 
         Parameters
         ----------
-        size : Union[int, tuple[int, ...]], optional
+        size : Union[int, tuple[int, ...]]
             Output shape, by default 1
 
         Returns

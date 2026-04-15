@@ -432,6 +432,19 @@ def test_get_response_http_error(b3_core: B3TradingHoursCore, mocker: MockerFixt
 	original_validate = b3_core._validate_get_reponse
 
 	def validate_pass(*args: object, **kwargs: object) -> None:
+		"""No-op stub that replaces validation to allow error path testing.
+
+		Parameters
+		----------
+		*args : object
+			Positional arguments forwarded from the patched method.
+		**kwargs : object
+			Keyword arguments forwarded from the patched method.
+
+		Returns
+		-------
+		None
+		"""
 		pass
 
 	mocker.patch.object(b3_core, "_validate_get_reponse", side_effect=validate_pass)

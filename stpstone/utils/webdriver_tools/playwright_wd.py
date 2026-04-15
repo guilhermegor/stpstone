@@ -594,7 +594,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
     def get_list_data(
         self,
         table_selector: str,
-        selector_type: Literal["xpath", "css"] = "xpath",
+        selector_type: Literal['xpath', 'css'] = "xpath",
         timeout: Optional[int] = None
     ) -> list[str]:
         """Get text content from table cells.
@@ -836,7 +836,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
         timeout : Optional[int]
             Request timeout in milliseconds. If None, uses the instance's
             default timeout (self.int_default_timeout). Default is None.
-        cookies : Optional[Union[dict[str, str], list[dict[str, str]]]], optional
+        cookies : Optional[Union[dict[str, str], list[dict[str, str]]]]
             Cookies to add to the browser context. Can be either:
             - dict: Simple key-value pairs {"name": "value"}
             - list[dict]: Full cookie objects with domain, path, etc.
@@ -849,11 +849,6 @@ class PlaywrightScraper(metaclass=TypeChecker):
             The parsed JSON response. Returns a dictionary for JSON objects
             or a list for JSON arrays.
 
-        Raises
-        ------
-        requests.HTTPError
-            If the request fails or the JSON response is not valid.
-        
         Examples
         --------
         Basic usage:
@@ -1126,7 +1121,7 @@ class PlaywrightScraper(metaclass=TypeChecker):
             Default is 5_000 (5 seconds).
         logger : Optional[Any]
             Logger instance for logging. Default is None.
-        additional_data : Optional[dict[str, Any]], optional
+        additional_data : Optional[dict[str, Any]]
             Additional data to include in each row's dictionary.
             Useful for adding context like fund_code, page_number, etc.
             Default is None.

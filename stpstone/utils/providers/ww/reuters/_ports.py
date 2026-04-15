@@ -18,7 +18,7 @@ class IReuters(Protocol):
 		self,
 		app: str,
 		payload: Optional[dict],
-		method: Literal["GET", "POST"],
+		method: Literal['GET', 'POST'],
 		endpoint: str,
 		timeout: Union[tuple, float, int],
 	) -> str:
@@ -28,9 +28,9 @@ class IReuters(Protocol):
 		----------
 		app : str
 			Endpoint path appended to the base URL.
-		payload : dict or None
+		payload : Optional[dict]
 			Request parameters.
-		method : Literal["GET", "POST"]
+		method : Literal['GET', 'POST']
 			HTTP method.
 		endpoint : str
 			Base API URL.

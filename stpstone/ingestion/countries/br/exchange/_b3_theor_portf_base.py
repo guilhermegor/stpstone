@@ -100,7 +100,7 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 		    Whether to verify the SSL certificate, by default True.
@@ -114,6 +114,11 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 		-------
 		Optional[pd.DataFrame]
 		    The transformed DataFrame.
+
+		Raises
+		------
+		ValueError
+		    If cls_db is set but no table name is provided.
 		"""
 		if self.cls_db and not (str_table_name or self._TABLE_NAME):
 			raise ValueError("str_table_name cannot be empty")
@@ -150,7 +155,7 @@ class _B3TheoreticalPortfolioBase(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 		    Verify the SSL certificate, by default True.

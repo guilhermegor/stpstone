@@ -44,8 +44,8 @@ class PDFHandler(metaclass=TypeChecker):
     def fetch(
         self,
         complete_pdf_name: str,
-        method_open: Literal["rb", "r"] = "rb",
-        str_return_num_pages_text: Literal["num_pages", "text_pages"] = "num_pages"
+        method_open: Literal['rb', 'r'] = "rb",
+        str_return_num_pages_text: Literal['num_pages', 'text_pages'] = "num_pages"
     ) -> Union[int, list[str]]:
         """Fetch PDF metadata or text content.
 
@@ -152,11 +152,11 @@ class PDFHandler(metaclass=TypeChecker):
         fontsize_pt: int = 10,
         margin_bottom_mm: int = 10,
         character_width: int = 7,
-        orientation: Literal["P", "L"] = "P",
-        unit: Literal["mm", "pt", "cm", "in"] = "mm",
+        orientation: Literal['P', 'L'] = "P",
+        unit: Literal['mm', 'pt', 'cm', 'in'] = "mm",
         format: str = "A4",
         font_family: str = "Courier",
-        output_file: Literal["F", "S"] = "F"
+        output_file: Literal['F', 'S'] = "F"
     ) -> bool:
         """Convert plain text to formatted PDF file.
 

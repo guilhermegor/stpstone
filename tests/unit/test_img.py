@@ -103,7 +103,7 @@ class TestImgHandler:
         self,
         img_handler: ImgHandler,
         mock_image_file: "mock_open",
-        format: Literal["jpeg", "png", "gif"]
+        format: Literal['jpeg', 'png', 'gif']
     ) -> None:
         """Test all supported image formats.
 

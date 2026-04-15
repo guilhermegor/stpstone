@@ -297,7 +297,7 @@ class VaR(metaclass=TypeChecker):
             Mean return
         float_sigma : float
             Standard deviation of returns
-        array_r : Optional[Union[NDArray[np.float64], pd.Series, list[float]]], optional
+        array_r : Optional[Union[NDArray[np.float64], pd.Series, list[float]]]
             Historical returns (default: None)
         float_cl : Optional[float]
             Confidence level (default: 0.95)
@@ -381,7 +381,7 @@ class VaR(metaclass=TypeChecker):
     def historic_var_stress_test(
         self,
         float_shock: float,
-        str_shock_type: Literal["absolute", "relative"] = "relative"
+        str_shock_type: Literal['absolute', 'relative'] = "relative"
     ) -> float:
         """Calculate stressed historical VaR.
 
@@ -389,7 +389,7 @@ class VaR(metaclass=TypeChecker):
         ----------
         float_shock : float
             Shock magnitude
-        str_shock_type : Literal['absolute', 'relative'], optional
+        str_shock_type : Literal['absolute', 'relative']
             Shock type (default: "relative")
 
         Returns
@@ -503,7 +503,7 @@ class RiskMeasures(VaR):
             Mean return
         float_sigma : float
             Standard deviation of returns
-        array_r : Optional[Union[NDArray[np.float64], pd.Series, list[float]]], optional
+        array_r : Optional[Union[NDArray[np.float64], pd.Series, list[float]]]
             Historical returns (default: None)
         float_cl : Optional[float]
             Confidence level (default: 0.95)
@@ -618,7 +618,7 @@ class QuoteVar(VaR):
     def __init__(
         self,
         array_r: Union[NDArray[np.float64], pd.Series, list[float]],
-        str_method_str: Literal["std", "ewma_std"] = "std",
+        str_method_str: Literal['std', 'ewma_std'] = "std",
         float_cl: Optional[float] = 0.95,
         int_t: Optional[int] = 1,
         float_lambda: Optional[float] = 0.94
@@ -629,7 +629,7 @@ class QuoteVar(VaR):
         ----------
         array_r : Union[NDArray[np.float64], pd.Series, list[float]]
             Asset returns
-        str_method_str : Literal['std', 'ewma_std'], optional
+        str_method_str : Literal['std', 'ewma_std']
             Standard deviation method (default: "std")
         float_cl : Optional[float]
             Confidence level (default: 0.95)

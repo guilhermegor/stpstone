@@ -97,7 +97,7 @@ class YahiiRentIndices(ABCIngestionOperations):
         
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default 30_000
         bool_verify : bool
             Whether to verify the SSL certificate, by default True
@@ -151,7 +151,7 @@ class YahiiRentIndices(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default 30_000
         bool_verify : bool
             Verify the SSL certificate, by default True
@@ -178,7 +178,7 @@ class YahiiRentIndices(ABCIngestionOperations):
         ----------
         scraper : Union[Response, PlaywrightPage, SeleniumWebDriver, PlaywrightScraper]
             The scraper object.
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default 30_000
         
         Returns

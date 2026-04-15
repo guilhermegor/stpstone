@@ -110,7 +110,7 @@ def concrete_db_class(mock_db_connection: DbConnection) -> type[ABCDatabase]:
             ----------
             str_query : str
                 SQL query to execute
-            dict_type_cols : Optional[dict[str, Any]], optional
+            dict_type_cols : Optional[dict[str, Any]]
                 Column type mapping, defaults to None
             list_cols_dt : Optional[list[str]]
                 Date columns to parse, defaults to None

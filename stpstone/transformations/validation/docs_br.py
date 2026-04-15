@@ -224,10 +224,10 @@ class DocumentsNumbersBR(metaclass=TypeChecker):
 
         Parameters
         ----------
-        doc_number : str
-            Document number to check
         doc : TypeDoc
-            Type of document
+            Document type identifier
+        doc_number : str
+            Number to check for masking
 
         Returns
         -------

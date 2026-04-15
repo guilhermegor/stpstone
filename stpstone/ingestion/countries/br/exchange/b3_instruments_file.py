@@ -75,13 +75,13 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 		    Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool
 		    Whether to insert or ignore the data, by default False.
-		dict_dtypes : Optional[dict[str, Union[str, int, float]]], optional
+		dict_dtypes : Optional[dict[str, Union[str, int, float]]]
 		    Data types mapping, by default None.
 		str_fmt_dt : str
 		    Date format string, by default "YYYY-MM-DD".
@@ -130,7 +130,7 @@ class B3InstrumentsFile(ABCB3SearchByTradingSession):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 		    Verify the SSL certificate, by default True.

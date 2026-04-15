@@ -347,7 +347,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Input DataFrame
         bins : Optional[int]
             Number of bins, by default None (calculated as sqrt of rows)
-        figsize : tuple[int, int], optional
+        figsize : tuple[int, int]
             Figure size, by default (20, 15)
         complete_saving_path : Optional[str]
             Path to save the plot, by default None
@@ -432,7 +432,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Font size, by default 16
         bool_grid : bool
             Show grid, by default True
-        tup_fig_size : tuple[int, int], optional
+        tup_fig_size : tuple[int, int]
             Figure size, by default (8, 4)
         complete_saving_path : Optional[str]
             Path to save the plot, by default None
@@ -505,7 +505,7 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Font size, by default 16
         bool_grid : bool
             Show grid, by default True
-        tup_fig_size : tuple[int, int], optional
+        tup_fig_size : tuple[int, int]
             Figure size, by default (8, 4)
         complete_saving_path : Optional[str]
             Path to save the plot, by default None
@@ -571,12 +571,12 @@ class ProbStatsCharts(metaclass=TypeChecker):
             Number of rows for subplots, by default None
         nbins : int
             Number of bins, by default 100
-        limits : tuple[float, float], optional
+        limits : tuple[float, float]
             Range for histogram, by default (-100, 100)
+        size : tuple[int, int]
+            Figure dimensions (width, height), by default (60, 30)
         tick_label_size : int
             Tick label size, by default 30
-        size : tuple[int, int], optional
-            Figure size, by default (60, 30)
         suptitle_fontsize : int
             Super title font size, by default 80
         subtitle_fontsize : int

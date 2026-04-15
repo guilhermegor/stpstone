@@ -94,7 +94,7 @@ class YahiiINSSContribution(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 			Whether to verify the SSL certificate, by default False.
@@ -138,7 +138,7 @@ class YahiiINSSContribution(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 			Verify the SSL certificate, by default False.

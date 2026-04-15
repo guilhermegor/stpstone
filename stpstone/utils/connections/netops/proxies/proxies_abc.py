@@ -100,7 +100,7 @@ class ReturnAvailableProxies(TypedDict):
     bool_alive: bool
     status: str
     alive_since: float
-    anonymity: Literal["anonymous", "elite", "transparent"]
+    anonymity: Literal['anonymous', 'elite', 'transparent']
     average_timeout: float
     first_seen: float
     ip_data: str

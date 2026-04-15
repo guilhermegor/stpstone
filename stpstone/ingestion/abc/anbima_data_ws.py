@@ -20,6 +20,29 @@ class AnbimaDataUtils:
                  bool_schema: bool = True, str_tbl_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None, bool_insert_or_ignore: Optional[bool] = False,
                  logger: Optional[Logger] = None) -> None:
+        """Initialize AnbimaDataUtils.
+
+        Parameters
+        ----------
+        dict_metadata : Dict[str, str]
+            Metadata dictionary with credentials and resource configuration.
+        cls_db : Optional[Any]
+            Database client instance, by default None.
+        bool_schema : bool
+            Whether to use schema prefix for table names, by default True.
+        str_tbl_name : Optional[str]
+            Target table name, by default None.
+        str_schema_name : Optional[str]
+            Schema name for the target table, by default None.
+        bool_insert_or_ignore : Optional[bool]
+            Whether to insert or ignore on conflict, by default False.
+        logger : Optional[Logger]
+            Logger instance, by default None.
+
+        Returns
+        -------
+        None
+        """
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
         self.bool_schema = bool_schema
@@ -28,13 +51,38 @@ class AnbimaDataUtils:
         self.bool_insert_or_ignore = bool_insert_or_ignore
         self.logger = logger
 
-    def _log_info(self, message: str):
+    def _log_info(self, message: str) -> None:
+        """Log an informational message via the configured logger or stdout.
+
+        Parameters
+        ----------
+        message : str
+            The message string to log.
+
+        Returns
+        -------
+        None
+        """
         if self.logger is not None:
             CreateLog().log_message(self.logger, message, "info")
         else:
             print(f"INFO: {message}")
 
     def get_property(self, property_: str, resource: Optional[str] = None) -> str:
+        """Return a metadata property value for the given resource.
+
+        Parameters
+        ----------
+        property_ : str
+            The property key to retrieve.
+        resource : Optional[str]
+            The resource section to look up first, by default None.
+
+        Returns
+        -------
+        str
+            The property value from the metadata dictionary.
+        """
         if resource is not None:
             return self.dict_metadata[resource].get(property_, None) \
                 if self.dict_metadata[resource].get(property_, None) is not None \
@@ -42,7 +90,18 @@ class AnbimaDataUtils:
         else:
             return self.dict_metadata["credentials"].get(property_, None)
 
-    def insert_db(self, list_ser) -> None:
+    def insert_db(self, list_ser: List[Any]) -> None:
+        """Insert serialized records into the configured database table.
+
+        Parameters
+        ----------
+        list_ser : List[Any]
+            List of records to insert.
+
+        Returns
+        -------
+        None
+        """
         if self.bool_schema == False:
             str_table_name = f"{self.str_schema_name}_{self.str_tbl_name}"
         self.cls_db.insert(
@@ -58,6 +117,27 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
                  bool_schema: bool = True, strbool_name: Optional[str] = None,
                  str_schema_name: Optional[str] = None,
                  bool_insert_or_ignore: Optional[bool] = False) -> None:
+        """Initialize AnbimaDataDecrypt.
+
+        Parameters
+        ----------
+        dict_metadata : Dict[str, str]
+            Metadata dictionary with credentials and resource configuration.
+        cls_db : Optional[Any]
+            Database client instance, by default None.
+        bool_schema : bool
+            Whether to use schema prefix for table names, by default True.
+        strbool_name : Optional[str]
+            Target table name, by default None.
+        str_schema_name : Optional[str]
+            Schema name for the target table, by default None.
+        bool_insert_or_ignore : Optional[bool]
+            Whether to insert or ignore on conflict, by default False.
+
+        Returns
+        -------
+        None
+        """
         self.dict_metadata  = dict_metadata
         self.cls_db = cls_db
         self.bool_schema = bool_schema
@@ -75,6 +155,30 @@ class AnbimaDataDecrypt(AnbimaDataUtils):
         list_ids_ignore: Optional[List[str]] = None,
         fstr_url: str = "https://data.anbima.com.br/fundos/{}/indicadores"
     ) -> List[Dict[str, str]]:
+        """Build a list of fund URLs with their HTTP status codes.
+
+        Parameters
+        ----------
+        int_lower_bound : int
+            Lower bound for fund ID range, by default 0.
+        int_upper_bound : int
+            Upper bound for fund ID range, by default 1_000_000.
+        int_step : int
+            Step size for fund ID iteration, by default 1.
+        str_prefix : str
+            Prefix string for fund IDs, by default "C".
+        int_length : int
+            Total length of the fund ID string after zero-fill, by default 11.
+        list_ids_ignore : Optional[List[str]]
+            List of fund IDs to skip, by default None.
+        fstr_url : str
+            Format string for constructing fund URLs, by default the ANBIMA indicators URL.
+
+        Returns
+        -------
+        List[Dict[str, str]]
+            List of dicts with COD_ANBIMA, URL, and STATUS_CODE keys.
+        """
         list_ser = list()
         for i in range(int_lower_bound, int_upper_bound, int_step):
             id_ = StrHandler().fill_zeros(str_prefix, i, int_length)
@@ -97,6 +201,29 @@ class AnbimaDataFetcher(AnbimaDataUtils):
     def __init__(self, resource: str, dict_metadata: Dict[str, Any], list_slugs: List[str],
                  str_bucket_name: str, session: YieldFreeProxy, client_s3: Any,
                  logger: Optional[Logger] = None) -> None:
+        """Initialize AnbimaDataFetcher.
+
+        Parameters
+        ----------
+        resource : str
+            Resource key used to look up metadata entries.
+        dict_metadata : Dict[str, Any]
+            Metadata dictionary with credentials and resource configuration.
+        list_slugs : List[str]
+            List of slugs to fetch and store.
+        str_bucket_name : str
+            S3 bucket name for storing HTML content.
+        session : YieldFreeProxy
+            Proxy session for HTTP requests.
+        client_s3 : Any
+            S3 client used for object storage operations.
+        logger : Optional[Logger]
+            Logger instance, by default None.
+
+        Returns
+        -------
+        None
+        """
         self.resource = resource
         self.dict_metadata = dict_metadata
         self.list_slugs = list_slugs
@@ -114,6 +241,18 @@ class AnbimaDataFetcher(AnbimaDataUtils):
         max_value=1200
     )
     def _req_wo_session(self, url: str) -> Response:
+        """Perform a GET request without a proxy session.
+
+        Parameters
+        ----------
+        url : str
+            URL to request.
+
+        Returns
+        -------
+        Response
+            The HTTP response object.
+        """
         return request(
             "GET",
             url,
@@ -124,6 +263,18 @@ class AnbimaDataFetcher(AnbimaDataUtils):
         )
 
     def _get_data(self, slug: str) -> Optional[html.HtmlElement]:
+        """Fetch and parse the HTML content for a given slug.
+
+        Parameters
+        ----------
+        slug : str
+            Slug identifier used to build the request URL.
+
+        Returns
+        -------
+        Optional[html.HtmlElement]
+            Parsed HTML element, or None if the response has status 200.
+        """
         app_ = StrHandler().fill_placeholders(
             self.dict_metadata[self.resource]["app"], {"slug": slug})
         url = self.dict_metadata["credentials"]["host"] + app_
@@ -143,12 +294,25 @@ class AnbimaDataFetcher(AnbimaDataUtils):
 
     @property
     def filtered_slugs(self) -> List[str]:
+        """Return slugs not yet stored in the S3 bucket.
+
+        Returns
+        -------
+        List[str]
+            List of slugs that have not been uploaded to S3.
+        """
         list_slugs_stored = [str(x).replace(".html", "") for x in
                              self.client_s3.list_objects(self.str_bucket_name)]
         return [x for x in self.list_slugs if x not in list_slugs_stored]
 
     @property
     def store_s3_data(self) -> None:
+        """Fetch and store HTML content for all unprocessed slugs in S3.
+
+        Returns
+        -------
+        None
+        """
         for slug in self.filtered_slugs:
             html_content = self._get_data(slug)
             if html_content is not None:
@@ -169,6 +333,23 @@ class AnbimaDataTrt(ABC):
 
     def __init__(self, url: str, html_content: html.HtmlElement, xpath_script: str,
                  dict_re_patters: Dict[str, str]) -> None:
+        """Initialize AnbimaDataTrt.
+
+        Parameters
+        ----------
+        url : str
+            Source URL associated with the HTML content.
+        html_content : html.HtmlElement
+            Parsed lxml HTML element to extract data from.
+        xpath_script : str
+            XPath expression used to select target elements.
+        dict_re_patters : Dict[str, str]
+            Mapping of field names to regex patterns for extraction.
+
+        Returns
+        -------
+        None
+        """
         self.url = url
         self.html_content = html_content
         self.xpath_script = xpath_script
@@ -176,6 +357,13 @@ class AnbimaDataTrt(ABC):
 
     @property
     def get_re_matches(self) -> Dict[str, str]:
+        """Return regex match results extracted from the HTML content.
+
+        Returns
+        -------
+        Dict[str, str]
+            Mapping of field names to lists of extracted regex match strings.
+        """
         dict_re_matches = dict()
         for el_ in HtmlHandler().lxml_xpath(self.html_content, self.xpath_script):
             for key, re_pattern in self.dict_re_patterns.items():

@@ -170,7 +170,7 @@ class AlphaTools(metaclass=TypeChecker):
 	)
 	def generic_req(
 		self,
-		str_method: Literal["GET", "POST"],
+		str_method: Literal['GET', 'POST'],
 		str_app: str,
 		dict_params: dict[str, Any],
 	) -> list[dict[str, Any]]:

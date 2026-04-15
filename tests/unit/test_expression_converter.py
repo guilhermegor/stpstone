@@ -1046,8 +1046,8 @@ class TestEdgeCases:
 		("prefix", "postfix"),
 	])
 	def test_single_operand_all_conversions(
-		self, from_type: Literal["infix", "postfix", "prefix"],
-		to_type: Literal["infix", "postfix", "prefix"]
+		self, from_type: Literal['infix', 'postfix', 'prefix'],
+		to_type: Literal['infix', 'postfix', 'prefix']
 	) -> None:
 		"""Test single operand conversions for all notation types.
 

@@ -85,7 +85,7 @@ class CVMDataBanksRegistry(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             Request timeout in seconds. Can be a single value or tuple of
             (connect, read) timeouts, by default (12.0, 21.0).
         bool_verify : bool
@@ -171,7 +171,7 @@ class CVMDataBanksRegistry(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             Request timeout in seconds, by default (12.0, 21.0).
         bool_verify : bool
             Whether to verify SSL certificates, by default True.

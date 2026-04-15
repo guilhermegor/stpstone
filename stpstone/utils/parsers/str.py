@@ -28,14 +28,14 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 TypeCaseFrom = TypeVar(
     "TypeCaseFrom", 
-    bound=Literal["camel", "pascal", "kebab", "upper_constant", "lower_constant", "snake", 
-                  "upper_first", "default"]
+    bound=Literal['camel', 'pascal', 'kebab', 'upper_constant', 'lower_constant', 'snake', 
+                  'upper_first', 'default']
 )
 
 TypeCaseTo = TypeVar(
     "TypeCaseTo", 
-    bound=Literal["camel", "pascal", "snake", "kebab", "upper_constant", "lower_constant", 
-                  "upper_first"]
+    bound=Literal['camel', 'pascal', 'snake', 'kebab', 'upper_constant', 'lower_constant', 
+                  'upper_first']
 )
 
 class ReturnUUID(TypedDict):

@@ -99,7 +99,7 @@ class _GlobalRatesBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0).
         bool_verify : bool
             Whether to verify the SSL certificate, by default False.
@@ -144,7 +144,7 @@ class _GlobalRatesBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0).
         bool_verify : bool
             Verify the SSL certificate, by default False.
@@ -318,10 +318,10 @@ class _GlobalRatesBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        list_ : list[Any]
-            The list to repeat.
         n : int
             The number of repetitions.
+        list_ : list[Any]
+            The list to repeat.
 
         Returns
         -------
@@ -336,10 +336,10 @@ class _GlobalRatesBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        list_ : list[Any]
-            The list whose elements to repeat.
         n : int
             The number of times each element is repeated.
+        list_ : list[Any]
+            The list whose elements to repeat.
 
         Returns
         -------

@@ -163,7 +163,7 @@ regression-model-in-python
         array_y: np.ndarray,
         cross_validation_folds: int = 3,
         scoring_method: str = "neg_mean_squared_error",
-        cross_val_model: Literal["score", "predict"] = "score",
+        cross_val_model: Literal['score', 'predict'] = "score",
         cross_val_model_method: str = "predict_proba",
     ) -> ResultCrossValidation:
         """Perform cross-validation to measure estimator performance.
@@ -180,7 +180,7 @@ regression-model-in-python
             Number of cross-validation folds, by default 3
         scoring_method : str
             Scoring method, by default "neg_mean_squared_error"
-        cross_val_model : Literal['score', 'predict'], optional
+        cross_val_model : Literal['score', 'predict']
             Cross-validation model type, by default "score"
         cross_val_model_method : str
             Cross-validation model method, by default "predict_proba"

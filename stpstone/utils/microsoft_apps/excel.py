@@ -22,12 +22,12 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
-STYLE_HEADING1: Literal["style_heading1"] = "style_heading1"
-STYLE_HEADING2: Literal["style_heading2"] = "style_heading2"
-STYLE_BORDER_BOTTOM: Literal["style_border_bottom"] = "style_border_bottom"
-STYLE_GREY_CELL: Literal["style_grey_cell"] = "style_grey_cell"
-STYLE_PALE_YELLOW_CELL: Literal["style_pale_yellow_cell"] = "style_pale_yellow_cell"
-STYLE_ITALICS: Literal["style_italics"] = "style_italics"
+STYLE_HEADING1: Literal['style_heading1'] = "style_heading1"
+STYLE_HEADING2: Literal['style_heading2'] = "style_heading2"
+STYLE_BORDER_BOTTOM: Literal['style_border_bottom'] = "style_border_bottom"
+STYLE_GREY_CELL: Literal['style_grey_cell'] = "style_grey_cell"
+STYLE_PALE_YELLOW_CELL: Literal['style_pale_yellow_cell'] = "style_pale_yellow_cell"
+STYLE_ITALICS: Literal['style_italics'] = "style_italics"
 
 XL_CONST_EDGE_LEFT: int = 7
 XL_CONST_EDGE_BOTTOM: int = 9
@@ -41,8 +41,8 @@ RGB_PALE_YELLOW: int = 13565951
 
 
 TypeStyleXLObject = TypeVar("TypeVarStyle", 
-                      Literal["style_heading1", "style_heading2", "style_border_bottom", 
-                              "style_grey_cell", "style_pale_yellow_cell", "style_italics"])
+                      Literal['style_heading1', 'style_heading2', 'style_border_bottom', 
+                              'style_grey_cell', 'style_pale_yellow_cell', 'style_italics'])
 
 class SaveAsReturn(TypedDict):
     """Return type for save_as_active_wb method.

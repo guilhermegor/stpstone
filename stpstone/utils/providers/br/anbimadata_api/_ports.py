@@ -33,7 +33,7 @@ class IAnbimaApiClient(Protocol):
 	def generic_request(
 		self,
 		str_app: str,
-		str_method: Literal["GET", "POST"],
+		str_method: Literal['GET', 'POST'],
 		dict_payload: Optional[dict[str, Any]] = None,
 	) -> list[dict[str, Any]]:
 		"""Dispatch an authenticated HTTP request to ANBIMA's API.
@@ -42,9 +42,9 @@ class IAnbimaApiClient(Protocol):
 		----------
 		str_app : str
 			Relative endpoint path (appended to the host URL).
-		str_method : Literal["GET", "POST"]
+		str_method : Literal['GET', 'POST']
 			HTTP verb.
-		dict_payload : dict[str, Any] or None, optional
+		dict_payload : Optional[dict[str, Any]]
 			Query params (GET) or request body (POST).
 
 		Returns

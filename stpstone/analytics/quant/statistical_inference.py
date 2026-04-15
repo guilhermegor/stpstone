@@ -451,12 +451,12 @@ class MultipleRegressionHT(metaclass=TypeChecker):
 
         Parameters
         ----------
+        p : Optional[int]
+            Number of lags, by default n_predictors + 1.
         array_x : NDArray[np.float64]
             Independent variables array, shape (n_samples, n_predictors).
         array_y : NDArray[np.float64]
             Dependent variable array, shape (n_samples,).
-        p : Optional[int]
-            Number of lags, by default n_predictors + 1.
 
         Returns
         -------
@@ -646,14 +646,14 @@ class MultipleRegressionHT(metaclass=TypeChecker):
 
         Parameters
         ----------
+        n : int
+            Number of observations.
         sse_r : float
             Sum of squared errors for restricted model.
         sse_unr : float
             Sum of squared errors for unrestricted model.
         q : int
             Number of restrictions.
-        n : int
-            Number of observations.
         k : int
             Number of independent variables.
 

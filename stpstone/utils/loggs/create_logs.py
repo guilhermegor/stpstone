@@ -57,7 +57,7 @@ class CreateLog(metaclass=TypeChecker):
     def basic_conf(
         self,
         complete_path: str,
-        basic_level: Literal["info", "debug"] = "info"
+        basic_level: Literal['info', 'debug'] = "info"
     ) -> logging.Logger:
         """Configure basic logging settings.
 
@@ -109,7 +109,7 @@ class CreateLog(metaclass=TypeChecker):
         self,
         logger: Optional[logging.Logger],
         message: str,
-        log_level: Literal["info", "warning", "error", "critical"]
+        log_level: Literal['info', 'warning', 'error', 'critical']
     ) -> None:
         """Log a message with caller context information.
 

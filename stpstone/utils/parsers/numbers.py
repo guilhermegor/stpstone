@@ -250,7 +250,7 @@ class NumHandler(metaclass=TypeChecker):
         ----------
         number : Union[float, int]
             Number whose sign to use
-        base_number : Union[float, int], optional
+        base_number : Union[float, int]
             Number to apply sign to (default: 1)
 
         Returns

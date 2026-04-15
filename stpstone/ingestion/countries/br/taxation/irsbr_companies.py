@@ -140,7 +140,7 @@ class IRSBRCompanies(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 			Whether to verify the SSL certificate, by default False.
@@ -207,7 +207,7 @@ class IRSBRCompanies(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool
 			Whether to verify the SSL certificate, by default False.
@@ -264,7 +264,7 @@ class IRSBRCompanies(ABCIngestionOperations):
 
 		Parameters
 		----------
-		file : Optional[Union[StringIO, BytesIO]], optional
+		file : Optional[Union[StringIO, BytesIO]]
 			The bytes stream of the ZIP file, by default None.
 
 		Returns

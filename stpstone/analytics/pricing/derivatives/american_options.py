@@ -19,7 +19,7 @@ class InitialSettings(metaclass=TypeChecker):
         n: int,
         u: float,
         d: float,
-        opt_style: Literal["call", "put"] = "call"
+        opt_style: Literal['call', 'put'] = "call"
     ) -> tuple[float, float, float, float, int, float, float]:
         """Set parameters for the pricing model.
         
@@ -123,7 +123,7 @@ class PricingModels(InitialSettings):
         n: int, 
         u: float, 
         d: float, 
-        opt_style: Literal["call", "put"] = "call", 
+        opt_style: Literal['call', 'put'] = "call", 
         h_upper: float = None, 
         h_lower: float = None
     ) -> float:

@@ -375,10 +375,6 @@ class DirFilesManagement(metaclass=TypeChecker):
             True if successful, False otherwise
 
 
-        Raises
-        ------
-        pycurl.error
-            If pycurl fails
         """
         if filepath and self.object_exists(filepath):
             self.removing_file(filepath)
@@ -974,7 +970,7 @@ class DirFilesManagement(metaclass=TypeChecker):
         self,
         archive_path: Union[str, Path],
         extract_dir: Union[str, Path],
-        format: Literal["zip", "tar", "7z"] = "zip"
+        format: Literal['zip', 'tar', '7z'] = "zip"
     ) -> bool:
         """Extract archive file.
 

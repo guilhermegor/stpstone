@@ -139,18 +139,20 @@ class CacheManager(metaclass=TypeChecker):
         
         Raises
         ------
+        ValueError
+            If there is an error generating the cache key from callable.
         AttributeError
             If the instance does not have a 'cls_cache_manager' attribute
         """
         @type_checker
         def decorator(func: Callable) -> Callable:
             """Decorate a function to cache its output as a DataFrame.
-            
+
             Parameters
             ----------
             func : Callable
                 The function to decorate
-            
+
             Returns
             -------
             Callable
@@ -158,6 +160,8 @@ class CacheManager(metaclass=TypeChecker):
 
             Raises
             ------
+            ValueError
+                If there is an error generating the cache key from callable.
             AttributeError
                 If the instance does not have a 'cls_cache_manager' attribute
             """
@@ -169,7 +173,7 @@ class CacheManager(metaclass=TypeChecker):
                 **kwargs: Any # noqa ANN401: typing.Any is not allowed
             ) -> pd.DataFrame:
                 """Wrap the function to cache its output as a DataFrame.
-                
+
                 Parameters
                 ----------
                 self : Any
@@ -178,7 +182,7 @@ class CacheManager(metaclass=TypeChecker):
                     Variable-length argument list
                 **kwargs : Any
                     Arbitrary keyword arguments
-                
+
                 Returns
                 -------
                 pd.DataFrame
@@ -186,6 +190,8 @@ class CacheManager(metaclass=TypeChecker):
 
                 Raises
                 ------
+                ValueError
+                    If there is an error generating the cache key from callable.
                 AttributeError
                     If the instance does not have a 'cls_cache_manager' attribute
                 """
@@ -230,38 +236,42 @@ class CacheManager(metaclass=TypeChecker):
     @staticmethod
     def cache_value(key: str) -> Callable:
         """Decorate a function to cache its output as a generic value.
-        
+
         Parameters
         ----------
         key : str
             Key to use for caching
-        
+
         Returns
         -------
         Callable
             Decorated function
-        
+
         Raises
         ------
+        ValueError
+            If there is an error generating the cache key from callable.
         AttributeError
             If the instance does not have a 'cls_cache_manager' attribute
         """
         @type_checker
         def decorator(func: Callable[..., T]) -> Callable[..., T]:
             """Decorate a function to cache its output as a generic value.
-            
+
             Parameters
             ----------
-            func : Callable
+            func : Callable[..., T]
                 The function to decorate
-            
+
             Returns
             -------
-            Callable
+            Callable[..., T]
                 Decorated function
 
             Raises
             ------
+            ValueError
+                If there is an error generating the cache key from callable.
             AttributeError
                 If the instance does not have a 'cls_cache_manager' attribute
             """
@@ -273,7 +283,7 @@ class CacheManager(metaclass=TypeChecker):
                 **kwargs: Any # noqa ANN401: typing.Any is not allowed
             ) -> T:
                 """Wrap the function to cache its output as a generic value.
-                
+
                 Parameters
                 ----------
                 self : Any
@@ -282,7 +292,7 @@ class CacheManager(metaclass=TypeChecker):
                     Variable-length argument list
                 **kwargs : Any
                     Arbitrary keyword arguments
-                
+
                 Returns
                 -------
                 T
@@ -290,6 +300,8 @@ class CacheManager(metaclass=TypeChecker):
 
                 Raises
                 ------
+                ValueError
+                    If there is an error generating the cache key from callable.
                 AttributeError
                     If the instance does not have a 'cls_cache_manager' attribute
                 """

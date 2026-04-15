@@ -144,7 +144,7 @@ class JsonFiles(metaclass=TypeChecker):
         json_file : str
             JSON file to load
         errors : str
-            How to handle encoding errors (default: "ignore")
+            How to handle decode errors (default: "ignore")
         encoding : Optional[str]
             File encoding (default: None)
         decoding : Optional[str]

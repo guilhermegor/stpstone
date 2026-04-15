@@ -27,7 +27,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 		self,
 		str_client_id: str,
 		str_client_secret: str,
-		str_env: Literal["dev", "prd"] = "dev",
+		str_env: Literal['dev', 'prd'] = "dev",
 		int_chunk: int = 1000,
 	) -> None:
 		"""Initialize ANBIMA API client.
@@ -38,7 +38,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 			Client ID for API authentication.
 		str_client_secret : str
 			Client secret for API authentication.
-		str_env : Literal["dev", "prd"]
+		str_env : Literal['dev', 'prd']
 			Target environment, defaults to ``"dev"``.
 		int_chunk : int
 			Page size for paginated requests, defaults to 1000.
@@ -49,9 +49,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 			If ``str_client_id`` or ``str_client_secret`` is empty, or if the
 			authentication request fails.
 		NotImplementedError
-			If this class does not satisfy the ``IAnbimaApiClient`` port — i.e.,
-			if the required interface methods are missing or have incompatible
-			signatures.
+			If this class does not satisfy the ``IAnbimaApiClient`` port.
 		"""
 		if not str_client_id or not str_client_id.strip():
 			raise ValueError("str_client_id cannot be empty")
@@ -117,7 +115,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 	def generic_request(
 		self,
 		str_app: str,
-		str_method: Literal["GET", "POST"],
+		str_method: Literal['GET', 'POST'],
 		dict_payload: Optional[dict[str, Any]] = None,
 	) -> list[dict[str, Any]]:
 		"""Dispatch an authenticated request to ANBIMA's API.
@@ -126,9 +124,9 @@ class AnbimaDataGen(metaclass=TypeChecker):
 		----------
 		str_app : str
 			Relative endpoint path appended to the host URL.
-		str_method : Literal["GET", "POST"]
+		str_method : Literal['GET', 'POST']
 			HTTP verb.
-		dict_payload : dict[str, Any] or None, optional
+		dict_payload : Optional[dict[str, Any]]
 			Query params for GET or request body for POST.
 
 		Returns

@@ -94,8 +94,8 @@ class DealingPd(metaclass=TypeChecker):
         list_tup_df_sheet_name: list[tuple[pd.DataFrame, str]],
         bool_header: bool = True,
         bool_index: bool = False,
-        mode: Literal["w", "a"] = "w",
-        label_sensitivity: Literal["public", "internal", "confidential", "restricted"] = \
+        mode: Literal['w', 'a'] = "w",
+        label_sensitivity: Literal['public', 'internal', 'confidential', 'restricted'] = \
             "internal",
         bool_set_sensitivity_label: bool = False,
         engine: str = "openpyxl"

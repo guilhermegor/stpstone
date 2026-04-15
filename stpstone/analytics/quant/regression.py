@@ -105,8 +105,7 @@ class LinearRegressions(metaclass=TypeChecker):
 
         Returns
         -------
-        Union[NDArray[np.float64], tuple[NDArray[np.float64], NDArray[np.float64], int, \
-            NDArray[np.float64]]]
+        Union[NDArray[np.float64], tuple[NDArray[np.float64], NDArray[np.float64], int, NDArray[np.float64]]]
 
         Raises
         ------
@@ -197,7 +196,7 @@ class LinearRegressions(metaclass=TypeChecker):
         self,
         array_x: NDArray[np.float64],
         array_y: NDArray[np.float64],
-        method: Literal["implemented", "sklearn"] = "sklearn",
+        method: Literal['implemented', 'sklearn'] = "sklearn",
         n_epochs: int = 1000,
         t0: int = 5,
         t1: int = 50,
@@ -215,7 +214,9 @@ class LinearRegressions(metaclass=TypeChecker):
             Input feature array
         array_y : NDArray[np.float64]
             Target values
-        method : Literal['implemented', 'sklearn'], optional
+        m : int
+            Number of instances (default: 100)
+        method : Literal['implemented', 'sklearn']
             Implementation method (default: "sklearn")
         n_epochs : int
             Maximum iterations (default: 1000)
@@ -223,8 +224,6 @@ class LinearRegressions(metaclass=TypeChecker):
             Learning schedule hyperparameter (default: 5)
         t1 : int
             Learning schedule hyperparameter (default: 50)
-        m : int
-            Number of instances (default: 100)
         theta : Optional[np.ndarray]
             Initial theta vector (default: random initialization)
         tolerance : float
@@ -943,7 +942,7 @@ class NonLinearEquations(metaclass=TypeChecker):
         self,
         cost_func: callable,
         list_bounds: list[tuple[float, float]],
-        method: Literal["scipy", "mystic"] = "scipy",
+        method: Literal['scipy', 'mystic'] = "scipy",
         max_iter: int = 1000,
         max_iterations_wo_improvement: int = 100,
         int_verbose_monitor: int = 10,
@@ -961,7 +960,7 @@ class NonLinearEquations(metaclass=TypeChecker):
             Cost function to minimize
         list_bounds : list[tuple[float, float]]
             List of (min, max) pairs for each parameter
-        method : Literal['scipy', 'mystic'], optional
+        method : Literal['scipy', 'mystic']
             Implementation method (default: "scipy")
         max_iter : int
             Maximum iterations (default: 1000)

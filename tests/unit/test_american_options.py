@@ -93,19 +93,19 @@ class TestParameterValidation:
         error_msg: str
     ) -> None:
         """Test type validation for all parameters.
-        
+
         Parameters
         ----------
-        pricing_model : PricingModels
-            Instance of PricingModels
-        default_params : dict[str, Any]
-            Default parameters dictionary
         param : str
             Parameter name to test
         value : object
             Invalid value to test
         error_msg : str
             Expected error message
+        pricing_model : PricingModels
+            Instance of PricingModels
+        default_params : dict[str, Any]
+            Default parameters dictionary
         """
         params = default_params.copy()
         params[param] = value
@@ -131,19 +131,19 @@ class TestParameterValidation:
         error_msg: str
     ) -> None:
         """Test value validation for all parameters.
-        
+
         Parameters
         ----------
-        pricing_model : PricingModels
-            Instance of PricingModels
-        default_params : dict[str, Any]
-            Default parameters dictionary
         param : str
             Parameter name to test
         value : object
             Invalid value to test
         error_msg : str
             Expected error message
+        pricing_model : PricingModels
+            Instance of PricingModels
+        default_params : dict[str, Any]
+            Default parameters dictionary
         """
         params = default_params.copy()
         params[param] = value
@@ -187,23 +187,22 @@ class TestBinomialModel:
         expected: float
     ) -> None:
         """Test call option pricing at maturity (t=0).
-        
-        Verifies that:
-        - Call option value equals max(S-K, 0) at maturity
-        - Proper handling of ITM/OTM/ATM cases
+
+        Verifies call value equals max(S-K, 0) at maturity
+        and proper handling of ITM/OTM/ATM cases.
 
         Parameters
         ----------
-        pricing_model : PricingModels
-            Instance of PricingModels
-        default_params : dict[str, Any]
-            Default parameters dictionary
         s : float
             Current stock price
         k : float
             Strike price of the option
         expected : float
             Expected call option value
+        pricing_model : PricingModels
+            Instance of PricingModels
+        default_params : dict[str, Any]
+            Default parameters dictionary
         """
         params = default_params.copy()
         params.update({"t": 0.0, "s": s, "k": k})
@@ -223,23 +222,22 @@ class TestBinomialModel:
         expected: float
     ) -> None:
         """Test put option pricing at maturity (t=0).
-        
-        Verifies that:
-        - Put option value equals max(K-S, 0) at maturity
-        - Proper handling of ITM/OTM/ATM cases
+
+        Verifies put value equals max(K-S, 0) at maturity
+        and proper handling of ITM/OTM/ATM cases.
 
         Parameters
         ----------
-        pricing_model : PricingModels
-            Instance of PricingModels
-        default_params : dict[str, Any]
-            Default parameters dictionary
         s : float
             Current stock price
         k : float
             Strike price of the option
         expected : float
             Expected put option value
+        pricing_model : PricingModels
+            Instance of PricingModels
+        default_params : dict[str, Any]
+            Default parameters dictionary
         """
         params = default_params.copy()
         params.update({"t": 0.0, "s": s, "k": k, "opt_style": "put"})
@@ -313,19 +311,18 @@ class TestBinomialModel:
         n: int
     ) -> None:
         """Test binomial model convergence with increasing steps.
-        
-        Verifies that:
-        - Price stabilizes as number of steps increases
-        - No numerical instability with large step counts
+
+        Verifies price stabilizes as steps increase
+        and no numerical instability with large step counts.
 
         Parameters
         ----------
+        n : int
+            Number of time steps
         pricing_model : PricingModels
             Instance of PricingModels
         default_params : dict[str, Any]
             Default parameters dictionary
-        n : int
-            Number of time steps
         """
         params = default_params.copy()
         params["n"] = n

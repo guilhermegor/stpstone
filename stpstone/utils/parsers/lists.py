@@ -797,14 +797,19 @@ class ListHandler(metaclass=TypeChecker):
             Insert every nth position (e.g., 5 means every 5th position)
         regex_pattern : str
             Regex pattern to check against. If value matches, skip insertion
-        start_index : int, default=0
+        start_index : int
             Starting index for nth position calculation
             
         Returns
         -------
         list[Any]
             Modified list with values inserted
-            
+
+        Raises
+        ------
+        ValueError
+            If nth_position is not greater than 0.
+
         Examples
         --------
         >>> handler = ListHandler()
@@ -859,9 +864,9 @@ class ListHandler(metaclass=TypeChecker):
             Insert every nth position
         regex_pattern : str
             Regex pattern to check against
-        start_index : int, default=0
+        start_index : int
             Starting index for calculation
-        logger : Optional[Logger], default=None
+        logger : Optional[Logger]
             Logger for detailed operation info
             
         Returns
@@ -873,6 +878,11 @@ class ListHandler(metaclass=TypeChecker):
             - 'positions_checked': List of positions that were checked
             - 'positions_inserted': List of positions where insertions occurred
             - 'positions_skipped': List of positions skipped due to regex match
+
+        Raises
+        ------
+        ValueError
+            If nth_position is not greater than 0.
         """
         if not list_:
             return {

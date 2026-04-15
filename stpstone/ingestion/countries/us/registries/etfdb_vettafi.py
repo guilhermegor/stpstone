@@ -104,7 +104,7 @@ class EtfDBVettaFi(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0).
         bool_verify : bool
             Whether to verify the SSL certificate, by default False.
@@ -180,7 +180,7 @@ class EtfDBVettaFi(ABCIngestionOperations):
         ----------
         slug_url : str
             Fully-qualified URL for the ETF holdings page to scrape.
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0).
         bool_verify : bool
             Verify the SSL certificate, by default False.

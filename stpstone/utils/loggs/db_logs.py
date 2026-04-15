@@ -151,7 +151,7 @@ class DBLogs(metaclass=TypeChecker):
     def log_data_insert(
         self, 
         df_: pd.DataFrame, 
-        action_type: Literal["insert", "update", "delete"], 
+        action_type: Literal['insert', 'update', 'delete'], 
         dt_action: date
     ) -> pd.DataFrame:
         """Insert logging information for data actions into the DataFrame.

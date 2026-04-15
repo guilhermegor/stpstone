@@ -24,15 +24,15 @@ pd.set_option("future.no_silent_downcasting", True)
 
 TypeFillnaStrategy = TypeVar(
     "TypeFillnaStrategy",
-    bound=Optional[dict[str, Literal["bfill", "ffill"]]]
+    bound=Optional[dict[str, Literal['bfill', 'ffill']]]
 )
 TypeErrorActionAsTypeDataFrame = TypeVar(
     "TypeErrorActionAsTypeDataFrame",
-    bound=Literal["raise", "ignore", "coerce"]
+    bound=Literal['raise', 'ignore', 'coerce']
 )
 TypeKeepDuplicatedDataFrame = TypeVar(
     "TypeKeepDuplicatedDataFrame",
-    bound=Literal["first", "last", False]
+    bound=Literal['first', 'last', False]
 )
 
 
@@ -57,7 +57,7 @@ class DFStandardization(metaclass=TypeChecker):
 
         Parameters
         ----------
-        dict_dtypes : Optional[dict[str, Any]], optional
+        dict_dtypes : Optional[dict[str, Any]]
             Dictionary of column names and data types, by default {}.
         cols_from_case : Optional[TypeCaseFrom]
             Case conversion for column names, by default None.

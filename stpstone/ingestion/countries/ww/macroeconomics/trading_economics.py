@@ -80,7 +80,7 @@ class _TradingEconBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             Unused; kept for interface consistency, by default (12.0, 21.0).
         bool_verify : bool
             Unused; kept for interface consistency, by default False.
@@ -124,7 +124,7 @@ class _TradingEconBase(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             Unused; kept for interface consistency, by default (12.0, 21.0).
         bool_verify : bool
             Unused; kept for interface consistency, by default False.

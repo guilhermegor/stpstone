@@ -84,7 +84,7 @@ class AnbimaIPCACore(ABCIngestionOperations):
         ----------
         dict_dtypes : dict[str, Union[str, int, float]]
             The dictionary of data types.
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0).
         bool_verify : bool
             Whether to verify the SSL certificate, by default True.
@@ -140,7 +140,7 @@ class AnbimaIPCACore(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0).
         bool_verify : bool
             Verify the SSL certificate, by default True.

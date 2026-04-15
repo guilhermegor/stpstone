@@ -577,8 +577,7 @@ class MarkowitzEff(metaclass=TypeChecker):
 
         Returns
         -------
-        tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], \
-            NDArray[np.float64], list[str]]
+        tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], NDArray[np.float64], list[str]]
             Returns, standard deviation, sharpes ratio, weights, returns and asset identifiers.
         
         Raises

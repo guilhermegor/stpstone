@@ -61,7 +61,7 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout value, by default (12.0, 21.0)
         
         Returns
@@ -139,7 +139,7 @@ class ABCIngestion(metaclass=ABCTypeCheckerMeta):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0)
         bool_verify : bool
             Whether to verify the SSL certificate, by default True

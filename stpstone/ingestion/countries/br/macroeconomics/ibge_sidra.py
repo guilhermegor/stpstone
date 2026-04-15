@@ -126,7 +126,7 @@ class IBGESIDRA(ABCIngestionOperations):
 
         Parameters
         ----------
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0)
         bool_verify : bool
             Whether to verify the SSL certificate, by default True
@@ -205,9 +205,9 @@ class IBGESIDRA(ABCIngestionOperations):
         ----------
         url : str
             The URL to request
-        dict_headers : Optional[dict[str, str]], optional
+        dict_headers : Optional[dict[str, str]]
             The headers, by default None
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             The timeout, by default (12.0, 21.0)
         bool_verify : bool
             Verify the SSL certificate, by default True

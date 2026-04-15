@@ -640,7 +640,7 @@ class TestVaR:
     def test_historic_var_stress_test(
         self,
         var_instance: VaR,
-        shock_type: Literal["absolute", "relative"],
+        shock_type: Literal['absolute', 'relative'],
         shock: float
     ) -> None:
         """Test stressed historical VaR calculation.
@@ -652,12 +652,12 @@ class TestVaR:
 
         Parameters
         ----------
+        shock : float
+            Shock magnitude
         var_instance : VaR
             VaR instance from fixture
         shock_type : Literal['absolute', 'relative']
             Type of shock to apply
-        shock : float
-            Shock magnitude
 
         Returns
         -------
@@ -909,7 +909,7 @@ class TestQuoteVar:
     def test_different_std_methods(
         self,
         sample_returns: NDArray[np.float64],
-        method: Literal["std", "ewma_std"]
+        method: Literal['std', 'ewma_std']
     ) -> None:
         """Test initialization with different std methods.
 

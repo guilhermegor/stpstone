@@ -9,7 +9,18 @@ import pytest
 
 
 def heavy_computation(n: int) -> int:
-    """Simulates a CPU-bound operation."""
+    """Simulate a CPU-bound operation by summing squared integers.
+
+    Parameters
+    ----------
+    n : int
+        Upper bound (exclusive) for the range of integers to square and sum.
+
+    Returns
+    -------
+    int
+        Sum of squares of integers from 0 to n-1.
+    """
     total = 0
     for i in range(n):
         total += i * i

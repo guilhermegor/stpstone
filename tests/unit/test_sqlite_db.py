@@ -356,11 +356,6 @@ def test_execute_operational_error(
     Returns
     -------
     None
-
-    Raises
-    ------
-    sqlite3.OperationalError
-        If query is "SELECT 1"
     """
     mock_cursor = Mock()
     def execute_side_effect(query: str) -> None:
@@ -374,11 +369,6 @@ def test_execute_operational_error(
         Returns
         -------
         None
-
-        Raises
-        ------
-        sqlite3.OperationalError
-            If query is "SELECT 1"
         """
         if query == "SELECT 1":
             return None

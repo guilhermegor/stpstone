@@ -125,7 +125,7 @@ class DimensionalityReduction(metaclass=TypeChecker):
         self,
         array_x: NDArray[np.float64],
         array_y: NDArray[np.float64],
-        str_estimator: Literal["linear_regression", "rf_classifier"] = "linear_regression",
+        str_estimator: Literal['linear_regression', 'rf_classifier'] = "linear_regression",
         int_cv: int = 5,
         int_verbose: int = 0,
     ) -> ReturnDimensionalityReductionStandard:
@@ -189,7 +189,7 @@ class DimensionalityReduction(metaclass=TypeChecker):
         self,
         array_x: NDArray[np.float64],
         array_y: NDArray[np.float64],
-        str_estimator: Literal["linear_regression", "rf_classifier"] = "linear_regression",
+        str_estimator: Literal['linear_regression', 'rf_classifier'] = "linear_regression",
         int_cv: int = 5,
         int_verbose: int = 0,
     ) -> ReturnDimensionalityReductionStandard:
@@ -253,7 +253,7 @@ class DimensionalityReduction(metaclass=TypeChecker):
         self,
         array_x: NDArray[np.float64],
         array_y: NDArray[np.float64],
-        str_estimator: Literal["linear_regression", "rf_classifier"] = "linear_regression",
+        str_estimator: Literal['linear_regression', 'rf_classifier'] = "linear_regression",
         max_features: Optional[int] = None,
         int_cv: int = 5,
     ) -> ReturnDimensionalityReductionStandard:

@@ -29,7 +29,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         Yield to maturity (must be between 0 and 1)
     float_fv : float
         Face value of the bond
-    str_when : Literal["end", "begin"]
+    str_when : Literal['end', 'begin']
         When payments are made (default: "end")
 
     Raises
@@ -44,7 +44,7 @@ class BondDuration(FinancialMath, metaclass=TypeChecker):
         array_cfs: NDArray[np.float64],
         float_ytm: float,
         float_fv: float,
-        str_when: Literal["end", "begin"] = "end"
+        str_when: Literal['end', 'begin'] = "end"
     ) -> None:
         """Initialize BondDuration object.
         

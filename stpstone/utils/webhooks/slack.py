@@ -86,7 +86,7 @@ class WebhookSlack(metaclass=TypeChecker):
     def send_message(
         self,
         str_msg: str,
-        str_method: Literal["POST", "GET", "PUT", "DELETE"] = "POST",
+        str_method: Literal['POST', 'GET', 'PUT', 'DELETE'] = "POST",
         timeout: Union[tuple[float, float], float, int] = 10
     ) -> str:
         """Send message to Slack channel via webhook.

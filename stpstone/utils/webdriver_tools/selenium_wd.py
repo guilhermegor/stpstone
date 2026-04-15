@@ -300,7 +300,7 @@ class SeleniumWD(metaclass=TypeChecker):
         self,
         selector: Union[WebElement, WebDriver],
         str_element_interest: str,
-        selector_type: Literal["XPATH", "ID", "NAME", "TAG_NAME", "CLASS_NAME"] = "XPATH"
+        selector_type: Literal['XPATH', 'ID', 'NAME', 'TAG_NAME', 'CLASS_NAME'] = "XPATH"
     ) -> WebElement:
         """Find single web element using specified selector.
 
@@ -332,7 +332,7 @@ class SeleniumWD(metaclass=TypeChecker):
         self,
         selector: Union[WebElement, WebDriver],
         str_element_interest: str,
-        selector_type: Literal["XPATH", "ID", "NAME", "TAG_NAME", "CLASS_NAME"] = "XPATH"
+        selector_type: Literal['XPATH', 'ID', 'NAME', 'TAG_NAME', 'CLASS_NAME'] = "XPATH"
     ) -> list[WebElement]:
         """Find multiple web elements using specified selector.
 

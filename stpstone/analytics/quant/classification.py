@@ -226,7 +226,7 @@ class Classification(metaclass=TypeChecker):
         array_y: NDArray[np.float64], 
         kernel: str = "rbf",
         float_regularization_parameter: float = 1,
-        multiclass_classification_strategy: Literal["best", "ovr", "ovo"] = "best",
+        multiclass_classification_strategy: Literal['best', 'ovr', 'ovo'] = "best",
         gamma: str = "auto", 
         int_random_state_seed: int = 42
     ) -> ResultClassification:
@@ -242,7 +242,7 @@ class Classification(metaclass=TypeChecker):
             Kernel type, default "rbf"
         float_regularization_parameter : float
             Regularization parameter, default 1
-        multiclass_classification_strategy : Literal['best', 'ovr', 'ovo'], optional
+        multiclass_classification_strategy : Literal['best', 'ovr', 'ovo']
             Strategy for multiclass ("best", "ovr", "ovo"), default "best"
         gamma : str
             Kernel coefficient, default "auto"

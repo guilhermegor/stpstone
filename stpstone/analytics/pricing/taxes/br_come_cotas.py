@@ -66,7 +66,7 @@ class ComeCotasCalculator(metaclass=TypeChecker):
     
     def __init__(
         self, 
-        str_fund_type: Literal["FIA", "FIRF", "FIM", "FIDC", "FIP", "FI-IE", "FII"]
+        str_fund_type: Literal['FIA', 'FIRF', 'FIM', 'FIDC', 'FIP', 'FI-IE', 'FII']
     ) -> None:
         """Initialize the calculator with a specific fund type.
         

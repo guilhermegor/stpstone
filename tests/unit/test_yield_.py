@@ -432,7 +432,7 @@ class TestBondDuration:
 
         Verifies
         --------
-        - TypeError is raised when when is not Literal["end", "begin"]
+        - TypeError is raised when when is not Literal['end', 'begin']
         """
         with pytest.raises(TypeError):
             BondDuration(sample_cash_flows, valid_ytm, valid_fv, invalid_when)

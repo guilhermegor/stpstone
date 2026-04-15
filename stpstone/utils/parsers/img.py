@@ -19,7 +19,7 @@ class ImgHandler(metaclass=TypeChecker):
 
     def img_to_html(
         self, 
-        complete_path: str, format: Literal["jpeg", "png", "gif"] = "jpeg"
+        complete_path: str, format: Literal['jpeg', 'png', 'gif'] = "jpeg"
     ) -> str:
         """Convert an image file to an HTML image tag with base64 encoding.
 

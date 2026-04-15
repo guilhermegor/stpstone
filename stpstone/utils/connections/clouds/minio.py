@@ -128,7 +128,7 @@ class MinioClient(metaclass=TypeChecker):
             Name for the stored object
         file_path : str
             Path to local file to upload
-        dict_metadata : Optional[dict[str, Any]], optional
+        dict_metadata : Optional[dict[str, Any]]
             Metadata for the object (default: None)
         content_type : Optional[str]
             Content type of the object (default: None)
@@ -185,7 +185,7 @@ class MinioClient(metaclass=TypeChecker):
             Stream containing data to upload
         int_lenght : int
             Length of the data in bytes
-        dict_metadata : Optional[dict[str, Any]], optional
+        dict_metadata : Optional[dict[str, Any]]
             Metadata for the object (default: None)
         content_type : Optional[str]
             Content type of the object (default: None)
@@ -235,7 +235,7 @@ class MinioClient(metaclass=TypeChecker):
             Name for the stored object
         data : bytes
             Bytes data to upload
-        dict_metadata : Optional[dict[str, Any]], optional
+        dict_metadata : Optional[dict[str, Any]]
             Metadata for the object (default: None)
         content_type : Optional[str]
             Content type of the object (default: None)

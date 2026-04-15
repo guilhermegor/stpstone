@@ -300,9 +300,9 @@ def test_validate_type_literal() -> None:
     -------
     None
     """
-    validate_type("read", Literal["read", "write"], "mode")
+    validate_type("read", Literal['read', 'write'], "mode")
     with pytest.raises(TypeError, match="mode must be one of: 'read', 'write'"):
-        validate_type("invalid", Literal["read", "write"], "mode")
+        validate_type("invalid", Literal['read', 'write'], "mode")
 
 
 def test_validate_type_union() -> None:

@@ -217,7 +217,7 @@ class JobsCLI(metaclass=TypeChecker):
         ----------
         filename : str
             Output filename for run ID (default: "run_id.json")
-        notebook_params : Optional[dict[str, Any]], optional
+        notebook_params : Optional[dict[str, Any]]
             Notebook parameters for job execution
 
         Returns
@@ -225,10 +225,6 @@ class JobsCLI(metaclass=TypeChecker):
         ReturnJobRun
             Dictionary containing run_id
 
-        Raises
-        ------
-        json.JSONDecodeError
-            If output file contains invalid JSON
         """
         self._validate_filename(filename)
         complete_path = os.path.join(self.path, filename)
@@ -269,10 +265,6 @@ class JobsCLI(metaclass=TypeChecker):
         ReturnGetJobMetadata
             Dictionary containing job metadata
 
-        Raises
-        ------
-        json.JSONDecodeError
-            If output file contains invalid JSON
         """
         self._validate_filename(filename)
         complete_path = os.path.join(self.path, filename)
@@ -332,8 +324,6 @@ class JobsCLI(metaclass=TypeChecker):
         ------
         ValueError
             If no run_id available and outside_run_id not provided
-        json.JSONDecodeError
-            If output file contains invalid JSON
         """
         self._validate_filename(filename)
         run_id_to_query = outside_run_id if outside_run_id is not None else self.run_id
@@ -378,8 +368,6 @@ class JobsCLI(metaclass=TypeChecker):
         ------
         ValueError
             If run_id_to_query not available
-        json.JSONDecodeError
-            If output file contains invalid JSON
         """
         self._validate_filename(filename)
         run_id_to_query = outside_run_id if outside_run_id is not None else self.run_id
@@ -511,8 +499,8 @@ class DbfsCLI(metaclass=TypeChecker):
     def list_files(
         self,
         path: str,
-        absolute: Literal["--absolute", ""] = "--absolute",
-        l_flag: Literal["-l", ""] = "-l"
+        absolute: Literal['--absolute', ''] = "--absolute",
+        l_flag: Literal['-l', ''] = "-l"
     ) -> Union[dict[str, dict[str, str]], list[str]]:
         """List files in DBFS directory.
 
@@ -520,9 +508,9 @@ class DbfsCLI(metaclass=TypeChecker):
         ----------
         path : str
             DBFS directory path
-        absolute : Literal['--absolute', ''], optional
+        absolute : Literal['--absolute', '']
             Whether to show absolute paths (default: "--absolute")
-        l_flag : Literal['-l', ''], optional
+        l_flag : Literal['-l', '']
             Whether to show detailed listing (default: "-l")
 
         Returns
@@ -576,7 +564,7 @@ class DbfsCLI(metaclass=TypeChecker):
 
     def copy_and_run(
         self, local_path: str, dbfs_path: str, job_id: int, int_seconds_wait: int = 10
-    ) -> Literal["Success running job", "Error running job"]:
+    ) -> Literal['Success running job', 'Error running job']:
         """Copy CSV files to DBFS and run job to upload data.
 
         Parameters

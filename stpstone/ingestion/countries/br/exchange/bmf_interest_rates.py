@@ -88,7 +88,7 @@ class BMFInterestRates(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout, by default (12.0, 21.0)
 		bool_verify : bool
 		    Whether to verify the SSL certificate, by default True
@@ -162,7 +162,7 @@ class BMFInterestRates(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 		    The timeout, by default (12.0, 21.0)
 		bool_verify : bool
 		    Verify the SSL certificate, by default True
@@ -203,6 +203,18 @@ class BMFInterestRates(ABCIngestionOperations):
 		return list_ser
 
 	def _pair_headers_with_data(self, list_data: list[float]) -> list[dict[str, float]]:
+		"""Pair extracted table data with their corresponding column headers.
+
+		Parameters
+		----------
+		list_data : list[float]
+			Flat list of numeric values scraped from the interest rate table.
+
+		Returns
+		-------
+		list[dict[str, float]]
+			List of dicts mapping column names to their float values.
+		"""
 		list_th: list[str] = [
 			"DIAS_CORRIDOS",
 			"DI_PRE_252",

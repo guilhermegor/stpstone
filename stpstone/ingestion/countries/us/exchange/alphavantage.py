@@ -115,7 +115,7 @@ class AlphaVantageUS(ABCIngestionOperations):
         ----------
         bool_verify : bool
             Whether to verify the SSL certificate, by default False.
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             Request timeout passed to ``requests.get``, by default (12.0, 21.0).
         bool_insert_or_ignore : bool
             Whether to use INSERT OR IGNORE semantics when persisting,
@@ -186,7 +186,7 @@ class AlphaVantageUS(ABCIngestionOperations):
         ----------
         url : str
             Fully-qualified AlphaVantage query URL (from ``_build_url``).
-        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+        timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
             Request timeout, by default (12.0, 21.0).
         bool_verify : bool
             Whether to verify the SSL certificate, by default False.

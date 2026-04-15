@@ -20,8 +20,8 @@ from stpstone.transformations.validation.metaclass_type_checker import ABCTypeCh
 
 TypeDateFormatInput = TypeVar(
     "TypeDateFormatInput", 
-    bound=Literal["DD/MM/YYYY", "D/M/YYYY", "YYYY-MM-DD", "YYMMDD", "DDMMYY", "DDMMYYYY", 
-                  "DMMYYY", "YYYYMMDD", "MM-DD-YYYY", "DD/MM/YY", "DD.MM.YY"]
+    bound=Literal['DD/MM/YYYY', 'D/M/YYYY', 'YYYY-MM-DD', 'YYMMDD', 'DDMMYY', 'DDMMYYYY', 
+                  'DMMYYY', 'YYYYMMDD', 'MM-DD-YYYY', 'DD/MM/YY', 'DD.MM.YY']
 )
 
 TypeDatetimeDate = TypeVar("TypeDatetimeDate", bound=Union[datetime, date])

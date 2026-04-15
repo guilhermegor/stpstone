@@ -36,7 +36,7 @@ class HandlingLXML(metaclass=TypeChecker):
         if not (url.startswith("http://") or url.startswith("https://")):
             raise ValueError("URL must start with http:// or https://")
 
-    def fetch(self, url: str, method: Literal["get", "post"] = "get") -> _Element:
+    def fetch(self, url: str, method: Literal['get', 'post'] = "get") -> _Element:
         """Fetch and parse HTML document for XPath selection.
 
         Parameters

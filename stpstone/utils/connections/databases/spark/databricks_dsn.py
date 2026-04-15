@@ -138,10 +138,6 @@ class Databricks(metaclass=TypeChecker):
         pyo.Connection
             PyODBC connection object
 
-        Raises
-        ------
-        pyo.Error
-            If ODBC connection fails
         """
         self._validate_dsn_conn(dsn_conn)
         self._validate_int_timeout(int_timeout)
@@ -172,8 +168,6 @@ class Databricks(metaclass=TypeChecker):
         ------
         ValueError
             If connection is invalid or query execution fails
-        pyo.Error
-            If SQL execution error occurs
         """
         if not connection:
             raise ValueError("Connection object cannot be None")

@@ -98,7 +98,7 @@ class FinancialReturns(metaclass=TypeChecker):
     def calc_returns_from_prices(
         self,
         array_prices: Union[list[float], NDArray[np.float64]],
-        type_return: Literal["ln_return", "stnd_return"] = "ln_return"
+        type_return: Literal['ln_return', 'stnd_return'] = "ln_return"
     ) -> NDArray[np.float64]:
         """Calculate a series of returns from a list of prices.
 
@@ -146,7 +146,7 @@ class FinancialReturns(metaclass=TypeChecker):
         col_lag_close: str = "lag_close",
         col_first_occurrence_ticker: str = "first_occ_ticker",
         col_stock_returns: str = "returns",
-        type_return: Literal["ln_return", "stnd_return"] = "ln_return"
+        type_return: Literal['ln_return', 'stnd_return'] = "ln_return"
     ) -> pd.DataFrame:
         """Calculate returns from spot prices in a pandas DataFrame.
 
@@ -261,7 +261,7 @@ class FinancialReturns(metaclass=TypeChecker):
         short_price: Union[float, int],
         leverage: Union[float, int],
         operational_costs: Union[float, int] = 0,
-        type_return: Literal["ln_return", "stnd_return"] = "ln_return"
+        type_return: Literal['ln_return', 'stnd_return'] = "ln_return"
     ) -> ResultPricingStrategy:
         """Calculate performance metrics for a trading strategy.
 

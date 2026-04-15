@@ -64,7 +64,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 		self,
 		str_client_id: str,
 		str_client_secret: str,
-		str_env: Literal["dev", "prd"] = "dev",
+		str_env: Literal['dev', 'prd'] = "dev",
 		int_chunk: int = 1000,
 	) -> None:
 		"""Initialize fund client and cache utility instances.
@@ -75,7 +75,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 			Client ID for API authentication.
 		str_client_secret : str
 			Client secret for API authentication.
-		str_env : Literal["dev", "prd"]
+		str_env : Literal['dev', 'prd']
 			Target environment, defaults to ``"dev"``.
 		int_chunk : int
 			Page size for paginated requests, defaults to 1000.
@@ -95,7 +95,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 
 		Parameters
 		----------
-		int_pg : int or None
+		int_pg : Optional[int]
 			Page number.
 
 		Returns
