@@ -60,7 +60,7 @@ class DFStandardization(metaclass=TypeChecker):
 			Case conversion for column names, by default None.
 		cols_to_case : Optional[TypeCaseTo]
 			Case conversion for column names, by default None.
-		list_cols_drop_dupl : list[str]
+		list_cols_drop_dupl : Optional[list[str]]
 			List of columns to drop duplicates, by default None.
 		dict_fillna_strt : TypeFillnaStrategy
 			Dictionary of column names and fillna values, by default None.

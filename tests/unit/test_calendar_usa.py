@@ -450,7 +450,7 @@ def test_federal_get_holidays_raw_success(mocker: MockerFixture) -> None:
 	@contextmanager
 	def _fake_launch() -> Generator[MagicMock, None, None]:
 		"""Context manager to mock PlaywrightScraper.launch method.
-		
+
 		Returns
 		-------
 		Generator[MagicMock, None, None]

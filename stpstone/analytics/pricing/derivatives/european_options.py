@@ -1,7 +1,7 @@
 """European options pricing models."""
 
 from math import pi
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, TypeVar, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,6 +10,18 @@ from scipy.optimize import fsolve, minimize
 from stpstone.analytics.quant.prob_distributions import NormalDistribution
 from stpstone.analytics.quant.regression import NonLinearEquations
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+
+
+TypeMethodIV = TypeVar(
+	"TypeMethodIV",
+	Literal[
+		"newton_raphson",
+		"bisection",
+		"fsolve",
+		"scipy_optimize_minimize",
+		"differential_evolution",
+	],
+)
 
 
 class ResultVommaPositiveOutsideInterval(TypedDict):
@@ -2982,13 +2994,7 @@ class EuropeanOptions(IterativeMethods):
 		b: float,
 		cp0: float,
 		opt_type: Literal["call", "put"],
-		method: Literal[
-			"newton_raphson",
-			"bisection",
-			"fsolve",
-			"scipy_optimize_minimize",
-			"differential_evolution",
-		] = "fsolve",
+		method: TypeMethodIV = "fsolve",
 		tolerance: float = 1e-3,
 		epsilon: float = 1,
 		max_iter: int = 1000,
@@ -3017,13 +3023,14 @@ class EuropeanOptions(IterativeMethods):
 			Current price of the option.
 		opt_type : Literal['call', 'put']
 			Option type, either 'call' or 'put'.
-		method : Literal['newton_raphson', 'bisection', 'fsolve', 'scipy_optimize_minimize', 'differential_evolution'] # noqa: E501
+		method : TypeMethodIV
 			Method to use for calculating the implied volatility, by default 'fsolve'.
 			- 'newton_raphson': Newton-Raphson method.
 			- 'bisection': Bisection method.
 			- 'fsolve': fsolve method.
 			- 'scipy_optimize_minimize': scipy.optimize.minimize method.
 			- 'differential_evolution': differential_evolution method.
+			- by default 'fsolve'.
 		tolerance : float
 			Tolerance for the error, by default 1e-3.
 		epsilon : float
