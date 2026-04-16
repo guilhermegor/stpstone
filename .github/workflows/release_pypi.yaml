@@ -254,7 +254,7 @@ jobs:
       - name: Publish to PyPI
         run: |
           poetry config pypi-token.pypi "${{ secrets.PYPI_TOKEN }}"
-          poetry publish --build || {
+          poetry publish || {
             echo "Poetry publish failed, falling back to twine"
             poetry run twine upload \
               --verbose \
