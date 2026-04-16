@@ -7,7 +7,7 @@ bit shifting properties.
 Classes
 -------
 BinaryMultiplier
-    A class that performs binary multiplication on two numbers using bit shifting.
+	A class that performs binary multiplication on two numbers using bit shifting.
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -23,16 +23,16 @@ class BinaryMultiplier(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : int
-	    The multiplicand (must be 0-255)
+		The multiplicand (must be 0-255)
 	b : int
-	    The multiplier (must be 0-255)
+		The multiplier (must be 0-255)
 
 	Raises
 	------
 	ValueError
-	    If inputs are negative or exceed 8-bit range
+		If inputs are negative or exceed 8-bit range
 	TypeError
-	    If inputs are not integers
+		If inputs are not integers
 
 	Examples
 	--------
@@ -48,16 +48,16 @@ class BinaryMultiplier(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    The multiplicand (must be 0-255)
+			The multiplicand (must be 0-255)
 		b : int
-		    The multiplier (must be 0-255)
+			The multiplier (must be 0-255)
 
 		Raises
 		------
 		ValueError
-		    If inputs are negative or exceed 8-bit range
+			If inputs are negative or exceed 8-bit range
 		TypeError
-		    If inputs are not integers
+			If inputs are not integers
 		"""
 		if not isinstance(a, int) or not isinstance(b, int):
 			raise TypeError("Both inputs must be integers")
@@ -74,7 +74,7 @@ class BinaryMultiplier(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The product of the two numbers (may exceed 8 bits)
+			The product of the two numbers (may exceed 8 bits)
 
 		Examples
 		--------

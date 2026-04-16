@@ -8,7 +8,7 @@ This module provides functionality to convert numbers between different bases:
 Classes
 -------
 BinaryConverter
-    A class that provides methods for converting between different number bases.
+	A class that provides methods for converting between different number bases.
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -23,12 +23,12 @@ class BinaryConverter(metaclass=TypeChecker):
 		Parameters
 		----------
 		binary : str
-		    A string of binary digits (0s and 1s). Must be a valid binary string.
+			A string of binary digits (0s and 1s). Must be a valid binary string.
 
 		Returns
 		-------
 		int
-		    The decimal integer equivalent of the binary string.
+			The decimal integer equivalent of the binary string.
 
 		Examples
 		--------
@@ -44,12 +44,12 @@ class BinaryConverter(metaclass=TypeChecker):
 		Parameters
 		----------
 		decimal : int
-		    A non-negative integer to be converted to binary.
+			A non-negative integer to be converted to binary.
 
 		Returns
 		-------
 		str
-		    The binary string equivalent of the decimal integer, without the '0b' prefix.
+			The binary string equivalent of the decimal integer, without the '0b' prefix.
 
 		Examples
 		--------
@@ -65,13 +65,13 @@ class BinaryConverter(metaclass=TypeChecker):
 		Parameters
 		----------
 		decimal : int
-		    A non-negative integer to be converted to hexadecimal.
+			A non-negative integer to be converted to hexadecimal.
 
 		Returns
 		-------
 		str
-		    The hexadecimal string equivalent of the decimal integer, in uppercase and
-		    without the '0x' prefix.
+			The hexadecimal string equivalent of the decimal integer, in uppercase and
+			without the '0x' prefix.
 
 		Examples
 		--------
@@ -87,12 +87,12 @@ class BinaryConverter(metaclass=TypeChecker):
 		Parameters
 		----------
 		hexadecimal : str
-		    A string of hexadecimal digits (0-9, A-F). Case insensitive.
+			A string of hexadecimal digits (0-9, A-F). Case insensitive.
 
 		Returns
 		-------
 		int
-		    The decimal integer equivalent of the hexadecimal string.
+			The decimal integer equivalent of the hexadecimal string.
 
 		Examples
 		--------

@@ -20,9 +20,9 @@ class HalfAdder(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : int
-	    First bit input (0 or 1)
+		First bit input (0 or 1)
 	b : int
-	    Second bit input (0 or 1)
+		Second bit input (0 or 1)
 
 	Examples
 	--------
@@ -39,14 +39,14 @@ class HalfAdder(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First bit input (0 or 1)
+			First bit input (0 or 1)
 		b : int
-		    Second bit input (0 or 1)
+			Second bit input (0 or 1)
 
 		Raises
 		------
 		ValueError
-		    If inputs are not 0 or 1
+			If inputs are not 0 or 1
 		"""
 		if a not in (0, 1) or b not in (0, 1):
 			raise ValueError("Inputs must be 0 or 1")
@@ -60,7 +60,7 @@ class HalfAdder(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The sum output (0 or 1)
+			The sum output (0 or 1)
 
 		Examples
 		--------
@@ -77,7 +77,7 @@ class HalfAdder(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The carry output (0 or 1)
+			The carry output (0 or 1)
 
 		Examples
 		--------
@@ -98,16 +98,16 @@ class FullAdder(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First bit input (0 or 1)
+			First bit input (0 or 1)
 		b : int
-		    Second bit input (0 or 1)
+			Second bit input (0 or 1)
 		carry_in : int
-		    Carry-in input (0 or 1)
+			Carry-in input (0 or 1)
 
 		Raises
 		------
 		ValueError
-		    If inputs are not 0 or 1
+			If inputs are not 0 or 1
 		"""
 		if a not in (0, 1) or b not in (0, 1) or carry_in not in (0, 1):
 			raise ValueError("All inputs must be 0 or 1")
@@ -122,7 +122,7 @@ class FullAdder(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The sum output (0 or 1)
+			The sum output (0 or 1)
 
 		Examples
 		--------
@@ -141,7 +141,7 @@ class FullAdder(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The carry-out (0 or 1)
+			The carry-out (0 or 1)
 
 		Examples
 		--------
@@ -164,14 +164,14 @@ class EightBitFullAdder(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First 8-bit number
+			First 8-bit number
 		b : int
-		    Second 8-bit number
+			Second 8-bit number
 
 		Raises
 		------
 		ValueError
-		    If inputs are not 8-bit numbers (0-255)
+			If inputs are not 8-bit numbers (0-255)
 		"""
 		if a < 0 or a > 255 or b < 0 or b > 255:
 			raise ValueError("Inputs must be 8-bit numbers (0-255)")
@@ -185,7 +185,7 @@ class EightBitFullAdder(metaclass=TypeChecker):
 		Returns
 		-------
 		tuple[int, int]
-		    A tuple containing the sum and final carry-out (0 or 1)
+			A tuple containing the sum and final carry-out (0 or 1)
 
 		Examples
 		--------
@@ -218,14 +218,14 @@ class ConfigurableHalfAdder(metaclass=AdvancedTypeChecker):
 		Parameters
 		----------
 		a : int
-		    First bit input (0 or 1)
+			First bit input (0 or 1)
 		b : int
-		    Second bit input (0 or 1)
+			Second bit input (0 or 1)
 
 		Raises
 		------
 		ValueError
-		    If inputs are not 0 or 1
+			If inputs are not 0 or 1
 		"""
 		if a not in (0, 1) or b not in (0, 1):
 			raise ValueError("Inputs must be 0 or 1")
@@ -238,7 +238,7 @@ class ConfigurableHalfAdder(metaclass=AdvancedTypeChecker):
 		Returns
 		-------
 		int
-		    The sum output (0 or 1)
+			The sum output (0 or 1)
 		"""
 		return self.a ^ self.b
 
@@ -248,7 +248,7 @@ class ConfigurableHalfAdder(metaclass=AdvancedTypeChecker):
 		Returns
 		-------
 		int
-		    The carry output (0 or 1)
+			The carry output (0 or 1)
 		"""
 		return self.a & self.b
 
@@ -258,12 +258,12 @@ class ConfigurableHalfAdder(metaclass=AdvancedTypeChecker):
 		Parameters
 		----------
 		x : int
-		    Input value
+			Input value
 
 		Returns
 		-------
 		int
-		    The input value
+			The input value
 		"""
 		return x
 
@@ -284,14 +284,14 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
 		Parameters
 		----------
 		a : int
-		    First bit input (0 or 1)
+			First bit input (0 or 1)
 		b : int
-		    Second bit input (0 or 1)
+			Second bit input (0 or 1)
 
 		Raises
 		------
 		ValueError
-		    If inputs are not 0 or 1
+			If inputs are not 0 or 1
 		"""
 		# store raw values first for testing purposes
 		self.a = a
@@ -308,14 +308,14 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
 		Parameters
 		----------
 		x : int
-		    First number
+			First number
 		y : int
-		    Second number
+			Second number
 
 		Returns
 		-------
 		int
-		    The sum of x and y
+			The sum of x and y
 		"""
 		# simple addition - let the type checker handle type validation
 		# don't do internal type conversion to allow type checker to work
@@ -327,7 +327,7 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
 		Parameters
 		----------
 		data : str
-		    Data to print
+			Data to print
 		"""
 		print(f"Debug: {data}")
 
@@ -337,11 +337,11 @@ class FlexibleAdder(metaclass=ConfigurableTypeChecker):
 		Parameters
 		----------
 		value : str
-		    String to convert to uppercase
+			String to convert to uppercase
 
 		Returns
 		-------
 		str
-		    Uppercase version of the input string
+			Uppercase version of the input string
 		"""
 		return value.upper()

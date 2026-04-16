@@ -7,7 +7,7 @@ while maintaining fractions in their simplest form.
 Classes
 -------
 Fraction
-    A class representing fractions with numerator and denominator.
+	A class representing fractions with numerator and denominator.
 """
 
 import math
@@ -25,14 +25,14 @@ class Fraction(metaclass=TypeChecker):
 	Parameters
 	----------
 	numerator : int
-	    The numerator of the fraction
+		The numerator of the fraction
 	denominator : int
-	    The denominator of the fraction (must not be zero)
+		The denominator of the fraction (must not be zero)
 
 	Raises
 	------
 	ValueError
-	    If denominator is zero
+		If denominator is zero
 
 	Examples
 	--------
@@ -51,14 +51,14 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		numerator : int
-		    The numerator of the fraction
+			The numerator of the fraction
 		denominator : int
-		    The denominator of the fraction (must not be zero)
+			The denominator of the fraction (must not be zero)
 
 		Raises
 		------
 		ValueError
-		    If denominator is zero
+			If denominator is zero
 
 		Examples
 		--------
@@ -82,7 +82,7 @@ class Fraction(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The numerator of the fraction
+			The numerator of the fraction
 
 		Examples
 		--------
@@ -97,7 +97,7 @@ class Fraction(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The denominator of the fraction
+			The denominator of the fraction
 
 		Examples
 		--------
@@ -112,12 +112,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to add to this fraction
+			The fraction to add to this fraction
 
 		Returns
 		-------
 		object
-		    The sum of the two fractions in reduced form
+			The sum of the two fractions in reduced form
 
 		Examples
 		--------
@@ -137,12 +137,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : int
-		    The integer to add to this fraction
+			The integer to add to this fraction
 
 		Returns
 		-------
 		object
-		    The sum as a new Fraction
+			The sum as a new Fraction
 
 		Examples
 		--------
@@ -162,12 +162,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to add to this fraction
+			The fraction to add to this fraction
 
 		Returns
 		-------
 		object
-		    This fraction after addition (in reduced form)
+			This fraction after addition (in reduced form)
 
 		Examples
 		--------
@@ -194,12 +194,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to subtract from this fraction
+			The fraction to subtract from this fraction
 
 		Returns
 		-------
 		object
-		    The difference as a new Fraction
+			The difference as a new Fraction
 
 		Examples
 		--------
@@ -219,12 +219,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to multiply by
+			The fraction to multiply by
 
 		Returns
 		-------
 		object
-		    The product as a new Fraction
+			The product as a new Fraction
 
 		Examples
 		--------
@@ -241,17 +241,17 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to divide by (must not be zero)
+			The fraction to divide by (must not be zero)
 
 		Returns
 		-------
 		object
-		    The quotient as a new Fraction
+			The quotient as a new Fraction
 
 		Raises
 		------
 		ValueError
-		    If attempting to divide by zero
+			If attempting to divide by zero
 
 		Examples
 		--------
@@ -270,12 +270,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to compare with
+			The fraction to compare with
 
 		Returns
 		-------
 		bool
-		    True if this fraction is greater, False otherwise
+			True if this fraction is greater, False otherwise
 
 		Examples
 		--------
@@ -293,12 +293,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to compare with
+			The fraction to compare with
 
 		Returns
 		-------
 		bool
-		    True if this fraction is greater or equal, False otherwise
+			True if this fraction is greater or equal, False otherwise
 
 		Examples
 		--------
@@ -316,12 +316,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to compare with
+			The fraction to compare with
 
 		Returns
 		-------
 		bool
-		    True if this fraction is less, False otherwise
+			True if this fraction is less, False otherwise
 
 		Examples
 		--------
@@ -339,12 +339,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to compare with
+			The fraction to compare with
 
 		Returns
 		-------
 		bool
-		    True if this fraction is less or equal, False otherwise
+			True if this fraction is less or equal, False otherwise
 
 		Examples
 		--------
@@ -362,12 +362,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to compare with
+			The fraction to compare with
 
 		Returns
 		-------
 		bool
-		    True if fractions are not equal, False otherwise
+			True if fractions are not equal, False otherwise
 
 		Examples
 		--------
@@ -382,12 +382,12 @@ class Fraction(metaclass=TypeChecker):
 		Parameters
 		----------
 		fraction_new_instance : object
-		    The fraction to compare with
+			The fraction to compare with
 
 		Returns
 		-------
 		bool
-		    True if fractions are equal, False otherwise
+			True if fractions are equal, False otherwise
 
 		Examples
 		--------
@@ -405,7 +405,7 @@ class Fraction(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    String representation suitable for eval()
+			String representation suitable for eval()
 
 		Examples
 		--------
@@ -420,7 +420,7 @@ class Fraction(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    String in 'numerator/denominator' format
+			String in 'numerator/denominator' format
 
 		Examples
 		--------

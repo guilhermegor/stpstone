@@ -16,9 +16,9 @@ class BinaryComparator(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    Binary input 1
+			Binary input 1
 		b : int
-		    Binary input 2
+			Binary input 2
 		"""
 		self.a = a
 		self.b = b
@@ -35,7 +35,7 @@ class BinaryComparator(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    A string indicating the comparison result
+			A string indicating the comparison result
 		"""
 		if self.a < self.b:
 			return "A is less than B"

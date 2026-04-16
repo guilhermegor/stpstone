@@ -7,7 +7,7 @@ operations for efficiency.
 Classes
 -------
 BinaryDivider
-    A class that performs binary division on two numbers, returning quotient and remainder.
+	A class that performs binary division on two numbers, returning quotient and remainder.
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -23,16 +23,16 @@ class BinaryDivider(metaclass=TypeChecker):
 	Parameters
 	----------
 	dividend : int
-	    The number to be divided (must be non-negative)
+		The number to be divided (must be non-negative)
 	divisor : int
-	    The number to divide by (must be positive)
+		The number to divide by (must be positive)
 
 	Raises
 	------
 	ValueError
-	    If dividend is negative or divisor is not positive
+		If dividend is negative or divisor is not positive
 	TypeError
-	    If inputs are not integers
+		If inputs are not integers
 	"""
 
 	def __init__(self, dividend: int, divisor: int) -> None:
@@ -41,16 +41,16 @@ class BinaryDivider(metaclass=TypeChecker):
 		Parameters
 		----------
 		dividend : int
-		    The number to be divided (must be non-negative)
+			The number to be divided (must be non-negative)
 		divisor : int
-		    The number to divide by (must be positive)
+			The number to divide by (must be positive)
 
 		Raises
 		------
 		ValueError
-		    If dividend is negative or divisor is not positive
+			If dividend is negative or divisor is not positive
 		TypeError
-		    If inputs are not integers
+			If inputs are not integers
 		"""
 		if not isinstance(dividend, int) or not isinstance(divisor, int):
 			raise TypeError("Both dividend and divisor must be integers")
@@ -68,12 +68,12 @@ class BinaryDivider(metaclass=TypeChecker):
 		Returns
 		-------
 		tuple[int, int]
-		    A tuple where the first element is the quotient and the second is the remainder
+			A tuple where the first element is the quotient and the second is the remainder
 
 		Raises
 		------
 		ValueError
-		    If divisor is zero
+			If divisor is zero
 		"""
 		if self.divisor == 0:
 			raise ValueError("Divisor cannot be zero")
@@ -81,12 +81,10 @@ class BinaryDivider(metaclass=TypeChecker):
 		quotient = 0
 		remainder = self.dividend
 
-		# find the highest power of 2 where divisor * 2^i <= dividend
 		i = 0
 		while (self.divisor << (i + 1)) <= self.dividend:
 			i += 1
 
-		# perform binary division
 		for power in range(i, -1, -1):
 			if remainder >= (self.divisor << power):
 				remainder -= self.divisor << power

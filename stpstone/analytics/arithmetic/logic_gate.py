@@ -7,11 +7,11 @@ and can be used in boolean expressions.
 Classes
 -------
 NANDGate
-    Implements the NAND (NOT AND) logic operation
+	Implements the NAND (NOT AND) logic operation
 NORGate
-    Implements the NOR (NOT OR) logic operation
+	Implements the NOR (NOT OR) logic operation
 XORGate
-    Implements the XOR (Exclusive OR) logic operation
+	Implements the XOR (Exclusive OR) logic operation
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -27,9 +27,9 @@ class NANDGate(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : bool
-	    First input to the gate
+		First input to the gate
 	b : bool
-	    Second input to the gate
+		Second input to the gate
 
 	Examples
 	--------
@@ -46,9 +46,9 @@ class NANDGate(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : bool
-		    First input to the gate
+			First input to the gate
 		b : bool
-		    Second input to the gate
+			Second input to the gate
 		"""
 		self.a = a
 		self.b = b
@@ -63,7 +63,7 @@ class NANDGate(metaclass=TypeChecker):
 		Returns
 		-------
 		bool
-		    The output of the NAND operation
+			The output of the NAND operation
 
 		Examples
 		--------
@@ -80,7 +80,7 @@ class NANDGate(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    String showing inputs and current output state
+			String showing inputs and current output state
 
 		Examples
 		--------
@@ -99,9 +99,9 @@ class NORGate(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : bool
-	    First input to the gate
+		First input to the gate
 	b : bool
-	    Second input to the gate
+		Second input to the gate
 
 	Examples
 	--------
@@ -118,9 +118,9 @@ class NORGate(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : bool
-		    First input to the gate
+			First input to the gate
 		b : bool
-		    Second input to the gate
+			Second input to the gate
 		"""
 		self.a = a
 		self.b = b
@@ -135,7 +135,7 @@ class NORGate(metaclass=TypeChecker):
 		Returns
 		-------
 		bool
-		    The output of the NOR operation
+			The output of the NOR operation
 
 		Examples
 		--------
@@ -152,7 +152,7 @@ class NORGate(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    String showing inputs and current output state
+			String showing inputs and current output state
 
 		Examples
 		--------
@@ -171,9 +171,9 @@ class XORGate(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : bool
-	    First input to the gate
+		First input to the gate
 	b : bool
-	    Second input to the gate
+		Second input to the gate
 
 	Examples
 	--------
@@ -190,9 +190,9 @@ class XORGate(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : bool
-		    First input to the gate
+			First input to the gate
 		b : bool
-		    Second input to the gate
+			Second input to the gate
 		"""
 		self.a = a
 		self.b = b
@@ -207,7 +207,7 @@ class XORGate(metaclass=TypeChecker):
 		Returns
 		-------
 		bool
-		    The output of the XOR operation
+			The output of the XOR operation
 
 		Examples
 		--------
@@ -224,7 +224,7 @@ class XORGate(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    String showing inputs and current output state
+			String showing inputs and current output state
 
 		Examples
 		--------

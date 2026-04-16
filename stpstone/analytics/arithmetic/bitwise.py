@@ -6,7 +6,7 @@ on integers. The operations include AND, OR, XOR, and NOT.
 Classes
 -------
 Bitwise
-    A utility class providing bitwise operation methods.
+	A utility class providing bitwise operation methods.
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -37,14 +37,14 @@ class Bitwise(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First integer operand
+			First integer operand
 		b : int
-		    Second integer operand
+			Second integer operand
 
 		Returns
 		-------
 		int
-		    Result of the bitwise AND operation
+			Result of the bitwise AND operation
 
 		Examples
 		--------
@@ -64,14 +64,14 @@ class Bitwise(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First integer operand
+			First integer operand
 		b : int
-		    Second integer operand
+			Second integer operand
 
 		Returns
 		-------
 		int
-		    Result of the bitwise OR operation
+			Result of the bitwise OR operation
 
 		Examples
 		--------
@@ -91,14 +91,14 @@ class Bitwise(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First integer operand
+			First integer operand
 		b : int
-		    Second integer operand
+			Second integer operand
 
 		Returns
 		-------
 		int
-		    Result of the bitwise XOR operation
+			Result of the bitwise XOR operation
 
 		Examples
 		--------
@@ -119,12 +119,12 @@ class Bitwise(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    Integer operand to invert
+			Integer operand to invert
 
 		Returns
 		-------
 		int
-		    Result of the bitwise NOT operation
+			Result of the bitwise NOT operation
 
 		Examples
 		--------

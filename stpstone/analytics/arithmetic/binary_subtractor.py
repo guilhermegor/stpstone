@@ -13,9 +13,9 @@ class BinarySubtractor(metaclass=TypeChecker):
 		Parameters
 		----------
 		minuend : str
-		    The minuend (the number to be subtracted from)
+			The minuend (the number to be subtracted from)
 		subtrahend : str
-		    The subtrahend (the number to be subtracted)
+			The subtrahend (the number to be subtracted)
 		"""
 		self._validate_inputs(minuend, subtrahend)
 		max_length = max(len(minuend), len(subtrahend))
@@ -29,18 +29,18 @@ class BinarySubtractor(metaclass=TypeChecker):
 		Parameters
 		----------
 		minuend : str
-		    The minuend (the number to be subtracted from)
+			The minuend (the number to be subtracted from)
 		subtrahend : str
-		    The subtrahend (the number to be subtracted)
+			The subtrahend (the number to be subtracted)
 
 		Raises
 		------
 		TypeError
-		    If minuend or subtrahend is not a string
+			If minuend or subtrahend is not a string
 		ValueError
-		    If minuend or subtrahend is empty
+			If minuend or subtrahend is empty
 		ValueError
-		    If minuend or subtrahend is not a binary string
+			If minuend or subtrahend is not a binary string
 		"""
 		if not isinstance(minuend, str) or not isinstance(subtrahend, str):
 			raise TypeError("Inputs must be strings")
@@ -57,7 +57,7 @@ class BinarySubtractor(metaclass=TypeChecker):
 		Returns
 		-------
 		str
-		    The binary result of the subtraction.
+			The binary result of the subtraction.
 		"""
 		result = []
 		borrow = 0

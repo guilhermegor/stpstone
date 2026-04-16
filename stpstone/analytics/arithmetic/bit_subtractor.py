@@ -7,9 +7,9 @@ This module provides implementations of binary subtractors:
 Classes
 -------
 HalfSubtractor
-    Subtracts two single bits producing difference and borrow
+	Subtracts two single bits producing difference and borrow
 FullSubtractor
-    Subtracts two bits with borrow-in producing difference and borrow-out
+	Subtracts two bits with borrow-in producing difference and borrow-out
 """
 
 from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
@@ -24,9 +24,9 @@ class HalfSubtractor(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : int
-	    First binary input (0 or 1)
+		First binary input (0 or 1)
 	b : int
-	    Second binary input (0 or 1)
+		Second binary input (0 or 1)
 
 	Examples
 	--------
@@ -43,9 +43,9 @@ class HalfSubtractor(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First binary input (0 or 1)
+			First binary input (0 or 1)
 		b : int
-		    Second binary input (0 or 1)
+			Second binary input (0 or 1)
 		"""
 		self._validate_binary_input(a, "a")
 		self._validate_binary_input(b, "b")
@@ -58,14 +58,14 @@ class HalfSubtractor(metaclass=TypeChecker):
 		Parameters
 		----------
 		value : int
-		    The input value to validate
+			The input value to validate
 		param_name : str
-		    The name of the parameter being validated
+			The name of the parameter being validated
 
 		Raises
 		------
 		ValueError
-		    If input is not 0 or 1
+			If input is not 0 or 1
 		"""
 		if value not in (0, 1):
 			raise ValueError(f"{param_name} must be 0 or 1, got {value}")
@@ -79,7 +79,7 @@ class HalfSubtractor(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The difference output (0 or 1)
+			The difference output (0 or 1)
 
 		Examples
 		--------
@@ -99,7 +99,7 @@ class HalfSubtractor(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The borrow output (0 or 1)
+			The borrow output (0 or 1)
 
 		Examples
 		--------
@@ -120,11 +120,11 @@ class FullSubtractor(metaclass=TypeChecker):
 	Parameters
 	----------
 	a : int
-	    First binary input (0 or 1)
+		First binary input (0 or 1)
 	b : int
-	    Second binary input (0 or 1)
+		Second binary input (0 or 1)
 	borrow_in : int
-	    Borrow input from previous stage (0 or 1)
+		Borrow input from previous stage (0 or 1)
 
 	Examples
 	--------
@@ -141,11 +141,11 @@ class FullSubtractor(metaclass=TypeChecker):
 		Parameters
 		----------
 		a : int
-		    First binary input (0 or 1)
+			First binary input (0 or 1)
 		b : int
-		    Second binary input (0 or 1)
+			Second binary input (0 or 1)
 		borrow_in : int
-		    Borrow input from previous stage (0 or 1)
+			Borrow input from previous stage (0 or 1)
 		"""
 		self._validate_binary_input(a, "a")
 		self._validate_binary_input(b, "b")
@@ -160,14 +160,14 @@ class FullSubtractor(metaclass=TypeChecker):
 		Parameters
 		----------
 		value : int
-		    The input value to validate
+			The input value to validate
 		param_name : str
-		    The name of the parameter being validated
+			The name of the parameter being validated
 
 		Raises
 		------
 		ValueError
-		    If input is not 0 or 1
+			If input is not 0 or 1
 		"""
 		if value not in (0, 1):
 			raise ValueError(f"{param_name} must be 0 or 1, got {value}")
@@ -181,7 +181,7 @@ class FullSubtractor(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The difference output (0 or 1)
+			The difference output (0 or 1)
 
 		Examples
 		--------
@@ -201,7 +201,7 @@ class FullSubtractor(metaclass=TypeChecker):
 		Returns
 		-------
 		int
-		    The borrow-out bit (0 or 1)
+			The borrow-out bit (0 or 1)
 
 		Examples
 		--------
