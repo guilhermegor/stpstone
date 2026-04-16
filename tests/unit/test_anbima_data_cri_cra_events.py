@@ -197,10 +197,7 @@ class TestAnbimaDataCRICRAEvents:
 		assert "DATA_EVENTO" in result.columns
 		assert "STATUS" in result.columns
 
-	@patch(
-		"stpstone.ingestion.countries.br.registries"
-		".anbima_data_cri_cra_events.sync_playwright"
-	)
+	@patch("stpstone.ingestion.countries.br.registries.anbima_data_cri_cra_events.sync_playwright")
 	def test_get_response_no_assets(self, mock_playwright: Mock, mock_logger: Logger) -> None:
 		"""Test get_response with no asset codes.
 

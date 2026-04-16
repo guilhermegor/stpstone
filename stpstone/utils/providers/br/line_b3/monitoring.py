@@ -43,8 +43,7 @@ class Monitoring(metaclass=TypeChecker):
 
 		if not isinstance(self, IMonitoring):
 			raise NotImplementedError(
-				f"{type(self).__name__} does not satisfy IMonitoring — "
-				"implement alerts()."
+				f"{type(self).__name__} does not satisfy IMonitoring — implement alerts()."
 			)
 
 	def alerts(self) -> Union[list[dict[str, Any]], int]:

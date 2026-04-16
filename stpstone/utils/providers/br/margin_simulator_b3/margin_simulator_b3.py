@@ -103,12 +103,8 @@ class MarginSimulatorB3(metaclass=TypeChecker):
 		self.timeout = timeout
 		self.bool_verify = bool_verify
 		self._cookies = dict_cookies or self._DEFAULT_COOKIES
-		self.url_reference_data = (
-			"https://simulador.b3.com.br/api/cors-app/web/V1.0/ReferenceData"
-		)
-		self.url_risk_calc = (
-			"https://simulador.b3.com.br/api/cors-app/web/V1.0/RiskCalculation"
-		)
+		self.url_reference_data = "https://simulador.b3.com.br/api/cors-app/web/V1.0/ReferenceData"
+		self.url_risk_calc = "https://simulador.b3.com.br/api/cors-app/web/V1.0/RiskCalculation"
 		self.token = self._get_reference_data()["ReferenceData"]["referenceDataToken"]
 		self.cls_json_files = JsonFiles()
 

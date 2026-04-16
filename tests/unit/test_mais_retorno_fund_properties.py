@@ -192,8 +192,7 @@ def test_parse_raw_file_returns_playwright_scraper(
 	None
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.br.registries"
-		".mais_retorno_fund_properties.PlaywrightScraper"
+		"stpstone.ingestion.countries.br.registries.mais_retorno_fund_properties.PlaywrightScraper"
 	)
 	mock_inst = mock_cls.return_value
 	result = fund_properties_instance.parse_raw_file()

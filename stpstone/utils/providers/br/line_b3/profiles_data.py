@@ -57,9 +57,7 @@ class ProfilesData(metaclass=TypeChecker):
 		"""
 		return self._conn.app_request(method="GET", app="/api/v1.0/riskProfile")
 
-	def entities_associated_profile(
-		self, id_profile: str
-	) -> Union[list[dict[str, Any]], int]:
+	def entities_associated_profile(self, id_profile: str) -> Union[list[dict[str, Any]], int]:
 		"""Retrieve entities associated with a risk profile.
 
 		Parameters
@@ -97,9 +95,7 @@ class ProfilesData(metaclass=TypeChecker):
 		Union[list[dict[str, Any]], int]
 			Limits data or status code.
 		"""
-		return self._conn.app_request(
-			method="GET", app=f"/api/v1.0/riskProfile/{prof_id}/lmt"
-		)
+		return self._conn.app_request(method="GET", app=f"/api/v1.0/riskProfile/{prof_id}/lmt")
 
 	def profile_market_limits_get(self, prof_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Retrieve market limits for a risk profile.

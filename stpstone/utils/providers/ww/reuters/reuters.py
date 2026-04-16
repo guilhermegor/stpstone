@@ -87,7 +87,7 @@ class Reuters(metaclass=TypeChecker):
 		self,
 		app: str,
 		payload: dict = None,
-		method: Literal['GET', 'POST'] = "GET",
+		method: Literal["GET", "POST"] = "GET",
 		endpoint: str = "https://apiservice.reuters.com/api/",
 		timeout: Union[tuple[float, float], float, int] = (200, 200),
 	) -> str:
@@ -141,7 +141,7 @@ class Reuters(metaclass=TypeChecker):
 		api_key: str,
 		deviceid: str,
 		app: str = "service/modtoken",
-		method: Literal['GET', 'POST'] = "GET",
+		method: Literal["GET", "POST"] = "GET",
 	) -> ReturnToken:
 		"""Get authentication token from Reuters API.
 

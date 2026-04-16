@@ -1,8 +1,8 @@
 """CVM Monthly Profile (Perfil Mensal) serialization and format conversion."""
 
-import tempfile
 from decimal import Decimal
 from pathlib import Path
+import tempfile
 
 from stpstone.filings.br._models_monthly_report_cvm import (
 	ClientCount,
@@ -13,8 +13,8 @@ from stpstone.filings.br._models_monthly_report_cvm import (
 	PatrimonyDistribution,
 	PerfilMensalDocument,
 	PerfilMensalRow,
-	VarPercValCota,
 	PrimitiveRiskFactor,
+	VarPercValCota,
 )
 from stpstone.filings.br.monthly_report_cvm import CvmMonthlyReport
 

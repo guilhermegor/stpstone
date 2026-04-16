@@ -1,6 +1,8 @@
 """Investing.com ticker ID lookup for worldwide exchange-traded instruments."""
 
-from stpstone.ingestion.countries.ww.exchange.markets.investingcom_ticker_id import InvestingComTickerId
+from stpstone.ingestion.countries.ww.exchange.markets.investingcom_ticker_id import (
+	InvestingComTickerId,
+)
 
 
 cls_ = InvestingComTickerId(

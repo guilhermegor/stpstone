@@ -173,15 +173,19 @@ class GPT(metaclass=TypeChecker):
 				raise ValueError("Tuple content cannot be empty")
 
 			if content_type == "text":
-				list_content.append({
-					"type": "text",
-					"text": str(content),
-				})
+				list_content.append(
+					{
+						"type": "text",
+						"text": str(content),
+					}
+				)
 			elif content_type == "image_url":
-				list_content.append({
-					"type": "image_url",
-					"image_url": {"url": str(content)},
-				})
+				list_content.append(
+					{
+						"type": "image_url",
+						"image_url": {"url": str(content)},
+					}
+				)
 			else:
 				raise ValueError(f"Invalid tuple type: {content_type}")
 
@@ -189,10 +193,12 @@ class GPT(metaclass=TypeChecker):
 
 		list_prompt = []
 		if self.str_context is not None:
-			list_prompt.append({
-				"role": "system",
-				"content": self.str_context,
-			})
+			list_prompt.append(
+				{
+					"role": "system",
+					"content": self.str_context,
+				}
+			)
 		list_prompt.append(dict_content)
 
 		return self.client.chat.completions.create(

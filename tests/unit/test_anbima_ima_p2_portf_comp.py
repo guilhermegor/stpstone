@@ -201,7 +201,9 @@ class TestAnbimaIMAP2TheoreticalPortfolio:
 			date_ref=sample_date, logger=mock_logger, cls_db=mock_db_session
 		)
 		assert instance.date_ref == sample_date
-		assert instance.url == "https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt"
+		assert (
+			instance.url == "https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt"
+		)
 		assert isinstance(instance.cls_dir_files_management, DirFilesManagement)
 		assert isinstance(instance.cls_dates_current, DatesCurrent)
 		assert isinstance(instance.cls_create_log, CreateLog)
@@ -297,11 +299,23 @@ class TestAnbimaIMAP2TheoreticalPortfolio:
 		df_ = theoretical_portfolio_instance.transform_data(sample_data)
 		assert isinstance(df_, pd.DataFrame)
 		assert list(df_.columns) == [
-			"DATA_REFERENCIA", "INDICE", "TITULOS", "DATA_VENCIMENTO",
-			"CODIGO_SELIC", "CODIGO_ISIN", "TX_INDICATIVA", "PU",
-			"PU_JUROS", "QTD_1000_TITULOS", "QTD_TEORICA_1000_TITULOS",
-			"CARTEIRA_MERCADO_MTM_BRL_1000", "PESO_PCT", "PRAZO_DU",
-			"DURATION_DU", "NUMERO_OPERACOES", "QTD_NEGOCIADA_1000_TITULOS",
+			"DATA_REFERENCIA",
+			"INDICE",
+			"TITULOS",
+			"DATA_VENCIMENTO",
+			"CODIGO_SELIC",
+			"CODIGO_ISIN",
+			"TX_INDICATIVA",
+			"PU",
+			"PU_JUROS",
+			"QTD_1000_TITULOS",
+			"QTD_TEORICA_1000_TITULOS",
+			"CARTEIRA_MERCADO_MTM_BRL_1000",
+			"PESO_PCT",
+			"PRAZO_DU",
+			"DURATION_DU",
+			"NUMERO_OPERACOES",
+			"QTD_NEGOCIADA_1000_TITULOS",
 			"PMR",
 		]
 		assert df_["TX_INDICATIVA"].iloc[0] == pytest.approx(5.0)

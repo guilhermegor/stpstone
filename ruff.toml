@@ -47,6 +47,12 @@ exclude = [
     ".pyenv",
     "node_modules",
     "*.log",
+
+    # example/utility scripts — not production code, not linted
+    "examples",
+    "run_dist.py",
+    "pkg_version.py",
+    "check_import.py",
 ]
 
 [format]
@@ -97,4 +103,5 @@ allow-star-arg-any = false  # do not allow `*args` and `**kwargs` to be untyped
 "tests/**/*.py" = [
     "S101",   # use of assert
     "ERA001", # section-header comments look like commented-out code to eradicate
+    "S106",   # fake tokens in test fixtures are not real passwords
 ]

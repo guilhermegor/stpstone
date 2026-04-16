@@ -25,20 +25,16 @@ class MaisRetornoConsistency(ABCIngestionOperations):
 
 	_BASE_URL = "https://maisretorno.com/{}/{}"
 	_XPATH_SPAN_POSITIVE_MONTHS = (
-		"(//section[@id=\"consistency-table\"]"
-		"//span[@data-testid=\"negative-number\"])[1]"
+		'(//section[@id="consistency-table"]//span[@data-testid="negative-number"])[1]'
 	)
 	_XPATH_SPAN_NEGATIVE_MONTHS = (
-		"(//section[@id=\"consistency-table\"]"
-		"//span[@data-testid=\"negative-number\"])[3]"
+		'(//section[@id="consistency-table"]//span[@data-testid="negative-number"])[3]'
 	)
 	_XPATH_SPAN_GREATEST_RETURN = (
-		"(//section[@id=\"consistency-table\"]"
-		"//span[@data-testid=\"negative-number\"])[5]"
+		'(//section[@id="consistency-table"]//span[@data-testid="negative-number"])[5]'
 	)
 	_XPATH_SPAN_LEAST_RETURN = (
-		"(//section[@id=\"consistency-table\"]"
-		"//span[@data-testid=\"negative-number\"])[6]"
+		'(//section[@id="consistency-table"]//span[@data-testid="negative-number"])[6]'
 	)
 
 	def __init__(
@@ -85,8 +81,9 @@ class MaisRetornoConsistency(ABCIngestionOperations):
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
 		self.cls_num_handler = NumHandler()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or ["aasl-fia"]
 		self.instruments_class = instruments_class or "fundo"
 		self.bool_headless = bool_headless
@@ -201,14 +198,10 @@ class MaisRetornoConsistency(ABCIngestionOperations):
 				str_instrument = self.cls_dir_files_management.get_filename_parts_from_url(
 					scraper_playwright.get_current_url()
 				)[0].upper()
-				list_ser.extend(
-					self._extract_consistency(scraper_playwright, str_instrument)
-				)
+				list_ser.extend(self._extract_consistency(scraper_playwright, str_instrument))
 		return pd.DataFrame(list_ser)
 
-	def _extract_consistency(
-		self, scraper: PlaywrightScraper, str_instrument: str
-	) -> list:
+	def _extract_consistency(self, scraper: PlaywrightScraper, str_instrument: str) -> list:
 		"""Extract consistency metrics from the currently loaded instrument page.
 
 		Parameters
@@ -257,9 +250,7 @@ class MaisRetornoConsistency(ABCIngestionOperations):
 				)
 				if raw_greatest is not None
 				else None,
-				"LEAST_RETURN": self.cls_num_handler.transform_to_float(
-					raw_least, int_precision=6
-				)
+				"LEAST_RETURN": self.cls_num_handler.transform_to_float(raw_least, int_precision=6)
 				if raw_least is not None
 				else None,
 			}

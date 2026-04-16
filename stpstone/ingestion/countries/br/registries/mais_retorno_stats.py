@@ -27,13 +27,12 @@ class MaisRetornoStats(ABCIngestionOperations):
 
 	_BASE_URL = "https://maisretorno.com/{}/{}"
 	_XPATH_LIST_STAS = (
-		"//th[@class=\"MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium"
-		" css-qixyx5\"]"
+		'//th[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-qixyx5"]'
 	)
 	_XPATH_LIST_TD = (
-		"//section[@id=\"profitability-ratio\"]"
-		"//td[@class=\"MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium"
-		" css-qixyx5\"]/span[@data-testid=\"negative-number\"]"
+		'//section[@id="profitability-ratio"]'
+		'//td[@class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium'
+		' css-qixyx5"]/span[@data-testid="negative-number"]'
 	)
 	_LIST_COLS = ["YTD", "MTD", "LTM", "L_24M", "L_36M", "L_48M", "L_60M", "SINCE_INCEPTION"]
 
@@ -82,8 +81,9 @@ class MaisRetornoStats(ABCIngestionOperations):
 		self.cls_dates_br = DatesBRAnbima()
 		self.cls_num_handler = NumHandler()
 		self.cls_dict_handler = HandlingDicts()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or ["aasl-fia"]
 		self.instruments_class = instruments_class or "fundo"
 		self.bool_headless = bool_headless
@@ -202,9 +202,7 @@ class MaisRetornoStats(ABCIngestionOperations):
 					self._XPATH_LIST_TD, selector_type="xpath"
 				)
 				list_td = self._convert_nums(list_td)
-				list_rows = self.cls_dict_handler.pair_headers_with_data(
-					self._LIST_COLS, list_td
-				)
+				list_rows = self.cls_dict_handler.pair_headers_with_data(self._LIST_COLS, list_td)
 				df_slug = pd.DataFrame(list_rows)
 				df_slug["STATISTIC"] = [d["text"] for d in list_stas]
 				df_slug["INSTRUMENT"] = str_instrument
@@ -226,7 +224,5 @@ class MaisRetornoStats(ABCIngestionOperations):
 		list
 			Processed list with floats or nan for missing/dash values.
 		"""
-		list_ = [
-			self.cls_num_handler.transform_to_float(d, int_precision=6) for d in list_
-		]
+		list_ = [self.cls_num_handler.transform_to_float(d, int_precision=6) for d in list_]
 		return [nan if x == "-" else x for x in list_]

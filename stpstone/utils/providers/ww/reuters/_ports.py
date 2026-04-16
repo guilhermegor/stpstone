@@ -18,7 +18,7 @@ class IReuters(Protocol):
 		self,
 		app: str,
 		payload: Optional[dict],
-		method: Literal['GET', 'POST'],
+		method: Literal["GET", "POST"],
 		endpoint: str,
 		timeout: Union[tuple, float, int],
 	) -> str:

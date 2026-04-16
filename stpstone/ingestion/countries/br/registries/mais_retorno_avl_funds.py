@@ -24,24 +24,20 @@ class MaisRetornoAvlFunds(ABCIngestionOperations):
 
 	_BASE_URL = "https://maisretorno.com/lista-fundos-investimentos/page/{}"
 	_XPATH_P_CNPJ = (
-		"//ul[@style=\"padding:0\"]/li[{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"]"
+		'//ul[@style="padding:0"]/li[{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"]'
 	)
 	_XPATH_HREF_FUND = (
-		"//ul[@style=\"padding:0\"]/li[{}]"
-		"//h2[@class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\"]/a"
+		'//ul[@style="padding:0"]/li[{}]'
+		'//h2[@class="MuiTypography-root MuiTypography-body1 css-fuk7hj"]/a'
 	)
-	_XPATH_A_FUND_NAME = (
-		"//ul[@style=\"padding:0\"]/li[{}]//a[@class=\"css-g90fw7\"]"
-	)
-	_XPATH_A_CATEGORY = (
-		"//ul[@style=\"padding:0\"]/li[{}]//a[@class=\"css-3xq1wq\"]"
-	)
+	_XPATH_A_FUND_NAME = '//ul[@style="padding:0"]/li[{}]//a[@class="css-g90fw7"]'
+	_XPATH_A_CATEGORY = '//ul[@style="padding:0"]/li[{}]//a[@class="css-3xq1wq"]'
 	_XPATH_STATUS_FUND = (
-		"//ul[@style=\"padding:0\"]/li[{}]"
-		"//span[@class=\"MuiChip-label MuiChip-labelMedium css-4qalxv\""
-		" or @class=\"MuiChip-root MuiChip-outlined MuiChip-sizeMedium"
-		" MuiChip-colorDefault MuiChip-outlinedDefault css-6ot3hj\"]"
+		'//ul[@style="padding:0"]/li[{}]'
+		'//span[@class="MuiChip-label MuiChip-labelMedium css-4qalxv"'
+		' or @class="MuiChip-root MuiChip-outlined MuiChip-sizeMedium'
+		' MuiChip-colorDefault MuiChip-outlinedDefault css-6ot3hj"]'
 	)
 
 	def __init__(
@@ -84,8 +80,9 @@ class MaisRetornoAvlFunds(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or list(range(1, 11))
 		self.bool_headless = bool_headless
 		self.int_wait_load_seconds = int_wait_load_seconds
@@ -224,28 +221,18 @@ class MaisRetornoAvlFunds(ABCIngestionOperations):
 		dict
 			Mapping of column names to scraped values.
 		"""
-		p_cnpj = scraper.get_element(
-			self._XPATH_P_CNPJ.format(i), selector_type="xpath"
-		)
+		p_cnpj = scraper.get_element(self._XPATH_P_CNPJ.format(i), selector_type="xpath")
 		href_fund = scraper.get_element_attrb(
 			self._XPATH_HREF_FUND.format(i),
 			str_attribute="href",
 			selector_type="xpath",
 		)
-		a_fund_name = scraper.get_element(
-			self._XPATH_A_FUND_NAME.format(i), selector_type="xpath"
-		)
-		a_category = scraper.get_element(
-			self._XPATH_A_CATEGORY.format(i), selector_type="xpath"
-		)
-		status_fund = scraper.get_element(
-			self._XPATH_STATUS_FUND.format(i), selector_type="xpath"
-		)
+		a_fund_name = scraper.get_element(self._XPATH_A_FUND_NAME.format(i), selector_type="xpath")
+		a_category = scraper.get_element(self._XPATH_A_CATEGORY.format(i), selector_type="xpath")
+		status_fund = scraper.get_element(self._XPATH_STATUS_FUND.format(i), selector_type="xpath")
 		return {
 			"CNPJ": p_cnpj.get("text", None) if p_cnpj else None,
-			"URL_FUND": "https://maisretorno.com/" + href_fund
-			if href_fund is not None
-			else None,
+			"URL_FUND": "https://maisretorno.com/" + href_fund if href_fund is not None else None,
 			"FUND_NAME": a_fund_name.get("text", None) if a_fund_name else None,
 			"CATEGORY": a_category.get("text", None) if a_category else None,
 			"STATUS_FUND": status_fund.get("text", None) if status_fund else None,

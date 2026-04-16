@@ -8,7 +8,6 @@ References
 .. [1] http://www.b3.com.br/data/files/2E/95/28/F1/EBD17610515A8076AC094EA8/GUIDE-TO-LINE-5.0-API.pdf
 """
 
-
 import pytest
 from pytest_mock import MockerFixture
 
@@ -96,9 +95,7 @@ class TestProfilesData:
 		None
 		"""
 		profiles_data.risk_profile()
-		mock_conn.app_request.assert_called_once_with(
-			method="GET", app="/api/v1.0/riskProfile"
-		)
+		mock_conn.app_request.assert_called_once_with(method="GET", app="/api/v1.0/riskProfile")
 
 	def test_entities_associated_profile_passes_id_and_participant_params(
 		self,

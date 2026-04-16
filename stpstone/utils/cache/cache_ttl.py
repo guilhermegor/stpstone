@@ -13,132 +13,129 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 
 class TTLCacheDecorator(metaclass=TypeChecker):
-    """Decorator to cache method results with a time-to-live expiration.
+	"""Decorator to cache method results with a time-to-live expiration.
 
-    This decorator caches the results of method calls and returns the cached
-    value if it is still valid based on the specified TTL. Invalid cache entries
-    are automatically refreshed by calling the original method.
+	This decorator caches the results of method calls and returns the cached
+	value if it is still valid based on the specified TTL. Invalid cache entries
+	are automatically refreshed by calling the original method.
 
-    Parameters
-    ----------
-    ttl_seconds : int
-        Time-to-live for cache entries in seconds (must be positive)
-    cache_key : str
-        Base key for cache entries (must not be empty)
+	Parameters
+	----------
+	ttl_seconds : int
+		Time-to-live for cache entries in seconds (must be positive)
+	cache_key : str
+		Base key for cache entries (must not be empty)
 
-    Raises
-    ------
-    ValueError
-        If ttl_seconds is not positive
-        If cache_key is empty or not a string
-    """
+	Raises
+	------
+	ValueError
+		If ttl_seconds is not positive
+		If cache_key is empty or not a string
+	"""
 
-    def __init__(
-        self, 
-        ttl_seconds: int, 
-        cache_key: str
-    ) -> None:
-        """Initialize the TTLCacheDecorator.
-        
-        Parameters
-        ----------
-        ttl_seconds : int
-            Time-to-live for cache entries in seconds (must be positive)
-        cache_key : str
-            Base key for cache entries (must not be empty)
-        
-        Returns
-        -------
-        None
-        """
-        self._validate_ttl_seconds(ttl_seconds)
-        self._validate_cache_key(cache_key)
-        self.ttl_seconds = ttl_seconds
-        self.cache_key = cache_key
-        self.cache: dict[str, Any] = {}
-        self.last_updated: dict[str, datetime] = {}
+	def __init__(self, ttl_seconds: int, cache_key: str) -> None:
+		"""Initialize the TTLCacheDecorator.
 
-    def __call__(self, method: Callable) -> Callable:
-        """Wrap the method with TTL caching functionality.
+		Parameters
+		----------
+		ttl_seconds : int
+			Time-to-live for cache entries in seconds (must be positive)
+		cache_key : str
+			Base key for cache entries (must not be empty)
 
-        Parameters
-        ----------
-        method : Callable
-            Method to be decorated
+		Returns
+		-------
+		None
+		"""
+		self._validate_ttl_seconds(ttl_seconds)
+		self._validate_cache_key(cache_key)
+		self.ttl_seconds = ttl_seconds
+		self.cache_key = cache_key
+		self.cache: dict[str, Any] = {}
+		self.last_updated: dict[str, datetime] = {}
 
-        Returns
-        -------
-        Callable
-            Wrapped method with caching behavior
-        """
-        @type_checker
-        @wraps(method)
-        def wrapper(
-            self_instance: Any, # noqa ANN401: typing.Any is not allowed
-            *args: Any, # noqa ANN401: typing.Any is not allowed
-            **kwargs: Any # noqa ANN401: typing.Any is not allowed
-        ) -> Any: # noqa ANN401: typing.Any is not allowed
-            """Implement TTL caching behavior.
+	def __call__(self, method: Callable) -> Callable:
+		"""Wrap the method with TTL caching functionality.
 
-            Parameters
-            ----------
-            self_instance : Any
-                Instance of the class containing the decorated method
-            *args : Any
-                Positional arguments passed to the method
-            **kwargs : Any
-                Keyword arguments passed to the method
+		Parameters
+		----------
+		method : Callable
+			Method to be decorated
 
-            Returns
-            -------
-            Any
-                Cached result if valid, otherwise newly computed result
-            """
-            key = f"{self.cache_key}:{args}:{kwargs}"
-            current_time = datetime.now()
+		Returns
+		-------
+		Callable
+			Wrapped method with caching behavior
+		"""
 
-            if key in self.cache:
-                time_since_update = current_time - self.last_updated[key]
-                if time_since_update < timedelta(seconds=self.ttl_seconds):
-                    return self.cache[key]
+		@type_checker
+		@wraps(method)
+		def wrapper(
+			self_instance: Any,  # noqa ANN401: typing.Any is not allowed
+			*args: Any,  # noqa ANN401: typing.Any is not allowed
+			**kwargs: Any,  # noqa ANN401: typing.Any is not allowed
+		) -> Any:  # noqa ANN401: typing.Any is not allowed
+			"""Implement TTL caching behavior.
 
-            result = method(self_instance, *args, **kwargs)
-            self.cache[key] = result
-            self.last_updated[key] = current_time
-            return result
+			Parameters
+			----------
+			self_instance : Any
+				Instance of the class containing the decorated method
+			*args : Any
+				Positional arguments passed to the method
+			**kwargs : Any
+				Keyword arguments passed to the method
 
-        return wrapper
+			Returns
+			-------
+			Any
+				Cached result if valid, otherwise newly computed result
+			"""
+			key = f"{self.cache_key}:{args}:{kwargs}"
+			current_time = datetime.now()
 
-    def _validate_ttl_seconds(self, ttl_seconds: int) -> None:
-        """Validate that TTL seconds is a positive integer.
+			if key in self.cache:
+				time_since_update = current_time - self.last_updated[key]
+				if time_since_update < timedelta(seconds=self.ttl_seconds):
+					return self.cache[key]
 
-        Parameters
-        ----------
-        ttl_seconds : int
-            Time-to-live value to validate
+			result = method(self_instance, *args, **kwargs)
+			self.cache[key] = result
+			self.last_updated[key] = current_time
+			return result
 
-        Raises
-        ------
-        ValueError
-            If ttl_seconds is not positive
-            If ttl_seconds is not an integer
-        """
-        if ttl_seconds <= 0:
-            raise ValueError("ttl_seconds must be positive")
+		return wrapper
 
-    def _validate_cache_key(self, cache_key: str) -> None:
-        """Validate that cache key is a non-empty string.
+	def _validate_ttl_seconds(self, ttl_seconds: int) -> None:
+		"""Validate that TTL seconds is a positive integer.
 
-        Parameters
-        ----------
-        cache_key : str
-            Cache key to validate
+		Parameters
+		----------
+		ttl_seconds : int
+			Time-to-live value to validate
 
-        Raises
-        ------
-        ValueError
-            If cache_key is empty
-            If cache_key is not a string
-        """
-        if not cache_key.strip():
-            raise ValueError("cache_key cannot be empty")
+		Raises
+		------
+		ValueError
+			If ttl_seconds is not positive
+			If ttl_seconds is not an integer
+		"""
+		if ttl_seconds <= 0:
+			raise ValueError("ttl_seconds must be positive")
+
+	def _validate_cache_key(self, cache_key: str) -> None:
+		"""Validate that cache key is a non-empty string.
+
+		Parameters
+		----------
+		cache_key : str
+			Cache key to validate
+
+		Raises
+		------
+		ValueError
+			If cache_key is empty
+			If cache_key is not a string
+		"""
+		if not cache_key.strip():
+			raise ValueError("cache_key cannot be empty")

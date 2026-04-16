@@ -124,8 +124,7 @@ class TestAnbimaDataCRICRADocuments:
 		assert isinstance(instance.date_ref, date)
 
 	@patch(
-		"stpstone.ingestion.countries.br.registries"
-		".anbima_data_cri_cra_documents.sync_playwright"
+		"stpstone.ingestion.countries.br.registries.anbima_data_cri_cra_documents.sync_playwright"
 	)
 	def test_get_response_empty_asset_codes(
 		self, mock_playwright: Mock, mock_logger: Logger
@@ -277,9 +276,7 @@ class TestListAssetCodes:
 		None
 		"""
 		original_list = ["ASSET001", "ASSET002"]
-		instance = AnbimaDataCRICRADocuments(
-			logger=mock_logger, list_asset_codes=original_list
-		)
+		instance = AnbimaDataCRICRADocuments(logger=mock_logger, list_asset_codes=original_list)
 
 		assert instance.list_asset_codes == original_list
 		assert len(instance.list_asset_codes) == len(original_list)

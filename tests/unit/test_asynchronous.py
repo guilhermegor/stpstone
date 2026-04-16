@@ -21,455 +21,456 @@ from stpstone.utils.pipelines.asynchronous import async_pipeline
 # --------------------------
 @pytest.fixture
 def sample_async_functions() -> list[Callable[[int], int]]:
-    """Fixture providing sample async functions for testing.
+	"""Fixture providing sample async functions for testing.
 
-    Returns
-    -------
-    list[Callable[[int], int]]
-        list of three async functions that:
-        1. Multiplies input by 2
-        2. Adds 10 to input
-        3. Subtracts 5 from input
-    """
-    async def func1(x: int) -> int:
-        """Multiply input by 2.
-        
-        Parameters
-        ----------
-        x : int
-            Input value
+	Returns
+	-------
+	list[Callable[[int], int]]
+		list of three async functions that:
+		1. Multiplies input by 2
+		2. Adds 10 to input
+		3. Subtracts 5 from input
+	"""
 
-        Returns
-        -------
-        int
-            Multiplied value
-        """
-        await asyncio.sleep(0.01)
-        return x * 2
+	async def func1(x: int) -> int:
+		"""Multiply input by 2.
 
-    async def func2(x: int) -> int:
-        """Add 10 to input.
-        
-        Parameters
-        ----------
-        x : int
-            Input value
+		Parameters
+		----------
+		x : int
+			Input value
 
-        Returns
-        -------
-        int
-            Summed value
-        """
-        await asyncio.sleep(0.01)
-        return x + 10
+		Returns
+		-------
+		int
+			Multiplied value
+		"""
+		await asyncio.sleep(0.01)
+		return x * 2
 
-    async def func3(x: int) -> int:
-        """Subtract 5 from input.
-        
-        Parameters
-        ----------
-        x : int
-            Input value
+	async def func2(x: int) -> int:
+		"""Add 10 to input.
 
-        Returns
-        -------
-        int
-            Subtracted value
-        """
-        await asyncio.sleep(0.01)
-        return x - 5
+		Parameters
+		----------
+		x : int
+			Input value
 
-    return [func1, func2, func3]
+		Returns
+		-------
+		int
+			Summed value
+		"""
+		await asyncio.sleep(0.01)
+		return x + 10
+
+	async def func3(x: int) -> int:
+		"""Subtract 5 from input.
+
+		Parameters
+		----------
+		x : int
+			Input value
+
+		Returns
+		-------
+		int
+			Subtracted value
+		"""
+		await asyncio.sleep(0.01)
+		return x - 5
+
+	return [func1, func2, func3]
 
 
 @pytest.fixture
 def failing_async_function() -> Callable[[Any], Any]:
-    """Fixture providing an async function that raises ValueError.
+	"""Fixture providing an async function that raises ValueError.
 
-    Returns
-    -------
-    Callable[[Any], Any]
-        Async function that raises ValueError with test message
+	Returns
+	-------
+	Callable[[Any], Any]
+		Async function that raises ValueError with test message
 
-    Raises
-    ------
-    ValueError
-        Test error
-    """
-    async def func(
-        x: Any # noqa ANN401: typing.Any is not allowed
-    ) -> Any: # noqa ANN401: typing.Any is not allowed
-        """Async function that raises ValueError.
-        
-        Parameters
-        ----------
-        x : Any
-            Input value
+	Raises
+	------
+	ValueError
+		Test error
+	"""
 
-        Returns
-        -------
-        Any
-            Input value
+	async def func(
+		x: Any,  # noqa ANN401: typing.Any is not allowed
+	) -> Any:  # noqa ANN401: typing.Any is not allowed
+		"""Async function that raises ValueError.
 
-        Raises
-        ------
-        ValueError
-            Test error
-        """
-        await asyncio.sleep(0.01)
-        raise ValueError("Test error")
+		Parameters
+		----------
+		x : Any
+			Input value
 
-    return func
+		Returns
+		-------
+		Any
+			Input value
+
+		Raises
+		------
+		ValueError
+			Test error
+		"""
+		await asyncio.sleep(0.01)
+		raise ValueError("Test error")
+
+	return func
 
 
 # --------------------------
 # Tests
 # --------------------------
 class TestAsyncPipelineSuccess:
-    """Tests for successful pipeline execution scenarios."""
+	"""Tests for successful pipeline execution scenarios."""
 
-    async def test_normal_execution(
-        self, sample_async_functions: list[Callable[[int], int]]
-    ) -> None:
-        """Test pipeline with valid functions and input.
+	async def test_normal_execution(
+		self, sample_async_functions: list[Callable[[int], int]]
+	) -> None:
+		"""Test pipeline with valid functions and input.
 
-        Verifies
-        --------
-        - Pipeline executes all functions in order
-        - Returns correct final result
-        - Maintains proper type through transformations
+		Verifies
+		--------
+		- Pipeline executes all functions in order
+		- Returns correct final result
+		- Maintains proper type through transformations
 
-        Parameters
-        ----------
-        sample_async_functions : list[Callable[[int], int]]
-            list of sample async functions
+		Parameters
+		----------
+		sample_async_functions : list[Callable[[int], int]]
+			list of sample async functions
 
-        Returns
-        -------
-        None
-        """
-        result = await async_pipeline(5, sample_async_functions)
-        assert result == 15  # ((5 * 2) + 10) - 5
-        assert isinstance(result, int)
+		Returns
+		-------
+		None
+		"""
+		result = await async_pipeline(5, sample_async_functions)
+		assert result == 15  # ((5 * 2) + 10) - 5
+		assert isinstance(result, int)
 
-    async def test_single_function(
-        self, sample_async_functions: list[Callable[[int], int]]
-    ) -> None:
-        """Test pipeline with single function.
+	async def test_single_function(
+		self, sample_async_functions: list[Callable[[int], int]]
+	) -> None:
+		"""Test pipeline with single function.
 
-        Verifies
-        --------
-        - Pipeline works with single function list
-        - Returns correct transformed value
+		Verifies
+		--------
+		- Pipeline works with single function list
+		- Returns correct transformed value
 
-        Parameters
-        ----------
-        sample_async_functions : list[Callable[[int], int]]
-            list of sample async functions
+		Parameters
+		----------
+		sample_async_functions : list[Callable[[int], int]]
+			list of sample async functions
 
-        Returns
-        -------
-        None
-        """
-        result = await async_pipeline(5, [sample_async_functions[0]])
-        assert result == 10
+		Returns
+		-------
+		None
+		"""
+		result = await async_pipeline(5, [sample_async_functions[0]])
+		assert result == 10
 
-    async def test_string_data(self) -> None:
-        """Test pipeline with string data transformation.
+	async def test_string_data(self) -> None:
+		"""Test pipeline with string data transformation.
 
-        Verifies
-        --------
-        - Pipeline works with non-numeric data
-        - String operations execute correctly
+		Verifies
+		--------
+		- Pipeline works with non-numeric data
+		- String operations execute correctly
 
-        Returns
-        -------
-        None
-        """
-        async def append_hello(s: str) -> str:
-            """Append 'hello' to input string.
-            
-            Parameters
-            ----------
-            s : str
-                Input string
+		Returns
+		-------
+		None
+		"""
 
-            Returns
-            -------
-            str
-                String with 'hello' appended
-            """
-            await asyncio.sleep(0.01)
-            return s + " hello"
+		async def append_hello(s: str) -> str:
+			"""Append 'hello' to input string.
 
-        async def append_world(s: str) -> str:
-            """Append 'world' to input string.
-            
-            Parameters
-            ----------
-            s : str
-                Input string
+			Parameters
+			----------
+			s : str
+				Input string
 
-            Returns
-            -------
-            str
-                String with 'world' appended
-            """
-            await asyncio.sleep(0.01)
-            return s + " world"
+			Returns
+			-------
+			str
+				String with 'hello' appended
+			"""
+			await asyncio.sleep(0.01)
+			return s + " hello"
 
-        result = await async_pipeline("test", [append_hello, append_world])
-        assert result == "test hello world"
+		async def append_world(s: str) -> str:
+			"""Append 'world' to input string.
+
+			Parameters
+			----------
+			s : str
+				Input string
+
+			Returns
+			-------
+			str
+				String with 'world' appended
+			"""
+			await asyncio.sleep(0.01)
+			return s + " world"
+
+		result = await async_pipeline("test", [append_hello, append_world])
+		assert result == "test hello world"
 
 
 class TestAsyncPipelineEdgeCases:
-    """Tests for edge cases and special scenarios."""
+	"""Tests for edge cases and special scenarios."""
 
-    async def test_empty_function_list(self) -> None:
-        """Test pipeline with empty functions list.
+	async def test_empty_function_list(self) -> None:
+		"""Test pipeline with empty functions list.
 
-        Verifies
-        --------
-        - Returns original input unchanged
-        - No errors raised with empty list
+		Verifies
+		--------
+		- Returns original input unchanged
+		- No errors raised with empty list
 
-        Returns
-        -------
-        None
-        """
-        result = await async_pipeline(5, [])
-        assert result == 5
+		Returns
+		-------
+		None
+		"""
+		result = await async_pipeline(5, [])
+		assert result == 5
 
-    async def test_none_input(self, sample_async_functions: list[Callable[[int], int]]
-    ) -> None:
-        """Test pipeline with None as input.
+	async def test_none_input(self, sample_async_functions: list[Callable[[int], int]]) -> None:
+		"""Test pipeline with None as input.
 
-        Verifies
-        --------
-        - None propagates through functions unchanged
-        - No errors raised with None input
+		Verifies
+		--------
+		- None propagates through functions unchanged
+		- No errors raised with None input
 
-        Parameters
-        ----------
-        sample_async_functions : list[Callable[[int], int]]
-            list of sample async functions
+		Parameters
+		----------
+		sample_async_functions : list[Callable[[int], int]]
+			list of sample async functions
 
-        Returns
-        -------
-        None
-        """
-        result = await async_pipeline(None, sample_async_functions)
-        assert result is None
+		Returns
+		-------
+		None
+		"""
+		result = await async_pipeline(None, sample_async_functions)
+		assert result is None
 
-    async def test_large_input(self, sample_async_functions: list[Callable[[int], int]]
-    ) -> None:
-        """Test pipeline with large numeric input.
+	async def test_large_input(self, sample_async_functions: list[Callable[[int], int]]) -> None:
+		"""Test pipeline with large numeric input.
 
-        Verifies
-        --------
-        - Handles large numbers correctly
-        - No overflow or precision issues
+		Verifies
+		--------
+		- Handles large numbers correctly
+		- No overflow or precision issues
 
-        Parameters
-        ----------
-        sample_async_functions : list[Callable[[int], int]]
-            list of sample async functions
+		Parameters
+		----------
+		sample_async_functions : list[Callable[[int], int]]
+			list of sample async functions
 
-        Returns
-        -------
-        None
-        """
-        large_num = 10**18
-        result = await async_pipeline(large_num, [sample_async_functions[0]])
-        assert result == large_num * 2
+		Returns
+		-------
+		None
+		"""
+		large_num = 10**18
+		result = await async_pipeline(large_num, [sample_async_functions[0]])
+		assert result == large_num * 2
 
 
 class TestAsyncPipelineErrorHandling:
-    """Tests for error handling scenarios."""
+	"""Tests for error handling scenarios."""
 
-    async def test_function_error(
-        self,
-        sample_async_functions: list[Callable[[int], int]],
-        failing_async_function: Callable[[Any], Any]
-    ) -> None:
-        """Test pipeline with failing function.
+	async def test_function_error(
+		self,
+		sample_async_functions: list[Callable[[int], int]],
+		failing_async_function: Callable[[Any], Any],
+	) -> None:
+		"""Test pipeline with failing function.
 
-        Verifies
-        --------
-        - Pipeline stops at failing function
-        - Returns partial result from successful functions
-        - Error message is printed
+		Verifies
+		--------
+		- Pipeline stops at failing function
+		- Returns partial result from successful functions
+		- Error message is printed
 
-        Parameters
-        ----------
-        sample_async_functions : list[Callable[[int], int]]
-            list of sample async functions
-        failing_async_function : Callable[[Any], Any]
-            Async function that raises ValueError
+		Parameters
+		----------
+		sample_async_functions : list[Callable[[int], int]]
+			list of sample async functions
+		failing_async_function : Callable[[Any], Any]
+			Async function that raises ValueError
 
-        Returns
-        -------
-        None
-        """
-        functions = sample_async_functions[:1] + [failing_async_function] \
-            + sample_async_functions[1:]
-        
-        with patch("builtins.print") as mock_print:
-            result = await async_pipeline(5, functions)
-            
-        assert result == 10  # only first function executed
-        mock_print.assert_called_once()
-        assert "Error in func" in mock_print.call_args[0][0]
-        assert "Test error" in mock_print.call_args[0][0]
+		Returns
+		-------
+		None
+		"""
+		functions = (
+			sample_async_functions[:1] + [failing_async_function] + sample_async_functions[1:]
+		)
 
-    async def test_all_functions_fail(
-        self,
-        failing_async_function: Callable[[Any], Any]
-    ) -> None:
-        """Test pipeline where all functions fail.
+		with patch("builtins.print") as mock_print:
+			result = await async_pipeline(5, functions)
 
-        Verifies
-        --------
-        - Returns original input when all functions fail
-        - First error is caught and printed
+		assert result == 10  # only first function executed
+		mock_print.assert_called_once()
+		assert "Error in func" in mock_print.call_args[0][0]
+		assert "Test error" in mock_print.call_args[0][0]
 
-        Parameters
-        ----------
-        failing_async_function : Callable[[Any], Any]
-            Async function that raises ValueError
+	async def test_all_functions_fail(self, failing_async_function: Callable[[Any], Any]) -> None:
+		"""Test pipeline where all functions fail.
 
-        Returns
-        -------
-        None
-        """
-        with patch("builtins.print") as mock_print:
-            result = await async_pipeline(5, [failing_async_function, failing_async_function])
-            
-        assert result == 5
-        mock_print.assert_called_once()
+		Verifies
+		--------
+		- Returns original input when all functions fail
+		- First error is caught and printed
+
+		Parameters
+		----------
+		failing_async_function : Callable[[Any], Any]
+			Async function that raises ValueError
+
+		Returns
+		-------
+		None
+		"""
+		with patch("builtins.print") as mock_print:
+			result = await async_pipeline(5, [failing_async_function, failing_async_function])
+
+		assert result == 5
+		mock_print.assert_called_once()
 
 
 class TestAsyncPipelineTypeValidation:
-    """Tests for input type validation."""
+	"""Tests for input type validation."""
 
-    async def test_non_callable_in_list(self) -> None:
-        """Test pipeline with non-callable in functions list.
+	async def test_non_callable_in_list(self) -> None:
+		"""Test pipeline with non-callable in functions list.
 
-        Verifies
-        --------
-        - Raises TypeError when non-callable is provided
-        - Error message identifies the invalid item
+		Verifies
+		--------
+		- Raises TypeError when non-callable is provided
+		- Error message identifies the invalid item
 
-        Parameters
-        ----------
-        sample_async_functions : list[Callable[[int], int]]
-            list of sample async functions
+		Parameters
+		----------
+		sample_async_functions : list[Callable[[int], int]]
+			list of sample async functions
 
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(TypeError, match="must be of type"):
-            await async_pipeline(5, [lambda x: x, "not a function"])
+		Returns
+		-------
+		None
+		"""
+		with pytest.raises(TypeError, match="must be of type"):
+			await async_pipeline(5, [lambda x: x, "not a function"])
 
-    async def test_non_list_functions(self) -> None:
-        """Test pipeline with non-list functions parameter.
+	async def test_non_list_functions(self) -> None:
+		"""Test pipeline with non-list functions parameter.
 
-        Verifies
-        --------
-        - Raises TypeError when functions is not a list
-        - Error message indicates expected list type
-        
-        Returns
-        -------
-        None
-        """
-        with pytest.raises(TypeError, match="must be of type"):
-            await async_pipeline(5, "not a list")
-    
-    async def test_non_async_function(self) -> None:
-        """Test pipeline with synchronous function.
+		Verifies
+		--------
+		- Raises TypeError when functions is not a list
+		- Error message indicates expected list type
 
-        Verifies
-        --------
-        - Raises TypeError when sync function is provided
-        - Error message indicates async requirement
+		Returns
+		-------
+		None
+		"""
+		with pytest.raises(TypeError, match="must be of type"):
+			await async_pipeline(5, "not a list")
 
-        Returns
-        -------
-        None
-        """
-        def sync_func(x: int) -> int:
-            """Test Synchronous function.
-            
-            Parameters
-            ----------
-            x : int
-                Input value
+	async def test_non_async_function(self) -> None:
+		"""Test pipeline with synchronous function.
 
-            Returns
-            -------
-            int
-                Summed value
-            """
-            return x + 1
+		Verifies
+		--------
+		- Raises TypeError when sync function is provided
+		- Error message indicates async requirement
 
-        with pytest.raises(TypeError) as excinfo:
-            await async_pipeline(5, [sync_func])  # type: ignore
-        assert "async function" in str(excinfo.value)
+		Returns
+		-------
+		None
+		"""
+
+		def sync_func(x: int) -> int:
+			"""Test Synchronous function.
+
+			Parameters
+			----------
+			x : int
+				Input value
+
+			Returns
+			-------
+			int
+				Summed value
+			"""
+			return x + 1
+
+		with pytest.raises(TypeError) as excinfo:
+			await async_pipeline(5, [sync_func])  # type: ignore
+		assert "async function" in str(excinfo.value)
 
 
 class TestAsyncPipelineExamples:
-    """Tests based on examples from docstring."""
+	"""Tests based on examples from docstring."""
 
-    async def test_docstring_example(self) -> None:
-        """Verify the example from function docstring works correctly.
-        
-        Returns
-        -------
-        None
-        """
-        async def async_step_1(data: int) -> int:
-            """Multiply input by 2.
-            
-            Parameters
-            ----------
-            data : int
-                Input value
+	async def test_docstring_example(self) -> None:
+		"""Verify the example from function docstring works correctly.
 
-            Returns
-            -------
-            int
-                Multiplied value
-            """
-            await asyncio.sleep(0.01)
-            return data * 2
+		Returns
+		-------
+		None
+		"""
 
-        async def async_step_2(data: int) -> int:
-            """Add 10 to input.
-            
-            Parameters
-            ----------
-            data : int
-                Input value
+		async def async_step_1(data: int) -> int:
+			"""Multiply input by 2.
 
-            Returns
-            -------
-            int
-                Summed value
-            """
-            await asyncio.sleep(0.01)
-            return data + 10
+			Parameters
+			----------
+			data : int
+				Input value
 
-        async def main() -> int:
-            """Test main function.
-            
-            Returns
-            -------
-            int
-                Final result
-            """
-            return await async_pipeline(5, [async_step_1, async_step_2])
+			Returns
+			-------
+			int
+				Multiplied value
+			"""
+			await asyncio.sleep(0.01)
+			return data * 2
 
-        result = await main()
-        assert result == 20
+		async def async_step_2(data: int) -> int:
+			"""Add 10 to input.
+
+			Parameters
+			----------
+			data : int
+				Input value
+
+			Returns
+			-------
+			int
+				Summed value
+			"""
+			await asyncio.sleep(0.01)
+			return data + 10
+
+		async def main() -> int:
+			"""Test main function.
+
+			Returns
+			-------
+			int
+				Final result
+			"""
+			return await async_pipeline(5, [async_step_1, async_step_2])
+
+		result = await main()
+		assert result == 20

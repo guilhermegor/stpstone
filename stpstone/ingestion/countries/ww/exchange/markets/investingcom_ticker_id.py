@@ -73,8 +73,9 @@ class InvestingComTickerId(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.url = (
 			f"{self._BASE_URL}725910b675af9252224ca6069a1e73cc/1631836267/1/1/8"
 			f"/symbols?symbol={self.str_ticker}"

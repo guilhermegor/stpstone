@@ -64,7 +64,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 		self,
 		str_client_id: str,
 		str_client_secret: str,
-		str_env: Literal['dev', 'prd'] = "dev",
+		str_env: Literal["dev", "prd"] = "dev",
 		int_chunk: int = 1000,
 	) -> None:
 		"""Initialize fund client and cache utility instances.
@@ -152,9 +152,8 @@ class AnbimaDataFunds(AnbimaDataGen):
 									dict_aux[key_cls] = data_cls.strip()
 								elif key_cls != self._KEY_SUBCLASSES and data_cls is None:
 									dict_aux[key_cls] = data_cls
-								elif (
-									key_cls == self._KEY_SUBCLASSES
-									and isinstance(data_cls, list)
+								elif key_cls == self._KEY_SUBCLASSES and isinstance(
+									data_cls, list
 								):
 									for dict_sbcls in data_cls:
 										dict_xpt = dict_aux.copy()
@@ -281,9 +280,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 		list[dict[str, Any]]
 			Raw API response.
 		"""
-		return self.generic_request(
-			f"feed/fundos/v2/fundos/{str_code_fnd}/historico", "GET"
-		)
+		return self.generic_request(f"feed/fundos/v2/fundos/{str_code_fnd}/historico", "GET")
 
 	def fund_hist(self, str_code_class: str) -> list[dict[str, Any]]:
 		"""Retrieve raw historical data for a fund by class code.
@@ -298,9 +295,7 @@ class AnbimaDataFunds(AnbimaDataGen):
 		list[dict[str, Any]]
 			Raw API response.
 		"""
-		return self.generic_request(
-			f"feed/fundos/v2/fundos/{str_code_class}/historico", "GET"
-		)
+		return self.generic_request(f"feed/fundos/v2/fundos/{str_code_class}/historico", "GET")
 
 	def fund_trt(self, list_code_fnds: list[str]) -> dict[str, list[pd.DataFrame]]:
 		"""Fetch and transform historical data for multiple funds.

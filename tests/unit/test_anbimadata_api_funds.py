@@ -57,9 +57,7 @@ def mock_requests(mocker: MockerFixture) -> object:
 	object
 		Patched ``request`` callable.
 	"""
-	return mocker.patch(
-		"stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.request"
-	)
+	return mocker.patch("stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.request")
 
 
 @pytest.fixture
@@ -108,9 +106,7 @@ def sample_funds_json() -> list[dict[str, Any]]:
 					"fund_name": "Test Fund",
 					"inception_date": "2023-01-01",
 					"update_timestamp": "2023-01-01T12:00:00Z",
-					"subclasses": [
-						{"subclass_code": "SC1", "subclass_name": "Subclass 1"}
-					],
+					"subclasses": [{"subclass_code": "SC1", "subclass_name": "Subclass 1"}],
 				}
 			]
 		}
@@ -488,10 +484,7 @@ class TestAnbimaDataFunds:
 		assert result == [{"financials": "data"}]
 		mock_requests.assert_called_once_with(
 			method="GET",
-			url=(
-				"https://api-sandbox.anbima.com.br"
-				"/feed/fundos/v2/fundos/serie-historica/lote"
-			),
+			url=("https://api-sandbox.anbima.com.br/feed/fundos/v2/fundos/serie-historica/lote"),
 			headers={
 				"accept": "application/json",
 				"client_id": "test_client",
@@ -536,10 +529,7 @@ class TestAnbimaDataFunds:
 		assert result == [{"registration": "data"}]
 		mock_requests.assert_called_once_with(
 			method="GET",
-			url=(
-				"https://api-sandbox.anbima.com.br"
-				"/feed/fundos/v2/fundos/dados-cadastrais/lote"
-			),
+			url=("https://api-sandbox.anbima.com.br/feed/fundos/v2/fundos/dados-cadastrais/lote"),
 			headers={
 				"accept": "application/json",
 				"client_id": "test_client",
@@ -584,10 +574,7 @@ class TestAnbimaDataFunds:
 		assert result == [{"name": "Institution"}]
 		mock_requests.assert_called_once_with(
 			method="GET",
-			url=(
-				"https://api-sandbox.anbima.com.br"
-				"/feed/fundos/v2/fundos/instituicoes"
-			),
+			url=("https://api-sandbox.anbima.com.br/feed/fundos/v2/fundos/instituicoes"),
 			headers={
 				"accept": "application/json",
 				"client_id": "test_client",
@@ -632,10 +619,7 @@ class TestAnbimaDataFunds:
 		assert result == [{"ein": "123456"}]
 		mock_requests.assert_called_once_with(
 			method="GET",
-			url=(
-				"https://api-sandbox.anbima.com.br"
-				"/feed/fundos/v2/fundos/instituicoes/123456"
-			),
+			url=("https://api-sandbox.anbima.com.br/feed/fundos/v2/fundos/instituicoes/123456"),
 			headers={
 				"accept": "application/json",
 				"client_id": "test_client",
@@ -680,10 +664,7 @@ class TestAnbimaDataFunds:
 		assert result == [{"note": "Note"}]
 		mock_requests.assert_called_once_with(
 			method="GET",
-			url=(
-				"https://api-sandbox.anbima.com.br"
-				"/feed/fundos/v2/fundos/C1/notas-explicativas"
-			),
+			url=("https://api-sandbox.anbima.com.br/feed/fundos/v2/fundos/C1/notas-explicativas"),
 			headers={
 				"accept": "application/json",
 				"client_id": "test_client",

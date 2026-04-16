@@ -45,7 +45,7 @@ class YahiiDailyFX(ABCIngestionOperations):
 
 	def __init__(
 		self,
-		str_currency: Literal['usd', 'eur'] = "usd",
+		str_currency: Literal["usd", "eur"] = "usd",
 		date_ref: Optional[date] = None,
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,

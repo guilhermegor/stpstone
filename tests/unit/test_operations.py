@@ -9,7 +9,6 @@ References
 .. [1] http://www.b3.com.br/data/files/2E/95/28/F1/EBD17610515A8076AC094EA8/GUIDE-TO-LINE-5.0-API.pdf
 """
 
-
 import pytest
 from pytest_mock import MockerFixture
 

@@ -544,9 +544,7 @@ class MT5(metaclass=TypeChecker):
 
 		symbol_info_tick_dict = lasttick._asdict()
 		for prop in symbol_info_tick_dict:
-			CreateLog().log_message(
-				self.logger, f"  {prop}={symbol_info_tick_dict[prop]}", "info"
-			)
+			CreateLog().log_message(self.logger, f"  {prop}={symbol_info_tick_dict[prop]}", "info")
 
 		return symbol_info_tick_dict
 

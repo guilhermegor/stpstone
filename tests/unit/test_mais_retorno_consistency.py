@@ -166,8 +166,7 @@ def test_parse_raw_file_returns_playwright_scraper(
 	None
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.br.registries"
-		".mais_retorno_consistency.PlaywrightScraper"
+		"stpstone.ingestion.countries.br.registries.mais_retorno_consistency.PlaywrightScraper"
 	)
 	mock_inst = mock_cls.return_value
 	result = consistency_instance.parse_raw_file()

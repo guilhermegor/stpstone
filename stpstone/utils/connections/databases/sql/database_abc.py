@@ -12,468 +12,443 @@ from typing import Any, Literal, Optional, Union
 import pandas as pd
 
 from stpstone.transformations.validation.metaclass_type_checker import (
-    ABCTypeCheckerMeta,
-    DbConnection,
-    DbCursor,
-    SQLComposable,
+	ABCTypeCheckerMeta,
+	DbConnection,
+	DbCursor,
+	SQLComposable,
 )
 from stpstone.utils.calendars.calendar_abc import TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class ABCDatabase(ABC, metaclass=ABCTypeCheckerMeta):
-    """Abstract base class for database connections.
-    
-    Enforces:
-    - self.conn (DbConnection) and self.cursor (DbCursor) must be created in __init__
-    - Standard database operations interface
+	"""Abstract base class for database connections.
 
-    References
-    ----------
-    .. [1] https://docs.python.org/3/library/abc.html
-    .. [2] https://peps.python.org/pep-0544/
-    """
+	Enforces:
+	- self.conn (DbConnection) and self.cursor (DbCursor) must be created in __init__
+	- Standard database operations interface
 
-    # class variables for type hinting (enforces instance attributes)
-    conn: DbConnection
-    cursor: DbCursor
-    _instances: dict[type, Any] = {}
+	References
+	----------
+	.. [1] https://docs.python.org/3/library/abc.html
+	.. [2] https://peps.python.org/pep-0544/
+	"""
 
-    @abstractmethod
-    def __init__(
-        self,
-        dbname: str,
-        user: str,
-        password: str,
-        host: str,
-        port: int,
-        str_schema: str = "public",
-        logger: Optional[Logger] = None,
-        bool_singleton: bool = False,
-    ) -> None:
-        """Initialize database connection.
-        
-        Concrete implementations MUST:
-        1. Create self.conn (DbConnection)
-        2. Create self.cursor (DbCursor)
-        3. Initialize other necessary attributes
+	# class variables for type hinting (enforces instance attributes)  # noqa: ERA001
+	conn: DbConnection
+	cursor: DbCursor
+	_instances: dict[type, Any] = {}
 
-        Parameters
-        ----------
-        dbname : str
-            Database name
-        user : str
-            Database user
-        password : str
-            Database password
-        host : str
-            Database host
-        port : int
-            Database port
-        str_schema : str
-            Schema name, defaults to 'public'
-        logger : Optional[Logger]
-            Logger instance, defaults to None
-        bool_singleton : bool
-            Whether to use singleton pattern, defaults to False
+	@abstractmethod
+	def __init__(
+		self,
+		dbname: str,
+		user: str,
+		password: str,
+		host: str,
+		port: int,
+		str_schema: str = "public",
+		logger: Optional[Logger] = None,
+		bool_singleton: bool = False,
+	) -> None:
+		"""Initialize database connection.
 
-        Returns
-        -------
-        None
-        """
-        self.dbname = dbname
-        self.user = user
-        self.password = password
-        self.host = host
-        self.port = port
-        self.str_schema = str_schema
-        self.logger = logger
-        self.bool_singleton = bool_singleton
+		Concrete implementations MUST:
+		1. Create self.conn (DbConnection)
+		2. Create self.cursor (DbCursor)
+		3. Initialize other necessary attributes
 
-    def _validate_connection_params(self) -> None:
-        """Validate database connection parameters.
+		Parameters
+		----------
+		dbname : str
+			Database name
+		user : str
+			Database user
+		password : str
+			Database password
+		host : str
+			Database host
+		port : int
+			Database port
+		str_schema : str
+			Schema name, defaults to 'public'
+		logger : Optional[Logger]
+			Logger instance, defaults to None
+		bool_singleton : bool
+			Whether to use singleton pattern, defaults to False
 
-        Raises
-        ------
-        ValueError
-            If database name, user, password, host, or port are empty
-            If database port is not a positive integer
-        """
-        if not self.dbname:
-            raise ValueError("Database name cannot be empty")
-        if not self.user:
-            raise ValueError("Database user cannot be empty")
-        if not self.password:
-            raise ValueError("Database password cannot be empty")
-        if not self.host:
-            raise ValueError("Database host cannot be empty")
-        if self.port <= 0:
-            raise ValueError("Database port must be a positive integer")
-        if not self.str_schema:
-            raise ValueError("Schema name cannot be empty")
+		Returns
+		-------
+		None
+		"""
+		self.dbname = dbname
+		self.user = user
+		self.password = password
+		self.host = host
+		self.port = port
+		self.str_schema = str_schema
+		self.logger = logger
+		self.bool_singleton = bool_singleton
 
-    def _validate_query(
-        self, 
-        str_query: Union[str, SQLComposable]
-    ) -> None:
-        """Validate SQL query parameters.
+	def _validate_connection_params(self) -> None:
+		"""Validate database connection parameters.
 
-        Parameters
-        ----------
-        str_query : Union[str, SQLComposable]
-            SQL query to validate
+		Raises
+		------
+		ValueError
+			If database name, user, password, host, or port are empty
+			If database port is not a positive integer
+		"""
+		if not self.dbname:
+			raise ValueError("Database name cannot be empty")
+		if not self.user:
+			raise ValueError("Database user cannot be empty")
+		if not self.password:
+			raise ValueError("Database password cannot be empty")
+		if not self.host:
+			raise ValueError("Database host cannot be empty")
+		if self.port <= 0:
+			raise ValueError("Database port must be a positive integer")
+		if not self.str_schema:
+			raise ValueError("Schema name cannot be empty")
 
-        Returns
-        -------
-        None
+	def _validate_query(self, str_query: Union[str, SQLComposable]) -> None:
+		"""Validate SQL query parameters.
 
-        Raises
-        ------
-        ValueError
-            If query is empty
-        """
-        if not str_query:
-            raise ValueError("SQL query cannot be empty")
+		Parameters
+		----------
+		str_query : Union[str, SQLComposable]
+			SQL query to validate
 
-    def _validate_insert_data(
-        self, 
-        json_data: list[dict[str, Any]], 
-        str_table_name: str
-    ) -> None:
-        """Validate data insertion parameters.
+		Returns
+		-------
+		None
 
-        Parameters
-        ----------
-        json_data : list[dict[str, Any]]
-            Data to insert
-        str_table_name : str
-            Target table name
+		Raises
+		------
+		ValueError
+			If query is empty
+		"""
+		if not str_query:
+			raise ValueError("SQL query cannot be empty")
 
-        Returns
-        -------
-        None
+	def _validate_insert_data(self, json_data: list[dict[str, Any]], str_table_name: str) -> None:
+		"""Validate data insertion parameters.
 
-        Raises
-        ------
-        ValueError
-            If json_data or str_table_name is empty
-        """
-        if not json_data:
-            raise ValueError("Insert data cannot be empty")
-        if not str_table_name:
-            raise ValueError("Table name cannot be empty")
+		Parameters
+		----------
+		json_data : list[dict[str, Any]]
+			Data to insert
+		str_table_name : str
+			Target table name
 
-    def _validate_backup_params(
-        self, 
-        str_backup_dir: str
-    ) -> None:
-        """Validate backup parameters.
+		Returns
+		-------
+		None
 
-        Parameters
-        ----------
-        str_backup_dir : str
-            Backup directory path
-        
-        Returns
-        -------
-        None
+		Raises
+		------
+		ValueError
+			If json_data or str_table_name is empty
+		"""
+		if not json_data:
+			raise ValueError("Insert data cannot be empty")
+		if not str_table_name:
+			raise ValueError("Table name cannot be empty")
 
-        Raises
-        ------
-        ValueError
-            If str_backup_dir is empty
-        """
-        if not str_backup_dir:
-            raise ValueError("Backup directory cannot be empty")
+	def _validate_backup_params(self, str_backup_dir: str) -> None:
+		"""Validate backup parameters.
 
-    def _validate_format_query_params(
-        self, 
-        query_path: str, 
-        dict_params: dict[str, Any]
-    ) -> None:
-        """Validate format query parameters.
+		Parameters
+		----------
+		str_backup_dir : str
+			Backup directory path
 
-        Parameters
-        ----------
-        query_path : str
-            Path to SQL query file
-        dict_params : dict[str, Any]
-            Parameters for query formatting
+		Returns
+		-------
+		None
 
-        Returns
-        -------
-        None
+		Raises
+		------
+		ValueError
+			If str_backup_dir is empty
+		"""
+		if not str_backup_dir:
+			raise ValueError("Backup directory cannot be empty")
 
-        Raises
-        ------
-        ValueError
-            If query_path or dict_params is empty
-        """
-        if not query_path:
-            raise ValueError("Query path cannot be empty")
-        if not dict_params:
-            raise ValueError("Parameters dictionary cannot be empty")
+	def _validate_format_query_params(self, query_path: str, dict_params: dict[str, Any]) -> None:
+		"""Validate format query parameters.
 
-    @classmethod
-    def _get_singleton_instance(
-        cls, 
-        *args: Any, # noqa ANN401: typing.Any is not allowed
-        **kwargs: Any # noqa ANN401: typing.Any is not allowed
-    ) -> "ABCDatabase":
-        """Get singleton instance of the database class.
+		Parameters
+		----------
+		query_path : str
+			Path to SQL query file
+		dict_params : dict[str, Any]
+			Parameters for query formatting
 
-        Parameters
-        ----------
-        *args : Any
-            Positional arguments for initialization
-        **kwargs : Any
-            Keyword arguments for initialization
+		Returns
+		-------
+		None
 
-        Returns
-        -------
-        'ABCDatabase'
-            Singleton instance of the database class
-        """
-        if cls not in cls._instances:
-            # temporarily set bool_singleton to False to avoid recursion
-            singleton_kwargs = kwargs.copy()
-            singleton_kwargs["bool_singleton"] = False
-            # use super().__new__ to bypass the singleton check in __new__
-            instance = super().__new__(cls)
-            instance.__init__(*args, **singleton_kwargs)
-            # restore the original bool_singleton value
-            instance.bool_singleton = kwargs.get("bool_singleton", False)
-            cls._instances[cls] = instance
-        return cls._instances[cls]
+		Raises
+		------
+		ValueError
+			If query_path or dict_params is empty
+		"""
+		if not query_path:
+			raise ValueError("Query path cannot be empty")
+		if not dict_params:
+			raise ValueError("Parameters dictionary cannot be empty")
 
-    def format_query(
-        self, 
-        query_path: str, 
-        dict_params: dict[str, Any]
-    ) -> str:
-        """Format a SQL query with parameters using f-strings.
+	@classmethod
+	def _get_singleton_instance(
+		cls,
+		*args: Any,  # noqa ANN401: typing.Any is not allowed
+		**kwargs: Any,  # noqa ANN401: typing.Any is not allowed
+	) -> "ABCDatabase":
+		"""Get singleton instance of the database class.
 
-        Parameters
-        ----------
-        query_path : str
-            Path to SQL query file
-        dict_params : dict[str, Any]
-            Dictionary of parameters for formatting
+		Parameters
+		----------
+		*args : Any
+			Positional arguments for initialization
+		**kwargs : Any
+			Keyword arguments for initialization
 
-        Returns
-        -------
-        str
-            Formatted SQL query
+		Returns
+		-------
+		'ABCDatabase'
+			Singleton instance of the database class
+		"""
+		if cls not in cls._instances:
+			# temporarily set bool_singleton to False to avoid recursion
+			singleton_kwargs = kwargs.copy()
+			singleton_kwargs["bool_singleton"] = False
+			# use super().__new__ to bypass the singleton check in __new__  # noqa: ERA001
+			instance = super().__new__(cls)
+			instance.__init__(*args, **singleton_kwargs)
+			# restore the original bool_singleton value
+			instance.bool_singleton = kwargs.get("bool_singleton", False)
+			cls._instances[cls] = instance
+		return cls._instances[cls]
 
-        Raises
-        ------
-        ValueError
-            If file cannot be read or parameters are invalid
-        FileNotFoundError
-            If query file does not exist
-        """
-        self._validate_format_query_params(query_path, dict_params)
-        
-        try:
-            with open(query_path, encoding="utf-8") as query_file:
-                query_read = query_file.read()
-        except FileNotFoundError as err:
-            raise FileNotFoundError(f"Query file not found: {query_path}") from err
-        except OSError as err:
-            raise ValueError(f"Error reading query file: {str(err)}") from err
-        
-        try:
-            return query_read.format(**dict_params)
-        except KeyError as err:
-            raise ValueError(f"Missing parameter in query: {str(err)}") from err
-        except ValueError as err:
-            raise ValueError(f"Error formatting query: {str(err)}") from err
+	def format_query(self, query_path: str, dict_params: dict[str, Any]) -> str:
+		"""Format a SQL query with parameters using f-strings.
 
-    @abstractmethod
-    def execute(
-        self, 
-        str_query: Union[str, SQLComposable]
-    ) -> None:
-        """Execute a SQL query without returning results.
+		Parameters
+		----------
+		query_path : str
+			Path to SQL query file
+		dict_params : dict[str, Any]
+			Dictionary of parameters for formatting
 
-        Parameters
-        ----------
-        str_query : Union[str, SQLComposable]
-            SQL query to execute
-            
-        Returns
-        -------
-        None
-        """
-        pass
+		Returns
+		-------
+		str
+			Formatted SQL query
 
-    @abstractmethod
-    def read(
-        self,
-        str_query: str,
-        dict_type_cols: Optional[dict[str, Any]] = None,
-        list_cols_dt: Optional[list[str]] = None,
-        str_fmt_dt: Optional[TypeDateFormatInput] = None,
-    ) -> pd.DataFrame:
-        """Execute a query and return results as DataFrame.
+		Raises
+		------
+		ValueError
+			If file cannot be read or parameters are invalid
+		FileNotFoundError
+			If query file does not exist
+		"""
+		self._validate_format_query_params(query_path, dict_params)
 
-        Parameters
-        ----------
-        str_query : str
-            SQL query to execute
-        dict_type_cols : Optional[dict[str, Any]]
-            Column type mapping, defaults to None
-        list_cols_dt : Optional[list[str]]
-            Date columns to parse, defaults to None
-        str_fmt_dt : Optional[TypeDateFormatInput]
-            Date format string, defaults to None
+		try:
+			with open(query_path, encoding="utf-8") as query_file:
+				query_read = query_file.read()
+		except FileNotFoundError as err:
+			raise FileNotFoundError(f"Query file not found: {query_path}") from err
+		except OSError as err:
+			raise ValueError(f"Error reading query file: {str(err)}") from err
 
-        Returns
-        -------
-        pd.DataFrame
-            Query results
-        """
-        pass
+		try:
+			return query_read.format(**dict_params)
+		except KeyError as err:
+			raise ValueError(f"Missing parameter in query: {str(err)}") from err
+		except ValueError as err:
+			raise ValueError(f"Error formatting query: {str(err)}") from err
 
-    @abstractmethod
-    def insert(
-        self,
-        json_data: list[dict[str, Any]],
-        str_table_name: str,
-        bool_insert_or_ignore: bool = False,
-    ) -> None:
-        """Insert data into a table.
+	@abstractmethod
+	def execute(self, str_query: Union[str, SQLComposable]) -> None:
+		"""Execute a SQL query without returning results.
 
-        Parameters
-        ----------
-        json_data : list[dict[str, Any]]
-            Data to insert (list of dicts)
-        str_table_name : str
-            Target table name
-        bool_insert_or_ignore : bool
-            If True, ignore duplicates, defaults to False
+		Parameters
+		----------
+		str_query : Union[str, SQLComposable]
+			SQL query to execute
 
-        Returns
-        -------
-        None
-        """
-        pass
+		Returns
+		-------
+		None
+		"""
+		pass
 
-    @abstractmethod
-    def close(self) -> None:
-        """Close the database connection.
+	@abstractmethod
+	def read(
+		self,
+		str_query: str,
+		dict_type_cols: Optional[dict[str, Any]] = None,
+		list_cols_dt: Optional[list[str]] = None,
+		str_fmt_dt: Optional[TypeDateFormatInput] = None,
+	) -> pd.DataFrame:
+		"""Execute a query and return results as DataFrame.
 
-        Returns
-        -------
-        None
-        """
-        pass
+		Parameters
+		----------
+		str_query : str
+			SQL query to execute
+		dict_type_cols : Optional[dict[str, Any]]
+			Column type mapping, defaults to None
+		list_cols_dt : Optional[list[str]]
+			Date columns to parse, defaults to None
+		str_fmt_dt : Optional[TypeDateFormatInput]
+			Date format string, defaults to None
 
-    @abstractmethod
-    def backup(
-        self, 
-        str_backup_dir: str, 
-        str_bkp_name: Optional[str] = None
-    ) -> str:
-        """Create database backup.
+		Returns
+		-------
+		pd.DataFrame
+			Query results
+		"""
+		pass
 
-        Parameters
-        ----------
-        str_backup_dir : str
-            Backup directory path
-        str_bkp_name : Optional[str]
-            Custom backup filename, defaults to None
+	@abstractmethod
+	def insert(
+		self,
+		json_data: list[dict[str, Any]],
+		str_table_name: str,
+		bool_insert_or_ignore: bool = False,
+	) -> None:
+		"""Insert data into a table.
 
-        Returns
-        -------
-        str
-            Backup status message
-        """
-        pass
+		Parameters
+		----------
+		json_data : list[dict[str, Any]]
+			Data to insert (list of dicts)
+		str_table_name : str
+			Target table name
+		bool_insert_or_ignore : bool
+			If True, ignore duplicates, defaults to False
 
-    @abstractmethod
-    def check_bkp_tool(self) -> bool:
-        """Check if backup tool is available.
+		Returns
+		-------
+		None
+		"""
+		pass
 
-        Returns
-        -------
-        bool
-            True if backup tool is available, False otherwise
-        """
-        pass
+	@abstractmethod
+	def close(self) -> None:
+		"""Close the database connection.
 
-    def __new__(
-        cls, 
-        *args: Any, # noqa ANN401: typing.Any is not allowed
-        **kwargs: Any # noqa ANN401: typing.Any is not allowed
-    ) -> "ABCDatabase":
-        """Handle singleton pattern during instance creation.
+		Returns
+		-------
+		None
+		"""
+		pass
 
-        Parameters
-        ----------
-        *args : Any
-            Positional arguments
-        **kwargs : Any
-            Keyword arguments
+	@abstractmethod
+	def backup(self, str_backup_dir: str, str_bkp_name: Optional[str] = None) -> str:
+		"""Create database backup.
 
-        Returns
-        -------
-        'ABCDatabase'
-            New instance or existing singleton instance
-        """
-        bool_singleton = kwargs.get("bool_singleton", False)
-        if bool_singleton:
-            return cls._get_singleton_instance(*args, **kwargs)
-        return super().__new__(cls)
+		Parameters
+		----------
+		str_backup_dir : str
+			Backup directory path
+		str_bkp_name : Optional[str]
+			Custom backup filename, defaults to None
 
-    def __enter__(self) -> "ABCDatabase":
-        """Support context manager protocol.
+		Returns
+		-------
+		str
+			Backup status message
+		"""
+		pass
 
-        Returns
-        -------
-        'ABCDatabase'
-            Self instance
-        """
-        return self
+	@abstractmethod
+	def check_bkp_tool(self) -> bool:
+		"""Check if backup tool is available.
 
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[Any], # noqa ANN401: typing.Any is not allowed
-    ) -> Literal[False]:
-        """Context manager exit handler.
-        
-        Closes the connection and:
-        - Returns False to let exceptions propagate
-        - Logs any errors during closing
+		Returns
+		-------
+		bool
+			True if backup tool is available, False otherwise
+		"""
+		pass
 
-        Parameters
-        ----------
-        exc_type : Optional[type[BaseException]]
-            Exception type
-        exc_val : Optional[BaseException]
-            Exception value
-        exc_tb : Optional[Any]
-            Exception traceback
+	def __new__(
+		cls,
+		*args: Any,  # noqa ANN401: typing.Any is not allowed
+		**kwargs: Any,  # noqa ANN401: typing.Any is not allowed
+	) -> "ABCDatabase":
+		"""Handle singleton pattern during instance creation.
 
-        Returns
-        -------
-        Literal[False]
-            Always returns False to propagate exceptions
-        """
-        try:
-            self.close()
-            if exc_type is not None and self.logger is not None:
-                CreateLog().log_message(
-                    self.logger,
-                    f"Context exited with exception: {exc_type.__name__}: {exc_val}",
-                    "error",
-                )
-        except Exception as err:
-            if self.logger is not None:
-                CreateLog().log_message(
-                    self.logger, f"Error closing connection: {str(err)}", "error"
-                )
-            raise
-        return False
+		Parameters
+		----------
+		*args : Any
+			Positional arguments
+		**kwargs : Any
+			Keyword arguments
+
+		Returns
+		-------
+		'ABCDatabase'
+			New instance or existing singleton instance
+		"""
+		bool_singleton = kwargs.get("bool_singleton", False)
+		if bool_singleton:
+			return cls._get_singleton_instance(*args, **kwargs)
+		return super().__new__(cls)
+
+	def __enter__(self) -> "ABCDatabase":
+		"""Support context manager protocol.
+
+		Returns
+		-------
+		'ABCDatabase'
+			Self instance
+		"""
+		return self
+
+	def __exit__(
+		self,
+		exc_type: Optional[type[BaseException]],
+		exc_val: Optional[BaseException],
+		exc_tb: Optional[Any],  # noqa ANN401: typing.Any is not allowed
+	) -> Literal[False]:
+		"""Context manager exit handler.
+
+		Closes the connection and:
+		- Returns False to let exceptions propagate
+		- Logs any errors during closing
+
+		Parameters
+		----------
+		exc_type : Optional[type[BaseException]]
+			Exception type
+		exc_val : Optional[BaseException]
+			Exception value
+		exc_tb : Optional[Any]
+			Exception traceback
+
+		Returns
+		-------
+		Literal[False]
+			Always returns False to propagate exceptions
+		"""
+		try:
+			self.close()
+			if exc_type is not None and self.logger is not None:
+				CreateLog().log_message(
+					self.logger,
+					f"Context exited with exception: {exc_type.__name__}: {exc_val}",
+					"error",
+				)
+		except Exception as err:
+			if self.logger is not None:
+				CreateLog().log_message(
+					self.logger, f"Error closing connection: {str(err)}", "error"
+				)
+			raise
+		return False

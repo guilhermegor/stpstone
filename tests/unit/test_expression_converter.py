@@ -128,9 +128,7 @@ class TestExpressionConverterInitialization:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=standard_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.str_expr == standard_infix_expr
 		assert converter.str_from_type == "infix"
@@ -160,9 +158,7 @@ class TestExpressionConverterInitialization:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=numeric_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=numeric_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.token_list == ["1", "+", "2", "*", "3"]
 		assert "0123456789" in converter.str_operands
@@ -181,9 +177,7 @@ class TestExpressionConverterInitialization:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="a + b",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="a + b", str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.token_list == ["A", "+", "B"]
 
@@ -201,9 +195,7 @@ class TestExpressionConverterInitialization:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A  +   B   *  C",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A  +   B   *  C", str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.token_list == ["A", "+", "B", "*", "C"]
 
@@ -226,9 +218,7 @@ class TestExpressionConverterInitialization:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=simple_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=simple_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.prec["*"] == 3
 		assert converter.prec["/"] == 3
@@ -258,11 +248,7 @@ class TestExpressionValidation:
 		None
 		"""
 		with pytest.raises(ValueError, match="Expression cannot be empty"):
-			ExpressionConverter(
-				str_expr="",
-				str_from_type="infix",
-				str_to_type="postfix"
-			)
+			ExpressionConverter(str_expr="", str_from_type="infix", str_to_type="postfix")
 
 	def test_whitespace_only_expression_raises_error(self) -> None:
 		"""Test that whitespace-only expression raises ValueError.
@@ -277,11 +263,7 @@ class TestExpressionValidation:
 		None
 		"""
 		with pytest.raises(ValueError, match="Expression cannot be empty"):
-			ExpressionConverter(
-				str_expr="   ",
-				str_from_type="infix",
-				str_to_type="postfix"
-			)
+			ExpressionConverter(str_expr="   ", str_from_type="infix", str_to_type="postfix")
 
 	def test_invalid_characters_raises_error(self) -> None:
 		"""Test that invalid characters in expression raise ValueError.
@@ -296,11 +278,7 @@ class TestExpressionValidation:
 		None
 		"""
 		with pytest.raises(ValueError, match="Expression contains invalid characters"):
-			ExpressionConverter(
-				str_expr="A + B & C",
-				str_from_type="infix",
-				str_to_type="postfix"
-			)
+			ExpressionConverter(str_expr="A + B & C", str_from_type="infix", str_to_type="postfix")
 
 	def test_unbalanced_parentheses_raises_error(self) -> None:
 		"""Test that unbalanced parentheses raise ValueError.
@@ -315,11 +293,7 @@ class TestExpressionValidation:
 		None
 		"""
 		with pytest.raises(ValueError, match="Unbalanced parentheses in expression"):
-			ExpressionConverter(
-				str_expr="(A + B",
-				str_from_type="infix",
-				str_to_type="postfix"
-			)
+			ExpressionConverter(str_expr="(A + B", str_from_type="infix", str_to_type="postfix")
 
 	def test_extra_closing_parentheses_raises_error(self) -> None:
 		"""Test that extra closing parentheses raise ValueError.
@@ -334,11 +308,7 @@ class TestExpressionValidation:
 		None
 		"""
 		with pytest.raises(ValueError, match="Unbalanced parentheses in expression"):
-			ExpressionConverter(
-				str_expr="A + B)",
-				str_from_type="infix",
-				str_to_type="postfix"
-			)
+			ExpressionConverter(str_expr="A + B)", str_from_type="infix", str_to_type="postfix")
 
 	def test_valid_characters_accepted(self, standard_infix_expr: str) -> None:
 		"""Test that expressions with valid characters are accepted.
@@ -359,9 +329,7 @@ class TestExpressionValidation:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=standard_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.str_expr == standard_infix_expr
 
@@ -383,9 +351,7 @@ class TestExpressionValidation:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=complex_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=complex_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.str_expr == complex_infix_expr
 
@@ -415,9 +381,7 @@ class TestInfixToPostfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=simple_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=simple_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B +"
@@ -441,9 +405,7 @@ class TestInfixToPostfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=standard_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B C * + D E / -"
@@ -467,9 +429,7 @@ class TestInfixToPostfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=complex_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=complex_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C D - *"
@@ -493,9 +453,7 @@ class TestInfixToPostfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=single_operand_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=single_operand_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A"
@@ -523,9 +481,7 @@ class TestInfixToPrefixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=simple_infix_expr,
-			str_from_type="infix",
-			str_to_type="prefix"
+			str_expr=simple_infix_expr, str_from_type="infix", str_to_type="prefix"
 		)
 		result = converter.convert()
 		assert result == "+ A B"
@@ -549,9 +505,7 @@ class TestInfixToPrefixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_infix_expr,
-			str_from_type="infix",
-			str_to_type="prefix"
+			str_expr=standard_infix_expr, str_from_type="infix", str_to_type="prefix"
 		)
 		result = converter.convert()
 		assert result == "- + A * B C / D E"
@@ -575,9 +529,7 @@ class TestInfixToPrefixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=complex_infix_expr,
-			str_from_type="infix",
-			str_to_type="prefix"
+			str_expr=complex_infix_expr, str_from_type="infix", str_to_type="prefix"
 		)
 		result = converter.convert()
 		assert result == "* + A B - C D"
@@ -600,9 +552,7 @@ class TestPostfixToInfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A B +",
-			str_from_type="postfix",
-			str_to_type="infix"
+			str_expr="A B +", str_from_type="postfix", str_to_type="infix"
 		)
 		result = converter.convert()
 		assert result == "(A + B)"
@@ -626,9 +576,7 @@ class TestPostfixToInfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_postfix_expr,
-			str_from_type="postfix",
-			str_to_type="infix"
+			str_expr=standard_postfix_expr, str_from_type="postfix", str_to_type="infix"
 		)
 		result = converter.convert()
 		assert result == "((A + (B * C)) - (D / E))"
@@ -651,9 +599,7 @@ class TestPostfixToPrefixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A B +",
-			str_from_type="postfix",
-			str_to_type="prefix"
+			str_expr="A B +", str_from_type="postfix", str_to_type="prefix"
 		)
 		result = converter.convert()
 		assert result == "+ A B"
@@ -677,9 +623,7 @@ class TestPostfixToPrefixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_postfix_expr,
-			str_from_type="postfix",
-			str_to_type="prefix"
+			str_expr=standard_postfix_expr, str_from_type="postfix", str_to_type="prefix"
 		)
 		result = converter.convert()
 		assert result == "- + A * B C / D E"
@@ -702,9 +646,7 @@ class TestPrefixToInfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="+ A B",
-			str_from_type="prefix",
-			str_to_type="infix"
+			str_expr="+ A B", str_from_type="prefix", str_to_type="infix"
 		)
 		result = converter.convert()
 		assert result == "(A + B)"
@@ -728,9 +670,7 @@ class TestPrefixToInfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_prefix_expr,
-			str_from_type="prefix",
-			str_to_type="infix"
+			str_expr=standard_prefix_expr, str_from_type="prefix", str_to_type="infix"
 		)
 		result = converter.convert()
 		assert result == "((A + (B * C)) - (D / E))"
@@ -753,9 +693,7 @@ class TestPrefixToPostfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="+ A B",
-			str_from_type="prefix",
-			str_to_type="postfix"
+			str_expr="+ A B", str_from_type="prefix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B +"
@@ -779,9 +717,7 @@ class TestPrefixToPostfixConversion:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_prefix_expr,
-			str_from_type="prefix",
-			str_to_type="postfix"
+			str_expr=standard_prefix_expr, str_from_type="prefix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B C * + D E / -"
@@ -793,9 +729,7 @@ class TestPrefixToPostfixConversion:
 class TestConvertMethod:
 	"""Test cases for the main convert method."""
 
-	def test_invalid_conversion_combination_raises_error(
-		self, simple_infix_expr: str
-	) -> None:
+	def test_invalid_conversion_combination_raises_error(self, simple_infix_expr: str) -> None:
 		"""Test that invalid conversion combinations raise ValueError.
 
 		Verifies
@@ -815,7 +749,7 @@ class TestConvertMethod:
 		converter = ExpressionConverter(
 			str_expr=simple_infix_expr,
 			str_from_type="infix",
-			str_to_type="infix"  # Same type conversion
+			str_to_type="infix",  # Same type conversion
 		)
 		with pytest.raises(ValueError, match="Invalid conversion from infix to infix"):
 			converter.convert()
@@ -856,9 +790,7 @@ class TestConvertMethod:
 				expr = "- + A * B C / D E"
 
 			converter = ExpressionConverter(
-				str_expr=expr,
-				str_from_type=from_type,
-				str_to_type=to_type
+				str_expr=expr, str_from_type=from_type, str_to_type=to_type
 			)
 			result = converter.convert()
 			assert isinstance(result, str)
@@ -890,9 +822,7 @@ class TestTypeValidation:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=standard_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=standard_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert isinstance(converter.str_expr, str)
 		assert converter.str_from_type in ["infix", "postfix", "prefix"]
@@ -917,9 +847,7 @@ class TestTypeValidation:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=simple_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=simple_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert isinstance(result, str)
@@ -928,7 +856,7 @@ class TestTypeValidation:
 
 
 # --------------------------
-# Test Edge Cases and Error Conditions  
+# Test Edge Cases and Error Conditions
 # --------------------------
 class TestEdgeCases:
 	"""Test cases for edge cases and boundary conditions."""
@@ -946,11 +874,7 @@ class TestEdgeCases:
 		None
 		"""
 		with pytest.raises(ValueError):
-			ExpressionConverter(
-				str_expr="+ - *",
-				str_from_type="infix",
-				str_to_type="postfix"
-			)
+			ExpressionConverter(str_expr="+ - *", str_from_type="infix", str_to_type="postfix")
 
 	def test_expression_with_mixed_case(self) -> None:
 		"""Test expression with mixed case letters.
@@ -966,9 +890,7 @@ class TestEdgeCases:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="a + B * c",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="a + B * c", str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.token_list == ["A", "+", "B", "*", "C"]
 		result = converter.convert()
@@ -988,9 +910,7 @@ class TestEdgeCases:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A + 1 * B - 2",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + 1 * B - 2", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A 1 B * + 2 -"
@@ -1009,9 +929,7 @@ class TestEdgeCases:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="((A + B) * (C + D))",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="((A + B) * (C + D))", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C D + *"
@@ -1030,24 +948,26 @@ class TestEdgeCases:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A + B - C * D / E",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B - C * D / E", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C D * E / -"
 
-	@pytest.mark.parametrize("from_type,to_type", [
-		("infix", "postfix"),
-		("infix", "prefix"),
-		("postfix", "infix"),
-		("postfix", "prefix"),
-		("prefix", "infix"),
-		("prefix", "postfix"),
-	])
+	@pytest.mark.parametrize(
+		"from_type,to_type",
+		[
+			("infix", "postfix"),
+			("infix", "prefix"),
+			("postfix", "infix"),
+			("postfix", "prefix"),
+			("prefix", "infix"),
+			("prefix", "postfix"),
+		],
+	)
 	def test_single_operand_all_conversions(
-		self, from_type: Literal['infix', 'postfix', 'prefix'],
-		to_type: Literal['infix', 'postfix', 'prefix']
+		self,
+		from_type: Literal["infix", "postfix", "prefix"],
+		to_type: Literal["infix", "postfix", "prefix"],
 	) -> None:
 		"""Test single operand conversions for all notation types.
 
@@ -1068,11 +988,7 @@ class TestEdgeCases:
 		-------
 		None
 		"""
-		converter = ExpressionConverter(
-			str_expr="A",
-			str_from_type=from_type,
-			str_to_type=to_type
-		)
+		converter = ExpressionConverter(str_expr="A", str_from_type=from_type, str_to_type=to_type)
 		result = converter.convert()
 		# single operand should remain as "A" for all conversions
 		assert "A" in result
@@ -1097,9 +1013,7 @@ class TestEdgeCases:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr=simple_infix_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=simple_infix_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.postfix_list == []
 		converter.convert()
@@ -1113,9 +1027,7 @@ class TestStackOperations:
 	"""Test cases for stack operations in conversion methods."""
 
 	@patch("stpstone.utils.conversions.expression_converter.Stack")
-	def test_infix_to_postfix_stack_usage(
-		self, mock_stack_class: MagicMock
-	) -> None:
+	def test_infix_to_postfix_stack_usage(self, mock_stack_class: MagicMock) -> None:
 		"""Test stack operations during infix to postfix conversion.
 
 		Verifies
@@ -1140,9 +1052,7 @@ class TestStackOperations:
 		mock_stack_class.return_value = mock_stack
 
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B", str_from_type="infix", str_to_type="postfix"
 		)
 		converter.convert()
 
@@ -1150,9 +1060,7 @@ class TestStackOperations:
 		mock_stack.push.assert_called()
 
 	@patch("stpstone.utils.conversions.expression_converter.Stack")
-	def test_postfix_to_infix_stack_usage(
-		self, mock_stack_class: MagicMock
-	) -> None:
+	def test_postfix_to_infix_stack_usage(self, mock_stack_class: MagicMock) -> None:
 		"""Test stack operations during postfix to infix conversion.
 
 		Verifies
@@ -1175,9 +1083,7 @@ class TestStackOperations:
 		mock_stack_class.return_value = mock_stack
 
 		converter = ExpressionConverter(
-			str_expr="A B +",
-			str_from_type="postfix",
-			str_to_type="infix"
+			str_expr="A B +", str_from_type="postfix", str_to_type="infix"
 		)
 		converter.convert()
 
@@ -1185,9 +1091,7 @@ class TestStackOperations:
 		assert mock_stack.pop.call_count >= 2
 
 	@patch("stpstone.utils.conversions.expression_converter.Stack")
-	def test_prefix_operations_stack_usage(
-		self, mock_stack_class: MagicMock
-	) -> None:
+	def test_prefix_operations_stack_usage(self, mock_stack_class: MagicMock) -> None:
 		"""Test stack operations during prefix conversions.
 
 		Verifies
@@ -1210,9 +1114,7 @@ class TestStackOperations:
 		mock_stack_class.return_value = mock_stack
 
 		converter = ExpressionConverter(
-			str_expr="+ A B",
-			str_from_type="prefix",
-			str_to_type="postfix"
+			str_expr="+ A B", str_from_type="prefix", str_to_type="postfix"
 		)
 		converter.convert()
 
@@ -1239,9 +1141,7 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A + B * C",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B * C", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter._infix_to_postfix()
 		assert result == "A B C * +"
@@ -1261,9 +1161,7 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="prefix"
+			str_expr="A + B", str_from_type="infix", str_to_type="prefix"
 		)
 		result = converter._infix_to_prefix()
 		assert result == "+ A B"
@@ -1282,9 +1180,7 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A B +",
-			str_from_type="postfix",
-			str_to_type="infix"
+			str_expr="A B +", str_from_type="postfix", str_to_type="infix"
 		)
 		result = converter._postfix_to_infix()
 		assert result == "(A + B)"
@@ -1303,9 +1199,7 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A B +",
-			str_from_type="postfix",
-			str_to_type="prefix"
+			str_expr="A B +", str_from_type="postfix", str_to_type="prefix"
 		)
 		result = converter._postfix_to_prefix()
 		assert result == "+ A B"
@@ -1324,9 +1218,7 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="+ A B",
-			str_from_type="prefix",
-			str_to_type="infix"
+			str_expr="+ A B", str_from_type="prefix", str_to_type="infix"
 		)
 		result = converter._prefix_to_infix()
 		assert result == "(A + B)"
@@ -1345,9 +1237,7 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="+ A B",
-			str_from_type="prefix",
-			str_to_type="postfix"
+			str_expr="+ A B", str_from_type="prefix", str_to_type="postfix"
 		)
 		result = converter._prefix_to_postfix()
 		assert result == "A B +"
@@ -1366,19 +1256,17 @@ class TestInternalMethods:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B", str_from_type="infix", str_to_type="postfix"
 		)
-		
+
 		converter._validate_expression("A + B")
-		
+
 		with pytest.raises(ValueError, match="Expression cannot be empty"):
 			converter._validate_expression("")
-		
+
 		with pytest.raises(ValueError, match="Expression contains invalid characters"):
 			converter._validate_expression("A & B")
-		
+
 		with pytest.raises(ValueError, match="Unbalanced parentheses in expression"):
 			converter._validate_expression("(A + B")
 
@@ -1403,32 +1291,26 @@ class TestComplexScenarios:
 		None
 		"""
 		complex_infix = "((A + B) * C) - (D / (E + F))"
-		
+
 		# test infix to postfix
 		converter = ExpressionConverter(
-			str_expr=complex_infix,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=complex_infix, str_from_type="infix", str_to_type="postfix"
 		)
 		postfix_result = converter.convert()
 		assert isinstance(postfix_result, str)
 		assert len(postfix_result) > 0
-		
+
 		# test infix to prefix
 		converter = ExpressionConverter(
-			str_expr=complex_infix,
-			str_from_type="infix",
-			str_to_type="prefix"
+			str_expr=complex_infix, str_from_type="infix", str_to_type="prefix"
 		)
 		prefix_result = converter.convert()
 		assert isinstance(prefix_result, str)
 		assert len(prefix_result) > 0
-		
+
 		# test round-trip conversions
 		converter = ExpressionConverter(
-			str_expr=postfix_result,
-			str_from_type="postfix",
-			str_to_type="prefix"
+			str_expr=postfix_result, str_from_type="postfix", str_to_type="prefix"
 		)
 		roundtrip_result = converter.convert()
 		assert roundtrip_result == prefix_result
@@ -1448,9 +1330,7 @@ class TestComplexScenarios:
 		"""
 		expr = "(A + B) * C - D / E"
 		converter = ExpressionConverter(
-			str_expr=expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C * D E / -"
@@ -1471,22 +1351,20 @@ class TestComplexScenarios:
 		# create expression with many operands
 		operands = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
 		operators = ["+", "-", "*", "/"]
-		
+
 		expr_parts = []
 		for i, operand in enumerate(operands[:-1]):
 			expr_parts.extend([operand, operators[i % len(operators)]])
 		expr_parts.append(operands[-1])
-		
+
 		large_expr = " ".join(expr_parts)
 		converter = ExpressionConverter(
-			str_expr=large_expr,
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr=large_expr, str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert isinstance(result, str)
 		assert len(result) > 0
-		
+
 		# verify all operands are in result
 		for operand in operands:
 			assert operand in result
@@ -1512,22 +1390,18 @@ class TestErrorRecoveryAndFallback:
 		None
 		"""
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B", str_from_type="infix", str_to_type="postfix"
 		)
-		
+
 		# manually test invalid conversion by modifying types
 		converter.str_from_type = "invalid"
 		converter.str_to_type = "invalid"
-		
+
 		with pytest.raises(ValueError, match="Invalid conversion from invalid to invalid"):
 			converter.convert()
 
 	@patch("stpstone.utils.conversions.expression_converter.Stack")
-	def test_stack_operation_error_handling(
-		self, mock_stack_class: MagicMock
-	) -> None:
+	def test_stack_operation_error_handling(self, mock_stack_class: MagicMock) -> None:
 		"""Test error handling when stack operations fail.
 
 		Verifies
@@ -1551,11 +1425,9 @@ class TestErrorRecoveryAndFallback:
 		mock_stack_class.return_value = mock_stack
 
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B", str_from_type="infix", str_to_type="postfix"
 		)
-		
+
 		# should raise exception due to stack failure
 		with pytest.raises(Exception, match="Stack error"):
 			converter.convert()
@@ -1582,12 +1454,10 @@ class TestMetaclassIntegration:
 		"""
 		# verify metaclass is applied
 		assert ExpressionConverter.__class__.__name__ == "TypeChecker"
-		
+
 		# test normal initialization still works
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B", str_from_type="infix", str_to_type="postfix"
 		)
 		assert converter.str_expr == "A + B"
 
@@ -1606,9 +1476,7 @@ class TestMetaclassIntegration:
 		"""
 		# this should work with correct types
 		converter = ExpressionConverter(
-			str_expr="A + B",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert isinstance(result, str)
@@ -1641,12 +1509,10 @@ class TestCoverageCompleteness:
 			("+ A B", "prefix", "infix", "(A + B)"),
 			("+ A B", "prefix", "postfix", "A B +"),
 		]
-		
+
 		for expr, from_type, to_type, expected in test_cases:
 			converter = ExpressionConverter(
-				str_expr=expr,
-				str_from_type=from_type,
-				str_to_type=to_type
+				str_expr=expr, str_from_type=from_type, str_to_type=to_type
 			)
 			result = converter.convert()
 			assert result == expected
@@ -1667,15 +1533,15 @@ class TestCoverageCompleteness:
 		# test empty expression
 		with pytest.raises(ValueError, match="Expression cannot be empty"):
 			ExpressionConverter("", "infix", "postfix")
-		
+
 		# test invalid characters
 		with pytest.raises(ValueError, match="Expression contains invalid characters"):
 			ExpressionConverter("A & B", "infix", "postfix")
-		
+
 		# test unbalanced parentheses
 		with pytest.raises(ValueError, match="Unbalanced parentheses in expression"):
 			ExpressionConverter("(A + B", "infix", "postfix")
-		
+
 		# test valid expression
 		converter = ExpressionConverter("A + B", "infix", "postfix")
 		assert converter.str_expr == "A + B"
@@ -1702,12 +1568,10 @@ class TestCoverageCompleteness:
 			"A + B - C",  # same precedence
 			"A * B / C",  # same precedence
 		]
-		
+
 		for expr in test_expressions:
 			converter = ExpressionConverter(
-				str_expr=expr,
-				str_from_type="infix",
-				str_to_type="postfix"
+				str_expr=expr, str_from_type="infix", str_to_type="postfix"
 			)
 			result = converter.convert()
 			assert isinstance(result, str)
@@ -1728,18 +1592,14 @@ class TestCoverageCompleteness:
 		"""
 		# test opening parentheses
 		converter = ExpressionConverter(
-			str_expr="(A + B) * C",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="(A + B) * C", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C *"
-		
+
 		# test nested parentheses
 		converter = ExpressionConverter(
-			str_expr="((A + B) * C)",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="((A + B) * C)", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C *"
@@ -1758,19 +1618,13 @@ class TestCoverageCompleteness:
 		None
 		"""
 		# simple expression that will test stack empty conditions
-		converter = ExpressionConverter(
-			str_expr="A",
-			str_from_type="infix",
-			str_to_type="postfix"
-		)
+		converter = ExpressionConverter(str_expr="A", str_from_type="infix", str_to_type="postfix")
 		result = converter.convert()
 		assert result == "A"
-		
+
 		# expression that will exercise while loops
 		converter = ExpressionConverter(
-			str_expr="A + B + C",
-			str_from_type="infix",
-			str_to_type="postfix"
+			str_expr="A + B + C", str_from_type="infix", str_to_type="postfix"
 		)
 		result = converter.convert()
 		assert result == "A B + C +"

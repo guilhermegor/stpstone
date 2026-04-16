@@ -57,9 +57,7 @@ def mock_requests(mocker: MockerFixture) -> object:
 	object
 		Patched ``request`` callable.
 	"""
-	return mocker.patch(
-		"stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.request"
-	)
+	return mocker.patch("stpstone.utils.providers.br.anbimadata_api.anbimadata_api_gen.request")
 
 
 @pytest.fixture

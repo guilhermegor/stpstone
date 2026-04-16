@@ -143,9 +143,7 @@ def test_run_returns_dataframe_without_db(
 	mocker.patch.object(B3TradingHoursCore, "transform_data", return_value=mock_dataframe)
 	mocker.patch.object(B3TradingHoursCore, "standardize_dataframe", return_value=mock_dataframe)
 
-	result = instance.run(
-		str_table_name="br_b3_trading_hours_real_denominated_interest_rates"
-	)
+	result = instance.run(str_table_name="br_b3_trading_hours_real_denominated_interest_rates")
 	assert isinstance(result, pd.DataFrame)
 
 
@@ -182,9 +180,7 @@ def test_run_with_db_returns_none(
 	mocker.patch.object(B3TradingHoursCore, "standardize_dataframe", return_value=mock_dataframe)
 	mocker.patch.object(B3TradingHoursCore, "insert_table_db")
 
-	result = instance.run(
-		str_table_name="br_b3_trading_hours_real_denominated_interest_rates"
-	)
+	result = instance.run(str_table_name="br_b3_trading_hours_real_denominated_interest_rates")
 	assert result is None
 
 

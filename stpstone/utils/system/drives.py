@@ -19,382 +19,360 @@ from stpstone.utils.loggs.create_logs import CreateLog
 
 
 class ReturnClassifyDrives(TypedDict):
-    """Typed dictionary for classify_drives return.
+	"""Typed dictionary for classify_drives return.
 
-    Keys
-    ----
-    local : list[str]
-        List of local drive paths
-    detachable : list[str]
-        List of detachable drive paths
-    """
+	Keys
+	----
+	local : list[str]
+		List of local drive paths
+	detachable : list[str]
+		List of detachable drive paths
+	"""
 
-    local: list[str]
-    detachable: list[str]
+	local: list[str]
+	detachable: list[str]
 
 
 class ReturnGetDriveUsage(TypedDict):
-    """Typed dictionary for get_drive_usage return.
+	"""Typed dictionary for get_drive_usage return.
 
-    Keys
-    ----
-    total : int
-        Total size in bytes
-    used : int
-        Used size in bytes
-    free : int
-        Free size in bytes
-    """
+	Keys
+	----
+	total : int
+		Total size in bytes
+	used : int
+		Used size in bytes
+	free : int
+		Free size in bytes
+	"""
 
-    total: int
-    used: int
-    free: int
+	total: int
+	used: int
+	free: int
+
 
 class ReturnGetDriveInfo(TypedDict):
-    """Typed dictionary for get_drive_info return.
+	"""Typed dictionary for get_drive_info return.
 
-    Keys
-    ----
-    device : str
-        Drive device path
-    mountpoint : str
-        Mount point path
-    fstype : str
-        File system type
-    opts : str
-        Mount options
-    """
+	Keys
+	----
+	device : str
+		Drive device path
+	mountpoint : str
+		Mount point path
+	fstype : str
+		File system type
+	opts : str
+		Mount options
+	"""
 
-    device: str
-    mountpoint: str
-    fstype: str
-    opts: str
+	device: str
+	mountpoint: str
+	fstype: str
+	opts: str
 
 
 class DriveClassifier(metaclass=TypeChecker):
-    """Class for classifying and retrieving information about disk drives."""
+	"""Class for classifying and retrieving information about disk drives."""
 
-    def __init__(self, logger: Optional[Logger] = None) -> None:
-        """Initialize DriveClassifier.
+	def __init__(self, logger: Optional[Logger] = None) -> None:
+		"""Initialize DriveClassifier.
 
-        Parameters
-        ----------
-        logger : Optional[Logger]
-            Logger instance for logging, by default None
-        
-        Returns
-        -------
-        None
-        """
-        self.logger = logger
+		Parameters
+		----------
+		logger : Optional[Logger]
+			Logger instance for logging, by default None
 
-    def _validate_drive_path(self, drive_path: str) -> None:
-        """Validate that drive path is a non-empty string.
+		Returns
+		-------
+		None
+		"""
+		self.logger = logger
 
-        Parameters
-        ----------
-        drive_path : str
-            Drive path to validate
+	def _validate_drive_path(self, drive_path: str) -> None:
+		"""Validate that drive path is a non-empty string.
 
-        Raises
-        ------
-        ValueError
-            If drive_path is empty
-            If drive_path is not a string
-        """
-        if not drive_path:
-            raise ValueError("Drive path cannot be empty")
-        if not isinstance(drive_path, str):
-            raise ValueError("Drive path must be a string")
+		Parameters
+		----------
+		drive_path : str
+			Drive path to validate
 
-    def classify_drives(self) -> ReturnClassifyDrives:
-        """Classify hard drive units as 'local' or 'detachable'.
+		Raises
+		------
+		ValueError
+			If drive_path is empty
+			If drive_path is not a string
+		"""
+		if not drive_path:
+			raise ValueError("Drive path cannot be empty")
+		if not isinstance(drive_path, str):
+			raise ValueError("Drive path must be a string")
 
-        Returns
-        -------
-        ReturnClassifyDrives
-            Dictionary with keys 'local' and 'detachable' containing drive paths
+	def classify_drives(self) -> ReturnClassifyDrives:
+		"""Classify hard drive units as 'local' or 'detachable'.
 
-        References
-        ----------
-        .. [1] https://psutil.readthedocs.io/en/latest/#psutil.disk_partitions
-        """
-        dict_drives: ReturnClassifyDrives = {"local": [], "detachable": []}
-        psutil_partitions = psutil.disk_partitions()
-        for partition in psutil_partitions:
-            if "removable" in partition.opts:
-                dict_drives["detachable"].append(partition.device)
-            else:
-                dict_drives["local"].append(partition.device)
-        return dict_drives
+		Returns
+		-------
+		ReturnClassifyDrives
+			Dictionary with keys 'local' and 'detachable' containing drive paths
 
-    def get_drive_usage(self, drive_path: str) -> Optional[ReturnGetDriveUsage]:
-        """Retrieve usage statistics for a specific drive.
+		References
+		----------
+		.. [1] https://psutil.readthedocs.io/en/latest/#psutil.disk_partitions
+		"""
+		dict_drives: ReturnClassifyDrives = {"local": [], "detachable": []}
+		psutil_partitions = psutil.disk_partitions()
+		for partition in psutil_partitions:
+			if "removable" in partition.opts:
+				dict_drives["detachable"].append(partition.device)
+			else:
+				dict_drives["local"].append(partition.device)
+		return dict_drives
 
-        Parameters
-        ----------
-        drive_path : str
-            Path of the drive
+	def get_drive_usage(self, drive_path: str) -> Optional[ReturnGetDriveUsage]:
+		"""Retrieve usage statistics for a specific drive.
 
-        Returns
-        -------
-        Optional[ReturnGetDriveUsage]
-            Dictionary with keys 'total', 'used', and 'free' in bytes,
-            or None if the drive is not found
+		Parameters
+		----------
+		drive_path : str
+			Path of the drive
 
-        References
-        ----------
-        .. [1] https://psutil.readthedocs.io/en/latest/#psutil.disk_usage
-        """
-        self._validate_drive_path(drive_path)
-        try:
-            usage = psutil.disk_usage(drive_path)
-            return {
-                "total": usage.total,
-                "used": usage.used,
-                "free": usage.free,
-            }
-        except FileNotFoundError:
-            return None
+		Returns
+		-------
+		Optional[ReturnGetDriveUsage]
+			Dictionary with keys 'total', 'used', and 'free' in bytes,
+			or None if the drive is not found
 
-    def get_drive_info(self) -> list[ReturnGetDriveInfo]:
-        """Retrieve detailed information about all drives.
+		References
+		----------
+		.. [1] https://psutil.readthedocs.io/en/latest/#psutil.disk_usage
+		"""
+		self._validate_drive_path(drive_path)
+		try:
+			usage = psutil.disk_usage(drive_path)
+			return {
+				"total": usage.total,
+				"used": usage.used,
+				"free": usage.free,
+			}
+		except FileNotFoundError:
+			return None
 
-        Returns
-        -------
-        list[ReturnGetDriveInfo]
-            List of dictionaries with device, mountpoint, fstype, and opts
+	def get_drive_info(self) -> list[ReturnGetDriveInfo]:
+		"""Retrieve detailed information about all drives.
 
-        References
-        ----------
-        .. [1] https://psutil.readthedocs.io/en/latest/#psutil.disk_partitions
-        """
-        psutil_partitions = psutil.disk_partitions()
-        drive_info: list[ReturnGetDriveInfo] = []
-        for partition in psutil_partitions:
-            drive_info.append(
-                {
-                    "device": partition.device,
-                    "mountpoint": partition.mountpoint,
-                    "fstype": partition.fstype,
-                    "opts": partition.opts,
-                }
-            )
-        return drive_info
+		Returns
+		-------
+		list[ReturnGetDriveInfo]
+			List of dictionaries with device, mountpoint, fstype, and opts
 
-    def list_all_drives(self) -> list[str]:
-        """List all drives without classification.
+		References
+		----------
+		.. [1] https://psutil.readthedocs.io/en/latest/#psutil.disk_partitions
+		"""
+		psutil_partitions = psutil.disk_partitions()
+		drive_info: list[ReturnGetDriveInfo] = []
+		for partition in psutil_partitions:
+			drive_info.append(
+				{
+					"device": partition.device,
+					"mountpoint": partition.mountpoint,
+					"fstype": partition.fstype,
+					"opts": partition.opts,
+				}
+			)
+		return drive_info
 
-        Returns
-        -------
-        list[str]
-            List of all drive paths
-        """
-        psutil_partitions = psutil.disk_partitions()
-        return [partition.device for partition in psutil_partitions]
+	def list_all_drives(self) -> list[str]:
+		"""List all drives without classification.
 
-    def filter_drives_by_fs(self, fs_type: str) -> list[str]:
-        """Filter drives by their file system type.
+		Returns
+		-------
+		list[str]
+			List of all drive paths
+		"""
+		psutil_partitions = psutil.disk_partitions()
+		return [partition.device for partition in psutil_partitions]
 
-        Parameters
-        ----------
-        fs_type : str
-            File system type to filter by (e.g., 'NTFS', 'ext4')
+	def filter_drives_by_fs(self, fs_type: str) -> list[str]:
+		"""Filter drives by their file system type.
 
-        Returns
-        -------
-        list[str]
-            List of drive paths that match the specified file system type
-        """
-        psutil_partitions = psutil.disk_partitions()
-        return [
-            partition.device
-            for partition in psutil_partitions
-            if partition.fstype == fs_type
-        ]
+		Parameters
+		----------
+		fs_type : str
+			File system type to filter by (e.g., 'NTFS', 'ext4')
 
-    def monitor_drive_changes(self, interval: int = 5) -> None:
-        """Monitor for changes in connected drives.
+		Returns
+		-------
+		list[str]
+			List of drive paths that match the specified file system type
+		"""
+		psutil_partitions = psutil.disk_partitions()
+		return [partition.device for partition in psutil_partitions if partition.fstype == fs_type]
 
-        Parameters
-        ----------
-        interval : int
-            Time interval in seconds between checks
+	def monitor_drive_changes(self, interval: int = 5) -> None:
+		"""Monitor for changes in connected drives.
 
-        Notes
-        -----
-        Press Ctrl+C to stop monitoring
-        """
-        previous_drives = set(self.list_all_drives())
-        CreateLog().log_message(
-                self.logger, 
-                "Monitoring drive changes. Press Ctrl+C to stop.", 
-                "info"
-        )
-        try:
-            while True:
-                time.sleep(interval)
-                current_drives = set(self.list_all_drives())
-                if current_drives != previous_drives:
-                    added = current_drives - previous_drives
-                    removed = previous_drives - current_drives
-                    if added:
-                        CreateLog().log_message(
-                            self.logger, 
-                            f"Drives added: {added}", 
-                            "info"
-                        )
-                    if removed:
-                        CreateLog().log_message(
-                            self.logger, 
-                            f"Drives removed: {removed}", 
-                            "info"
-                        )
-                    previous_drives = current_drives
-        except KeyboardInterrupt:
-            CreateLog().log_message(
-                self.logger, 
-                "Drive monitoring stopped.", 
-                "info"
-            )
+		Parameters
+		----------
+		interval : int
+			Time interval in seconds between checks
 
-    def get_drive_serial(self, drive_path: str) -> Optional[str]:
-        """Retrieve the serial number or unique identifier for a drive.
+		Notes
+		-----
+		Press Ctrl+C to stop monitoring
+		"""
+		previous_drives = set(self.list_all_drives())
+		CreateLog().log_message(
+			self.logger, "Monitoring drive changes. Press Ctrl+C to stop.", "info"
+		)
+		try:
+			while True:
+				time.sleep(interval)
+				current_drives = set(self.list_all_drives())
+				if current_drives != previous_drives:
+					added = current_drives - previous_drives
+					removed = previous_drives - current_drives
+					if added:
+						CreateLog().log_message(self.logger, f"Drives added: {added}", "info")
+					if removed:
+						CreateLog().log_message(self.logger, f"Drives removed: {removed}", "info")
+					previous_drives = current_drives
+		except KeyboardInterrupt:
+			CreateLog().log_message(self.logger, "Drive monitoring stopped.", "info")
 
-        Parameters
-        ----------
-        drive_path : str
-            Drive path
+	def get_drive_serial(self, drive_path: str) -> Optional[str]:
+		"""Retrieve the serial number or unique identifier for a drive.
 
-        Returns
-        -------
-        Optional[str]
-            Serial number of the drive or None if retrieval fails
-        """
-        self._validate_drive_path(drive_path)
-        system = platform.system()
-        if system == "Windows":
-            return self._get_drive_serial_windows(drive_path)
-        if system == "Linux":
-            return self._get_drive_serial_linux(drive_path)
-        if system == "Darwin":
-            return self._get_drive_serial_mac(drive_path)
-        CreateLog().log_message(
-            self.logger, 
-            f"Unsupported operating system: {system}", 
-            "critical"
-        )
-        return None
+		Parameters
+		----------
+		drive_path : str
+			Drive path
 
-    def _get_drive_serial_windows(self, drive_path: str) -> Optional[str]:
-        """Retrieve the serial number for a drive on Windows.
+		Returns
+		-------
+		Optional[str]
+			Serial number of the drive or None if retrieval fails
+		"""
+		self._validate_drive_path(drive_path)
+		system = platform.system()
+		if system == "Windows":
+			return self._get_drive_serial_windows(drive_path)
+		if system == "Linux":
+			return self._get_drive_serial_linux(drive_path)
+		if system == "Darwin":
+			return self._get_drive_serial_mac(drive_path)
+		CreateLog().log_message(self.logger, f"Unsupported operating system: {system}", "critical")
+		return None
 
-        Parameters
-        ----------
-        drive_path : str
-            Path of the drive
+	def _get_drive_serial_windows(self, drive_path: str) -> Optional[str]:
+		"""Retrieve the serial number for a drive on Windows.
 
-        Returns
-        -------
-        Optional[str]
-            Serial number of the drive
-        """
-        try:
-            import wmi
+		Parameters
+		----------
+		drive_path : str
+			Path of the drive
 
-            c = wmi.WMI()
-            for disk in c.Win32_DiskDrive():
-                if disk.DeviceID == drive_path:
-                    return disk.SerialNumber.strip()
-            return None
-        except ImportError:
-            CreateLog().log_message(
-                self.logger, 
-                "The 'wmi' library is required for this functionality on Windows.", 
-                "warning"
-            )
-            return None
+		Returns
+		-------
+		Optional[str]
+			Serial number of the drive
+		"""
+		try:
+			import wmi
 
-    def _get_drive_serial_linux(self, drive_path: str) -> Optional[str]:
-        """Retrieve the serial number for a drive on Linux.
+			c = wmi.WMI()
+			for disk in c.Win32_DiskDrive():
+				if disk.DeviceID == drive_path:
+					return disk.SerialNumber.strip()
+			return None
+		except ImportError:
+			CreateLog().log_message(
+				self.logger,
+				"The 'wmi' library is required for this functionality on Windows.",
+				"warning",
+			)
+			return None
 
-        Parameters
-        ----------
-        drive_path : str
-            Path of the drive (e.g., '/dev/sda')
+	def _get_drive_serial_linux(self, drive_path: str) -> Optional[str]:
+		"""Retrieve the serial number for a drive on Linux.
 
-        Returns
-        -------
-        Optional[str]
-            Serial number of the drive
+		Parameters
+		----------
+		drive_path : str
+			Path of the drive (e.g., '/dev/sda')
 
-        Raises
-        ------
-        SystemError
-            If the 'hdparm' command is not found
-        """
-        self._validate_drive_path(drive_path)
-        
-        sudo_cmd = shutil.which("sudo")
-        hdparm_cmd = shutil.which("hdparm")
-        if not sudo_cmd:
-            raise SystemError(
-                "The 'sudo' command is required for this functionality on Linux.")
-        if not hdparm_cmd:
-            raise SystemError(
-                "The 'hdparm' command is required for this functionality on Linux.")
+		Returns
+		-------
+		Optional[str]
+			Serial number of the drive
 
-        try:
-            result = subprocess.run( # noqa S603: execution of untrusted input
-                [sudo_cmd, hdparm_cmd, "-I", drive_path],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            if result.returncode == 0:
-                for line in result.stdout.splitlines():
-                    if "Serial Number:" in line:
-                        return line.split(":", 1)[1].strip()
-            return None
-        except FileNotFoundError:
-            return None
+		Raises
+		------
+		SystemError
+			If the 'hdparm' command is not found
+		"""
+		self._validate_drive_path(drive_path)
 
-    def _get_drive_serial_mac(self, drive_path: str) -> Optional[str]:
-        """Retrieve the serial number for a drive on macOS.
+		sudo_cmd = shutil.which("sudo")
+		hdparm_cmd = shutil.which("hdparm")
+		if not sudo_cmd:
+			raise SystemError("The 'sudo' command is required for this functionality on Linux.")
+		if not hdparm_cmd:
+			raise SystemError("The 'hdparm' command is required for this functionality on Linux.")
 
-        Parameters
-        ----------
-        drive_path : str
-            Path of the drive (e.g., '/dev/disk0')
+		try:
+			result = subprocess.run(  # noqa S603: execution of untrusted input
+				[sudo_cmd, hdparm_cmd, "-I", drive_path],
+				capture_output=True,
+				text=True,
+				check=False,
+			)
+			if result.returncode == 0:
+				for line in result.stdout.splitlines():
+					if "Serial Number:" in line:
+						return line.split(":", 1)[1].strip()
+			return None
+		except FileNotFoundError:
+			return None
 
-        Returns
-        -------
-        Optional[str]
-            Serial number of the drive
+	def _get_drive_serial_mac(self, drive_path: str) -> Optional[str]:
+		"""Retrieve the serial number for a drive on macOS.
 
-        Raises
-        ------
-        SystemError
-            If the 'diskutil' command is not found
-        """
-        self._validate_drive_path(drive_path)
+		Parameters
+		----------
+		drive_path : str
+			Path of the drive (e.g., '/dev/disk0')
 
-        diskutil_cmd = shutil.which("diskutil")
-        if not diskutil_cmd:
-            raise SystemError(
-                "The 'diskutil' command is required for this functionality on macOS.")
+		Returns
+		-------
+		Optional[str]
+			Serial number of the drive
 
-        try:
-            result = subprocess.run( # noqa S603: execution of untrusted input
-                [diskutil_cmd, "info", drive_path],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            if result.returncode == 0:
-                for line in result.stdout.splitlines():
-                    if "Device / Media Name:" in line:
-                        return line.split(":", 1)[1].strip()
-            return None
-        except FileNotFoundError:
-            return None
+		Raises
+		------
+		SystemError
+			If the 'diskutil' command is not found
+		"""
+		self._validate_drive_path(drive_path)
+
+		diskutil_cmd = shutil.which("diskutil")
+		if not diskutil_cmd:
+			raise SystemError(
+				"The 'diskutil' command is required for this functionality on macOS."
+			)
+
+		try:
+			result = subprocess.run(  # noqa S603: execution of untrusted input
+				[diskutil_cmd, "info", drive_path],
+				capture_output=True,
+				text=True,
+				check=False,
+			)
+			if result.returncode == 0:
+				for line in result.stdout.splitlines():
+					if "Device / Media Name:" in line:
+						return line.split(":", 1)[1].strip()
+			return None
+		except FileNotFoundError:
+			return None

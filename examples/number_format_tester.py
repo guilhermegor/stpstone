@@ -1,5 +1,6 @@
 from stpstone.utils.parsers.numbers import NumHandler
 
+
 num_converter = NumHandler().transform_to_float
 
 test_cases = [

@@ -67,8 +67,9 @@ class FMPStocksOhlcvYesterday(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.url = self._BASE_URL
 
 	def run(
@@ -101,7 +102,7 @@ class FMPStocksOhlcvYesterday(ABCIngestionOperations):
 		"""
 		list_frames: list[pd.DataFrame] = []
 		for i in range(0, len(self.list_slugs), self._CHUNK_SIZE):
-			chunk = ",".join(self.list_slugs[i:i + self._CHUNK_SIZE])
+			chunk = ",".join(self.list_slugs[i : i + self._CHUNK_SIZE])
 			self.url = f"{self._BASE_URL}batch-quote?symbols={chunk}&apikey={self.token}"
 			resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
 			list_frames.append(self.transform_data(resp_req=resp_req))

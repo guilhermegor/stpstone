@@ -8,15 +8,15 @@ import platform
 
 
 if platform.system() != "Windows":
-    raise OSError("This module requires a Windows operating system to function properly.")
+	raise OSError("This module requires a Windows operating system to function properly.")
 
 from ctypes import (
-    POINTER,
-    WINFUNCTYPE,
-    c_bool,
-    c_int,
-    create_unicode_buffer,
-    windll,
+	POINTER,
+	WINFUNCTYPE,
+	c_bool,
+	c_int,
+	create_unicode_buffer,
+	windll,
 )
 from typing import Union
 
@@ -37,123 +37,123 @@ GetForegroundWindow = windll.user32.GetForegroundWindow
 
 
 class DealingWindows(metaclass=TypeChecker):
-    """Class for manipulating windows in Windows OS.
+	"""Class for manipulating windows in Windows OS.
 
-    Provides methods to find, refresh, and close windows based on their titles.
+	Provides methods to find, refresh, and close windows based on their titles.
 
-    References
-    ----------
-    .. [1] https://makble.com/how-to-find-window-with-wildcard-in-python-and-win32gui
-    """
+	References
+	----------
+	.. [1] https://makble.com/how-to-find-window-with-wildcard-in-python-and-win32gui
+	"""
 
-    def __init__(self) -> None:
-        """Initialize DealingWindows with empty titles list."""
-        self.titles: list[tuple[int, str, str, bool]] = []
+	def __init__(self) -> None:
+		"""Initialize DealingWindows with empty titles list."""
+		self.titles: list[tuple[int, str, str, bool]] = []
 
-    def _validate_hwnd(self, hwnd: int) -> None:
-        """Validate window handle.
+	def _validate_hwnd(self, hwnd: int) -> None:
+		"""Validate window handle.
 
-        Parameters
-        ----------
-        hwnd : int
-            Window handle to validate
+		Parameters
+		----------
+		hwnd : int
+			Window handle to validate
 
-        Returns
-        -------
-        None
+		Returns
+		-------
+		None
 
-        Raises
-        ------
-        ValueError
-            If hwnd is not a positive integer
-        """
-        if not isinstance(hwnd, int) or hwnd <= 0:
-            raise ValueError("Window handle must be a positive integer")
+		Raises
+		------
+		ValueError
+			If hwnd is not a positive integer
+		"""
+		if not isinstance(hwnd, int) or hwnd <= 0:
+			raise ValueError("Window handle must be a positive integer")
 
-    def foreach_window(self, hwnd: int) -> bool:
-        """Enumerate windows.
+	def foreach_window(self, hwnd: int) -> bool:
+		"""Enumerate windows.
 
-        Parameters
-        ----------
-        hwnd : int
-            Window handle
-        
-        Returns
-        -------
-        bool
-            True to continue enumeration, False to stop
+		Parameters
+		----------
+		hwnd : int
+			Window handle
 
-        Notes
-        -----
-        Populates self.titles with visible windows information.
-        """
-        if IsWindowVisible(hwnd):
-            length = GetWindowTextLength(hwnd)
-            classname = create_unicode_buffer(100 + 1)
-            GetClassName(hwnd, classname, 100 + 1)
-            buff = create_unicode_buffer(length + 1)
-            GetWindowText(hwnd, buff, length + 1)
-            self.titles.append(
-                (hwnd, buff.value, classname.value, bool(windll.user32.IsIconic(hwnd)))
-            )
-        return True
+		Returns
+		-------
+		bool
+			True to continue enumeration, False to stop
 
-    def refresh_wins(self) -> None:
-        """Refresh the list of open window titles.
+		Notes
+		-----
+		Populates self.titles with visible windows information.
+		"""
+		if IsWindowVisible(hwnd):
+			length = GetWindowTextLength(hwnd)
+			classname = create_unicode_buffer(100 + 1)
+			GetClassName(hwnd, classname, 100 + 1)
+			buff = create_unicode_buffer(length + 1)
+			GetWindowText(hwnd, buff, length + 1)
+			self.titles.append(
+				(hwnd, buff.value, classname.value, bool(windll.user32.IsIconic(hwnd)))
+			)
+		return True
 
-        Returns
-        -------
-        None
+	def refresh_wins(self) -> None:
+		"""Refresh the list of open window titles.
 
-        Notes
-        -----
-        Clears and repopulates self.titles with current window information.
-        """
-        self.titles = []
-        EnumWindows(EnumWindowsProc(self.foreach_window), 0)
+		Returns
+		-------
+		None
 
-    def find_window(self, title_substring: str) -> Union[int, bool]:
-        """Find window containing title substring.
+		Notes
+		-----
+		Clears and repopulates self.titles with current window information.
+		"""
+		self.titles = []
+		EnumWindows(EnumWindowsProc(self.foreach_window), 0)
 
-        Parameters
-        ----------
-        title_substring : str
-            Substring to search in window titles
+	def find_window(self, title_substring: str) -> Union[int, bool]:
+		"""Find window containing title substring.
 
-        Returns
-        -------
-        Union[int, bool]
-            Window handle if found, False otherwise
+		Parameters
+		----------
+		title_substring : str
+			Substring to search in window titles
 
-        Raises
-        ------
-        ValueError
-            If title_substring is not a string
+		Returns
+		-------
+		Union[int, bool]
+			Window handle if found, False otherwise
 
-        Notes
-        -----
-        Performs case-insensitive search.
-        """
-        if not isinstance(title_substring, str):
-            raise ValueError("Title substring must be a string")
+		Raises
+		------
+		ValueError
+			If title_substring is not a string
 
-        self.refresh_wins()
-        for item in self.titles:
-            if title_substring.lower() in item[1].lower():
-                return item[0]
-        return False
+		Notes
+		-----
+		Performs case-insensitive search.
+		"""
+		if not isinstance(title_substring, str):
+			raise ValueError("Title substring must be a string")
 
-    def close_window(self, window_handler: int) -> None:
-        """Close specified window.
+		self.refresh_wins()
+		for item in self.titles:
+			if title_substring.lower() in item[1].lower():
+				return item[0]
+		return False
 
-        Parameters
-        ----------
-        window_handler : int
-            Handle of window to close
+	def close_window(self, window_handler: int) -> None:
+		"""Close specified window.
 
-        Returns
-        -------
-        None
-        """
-        self._validate_hwnd(window_handler)
-        win32gui.PostMessage(window_handler, win32con.WM_CLOSE, 0, 0)
+		Parameters
+		----------
+		window_handler : int
+			Handle of window to close
+
+		Returns
+		-------
+		None
+		"""
+		self._validate_hwnd(window_handler)
+		win32gui.PostMessage(window_handler, win32con.WM_CLOSE, 0, 0)

@@ -24,151 +24,143 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 	"""Mais Retorno individual fund detail properties."""
 
 	_BASE_URL = "https://maisretorno.com/fundo/{}"
-	_XPATH_H1_FUND_NICKNAME = (
-		"//h1[@class=\"MuiTypography-root MuiTypography-h1 css-mqbfcn\"]"
-	)
+	_XPATH_H1_FUND_NICKNAME = '//h1[@class="MuiTypography-root MuiTypography-h1 css-mqbfcn"]'
 	_XPATH_P_FUND_FULL_NAME = (
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\" and @id=\"fund-name\"]"
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-fuk7hj" and @id="fund-name"]'
 	)
-	_XPATH_SPAN_STATUS = "//li[@data-testid=\"status\"]/span"
-	_XPATH_SVG_POOL_OPEN = "//*[@data-testid=\"open-condominium\"]//*[name()=\"svg\"]"
-	_XPATH_SVG_QUALIFIED_INVESTOR = (
-		"//li[@data-testid=\"qualified-investor\"]//*[name()=\"svg\"]"
-	)
-	_XPATH_SVG_EXCLUSIVE_FUND = "//li[@data-testid=\"exclusive\"]//*[name()=\"svg\"]"
-	_XPATH_SVG_LONG_TERM_TAXATION = (
-		"//li[@data-testid=\"long_term_tributation\"]//*[name()=\"svg\"]"
-	)
-	_XPATH_SVG_PENSION_FUND = "//li[@data-testid=\"pension_fund\"]//*[name()=\"svg\"]"
-	_XPATH_P_CNPJ_FUND = "//p[@data-testid=\"fund-cnpj\"]"
-	_XPATH_P_BENCHMARK = "//p[@data-testid=\"fund-benhcmark\"]"
-	_XPATH_P_FUND_INITIAL_DATE = "//p[@data-testid=\"fund-initial-date\"]"
-	_XPATH_P_FUND_TYPE = "//p[@data-testid=\"fund-type\"]"
+	_XPATH_SPAN_STATUS = '//li[@data-testid="status"]/span'
+	_XPATH_SVG_POOL_OPEN = '//*[@data-testid="open-condominium"]//*[name()="svg"]'
+	_XPATH_SVG_QUALIFIED_INVESTOR = '//li[@data-testid="qualified-investor"]//*[name()="svg"]'
+	_XPATH_SVG_EXCLUSIVE_FUND = '//li[@data-testid="exclusive"]//*[name()="svg"]'
+	_XPATH_SVG_LONG_TERM_TAXATION = '//li[@data-testid="long_term_tributation"]//*[name()="svg"]'
+	_XPATH_SVG_PENSION_FUND = '//li[@data-testid="pension_fund"]//*[name()="svg"]'
+	_XPATH_P_CNPJ_FUND = '//p[@data-testid="fund-cnpj"]'
+	_XPATH_P_BENCHMARK = '//p[@data-testid="fund-benhcmark"]'
+	_XPATH_P_FUND_INITIAL_DATE = '//p[@data-testid="fund-initial-date"]'
+	_XPATH_P_FUND_TYPE = '//p[@data-testid="fund-type"]'
 	_XPATH_A_FUND_ADMINISTRATOR = (
-		"//li[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-md-4 css-1twzmnh\"]"
-		"/*[self::a or self::p][contains(@class, \"MuiTypography-root MuiTypography-body1\")]"
+		'//li[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-md-4 css-1twzmnh"]'
+		'/*[self::a or self::p][contains(@class, "MuiTypography-root MuiTypography-body1")]'
 	)
 	_XPATH_A_FUND_CLASS = (
-		"//li[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-md-2 css-wubtha\"]"
-		"/p[@class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\""
-		" and text()=\"Classe\"]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\"]"
-		" | //li[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-md-2 css-wubtha\"]/p[text()=\"Classe\"]"
+		'//li[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-md-2 css-wubtha"]'
+		'/p[@class="MuiTypography-root MuiTypography-body1 css-fuk7hj"'
+		' and text()="Classe"]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-body1 css-fuk7hj"]'
+		' | //li[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-md-2 css-wubtha"]/p[text()="Classe"]'
 		"/following-sibling::*[self::a["
-		"@class=\"MuiTypography-root MuiTypography-body1 css-13xqfhh\"]"
-		" or self::p[class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\"]]"
+		'@class="MuiTypography-root MuiTypography-body1 css-13xqfhh"]'
+		' or self::p[class="MuiTypography-root MuiTypography-body1 css-fuk7hj"]]'
 	)
 	_XPATH_A_FUND_SUBCLASS = (
-		"//li[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-md-2 css-wubtha\"]"
-		"/p[@class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\""
-		" and text()=\"Subclasse\"]"
+		'//li[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-md-2 css-wubtha"]'
+		'/p[@class="MuiTypography-root MuiTypography-body1 css-fuk7hj"'
+		' and text()="Subclasse"]'
 		"/following-sibling::*[self::p["
-		"@class=\"MuiTypography-root MuiTypography-body1 css-fuk7hj\"]"
-		" or self::a[@class=\"MuiTypography-root MuiTypography-body1 css-13xqfhh\"]]"
+		'@class="MuiTypography-root MuiTypography-body1 css-fuk7hj"]'
+		' or self::a[@class="MuiTypography-root MuiTypography-body1 css-13xqfhh"]]'
 	)
-	_XPATH_A_FUND_MANAGER = "//div[@class=\"MuiStack-root css-yhwlx1\"]/a"
+	_XPATH_A_FUND_MANAGER = '//div[@class="MuiStack-root css-yhwlx1"]/a'
 	_XPATH_P_RENTABILITY_LTM = (
-		"//div[@class=\"MuiBox-root css-139zab0\"]"
-		"/h3[@class=\"MuiTypography-root MuiTypography-body1 css-1wethdf\""
-		" and contains(text(), \"Rentabilidade\")]"
-		"/following-sibling::p[contains(@class, \"MuiTypography-root MuiTypography-h4\")]"
+		'//div[@class="MuiBox-root css-139zab0"]'
+		'/h3[@class="MuiTypography-root MuiTypography-body1 css-1wethdf"'
+		' and contains(text(), "Rentabilidade")]'
+		'/following-sibling::p[contains(@class, "MuiTypography-root MuiTypography-h4")]'
 	)
 	_XPATH_P_AUM = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-lg-2 css-1s8n1jb\"]"
-		"//h3[@class=\"MuiTypography-root MuiTypography-body1 css-1wethdf\""
-		" and contains(text(), \"Patrim\u00f4nio L\u00edquido\")]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-h4 css-wu84th\"]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-lg-2 css-1s8n1jb"]'
+		'//h3[@class="MuiTypography-root MuiTypography-body1 css-1wethdf"'
+		' and contains(text(), "Patrim\u00f4nio L\u00edquido")]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-h4 css-wu84th"]'
 	)
 	_XPATH_P_AVERAGE_AUM_LTM = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-lg-2 css-1s8n1jb\"]"
-		"//h3[@class=\"MuiTypography-root MuiTypography-body1 css-1wethdf\""
-		" and contains(text(), \"PL M\u00e9dio 12M\")]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-h4 css-wu84th\"]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-lg-2 css-1s8n1jb"]'
+		'//h3[@class="MuiTypography-root MuiTypography-body1 css-1wethdf"'
+		' and contains(text(), "PL M\u00e9dio 12M")]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-h4 css-wu84th"]'
 	)
 	_XPATH_P_VOLATILITY_LTM = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-lg-2 css-1s8n1jb\"]"
-		"//h3[@class=\"MuiTypography-root MuiTypography-body1 css-1wethdf\""
-		" and contains(text(), \"Volatilidade 12M\")]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-h4 css-wu84th\"]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-lg-2 css-1s8n1jb"]'
+		'//h3[@class="MuiTypography-root MuiTypography-body1 css-1wethdf"'
+		' and contains(text(), "Volatilidade 12M")]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-h4 css-wu84th"]'
 	)
 	_XPATH_P_SHARPE_LTM = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-lg-2 css-1s8n1jb\"]"
-		"//h3[@class=\"MuiTypography-root MuiTypography-body1 css-1wethdf\""
-		" and contains(text(), \"\u00cdndice de Sharpe 12M\")]"
-		"/following-sibling::p[contains(@class, \"MuiTypography-root MuiTypography-h4\")]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-lg-2 css-1s8n1jb"]'
+		'//h3[@class="MuiTypography-root MuiTypography-body1 css-1wethdf"'
+		' and contains(text(), "\u00cdndice de Sharpe 12M")]'
+		'/following-sibling::p[contains(@class, "MuiTypography-root MuiTypography-h4")]'
 	)
 	_XPATH_P_QTY_UNITHOLDERS = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6"
-		" MuiGrid-grid-lg-2 css-1s8n1jb\"]"
-		"//h3[@class=\"MuiTypography-root MuiTypography-body1 css-1wethdf\""
-		" and contains(text(), \"Cotistas\")]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-h4 css-wu84th\"]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-6'
+		' MuiGrid-grid-lg-2 css-1s8n1jb"]'
+		'//h3[@class="MuiTypography-root MuiTypography-body1 css-1wethdf"'
+		' and contains(text(), "Cotistas")]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-h4 css-wu84th"]'
 	)
-	_XPATH_H3_MANAGER_FULL_NAME = (
-		"//h3[@class=\"MuiTypography-root MuiTypography-h5 css-1cqpmia\"]"
-	)
+	_XPATH_H3_MANAGER_FULL_NAME = '//h3[@class="MuiTypography-root MuiTypography-h5 css-1cqpmia"]'
 	_XPATH_P_FUND_MANAGER_DIRECTOR = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"])[1]"
+		'(//div[@class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"])[1]'
 	)
 	_XPATH_P_FUND_MANAGER_EMAIL = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"])[2]"
+		'(//div[@class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"])[2]'
 	)
 	_XPATH_P_FUND_MANAGER_SITE = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"])[3]"
+		'(//div[@class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"])[3]'
 	)
 	_XPATH_P_FUND_MANAGER_TELEPHONE = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"])[4]"
+		'(//div[@class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2 css-b965al"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"])[4]'
 	)
 	_XPATH_P_MINIMUM_INVESTMENT_AMOUNT = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-d5w72u\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"])[1]"
+		'(//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-d5w72u"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"])[1]'
 	)
 	_XPATH_P_MINIMUM_BALANCE_REQUIRED = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-d5w72u\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"])[2]"
+		'(//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-d5w72u"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"])[2]'
 	)
 	_XPATH_P_ADMINISTRATION_FEE = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-d5w72u\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"])[3]"
+		'(//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-d5w72u"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"])[3]'
 	)
 	_XPATH_P_ADMINISTRATION_FEE_MAX = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-d5w72u\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"])[4]"
+		'(//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-d5w72u"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"])[4]'
 	)
 	_XPATH_P_PERFORMANCE_FEE = (
-		"(//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-d5w72u\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"])[5]"
+		'(//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-d5w72u"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"])[5]'
 	)
 	_XPATH_P_FUND_QUOTATION_PERIOD = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-1e35mkm\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\""
-		" and contains(text(), \"Prazo de cotiza\")]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-1e35mkm"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"'
+		' and contains(text(), "Prazo de cotiza")]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"]'
 	)
 	_XPATH_P_FUND_SETTLEMENT_PERIOD = (
-		"//div[@class=\"MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-4"
-		" MuiGrid-grid-lg-2 css-1e35mkm\"]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\""
-		" and contains(text(), \"Liqui\")]"
-		"/following-sibling::p[@class=\"MuiTypography-root MuiTypography-body2 css-11lk3u8\"]"
+		'//div[@class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-4'
+		' MuiGrid-grid-lg-2 css-1e35mkm"]'
+		'//p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"'
+		' and contains(text(), "Liqui")]'
+		'/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-11lk3u8"]'
 	)
 
 	def __init__(
@@ -211,8 +203,9 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or ["aasl-fia"]
 		self.bool_headless = bool_headless
 		self.int_wait_load_seconds = int_wait_load_seconds
@@ -367,15 +360,9 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 		list
 			Single-element list with a dict of all fund property fields.
 		"""
-		h1_fund_nickname = scraper.get_element(
-			self._XPATH_H1_FUND_NICKNAME, selector_type="xpath"
-		)
-		p_fund_full_name = scraper.get_element(
-			self._XPATH_P_FUND_FULL_NAME, selector_type="xpath"
-		)
-		span_status = scraper.get_element(
-			self._XPATH_SPAN_STATUS, selector_type="xpath"
-		)
+		h1_fund_nickname = scraper.get_element(self._XPATH_H1_FUND_NICKNAME, selector_type="xpath")
+		p_fund_full_name = scraper.get_element(self._XPATH_P_FUND_FULL_NAME, selector_type="xpath")
+		span_status = scraper.get_element(self._XPATH_SPAN_STATUS, selector_type="xpath")
 		hex_pool_open = scraper.get_element_attrb(
 			self._XPATH_SVG_POOL_OPEN, str_attribute="color", selector_type="xpath"
 		)
@@ -395,30 +382,18 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 		hex_pension_fund = scraper.get_element_attrb(
 			self._XPATH_SVG_PENSION_FUND, str_attribute="color", selector_type="xpath"
 		)
-		p_cnpj_fund = scraper.get_element(
-			self._XPATH_P_CNPJ_FUND, selector_type="xpath"
-		)
-		p_benchmark = scraper.get_element(
-			self._XPATH_P_BENCHMARK, selector_type="xpath"
-		)
+		p_cnpj_fund = scraper.get_element(self._XPATH_P_CNPJ_FUND, selector_type="xpath")
+		p_benchmark = scraper.get_element(self._XPATH_P_BENCHMARK, selector_type="xpath")
 		p_fund_initial_date = scraper.get_element(
 			self._XPATH_P_FUND_INITIAL_DATE, selector_type="xpath"
 		)
-		p_fund_type = scraper.get_element(
-			self._XPATH_P_FUND_TYPE, selector_type="xpath"
-		)
+		p_fund_type = scraper.get_element(self._XPATH_P_FUND_TYPE, selector_type="xpath")
 		a_fund_administrator = scraper.get_element(
 			self._XPATH_A_FUND_ADMINISTRATOR, selector_type="xpath"
 		)
-		a_fund_class = scraper.get_element(
-			self._XPATH_A_FUND_CLASS, selector_type="xpath"
-		)
-		a_fund_subclass = scraper.get_element(
-			self._XPATH_A_FUND_SUBCLASS, selector_type="xpath"
-		)
-		a_fund_manager = scraper.get_element(
-			self._XPATH_A_FUND_MANAGER, selector_type="xpath"
-		)
+		a_fund_class = scraper.get_element(self._XPATH_A_FUND_CLASS, selector_type="xpath")
+		a_fund_subclass = scraper.get_element(self._XPATH_A_FUND_SUBCLASS, selector_type="xpath")
+		a_fund_manager = scraper.get_element(self._XPATH_A_FUND_MANAGER, selector_type="xpath")
 		p_rentability_ltm = scraper.get_element(
 			self._XPATH_P_RENTABILITY_LTM, selector_type="xpath"
 		)
@@ -426,12 +401,8 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 		p_average_aum_ltm = scraper.get_element(
 			self._XPATH_P_AVERAGE_AUM_LTM, selector_type="xpath"
 		)
-		p_volatility_ltm = scraper.get_element(
-			self._XPATH_P_VOLATILITY_LTM, selector_type="xpath"
-		)
-		p_sharpe_ltm = scraper.get_element(
-			self._XPATH_P_SHARPE_LTM, selector_type="xpath"
-		)
+		p_volatility_ltm = scraper.get_element(self._XPATH_P_VOLATILITY_LTM, selector_type="xpath")
+		p_sharpe_ltm = scraper.get_element(self._XPATH_P_SHARPE_LTM, selector_type="xpath")
 		p_qty_unitholders = scraper.get_element(
 			self._XPATH_P_QTY_UNITHOLDERS, selector_type="xpath"
 		)
@@ -472,46 +443,28 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 			self._XPATH_P_FUND_SETTLEMENT_PERIOD, selector_type="xpath"
 		)
 
-		rentability_ltm_text = (
-			p_rentability_ltm.get("text", None) if p_rentability_ltm else None
-		)
-		volatility_ltm_text = (
-			p_volatility_ltm.get("text", None) if p_volatility_ltm else None
-		)
+		rentability_ltm_text = p_rentability_ltm.get("text", None) if p_rentability_ltm else None
+		volatility_ltm_text = p_volatility_ltm.get("text", None) if p_volatility_ltm else None
 		sharpe_ltm_text = p_sharpe_ltm.get("text", None) if p_sharpe_ltm else None
 		min_inv_text = (
-			p_minimum_investment_amount.get("text", None)
-			if p_minimum_investment_amount
-			else None
+			p_minimum_investment_amount.get("text", None) if p_minimum_investment_amount else None
 		)
 		min_bal_text = (
-			p_minimum_balance_required.get("text", None)
-			if p_minimum_balance_required
-			else None
+			p_minimum_balance_required.get("text", None) if p_minimum_balance_required else None
 		)
-		admin_fee_text = (
-			p_administration_fee.get("text", None) if p_administration_fee else None
-		)
+		admin_fee_text = p_administration_fee.get("text", None) if p_administration_fee else None
 		admin_fee_max_text = (
-			p_administration_fee_max.get("text", None)
-			if p_administration_fee_max
-			else None
+			p_administration_fee_max.get("text", None) if p_administration_fee_max else None
 		)
-		perf_fee_text = (
-			p_performance_fee.get("text", None) if p_performance_fee else None
-		)
+		perf_fee_text = p_performance_fee.get("text", None) if p_performance_fee else None
 		fund_initial_date_text = (
 			p_fund_initial_date.get("text", None) if p_fund_initial_date else None
 		)
 
 		return [
 			{
-				"NICKNAME": h1_fund_nickname.get("text", None)
-				if h1_fund_nickname
-				else None,
-				"FUND_NAME": p_fund_full_name.get("text", None)
-				if p_fund_full_name
-				else None,
+				"NICKNAME": h1_fund_nickname.get("text", None) if h1_fund_nickname else None,
+				"FUND_NAME": p_fund_full_name.get("text", None) if p_fund_full_name else None,
 				"STATUS": span_status.get("text", None) if span_status else None,
 				"BL_POOL_OPEN": ColorIdentifier(hex_pool_open).bool_green()
 				if hex_pool_open is not None
@@ -540,9 +493,7 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 				"CLASS": a_fund_class.get("text", None) if a_fund_class else None,
 				"SUBCLASS": a_fund_subclass.get("text", None) if a_fund_subclass else None,
 				"MANAGER": a_fund_manager.get("text", None) if a_fund_manager else None,
-				"RENTABILITY_LTM": float(
-					rentability_ltm_text.replace("%", "").replace(",", ".")
-				)
+				"RENTABILITY_LTM": float(rentability_ltm_text.replace("%", "").replace(",", "."))
 				/ 100.0
 				if rentability_ltm_text is not None and rentability_ltm_text != "-"
 				else None,
@@ -550,9 +501,7 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 				"AVERAGE_AUM_LTM": p_average_aum_ltm.get("text", None)
 				if p_average_aum_ltm
 				else None,
-				"VOLATILITY_LTM": float(
-					volatility_ltm_text.replace("%", "").replace(",", ".")
-				)
+				"VOLATILITY_LTM": float(volatility_ltm_text.replace("%", "").replace(",", "."))
 				/ 100.0
 				if volatility_ltm_text is not None and volatility_ltm_text != "-"
 				else None,
@@ -580,20 +529,12 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 				"MINIMUM_INVESTMENT_AMOUNT": float(
 					min_inv_text.replace(".", "").replace("R$ ", "")
 				)
-				if min_inv_text is not None
-				and min_inv_text != "-"
-				and len(min_inv_text) > 1
+				if min_inv_text is not None and min_inv_text != "-" and len(min_inv_text) > 1
 				else None,
-				"MINIMUM_BALANCE_REQUIRED": float(
-					min_bal_text.replace(".", "").replace("R$ ", "")
-				)
-				if min_bal_text is not None
-				and min_bal_text != "-"
-				and len(min_bal_text) > 1
+				"MINIMUM_BALANCE_REQUIRED": float(min_bal_text.replace(".", "").replace("R$ ", ""))
+				if min_bal_text is not None and min_bal_text != "-" and len(min_bal_text) > 1
 				else None,
-				"ADMINISTRATION_FEE": float(
-					admin_fee_text.replace("%", "").replace(",", ".")
-				)
+				"ADMINISTRATION_FEE": float(admin_fee_text.replace("%", "").replace(",", "."))
 				/ 100.0
 				if admin_fee_text is not None and admin_fee_text != "-"
 				else None,
@@ -603,17 +544,14 @@ class MaisRetornoFundProperties(ABCIngestionOperations):
 				/ 100.0
 				if admin_fee_max_text is not None and admin_fee_text != "-"
 				else None,
-				"PERFORMANCE_FEE": float(perf_fee_text.replace("%", "").replace(",", "."))
-				/ 100.0
+				"PERFORMANCE_FEE": float(perf_fee_text.replace("%", "").replace(",", ".")) / 100.0
 				if perf_fee_text is not None and perf_fee_text != "-"
 				else None,
 				"FUND_QUOTATION_PERIOD": p_fund_quotation_period.get("text", None)
-				if p_fund_quotation_period is not None
-				and p_fund_quotation_period != "-"
+				if p_fund_quotation_period is not None and p_fund_quotation_period != "-"
 				else None,
 				"FUND_SETTLEMENT_PERIOD": p_fund_settlement_period.get("text", None)
-				if p_fund_settlement_period is not None
-				and p_fund_settlement_period != "-"
+				if p_fund_settlement_period is not None and p_fund_settlement_period != "-"
 				else None,
 			}
 		]

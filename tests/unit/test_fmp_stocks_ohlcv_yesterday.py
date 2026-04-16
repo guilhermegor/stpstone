@@ -134,8 +134,7 @@ def mock_dates_current(mocker: MockerFixture) -> MagicMock:
 		Mocked DatesCurrent instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".fmp_stocks_ohlcv_yesterday.DatesCurrent"
+		"stpstone.ingestion.countries.ww.exchange.markets.fmp_stocks_ohlcv_yesterday.DatesCurrent"
 	)
 	mock_instance = MagicMock(spec=DatesCurrent)
 	mock_cls.return_value = mock_instance
@@ -160,8 +159,7 @@ def mock_dates_br(mocker: MockerFixture, mock_dates_current: MagicMock) -> Magic
 		Mocked DatesBRAnbima instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".fmp_stocks_ohlcv_yesterday.DatesBRAnbima"
+		"stpstone.ingestion.countries.ww.exchange.markets.fmp_stocks_ohlcv_yesterday.DatesBRAnbima"
 	)
 	mock_instance = MagicMock(spec=DatesBRAnbima)
 	mock_cls.return_value = mock_instance
@@ -207,8 +205,7 @@ def mock_create_log(mocker: MockerFixture) -> MagicMock:
 		Mocked CreateLog instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".fmp_stocks_ohlcv_yesterday.CreateLog"
+		"stpstone.ingestion.countries.ww.exchange.markets.fmp_stocks_ohlcv_yesterday.CreateLog"
 	)
 	mock_instance = MagicMock(spec=CreateLog)
 	mock_cls.return_value = mock_instance
@@ -589,7 +586,9 @@ class TestFMPStocksOhlcvYesterday:
 		standardized_df = pd.DataFrame({"SYMBOL": ["AAPL"]})
 
 		instance = FMPStocksOhlcvYesterday(
-			token="tok", list_slugs=["AAPL"], cls_db=mock_db_session  # noqa: S106
+			token="tok",
+			list_slugs=["AAPL"],
+			cls_db=mock_db_session,  # noqa: S106
 		)
 		mocker.patch.object(instance, "standardize_dataframe", return_value=standardized_df)
 		mock_insert = mocker.patch.object(instance, "insert_table_db", return_value=None)

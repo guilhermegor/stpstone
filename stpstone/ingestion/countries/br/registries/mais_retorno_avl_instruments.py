@@ -24,33 +24,33 @@ class MaisRetornoAvlInstruments(ABCIngestionOperations):
 
 	_BASE_URL = "https://maisretorno.com/{}/page/{}"
 	_XPATH_P_INSTRUMENT_CODE = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-12ucgyp\"]"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-12ucgyp"]'
 	)
 	_XPATH_P_INSTRUMENT_NAME = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//a/following-sibling::p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"]"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//a/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"]'
 	)
 	_XPATH_HREF_INSTRUMENT = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]//a"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]//a'
 	)
 	_XPATH_P_CNPJ = (
-		"(//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-q9x96w\"])[1]"
+		'(//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"])[1]'
 	)
 	_XPATH_P_SEGMENT = (
-		"(//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-q9x96w\"])[2]"
+		'(//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"])[2]'
 	)
 	_XPATH_P_SECTOR = (
-		"(//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-q9x96w\"])[3]"
+		'(//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"])[3]'
 	)
 
 	def __init__(
@@ -96,8 +96,9 @@ class MaisRetornoAvlInstruments(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or [1, 2]
 		self.instruments_class = instruments_class or "lista-fi-infra"
 		self.bool_headless = bool_headless
@@ -250,23 +251,13 @@ class MaisRetornoAvlInstruments(ABCIngestionOperations):
 			str_attribute="href",
 			selector_type="xpath",
 		)
-		p_cnpj = scraper.get_element(
-			self._XPATH_P_CNPJ.format(i), selector_type="xpath"
-		)
-		p_segment = scraper.get_element(
-			self._XPATH_P_SEGMENT.format(i), selector_type="xpath"
-		)
-		p_sector = scraper.get_element(
-			self._XPATH_P_SECTOR.format(i), selector_type="xpath"
-		)
+		p_cnpj = scraper.get_element(self._XPATH_P_CNPJ.format(i), selector_type="xpath")
+		p_segment = scraper.get_element(self._XPATH_P_SEGMENT.format(i), selector_type="xpath")
+		p_sector = scraper.get_element(self._XPATH_P_SECTOR.format(i), selector_type="xpath")
 		return {
 			"CNPJ": p_cnpj.get("text", None) if p_cnpj else None,
-			"INSTRUMENT_CODE": p_instrument_code.get("text", None)
-			if p_instrument_code
-			else None,
-			"INSTRUMENT_NAME": p_instrument_name.get("text", None)
-			if p_instrument_name
-			else None,
+			"INSTRUMENT_CODE": p_instrument_code.get("text", None) if p_instrument_code else None,
+			"INSTRUMENT_NAME": p_instrument_name.get("text", None) if p_instrument_name else None,
 			"URL_INSTRUMENT": "https://maisretorno.com/" + href_instrument
 			if href_instrument is not None
 			else None,

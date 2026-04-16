@@ -2,9 +2,9 @@ import random
 import time
 from typing import Any, Dict, Optional, Tuple
 
-import urllib3
 from fake_useragent import UserAgent
 from requests import Response, Session
+import urllib3
 from urllib3.exceptions import InsecureRequestWarning
 
 

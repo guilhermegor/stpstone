@@ -266,7 +266,7 @@ class ConnectionApi(metaclass=TypeChecker):
 
 	def app_request(
 		self,
-		method: Literal['GET', 'POST', 'DELETE'],
+		method: Literal["GET", "POST", "DELETE"],
 		app: str,
 		dict_params: Optional[dict[str, Any]] = None,
 		dict_payload: Optional[list[dict[str, Any]]] = None,

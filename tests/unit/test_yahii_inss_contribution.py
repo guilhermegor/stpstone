@@ -357,17 +357,21 @@ def test_run_without_db(
 	None
 	"""
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		inss_instance, "parse_raw_file", return_value=["De 1.302,00 ate 2.571,29", "7,5"]
-	) as mock_parse, \
+	with (
 		patch.object(
-			inss_instance, "transform_data",
-			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]})
-		) as mock_transform, \
+			inss_instance, "parse_raw_file", return_value=["De 1.302,00 ate 2.571,29", "7,5"]
+		) as mock_parse,
 		patch.object(
-			inss_instance, "standardize_dataframe",
-			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]})
-		) as mock_standardize:
+			inss_instance,
+			"transform_data",
+			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]}),
+		) as mock_transform,
+		patch.object(
+			inss_instance,
+			"standardize_dataframe",
+			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]}),
+		) as mock_standardize,
+	):
 		result = inss_instance.run()
 		assert isinstance(result, pd.DataFrame)
 		mock_parse.assert_called_once()
@@ -406,18 +410,22 @@ def test_run_with_db(
 	mock_db = MagicMock()
 	inss_instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		inss_instance, "parse_raw_file", return_value=["De 1.302,00 ate 2.571,29", "7,5"]
-	) as mock_parse, \
+	with (
 		patch.object(
-			inss_instance, "transform_data",
-			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]})
-		) as mock_transform, \
+			inss_instance, "parse_raw_file", return_value=["De 1.302,00 ate 2.571,29", "7,5"]
+		) as mock_parse,
 		patch.object(
-			inss_instance, "standardize_dataframe",
-			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]})
-		) as mock_standardize, \
-		patch.object(inss_instance, "insert_table_db") as mock_insert:
+			inss_instance,
+			"transform_data",
+			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]}),
+		) as mock_transform,
+		patch.object(
+			inss_instance,
+			"standardize_dataframe",
+			return_value=pd.DataFrame({"SALARIO_CONTRIBUICAO": ["bracket"]}),
+		) as mock_standardize,
+		patch.object(inss_instance, "insert_table_db") as mock_insert,
+	):
 		result = inss_instance.run()
 		assert result is None
 		mock_parse.assert_called_once()
@@ -426,12 +434,15 @@ def test_run_with_db(
 		mock_insert.assert_called_once()
 
 
-@pytest.mark.parametrize("timeout", [
-	10,
-	10.5,
-	(5.0, 10.0),
-	(5, 10),
-])
+@pytest.mark.parametrize(
+	"timeout",
+	[
+		10,
+		10.5,
+		(5.0, 10.0),
+		(5, 10),
+	],
+)
 def test_get_response_timeout_variations(
 	inss_instance: YahiiINSSContribution,
 	mock_requests_get: object,
@@ -483,6 +494,7 @@ def test_reload_module() -> None:
 	import importlib
 
 	import stpstone.ingestion.countries.br.macroeconomics.yahii_inss_contribution
+
 	original_instance = YahiiINSSContribution(date_ref=date(2025, 1, 1))
 	importlib.reload(stpstone.ingestion.countries.br.macroeconomics.yahii_inss_contribution)
 	new_instance = YahiiINSSContribution(date_ref=date(2025, 1, 1))

@@ -28,22 +28,32 @@ class MaisRetornoHistoricalRentability(ABCIngestionOperations):
 
 	_BASE_URL = "https://maisretorno.com/{}/{}"
 	_XPATH_LIST_YEARS = (
-		"//tbody[@class=\"css-cssveg\"]/tr"
-		"/th[@class=\"__variable_a57643 MuiBox-root css-i9lh1x\"][not(*)]"
+		'//tbody[@class="css-cssveg"]/tr'
+		'/th[@class="__variable_a57643 MuiBox-root css-i9lh1x"][not(*)]'
 	)
 	_XPATH_LIST_TD_RENTABILITIES = (
-		"//div[@class=\"MuiStack-root css-j7qwjs\"]"
-		"/span[@style=\"font-size: 0.7rem; color: rgb(107, 113, 137);"
-		" font-weight: 400; line-height: 1.5;\"]/preceding-sibling::span"
+		'//div[@class="MuiStack-root css-j7qwjs"]'
+		'/span[@style="font-size: 0.7rem; color: rgb(107, 113, 137);'
+		' font-weight: 400; line-height: 1.5;"]/preceding-sibling::span'
 	)
 	_XPATH_LIST_TD_ALPHA = (
-		"//div[@class=\"MuiStack-root css-j7qwjs\"]"
-		"/span[@style=\"font-size: 0.7rem; color: rgb(107, 113, 137);"
-		" font-weight: 400; line-height: 1.5;\"]"
+		'//div[@class="MuiStack-root css-j7qwjs"]'
+		'/span[@style="font-size: 0.7rem; color: rgb(107, 113, 137);'
+		' font-weight: 400; line-height: 1.5;"]'
 	)
 	_LIST_MONTHS = [
-		"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-		"JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+		"JAN",
+		"FEB",
+		"MAR",
+		"APR",
+		"MAY",
+		"JUN",
+		"JUL",
+		"AUG",
+		"SEP",
+		"OCT",
+		"NOV",
+		"DEC",
 	]
 
 	def __init__(
@@ -92,8 +102,9 @@ class MaisRetornoHistoricalRentability(ABCIngestionOperations):
 		self.cls_num_handler = NumHandler()
 		self.cls_list_handler = ListHandler()
 		self.cls_dict_handler = HandlingDicts()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or ["aasl-fia"]
 		self.instruments_class = instruments_class or "fundo"
 		self.bool_headless = bool_headless
@@ -126,7 +137,10 @@ class MaisRetornoHistoricalRentability(ABCIngestionOperations):
 		scraper_playwright = self.parse_raw_file()
 		df_ = self.transform_data(scraper_playwright=scraper_playwright)
 		dict_dtypes: dict = {
-			"YEAR": int, "INSTRUMENT": str, "YTD": float, "SINCE_INCEPTION": float
+			"YEAR": int,
+			"INSTRUMENT": str,
+			"YTD": float,
+			"SINCE_INCEPTION": float,
 		}
 		for month in self._LIST_MONTHS:
 			dict_dtypes[month] = float
@@ -227,9 +241,7 @@ class MaisRetornoHistoricalRentability(ABCIngestionOperations):
 				list_combined = self.cls_list_handler.extend_lists(
 					list_td_rentabilities, list_td_alpha, bool_remove_duplicates=False
 				)
-				list_rows = self.cls_dict_handler.pair_headers_with_data(
-					list_cols, list_combined
-				)
+				list_rows = self.cls_dict_handler.pair_headers_with_data(list_cols, list_combined)
 				df_slug = pd.DataFrame(list_rows)
 				df_slug["YEAR"] = list_years
 				list_ser.extend(df_slug.to_dict(orient="records"))
@@ -254,9 +266,7 @@ class MaisRetornoHistoricalRentability(ABCIngestionOperations):
 		list
 			Processed list with floats, nan, or labelled strings.
 		"""
-		list_ = [
-			self.cls_num_handler.transform_to_float(d, int_precision=6) for d in list_
-		]
+		list_ = [self.cls_num_handler.transform_to_float(d, int_precision=6) for d in list_]
 		if str_instrument:
 			list_ = [
 				nan

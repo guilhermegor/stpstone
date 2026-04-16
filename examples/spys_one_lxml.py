@@ -1,6 +1,8 @@
-import requests
-from lxml import html
 from pathlib import Path
+
+from lxml import html
+import requests
+
 
 url = "https://spys.one/free-proxy-list/BR/"
 

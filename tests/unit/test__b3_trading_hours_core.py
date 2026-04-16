@@ -613,9 +613,7 @@ def test_transform_data_empty_input(
 		(HtmlElement(), ["MERCADO"], "//table/td", None),
 	],
 )
-def test_transform_data_invalid_inputs(
-	b3_core: B3TradingHoursCore, invalid_input: tuple
-) -> None:
+def test_transform_data_invalid_inputs(b3_core: B3TradingHoursCore, invalid_input: tuple) -> None:
 	"""Test transform_data raises TypeError for invalid parameter types.
 
 	Parameters

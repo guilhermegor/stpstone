@@ -112,8 +112,7 @@ def mock_dates_current(mocker: MockerFixture) -> MagicMock:
 		Mocked DatesCurrent instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".fmp_mkt_hours_exchanges.DatesCurrent"
+		"stpstone.ingestion.countries.ww.exchange.markets.fmp_mkt_hours_exchanges.DatesCurrent"
 	)
 	mock_instance = MagicMock(spec=DatesCurrent)
 	mock_cls.return_value = mock_instance
@@ -138,8 +137,7 @@ def mock_dates_br(mocker: MockerFixture, mock_dates_current: MagicMock) -> Magic
 		Mocked DatesBRAnbima instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".fmp_mkt_hours_exchanges.DatesBRAnbima"
+		"stpstone.ingestion.countries.ww.exchange.markets.fmp_mkt_hours_exchanges.DatesBRAnbima"
 	)
 	mock_instance = MagicMock(spec=DatesBRAnbima)
 	mock_cls.return_value = mock_instance
@@ -185,8 +183,7 @@ def mock_create_log(mocker: MockerFixture) -> MagicMock:
 		Mocked CreateLog instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".fmp_mkt_hours_exchanges.CreateLog"
+		"stpstone.ingestion.countries.ww.exchange.markets.fmp_mkt_hours_exchanges.CreateLog"
 	)
 	mock_instance = MagicMock(spec=CreateLog)
 	mock_cls.return_value = mock_instance
@@ -275,8 +272,7 @@ class TestFMPMktHoursExchanges:
 		assert instance.logger == mock_logger
 		assert instance.cls_db == mock_session
 		assert instance.url == (
-			"https://financialmodelingprep.com/stable/"
-			"all-exchange-market-hours?apikey=test_token"
+			"https://financialmodelingprep.com/stable/all-exchange-market-hours?apikey=test_token"
 		)
 
 	def test_init_default_date_uses_previous_working_day(
@@ -347,9 +343,7 @@ class TestFMPMktHoursExchanges:
 		result = instance.get_response(timeout=10.0, bool_verify=False)
 
 		assert result is mock_response_success
-		mock_requests_get.assert_called_once_with(
-			instance.url, timeout=10.0, verify=False
-		)
+		mock_requests_get.assert_called_once_with(instance.url, timeout=10.0, verify=False)
 		mock_response_success.raise_for_status.assert_called_once()
 
 	def test_get_response_raises_on_http_error(
@@ -530,10 +524,12 @@ class TestFMPMktHoursExchanges:
 		"""
 		mock_requests_get.return_value = mock_response_success
 
-		standardized_df = pd.DataFrame({
-			"EXCHANGE": ["NYSE"],
-			"NAME": ["New York Stock Exchange"],
-		})
+		standardized_df = pd.DataFrame(
+			{
+				"EXCHANGE": ["NYSE"],
+				"NAME": ["New York Stock Exchange"],
+			}
+		)
 
 		instance = FMPMktHoursExchanges(token="tok")  # noqa: S106
 		mocker.patch.object(instance, "standardize_dataframe", return_value=standardized_df)

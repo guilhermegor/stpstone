@@ -1,6 +1,8 @@
 """Investing.com daily OHLCV history for worldwide exchange-traded instruments."""
 
-from stpstone.ingestion.countries.ww.exchange.markets.investingcom_daily_ohlcv import InvestingComDailyOhlcv
+from stpstone.ingestion.countries.ww.exchange.markets.investingcom_daily_ohlcv import (
+	InvestingComDailyOhlcv,
+)
 
 
 cls_ = InvestingComDailyOhlcv(

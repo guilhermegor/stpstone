@@ -7,89 +7,89 @@ import pytest
 
 
 class APIClient(Protocol):
-    """Protocol defining the API client interface."""
-    
-    def get_value(self) -> int: 
-        """Get a value from the API.
+	"""Protocol defining the API client interface."""
 
-        Returns
-        -------
-        int
-            The retrieved value
-        """
+	def get_value(self) -> int:
+		"""Get a value from the API.
+
+		Returns
+		-------
+		int
+			The retrieved value
+		"""
 
 
 class Calculator:
-    """Simple calculator class for demonstration purposes."""
-    
-    def add(self, a: int, b: int) -> int:
-        """Add two numbers together.
+	"""Simple calculator class for demonstration purposes."""
 
-        Parameters
-        ----------
-        a : int
-            First number
-        b : int
-            Second number
+	def add(self, a: int, b: int) -> int:
+		"""Add two numbers together.
 
-        Returns
-        -------
-        int
-            Sum of a and b
-        """
-        return a + b
+		Parameters
+		----------
+		a : int
+			First number
+		b : int
+			Second number
 
-    def fetch_remote_value(self, api_client: APIClient) -> int:
-        """Fetch and process a remote value.
+		Returns
+		-------
+		int
+			Sum of a and b
+		"""
+		return a + b
 
-        Parameters
-        ----------
-        api_client : APIClient
-            Client object with get_value() method
+	def fetch_remote_value(self, api_client: APIClient) -> int:
+		"""Fetch and process a remote value.
 
-        Returns
-        -------
-        int
-            Remote value plus 10
-        """
-        return api_client.get_value() + 10
+		Parameters
+		----------
+		api_client : APIClient
+			Client object with get_value() method
+
+		Returns
+		-------
+		int
+			Remote value plus 10
+		"""
+		return api_client.get_value() + 10
 
 
 class TestCalculator:
-    """Test suite for Calculator class."""
+	"""Test suite for Calculator class."""
 
-    @pytest.fixture
-    def calculator(self) -> Calculator:
-        """Fixture providing Calculator instance for tests.
-        
-        Returns
-        -------
-        Calculator
-            Fresh Calculator instance
-        """
-        return Calculator()
+	@pytest.fixture
+	def calculator(self) -> Calculator:
+		"""Fixture providing Calculator instance for tests.
 
-    def test_add(self, calculator: Calculator) -> None:
-        """Test addition functionality.
-        
-        Parameters
-        ----------
-        calculator : Calculator
-            Calculator instance from fixture
-        """
-        result = calculator.add(2, 3)
-        assert result == 5
+		Returns
+		-------
+		Calculator
+			Fresh Calculator instance
+		"""
+		return Calculator()
 
-    def test_fetch_remote_value(self, calculator: Calculator) -> None:
-        """Test remote value fetching.
-        
-        Parameters
-        ----------
-        calculator : Calculator
-            Calculator instance from fixture
-        """
-        mock_api_client = MagicMock()
-        mock_api_client.get_value.return_value = 5
-        result = calculator.fetch_remote_value(mock_api_client)
-        mock_api_client.get_value.assert_called_once()
-        assert result == 15
+	def test_add(self, calculator: Calculator) -> None:
+		"""Test addition functionality.
+
+		Parameters
+		----------
+		calculator : Calculator
+			Calculator instance from fixture
+		"""
+		result = calculator.add(2, 3)
+		assert result == 5
+
+	def test_fetch_remote_value(self, calculator: Calculator) -> None:
+		"""Test remote value fetching.
+
+		Parameters
+		----------
+		calculator : Calculator
+			Calculator instance from fixture
+		"""
+		mock_api_client = MagicMock()
+		mock_api_client.get_value.return_value = 5
+		result = calculator.fetch_remote_value(mock_api_client)
+		mock_api_client.get_value.assert_called_once()
+		assert result == 15

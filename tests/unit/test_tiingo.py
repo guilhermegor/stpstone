@@ -138,9 +138,7 @@ def mock_requests_get(mocker: MockerFixture) -> object:
 	object
 		Patched requests.get callable.
 	"""
-	return mocker.patch(
-		"stpstone.ingestion.countries.us.exchange.tiingo.requests.get"
-	)
+	return mocker.patch("stpstone.ingestion.countries.us.exchange.tiingo.requests.get")
 
 
 @pytest.fixture
@@ -157,9 +155,7 @@ def mock_sleep(mocker: MockerFixture) -> object:
 	object
 		Patched sleep callable.
 	"""
-	return mocker.patch(
-		"stpstone.ingestion.countries.us.exchange.tiingo.sleep"
-	)
+	return mocker.patch("stpstone.ingestion.countries.us.exchange.tiingo.sleep")
 
 
 @pytest.fixture
@@ -176,9 +172,7 @@ def mock_backoff(mocker: MockerFixture) -> object:
 	object
 		Patched backoff decorator.
 	"""
-	return mocker.patch(
-		"backoff.on_exception", lambda *args, **kwargs: lambda func: func
-	)
+	return mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
 
 
 # --------------------------
@@ -220,9 +214,7 @@ def test_init_default_date_is_previous_working_day() -> None:
 	-------
 	None
 	"""
-	with patch.object(
-		DatesBRAnbima, "add_working_days", return_value=_SAMPLE_DATE
-	):
+	with patch.object(DatesBRAnbima, "add_working_days", return_value=_SAMPLE_DATE):
 		inst = TiingoUS(token=_SAMPLE_TOKEN)
 		assert inst.date_ref == _SAMPLE_DATE
 
@@ -416,9 +408,7 @@ def test_parse_raw_file_returns_stringio(
 	-------
 	None
 	"""
-	with patch.object(
-		instance, "get_file", return_value=StringIO("[]")
-	) as mock_get_file:
+	with patch.object(instance, "get_file", return_value=StringIO("[]")) as mock_get_file:
 		result = instance.parse_raw_file(mock_response)
 		assert isinstance(result, StringIO)
 		mock_get_file.assert_called_once_with(resp_req=mock_response)
@@ -483,9 +473,20 @@ def test_transform_data_valid_json_returns_dataframe(
 	assert isinstance(df_, pd.DataFrame)
 	assert not df_.empty
 	expected_cols = [
-		"DATE", "TICKER", "CLOSE", "HIGH", "LOW", "OPEN", "VOLUME",
-		"ADJ_CLOSE", "ADJ_HIGH", "ADJ_LOW", "ADJ_OPEN", "ADJ_VOLUME",
-		"DIV_CASH", "SPLIT_FACTOR",
+		"DATE",
+		"TICKER",
+		"CLOSE",
+		"HIGH",
+		"LOW",
+		"OPEN",
+		"VOLUME",
+		"ADJ_CLOSE",
+		"ADJ_HIGH",
+		"ADJ_LOW",
+		"ADJ_OPEN",
+		"ADJ_VOLUME",
+		"DIV_CASH",
+		"SPLIT_FACTOR",
 	]
 	assert list(df_.columns) == expected_cols
 	assert (df_["TICKER"] == _SAMPLE_SLUG).all()
@@ -550,10 +551,18 @@ def test_transform_data_ticker_matches_slug(
 	resp.json.return_value = [
 		{
 			"date": "2025-01-02T00:00:00+00:00",
-			"close": 100.0, "high": 101.0, "low": 99.0, "open": 100.0,
-			"volume": 1000.0, "adjClose": 100.0, "adjHigh": 101.0,
-			"adjLow": 99.0, "adjOpen": 100.0, "adjVolume": 1000.0,
-			"divCash": 0.0, "splitFactor": 1.0,
+			"close": 100.0,
+			"high": 101.0,
+			"low": 99.0,
+			"open": 100.0,
+			"volume": 1000.0,
+			"adjClose": 100.0,
+			"adjHigh": 101.0,
+			"adjLow": 99.0,
+			"adjOpen": 100.0,
+			"adjVolume": 1000.0,
+			"divCash": 0.0,
+			"splitFactor": 1.0,
 		}
 	]
 	df_ = instance.transform_data(resp_req=resp, slug="FAKE")
@@ -592,9 +601,7 @@ def test_run_without_db_returns_dataframe(
 	None
 	"""
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		instance, "standardize_dataframe", side_effect=lambda **kw: kw["df_"]
-	):
+	with patch.object(instance, "standardize_dataframe", side_effect=lambda **kw: kw["df_"]):
 		result = instance.run()
 	assert isinstance(result, pd.DataFrame)
 	assert not result.empty
@@ -628,9 +635,7 @@ def test_run_sleeps_once_per_slug(
 	"""
 	instance.list_slugs = ["AAPL", "MSFT"]
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		instance, "standardize_dataframe", side_effect=lambda **kw: kw["df_"]
-	):
+	with patch.object(instance, "standardize_dataframe", side_effect=lambda **kw: kw["df_"]):
 		instance.run()
 	assert mock_sleep.call_count == 2
 	mock_sleep.assert_called_with(RATE_LIMIT_SLEEP_SECONDS)
@@ -665,9 +670,10 @@ def test_run_with_db_inserts_and_returns_none(
 	mock_db = MagicMock()
 	instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		instance, "standardize_dataframe", side_effect=lambda **kw: kw["df_"]
-	), patch.object(instance, "insert_table_db") as mock_insert:
+	with (
+		patch.object(instance, "standardize_dataframe", side_effect=lambda **kw: kw["df_"]),
+		patch.object(instance, "insert_table_db") as mock_insert,
+	):
 		result = instance.run()
 	assert result is None
 	mock_insert.assert_called_once()

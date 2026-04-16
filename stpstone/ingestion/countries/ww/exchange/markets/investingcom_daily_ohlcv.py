@@ -79,10 +79,10 @@ class InvestingComDailyOhlcv(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
-		self.date_start = date_start or \
-			self.cls_dates_br.add_working_days(self.date_ref, -5)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
+		self.date_start = date_start or self.cls_dates_br.add_working_days(self.date_ref, -5)
 		self.date_end = date_end or self.date_ref
 		self.date_start_unix_ts = int(
 			datetime.combine(self.date_start, datetime.min.time()).timestamp()

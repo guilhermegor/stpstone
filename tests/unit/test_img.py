@@ -18,290 +18,265 @@ from stpstone.utils.parsers.img import ImgHandler
 
 
 class TestImgHandler:
-    """Test cases for ImgHandler class.
+	"""Test cases for ImgHandler class.
 
-    This test class verifies the behavior of image to HTML conversion
-    with different input types and edge cases.
-    """
+	This test class verifies the behavior of image to HTML conversion
+	with different input types and edge cases.
+	"""
 
-    @pytest.fixture
-    def img_handler(self) -> ImgHandler:
-        """Fixture providing an instance of ImgHandler.
+	@pytest.fixture
+	def img_handler(self) -> ImgHandler:
+		"""Fixture providing an instance of ImgHandler.
 
-        Returns
-        -------
-        ImgHandler
-            Instance of the class to be tested
-        """
-        return ImgHandler()
+		Returns
+		-------
+		ImgHandler
+			Instance of the class to be tested
+		"""
+		return ImgHandler()
 
-    @pytest.fixture
-    def sample_image_data(self) -> bytes:
-        """Fixture providing sample image binary data.
+	@pytest.fixture
+	def sample_image_data(self) -> bytes:
+		"""Fixture providing sample image binary data.
 
-        Returns
-        -------
-        bytes
-            Mock image binary data
-        """
-        return b"mock_image_data"
+		Returns
+		-------
+		bytes
+			Mock image binary data
+		"""
+		return b"mock_image_data"
 
-    @pytest.fixture
-    def mock_image_file(
-        self, 
-        sample_image_data: bytes
-    ) -> "mock_open":
-        """Fixture providing a mock file object for image reading.
+	@pytest.fixture
+	def mock_image_file(self, sample_image_data: bytes) -> "mock_open":
+		"""Fixture providing a mock file object for image reading.
 
-        Parameters
-        ----------
-        sample_image_data : bytes
-            The mock image data to return when file is read
+		Parameters
+		----------
+		sample_image_data : bytes
+			The mock image data to return when file is read
 
-        Returns
-        -------
-        'mock_open'
-            Mock file object
-        """
-        return mock_open(read_data=sample_image_data)
+		Returns
+		-------
+		'mock_open'
+			Mock file object
+		"""
+		return mock_open(read_data=sample_image_data)
 
-    def test_successful_conversion(
-        self,
-        img_handler: ImgHandler,
-        mock_image_file: "mock_open",
-        sample_image_data: bytes
-    ) -> None:
-        """Test successful image to HTML conversion.
+	def test_successful_conversion(
+		self, img_handler: ImgHandler, mock_image_file: "mock_open", sample_image_data: bytes
+	) -> None:
+		"""Test successful image to HTML conversion.
 
-        Verifies
-        --------
-        - Correct HTML tag generation
-        - Proper base64 encoding
-        - File handling with context manager
+		Verifies
+		--------
+		- Correct HTML tag generation
+		- Proper base64 encoding
+		- File handling with context manager
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        mock_image_file : 'mock_open'
-            Mock file object
-        sample_image_data : bytes
-            Sample image data to be encoded
-        """
-        test_path = "/path/to/image.jpeg"
-        expected_b64 = base64.b64encode(sample_image_data).decode("utf-8")
-        expected_html = f'<img src="data:image/jpeg;base64,{expected_b64}">'
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		mock_image_file : 'mock_open'
+			Mock file object
+		sample_image_data : bytes
+			Sample image data to be encoded
+		"""
+		test_path = "/path/to/image.jpeg"
+		expected_b64 = base64.b64encode(sample_image_data).decode("utf-8")
+		expected_html = f'<img src="data:image/jpeg;base64,{expected_b64}">'
 
-        with patch("builtins.open", mock_image_file):
-            result = img_handler.img_to_html(test_path, "jpeg")
+		with patch("builtins.open", mock_image_file):
+			result = img_handler.img_to_html(test_path, "jpeg")
 
-        assert result == expected_html
-        mock_image_file.assert_called_once_with(test_path, "rb")
+		assert result == expected_html
+		mock_image_file.assert_called_once_with(test_path, "rb")
 
-    @pytest.mark.parametrize("format", ["jpeg", "png", "gif"])
-    def test_supported_formats(
-        self,
-        img_handler: ImgHandler,
-        mock_image_file: "mock_open",
-        format: Literal['jpeg', 'png', 'gif']
-    ) -> None:
-        """Test all supported image formats.
+	@pytest.mark.parametrize("format", ["jpeg", "png", "gif"])
+	def test_supported_formats(
+		self,
+		img_handler: ImgHandler,
+		mock_image_file: "mock_open",
+		format: Literal["jpeg", "png", "gif"],
+	) -> None:
+		"""Test all supported image formats.
 
-        Verifies
-        --------
-        - All declared formats are accepted
-        - Format appears correctly in output tag
+		Verifies
+		--------
+		- All declared formats are accepted
+		- Format appears correctly in output tag
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        mock_image_file : 'mock_open'
-            Mock file object
-        format : Literal['jpeg', 'png', 'gif']
-            Image format to test
-        """
-        test_path = f"/path/to/image.{format}"
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		mock_image_file : 'mock_open'
+			Mock file object
+		format : Literal['jpeg', 'png', 'gif']
+			Image format to test
+		"""
+		test_path = f"/path/to/image.{format}"
 
-        with patch("builtins.open", mock_image_file):
-            result = img_handler.img_to_html(test_path, format)
+		with patch("builtins.open", mock_image_file):
+			result = img_handler.img_to_html(test_path, format)
 
-        assert f'image/{format}' in result
+		assert f"image/{format}" in result
 
-    @pytest.mark.parametrize("invalid_format", ["bmp", "tiff", "webp", ""])
-    def test_invalid_formats(
-        self,
-        img_handler: ImgHandler,
-        invalid_format: str
-    ) -> None:
-        """Test unsupported image formats raise ValueError.
+	@pytest.mark.parametrize("invalid_format", ["bmp", "tiff", "webp", ""])
+	def test_invalid_formats(self, img_handler: ImgHandler, invalid_format: str) -> None:
+		"""Test unsupported image formats raise ValueError.
 
-        Verifies
-        --------
-        - Unsupported formats raise ValueError
-        - Error message contains supported formats
+		Verifies
+		--------
+		- Unsupported formats raise ValueError
+		- Error message contains supported formats
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        invalid_format : str
-            Unsupported format to test
-        """
-        test_path = f"/path/to/image.{invalid_format}"
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		invalid_format : str
+			Unsupported format to test
+		"""
+		test_path = f"/path/to/image.{invalid_format}"
 
-        with pytest.raises(TypeError, match="must be one of"):
-            img_handler.img_to_html(test_path, invalid_format)
+		with pytest.raises(TypeError, match="must be one of"):
+			img_handler.img_to_html(test_path, invalid_format)
 
-    def test_file_not_found(self, img_handler: ImgHandler) -> None:
-        """Test FileNotFoundError is raised for missing files.
+	def test_file_not_found(self, img_handler: ImgHandler) -> None:
+		"""Test FileNotFoundError is raised for missing files.
 
-        Verifies
-        --------
-        - FileNotFoundError is raised when file doesn't exist
-        - Error message contains the path
+		Verifies
+		--------
+		- FileNotFoundError is raised when file doesn't exist
+		- Error message contains the path
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        """
-        test_path = "/nonexistent/path/image.jpeg"
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		"""
+		test_path = "/nonexistent/path/image.jpeg"
 
-        with pytest.raises(FileNotFoundError) as excinfo:
-            img_handler.img_to_html(test_path)
-        
-        assert test_path in str(excinfo.value)
+		with pytest.raises(FileNotFoundError) as excinfo:
+			img_handler.img_to_html(test_path)
 
-    def test_empty_file(
-        self,
-        img_handler: ImgHandler
-    ) -> None:
-        """Test behavior with empty image file.
+		assert test_path in str(excinfo.value)
 
-        Verifies
-        --------
-        - Empty files are handled without error
-        - Output HTML contains empty base64 data
+	def test_empty_file(self, img_handler: ImgHandler) -> None:
+		"""Test behavior with empty image file.
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        """
-        test_path = "/path/to/empty.jpeg"
-        mock_empty_file = mock_open(read_data=b"")
+		Verifies
+		--------
+		- Empty files are handled without error
+		- Output HTML contains empty base64 data
 
-        with patch("builtins.open", mock_empty_file):
-            result = img_handler.img_to_html(test_path)
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		"""
+		test_path = "/path/to/empty.jpeg"
+		mock_empty_file = mock_open(read_data=b"")
 
-        assert 'base64,' in result
-        assert len(result) > 20
+		with patch("builtins.open", mock_empty_file):
+			result = img_handler.img_to_html(test_path)
 
-    def test_relative_path(
-        self,
-        img_handler: ImgHandler,
-        mock_image_file: "mock_open",
-        tmp_path: Path
-    ) -> None:
-        """Test behavior with relative file paths.
+		assert "base64," in result
+		assert len(result) > 20
 
-        Verifies
-        --------
-        - Relative paths are handled correctly
-        - Absolute path is properly resolved
+	def test_relative_path(
+		self, img_handler: ImgHandler, mock_image_file: "mock_open", tmp_path: Path
+	) -> None:
+		"""Test behavior with relative file paths.
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        mock_image_file : 'mock_open'
-            Mock file object
-        tmp_path : Path
-            pytest temporary directory fixture
-        """
-        rel_path = "relative/image.jpeg"
+		Verifies
+		--------
+		- Relative paths are handled correctly
+		- Absolute path is properly resolved
 
-        with patch("builtins.open", mock_image_file):
-            img_handler.img_to_html(rel_path)
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		mock_image_file : 'mock_open'
+			Mock file object
+		tmp_path : Path
+			pytest temporary directory fixture
+		"""
+		rel_path = "relative/image.jpeg"
 
-        mock_image_file.assert_called_once_with(rel_path, "rb")
+		with patch("builtins.open", mock_image_file):
+			img_handler.img_to_html(rel_path)
 
-    def test_format_case_insensitivity(
-        self,
-        img_handler: ImgHandler,
-        mock_image_file: "mock_open"
-    ) -> None:
-        """Test format name case insensitivity.
+		mock_image_file.assert_called_once_with(rel_path, "rb")
 
-        Verifies
-        --------
-        - Format names are case insensitive
-        - Output uses lowercase format
+	def test_format_case_insensitivity(
+		self, img_handler: ImgHandler, mock_image_file: "mock_open"
+	) -> None:
+		"""Test format name case insensitivity.
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        mock_image_file : 'mock_open'
-            Mock file object
-        """
-        test_path = "/path/to/image.jpeg"
+		Verifies
+		--------
+		- Format names are case insensitive
+		- Output uses lowercase format
 
-        with pytest.raises(TypeError, match="must be one of"):
-            _ = img_handler.img_to_html(test_path, "JPEG")
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		mock_image_file : 'mock_open'
+			Mock file object
+		"""
+		test_path = "/path/to/image.jpeg"
 
-    def test_validate_format_method(
-        self,
-        img_handler: ImgHandler
-    ) -> None:
-        """Test _validate_format helper method directly.
+		with pytest.raises(TypeError, match="must be one of"):
+			_ = img_handler.img_to_html(test_path, "JPEG")
 
-        Verifies
-        --------
-        - Method raises ValueError for invalid formats
-        - Accepts supported formats without error
+	def test_validate_format_method(self, img_handler: ImgHandler) -> None:
+		"""Test _validate_format helper method directly.
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        """
-        # Test valid formats
-        img_handler._validate_format("jpeg")
-        img_handler._validate_format("png")
-        img_handler._validate_format("gif")
+		Verifies
+		--------
+		- Method raises ValueError for invalid formats
+		- Accepts supported formats without error
 
-        # Test invalid format
-        with pytest.raises(ValueError):
-            img_handler._validate_format("bmp")
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		"""
+		# Test valid formats
+		img_handler._validate_format("jpeg")
+		img_handler._validate_format("png")
+		img_handler._validate_format("gif")
 
-    def test_html_structure(
-        self,
-        img_handler: ImgHandler,
-        mock_image_file: "mock_open"
-    ) -> None:
-        """Test output HTML structure is correct.
+		# Test invalid format
+		with pytest.raises(ValueError):
+			img_handler._validate_format("bmp")
 
-        Verifies
-        --------
-        - Output is valid HTML img tag
-        - Contains required attributes
-        - Proper attribute formatting
+	def test_html_structure(self, img_handler: ImgHandler, mock_image_file: "mock_open") -> None:
+		"""Test output HTML structure is correct.
 
-        Parameters
-        ----------
-        img_handler : ImgHandler
-            Instance of the class being tested
-        mock_image_file : 'mock_open'
-            Mock file object
-        """
-        test_path = "/path/to/image.jpeg"
+		Verifies
+		--------
+		- Output is valid HTML img tag
+		- Contains required attributes
+		- Proper attribute formatting
 
-        with patch("builtins.open", mock_image_file):
-            result = img_handler.img_to_html(test_path)
+		Parameters
+		----------
+		img_handler : ImgHandler
+			Instance of the class being tested
+		mock_image_file : 'mock_open'
+			Mock file object
+		"""
+		test_path = "/path/to/image.jpeg"
 
-        assert result.startswith('<img src="data:image/jpeg;base64,')
-        assert result.endswith('">')
-        assert 'src=' in result
-        assert 'data:image/jpeg;base64,' in result
+		with patch("builtins.open", mock_image_file):
+			result = img_handler.img_to_html(test_path)
+
+		assert result.startswith('<img src="data:image/jpeg;base64,')
+		assert result.endswith('">')
+		assert "src=" in result
+		assert "data:image/jpeg;base64," in result

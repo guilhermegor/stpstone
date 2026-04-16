@@ -250,9 +250,7 @@ class TestAnbimaExchangeInfosBRCorporateBonds:
 		mock_dates_br = mocker.patch.object(
 			DatesBRAnbima, "add_working_days", return_value=date(2025, 9, 5)
 		)
-		instance = AnbimaExchangeInfosBRCorporateBonds(
-			logger=mock_logger, cls_db=mock_db_session
-		)
+		instance = AnbimaExchangeInfosBRCorporateBonds(logger=mock_logger, cls_db=mock_db_session)
 		assert instance.date_ref == date(2025, 9, 5)
 		assert instance.url.endswith("db250905.txt")
 		mock_dates_br.assert_called_once()
@@ -338,10 +336,21 @@ class TestAnbimaExchangeInfosBRCorporateBonds:
 		df_ = corporate_bonds_instance.transform_data(sample_corporate_bonds_data)
 		assert isinstance(df_, pd.DataFrame)
 		assert list(df_.columns) == [
-			"CODIGO", "NOME_EMISSOR", "DT_REPACTUACAO_VENCIMENTO", "INDICE_CORRECAO",
-			"TX_COMPRA", "TX_VENDA", "TX_INDICATIVA", "DESVIO_PADRAO",
-			"INTERVALO_INDICATIVO_MIN", "INTERVALO_INDICATIVO_MAX", "PU",
-			"RATIO_PU_PAR_VNE", "DURATION", "PCT_REUNE", "REF_NTNB",
+			"CODIGO",
+			"NOME_EMISSOR",
+			"DT_REPACTUACAO_VENCIMENTO",
+			"INDICE_CORRECAO",
+			"TX_COMPRA",
+			"TX_VENDA",
+			"TX_INDICATIVA",
+			"DESVIO_PADRAO",
+			"INTERVALO_INDICATIVO_MIN",
+			"INTERVALO_INDICATIVO_MAX",
+			"PU",
+			"RATIO_PU_PAR_VNE",
+			"DURATION",
+			"PCT_REUNE",
+			"REF_NTNB",
 		]
 		assert df_["TX_COMPRA"].iloc[0] == pytest.approx(5.0)
 		assert df_["CODIGO"].iloc[0] == "ABC123"

@@ -336,10 +336,21 @@ class TestAnbimaExchangeInfosBRTreasuries:
 		df_ = treasuries_instance.transform_data(sample_treasuries_data)
 		assert isinstance(df_, pd.DataFrame)
 		assert list(df_.columns) == [
-			"TITULO", "DATA_REFERENCIA", "CODIGO_SELIC", "DATA_BASE_EMISSAO",
-			"DATA_VENCIMENTO", "TX_COMPRA", "TX_VENDA", "TX_INDICATIVAS",
-			"PU", "DESVIO_PADRAO", "INTERV_IND_INF_D0", "INTERV_IND_SUP_D0",
-			"INTERV_IND_INF_DMA1", "INTERV_IND_SUP_DMA1", "CRITERIO",
+			"TITULO",
+			"DATA_REFERENCIA",
+			"CODIGO_SELIC",
+			"DATA_BASE_EMISSAO",
+			"DATA_VENCIMENTO",
+			"TX_COMPRA",
+			"TX_VENDA",
+			"TX_INDICATIVAS",
+			"PU",
+			"DESVIO_PADRAO",
+			"INTERV_IND_INF_D0",
+			"INTERV_IND_SUP_D0",
+			"INTERV_IND_INF_DMA1",
+			"INTERV_IND_SUP_DMA1",
+			"CRITERIO",
 		]
 		assert df_["TX_COMPRA"].iloc[0] == pytest.approx(5.1)
 		assert df_["TITULO"].iloc[0] == "LTN"
@@ -417,9 +428,7 @@ class TestAnbimaExchangeInfosBRTreasuries:
 		None
 		"""
 		mock_requests_get.return_value = mock_response
-		mocker.patch.object(
-			treasuries_instance, "get_file", return_value=sample_treasuries_data
-		)
+		mocker.patch.object(treasuries_instance, "get_file", return_value=sample_treasuries_data)
 		mocker.patch.object(
 			treasuries_instance, "standardize_dataframe", return_value=pd.DataFrame()
 		)

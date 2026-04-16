@@ -27,7 +27,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 		self,
 		str_client_id: str,
 		str_client_secret: str,
-		str_env: Literal['dev', 'prd'] = "dev",
+		str_env: Literal["dev", "prd"] = "dev",
 		int_chunk: int = 1000,
 	) -> None:
 		"""Initialize ANBIMA API client.
@@ -59,9 +59,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 		self.str_client_id = str_client_id
 		self.str_client_secret = str_client_secret
 		self.int_chunk = int_chunk
-		self.str_host = (
-			self._URL_HOST_DEV if str_env == "dev" else self._URL_HOST_PRD
-		)
+		self.str_host = self._URL_HOST_DEV if str_env == "dev" else self._URL_HOST_PRD
 		self._token_cache: Optional[ReturnAccessToken] = None
 		self._cls_str = StrHandler()
 		self._cls_json = JsonFiles()
@@ -115,7 +113,7 @@ class AnbimaDataGen(metaclass=TypeChecker):
 	def generic_request(
 		self,
 		str_app: str,
-		str_method: Literal['GET', 'POST'],
+		str_method: Literal["GET", "POST"],
 		dict_payload: Optional[dict[str, Any]] = None,
 	) -> list[dict[str, Any]]:
 		"""Dispatch an authenticated request to ANBIMA's API.

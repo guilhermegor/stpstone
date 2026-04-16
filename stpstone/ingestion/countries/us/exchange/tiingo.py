@@ -83,9 +83,7 @@ class TiingoUS(ABCIngestionOperations):
 		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
 			self.cls_dates_current.curr_date(), -1
 		)
-		self.date_start = date_start or self.cls_dates_br.add_working_days(
-			self.date_ref, -52
-		)
+		self.date_start = date_start or self.cls_dates_br.add_working_days(self.date_ref, -52)
 		self.date_end = date_end or self.date_ref
 
 	def _build_url(self, slug: str) -> str:

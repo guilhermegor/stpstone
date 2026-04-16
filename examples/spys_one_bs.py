@@ -1,7 +1,8 @@
-import requests
-import re
-from bs4 import BeautifulSoup
 from pathlib import Path
+import re
+
+from bs4 import BeautifulSoup
+import requests
 
 
 def ensure_directory_exists():

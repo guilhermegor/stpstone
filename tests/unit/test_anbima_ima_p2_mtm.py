@@ -190,9 +190,7 @@ class TestAnbimaExchangeBRIMAP2MTMs:
 		AnbimaExchangeBRIMAP2MTMs
 			Initialized instance without DB session.
 		"""
-		return AnbimaExchangeBRIMAP2MTMs(
-			date_ref=sample_date, logger=mock_logger, cls_db=None
-		)
+		return AnbimaExchangeBRIMAP2MTMs(date_ref=sample_date, logger=mock_logger, cls_db=None)
 
 	def test_init_valid_inputs(
 		self,
@@ -219,7 +217,9 @@ class TestAnbimaExchangeBRIMAP2MTMs:
 			date_ref=sample_date, logger=mock_logger, cls_db=mock_db_session
 		)
 		assert instance.date_ref == sample_date
-		assert instance.url == "https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt"
+		assert (
+			instance.url == "https://www.anbima.com.br/informacoes/ima-p2/arqs/ima_completo_p2.txt"
+		)
 		assert isinstance(instance.cls_dir_files_management, DirFilesManagement)
 		assert isinstance(instance.cls_dates_current, DatesCurrent)
 		assert isinstance(instance.cls_create_log, CreateLog)
@@ -309,10 +309,19 @@ class TestAnbimaExchangeBRIMAP2MTMs:
 		df_ = ima_p2_instance.transform_data(sample_ima_p2_data)
 		assert isinstance(df_, pd.DataFrame)
 		assert list(df_.columns) == [
-			"DATA_REFERENCIA", "INDICE", "NUMERO_INDICE", "VARIACAO_DIARIA_PCT",
-			"VARIACAO_MES_PCT", "VARIACAO_ANUAL_PCT", "VARIACAO_ULTIMOS_12_MESES",
-			"VARIACAO_ULTIMOS_24_MESES", "DURATION_DU", "CARTEIRA_MERCADO_MTM",
-			"NUMERO_OPERACOES", "QTD_NEGOCIADA_1000_TITULOS", "VALOR_NEGOCIADO_MIL_BRL",
+			"DATA_REFERENCIA",
+			"INDICE",
+			"NUMERO_INDICE",
+			"VARIACAO_DIARIA_PCT",
+			"VARIACAO_MES_PCT",
+			"VARIACAO_ANUAL_PCT",
+			"VARIACAO_ULTIMOS_12_MESES",
+			"VARIACAO_ULTIMOS_24_MESES",
+			"DURATION_DU",
+			"CARTEIRA_MERCADO_MTM",
+			"NUMERO_OPERACOES",
+			"QTD_NEGOCIADA_1000_TITULOS",
+			"VALOR_NEGOCIADO_MIL_BRL",
 			"PMR",
 		]
 		assert df_["VARIACAO_DIARIA_PCT"].iloc[0] == pytest.approx(0.5)
@@ -349,9 +358,7 @@ class TestAnbimaExchangeBRIMAP2MTMs:
 		None
 		"""
 		mock_requests_get.return_value = mock_response
-		mocker.patch.object(
-			ima_p2_instance_no_db, "get_file", return_value=sample_ima_p2_data
-		)
+		mocker.patch.object(ima_p2_instance_no_db, "get_file", return_value=sample_ima_p2_data)
 		mocker.patch.object(
 			ima_p2_instance_no_db, "standardize_dataframe", return_value=pd.DataFrame()
 		)
@@ -392,9 +399,7 @@ class TestAnbimaExchangeBRIMAP2MTMs:
 		"""
 		mock_requests_get.return_value = mock_response
 		mocker.patch.object(ima_p2_instance, "get_file", return_value=sample_ima_p2_data)
-		mocker.patch.object(
-			ima_p2_instance, "standardize_dataframe", return_value=pd.DataFrame()
-		)
+		mocker.patch.object(ima_p2_instance, "standardize_dataframe", return_value=pd.DataFrame())
 		mock_insert = mocker.patch.object(ima_p2_instance, "insert_table_db")
 		result = ima_p2_instance.run()
 		assert result is None

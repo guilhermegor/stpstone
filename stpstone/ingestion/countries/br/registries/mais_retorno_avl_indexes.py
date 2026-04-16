@@ -24,23 +24,23 @@ class MaisRetornoAvlIndexes(ABCIngestionOperations):
 
 	_BASE_URL = "https://maisretorno.com/lista-indices/page/{}"
 	_XPATH_P_INDEX_NAME = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-12ucgyp\"]"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-12ucgyp"]'
 	)
 	_XPATH_P_INDEX_CODE = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//a/following-sibling::p[@class=\"MuiTypography-root MuiTypography-body2 css-oc8vpl\"]"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//a/following-sibling::p[@class="MuiTypography-root MuiTypography-body2 css-oc8vpl"]'
 	)
 	_XPATH_HREF_INDEX_URL = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]//a"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]//a'
 	)
 	_XPATH_P_STATUS = (
-		"//li[@class=\"MuiListItem-root MuiListItem-gutters MuiListItem-padding"
-		" MuiListItem-divider css-1toktnj\"][{}]"
-		"//p[@class=\"MuiTypography-root MuiTypography-body1 css-q9x96w\"]"
+		'//li[@class="MuiListItem-root MuiListItem-gutters MuiListItem-padding'
+		' MuiListItem-divider css-1toktnj"][{}]'
+		'//p[@class="MuiTypography-root MuiTypography-body1 css-q9x96w"]'
 	)
 
 	def __init__(
@@ -83,8 +83,9 @@ class MaisRetornoAvlIndexes(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
-		self.date_ref = date_ref or \
-			self.cls_dates_br.add_working_days(self.cls_dates_current.curr_date(), -1)
+		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
+			self.cls_dates_current.curr_date(), -1
+		)
 		self.list_slugs = list_slugs or [1, 2]
 		self.bool_headless = bool_headless
 		self.int_wait_load_seconds = int_wait_load_seconds
@@ -233,9 +234,7 @@ class MaisRetornoAvlIndexes(ABCIngestionOperations):
 			str_attribute="href",
 			selector_type="xpath",
 		)
-		p_status = scraper.get_element(
-			self._XPATH_P_STATUS.format(i), selector_type="xpath"
-		)
+		p_status = scraper.get_element(self._XPATH_P_STATUS.format(i), selector_type="xpath")
 		return {
 			"INDEX_NAME": p_index_name.get("text", None) if p_index_name else None,
 			"INDEX_CODE": p_index_code.get("text", None) if p_index_code else None,

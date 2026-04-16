@@ -144,9 +144,7 @@ class AccountsData(metaclass=TypeChecker):
 			bool_parse_dict_params_data=True,
 		)
 
-	def spxi_tmox_global_metrics_remove(
-		self, account_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def spxi_tmox_global_metrics_remove(self, account_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Remove all global metrics limits for an account.
 
 		Parameters

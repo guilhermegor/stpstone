@@ -1,15 +1,16 @@
 """stpstone package - Solid financial ETL, analytics and utils with support to global markets."""
+
 from importlib.metadata import PackageNotFoundError, version
 
 
 try:
-    __version__ = version("stpstone")
+	__version__ = version("stpstone")
 except PackageNotFoundError:
-    try:
-        from importlib.metadata import metadata
+	try:
+		from importlib.metadata import metadata
 
-        __version__ = metadata("stpstone")["version"]
-    except (PackageNotFoundError, ImportError):
-        __version__ = "3.0.0"
+		__version__ = metadata("stpstone")["version"]
+	except (PackageNotFoundError, ImportError):
+		__version__ = "3.0.0"
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)

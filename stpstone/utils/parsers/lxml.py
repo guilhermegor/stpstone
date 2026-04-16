@@ -14,57 +14,57 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 
 class HandlingLXML(metaclass=TypeChecker):
-    """Class for handling HTML data extraction using lxml."""
+	"""Class for handling HTML data extraction using lxml."""
 
-    def _validate_url(self, url: str) -> None:
-        """Validate URL format and content.
+	def _validate_url(self, url: str) -> None:
+		"""Validate URL format and content.
 
-        Parameters
-        ----------
-        url : str
-            URL to validate
+		Parameters
+		----------
+		url : str
+			URL to validate
 
-        Raises
-        ------
-        ValueError
-            If URL is empty or invalid
-        """
-        if not url:
-            raise ValueError("URL cannot be empty")
-        if not isinstance(url, str):
-            raise ValueError("URL must be a string")
-        if not (url.startswith("http://") or url.startswith("https://")):
-            raise ValueError("URL must start with http:// or https://")
+		Raises
+		------
+		ValueError
+			If URL is empty or invalid
+		"""
+		if not url:
+			raise ValueError("URL cannot be empty")
+		if not isinstance(url, str):
+			raise ValueError("URL must be a string")
+		if not (url.startswith("http://") or url.startswith("https://")):
+			raise ValueError("URL must start with http:// or https://")
 
-    def fetch(self, url: str, method: Literal['get', 'post'] = "get") -> _Element:
-        """Fetch and parse HTML document for XPath selection.
+	def fetch(self, url: str, method: Literal["get", "post"] = "get") -> _Element:
+		"""Fetch and parse HTML document for XPath selection.
 
-        Parameters
-        ----------
-        url : str
-            URL to fetch HTML content from
-        method : Literal['get', 'post']
-            HTTP request method (default: "get")
+		Parameters
+		----------
+		url : str
+			URL to fetch HTML content from
+		method : Literal['get', 'post']
+			HTTP request method (default: "get")
 
-        Returns
-        -------
-        _Element
-            Parsed HTML document as an lxml _Element
+		Returns
+		-------
+		_Element
+			Parsed HTML document as an lxml _Element
 
-        Raises
-        ------
-        ValueError
-            If URL is invalid or request fails
+		Raises
+		------
+		ValueError
+			If URL is invalid or request fails
 
-        References
-        ----------
-        .. [1] https://stackoverflow.com/questions/26944078/extracting-value-of-url-source-by-xpath-in-python
-        """
-        self._validate_url(url)
-        try:
-            content = request(method, url, timeout=(200, 200)).content
-            if not content:
-                raise ValueError("Received empty response from URL")
-            return html.fromstring(content)
-        except Exception as err:
-            raise ValueError(f"Failed to fetch or parse URL: {str(err)}") from err
+		References
+		----------
+		.. [1] https://stackoverflow.com/questions/26944078/extracting-value-of-url-source-by-xpath-in-python
+		"""
+		self._validate_url(url)
+		try:
+			content = request(method, url, timeout=(200, 200)).content
+			if not content:
+				raise ValueError("Received empty response from URL")
+			return html.fromstring(content)
+		except Exception as err:
+			raise ValueError(f"Failed to fetch or parse URL: {str(err)}") from err

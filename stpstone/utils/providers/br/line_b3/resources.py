@@ -91,9 +91,9 @@ class Resources(metaclass=TypeChecker):
 			right_on="instrumentId",
 		)
 
-		df_join_instruments = df_join_instruments.rename(
-			columns={"symbol_x": "symbol"}
-		).drop(columns=["symbol_y"])
+		df_join_instruments = df_join_instruments.rename(columns={"symbol_x": "symbol"}).drop(
+			columns=["symbol_y"]
+		)
 
 		return {
 			row["symbol"]: {col_: row[col_] for col_ in df_join_instruments.columns}

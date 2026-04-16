@@ -226,15 +226,11 @@ def test_get_response_success(
 	mock_requests_get.return_value = mock_response
 	result = cvm_instance.get_response(timeout=(12.0, 21.0), bool_verify=True)
 	assert isinstance(result, Response)
-	mock_requests_get.assert_called_once_with(
-		cvm_instance.url, timeout=(12.0, 21.0), verify=True
-	)
+	mock_requests_get.assert_called_once_with(cvm_instance.url, timeout=(12.0, 21.0), verify=True)
 	mock_response.raise_for_status.assert_called_once()
 
 
-def test_parse_raw_file(
-	cvm_instance: CvmFundsMonthlyProfile, mock_response: Response
-) -> None:
+def test_parse_raw_file(cvm_instance: CvmFundsMonthlyProfile, mock_response: Response) -> None:
 	"""Test parsing of raw file content.
 
 	Verifies
@@ -253,16 +249,15 @@ def test_parse_raw_file(
 	-------
 	None
 	"""
-	with patch.object(cvm_instance, "get_file", return_value=StringIO("test content")) \
-			as mock_get_file:
+	with patch.object(
+		cvm_instance, "get_file", return_value=StringIO("test content")
+	) as mock_get_file:
 		result = cvm_instance.parse_raw_file(mock_response)
 		assert isinstance(result, StringIO)
 		mock_get_file.assert_called_once_with(resp_req=mock_response)
 
 
-def test_transform_data(
-	cvm_instance: CvmFundsMonthlyProfile, sample_file: StringIO
-) -> None:
+def test_transform_data(cvm_instance: CvmFundsMonthlyProfile, sample_file: StringIO) -> None:
 	"""Test data transformation into DataFrame.
 
 	Verifies
@@ -325,14 +320,15 @@ def test_run_without_db(
 	None
 	"""
 	mock_requests_get.return_value = mock_response
-	with patch.object(cvm_instance, "parse_raw_file", return_value=StringIO("test")) \
-			as mock_parse, \
+	with (
+		patch.object(cvm_instance, "parse_raw_file", return_value=StringIO("test")) as mock_parse,
 		patch.object(
 			cvm_instance, "transform_data", return_value=pd.DataFrame({"VERSAO": [4]})
-		) as mock_transform, \
+		) as mock_transform,
 		patch.object(
 			cvm_instance, "standardize_dataframe", return_value=pd.DataFrame({"VERSAO": [4]})
-		) as mock_standardize:
+		) as mock_standardize,
+	):
 		result = cvm_instance.run()
 		assert isinstance(result, pd.DataFrame)
 		mock_parse.assert_called_once()
@@ -372,15 +368,16 @@ def test_run_with_db(
 	mock_db = MagicMock()
 	cvm_instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(cvm_instance, "parse_raw_file", return_value=StringIO("test")) \
-			as mock_parse, \
+	with (
+		patch.object(cvm_instance, "parse_raw_file", return_value=StringIO("test")) as mock_parse,
 		patch.object(
 			cvm_instance, "transform_data", return_value=pd.DataFrame({"VERSAO": [4]})
-		) as mock_transform, \
+		) as mock_transform,
 		patch.object(
 			cvm_instance, "standardize_dataframe", return_value=pd.DataFrame({"VERSAO": [4]})
-		) as mock_standardize, \
-		patch.object(cvm_instance, "insert_table_db") as mock_insert:
+		) as mock_standardize,
+		patch.object(cvm_instance, "insert_table_db") as mock_insert,
+	):
 		result = cvm_instance.run()
 		assert result is None
 		mock_parse.assert_called_once()
@@ -389,12 +386,15 @@ def test_run_with_db(
 		mock_insert.assert_called_once()
 
 
-@pytest.mark.parametrize("timeout", [
-	10,
-	10.5,
-	(5.0, 10.0),
-	(5, 10),
-])
+@pytest.mark.parametrize(
+	"timeout",
+	[
+		10,
+		10.5,
+		(5.0, 10.0),
+		(5, 10),
+	],
+)
 def test_get_response_timeout_variations(
 	cvm_instance: CvmFundsMonthlyProfile,
 	mock_requests_get: object,
@@ -432,12 +432,15 @@ def test_get_response_timeout_variations(
 	mock_requests_get.assert_called_once_with(cvm_instance.url, timeout=timeout, verify=True)
 
 
-@pytest.mark.parametrize("invalid_input,expected_error", [
-	(None, "resp_req must be one of types: Response, Page, WebDriver, got NoneType"),
-	("invalid", "resp_req must be one of types: Response, Page, WebDriver, got str"),
-	(123, "resp_req must be one of types: Response, Page, WebDriver, got int"),
-	([], "resp_req must be one of types: Response, Page, WebDriver, got list"),
-])
+@pytest.mark.parametrize(
+	"invalid_input,expected_error",
+	[
+		(None, "resp_req must be one of types: Response, Page, WebDriver, got NoneType"),
+		("invalid", "resp_req must be one of types: Response, Page, WebDriver, got str"),
+		(123, "resp_req must be one of types: Response, Page, WebDriver, got int"),
+		([], "resp_req must be one of types: Response, Page, WebDriver, got list"),
+	],
+)
 def test_parse_raw_file_invalid_input(
 	cvm_instance: CvmFundsMonthlyProfile,
 	invalid_input: Union[None, str, int, list],

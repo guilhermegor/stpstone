@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 from requests import Response
 
 from stpstone.ingestion.countries.ww.macroeconomics.global_rates_british_cpi import (
-    GlobalRatesBritishCpi,
+	GlobalRatesBritishCpi,
 )
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -23,280 +23,281 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 # --------------------------
 @pytest.fixture
 def sample_date() -> date:
-    """Provide a fixed date for testing.
+	"""Provide a fixed date for testing.
 
-    Returns
-    -------
-    date
-        Fixed reference date.
-    """
-    return date(2025, 1, 1)
+	Returns
+	-------
+	date
+		Fixed reference date.
+	"""
+	return date(2025, 1, 1)
 
 
 @pytest.fixture
 def mock_response() -> Response:
-    """Mock HTTP Response.
+	"""Mock HTTP Response.
 
-    Returns
-    -------
-    Response
-        Mocked Response object.
-    """
-    response = MagicMock(spec=Response)
-    response.status_code = 200
-    response.raise_for_status = MagicMock()
-    return response
+	Returns
+	-------
+	Response
+		Mocked Response object.
+	"""
+	response = MagicMock(spec=Response)
+	response.status_code = 200
+	response.raise_for_status = MagicMock()
+	return response
 
 
 @pytest.fixture
 def mock_requests_get(mocker: MockerFixture) -> object:
-    """Patch requests.get to prevent real HTTP calls.
+	"""Patch requests.get to prevent real HTTP calls.
 
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture.
+	Parameters
+	----------
+	mocker : MockerFixture
+		Pytest-mock fixture.
 
-    Returns
-    -------
-    object
-        Mocked requests.get.
-    """
-    return mocker.patch("requests.get")
+	Returns
+	-------
+	object
+		Mocked requests.get.
+	"""
+	return mocker.patch("requests.get")
 
 
 @pytest.fixture
 def mock_backoff(mocker: MockerFixture) -> object:
-    """Patch backoff.on_exception to bypass retry delays.
+	"""Patch backoff.on_exception to bypass retry delays.
 
-    Parameters
-    ----------
-    mocker : MockerFixture
-        Pytest-mock fixture.
+	Parameters
+	----------
+	mocker : MockerFixture
+		Pytest-mock fixture.
 
-    Returns
-    -------
-    object
-        Mocked backoff decorator.
-    """
-    return mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
+	Returns
+	-------
+	object
+		Mocked backoff decorator.
+	"""
+	return mocker.patch("backoff.on_exception", lambda *args, **kwargs: lambda func: func)
 
 
 @pytest.fixture
 def instance(sample_date: date) -> GlobalRatesBritishCpi:
-    """Provide a GlobalRatesBritishCpi instance for testing.
+	"""Provide a GlobalRatesBritishCpi instance for testing.
 
-    Parameters
-    ----------
-    sample_date : date
-        Fixed reference date.
+	Parameters
+	----------
+	sample_date : date
+		Fixed reference date.
 
-    Returns
-    -------
-    GlobalRatesBritishCpi
-        Initialized instance.
-    """
-    return GlobalRatesBritishCpi(date_ref=sample_date)
+	Returns
+	-------
+	GlobalRatesBritishCpi
+		Initialized instance.
+	"""
+	return GlobalRatesBritishCpi(date_ref=sample_date)
 
 
 # --------------------------
 # Tests
 # --------------------------
 def test_init_with_valid_date(sample_date: date) -> None:
-    """Test initialization sets expected attributes.
+	"""Test initialization sets expected attributes.
 
-    Parameters
-    ----------
-    sample_date : date
-        Fixed reference date.
+	Parameters
+	----------
+	sample_date : date
+		Fixed reference date.
 
-    Returns
-    -------
-    None
-    """
-    obj = GlobalRatesBritishCpi(date_ref=sample_date)
-    assert obj.date_ref == sample_date
-    assert isinstance(obj.cls_dates_current, DatesCurrent)
-    assert isinstance(obj.cls_dates_br, DatesBRAnbima)
-    assert isinstance(obj.cls_create_log, CreateLog)
-    assert isinstance(obj.cls_dir_files_management, DirFilesManagement)
-    assert "united-kingdom" in obj.url
+	Returns
+	-------
+	None
+	"""
+	obj = GlobalRatesBritishCpi(date_ref=sample_date)
+	assert obj.date_ref == sample_date
+	assert isinstance(obj.cls_dates_current, DatesCurrent)
+	assert isinstance(obj.cls_dates_br, DatesBRAnbima)
+	assert isinstance(obj.cls_create_log, CreateLog)
+	assert isinstance(obj.cls_dir_files_management, DirFilesManagement)
+	assert "united-kingdom" in obj.url
 
 
 def test_init_with_default_date() -> None:
-    """Test initialization without date_ref uses the previous working day.
+	"""Test initialization without date_ref uses the previous working day.
 
-    Returns
-    -------
-    None
-    """
-    with patch.object(DatesBRAnbima, "add_working_days", return_value=date(2025, 1, 1)):
-        obj = GlobalRatesBritishCpi()
-        assert obj.date_ref == date(2025, 1, 1)
+	Returns
+	-------
+	None
+	"""
+	with patch.object(DatesBRAnbima, "add_working_days", return_value=date(2025, 1, 1)):
+		obj = GlobalRatesBritishCpi()
+		assert obj.date_ref == date(2025, 1, 1)
 
 
 def test_get_response_success(
-    instance: GlobalRatesBritishCpi,
-    mock_requests_get: object,
-    mock_response: Response,
-    mock_backoff: object,
+	instance: GlobalRatesBritishCpi,
+	mock_requests_get: object,
+	mock_response: Response,
+	mock_backoff: object,
 ) -> None:
-    """Test get_response returns mocked Response on success.
+	"""Test get_response returns mocked Response on success.
 
-    Parameters
-    ----------
-    instance : GlobalRatesBritishCpi
-        Ingestion instance.
-    mock_requests_get : object
-        Mocked requests.get.
-    mock_response : Response
-        Mocked Response.
-    mock_backoff : object
-        Mocked backoff decorator.
+	Parameters
+	----------
+	instance : GlobalRatesBritishCpi
+		Ingestion instance.
+	mock_requests_get : object
+		Mocked requests.get.
+	mock_response : Response
+		Mocked Response.
+	mock_backoff : object
+		Mocked backoff decorator.
 
-    Returns
-    -------
-    None
-    """
-    mock_requests_get.return_value = mock_response
-    result = instance.get_response()
-    assert result is mock_response
+	Returns
+	-------
+	None
+	"""
+	mock_requests_get.return_value = mock_response
+	result = instance.get_response()
+	assert result is mock_response
 
 
 @pytest.mark.parametrize("timeout", [10, 10.5, (5.0, 10.0), (5, 10)])
 def test_get_response_timeout_variations(
-    instance: GlobalRatesBritishCpi,
-    mock_requests_get: object,
-    mock_response: Response,
-    mock_backoff: object,
-    timeout: Union[int, float, tuple],
+	instance: GlobalRatesBritishCpi,
+	mock_requests_get: object,
+	mock_response: Response,
+	mock_backoff: object,
+	timeout: Union[int, float, tuple],
 ) -> None:
-    """Test get_response accepts various timeout formats.
+	"""Test get_response accepts various timeout formats.
 
-    Parameters
-    ----------
-    instance : GlobalRatesBritishCpi
-        Ingestion instance.
-    mock_requests_get : object
-        Mocked requests.get.
-    mock_response : Response
-        Mocked Response.
-    mock_backoff : object
-        Mocked backoff decorator.
-    timeout : Union[int, float, tuple]
-        Timeout value to test.
+	Parameters
+	----------
+	instance : GlobalRatesBritishCpi
+		Ingestion instance.
+	mock_requests_get : object
+		Mocked requests.get.
+	mock_response : Response
+		Mocked Response.
+	mock_backoff : object
+		Mocked backoff decorator.
+	timeout : Union[int, float, tuple]
+		Timeout value to test.
 
-    Returns
-    -------
-    None
-    """
-    mock_requests_get.return_value = mock_response
-    result = instance.get_response(timeout=timeout)
-    assert result is mock_response
+	Returns
+	-------
+	None
+	"""
+	mock_requests_get.return_value = mock_response
+	result = instance.get_response(timeout=timeout)
+	assert result is mock_response
 
 
 def test_parse_raw_file_passthrough(
-    instance: GlobalRatesBritishCpi,
-    mock_response: Response,
+	instance: GlobalRatesBritishCpi,
+	mock_response: Response,
 ) -> None:
-    """Test parse_raw_file returns the response object unchanged.
+	"""Test parse_raw_file returns the response object unchanged.
 
-    Parameters
-    ----------
-    instance : GlobalRatesBritishCpi
-        Ingestion instance.
-    mock_response : Response
-        Mocked Response.
+	Parameters
+	----------
+	instance : GlobalRatesBritishCpi
+		Ingestion instance.
+	mock_response : Response
+		Mocked Response.
 
-    Returns
-    -------
-    None
-    """
-    result = instance.parse_raw_file(mock_response)
-    assert result is mock_response
+	Returns
+	-------
+	None
+	"""
+	result = instance.parse_raw_file(mock_response)
+	assert result is mock_response
 
 
 def test_run_without_db(
-    instance: GlobalRatesBritishCpi,
-    mock_requests_get: object,
-    mock_response: Response,
-    mock_backoff: object,
+	instance: GlobalRatesBritishCpi,
+	mock_requests_get: object,
+	mock_response: Response,
+	mock_backoff: object,
 ) -> None:
-    """Test run returns a DataFrame when no cls_db is provided.
+	"""Test run returns a DataFrame when no cls_db is provided.
 
-    Parameters
-    ----------
-    instance : GlobalRatesBritishCpi
-        Ingestion instance.
-    mock_requests_get : object
-        Mocked requests.get.
-    mock_response : Response
-        Mocked Response.
-    mock_backoff : object
-        Mocked backoff decorator.
+	Parameters
+	----------
+	instance : GlobalRatesBritishCpi
+		Ingestion instance.
+	mock_requests_get : object
+		Mocked requests.get.
+	mock_response : Response
+		Mocked Response.
+	mock_backoff : object
+		Mocked backoff decorator.
 
-    Returns
-    -------
-    None
-    """
-    with patch.object(
-        instance, "get_response", return_value=mock_response
-    ), patch.object(
-        instance, "transform_data", return_value=pd.DataFrame({"DATE": ["2025-01"]})
-    ), patch.object(
-        instance, "standardize_dataframe", return_value=pd.DataFrame({"DATE": ["2025-01"]})
-    ):
-        result = instance.run()
-    assert isinstance(result, pd.DataFrame)
+	Returns
+	-------
+	None
+	"""
+	with (
+		patch.object(instance, "get_response", return_value=mock_response),
+		patch.object(instance, "transform_data", return_value=pd.DataFrame({"DATE": ["2025-01"]})),
+		patch.object(
+			instance, "standardize_dataframe", return_value=pd.DataFrame({"DATE": ["2025-01"]})
+		),
+	):
+		result = instance.run()
+	assert isinstance(result, pd.DataFrame)
 
 
 def test_run_with_db(
-    instance: GlobalRatesBritishCpi,
-    mock_requests_get: object,
-    mock_response: Response,
-    mock_backoff: object,
+	instance: GlobalRatesBritishCpi,
+	mock_requests_get: object,
+	mock_response: Response,
+	mock_backoff: object,
 ) -> None:
-    """Test run calls insert_table_db and returns None when cls_db is set.
+	"""Test run calls insert_table_db and returns None when cls_db is set.
 
-    Parameters
-    ----------
-    instance : GlobalRatesBritishCpi
-        Ingestion instance.
-    mock_requests_get : object
-        Mocked requests.get.
-    mock_response : Response
-        Mocked Response.
-    mock_backoff : object
-        Mocked backoff decorator.
+	Parameters
+	----------
+	instance : GlobalRatesBritishCpi
+		Ingestion instance.
+	mock_requests_get : object
+		Mocked requests.get.
+	mock_response : Response
+		Mocked Response.
+	mock_backoff : object
+		Mocked backoff decorator.
 
-    Returns
-    -------
-    None
-    """
-    instance.cls_db = MagicMock()
-    with patch.object(
-        instance, "get_response", return_value=mock_response
-    ), patch.object(
-        instance, "transform_data", return_value=pd.DataFrame({"DATE": ["2025-01"]})
-    ), patch.object(
-        instance, "standardize_dataframe", return_value=pd.DataFrame({"DATE": ["2025-01"]})
-    ), patch.object(instance, "insert_table_db") as mock_insert:
-        result = instance.run()
-    assert result is None
-    mock_insert.assert_called_once()
+	Returns
+	-------
+	None
+	"""
+	instance.cls_db = MagicMock()
+	with (
+		patch.object(instance, "get_response", return_value=mock_response),
+		patch.object(instance, "transform_data", return_value=pd.DataFrame({"DATE": ["2025-01"]})),
+		patch.object(
+			instance, "standardize_dataframe", return_value=pd.DataFrame({"DATE": ["2025-01"]})
+		),
+		patch.object(instance, "insert_table_db") as mock_insert,
+	):
+		result = instance.run()
+	assert result is None
+	mock_insert.assert_called_once()
 
 
 def test_reload_module() -> None:
-    """Test that the module can be reloaded without errors.
+	"""Test that the module can be reloaded without errors.
 
-    Returns
-    -------
-    None
-    """
-    import importlib
+	Returns
+	-------
+	None
+	"""
+	import importlib
 
-    import stpstone.ingestion.countries.ww.macroeconomics.global_rates_british_cpi as mod
+	import stpstone.ingestion.countries.ww.macroeconomics.global_rates_british_cpi as mod
 
-    importlib.reload(mod)
-    obj = mod.GlobalRatesBritishCpi(date_ref=date(2025, 1, 1))
-    assert obj.date_ref == date(2025, 1, 1)
+	importlib.reload(mod)
+	obj = mod.GlobalRatesBritishCpi(date_ref=date(2025, 1, 1))
+	assert obj.date_ref == date(2025, 1, 1)

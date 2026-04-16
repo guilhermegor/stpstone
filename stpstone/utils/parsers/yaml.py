@@ -12,41 +12,39 @@ from stpstone.transformations.validation.metaclass_type_checker import type_chec
 
 
 @type_checker
-def reading_yaml(
-    file_path: str
-) -> Any: # noqa ANN401: typing.Any is not allowed
-    """Read and parse a YAML file.
+def reading_yaml(file_path: str) -> Any:  # noqa ANN401: typing.Any is not allowed
+	"""Read and parse a YAML file.
 
-    Parameters
-    ----------
-    file_path : str
-        Path to the YAML file to be read
+	Parameters
+	----------
+	file_path : str
+		Path to the YAML file to be read
 
-    Returns
-    -------
-    Any
-        Parsed YAML content as Python objects
+	Returns
+	-------
+	Any
+		Parsed YAML content as Python objects
 
-    Raises
-    ------
-    TypeError
-        If file_path is not a string
-    FileNotFoundError
-        If the specified file does not exist
-    YAMLError
-        If the YAML file is malformed
+	Raises
+	------
+	TypeError
+		If file_path is not a string
+	FileNotFoundError
+		If the specified file does not exist
+	YAMLError
+		If the YAML file is malformed
 
-    References
-    ----------
-    .. [1] https://pyyaml.org/wiki/PyYAMLDocumentation
-    """
-    if not isinstance(file_path, str):
-        raise TypeError("file_path must be a string")
-    
-    try:
-        with open(file_path) as f:
-            return safe_load(f)
-    except FileNotFoundError as err:
-        raise FileNotFoundError(f"YAML file not found: {file_path}") from err
-    except YAMLError as err:
-        raise YAMLError(f"Error parsing YAML file: {str(err)}") from err
+	References
+	----------
+	.. [1] https://pyyaml.org/wiki/PyYAMLDocumentation
+	"""
+	if not isinstance(file_path, str):
+		raise TypeError("file_path must be a string")
+
+	try:
+		with open(file_path) as f:
+			return safe_load(f)
+	except FileNotFoundError as err:
+		raise FileNotFoundError(f"YAML file not found: {file_path}") from err
+	except YAMLError as err:
+		raise YAMLError(f"Error parsing YAML file: {str(err)}") from err

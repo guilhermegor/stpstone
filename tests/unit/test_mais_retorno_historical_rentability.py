@@ -85,8 +85,22 @@ def sample_df() -> pd.DataFrame:
 		Minimal DataFrame with expected columns.
 	"""
 	cols = [
-		"YEAR", "INSTRUMENT", "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-		"JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "YTD", "SINCE_INCEPTION",
+		"YEAR",
+		"INSTRUMENT",
+		"JAN",
+		"FEB",
+		"MAR",
+		"APR",
+		"MAY",
+		"JUN",
+		"JUL",
+		"AUG",
+		"SEP",
+		"OCT",
+		"NOV",
+		"DEC",
+		"YTD",
+		"SINCE_INCEPTION",
 	]
 	return pd.DataFrame([[2024, "AASL-FIA"] + [0.01] * 14], columns=cols)
 
@@ -287,9 +301,7 @@ def test_run_with_db(
 	hist_rentability_instance.cls_db = MagicMock()
 	mocker.patch.object(hist_rentability_instance, "parse_raw_file", return_value=MagicMock())
 	mocker.patch.object(hist_rentability_instance, "transform_data", return_value=sample_df)
-	mocker.patch.object(
-		hist_rentability_instance, "standardize_dataframe", return_value=sample_df
-	)
+	mocker.patch.object(hist_rentability_instance, "standardize_dataframe", return_value=sample_df)
 	mocker.patch.object(hist_rentability_instance, "insert_table_db")
 
 	result = hist_rentability_instance.run()

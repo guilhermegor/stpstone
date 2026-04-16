@@ -269,7 +269,7 @@ class B3OptionsSettlementCalendar(ABCIngestionOperations):
 			The list of strings with missing values filled.
 		"""
 		for index, row in df_.iterrows():
-			if row["DETALHE"] is None:
+			if pd.isna(row["DETALHE"]):
 				if int(row["MES"]) % 2 == 1:
 					df_.loc[index, "DETALHE"] = df_.loc[index - 3, "DETALHE"]
 				else:

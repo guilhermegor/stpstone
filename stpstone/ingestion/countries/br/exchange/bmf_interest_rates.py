@@ -278,9 +278,11 @@ class BMFInterestRates(ABCIngestionOperations):
 		)
 		df_4 = pd.DataFrame(list_ser)
 
-		df_ = df_1.merge(df_2, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
-		df_ = df_.merge(df_3, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
-		df_ = df_.merge(df_4, on="DIAS_CORRIDOS", how="left", suffixes=("", "_"))
+		df_ = df_1.merge(df_2, on="DIAS_CORRIDOS", how="left")
+		cols_to_drop_df3 = [c for c in df_3.columns if c in df_.columns and c != "DIAS_CORRIDOS"]
+		df_ = df_.merge(df_3.drop(columns=cols_to_drop_df3), on="DIAS_CORRIDOS", how="left")
+		cols_to_drop_df4 = [c for c in df_4.columns if c in df_.columns and c != "DIAS_CORRIDOS"]
+		df_ = df_.merge(df_4.drop(columns=cols_to_drop_df4), on="DIAS_CORRIDOS", how="left")
 		list_ser = df_.to_dict("records")
 		return list_ser
 

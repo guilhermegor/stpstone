@@ -353,19 +353,25 @@ def test_run_without_db(
 	None
 	"""
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		yahii_instance, "parse_raw_file", return_value=["DECRETO 1", "01.01.01", "R$ 100,00"]
-	) as mock_parse, \
+	with (
 		patch.object(
-			yahii_instance, "transform_data",
-			return_value=pd.DataFrame({"DISPOSITIVO_LEGAL": ["LEI 1"], "DATA": ["2001-01-01"],
-				"VALOR": [100.0]})
-		) as mock_transform, \
+			yahii_instance, "parse_raw_file", return_value=["DECRETO 1", "01.01.01", "R$ 100,00"]
+		) as mock_parse,
 		patch.object(
-			yahii_instance, "standardize_dataframe",
-			return_value=pd.DataFrame({"DISPOSITIVO_LEGAL": ["LEI 1"], "DATA": ["2001-01-01"],
-				"VALOR": [100.0]})
-		) as mock_standardize:
+			yahii_instance,
+			"transform_data",
+			return_value=pd.DataFrame(
+				{"DISPOSITIVO_LEGAL": ["LEI 1"], "DATA": ["2001-01-01"], "VALOR": [100.0]}
+			),
+		) as mock_transform,
+		patch.object(
+			yahii_instance,
+			"standardize_dataframe",
+			return_value=pd.DataFrame(
+				{"DISPOSITIVO_LEGAL": ["LEI 1"], "DATA": ["2001-01-01"], "VALOR": [100.0]}
+			),
+		) as mock_standardize,
+	):
 		result = yahii_instance.run()
 		assert isinstance(result, pd.DataFrame)
 		mock_parse.assert_called_once()
@@ -404,18 +410,22 @@ def test_run_with_db(
 	mock_db = MagicMock()
 	yahii_instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		yahii_instance, "parse_raw_file", return_value=["DECRETO 1", "01.01.01", "R$ 100,00"]
-	) as mock_parse, \
+	with (
 		patch.object(
-			yahii_instance, "transform_data",
-			return_value=pd.DataFrame({"DISPOSITIVO_LEGAL": ["LEI 1"]})
-		) as mock_transform, \
+			yahii_instance, "parse_raw_file", return_value=["DECRETO 1", "01.01.01", "R$ 100,00"]
+		) as mock_parse,
 		patch.object(
-			yahii_instance, "standardize_dataframe",
-			return_value=pd.DataFrame({"DISPOSITIVO_LEGAL": ["LEI 1"]})
-		) as mock_standardize, \
-		patch.object(yahii_instance, "insert_table_db") as mock_insert:
+			yahii_instance,
+			"transform_data",
+			return_value=pd.DataFrame({"DISPOSITIVO_LEGAL": ["LEI 1"]}),
+		) as mock_transform,
+		patch.object(
+			yahii_instance,
+			"standardize_dataframe",
+			return_value=pd.DataFrame({"DISPOSITIVO_LEGAL": ["LEI 1"]}),
+		) as mock_standardize,
+		patch.object(yahii_instance, "insert_table_db") as mock_insert,
+	):
 		result = yahii_instance.run()
 		assert result is None
 		mock_parse.assert_called_once()
@@ -424,12 +434,15 @@ def test_run_with_db(
 		mock_insert.assert_called_once()
 
 
-@pytest.mark.parametrize("timeout", [
-	10,
-	10.5,
-	(5.0, 10.0),
-	(5, 10),
-])
+@pytest.mark.parametrize(
+	"timeout",
+	[
+		10,
+		10.5,
+		(5.0, 10.0),
+		(5, 10),
+	],
+)
 def test_get_response_timeout_variations(
 	yahii_instance: YahiiMinWage,
 	mock_requests_get: object,
@@ -481,6 +494,7 @@ def test_reload_module() -> None:
 	import importlib
 
 	import stpstone.ingestion.countries.br.macroeconomics.yahii_min_wage
+
 	original_instance = YahiiMinWage(date_ref=date(2025, 1, 1))
 	importlib.reload(stpstone.ingestion.countries.br.macroeconomics.yahii_min_wage)
 	new_instance = YahiiMinWage(date_ref=date(2025, 1, 1))

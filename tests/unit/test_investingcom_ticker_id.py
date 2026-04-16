@@ -108,8 +108,7 @@ def mock_dates_current(mocker: MockerFixture) -> MagicMock:
 		Mocked DatesCurrent instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".investingcom_ticker_id.DatesCurrent"
+		"stpstone.ingestion.countries.ww.exchange.markets.investingcom_ticker_id.DatesCurrent"
 	)
 	mock_instance = MagicMock(spec=DatesCurrent)
 	mock_cls.return_value = mock_instance
@@ -134,8 +133,7 @@ def mock_dates_br(mocker: MockerFixture, mock_dates_current: MagicMock) -> Magic
 		Mocked DatesBRAnbima instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".investingcom_ticker_id.DatesBRAnbima"
+		"stpstone.ingestion.countries.ww.exchange.markets.investingcom_ticker_id.DatesBRAnbima"
 	)
 	mock_instance = MagicMock(spec=DatesBRAnbima)
 	mock_cls.return_value = mock_instance
@@ -181,8 +179,7 @@ def mock_create_log(mocker: MockerFixture) -> MagicMock:
 		Mocked CreateLog instance.
 	"""
 	mock_cls = mocker.patch(
-		"stpstone.ingestion.countries.ww.exchange.markets"
-		".investingcom_ticker_id.CreateLog"
+		"stpstone.ingestion.countries.ww.exchange.markets.investingcom_ticker_id.CreateLog"
 	)
 	mock_instance = MagicMock(spec=CreateLog)
 	mock_cls.return_value = mock_instance

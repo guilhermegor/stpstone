@@ -58,6 +58,18 @@ fix_playwright:
 
 
 # -------------------
+# LINTING
+# -------------------
+.PHONY: lint
+
+lint:
+	@poetry run ruff check --fix .
+	@poetry run ruff format .
+	@poetry run codespell .
+	@poetry run pydocstyle stpstone/
+
+
+# -------------------
 # PACKAGE MANAGEMENT
 # -------------------
 .PHONY: package_tree bump_version clean_builds install_dist_locally test_dist
@@ -108,6 +120,9 @@ help:
 	@echo "  test_feat MODULE=... - Test specific feature module"
 	@echo "  test_urls_docstrings - Test URL docstrings"
 	@echo "  fix_playwright       - Fix Playwright installation"
+	@echo ""
+	@echo "Linting:"
+	@echo "  lint                 - Fix, format (ruff), spell-check (codespell), and docstring-lint (pydocstyle)"
 	@echo ""
 	@echo "Package Management:"
 	@echo "  package_tree         - Generate package tree structure"

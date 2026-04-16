@@ -61,7 +61,7 @@ class IConnectionApi(Protocol):
 
 	def app_request(
 		self,
-		method: Literal['GET', 'POST', 'DELETE'],
+		method: Literal["GET", "POST", "DELETE"],
 		app: str,
 		dict_params: Optional[dict[str, Any]] = None,
 		dict_payload: Optional[list[dict[str, Any]]] = None,
@@ -105,7 +105,7 @@ class IOperations(Protocol):
 
 	def app_request(
 		self,
-		method: Literal['GET', 'POST', 'DELETE'],
+		method: Literal["GET", "POST", "DELETE"],
 		app: str,
 		dict_params: Optional[dict[str, Any]] = None,
 		dict_payload: Optional[list[dict[str, Any]]] = None,
@@ -162,9 +162,7 @@ class IOperations(Protocol):
 		"""
 		...
 
-	def intruments_per_group(
-		self, group_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def intruments_per_group(self, group_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Get instruments for a group.
 
 		Parameters
@@ -218,9 +216,7 @@ class IResources(Protocol):
 		"""
 		...
 
-	def instrument_id_by_symbol(
-		self, symbol: str
-	) -> Union[list[dict[str, Any]], int]:
+	def instrument_id_by_symbol(self, symbol: str) -> Union[list[dict[str, Any]], int]:
 		"""Get instrument ID by symbol.
 
 		Parameters
@@ -312,9 +308,7 @@ class IAccountsData(Protocol):
 		"""
 		...
 
-	def spxi_tmox_global_metrics_remove(
-		self, account_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def spxi_tmox_global_metrics_remove(self, account_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Remove SPXI TMOX global metrics.
 
 		Parameters
@@ -407,9 +401,7 @@ class IDocumentsData(Protocol):
 		"""
 		...
 
-	def is_protection_mode(
-		self, doc_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def is_protection_mode(self, doc_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Check if document is in protection mode.
 
 		Parameters
@@ -571,9 +563,7 @@ class IProfilesData(Protocol):
 		"""
 		...
 
-	def entities_associated_profile(
-		self, id_profile: str
-	) -> Union[list[dict[str, Any]], int]:
+	def entities_associated_profile(self, id_profile: str) -> Union[list[dict[str, Any]], int]:
 		"""Get entities associated with profile.
 
 		Parameters
@@ -588,9 +578,7 @@ class IProfilesData(Protocol):
 		"""
 		...
 
-	def profile_global_limits_get(
-		self, prof_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def profile_global_limits_get(self, prof_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Get profile global limits.
 
 		Parameters
@@ -605,9 +593,7 @@ class IProfilesData(Protocol):
 		"""
 		...
 
-	def profile_market_limits_get(
-		self, prof_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def profile_market_limits_get(self, prof_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Get profile market limits.
 
 		Parameters
@@ -622,9 +608,7 @@ class IProfilesData(Protocol):
 		"""
 		...
 
-	def profile_spxi_limits_get(
-		self, prof_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def profile_spxi_limits_get(self, prof_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Get profile SPXI limits.
 
 		Parameters
@@ -639,9 +623,7 @@ class IProfilesData(Protocol):
 		"""
 		...
 
-	def profile_tmox_limits_get(
-		self, prof_id: str
-	) -> Union[list[dict[str, Any]], int]:
+	def profile_tmox_limits_get(self, prof_id: str) -> Union[list[dict[str, Any]], int]:
 		"""Get profile TMOX limits.
 
 		Parameters

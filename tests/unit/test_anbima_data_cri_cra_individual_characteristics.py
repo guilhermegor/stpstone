@@ -9,8 +9,7 @@ import pandas as pd
 import pytest
 from requests import Session
 
-from stpstone.ingestion.countries.br.registries \
-	.anbima_data_cri_cra_individual_characteristics import (
+from stpstone.ingestion.countries.br.registries.anbima_data_cri_cra_individual_characteristics import (  # noqa: E501
 	AnbimaDataCRICRAIndividualCharacteristics,
 )
 
@@ -299,9 +298,7 @@ class TestListAssetCodes:
 	"""Test list_asset_codes parameter handling for individual characteristics."""
 
 	@pytest.mark.parametrize("asset_count", [0, 1, 5, 100])
-	def test_various_asset_list_sizes(
-		self, asset_count: int, mock_logger: Logger
-	) -> None:
+	def test_various_asset_list_sizes(self, asset_count: int, mock_logger: Logger) -> None:
 		"""Test handling of various asset list sizes.
 
 		Verifies

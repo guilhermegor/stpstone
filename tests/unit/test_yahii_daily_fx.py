@@ -394,20 +394,25 @@ def test_run_without_db(
 	None
 	"""
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		fx_usd_instance, "parse_raw_file",
-		return_value=["02/01/2025", "6,1871", "6,1878"]
-	) as mock_parse, \
+	with (
 		patch.object(
-			fx_usd_instance, "transform_data",
-			return_value=pd.DataFrame({"DATA": ["02/01/2025"], "COMPRA": [6.1871],
-				"VENDA": [6.1878]})
-		) as mock_transform, \
+			fx_usd_instance, "parse_raw_file", return_value=["02/01/2025", "6,1871", "6,1878"]
+		) as mock_parse,
 		patch.object(
-			fx_usd_instance, "standardize_dataframe",
-			return_value=pd.DataFrame({"DATA": ["02/01/2025"], "COMPRA": [6.1871],
-				"VENDA": [6.1878]})
-		) as mock_standardize:
+			fx_usd_instance,
+			"transform_data",
+			return_value=pd.DataFrame(
+				{"DATA": ["02/01/2025"], "COMPRA": [6.1871], "VENDA": [6.1878]}
+			),
+		) as mock_transform,
+		patch.object(
+			fx_usd_instance,
+			"standardize_dataframe",
+			return_value=pd.DataFrame(
+				{"DATA": ["02/01/2025"], "COMPRA": [6.1871], "VENDA": [6.1878]}
+			),
+		) as mock_standardize,
+	):
 		result = fx_usd_instance.run()
 		assert isinstance(result, pd.DataFrame)
 		mock_parse.assert_called_once()
@@ -446,19 +451,20 @@ def test_run_with_db(
 	mock_db = MagicMock()
 	fx_usd_instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(
-		fx_usd_instance, "parse_raw_file",
-		return_value=["02/01/2025", "6,1871", "6,1878"]
-	) as mock_parse, \
+	with (
 		patch.object(
-			fx_usd_instance, "transform_data",
-			return_value=pd.DataFrame({"DATA": ["02/01/2025"]})
-		) as mock_transform, \
+			fx_usd_instance, "parse_raw_file", return_value=["02/01/2025", "6,1871", "6,1878"]
+		) as mock_parse,
 		patch.object(
-			fx_usd_instance, "standardize_dataframe",
-			return_value=pd.DataFrame({"DATA": ["02/01/2025"]})
-		) as mock_standardize, \
-		patch.object(fx_usd_instance, "insert_table_db") as mock_insert:
+			fx_usd_instance, "transform_data", return_value=pd.DataFrame({"DATA": ["02/01/2025"]})
+		) as mock_transform,
+		patch.object(
+			fx_usd_instance,
+			"standardize_dataframe",
+			return_value=pd.DataFrame({"DATA": ["02/01/2025"]}),
+		) as mock_standardize,
+		patch.object(fx_usd_instance, "insert_table_db") as mock_insert,
+	):
 		result = fx_usd_instance.run()
 		assert result is None
 		mock_parse.assert_called_once()
@@ -497,10 +503,12 @@ def test_run_uses_correct_table_name_usd(
 	mock_db = MagicMock()
 	fx_usd_instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(fx_usd_instance, "parse_raw_file", return_value=[]), \
-		patch.object(fx_usd_instance, "transform_data", return_value=pd.DataFrame()), \
-		patch.object(fx_usd_instance, "standardize_dataframe", return_value=pd.DataFrame()), \
-		patch.object(fx_usd_instance, "insert_table_db") as mock_insert:
+	with (
+		patch.object(fx_usd_instance, "parse_raw_file", return_value=[]),
+		patch.object(fx_usd_instance, "transform_data", return_value=pd.DataFrame()),
+		patch.object(fx_usd_instance, "standardize_dataframe", return_value=pd.DataFrame()),
+		patch.object(fx_usd_instance, "insert_table_db") as mock_insert,
+	):
 		fx_usd_instance.run()
 		call_kwargs = mock_insert.call_args
 		assert call_kwargs[1]["str_table_name"] == "br_yahii_daily_usdbrl"
@@ -536,21 +544,26 @@ def test_run_uses_correct_table_name_eur(
 	mock_db = MagicMock()
 	fx_eur_instance.cls_db = mock_db
 	mock_requests_get.return_value = mock_response
-	with patch.object(fx_eur_instance, "parse_raw_file", return_value=[]), \
-		patch.object(fx_eur_instance, "transform_data", return_value=pd.DataFrame()), \
-		patch.object(fx_eur_instance, "standardize_dataframe", return_value=pd.DataFrame()), \
-		patch.object(fx_eur_instance, "insert_table_db") as mock_insert:
+	with (
+		patch.object(fx_eur_instance, "parse_raw_file", return_value=[]),
+		patch.object(fx_eur_instance, "transform_data", return_value=pd.DataFrame()),
+		patch.object(fx_eur_instance, "standardize_dataframe", return_value=pd.DataFrame()),
+		patch.object(fx_eur_instance, "insert_table_db") as mock_insert,
+	):
 		fx_eur_instance.run()
 		call_kwargs = mock_insert.call_args
 		assert call_kwargs[1]["str_table_name"] == "br_yahii_daily_eurbrl"
 
 
-@pytest.mark.parametrize("timeout", [
-	10,
-	10.5,
-	(5.0, 10.0),
-	(5, 10),
-])
+@pytest.mark.parametrize(
+	"timeout",
+	[
+		10,
+		10.5,
+		(5.0, 10.0),
+		(5, 10),
+	],
+)
 def test_get_response_timeout_variations(
 	fx_usd_instance: YahiiDailyFX,
 	mock_requests_get: object,
@@ -602,6 +615,7 @@ def test_reload_module() -> None:
 	import importlib
 
 	import stpstone.ingestion.countries.br.macroeconomics.yahii_daily_fx
+
 	original_instance = YahiiDailyFX(date_ref=date(2025, 1, 1))
 	importlib.reload(stpstone.ingestion.countries.br.macroeconomics.yahii_daily_fx)
 	new_instance = YahiiDailyFX(date_ref=date(2025, 1, 1))
