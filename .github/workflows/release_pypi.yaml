@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       tests_passed:
-        description: 'Whether Tests Passed'
+        description: 'Confirm tests have already passed before releasing'
         required: true
         type: choice
         options:
@@ -42,11 +42,14 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - name: Check Ref Type
-        if: github.ref_type != 'tag'
-        run: echo "This is not a tag; exiting"; exit 1
+        if: github.event_name != 'workflow_dispatch' && github.ref_type != 'tag'
+        run: echo "This is not a tag or workflow_dispatch; exiting"; exit 1
 
       - name: Extract Tag and Details
         id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
           NEW_VERSION=$(echo $TAG_NAME | awk -F'-' '{print $1}')
