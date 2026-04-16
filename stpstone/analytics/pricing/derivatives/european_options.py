@@ -14,7 +14,7 @@ from stpstone.transformations.validation.metaclass_type_checker import TypeCheck
 
 TypeMethodIV = TypeVar(
 	"TypeMethodIV",
-	Literal[
+	bound=Literal[
 		"newton_raphson",
 		"bisection",
 		"fsolve",
