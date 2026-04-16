@@ -272,7 +272,7 @@ class DealingPd(metaclass=TypeChecker):
             df_ = df_.astype(dict(zip(list_col_date, [object] * len(list_col_date))))
             for index, row in df_.iterrows():
                 for col_date in list_col_date:
-                    if "-" in row[col_date]:
+                    if isinstance(row[col_date], str) and "-" in row[col_date]:
                         ano = int(row[col_date].split(" ")[0].split("-")[0])
                         mes = int(row[col_date].split(" ")[0].split("-")[1])
                         dia = int(row[col_date].split(" ")[0].split("-")[2])
