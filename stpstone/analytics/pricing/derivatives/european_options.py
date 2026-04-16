@@ -3050,7 +3050,7 @@ class EuropeanOptions(IterativeMethods):
 
 		Raises
 		------
-		ValueError
+		TypeError
 			If the method to return the root of the non-linear equation is not recognized.
 
 		References
@@ -3118,9 +3118,9 @@ class EuropeanOptions(IterativeMethods):
 				self.func_non_linear(s, k, r, t, sigma, q, b, cp0, opt_type), list_bounds
 			), False
 		else:
-			raise ValueError(
-				"Method to return the root of the non-linear equation is not "
-				+ "recognized, please revisit the parameter"
+			raise TypeError(
+				f"method must be one of 'newton_raphson', 'bisection', 'fsolve', "
+				f"'scipy_optimize_minimize', 'differential_evolution'; got {method!r}"
 			)
 
 	def moneyness(self, s: float, k: float, r: float, t: float, sigma: float, q: float) -> float:
