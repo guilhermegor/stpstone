@@ -51,9 +51,16 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_VERSION: ${{ inputs.version }}
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          NEW_VERSION=$(echo $TAG_NAME | awk -F'-' '{print $1}')
-          SUFFIX=$(echo $TAG_NAME | grep -oP '[a-z]+[0-9]+' || echo "")
+          if [ "$EVENT_NAME" == "workflow_dispatch" ]; then
+            NEW_VERSION="$INPUT_VERSION"
+            SUFFIX=$(echo "$NEW_VERSION" | grep -oP '[a-z]+[0-9]+' || echo "")
+            TAG_NAME="$NEW_VERSION"
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            NEW_VERSION=$(echo $TAG_NAME | awk -F'-' '{print $1}')
+            SUFFIX=$(echo $TAG_NAME | grep -oP '[a-z]+[0-9]+' || echo "")
+          fi
+
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           echo "suffix=$SUFFIX" >> "$GITHUB_OUTPUT"
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
