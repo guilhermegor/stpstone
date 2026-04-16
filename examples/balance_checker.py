@@ -3,9 +3,11 @@ from stpstone.transformations.validation.balance_brackets import BalanceBrackets
 
 balance_brackets = BalanceBrackets()
 
+
 # 1. syntax validation in code editors or IDEs (with function input)
 def validate_function_syntax(func_str: str) -> bool:
-    return balance_brackets.is_balanced(func_str)
+	return balance_brackets.is_balanced(func_str)
+
 
 function_code = """
 def foo():
@@ -21,7 +23,10 @@ def foo():
         return [1, 2, 3]
 """
 
-print("1.2. Unbalanced Function Syntax Validation:", validate_function_syntax(unbalanced_function_code))
+print(
+	"1.2. Unbalanced Function Syntax Validation:",
+	validate_function_syntax(unbalanced_function_code),
+)
 
 # 2. mathematical expression Evaluation
 expression = "((a + b) * (c - d))"

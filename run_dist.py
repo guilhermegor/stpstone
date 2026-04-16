@@ -1,28 +1,28 @@
 from stpstone.analytics.pricing.derivatives.european_options import EuropeanOptions
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.conversions.base_converter import BaseConverter
 from stpstone.utils.conversions.expression_converter import ExpressionConverter
-from stpstone.utils.geography.br import BrazilGeo
-from stpstone.utils.parsers.numbers import NumHandler
+from stpstone.utils.geography.geo_br import BrazilGeo
 from stpstone.utils.parsers.lists import ListHandler
+from stpstone.utils.parsers.numbers import NumHandler
 
 
 print("*** Dates BR Tester ***")
-print(f"Current Date: {DatesBR().curr_date}")
-print(f"3 working days before current date: {DatesBR().sub_working_days(DatesBR().curr_date, 3)}")
-print(f"3 working days after current date: {DatesBR().add_working_days(DatesBR().curr_date, 3)}")
+print(f"Current Date: {DatesBRAnbima().curr_date()}")
+print(f"3 working days before current date: {DatesBRAnbima().sub_working_days(DatesBRAnbima().curr_date(), 3)}")
+print(f"3 working days after current date: {DatesBRAnbima().add_working_days(DatesBRAnbima().curr_date(), 3)}")
 
 print("\n*** Unix Timestamp Tester ***")
-print(f"Current Unix Timestamp: {DatesBR().datetime_to_unix_timestamp(DatesBR().curr_date)}")
+print(f"Current Unix Timestamp: {DatesBRAnbima().datetime_to_unix_timestamp(DatesBRAnbima().curr_date())}")
 
 print("\n*** European Options Tester ***")
 print(f"Black Scholes Call Option: {EuropeanOptions().general_opt_price(103.0, 100.0, 0.025, 0.25, 0.2, 0.0, 0.0, 'call')}")
 print(f"Black Scholes Put Option: {EuropeanOptions().general_opt_price(103.0, 100.0, 0.025, 0.25, 0.2, 0.0, 0.0, 'put')}")
 
 print("\n*** Base Converter Tester ***")
-print(f"Decimal to Binary: {BaseConverter("1027", 10, 2).convert}")
-print(f"Decimal to Hexadecimal: {BaseConverter("1027", 10, 16).convert}")
-print(f"Decimal to Octal: {BaseConverter("1027", 10, 8).convert}")
+print(f"Decimal to Binary: {BaseConverter('1027', 10, 2).convert}")
+print(f"Decimal to Hexadecimal: {BaseConverter('1027', 10, 16).convert}")
+print(f"Decimal to Octal: {BaseConverter('1027', 10, 8).convert}")
 
 print("\n***Expression Converter Tester ***")
 
@@ -78,7 +78,7 @@ print(f"First Numeric (no numbers): {ListHandler().first_numeric(['abc', 'def', 
 
 # Example 3: Extend multiple lists
 print(f"Extend Lists: {ListHandler().extend_lists([1, 2, 3], [4, 5, 6], [7, 8, 9])}")
-print(f"Extend Lists (with duplicates): {ListHandler().extend_lists([1, 2, 3], [3, 4, 5], [5, 6, 7], bl_remove_duplicates=False)}")
+print(f"Extend Lists (with duplicates): {ListHandler().extend_lists([1, 2, 3], [3, 4, 5], [5, 6, 7], bool_remove_duplicates=False)}")
 
 print("\n*** List Handler Mathematical Operations ***")
 # Example 4: Find closest number
@@ -98,7 +98,7 @@ print(f"Sort Alphanumeric: {ListHandler().sort_alphanumeric(['item10', 'item2', 
 
 # Example 8: First occurrence operations
 test_list = ['apple', 'BANANA', 'cherry', 'DATE']
-print(f"First Uppercase: {ListHandler().get_first_occurrence_within_list(test_list, bl_uppercase=True)}")
+print(f"First Uppercase: {ListHandler().get_first_occurrence_within_list(test_list, bool_uppercase=True)}")
 # Using exact match that exists in the list to avoid StopIteration error
 print(f"First Occurrence Like 'banana': {ListHandler().first_occurrence_like(['apple', 'banana', 'cherry'], 'banana')}")
 print(f"First Occurrence with obj_occurrence: {ListHandler().get_first_occurrence_within_list(['apple', 'banana', 'cherry'], obj_occurrence='banana')}")

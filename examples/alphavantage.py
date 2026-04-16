@@ -1,17 +1,16 @@
-# pypi.org libs
-import os
-from keyring import get_password
-# local libs
-os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
+"""AlphaVantage daily OHLCV ingestion for US equities."""
+
 from stpstone.ingestion.countries.us.exchange.alphavantage import AlphaVantageUS
-from stpstone.utils.cals.handling_dates import DatesBR
 
 
-df_ = AlphaVantageUS(
-    session=None,
-    dt_ref=DatesBR().sub_working_days(DatesBR().curr_date, 5),
-    cls_db=None,
-    token=get_password('ALPHAVANTAGE', 'API_KEY'),
-    list_slugs=['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA']
-).source('ohlcv_not_adjusted', bl_debug=False, bl_fetch=True)
-print(f'DF ALPHAVANTAGE: \n{df_}')
+cls_ = AlphaVantageUS(
+	date_ref=None,
+	logger=None,
+	cls_db=None,
+	token=None,
+	list_slugs=["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA"],
+)
+
+df_ = cls_.run()
+print(f"DF ALPHAVANTAGE OHLCV: \n{df_}")
+df_.info()

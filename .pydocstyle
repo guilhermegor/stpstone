@@ -1,0 +1,4 @@
+[pydocstyle]
+convention = numpy
+add-select = D417
+add-ignore = D206

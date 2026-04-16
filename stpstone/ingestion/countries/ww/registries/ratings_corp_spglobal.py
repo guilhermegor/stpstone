@@ -1,115 +1,105 @@
-import re
-import pandas as pd
-from datetime import datetime
-from typing import Optional, List
-from sqlalchemy.orm import Session
+"""S&P Global corporate ratings orchestrator ingestion."""
+
+from datetime import date
 from logging import Logger
-from requests import Response
 from time import sleep
-from stpstone._config.global_slots import YAML_WW_RATINGS_CORP_S_AND_P
-from stpstone.utils.cals.handling_dates import DatesBR
-from stpstone.ingestion.abc.requests import ABCRequests
-from stpstone.utils.webdriver_tools.selenium_wd import SeleniumWD
+from typing import Optional
+
+import pandas as pd
+from requests import Session
+
+from stpstone.ingestion.countries.ww.registries.ratings_corp_spglobal_one_page import (
+	RatingsCorpSPGlobalOnePage,
+)
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
 from stpstone.utils.loggs.create_logs import CreateLog
 
 
-class RatingsCorpSPGlobalConcreteCreator(ABCRequests):
+class RatingsCorpSPGlobal(metaclass=TypeChecker):
+	"""Orchestrator that paginates through all S&P Global corporate rating actions."""
 
-    def __init__(
-        self,
-        bearer: str,
-        session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        cls_db: Optional[Session] = None,
-        logger: Optional[Logger] = None,
-        token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None,
-        pg_number: int = 1
-    ) -> None:
-        super().__init__(
-            dict_metadata=YAML_WW_RATINGS_CORP_S_AND_P,
-            session=session,
-            dt_ref=dt_ref,
-            cls_db=cls_db,
-            logger=logger,
-            token=token,
-            list_slugs=list_slugs
-        )
-        self.bearer = bearer
-        self.session = session
-        self.dt_ref = dt_ref
-        self.cls_db = cls_db
-        self.logger = logger
-        self.list_slugs = list_slugs
-        self.pg_number = pg_number
+	def __init__(
+		self,
+		date_ref: Optional[date] = None,
+		logger: Optional[Logger] = None,
+		cls_db: Optional[Session] = None,
+	) -> None:
+		"""Initialize the orchestrator.
 
-    @property
-    def get_bearer(self) -> str:
-        regex_pattern = "(?i)system_access_token=([^*]+?);"
-        url = "https://disclosure.spglobal.com/ratings/en/regulatory/ratings-actions"
-        cls_selenium = SeleniumWD(url, bl_headless=True, bl_incognito=True)
-        cls_selenium.wait(60)
-        cls_selenium.wait_until_el_loaded('//a[@class="link-black link-black-hover text-underline"]')
-        sleep(60)
-        list_network_traffic = cls_selenium.get_network_traffic
-        for i, dict_ in enumerate(list_network_traffic):
-            if dict_["method"] == "Network.responseReceivedExtraInfo":
-                int_idx_bearer = i
-                break
-        regex_match = re.search(
-            regex_pattern,
-            list_network_traffic[int_idx_bearer]["params"]["headers"]["set-cookie"]
-        )
-        if (regex_match is not None) \
-            and (regex_match.group(0) is not None) \
-            and (len(regex_match.group(0)) > 0):
-            return f"Bearer {regex_match.group(1)}"
+		Parameters
+		----------
+		date_ref : Optional[date]
+			The date of reference forwarded to each page ingestion, by default None.
+		logger : Optional[Logger]
+			The logger, by default None.
+		cls_db : Optional[Session]
+			The database session, by default None.
 
-    def req_trt_injection(self, resp_req: Response) -> Optional[pd.DataFrame]:
-        return pd.DataFrame(resp_req.json()["RatingAction"])
+		Returns
+		-------
+		None
+		"""
+		self.date_ref = date_ref
+		self.logger = logger
+		self.cls_db = cls_db
+		self.cls_create_log = CreateLog()
 
+	@property
+	def get_corp_ratings(self) -> pd.DataFrame:
+		"""Fetch all corporate rating actions across all available pages.
 
-class RatingsCorpSPGlobalProduct:
+		Returns
+		-------
+		pd.DataFrame
+			Combined DataFrame of all rating actions.
+		"""
+		list_ser: list[dict] = []
+		str_bearer = RatingsCorpSPGlobalOnePage(
+			bearer="", date_ref=self.date_ref, logger=self.logger
+		).get_bearer
+		for i in range(1, 100):
+			try:
+				cls_ = RatingsCorpSPGlobalOnePage(
+					bearer=str_bearer,
+					pg_number=i,
+					date_ref=self.date_ref,
+					logger=self.logger,
+				)
+				df_ = cls_.run()
+				if df_ is None or df_.empty:
+					break
+				list_ser.extend(df_.to_dict(orient="records"))
+				sleep(10)
+			except Exception as e:
+				self.cls_create_log.log_message(
+					self.logger, f"Pagination stopped at page {i}: {e}", log_level="warning"
+				)
+				break
+		return pd.DataFrame(list_ser)
 
-    def __init__(
-        self,
-        session: Optional[Session] = None,
-        dt_ref: datetime = DatesBR().sub_working_days(DatesBR().curr_date, 1),
-        cls_db: Optional[Session] = None,
-        logger: Optional[Logger] = None,
-        token: Optional[str] = None,
-        list_slugs: Optional[List[str]] = None,
-        pg_number: int = 1
-    ) -> None:
-        self.session = session
-        self.dt_ref = dt_ref
-        self.cls_db = cls_db
-        self.logger = logger
-        self.token = token
-        self.list_slugs = list_slugs
-        self.pg_number = pg_number
+	def update_db(self) -> None:
+		"""Insert all corporate rating actions into the database, page by page.
 
-    @property
-    def get_corp_ratings(self) -> pd.DataFrame:
-        list_ser = list()
-        str_bearer = RatingsCorpSPGlobalConcreteCreator(bearer=None).get_bearer
-        for i in range(1, 100):
-            try:
-                cls_ = RatingsCorpSPGlobalConcreteCreator(pg_number=i, bearer=str_bearer)
-                df_ = cls_.source("ratings_corp", bl_fetch=True)
-                list_ser.extend(df_.to_dict(orient="records"))
-                sleep(10)
-            except Exception as e:
-                CreateLog().log_message(self.logger, f"Error: {e}", log_level="warning")
-        return pd.DataFrame(list_ser)
-
-    @property
-    def update_db(self) -> None:
-        str_bearer = RatingsCorpSPGlobalConcreteCreator(bearer=None).get_bearer
-        for i in range(1, 100):
-            try:
-                cls_ = RatingsCorpSPGlobalConcreteCreator(pg_number=i, bearer=str_bearer)
-                _ = cls_.source("ratings_corp", bl_fetch=False)
-                sleep(10)
-            except Exception as e:
-                CreateLog().log_message(self.logger, f"Error: {e}", log_level="warning")
+		Returns
+		-------
+		None
+		"""
+		str_bearer = RatingsCorpSPGlobalOnePage(
+			bearer="", date_ref=self.date_ref, logger=self.logger
+		).get_bearer
+		for i in range(1, 100):
+			try:
+				cls_ = RatingsCorpSPGlobalOnePage(
+					bearer=str_bearer,
+					pg_number=i,
+					date_ref=self.date_ref,
+					logger=self.logger,
+					cls_db=self.cls_db,
+				)
+				cls_.run()
+				sleep(10)
+			except Exception as e:
+				self.cls_create_log.log_message(
+					self.logger, f"DB update stopped at page {i}: {e}", log_level="warning"
+				)
+				break

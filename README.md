@@ -1,16 +1,19 @@
 # stpstone <img src="img/logo_stpstone.png" align="right" width="200" style="border-radius: 15px;" alt="stpstone">
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue.svg)
 ![PyPI Version](https://img.shields.io/pypi/v/stpstone)
-![Linting](https://img.shields.io/badge/linting-flake8%20+%20isort-blue)
-![Security](https://img.shields.io/badge/security-bandit-blue.svg)
+[![Linting](https://img.shields.io/badge/linting-ruff_|_codespell-blue)](https://github.com/astral-sh/ruff+https://github.com/codespell-project/codespell)
+[![Formatting: isort](https://img.shields.io/badge/formatting-isort-%231674b1)](https://pycqa.github.io/isort/)
+![Test Coverage](./coverage.svg)
+[![Snyk Vulnerabilities](https://snyk.io/test/github/yourusername/stpstone/badge.svg)](https://snyk.io/test/github/yourusername/stpstone)
+[![Snyk License](https://snyk.io/advisor/python/stpstone/badge.svg)](https://snyk.io/advisor/python/stpstone)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![PyPI Downloads](https://img.shields.io/pypi/dm/stpstone?color=teal)
+![PyPI Downloads](https://static.pepy.tech/badge/stpstone)
 ![Open Issues](https://img.shields.io/github/issues/guilhermegor/stpstone)
 ![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-darkgreen.svg)
 
-**stpstone** (short for *stepping stone*) is a Python framework designed for ingesting, processing, and analyzing structured and unstructured financial data. It provides tools for ETL (Extract, Transform, Load), quantitative analysis, and derivatives pricing, optimized for financial market applications.
+**stpstone** (short for *stepping stone*) is a Python package designed for ingesting, processing, and analyzing structured and unstructured financial data. It provides tools for ETL (Extract, Transform, Load), quantitative analysis, and derivatives pricing, optimized for financial market applications.
 
 ## ✨ Key Features
 
@@ -172,13 +175,13 @@
 - [Yield Risk](stpstone/analytics/risk/yield_.py)
 
 #### **Computer Arithmetic**
-- [Binary Operations](stpstone/analytics/arithmetics/)
-  - [Binary Comparator](stpstone/analytics/arithmetics/binary_comparator.py)
-  - [Binary Converter](stpstone/analytics/arithmetics/binary_converter.py)
-  - [Binary Arithmetic](stpstone/analytics/arithmetics/binary_divider.py)
-  - [Bit Operations](stpstone/analytics/arithmetics/bitwise.py)
-  - [Logic Gates](stpstone/analytics/arithmetics/logic_gate.py)
-  - [Fraction Operations](stpstone/analytics/arithmetics/fraction.py)
+- [Binary Operations](stpstone/analytics/arithmetic/)
+  - [Binary Comparator](stpstone/analytics/arithmetic/binary_comparator.py)
+  - [Binary Converter](stpstone/analytics/arithmetic/binary_converter.py)
+  - [Binary Arithmetic](stpstone/analytics/arithmetic/binary_divider.py)
+  - [Bit Operations](stpstone/analytics/arithmetic/bitwise.py)
+  - [Logic Gates](stpstone/analytics/arithmetic/logic_gate.py)
+  - [Fraction Operations](stpstone/analytics/arithmetic/fraction.py)
 
 ----
 ### ⚙️ Utilities
@@ -375,7 +378,7 @@ stpstone/
 ├── 📁 .vscode/               # VSCode configuration
 │   └── ⚙️ settings.json      # Editor preferences and extensions
 │
-├── 📁 cli/                   # Command Line Interface components
+├── 📁 bin/                   # Command Line Interface components
 │
 ├── 📁 data/                  # Data storage and management
 │
@@ -408,8 +411,8 @@ stpstone/
 ├── ⚙️ pyproject.toml        # Project metadata and dependencies
 ├── 📖 README.md             # Project overview
 ├── 📦 requirements.txt      # Production dependencies
-├── 🔧 requirements-dev.txt  # Development dependencies
-└── 💻 requirements-venv.txt # Virtual environment setup
+├── 🔧 extensions.txt  # Development dependencies
+└── 💻 requirements-prd.txt # Virtual environment setup
 </code></pre>
 
 ## 👨‍💻 Authors

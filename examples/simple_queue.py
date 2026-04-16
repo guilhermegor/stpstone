@@ -1,4 +1,4 @@
-from stpstone.dsa.queues.simple_queue import Queue
+from stpstone.utils.dsa.queues.simple_queue import Queue
 
 
 cls_queue = Queue()

@@ -74,7 +74,7 @@ stpstone
 │   ├── generic.yaml
 │   └── global_slots.py
 ├── analytics
-│   ├── arithmetics
+│   ├── arithmetic
 │   │   ├── binary_comparator.py
 │   │   ├── binary_converter.py
 │   │   ├── binary_divider.py
@@ -86,28 +86,32 @@ stpstone
 │   │   ├── fraction.py
 │   │   └── logic_gate.py
 │   ├── perf_metrics
-│   │   ├── data_deltas.py
 │   │   ├── earnings_quality.py
 │   │   ├── financial_math.py
+│   │   ├── financial_returns.py
 │   │   └── roe_decomposition.py
 │   ├── portfolio_alloc
-│   │   └── eff.py
+│   │   └── markowitz_eff.py
 │   ├── pricing
-│   │   ├── debentures.py
 │   │   ├── derivatives
 │   │   │   ├── american_options.py
 │   │   │   ├── european_options.py
 │   │   │   ├── forward.py
-│   │   │   └── futures.py
-│   │   └── sovereign_bonds
-│   │       └── br.py
+│   │   │   └── futures_b3.py
+│   │   ├── private_debt
+│   │   │   └── debentures.py
+│   │   ├── public_debt
+│   │   │   └── br_national_bonds.py
+│   │   └── taxes
+│   │       ├── br_come_cotas.py
+│   │       └── br_regressive_tax_schedules.py
 │   ├── quant
 │   │   ├── calculus.py
 │   │   ├── classification.py
 │   │   ├── fit_assessment.py
 │   │   ├── interpolation.py
 │   │   ├── josephus_solver.py
-│   │   ├── linear_algebra.py
+│   │   ├── linear_transformations.py
 │   │   ├── prob_distributions.py
 │   │   ├── regression.py
 │   │   ├── root.py
@@ -120,20 +124,9 @@ stpstone
 │       ├── liquidity.py
 │       ├── market.py
 │       └── yield_.py
-├── dsa
-│   ├── queues
-│   │   ├── priority_queues.py
-│   │   ├── simple_deque.py
-│   │   └── simple_queue.py
-│   ├── stacks
-│   │   └── simple_stack.py
-│   └── trees
-│       ├── avl_tree.py
-│       └── b_tree.py
 ├── ingestion
 │   ├── abc
-│   │   ├── anbima_data_ws.py
-│   │   └── requests.py
+│   │   └── ingestion_abc.py
 │   └── countries
 │       ├── br
 │       │   ├── bylaws
@@ -209,14 +202,14 @@ stpstone
 │   ├── cleaner
 │   │   ├── data_cleaning.py
 │   │   ├── eda.py
-│   │   └── features_selecting.py
+│   │   └── features_selection.py
 │   ├── standardization
-│   │   └── dataframe.py
+│   │   └── standardizer_df.py
 │   └── validation
 │       ├── balance_brackets.py
 │       ├── br_docs.py
-│       ├── dataframe.py
-│       └── metaclass_type_checker.py
+│       ├── metaclass_type_checker.py
+│       └── validate_df.py
 └── utils
     ├── cals
     │   ├── br_bzdays.py
@@ -228,16 +221,16 @@ stpstone
     │   │   ├── minio.py
     │   │   └── sendgrid.py
     │   ├── databases
-    │   │   ├── abc.py
     │   │   ├── dabricksCLI.py
     │   │   ├── databricks.py
-    │   │   ├── generic.py
     │   │   ├── mongodb.py
-    │   │   ├── mysql.py
-    │   │   ├── postgresql.py
     │   │   ├── redis.py
-    │   │   ├── sqlite.py
-    │   │   └── sqlserver.py
+    │   │   └── sql
+    │   │       ├── database_abc.py
+    │   │       ├── mysql.py
+    │   │       ├── postgresql.py
+    │   │       ├── sqlite.py
+    │   │       └── sqlserver.py
     │   └── netops
     │       ├── diagnostics
     │       │   └── network_info.py
@@ -250,20 +243,29 @@ stpstone
     │       │   │   ├── proxy_webshare.py
     │       │   │   ├── spysme.py
     │       │   │   └── spysone.py
-    │       │   ├── abc.py
-    │       │   ├── load_testing.py
     │       │   ├── managers
-    │       │   │   └── free.py
-    │       │   └── test_proxy.py
+    │       │   │   └── free_proxies_manager.py
+    │       │   ├── proxies_abc.py
+    │       │   └── proxies_tester.py
     │       └── scraping
     │           ├── scrape_checker.py
     │           └── user_agents.py
     ├── conversions
     │   ├── base_converter.py
     │   └── expression_converter.py
+    ├── dsa
+    │   ├── queues
+    │   │   ├── priority_queues.py
+    │   │   ├── simple_deque.py
+    │   │   └── simple_queue.py
+    │   ├── stacks
+    │   │   └── simple_stack.py
+    │   └── trees
+    │       ├── avl_tree.py
+    │       └── b_tree.py
     ├── geography
-    │   ├── br.py
-    │   └── ww.py
+    │   ├── geo_br.py
+    │   └── geo_ww.py
     ├── llms
     │   └── gpt.py
     ├── loggs
@@ -277,8 +279,7 @@ stpstone
     │   ├── outlook.py
     │   └── windows_os.py
     ├── orchestrators
-    │   └── airflow
-    │       └── plugins.py
+    │   └── airflow_plugins.py
     ├── parsers
     │   ├── arrays.py
     │   ├── colors.py
@@ -303,20 +304,19 @@ stpstone
     │   ├── asynchronous.py
     │   ├── conditional.py
     │   ├── generic.py
-    │   ├── logging.py
     │   ├── mp_helper.py
     │   ├── parallel.py
     │   └── streaming.py
     ├── providers
     │   ├── br
-    │   │   ├── abimadata_api.py
+    │   │   ├── anbimadata_api.py
     │   │   ├── inoa.py
     │   │   ├── line_b3.py
     │   │   └── margin_simulator_b3.py
     │   └── ww
     │       └── reuters.py
     ├── security
-    │   └── secure_crypto.py
+    │   └── secure_cryptography.py
     ├── system
     │   └── drives.py
     ├── trading_platforms

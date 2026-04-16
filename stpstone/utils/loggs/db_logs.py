@@ -1,96 +1,178 @@
-### DATABASE LOGGING ###
+"""Database logging utilities for audit tracking.
 
-# pypi.org libs
+This module provides a class for adding audit-related information to pandas DataFrames,
+including URL, timestamp, user, host, error messages, and action logging. It ensures
+robust validation and type safety for all operations.
+"""
+
+from datetime import date
 import socket
-from datetime import datetime
+from typing import Literal, Optional
 
 import pandas as pd
 
-# local libs
-from stpstone._config.global_slots import YAML_GEN
-from stpstone.utils.cals.handling_dates import DatesBR
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 
 
-class DBLogs:
+class DBLogs(metaclass=TypeChecker):
+	"""Class for handling database audit logging operations."""
 
-    def audit_log(
-        self, df_: pd.DataFrame, str_url: str, dt_db_ref: datetime, bl_ts_log_str: bool = True
-    ) -> pd.DataFrame:
-        """
-        Adds audit columns to the DataFrame for logging.
+	def _validate_dataframe(self, df_: pd.DataFrame) -> None:
+		"""Validate DataFrame input.
 
-        Args:
-            - df_ (pandas.DataFrame): DataFrame to update.
-            - str_url (str): URL to insert into the DataFrame.
-            - dt_last_update (str): Timestamp of the last update.
+		Parameters
+		----------
+		df_ : pd.DataFrame
+			DataFrame to validate
 
-        Returns:
-            - pd.DataFrame: DataFrame with audit log information.
-        """
-        df_[YAML_GEN["audit_log_cols"]["url"]] = str_url
-        df_[YAML_GEN["audit_log_cols"]["ref_date"]] = dt_db_ref
-        if bl_ts_log_str == True:
-            df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = DatesBR().utc_log_ts.strftime(
-                "%Y-%m-%d %H:%M:%S.%f%z")
-        else:
-            df_[YAML_GEN["audit_log_cols"]["log_timestamp"]] = DatesBR().utc_log_ts
-        return df_
+		Raises
+		------
+		ValueError
+			If DataFrame is empty or None
+		"""
+		if df_.empty:
+			raise ValueError("DataFrame cannot be empty")
 
-    def insert_user_info(self, df_: pd.DataFrame, user_id: str) -> pd.DataFrame:
-        """
-        Inserts user information into the dataframe for traceability.
+	def _validate_string(self, value: Optional[str], name: str) -> None:
+		"""Validate string input.
 
-        Args:
-            df_ (pandas.DataFrame): DataFrame to update.
-            user_id (str): ID of the user responsible for the update.
+		Parameters
+		----------
+		value : Optional[str]
+			String to validate
+		name : str
+			Name of the variable for error messages
 
-        Returns:
-            pd.DataFrame: Updated DataFrame with user information.
-        """
-        df_[YAML_GEN["audit_log_cols"]["user"]] = user_id
-        return df_
+		Raises
+		------
+		ValueError
+			If string is empty
+		"""
+		if not value or len(value) == 0:
+			raise ValueError(f"{name} cannot be empty")
 
-    def insert_host_info(self, df_: pd.DataFrame) -> pd.DataFrame:
-        """
-        Inserts the host name (machine) where the data is being processed into the dataframe.
+	def audit_log(
+		self,
+		df_: pd.DataFrame,
+		url: Optional[str],
+		dt_db_ref: date,
+		bool_format_log_as_str: bool = True,
+	) -> pd.DataFrame:
+		"""Add audit columns to the DataFrame for logging.
 
-        Args:
-            df_ (pandas.DataFrame): DataFrame to update.
+		Parameters
+		----------
+		df_ : pd.DataFrame
+			DataFrame to update
+		url : Optional[str]
+			URL to insert into the DataFrame
+		dt_db_ref : date
+			Date of the database reference
+		bool_format_log_as_str : bool
+			Whether to format timestamp as string (default: True)
 
-        Returns:
-            pd.DataFrame: Updated DataFrame with host information.
-        """
-        df_[YAML_GEN["audit_log_cols"]["host"]] = socket.gethostname()
-        return df_
+		Returns
+		-------
+		pd.DataFrame
+			Updated DataFrame with audit columns
+		"""
+		self._validate_dataframe(df_)
+		if "URL" not in df_.columns:
+			self._validate_string(url, "url")
+			df_["URL"] = url
+		df_["REF_DATE"] = dt_db_ref
+		log_ts = DatesBRAnbima().utc_log_ts()
+		df_["LOG_TIMESTAMP"] = (
+			log_ts.strftime("%Y-%m-%d %H:%M:%S.%f%z") if bool_format_log_as_str else log_ts
+		)
+		return df_
 
-    def insert_error_info(self, df_: pd.DataFrame, error_msg: str) -> pd.DataFrame:
-        """
-        Inserts error information into the dataframe to track the issues.
+	def insert_user_info(self, df_: pd.DataFrame, user_id: str) -> pd.DataFrame:
+		"""Insert user information into the DataFrame for traceability.
 
-        Args:
-            df_ (pandas.DataFrame): DataFrame to update.
-            error_msg (str): Error message to insert.
+		Parameters
+		----------
+		df_ : pd.DataFrame
+			DataFrame to update
+		user_id : str
+			ID of the user responsible for the update
 
-        Returns:
-            pd.DataFrame: Updated DataFrame with error information.
-        """
-        df_[YAML_GEN["audit_log_cols"]["error_msg"]] = error_msg
-        return df_
+		Returns
+		-------
+		pd.DataFrame
+			Updated DataFrame with user information
+		"""
+		self._validate_dataframe(df_)
+		self._validate_string(user_id, "user_id")
 
-    def log_data_insert(
-        self, df_: pd.DataFrame, action_type: str, dt_action: str
-    ) -> pd.DataFrame:
-        """
-        Inserts logging information for data insertions into the dataframe.
+		df_["USER"] = user_id
+		return df_
 
-        Args:
-            df_ (pandas.DataFrame): DataFrame to update.
-            action_type (str): Type of action (insert, update, delete).
-            dt_action (str): Timestamp of the action.
+	def insert_host_info(self, df_: pd.DataFrame) -> pd.DataFrame:
+		"""Insert host name (machine) where data is processed into the DataFrame.
 
-        Returns:
-            pd.DataFrame: Updated DataFrame with logging information.
-        """
-        df_[YAML_GEN["audit_log_cols"]["action_type"]] = action_type
-        df_[YAML_GEN["audit_log_cols"]["action_timestamp"]] = dt_action
-        return df_
+		Parameters
+		----------
+		df_ : pd.DataFrame
+			DataFrame to update
+
+		Returns
+		-------
+		pd.DataFrame
+			Updated DataFrame with host information
+		"""
+		self._validate_dataframe(df_)
+
+		df_["HOST"] = socket.gethostname()
+		return df_
+
+	def insert_error_info(self, df_: pd.DataFrame, error_msg: str) -> pd.DataFrame:
+		"""Insert error information into the DataFrame to track issues.
+
+		Parameters
+		----------
+		df_ : pd.DataFrame
+			DataFrame to update
+		error_msg : str
+			Error message to insert
+
+		Returns
+		-------
+		pd.DataFrame
+			Updated DataFrame with error information
+		"""
+		self._validate_dataframe(df_)
+		self._validate_string(error_msg, "error_msg")
+
+		df_["ERROR_MSG"] = error_msg
+		return df_
+
+	def log_data_insert(
+		self,
+		df_: pd.DataFrame,
+		action_type: Literal["insert", "update", "delete"],
+		dt_action: date,
+	) -> pd.DataFrame:
+		"""Insert logging information for data actions into the DataFrame.
+
+		Parameters
+		----------
+		df_ : pd.DataFrame
+			DataFrame to update
+		action_type : Literal['insert', 'update', 'delete']
+			Type of action
+		dt_action : date
+			Date of the action
+
+		Returns
+		-------
+		pd.DataFrame
+			Updated DataFrame with action logging information
+		"""
+		self._validate_dataframe(df_)
+		self._validate_string(action_type, "action_type")
+
+		df_["ACTION_TYPE"] = action_type
+		df_["ACTION_TIMESTAMP"] = dt_action
+		return df_

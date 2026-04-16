@@ -1,322 +1,590 @@
-### HANDLING CLASSIFICATION ISSUES ###
+"""Module for classification analysis."""
 
-# pypi.org libs
+from typing import Literal, Optional, TypedDict, Union
+
 import matplotlib.pyplot as plt
-from sklearn.datasets import fetch_openml
-from sklearn.linear_model import SGDClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, \
-    roc_auc_score, adjusted_rand_score, silhouette_score, accuracy_score
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
-from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
+from numpy.typing import NDArray
+import pandas as pd
+from scipy.sparse import csr_matrix
+from sklearn.base import BaseEstimator
 from sklearn.cluster import KMeans
+from sklearn.datasets import fetch_openml
+from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.decomposition import PCA
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import (
+	accuracy_score,
+	adjusted_rand_score,
+	confusion_matrix,
+)
+from sklearn.multiclass import OneVsOneClassifier, OneVsRestClassifier
 from sklearn.naive_bayes import GaussianNB
-# local libs
-from stpstone.handling_data.lists import ListHandler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+from stpstone.transformations.validation.metaclass_type_checker import TypeChecker
+from stpstone.utils.parsers.lists import ListHandler
 from stpstone.utils.parsers.str import StrHandler
 
 
-class InputsClassification:
+class ResultFetchSklearn(TypedDict):
+	"""TypedDict for sklearn fetch_openml results."""
 
-    def fetch_sklearn_database(self, database_name='mnist_784', version=1, bl_asframe=False):
-        """
-        DOCSTRING: DATASET FROM SCIKIT-LEARN, WHICH NORMALLY HAVE A SIMILAR DICTIONARY
-            STRUCTURE: DESCR (DESCRIPTION OF THE DATASET), DATA (ARRAY WITH ONE ROW PER
-            INSTANCE AND ONE COLUMN PER FEATURE), AND TARGET (AN ARRAY WITH LABELS)
-        INPUTS: DATABASE NAME (MNIST_784 AS DEFAULT) AND VERSION
-        OUTPUTS: DICTIONARY WITH DATA, TARGET, FEATURE NAMES, DESCR, DETAILS, CATEGORIES AND
-            URL
-        """
-        return fetch_openml(database_name, version=version, as_frame=bl_asframe)
-
-    def show_image_from_dataset(self, array_instance, cmap='binary', shape=(28, 28),
-                                bl_axis='off', complete_saving_path=None):
-        """
-        DOCSTRING: SHOW IMAGE FROM DATASET
-        INPUTS: VECTOR INSTANCE, CMAP (DEFAULT), SHAPE (DEFAULT)
-        OUTPUTS: -
-        """
-        # reshape image
-        array_instance = array_instance.reshape(shape)
-        # creating image
-        plt.imshow(array_instance, cmap=cmap)
-        plt.axis(bl_axis)
-        # saving the plot, if is user's will
-        if complete_saving_path != None:
-            plt.savefig(complete_saving_path)
-        # show result
-        plt.show()
+	data: Union[NDArray[np.float64], csr_matrix, pd.DataFrame]
+	target: NDArray[np.float64]
+	DESCR: str
+	feature_names: list[str]
+	target_names: list[str]
+	categories: Optional[dict]
+	details: dict
+	frame: pd.DataFrame
 
 
-class Classification:
+class ResultOneHotVectorizer(TypedDict):
+	"""TypedDict for one-hot vectorizer results."""
 
-    def one_hot_vectorizer(self, list_corpus):
-        """
-        DOCSTRING: ONE HOT VECTORIZER, AIMING TO ENCODE A LIST OF STRINGS AND CONVERT TO AN ARRAY
-        INPUTS: CORPUS (LIST TYPE)
-        OUTPUTS: DICTIONARY (LABLES AND ARRAY OF ONE HOT ENCODER)
-        """
-        # list of words to vectorizer - alphabetical order
-        list_labels = ListHandler().extend_lists(
-            *[x.split() for x in list_corpus])
-        list_labels = [StrHandler().remove_sup_period_marks(x).lower()
-                       for x in ListHandler().remove_duplicates(list_labels)]
-        list_labels.sort()
-        # one hot vectorizer
-        one_hot_vectorizer = CountVectorizer(binary=True)
-        array_one_hot = one_hot_vectorizer.fit_transform(list_corpus).toarray()
-        # return dictionary with labels and one hot encoder
-        return {
-            'labels': list_labels,
-            'one_hot_encoder': array_one_hot
-        }
-
-    def sgd_classifier(self, array_x, array_y, int_random_state_seed=5):
-        """
-        DOCSTRING: TRAINING A BINARY CLASSIFIER WITH STOCHASTIC GRADIENT DESCENT (SGD),
-            TO EAVLUATE WHTEHER OR NOT A NEW ELEMENT BELONGS TO THE SUBSET, WHICH
-            HAS THE ADVANTAGE OF BEING CAPABLE OF HANDLING VERY LARGE DATASETS EFFICIENTLY
-        INPUTS: ARRAY DATA, ARRAY TARGET, LIST OF DATA TO PREDICT AND RANDOM STATE SEED
-            (5 AS DEFAULT)
-        OUTPUTS: DICTIONARY WITH KEYS model AND PREDICTIONS (DATALABEL AND WHETHER IT
-            BELONGS TO THE ARRAY DATA OR NOT, CONSIDERING A CLASSIFICATION METHOD)
-        """
-        # estimator
-        model = SGDClassifier(random_state=int_random_state_seed)
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-    def svm(
-            self, array_x, array_y, kernel='rbf', float_regularization_parameter=1,
-            multiclass_classification_strategy='best',
-            gamma='auto', int_random_state_seed=42):
-        """
-        DOCSTRING: SUPPORT VECTOR MACHINE CLASSIFICATION TO PREDICT, USING ONE VERSUS ONE
-            STRATEGY, TRAINING BINARY CLASSIFIERS, GETTING THEIR DECISION SCORES FOR THE DATA,
-            AND CHOOSING THE MODEL WHICH HAS AN OPTIMIZED RESPONSE, MATCHING TARGET CLASSIFICATION
-            IN MOST CASES
-        INPUTS: ARRAY X, ARRAY Y, KERNEL (LINEAR OR RBF ARE THE MOST COMMON), REGUALARIZATION
-            PARAMETER (1 AS DEFAULT), MULTICLASS CLASSIFICATION STRATEGY, GAMMA AND RANDOM STATE SEED
-        OUTPUTS: DICT
-        """
-        # classifier to the supporting vector machine classification, regarding multiclass
-        #   classification strategy (best, ovr or ovo)
-        if multiclass_classification_strategy == 'best':
-            model = SVC(C=float_regularization_parameter, gamma=gamma,
-                          random_state=int_random_state_seed, kernel=kernel)
-        elif multiclass_classification_strategy == 'ovr':
-            model = OneVsRestClassifier(
-                SVC(C=float_regularization_parameter, gamma=gamma,
-                    random_state=int_random_state_seed, kernel=kernel))
-        elif multiclass_classification_strategy == 'ovo':
-            model = OneVsOneClassifier(
-                SVC(C=float_regularization_parameter, gamma=gamma,
-                    random_state=int_random_state_seed, kernel=kernel))
-        else:
-            raise Exception(
-                'Multiclass classification strategy ought be wheter best, ovr'
-                + '(one-versus-the-rest) or ovo (one-versus-one), nevertheless it was declared'
-                + ' {}, which is invalid, please revisit the parameter '.format(
-                    multiclass_classification_strategy)
-                + 'multiclass_classification_strategy')
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-    def decision_tree(self, array_x, array_y, impurity_crit='gini',
-                      float_max_depth=None, int_random_state_seed=42):
-        """
-        REFERENCES: https://www.datacamp.com/tutorial/decision-tree-classification-python
-        DOCSTRING: DECISION TREE CLASSIFIER
-        INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS:
-        """
-        # classifier
-        model = DecisionTreeClassifier(criterion=impurity_crit, max_depth=float_max_depth,
-                                       random_state=int_random_state_seed)
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-    def random_forest(self, array_x, array_y, n_estimators=100, int_random_state_seed=42):
-        """
-        REFERENCES: https://www.datacamp.com/tutorial/random-forests-classifier-python
-        DOCSTRING: RANDOM FOREST CLASSIFIER, A.K.A. DECISION TREE ENSEMBLED
-        INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS:
-        """
-        # fitting model
-        model = RandomForestClassifier(random_state=int_random_state_seed, n_estimators=n_estimators)
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-    def knn_classifier(self, array_x, array_y, int_n_neighbors=5):
-        """
-        DOCSTRING: K NEIGHBORS CLASSIFIER
-        INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS:
-        """
-        # classifier
-        model = KNeighborsClassifier(n_neighbors=int_n_neighbors)
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-    def k_means(self, n_clusters, array_y, array_x, int_random_state_seed=0):
-        """
-        REFERENCES: https://www.hashtagtreinamentos.com/k-means-para-clusterizar-ciencia-dados?gad_source=1&gclid=Cj0KCQjwlZixBhCoARIsAIC745Bm8VTK5AMNUKTlV3TpYm6RB6ag2IGUIMEvNNYTmKmAfqN7O5vA6mwaAi6FEALw_wcB
-        DOCSTRING: K-MEANS CLUSTERING FOR LABELED DATA
-        INPUTS:
-        OUTPUTS: DICT (LABELS - INDENTIFICATIONS OF RESPECTIVE CLUSTER, AND ADJUSTED RAND, WHICH
-            INDICATES THE SCORE OF CLUSTERIZATION N_CLUSTERS-WISE)
-        """
-        # classifier
-        model = KMeans(n_clusters=n_clusters, random_state=int_random_state_seed)
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-    def naive_bayes(self, array_x, array_y):
-        """
-        DOCSTRING: NAIVE BAYES CLASSIFIER
-        INPUTS: ARRAY DATA, ARRAY TARGETS AND ARRAY DATA TO BE PREDICTED
-        OUTPUTS: DICT
-        """
-        # classifier
-        model = GaussianNB()
-        # fitting model
-        model.fit(array_x, array_y)
-        # array predictions
-        array_y_hat = model.predict(array_x)
-        # returning model fitted and predictions
-        return {
-            'model_fitted': model,
-            'predictions': array_y_hat,
-            'adjusted_rand_score': adjusted_rand_score(array_y, array_y_hat),
-            'score': model.score(array_x, array_y),
-            'accuracy_score': accuracy_score(array_y, array_y_hat),
-            'confusion_matrix': confusion_matrix(array_y, array_y_hat),
-            'classes': model.classes_,
-        }
-
-class ImageProcessing:
-
-    def img_dims(self, name_path):
-        """
-        REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
-        DOCSTRING: IMAGE DIMENSIONS
-        INPUTS:
-        OUTPUTS:
-        """
-        # image dimensions (height x width x channels)
-        return plt.imread(name_path).shape
-
-    def pca_with_var_exp(self, name_path, var_exp):
-        """
-        REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
-        DOCSTRING: PRINCIPAL COMPONENTS ANALYSIS WITH EXPLAINED VARIANCE RESULT FOR IMAGES
-        INPUTS:
-        OUTPUTS:
-        """
-        # defining the model
-        model = PCA(var_exp)
-        # fit transform
-        model = model.fit_transform(self.img_dims(name_path))
-        # return lowered dimensioned matrice
-        return model.inverse_transform(model)
-
-    def plot_subplot(float_exp_var_ratio, *array_x):
-        """
-        REFERENCES: https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
-        DOCSTRING: PLOT THE ORIGINAL IMAGES AND THE IV VARIANCE REDUCTIONS
-        INPUTS:
-        OUTPUTS:
-        """
-        # plot
-        plt.subplot(3, 2, float_exp_var_ratio)
-        plt.imshow(array_x, cmap='gray')
-        plt.xticks([])
-        plt.yticks([])
+	labels: list[str]
+	array: NDArray[np.float64]
 
 
-# corpus = ['Time flies flies like an arrow.', 'Fruit flies like a banana.']
-# print(BinaryMulticlassClassification().one_hot_vectorizer(corpus))
-# # output
-# {'labels': ['a', 'an', 'arrow', 'banana', 'flies', 'fruit', 'like', 'time'], 'one_hot_encoder': array([[1, 1, 0, 1, 0, 1, 1],
-#        [0, 0, 1, 1, 1, 1, 0]], dtype=int64)}
+class ResultClassification(TypedDict):
+	"""TypedDict for classification results."""
 
-# corpus = ['Time flies flies like an arrow.', 'Fruit flies like a banana.']
-# print(BinaryMulticlassClassification().convert_categories_from_strings_to_array(corpus, True))
+	model_fitted: BaseEstimator
+	predictions: NDArray[np.float64]
+	adjusted_rand_score: float
+	score: float
+	accuracy_score: float
+	confusion_matrix: NDArray[np.float64]
+	classes: NDArray[np.float64]
+
+
+class InputsClassification(metaclass=TypeChecker):
+	"""Class for handling input data for classification tasks."""
+
+	def fetch_sklearn_database(
+		self, database_name: str = "mnist_784", version: int = 1, bool_asframe: bool = False
+	) -> ResultFetchSklearn:
+		"""Fetch dataset from sklearn openml repository.
+
+		Parameters
+		----------
+		database_name : str
+			Name of dataset to fetch, default "mnist_784"
+		version : int
+			Version of dataset, default 1
+		bool_asframe : bool
+			Return as pandas DataFrame if True, default False
+
+		Returns
+		-------
+		ResultFetchSklearn
+			Dictionary containing dataset features and targets
+
+		References
+		----------
+		scikit-learn fetch_openml documentation
+		"""
+		return fetch_openml(database_name, version=version, as_frame=bool_asframe)
+
+	def show_image_from_dataset(
+		self,
+		array_instance: NDArray[np.float64],
+		cmap: str = "binary",
+		shape: tuple = (28, 28),
+		bool_axis: str = "off",
+		complete_saving_path: Optional[str] = None,
+	) -> None:
+		"""Display image from dataset array.
+
+		Parameters
+		----------
+		array_instance : NDArray[np.float64]
+			Array containing image data
+		cmap : str
+			Color map for display, default "binary"
+		shape : tuple
+			Shape to reshape image, default (28, 28)
+		bool_axis : str
+			Show axis if "on", default "off"
+		complete_saving_path : Optional[str]
+			Path to save image if provided, default None
+
+		References
+		----------
+		matplotlib.pyplot.imshow documentation
+		"""
+		array_instance = array_instance.reshape(shape)
+		plt.imshow(array_instance, cmap=cmap)
+		plt.axis(bool_axis)
+		if complete_saving_path is not None:
+			plt.savefig(complete_saving_path)
+		else:
+			plt.show()
+
+
+class Classification(metaclass=TypeChecker):
+	"""Class implementing various classification algorithms."""
+
+	def one_hot_vectorizer(self, list_corpus: list[str]) -> ResultOneHotVectorizer:
+		"""Convert text corpus to one-hot encoded vectors.
+
+		Parameters
+		----------
+		list_corpus : list[str]
+			list of text documents
+
+		Returns
+		-------
+		ResultOneHotVectorizer
+			Contains labels and one-hot encoded array
+
+		Raises
+		------
+		TypeError
+			If input is not a list of strings
+
+		References
+		----------
+		scikit-learn CountVectorizer documentation
+		"""
+		if not isinstance(list_corpus, list) or not all(isinstance(x, str) for x in list_corpus):
+			raise TypeError("Input must be a list of strings")
+
+		list_labels = ListHandler().extend_lists(*[x.split() for x in list_corpus])
+		list_labels = [
+			StrHandler().remove_sup_period_marks(x).lower()
+			for x in ListHandler().remove_duplicates(list_labels)
+		]
+		list_labels.sort()
+
+		model = CountVectorizer(binary=True)
+		array_y_hat = model.fit_transform(list_corpus).toarray()
+		return {"labels": list_labels, "one_hot_encoder": array_y_hat}
+
+	def sgd_classifier(
+		self,
+		array_x: NDArray[np.float64],
+		array_y: NDArray[np.float64],
+		int_random_state_seed: int = 5,
+	) -> ResultClassification:
+		"""Train SGD classifier and return metrics.
+
+		Parameters
+		----------
+		array_x : NDArray[np.float64]
+			Feature array
+		array_y : NDArray[np.float64]
+			Target array
+		int_random_state_seed : int
+			Random seed, default 5
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		Raises
+		------
+		TypeError
+			If inputs are not numpy arrays
+		ValueError
+			If inputs are empty
+
+		References
+		----------
+		scikit-learn SGDClassifier documentation
+		"""
+		if not isinstance(array_x, np.ndarray) or not isinstance(array_y, np.ndarray):
+			raise TypeError("Inputs must be numpy arrays")
+		if array_x.size == 0 or array_y.size == 0:
+			raise ValueError("Input arrays cannot be empty")
+
+		model = SGDClassifier(random_state=int_random_state_seed)
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+			"classes": model.classes_,
+		}
+
+	def svm(
+		self,
+		array_x: NDArray[np.float64],
+		array_y: NDArray[np.float64],
+		kernel: str = "rbf",
+		float_regularization_parameter: float = 1,
+		multiclass_classification_strategy: Literal["best", "ovr", "ovo"] = "best",
+		gamma: str = "auto",
+		int_random_state_seed: int = 42,
+	) -> ResultClassification:
+		"""Train SVM classifier with specified multiclass strategy.
+
+		Parameters
+		----------
+		array_x : NDArray[np.float64]
+			Feature array
+		array_y : NDArray[np.float64]
+			Target array
+		kernel : str
+			Kernel type, default "rbf"
+		float_regularization_parameter : float
+			Regularization parameter, default 1
+		multiclass_classification_strategy : Literal['best', 'ovr', 'ovo']
+			Strategy for multiclass ("best", "ovr", "ovo"), default "best"
+		gamma : str
+			Kernel coefficient, default "auto"
+		int_random_state_seed : int
+			Random seed, default 42
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		Raises
+		------
+		ValueError
+			If invalid multiclass strategy is provided
+
+		References
+		----------
+		scikit-learn SVC and multiclass classifier documentation
+		"""
+		if multiclass_classification_strategy == "best":
+			model = SVC(
+				C=float_regularization_parameter,
+				gamma=gamma,
+				random_state=int_random_state_seed,
+				kernel=kernel,
+			)
+		elif multiclass_classification_strategy == "ovr":
+			model = OneVsRestClassifier(
+				SVC(
+					C=float_regularization_parameter,
+					gamma=gamma,
+					random_state=int_random_state_seed,
+					kernel=kernel,
+				)
+			)
+		elif multiclass_classification_strategy == "ovo":
+			model = OneVsOneClassifier(
+				SVC(
+					C=float_regularization_parameter,
+					gamma=gamma,
+					random_state=int_random_state_seed,
+					kernel=kernel,
+				)
+			)
+		else:
+			raise ValueError("Invalid multiclass strategy")
+
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+			"classes": model.classes_,
+		}
+
+	def decision_tree(
+		self,
+		array_x: NDArray[np.float64],
+		array_y: NDArray[np.float64],
+		impurity_crit: str = "gini",
+		int_max_depth: Optional[int] = None,
+		int_random_state_seed: int = 42,
+	) -> ResultClassification:
+		"""Train decision tree classifier.
+
+		Parameters
+		----------
+		array_x : NDArray[np.float64]
+			Feature array
+		array_y : NDArray[np.float64]
+			Target array
+		impurity_crit : str
+			Splitting criterion, default "gini"
+		int_max_depth : Optional[int]
+			Max tree depth, default None
+		int_random_state_seed : int
+			Random seed, default 42
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		References
+		----------
+		[1] https://www.datacamp.com/tutorial/decision-tree-classification-python
+		scikit-learn DecisionTreeClassifier documentation
+		"""
+		model = DecisionTreeClassifier(
+			criterion=impurity_crit,
+			max_depth=int_max_depth if int_max_depth is not None else None,
+			random_state=int_random_state_seed,
+		)
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+			"classes": model.classes_,
+		}
+
+	def random_forest(
+		self,
+		array_x: NDArray[np.float64],
+		array_y: NDArray[np.float64],
+		n_estimators: int = 100,
+		int_random_state_seed: int = 42,
+	) -> ResultClassification:
+		"""Train random forest classifier.
+
+		Parameters
+		----------
+		array_x : NDArray[np.float64]
+			Feature array
+		array_y : NDArray[np.float64]
+			Target array
+		n_estimators : int
+			Number of trees, default 100
+		int_random_state_seed : int
+			Random seed, default 42
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		References
+		----------
+		[1] https://www.datacamp.com/tutorial/random-forests-classifier-python
+		scikit-learn RandomForestClassifier documentation
+		"""
+		model = RandomForestClassifier(
+			random_state=int_random_state_seed, n_estimators=n_estimators
+		)
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+			"classes": model.classes_,
+		}
+
+	def knn_classifier(
+		self, array_x: NDArray[np.float64], array_y: NDArray[np.float64], int_n_neighbors: int = 5
+	) -> ResultClassification:
+		"""Train KNN classifier.
+
+		Parameters
+		----------
+		array_x : NDArray[np.float64]
+			Feature array
+		array_y : NDArray[np.float64]
+			Target array
+		int_n_neighbors : int
+			Number of neighbors, default 5
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		References
+		----------
+		scikit-learn KNeighborsClassifier documentation
+		"""
+		model = KNeighborsClassifier(n_neighbors=int_n_neighbors)
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+			"classes": model.classes_,
+		}
+
+	def k_means(
+		self,
+		n_clusters: int,
+		array_y: NDArray[np.float64],
+		array_x: NDArray[np.float64],
+		int_random_state_seed: int = 0,
+	) -> ResultClassification:
+		"""Perform K-means clustering.
+
+		Parameters
+		----------
+		n_clusters : int
+			Number of clusters
+		array_y : NDArray[np.float64]
+			Target array
+		array_x : NDArray[np.float64]
+			Feature array
+		int_random_state_seed : int
+			Random seed, default 0
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		References
+		----------
+		[1] https://www.hashtagtreinamentos.com/k-means-para-clusterizar-ciencia-dados
+		scikit-learn KMeans documentation
+		"""
+		model = KMeans(n_clusters=n_clusters, random_state=int_random_state_seed)
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+		}
+
+	def naive_bayes(
+		self, array_x: NDArray[np.float64], array_y: NDArray[np.float64]
+	) -> ResultClassification:
+		"""Train Gaussian Naive Bayes classifier.
+
+		Parameters
+		----------
+		array_x : NDArray[np.float64]
+			Feature array
+		array_y : NDArray[np.float64]
+			Target array
+
+		Returns
+		-------
+		ResultClassification
+			Model and performance metrics
+
+		References
+		----------
+		scikit-learn GaussianNB documentation
+		"""
+		model = GaussianNB()
+		model.fit(array_x, array_y)
+		array_y_hat = model.predict(array_x)
+		return {
+			"model_fitted": model,
+			"predictions": array_y_hat,
+			"adjusted_rand_score": adjusted_rand_score(array_y, array_y_hat),
+			"score": model.score(array_x, array_y),
+			"accuracy_score": accuracy_score(array_y, array_y_hat),
+			"confusion_matrix": confusion_matrix(array_y, array_y_hat),
+			"classes": model.classes_,
+		}
+
+
+class ImageProcessing(metaclass=TypeChecker):
+	"""Class for image processing tasks."""
+
+	def img_dims(self, name_path: str) -> tuple:
+		"""Get image dimensions.
+
+		Parameters
+		----------
+		name_path : str
+			Path to image file
+
+		Returns
+		-------
+		tuple
+			Image dimensions (height, width, channels)
+
+		References
+		----------
+		matplotlib.pyplot.imread documentation
+		"""
+		return plt.imread(name_path).shape
+
+	def pca_with_var_exp(self, name_path: str, var_exp: float) -> NDArray[np.float64]:
+		"""Apply PCA with specified variance explained.
+
+		Parameters
+		----------
+		name_path : str
+			Path to image file
+		var_exp : float
+			Variance to retain
+
+		Returns
+		-------
+		NDArray[np.float64]
+			Transformed image array
+
+		References
+		----------
+		[1] https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
+		scikit-learn PCA documentation
+		"""
+		img = plt.imread(name_path)
+		# handle both color and grayscale images
+		if img.ndim == 3:  # color image (height, width, channels)
+			height, width, channels = img.shape
+			img_reshaped = img.reshape(-1, channels)
+		else:  # grayscale image (height, width)
+			height, width = img.shape
+			img_reshaped = img.reshape(-1, 1)
+
+		model = PCA(var_exp)
+		array_transformed = model.fit_transform(img_reshaped)
+		reconstructed = model.inverse_transform(array_transformed)
+		# reshape back to original dimensions
+		if img.ndim == 3:
+			return reconstructed.reshape(height, width, channels)
+		return reconstructed.reshape(height, width)
+
+	def plot_subplot(self, int_exp_var_ratio: int, *array_x: NDArray[np.float64]) -> None:
+		"""Plot subplot of image array.
+
+		Parameters
+		----------
+		int_exp_var_ratio : int
+			Explained variance ratio
+		*array_x : NDArray[np.float64]
+			Image arrays to plot
+
+		References
+		----------
+		[1] https://leandrocruvinel.medium.com/pca-na-mão-e-no-python-d559e9c8f053
+		matplotlib.pyplot.subplot documentation
+		"""
+		plt.subplot(3, 2, int_exp_var_ratio)
+		# remove single-dimensional entries
+		img = np.squeeze(array_x[0])
+		plt.imshow(img, cmap="gray")
+		plt.xticks([])
+		plt.yticks([])

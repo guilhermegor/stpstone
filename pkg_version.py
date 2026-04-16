@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-import sys
 import json
-import toml
 from pathlib import Path
+import sys
+
+import toml
+
 
 def get_package_info():
     """Detect package name and version from pyproject.toml, supporting both Poetry and PEP 621 formats.
