@@ -232,9 +232,7 @@ def test_init_logger_propagated() -> None:
 	assert inst.logger is mock_logger
 
 
-def test_get_response_success(
-	instance: B3BdiFixedIncomePumaTrades, mocker: MockerFixture
-) -> None:
+def test_get_response_success(instance: B3BdiFixedIncomePumaTrades, mocker: MockerFixture) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
