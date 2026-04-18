@@ -10,7 +10,9 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.otc.b3_bdi_fixed_income_inventory import B3BdiFixedIncomeInventory
+from stpstone.ingestion.countries.br.otc.b3_bdi_fixed_income_inventory import (
+	B3BdiFixedIncomeInventory,
+)
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -247,7 +249,9 @@ def test_get_response_success(instance: B3BdiFixedIncomeInventory, mocker: Mocke
 	mock_resp.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(instance: B3BdiFixedIncomeInventory, mocker: MockerFixture) -> None:
+def test_get_response_http_error(
+	instance: B3BdiFixedIncomeInventory, mocker: MockerFixture
+) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
@@ -290,7 +294,9 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_transform_data_normal(instance: B3BdiFixedIncomeInventory, sample_table_dict: dict) -> None:
+def test_transform_data_normal(
+	instance: B3BdiFixedIncomeInventory, sample_table_dict: dict
+) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters
@@ -373,7 +379,9 @@ def test_transform_data_with_null_volumes(instance: B3BdiFixedIncomeInventory) -
 	assert df_["QUANTITY_INSTRUMENT"].iloc[0] == 352
 
 
-def test_transform_data_empty_values(instance: B3BdiFixedIncomeInventory, empty_table_dict: dict) -> None:
+def test_transform_data_empty_values(
+	instance: B3BdiFixedIncomeInventory, empty_table_dict: dict
+) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters

@@ -354,8 +354,8 @@ class TestFIFCADFI:
 			mock_standardize.return_value = sample_dataframe
 
 			instance = CvmFIFCADFI(
-					date_ref=sample_date, logger=mock_logger, cls_db=mock_db_session
-				)
+				date_ref=sample_date, logger=mock_logger, cls_db=mock_db_session
+			)
 			result = instance.run()
 
 			mock_insert_db.assert_called_once_with(

@@ -209,9 +209,7 @@ def test_init_logger_propagated() -> None:
 	assert inst.logger is mock_logger
 
 
-def test_get_response_success(
-	instance: B3BdiFixedIncomeRepos, mocker: MockerFixture
-) -> None:
+def test_get_response_success(instance: B3BdiFixedIncomeRepos, mocker: MockerFixture) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
@@ -238,9 +236,7 @@ def test_get_response_success(
 	mock_resp.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(
-	instance: B3BdiFixedIncomeRepos, mocker: MockerFixture
-) -> None:
+def test_get_response_http_error(instance: B3BdiFixedIncomeRepos, mocker: MockerFixture) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
@@ -283,9 +279,7 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_transform_data_normal(
-	instance: B3BdiFixedIncomeRepos, sample_table_dict: dict
-) -> None:
+def test_transform_data_normal(instance: B3BdiFixedIncomeRepos, sample_table_dict: dict) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters

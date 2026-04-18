@@ -1,4 +1,4 @@
-"""B3 BDI Repo Debenture Transactions ingestion."""
+"""B3 BDI Fixed Income Trades ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -24,8 +24,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiFixedIncomeDebenturesRepurchaseAgreements(ABCIngestionOperations):
-	"""B3 BDI Repo Debenture Transactions ingestion class."""
+class B3BdiFixedIncomeTrades(ABCIngestionOperations):
+	"""B3 BDI Fixed Income Trades ingestion class."""
 
 	def __init__(
 		self,
@@ -76,7 +76,7 @@ class B3BdiFixedIncomeDebenturesRepurchaseAgreements(ABCIngestionOperations):
 		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/Repodebenture/"
+			f"https://arquivos.b3.com.br/bdi/table/Trade/"
 			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
 		)
 
@@ -85,7 +85,7 @@ class B3BdiFixedIncomeDebenturesRepurchaseAgreements(ABCIngestionOperations):
 		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_fixed_income_debentures_repurchase_agreements",
+		str_table_name: str = "br_b3_bdi_fixed_income_trades",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -101,8 +101,7 @@ class B3BdiFixedIncomeDebenturesRepurchaseAgreements(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default
-			"br_b3_bdi_fixed_income_debentures_repurchase_agreements".
+			The name of the table, by default "br_b3_bdi_fixed_income_trades".
 
 		Returns
 		-------
@@ -131,12 +130,22 @@ class B3BdiFixedIncomeDebenturesRepurchaseAgreements(ABCIngestionOperations):
 		df_ = pd.concat(list_dfs, ignore_index=True)
 		dict_dtypes = {
 			"RPT_DT": "date",
+			"DT_REF": "date",
+			"INSTRUMENT_TYPE": str,
+			"ISSUER": str,
 			"TCKR_SYMB": str,
-			"NUMBER_OF_DEALINGS": int,
-			"QUANTITY_TRADED": int,
-			"COMMITMENT_DATE": "date",
-			"TERM": int,
-			"FINANCIAL_VALUE": float,
+			"QUANTITY": float,
+			"PRICE": float,
+			"VOL": float,
+			"RATE": float,
+			"ORIGIN": str,
+			"TRADE_TIME": str,
+			"TRADE_DATE": "date",
+			"TRADE_CODE": str,
+			"ISIN": str,
+			"SETTLEMENT_DT": "date",
+			"SITUATION": str,
+			"ID_SER": int,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -172,10 +181,7 @@ class B3BdiFixedIncomeDebenturesRepurchaseAgreements(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(
-				f"B3BdiFixedIncomeDebenturesRepurchaseAgreements: "
-				f"page {int_page} fetched ({int_rows} rows)"
-			),
+			message=(f"B3BdiFixedIncomeTrades: page {int_page} fetched ({int_rows} rows)"),
 			log_level="info",
 		)
 

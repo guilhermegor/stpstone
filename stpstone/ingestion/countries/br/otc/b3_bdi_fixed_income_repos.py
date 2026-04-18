@@ -170,9 +170,7 @@ class B3BdiFixedIncomeRepos(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(
-				f"B3BdiFixedIncomeRepos: page {int_page} fetched ({int_rows} rows)"
-			),
+			message=(f"B3BdiFixedIncomeRepos: page {int_page} fetched ({int_rows} rows)"),
 			log_level="info",
 		)
 

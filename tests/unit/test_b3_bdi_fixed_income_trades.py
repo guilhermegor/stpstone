@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiFixedIncomeDebenturesRepurchaseAgreements class."""
+"""Unit tests for B3BdiFixedIncomeTrades class."""
 
 from datetime import date
 from logging import Logger
@@ -10,8 +10,8 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.otc.b3_bdi_fixed_income_debentures_repurchase_agreements import (  # noqa: E501
-	B3BdiFixedIncomeDebenturesRepurchaseAgreements,
+from stpstone.ingestion.countries.br.otc.b3_bdi_fixed_income_trades import (
+	B3BdiFixedIncomeTrades,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -34,8 +34,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(sample_date: date) -> B3BdiFixedIncomeDebenturesRepurchaseAgreements:
-	"""Fixture providing a B3BdiFixedIncomeDebenturesRepurchaseAgreements instance.
+def instance(sample_date: date) -> B3BdiFixedIncomeTrades:
+	"""Fixture providing a B3BdiFixedIncomeTrades instance.
 
 	Parameters
 	----------
@@ -44,10 +44,10 @@ def instance(sample_date: date) -> B3BdiFixedIncomeDebenturesRepurchaseAgreement
 
 	Returns
 	-------
-	B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	B3BdiFixedIncomeTrades
 		Initialized instance.
 	"""
-	return B3BdiFixedIncomeDebenturesRepurchaseAgreements(date_ref=sample_date)
+	return B3BdiFixedIncomeTrades(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -62,15 +62,43 @@ def sample_table_dict() -> dict:
 	return {
 		"columns": [
 			{"name": "RptDt"},
+			{"name": "DtRef"},
+			{"name": "InstrumentType"},
+			{"name": "Issuer"},
 			{"name": "TckrSymb"},
-			{"name": "NumberOfDealings"},
-			{"name": "QuantityTraded"},
-			{"name": "CommitmentDate"},
-			{"name": "Term"},
-			{"name": "FinancialValue"},
+			{"name": "Quantity"},
+			{"name": "Price"},
+			{"name": "Vol"},
+			{"name": "Rate"},
+			{"name": "Origin"},
+			{"name": "TradeTime"},
+			{"name": "TradeDate"},
+			{"name": "TradeCode"},
+			{"name": "ISIN"},
+			{"name": "SettlementDt"},
+			{"name": "Situation"},
+			{"name": "IdSer"},
 		],
 		"values": [
-			["2026-04-17T00:00:00", "GFFA11", 1, 156, "2026-04-30T00:00:00", 13, 39993.89],
+			[
+				"2026-04-17T00:00:00",
+				"2026-04-17T00:00:00",
+				"COE",
+				"BANCO MORGAN STANLEY S.A.",
+				"MS7526DKUMM",
+				19000,
+				1,
+				19000,
+				None,
+				"Registro",
+				"18:24:09",
+				"2026-04-17T00:00:00",
+				"#2026041764053887",
+				"BRMSDWOE10M5",
+				"2026-04-17T00:00:00",
+				"Confirmado",
+				369037695,
+			],
 		],
 	}
 
@@ -152,13 +180,13 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiFixedIncomeDebenturesRepurchaseAgreements(date_ref=sample_date, int_page_size=500)
+	inst = B3BdiFixedIncomeTrades(date_ref=sample_date, int_page_size=500)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
 	assert "{page}" in inst.url_tpl
 	assert "500" in inst.url_tpl
-	assert "Repodebenture" in inst.url_tpl
+	assert "Trade" in inst.url_tpl
 	assert inst.logger is None
 	assert isinstance(inst.cls_dir_files_management, DirFilesManagement)
 	assert isinstance(inst.cls_dates_br, DatesBRAnbima)
@@ -177,7 +205,7 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiFixedIncomeDebenturesRepurchaseAgreements(date_ref=sample_date)
+	inst = B3BdiFixedIncomeTrades(date_ref=sample_date)
 	assert inst.int_page_size == 1_000
 
 
@@ -194,7 +222,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiFixedIncomeDebenturesRepurchaseAgreements()
+	inst = B3BdiFixedIncomeTrades()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -206,20 +234,16 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiFixedIncomeDebenturesRepurchaseAgreements(
-		date_ref=date(2026, 4, 17), logger=mock_logger
-	)
+	inst = B3BdiFixedIncomeTrades(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
-def test_get_response_success(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements, mocker: MockerFixture
-) -> None:
+def test_get_response_success(instance: B3BdiFixedIncomeTrades, mocker: MockerFixture) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -241,14 +265,12 @@ def test_get_response_success(
 	mock_resp.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements, mocker: MockerFixture
-) -> None:
+def test_get_response_http_error(instance: B3BdiFixedIncomeTrades, mocker: MockerFixture) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -264,14 +286,14 @@ def test_get_response_http_error(
 
 
 def test_parse_raw_file_returns_table(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements,
+	instance: B3BdiFixedIncomeTrades,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test parse_raw_file extracts the table dict from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	sample_table_dict : dict
 		Expected table dict.
@@ -286,14 +308,12 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_transform_data_normal(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements, sample_table_dict: dict
-) -> None:
+def test_transform_data_normal(instance: B3BdiFixedIncomeTrades, sample_table_dict: dict) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	sample_table_dict : dict
 		Sample table dict with one row.
@@ -307,26 +327,46 @@ def test_transform_data_normal(
 	assert len(df_) == 1
 	assert list(df_.columns) == [
 		"RPT_DT",
+		"DT_REF",
+		"INSTRUMENT_TYPE",
+		"ISSUER",
 		"TCKR_SYMB",
-		"NUMBER_OF_DEALINGS",
-		"QUANTITY_TRADED",
-		"COMMITMENT_DATE",
-		"TERM",
-		"FINANCIAL_VALUE",
+		"QUANTITY",
+		"PRICE",
+		"VOL",
+		"RATE",
+		"ORIGIN",
+		"TRADE_TIME",
+		"TRADE_DATE",
+		"TRADE_CODE",
+		"ISIN",
+		"SETTLEMENT_DT",
+		"SITUATION",
+		"ID_SER",
 	]
-	assert df_["TCKR_SYMB"].iloc[0] == "GFFA11"
-	assert df_["NUMBER_OF_DEALINGS"].iloc[0] == 1
-	assert df_["QUANTITY_TRADED"].iloc[0] == 156
+	assert df_["TCKR_SYMB"].iloc[0] == "MS7526DKUMM"
+	assert df_["INSTRUMENT_TYPE"].iloc[0] == "COE"
+	assert df_["ISSUER"].iloc[0] == "BANCO MORGAN STANLEY S.A."
+	assert df_["QUANTITY"].iloc[0] == 19000
+	assert df_["PRICE"].iloc[0] == 1
+	assert df_["VOL"].iloc[0] == 19000
+	assert df_["RATE"].iloc[0] is None
+	assert df_["ORIGIN"].iloc[0] == "Registro"
+	assert df_["TRADE_TIME"].iloc[0] == "18:24:09"
+	assert df_["TRADE_CODE"].iloc[0] == "#2026041764053887"
+	assert df_["ISIN"].iloc[0] == "BRMSDWOE10M5"
+	assert df_["SITUATION"].iloc[0] == "Confirmado"
+	assert df_["ID_SER"].iloc[0] == 369037695
 
 
 def test_transform_data_empty_values(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements, empty_table_dict: dict
+	instance: B3BdiFixedIncomeTrades, empty_table_dict: dict
 ) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -341,7 +381,7 @@ def test_transform_data_empty_values(
 
 
 def test_run_without_db_paginates(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements,
+	instance: B3BdiFixedIncomeTrades,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -352,7 +392,7 @@ def test_run_without_db_paginates(
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -386,7 +426,7 @@ def test_run_without_db_paginates(
 
 
 def test_run_with_db(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements,
+	instance: B3BdiFixedIncomeTrades,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -395,7 +435,7 @@ def test_run_with_db(
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -425,7 +465,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements,
+	instance: B3BdiFixedIncomeTrades,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -433,7 +473,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -457,7 +497,7 @@ def test_run_no_data_returns_none(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiFixedIncomeDebenturesRepurchaseAgreements,
+	instance: B3BdiFixedIncomeTrades,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -465,7 +505,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiFixedIncomeDebenturesRepurchaseAgreements
+	instance : B3BdiFixedIncomeTrades
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.

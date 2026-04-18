@@ -10,7 +10,9 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.macroeconomics.b3_bdi_fixed_income_di_over import B3BdiFixedIncomeDiOver
+from stpstone.ingestion.countries.br.macroeconomics.b3_bdi_fixed_income_di_over import (
+	B3BdiFixedIncomeDiOver,
+)
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -254,7 +256,9 @@ def test_get_response_http_error(instance: B3BdiFixedIncomeDiOver, mocker: Mocke
 		instance.get_response()
 
 
-def test_get_response_timeout_error(instance: B3BdiFixedIncomeDiOver, mocker: MockerFixture) -> None:
+def test_get_response_timeout_error(
+	instance: B3BdiFixedIncomeDiOver, mocker: MockerFixture
+) -> None:
 	"""Test get_response propagates Timeout exceptions.
 
 	Parameters
@@ -329,7 +333,9 @@ def test_transform_data_normal(instance: B3BdiFixedIncomeDiOver, sample_table_di
 	assert df_["SELIC_RATE"].iloc[0] == 10.50
 
 
-def test_transform_data_empty_values(instance: B3BdiFixedIncomeDiOver, empty_table_dict: dict) -> None:
+def test_transform_data_empty_values(
+	instance: B3BdiFixedIncomeDiOver, empty_table_dict: dict
+) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
