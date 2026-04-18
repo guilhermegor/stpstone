@@ -355,6 +355,7 @@ def test_run_without_db_paginates(
 	None
 	"""
 	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
+	mocker.patch("time.sleep")
 	mocker.patch.object(
 		instance,
 		"get_response",
@@ -399,6 +400,7 @@ def test_run_with_db(
 	"""
 	instance.cls_db = MagicMock()
 	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
+	mocker.patch("time.sleep")
 	mocker.patch.object(
 		instance,
 		"get_response",
