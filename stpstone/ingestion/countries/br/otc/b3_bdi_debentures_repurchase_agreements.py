@@ -1,4 +1,4 @@
-"""B3 BDI Instrument Registration ingestion."""
+"""B3 BDI Repo Debenture Transactions ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -24,8 +24,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiInstrumentRegistration(ABCIngestionOperations):
-	"""B3 BDI Instrument Registration ingestion class."""
+class B3BdiDebenturesRepurchaseAgreements(ABCIngestionOperations):
+	"""B3 BDI Repo Debenture Transactions ingestion class."""
 
 	def __init__(
 		self,
@@ -76,7 +76,7 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/InstrumentRegistration/"
+			f"https://arquivos.b3.com.br/bdi/table/Repodebenture/"
 			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
 		)
 
@@ -85,7 +85,7 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_instrument_registration",
+		str_table_name: str = "br_b3_bdi_debentures_repurchase_agreements",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -101,7 +101,7 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_instrument_registration".
+			The name of the table, by default "br_b3_bdi_debentures_repurchase_agreements".
 
 		Returns
 		-------
@@ -129,24 +129,13 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 			return None
 		df_ = pd.concat(list_dfs, ignore_index=True)
 		dict_dtypes = {
-			"DT_REF": "date",
+			"RPT_DT": "date",
 			"TCKR_SYMB": str,
-			"ISIN": str,
-			"ISSUER": str,
-			"INSTRUMENT_TYPE": str,
-			"ENCOURAGED": str,
-			"SERIAL_NUMBER": str,
-			"ISSUE_NUMBER": str,
-			"INDEXER": str,
-			"INDEXER_PERCENTAGE": float,
-			"ADDITIONAL_FEE": float,
-			"CALCULATION_BASIS": str,
-			"MATURITY": "date",
-			"QUANTITY_ISSUED": int,
-			"UNIT_PRICE": float,
-			"EFFORT": str,
-			"ISSUE_TYPE": str,
-			"OFFERT": str,
+			"NUMBER_OF_DEALINGS": int,
+			"QUANTITY_TRADED": int,
+			"COMMITMENT_DATE": "date",
+			"TERM": int,
+			"FINANCIAL_VALUE": float,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -182,7 +171,9 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=f"B3BdiInstrumentRegistration: page {int_page} fetched ({int_rows} rows)",
+			message=(
+				f"B3BdiDebenturesRepurchaseAgreements: page {int_page} fetched ({int_rows} rows)"
+			),
 			log_level="info",
 		)
 
