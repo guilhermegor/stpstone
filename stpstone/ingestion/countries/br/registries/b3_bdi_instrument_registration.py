@@ -2,6 +2,7 @@
 
 from datetime import date
 from logging import Logger
+import time
 from typing import Optional, Union
 
 import backoff
@@ -32,6 +33,8 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,
 		int_page_size: int = 1_000,
+		int_page_min: int = 1,
+		int_page_max: Optional[int] = None,
 	) -> None:
 		"""Initialize the ingestion class.
 
@@ -45,6 +48,11 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 			The database session, by default None.
 		int_page_size : int, optional
 			Number of records per page, by default 1_000.
+		int_page_min : int, optional
+			First page to fetch (1-based), by default 1.
+		int_page_max : Optional[int], optional
+			Last page to fetch inclusive; None means fetch until the API
+			returns an empty result, by default None.
 
 		Returns
 		-------
@@ -64,6 +72,8 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 			self.cls_dates_current.curr_date(), -1
 		)
 		self.int_page_size = int_page_size
+		self.int_page_min = int_page_min
+		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
 			f"https://arquivos.b3.com.br/bdi/table/InstrumentRegistration/"
@@ -98,7 +108,7 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 		Optional[pd.DataFrame]
 			The transformed DataFrame, or None when writing to database.
 		"""
-		int_page = 1
+		int_page = self.int_page_min
 		list_dfs: list[pd.DataFrame] = []
 		while True:
 			resp_req = self.get_response(
@@ -108,13 +118,37 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 			df_page = self.transform_data(data)
 			if df_page.empty:
 				break
+			self._log_page_progress(int_page, len(df_page))
 			df_page["URL"] = self.url_tpl.format(page=int_page)
 			list_dfs.append(df_page)
+			if self.int_page_max is not None and int_page >= self.int_page_max:
+				break
 			int_page += 1
+			time.sleep(2)
 		if not list_dfs:
 			return None
 		df_ = pd.concat(list_dfs, ignore_index=True)
-		dict_dtypes = {col: str for col in df_.columns}
+		dict_dtypes = {
+			"DT_REF": "date",
+			"TCKR_SYMB": str,
+			"ISIN": str,
+			"ISSUER": str,
+			"INSTRUMENT_TYPE": str,
+			"ENCOURAGED": str,
+			"SERIAL_NUMBER": str,
+			"ISSUE_NUMBER": str,
+			"INDEXER": str,
+			"INDEXER_PERCENTAGE": float,
+			"ADDITIONAL_FEE": float,
+			"CALCULATION_BASIS": str,
+			"MATURITY": "date",
+			"QUANTITY_ISSUED": int,
+			"UNIT_PRICE": float,
+			"EFFORT": str,
+			"ISSUE_TYPE": str,
+			"OFFERT": str,
+			"URL": str,
+		}
 		df_ = self.standardize_dataframe(
 			df_=df_,
 			date_ref=self.date_ref,
@@ -131,6 +165,26 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 			)
 		else:
 			return df_
+
+	def _log_page_progress(self, int_page: int, int_rows: int) -> None:
+		"""Emit a progress message for the current page.
+
+		Parameters
+		----------
+		int_page : int
+			The page number just fetched.
+		int_rows : int
+			Number of rows returned on that page.
+
+		Returns
+		-------
+		None
+		"""
+		self.cls_create_log.log_message(
+			logger=self.logger,
+			message=f"B3BdiInstrumentRegistration: page {int_page} fetched ({int_rows} rows)",
+			log_level="info",
+		)
 
 	@backoff.on_exception(backoff.expo, requests.exceptions.HTTPError, max_time=60)
 	def get_response(
@@ -202,4 +256,6 @@ class B3BdiInstrumentRegistration(ABCIngestionOperations):
 			str_handler.convert_case(col["name"], "pascal", "upper_constant")
 			for col in data.get("columns", [])
 		]
-		return pd.DataFrame(values, columns=col_names)
+		df_ = pd.DataFrame(values)
+		rename_map = {i: name for i, name in enumerate(col_names)}
+		return df_.rename(columns=rename_map)

@@ -230,9 +230,7 @@ def test_get_response_success(
 	result = instance.get_response(int_page=3)
 
 	expected_url = instance.url_tpl.format(page=3)
-	mock_post.assert_called_once_with(
-		expected_url, json={}, timeout=(12.0, 21.0), verify=True
-	)
+	mock_post.assert_called_once_with(expected_url, json={}, timeout=(12.0, 21.0), verify=True)
 	assert result is mock_resp
 	mock_resp.raise_for_status.assert_called_once()
 
@@ -254,9 +252,7 @@ def test_get_response_http_error(
 	None
 	"""
 	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
-	mocker.patch(
-		"requests.post", side_effect=requests.exceptions.HTTPError("500 Server Error")
-	)
+	mocker.patch("requests.post", side_effect=requests.exceptions.HTTPError("500 Server Error"))
 	with pytest.raises(requests.exceptions.HTTPError):
 		instance.get_response()
 

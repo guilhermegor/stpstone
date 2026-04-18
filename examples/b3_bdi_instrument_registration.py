@@ -9,6 +9,8 @@ cls_ = B3BdiInstrumentRegistration(
 	date_ref=None,
 	logger=None,
 	cls_db=None,
+	int_page_min=1,
+	int_page_max=10,
 )
 
 df_ = cls_.run()
