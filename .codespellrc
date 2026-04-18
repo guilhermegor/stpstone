@@ -6,4 +6,4 @@ count =
 # set quiet level to suppress certain messages
 quiet-level = 3
 # ignore specific words (global across all files)
-ignore-words-list = nd,fpr,strat,enty,filetest,nome,ZAR,fro,hsi,HSI,WEGE,zar,SMLL,Classe,classe,erro,serie,emiss
+ignore-words-list = nd,fpr,strat,enty,filetest,nome,ZAR,fro,hsi,HSI,WEGE,zar,SMLL,Classe,classe,erro,serie,emiss,TERMO,termo
