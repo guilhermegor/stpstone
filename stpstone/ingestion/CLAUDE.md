@@ -286,6 +286,7 @@ After implementing or refactoring any ingestion module, run:
 
 ```bash
 make test_feat MODULE=<module_filename_without_extension>
+make lint
 ```
 
 This runs codespell, ruff (lint + format), type hint/docstring consistency checks, and pytest in sequence. The module must pass all checks before committing. Common issues caught by this recipe:
