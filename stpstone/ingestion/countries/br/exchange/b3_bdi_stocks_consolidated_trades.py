@@ -1,4 +1,4 @@
-"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion."""
+"""B3 BDI Consolidated Session Trades for equities ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -24,8 +24,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiEtfsOchl(ABCIngestionOperations):
-	"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion class."""
+class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
+	"""B3 BDI Consolidated Session Trades for equities ingestion class."""
 
 	def __init__(
 		self,
@@ -52,7 +52,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 			First page to fetch (1-based), by default 1.
 		int_page_max : int, optional
 			Last page to fetch inclusive; defaults to 1 because this endpoint
-			is non-paginated (returns the same IOPV rows on every page).
+			typically returns all consolidated trade rows on a single page.
 
 		Returns
 		-------
@@ -76,7 +76,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/IOPV/"
+			f"https://arquivos.b3.com.br/bdi/table/ConsolidatedTradesEquities/"
 			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
 		)
 
@@ -88,7 +88,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_etfs_ochl",
+		str_table_name: str = "br_b3_bdi_stocks_consolidated_trades",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -104,7 +104,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_etfs_ochl".
+			The name of the table, by default "br_b3_bdi_stocks_consolidated_trades".
 
 		Returns
 		-------
@@ -132,13 +132,28 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 			return None
 		df_ = pd.concat(list_dfs, ignore_index=True)
 		dict_dtypes = {
+			"RPT_DT": str,
 			"TCKR_SYMB": str,
-			"OPENING": float,
-			"MINIMUM": float,
-			"AVERAGE": float,
-			"MAXIMUM": float,
-			"CLOSING": float,
-			"OSCILLATION": float,
+			"ISIN": str,
+			"SGMT_NM": str,
+			"MKT": str,
+			"OPEN_PRIC": float,
+			"MIN_PRIC": float,
+			"MAX_PRIC": float,
+			"TRAD_AVRG_PRIC": float,
+			"LAST_PRIC": float,
+			"OSC": float,
+			"ADJSTD_QT": float,
+			"ADJSTD_QT_TAX": float,
+			"PRVS_ADJSTD_QT": float,
+			"REF_PRIC": float,
+			"VARTN_PTS": float,
+			"ADJSTD_VAL_CTRCT": float,
+			"BEST_BID_PRIC": float,
+			"BEST_ASK_PRIC": float,
+			"TRAD_QTY": int,
+			"FIN_INSTRM_QTY": int,
+			"NTL_FIN_VOL": float,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -174,7 +189,9 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(f"B3BdiEtfsOchl: page {int_page} fetched ({int_rows} rows)"),
+			message=(
+				f"B3BdiStocksConsolidatedTrades: page {int_page} fetched ({int_rows} rows)"
+			),
 			log_level="info",
 		)
 

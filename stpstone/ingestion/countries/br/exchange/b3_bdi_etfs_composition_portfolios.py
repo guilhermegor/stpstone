@@ -1,8 +1,7 @@
-"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion."""
+"""B3 BDI index portfolio composition (PreviaQuadrimestral) ingestion."""
 
 from datetime import date
 from logging import Logger
-import time
 from typing import Optional, Union
 
 import backoff
@@ -24,17 +23,21 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiEtfsOchl(ABCIngestionOperations):
-	"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion class."""
+class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
+	"""B3 BDI index portfolio composition ingestion class.
+
+	Fetches the composition of index portfolios (e.g. IBOVESPA members) from
+	B3's BDI PreviaQuadrimestral endpoint. This endpoint is non-paginated: a
+	single POST returns all indices at once, each nested as a child inside the
+	top-level ``table`` object.
+	"""
 
 	def __init__(
 		self,
 		date_ref: Optional[date] = None,
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,
-		int_page_size: int = 1_000,
-		int_page_min: int = 1,
-		int_page_max: int = 1,
+		int_page_size: int = 100,
 	) -> None:
 		"""Initialize the ingestion class.
 
@@ -47,12 +50,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		cls_db : Optional[Session], optional
 			The database session, by default None.
 		int_page_size : int, optional
-			Number of records per page, by default 1_000.
-		int_page_min : int, optional
-			First page to fetch (1-based), by default 1.
-		int_page_max : int, optional
-			Last page to fetch inclusive; defaults to 1 because this endpoint
-			is non-paginated (returns the same IOPV rows on every page).
+			Number of records requested per call; used in the URL only, by default 100.
 
 		Returns
 		-------
@@ -72,12 +70,10 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 			self.cls_dates_current.curr_date(), -1
 		)
 		self.int_page_size = int_page_size
-		self.int_page_min = int_page_min
-		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
-		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/IOPV/"
-			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
+		self.url = (
+			f"https://arquivos.b3.com.br/bdi/table/PreviaQuadrimestral/"
+			f"{str_date}/{str_date}/1/{self.int_page_size}"
 		)
 
 	def run(
@@ -88,7 +84,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_etfs_ochl",
+		str_table_name: str = "br_b3_bdi_etfs_composition_portfolios",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -104,41 +100,37 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_etfs_ochl".
+			The name of the table, by default "br_b3_bdi_etfs_composition_portfolios".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
 			The transformed DataFrame, or None when writing to database.
 		"""
-		int_page = self.int_page_min
-		list_dfs: list[pd.DataFrame] = []
-		while True:
-			resp_req = self.get_response(
-				int_page=int_page, timeout=timeout, bool_verify=bool_verify
-			)
-			data = self.parse_raw_file(resp_req)
-			df_page = self.transform_data(data)
-			if df_page.empty:
-				break
-			self._log_page_progress(int_page, len(df_page))
-			df_page["URL"] = self.url_tpl.format(page=int_page)
-			list_dfs.append(df_page)
-			if self.int_page_max is not None and int_page >= self.int_page_max:
-				break
-			int_page += 1
-			time.sleep(2)
-		if not list_dfs:
+		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+		data = self.parse_raw_file(resp_req)
+		df_ = self.transform_data(data)
+		if df_.empty:
 			return None
-		df_ = pd.concat(list_dfs, ignore_index=True)
+		int_non_empty = sum(
+			1 for child in data if child.get("values")
+		)
+		self.cls_create_log.log_message(
+			logger=self.logger,
+			message=(
+				f"B3BdiEtfsCompositionPortfolios: fetched {len(df_)} rows"
+				f" across {int_non_empty} indices"
+			),
+			log_level="info",
+		)
+		df_["URL"] = self.url
 		dict_dtypes = {
 			"TCKR_SYMB": str,
-			"OPENING": float,
-			"MINIMUM": float,
-			"AVERAGE": float,
-			"MAXIMUM": float,
-			"CLOSING": float,
-			"OSCILLATION": float,
+			"STOCK": str,
+			"CODE_TYPE": str,
+			"QTY_THEORETICAL": int,
+			"STOCK_PARTICIPATION": float,
+			"INDEX_NM": str,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -158,26 +150,6 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		else:
 			return df_
 
-	def _log_page_progress(self, int_page: int, int_rows: int) -> None:
-		"""Emit a progress message for the current page.
-
-		Parameters
-		----------
-		int_page : int
-			The page number just fetched.
-		int_rows : int
-			Number of rows returned on that page.
-
-		Returns
-		-------
-		None
-		"""
-		self.cls_create_log.log_message(
-			logger=self.logger,
-			message=(f"B3BdiEtfsOchl: page {int_page} fetched ({int_rows} rows)"),
-			log_level="info",
-		)
-
 	@backoff.on_exception(
 		backoff.expo,
 		(
@@ -191,19 +163,16 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 	)
 	def get_response(
 		self,
-		int_page: int = 1,
 		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (
 			12.0,
 			21.0,
 		),
 		bool_verify: bool = True,
 	) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
-		"""Return a response object for the given page.
+		"""Return a response object for the PreviaQuadrimestral endpoint.
 
 		Parameters
 		----------
-		int_page : int, optional
-			The page number to fetch, by default 1.
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool, optional
@@ -214,16 +183,19 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
 			A response object.
 		"""
-		url = self.url_tpl.format(page=int_page)
-		resp_req = requests.post(url, json={}, timeout=timeout, verify=bool_verify)
+		resp_req = requests.post(self.url, json={}, timeout=timeout, verify=bool_verify)
 		resp_req.raise_for_status()
 		return resp_req
 
 	def parse_raw_file(
 		self,
 		resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
-	) -> dict:
-		"""Parse the JSON response into the table metadata dict.
+	) -> list[dict]:
+		"""Parse the JSON response into the list of index children.
+
+		The PreviaQuadrimestral endpoint nests each index (IBOVESPA, IBRX, etc.)
+		as a child inside ``response["table"]["children"]``. The top-level
+		``values`` is always empty; the data lives only in the children.
 
 		Parameters
 		----------
@@ -232,35 +204,48 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 
 		Returns
 		-------
-		dict
-			The table object containing columns and values from the API response.
+		list[dict]
+			List of child dicts, one per index.
 		"""
-		return resp_req.json()["table"]
+		return resp_req.json()["table"]["children"]
 
-	def transform_data(self, data: dict) -> pd.DataFrame:
-		"""Build a DataFrame from the API table dict.
+	def transform_data(self, data: list[dict]) -> pd.DataFrame:
+		"""Build a DataFrame by concatenating rows from all non-empty index children.
 
-		Column names are converted from PascalCase to UPPER_SNAKE_CASE.
+		Each child represents one index (e.g. IBOVESPA). Children with empty
+		``values`` are silently skipped. Column names are converted from
+		PascalCase to UPPER_SNAKE_CASE and an ``INDEX_NM`` column is appended
+		with the index's friendly name.
 
 		Parameters
 		----------
-		data : dict
-			The table dict with keys 'columns' and 'values'.
+		data : list[dict]
+			List of child dicts returned by ``parse_raw_file``.
 
 		Returns
 		-------
 		pd.DataFrame
-			DataFrame with UPPER_SNAKE_CASE column names, or empty DataFrame
-			when values is an empty list.
+			Concatenated DataFrame for all non-empty indices, or an empty
+			DataFrame when no children carry data.
 		"""
-		values = data.get("values", [])
-		if not values:
+		if not data:
 			return pd.DataFrame()
 		str_handler = StrHandler()
-		col_names = [
-			str_handler.convert_case(col["name"], "pascal", "upper_constant")
-			for col in data.get("columns", [])
-		]
-		df_ = pd.DataFrame(values)
-		rename_map = {i: name for i, name in enumerate(col_names)}
-		return df_.rename(columns=rename_map)
+		list_dfs: list[pd.DataFrame] = []
+		for child in data:
+			values = child.get("values", [])
+			if not values:
+				continue
+			col_names = [
+				str_handler.convert_case(col["name"], "pascal", "upper_constant")
+				for col in child.get("columns", [])
+			]
+			n_cols = len(col_names)
+			df_child = pd.DataFrame(
+				[row[:n_cols] for row in values], columns=col_names
+			)
+			df_child["INDEX_NM"] = child.get("friendlyNameEn") or child.get("name")
+			list_dfs.append(df_child)
+		if not list_dfs:
+			return pd.DataFrame()
+		return pd.concat(list_dfs, ignore_index=True)

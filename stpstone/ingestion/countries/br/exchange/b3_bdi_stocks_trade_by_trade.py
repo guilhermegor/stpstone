@@ -1,9 +1,10 @@
-"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion."""
+"""B3 BDI stocks trade-by-trade (tick-level) ingestion."""
 
 from datetime import date
+from io import BytesIO, StringIO
 from logging import Logger
-import time
 from typing import Optional, Union
+from zipfile import ZipFile
 
 import backoff
 import pandas as pd
@@ -21,20 +22,52 @@ from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
-from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiEtfsOchl(ABCIngestionOperations):
-	"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion class."""
+_COLUMN_RENAME: dict[str, str] = {
+	"DataReferencia": "DATE_REF",
+	"CodigoInstrumento": "INSTRUMENT_CODE",
+	"AcaoAtualizacao": "UPDATE_ACTION",
+	"PrecoNegocio": "TRADE_PRICE",
+	"QuantidadeNegociada": "TRADED_QUANTITY",
+	"HoraFechamento": "CLOSING_TIME",
+	"CodigoIdentificadorNegocio": "TRADE_ID",
+	"TipoSessaoPregao": "SESSION_TYPE",
+	"DataNegocio": "TRADE_DATE",
+	"CodigoParticipanteComprador": "BUYER_CODE",
+	"CodigoParticipanteVendedor": "SELLER_CODE",
+	"TipoDoCanal": "CHANNEL_TYPE",
+}
+
+_DICT_DTYPES: dict[str, object] = {
+	"DATE_REF": "date",
+	"INSTRUMENT_CODE": str,
+	"UPDATE_ACTION": int,
+	"TRADE_PRICE": float,
+	"TRADED_QUANTITY": int,
+	"CLOSING_TIME": str,
+	"TRADE_ID": str,
+	"SESSION_TYPE": int,
+	"TRADE_DATE": "date",
+	"BUYER_CODE": str,
+	"SELLER_CODE": str,
+	"CHANNEL_TYPE": int,
+}
+
+
+class B3BdiStocksTradeByTrade(ABCIngestionOperations):
+	"""B3 BDI stocks trade-by-trade (tick-level) ingestion class.
+
+	Fetches a ZIP archive from the B3 RapiNegócios endpoint for a given
+	reference date, extracts the semicolon-delimited TXT file inside, and
+	returns a DataFrame with one row per individual trade.
+	"""
 
 	def __init__(
 		self,
 		date_ref: Optional[date] = None,
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,
-		int_page_size: int = 1_000,
-		int_page_min: int = 1,
-		int_page_max: int = 1,
 	) -> None:
 		"""Initialize the ingestion class.
 
@@ -46,13 +79,6 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 			The logger, by default None.
 		cls_db : Optional[Session], optional
 			The database session, by default None.
-		int_page_size : int, optional
-			Number of records per page, by default 1_000.
-		int_page_min : int, optional
-			First page to fetch (1-based), by default 1.
-		int_page_max : int, optional
-			Last page to fetch inclusive; defaults to 1 because this endpoint
-			is non-paginated (returns the same IOPV rows on every page).
 
 		Returns
 		-------
@@ -71,14 +97,8 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		self.date_ref = date_ref or self.cls_dates_br.add_working_days(
 			self.cls_dates_current.curr_date(), -1
 		)
-		self.int_page_size = int_page_size
-		self.int_page_min = int_page_min
-		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
-		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/IOPV/"
-			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
-		)
+		self.url = f"https://drp.b3.com.br/rapinegocios/tickercsv/{str_date}?type=2"
 
 	def run(
 		self,
@@ -88,7 +108,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_etfs_ochl",
+		str_table_name: str = "br_b3_bdi_stocks_trade_by_trade",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -104,49 +124,25 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_etfs_ochl".
+			The name of the table, by default "br_b3_bdi_stocks_trade_by_trade".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
 			The transformed DataFrame, or None when writing to database.
 		"""
-		int_page = self.int_page_min
-		list_dfs: list[pd.DataFrame] = []
-		while True:
-			resp_req = self.get_response(
-				int_page=int_page, timeout=timeout, bool_verify=bool_verify
-			)
-			data = self.parse_raw_file(resp_req)
-			df_page = self.transform_data(data)
-			if df_page.empty:
-				break
-			self._log_page_progress(int_page, len(df_page))
-			df_page["URL"] = self.url_tpl.format(page=int_page)
-			list_dfs.append(df_page)
-			if self.int_page_max is not None and int_page >= self.int_page_max:
-				break
-			int_page += 1
-			time.sleep(2)
-		if not list_dfs:
+		resp_req = self.get_response(timeout=timeout, bool_verify=bool_verify)
+		file = self.parse_raw_file(resp_req)
+		df_ = self.transform_data(file=file)
+		if df_.empty:
 			return None
-		df_ = pd.concat(list_dfs, ignore_index=True)
-		dict_dtypes = {
-			"TCKR_SYMB": str,
-			"OPENING": float,
-			"MINIMUM": float,
-			"AVERAGE": float,
-			"MAXIMUM": float,
-			"CLOSING": float,
-			"OSCILLATION": float,
-			"URL": str,
-		}
+		self._log_data_progress(len(df_))
 		df_ = self.standardize_dataframe(
 			df_=df_,
 			date_ref=self.date_ref,
-			dict_dtypes=dict_dtypes,
+			dict_dtypes=_DICT_DTYPES,
 			str_fmt_dt="YYYY-MM-DD",
-			url=None,
+			url=self.url,
 		)
 		if self.cls_db:
 			self.insert_table_db(
@@ -158,15 +154,13 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		else:
 			return df_
 
-	def _log_page_progress(self, int_page: int, int_rows: int) -> None:
-		"""Emit a progress message for the current page.
+	def _log_data_progress(self, int_rows: int) -> None:
+		"""Emit a progress message for the fetched dataset.
 
 		Parameters
 		----------
-		int_page : int
-			The page number just fetched.
 		int_rows : int
-			Number of rows returned on that page.
+			Number of trade rows returned from the archive.
 
 		Returns
 		-------
@@ -174,7 +168,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(f"B3BdiEtfsOchl: page {int_page} fetched ({int_rows} rows)"),
+			message=f"B3BdiStocksTradeByTrade: fetched {int_rows} trade rows from {self.url}",
 			log_level="info",
 		)
 
@@ -191,19 +185,16 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 	)
 	def get_response(
 		self,
-		int_page: int = 1,
 		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (
 			12.0,
 			21.0,
 		),
 		bool_verify: bool = True,
 	) -> Union[Response, PlaywrightPage, SeleniumWebDriver]:
-		"""Return a response object for the given page.
+		"""Return the raw HTTP response containing the ZIP archive.
 
 		Parameters
 		----------
-		int_page : int, optional
-			The page number to fetch, by default 1.
 		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
 			The timeout, by default (12.0, 21.0).
 		bool_verify : bool, optional
@@ -212,55 +203,74 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		Returns
 		-------
 		Union[Response, PlaywrightPage, SeleniumWebDriver]
-			A response object.
+			A response object whose content is the ZIP binary payload.
 		"""
-		url = self.url_tpl.format(page=int_page)
-		resp_req = requests.post(url, json={}, timeout=timeout, verify=bool_verify)
+		resp_req = requests.get(self.url, timeout=timeout, verify=bool_verify)
 		resp_req.raise_for_status()
 		return resp_req
 
 	def parse_raw_file(
 		self,
 		resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
-	) -> dict:
-		"""Parse the JSON response into the table metadata dict.
+	) -> StringIO:
+		"""Extract the TXT file from the ZIP archive and return it as a StringIO.
+
+		The endpoint returns a ZIP archive containing exactly one ``.txt``
+		file with semicolon-separated trade records. This method opens the
+		archive in-memory, reads the first ``.txt`` entry, and wraps the
+		decoded text in a ``StringIO`` ready for ``pd.read_csv``.
 
 		Parameters
 		----------
 		resp_req : Union[Response, PlaywrightPage, SeleniumWebDriver]
-			The response object.
+			The HTTP response object whose ``.content`` is the ZIP payload.
 
 		Returns
 		-------
-		dict
-			The table object containing columns and values from the API response.
+		StringIO
+			The decoded text content of the first ``.txt`` file found in the archive.
+
+		Raises
+		------
+		ValueError
+			If the ZIP archive contains no ``.txt`` files.
 		"""
-		return resp_req.json()["table"]
+		with ZipFile(BytesIO(resp_req.content)) as zf:
+			txt_names = [n for n in zf.namelist() if n.lower().endswith(".txt")]
+			if not txt_names:
+				raise ValueError("ZIP archive contains no .txt files.")
+			with zf.open(txt_names[0]) as txt_file:
+				txt_content = txt_file.read().decode("latin-1")
+		return StringIO(txt_content)
 
-	def transform_data(self, data: dict) -> pd.DataFrame:
-		"""Build a DataFrame from the API table dict.
+	def transform_data(self, file: StringIO) -> pd.DataFrame:
+		"""Parse the semicolon-delimited CSV and rename columns to UPPER_SNAKE_CASE.
 
-		Column names are converted from PascalCase to UPPER_SNAKE_CASE.
+		Brazilian decimal notation (comma as decimal separator) is handled
+		transparently by ``pd.read_csv`` via ``decimal=","``.  The
+		``CLOSING_TIME`` and ``TRADE_ID`` columns are read as strings to
+		preserve leading zeros and raw numeric identifiers.
 
 		Parameters
 		----------
-		data : dict
-			The table dict with keys 'columns' and 'values'.
+		file : StringIO
+			The decoded text stream produced by ``parse_raw_file``.
 
 		Returns
 		-------
 		pd.DataFrame
-			DataFrame with UPPER_SNAKE_CASE column names, or empty DataFrame
-			when values is an empty list.
+			DataFrame with UPPER_SNAKE_CASE column names, or an empty
+			DataFrame when the input stream contains no data rows.
 		"""
-		values = data.get("values", [])
-		if not values:
+		df_ = pd.read_csv(
+			file,
+			sep=";",
+			decimal=",",
+			dtype={
+				"HoraFechamento": str,
+				"CodigoIdentificadorNegocio": str,
+			},
+		)
+		if df_.empty:
 			return pd.DataFrame()
-		str_handler = StrHandler()
-		col_names = [
-			str_handler.convert_case(col["name"], "pascal", "upper_constant")
-			for col in data.get("columns", [])
-		]
-		df_ = pd.DataFrame(values)
-		rename_map = {i: name for i, name in enumerate(col_names)}
-		return df_.rename(columns=rename_map)
+		return df_.rename(columns=_COLUMN_RENAME)

@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiEtfsOchl class."""
+"""Unit tests for B3BdiStocksMonthlyVolumes class."""
 
 from datetime import date
 from logging import Logger
@@ -10,7 +10,9 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_etfs_ochl import B3BdiEtfsOchl
+from stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_monthly_volumes import (
+	B3BdiStocksMonthlyVolumes,
+)
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -32,8 +34,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(sample_date: date) -> B3BdiEtfsOchl:
-	"""Fixture providing a B3BdiEtfsOchl instance.
+def instance(sample_date: date) -> B3BdiStocksMonthlyVolumes:
+	"""Fixture providing a B3BdiStocksMonthlyVolumes instance.
 
 	Parameters
 	----------
@@ -42,10 +44,10 @@ def instance(sample_date: date) -> B3BdiEtfsOchl:
 
 	Returns
 	-------
-	B3BdiEtfsOchl
+	B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	"""
-	return B3BdiEtfsOchl(date_ref=sample_date)
+	return B3BdiStocksMonthlyVolumes(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -55,21 +57,16 @@ def sample_table_dict() -> dict:
 	Returns
 	-------
 	dict
-		Sample table dict mimicking the BDI IOPV API response structure.
+		Sample table dict mimicking the BDI AverageChart API response structure.
 	"""
 	return {
 		"columns": [
+			{"name": "RptDt"},
 			{"name": "TckrSymb"},
-			{"name": "Opening"},
-			{"name": "Minimum"},
-			{"name": "Average"},
-			{"name": "Maximum"},
-			{"name": "Closing"},
-			{"name": "Oscillation"},
-			{"name": "ColOrder"},
+			{"name": "LastPric"},
 		],
 		"values": [
-			["AGRI", 45.11, 44.98, 45.35, 45.84, 45.03, "-0.17", 1],
+			["2025-04-01T00:00:00", "2025-04-01T00:00:00", 27386.89],
 		],
 	}
 
@@ -85,14 +82,9 @@ def empty_table_dict() -> dict:
 	"""
 	return {
 		"columns": [
+			{"name": "RptDt"},
 			{"name": "TckrSymb"},
-			{"name": "Opening"},
-			{"name": "Minimum"},
-			{"name": "Average"},
-			{"name": "Maximum"},
-			{"name": "Closing"},
-			{"name": "Oscillation"},
-			{"name": "ColOrder"},
+			{"name": "LastPric"},
 		],
 		"values": [],
 	}
@@ -160,13 +152,13 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsOchl(date_ref=sample_date, int_page_size=500)
+	inst = B3BdiStocksMonthlyVolumes(date_ref=sample_date, int_page_size=500)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
 	assert "{page}" in inst.url_tpl
 	assert "500" in inst.url_tpl
-	assert "IOPV" in inst.url_tpl
+	assert "AverageChart" in inst.url_tpl
 	assert inst.logger is None
 	assert isinstance(inst.cls_dir_files_management, DirFilesManagement)
 	assert isinstance(inst.cls_dates_br, DatesBRAnbima)
@@ -185,7 +177,7 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsOchl(date_ref=sample_date)
+	inst = B3BdiStocksMonthlyVolumes(date_ref=sample_date)
 	assert inst.int_page_size == 1_000
 
 
@@ -202,7 +194,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiEtfsOchl()
+	inst = B3BdiStocksMonthlyVolumes()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -214,16 +206,16 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiEtfsOchl(date_ref=date(2026, 4, 17), logger=mock_logger)
+	inst = B3BdiStocksMonthlyVolumes(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
-def test_get_response_success(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_success(instance: B3BdiStocksMonthlyVolumes, mocker: MockerFixture) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -245,12 +237,14 @@ def test_get_response_success(instance: B3BdiEtfsOchl, mocker: MockerFixture) ->
 	mock_resp.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_http_error(
+	instance: B3BdiStocksMonthlyVolumes, mocker: MockerFixture
+) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -265,12 +259,14 @@ def test_get_response_http_error(instance: B3BdiEtfsOchl, mocker: MockerFixture)
 		instance.get_response()
 
 
-def test_get_response_timeout_error(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_timeout_error(
+	instance: B3BdiStocksMonthlyVolumes, mocker: MockerFixture
+) -> None:
 	"""Test get_response raises Timeout when the server does not respond.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -285,12 +281,14 @@ def test_get_response_timeout_error(instance: B3BdiEtfsOchl, mocker: MockerFixtu
 		instance.get_response()
 
 
-def test_get_response_connection_error(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_connection_error(
+	instance: B3BdiStocksMonthlyVolumes, mocker: MockerFixture
+) -> None:
 	"""Test get_response raises ConnectionError when the host is unreachable.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -309,14 +307,14 @@ def test_get_response_connection_error(instance: B3BdiEtfsOchl, mocker: MockerFi
 
 
 def test_parse_raw_file_returns_table(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiStocksMonthlyVolumes,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test parse_raw_file extracts the table dict from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	sample_table_dict : dict
 		Expected table dict.
@@ -331,12 +329,12 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_parse_raw_file_missing_table_key(instance: B3BdiEtfsOchl) -> None:
+def test_parse_raw_file_missing_table_key(instance: B3BdiStocksMonthlyVolumes) -> None:
 	"""Test parse_raw_file raises KeyError when 'table' key is absent.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 
 	Returns
@@ -349,12 +347,14 @@ def test_parse_raw_file_missing_table_key(instance: B3BdiEtfsOchl) -> None:
 		instance.parse_raw_file(mock_resp)
 
 
-def test_transform_data_normal(instance: B3BdiEtfsOchl, sample_table_dict: dict) -> None:
+def test_transform_data_normal(
+	instance: B3BdiStocksMonthlyVolumes, sample_table_dict: dict
+) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	sample_table_dict : dict
 		Sample table dict with one row.
@@ -366,27 +366,18 @@ def test_transform_data_normal(instance: B3BdiEtfsOchl, sample_table_dict: dict)
 	df_ = instance.transform_data(sample_table_dict)
 	assert isinstance(df_, pd.DataFrame)
 	assert len(df_) == 1
-	assert list(df_.columns) == [
-		"TCKR_SYMB",
-		"OPENING",
-		"MINIMUM",
-		"AVERAGE",
-		"MAXIMUM",
-		"CLOSING",
-		"OSCILLATION",
-		"COL_ORDER",
-	]
-	assert df_["TCKR_SYMB"].iloc[0] == "AGRI"
-	assert df_["OPENING"].iloc[0] == 45.11
-	assert df_["CLOSING"].iloc[0] == 45.03
+	assert list(df_.columns) == ["RPT_DT", "TCKR_SYMB", "LAST_PRIC"]
+	assert df_["RPT_DT"].iloc[0] == "2025-04-01T00:00:00"
+	assert df_["TCKR_SYMB"].iloc[0] == "2025-04-01T00:00:00"
+	assert df_["LAST_PRIC"].iloc[0] == 27386.89
 
 
-def test_transform_data_multiple_rows(instance: B3BdiEtfsOchl) -> None:
+def test_transform_data_multiple_rows(instance: B3BdiStocksMonthlyVolumes) -> None:
 	"""Test transform_data handles multiple rows correctly.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 
 	Returns
@@ -395,32 +386,30 @@ def test_transform_data_multiple_rows(instance: B3BdiEtfsOchl) -> None:
 	"""
 	table = {
 		"columns": [
+			{"name": "RptDt"},
 			{"name": "TckrSymb"},
-			{"name": "Opening"},
-			{"name": "Minimum"},
-			{"name": "Average"},
-			{"name": "Maximum"},
-			{"name": "Closing"},
-			{"name": "Oscillation"},
-			{"name": "ColOrder"},
+			{"name": "LastPric"},
 		],
 		"values": [
-			["AGRI", 45.11, 44.98, 45.35, 45.84, 45.03, "-0.17", 1],
-			["BOVA", 130.50, 129.80, 130.20, 131.00, 130.75, "+0.25", 2],
-			["HASH", 55.30, 54.90, 55.10, 55.80, 55.20, "-0.10", 3],
+			["2025-02-01T00:00:00", "2025-02-01T00:00:00", 21000.00],
+			["2025-03-01T00:00:00", "2025-03-01T00:00:00", 24500.50],
+			["2025-04-01T00:00:00", "2025-04-01T00:00:00", 27386.89],
 		],
 	}
 	df_ = instance.transform_data(table)
 	assert len(df_) == 3
-	assert set(df_["TCKR_SYMB"].tolist()) == {"AGRI", "BOVA", "HASH"}
+	assert list(df_.columns) == ["RPT_DT", "TCKR_SYMB", "LAST_PRIC"]
+	assert df_["LAST_PRIC"].iloc[2] == 27386.89
 
 
-def test_transform_data_empty_values(instance: B3BdiEtfsOchl, empty_table_dict: dict) -> None:
+def test_transform_data_empty_values(
+	instance: B3BdiStocksMonthlyVolumes, empty_table_dict: dict
+) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -435,7 +424,7 @@ def test_transform_data_empty_values(instance: B3BdiEtfsOchl, empty_table_dict: 
 
 
 def test_run_without_db_paginates(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiStocksMonthlyVolumes,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -446,7 +435,7 @@ def test_run_without_db_paginates(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -476,12 +465,12 @@ def test_run_without_db_paginates(
 
 	assert isinstance(result, pd.DataFrame)
 	assert len(result) == 1
-	assert "TCKR_SYMB" in result.columns
+	assert "RPT_DT" in result.columns
 	assert "URL" in result.columns
 
 
 def test_run_with_db(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiStocksMonthlyVolumes,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -490,7 +479,7 @@ def test_run_with_db(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -521,7 +510,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiStocksMonthlyVolumes,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -529,7 +518,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -553,7 +542,7 @@ def test_run_no_data_returns_none(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiStocksMonthlyVolumes,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -561,7 +550,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiStocksMonthlyVolumes
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -597,9 +586,9 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.exchange.b3_bdi_etfs_ochl as mod
+	import stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_monthly_volumes as mod
 
 	importlib.reload(mod)
-	inst = mod.B3BdiEtfsOchl(date_ref=sample_date)
+	inst = mod.B3BdiStocksMonthlyVolumes(date_ref=sample_date)
 	assert inst.date_ref == sample_date
-	assert "IOPV" in inst.url_tpl
+	assert "AverageChart" in inst.url_tpl

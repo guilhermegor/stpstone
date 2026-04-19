@@ -125,18 +125,43 @@ run_automated_tests() {
 }
 
 run_package_tests() {
-    print_status "info" "Running package tests..."
-    if [ -f "run_dist.py" ]; then
-        if poetry run python run_dist.py; then
-            print_status "success" "All tests passed"
-        else
-            print_status "error" "Some tests failed"
-            return 1
-        fi
-    else
-        print_status "error" "Test runner run_dist.py not found"
+    local containers_dir="containers"
+    local any_failed=0
+
+    print_status "info" "Running package tests via Docker containers..."
+
+    if [ ! -d "$containers_dir" ]; then
+        print_status "error" "Containers directory '${containers_dir}' not found"
         return 1
     fi
+
+    local dockerfiles=("$containers_dir"/*.dockerfile)
+    if [ ! -e "${dockerfiles[0]}" ]; then
+        print_status "error" "No .dockerfile files found in '${containers_dir}'"
+        return 1
+    fi
+
+    for dockerfile in "${dockerfiles[@]}"; do
+        local image_tag
+        image_tag=$(basename "$dockerfile" .dockerfile)
+        print_status "info" "Building image '${image_tag}' from ${dockerfile}..."
+
+        if ! docker build -f "$dockerfile" -t "$image_tag" .; then
+            print_status "error" "Build failed for ${dockerfile}"
+            any_failed=1
+            continue
+        fi
+
+        print_status "info" "Running container '${image_tag}'..."
+        if docker run --rm "$image_tag"; then
+            print_status "success" "Container '${image_tag}' passed"
+        else
+            print_status "error" "Container '${image_tag}' failed"
+            any_failed=1
+        fi
+    done
+
+    return $any_failed
 }
 
 main() {
