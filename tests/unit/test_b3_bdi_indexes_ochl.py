@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiEtfsOchl class."""
+"""Unit tests for B3BdiIndexesOchl class."""
 
 from datetime import date
 from logging import Logger
@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_etfs_ochl import B3BdiEtfsOchl
+from stpstone.ingestion.countries.br.exchange.b3_bdi_indexes_ochl import B3BdiIndexesOchl
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -32,8 +32,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(sample_date: date) -> B3BdiEtfsOchl:
-	"""Fixture providing a B3BdiEtfsOchl instance.
+def instance(sample_date: date) -> B3BdiIndexesOchl:
+	"""Fixture providing a B3BdiIndexesOchl instance.
 
 	Parameters
 	----------
@@ -42,10 +42,10 @@ def instance(sample_date: date) -> B3BdiEtfsOchl:
 
 	Returns
 	-------
-	B3BdiEtfsOchl
+	B3BdiIndexesOchl
 		Initialized instance.
 	"""
-	return B3BdiEtfsOchl(date_ref=sample_date)
+	return B3BdiIndexesOchl(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -160,7 +160,7 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsOchl(date_ref=sample_date, int_page_size=500)
+	inst = B3BdiIndexesOchl(date_ref=sample_date, int_page_size=500)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
@@ -185,7 +185,7 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsOchl(date_ref=sample_date)
+	inst = B3BdiIndexesOchl(date_ref=sample_date)
 	assert inst.int_page_size == 1_000
 
 
@@ -202,7 +202,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiEtfsOchl()
+	inst = B3BdiIndexesOchl()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -214,16 +214,16 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiEtfsOchl(date_ref=date(2026, 4, 17), logger=mock_logger)
+	inst = B3BdiIndexesOchl(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
-def test_get_response_success(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_success(instance: B3BdiIndexesOchl, mocker: MockerFixture) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -245,12 +245,12 @@ def test_get_response_success(instance: B3BdiEtfsOchl, mocker: MockerFixture) ->
 	mock_resp.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_http_error(instance: B3BdiIndexesOchl, mocker: MockerFixture) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -265,12 +265,12 @@ def test_get_response_http_error(instance: B3BdiEtfsOchl, mocker: MockerFixture)
 		instance.get_response()
 
 
-def test_get_response_timeout_error(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_timeout_error(instance: B3BdiIndexesOchl, mocker: MockerFixture) -> None:
 	"""Test get_response raises Timeout when the server does not respond.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -285,12 +285,12 @@ def test_get_response_timeout_error(instance: B3BdiEtfsOchl, mocker: MockerFixtu
 		instance.get_response()
 
 
-def test_get_response_connection_error(instance: B3BdiEtfsOchl, mocker: MockerFixture) -> None:
+def test_get_response_connection_error(instance: B3BdiIndexesOchl, mocker: MockerFixture) -> None:
 	"""Test get_response raises ConnectionError when the host is unreachable.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -309,14 +309,14 @@ def test_get_response_connection_error(instance: B3BdiEtfsOchl, mocker: MockerFi
 
 
 def test_parse_raw_file_returns_table(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiIndexesOchl,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test parse_raw_file extracts the table dict from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	sample_table_dict : dict
 		Expected table dict.
@@ -331,12 +331,12 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_parse_raw_file_missing_table_key(instance: B3BdiEtfsOchl) -> None:
+def test_parse_raw_file_missing_table_key(instance: B3BdiIndexesOchl) -> None:
 	"""Test parse_raw_file raises KeyError when 'table' key is absent.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 
 	Returns
@@ -349,12 +349,12 @@ def test_parse_raw_file_missing_table_key(instance: B3BdiEtfsOchl) -> None:
 		instance.parse_raw_file(mock_resp)
 
 
-def test_transform_data_normal(instance: B3BdiEtfsOchl, sample_table_dict: dict) -> None:
+def test_transform_data_normal(instance: B3BdiIndexesOchl, sample_table_dict: dict) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	sample_table_dict : dict
 		Sample table dict with one row.
@@ -381,12 +381,12 @@ def test_transform_data_normal(instance: B3BdiEtfsOchl, sample_table_dict: dict)
 	assert df_["CLOSING"].iloc[0] == 45.03
 
 
-def test_transform_data_multiple_rows(instance: B3BdiEtfsOchl) -> None:
+def test_transform_data_multiple_rows(instance: B3BdiIndexesOchl) -> None:
 	"""Test transform_data handles multiple rows correctly.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 
 	Returns
@@ -415,12 +415,12 @@ def test_transform_data_multiple_rows(instance: B3BdiEtfsOchl) -> None:
 	assert set(df_["TCKR_SYMB"].tolist()) == {"AGRI", "BOVA", "HASH"}
 
 
-def test_transform_data_empty_values(instance: B3BdiEtfsOchl, empty_table_dict: dict) -> None:
+def test_transform_data_empty_values(instance: B3BdiIndexesOchl, empty_table_dict: dict) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -435,7 +435,7 @@ def test_transform_data_empty_values(instance: B3BdiEtfsOchl, empty_table_dict: 
 
 
 def test_run_without_db_paginates(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiIndexesOchl,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -446,7 +446,7 @@ def test_run_without_db_paginates(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -481,7 +481,7 @@ def test_run_without_db_paginates(
 
 
 def test_run_with_db(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiIndexesOchl,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -490,7 +490,7 @@ def test_run_with_db(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -521,7 +521,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiIndexesOchl,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -529,7 +529,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -553,7 +553,7 @@ def test_run_no_data_returns_none(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiEtfsOchl,
+	instance: B3BdiIndexesOchl,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -561,7 +561,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsOchl
+	instance : B3BdiIndexesOchl
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -597,9 +597,9 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.exchange.b3_bdi_etfs_ochl as mod
+	import stpstone.ingestion.countries.br.exchange.b3_bdi_indexes_ochl as mod
 
 	importlib.reload(mod)
-	inst = mod.B3BdiEtfsOchl(date_ref=sample_date)
+	inst = mod.B3BdiIndexesOchl(date_ref=sample_date)
 	assert inst.date_ref == sample_date
 	assert "IOPV" in inst.url_tpl

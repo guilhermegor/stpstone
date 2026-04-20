@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_consolidated_non_exchange_trades import (
+from stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_consolidated_non_exchange_trades import (  # noqa: E501
 	B3BdiStocksConsolidatedNonExchangeTrades,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -605,7 +605,7 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_consolidated_non_exchange_trades as mod
+	import stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_consolidated_non_exchange_trades as mod  # noqa: E501
 
 	importlib.reload(mod)
 	inst = mod.B3BdiStocksConsolidatedNonExchangeTrades(date_ref=sample_date)

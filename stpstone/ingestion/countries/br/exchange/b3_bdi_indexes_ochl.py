@@ -1,4 +1,4 @@
-"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion."""
+"""B3 BDI indexes OCHL (Open, Closing, High, Low) ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -24,8 +24,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiEtfsOchl(ABCIngestionOperations):
-	"""B3 BDI ETFs IOPV (Indicative Optimized Portfolio Value) ingestion class."""
+class B3BdiIndexesOchl(ABCIngestionOperations):
+	"""B3 BDI indexes OCHL (Open, Closing, High, Low) ingestion class."""
 
 	def __init__(
 		self,
@@ -88,7 +88,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_etfs_ochl",
+		str_table_name: str = "br_b3_bdi_indexes_ochl",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -104,7 +104,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_etfs_ochl".
+			The name of the table, by default "br_b3_bdi_indexes_ochl".
 
 		Returns
 		-------
@@ -174,7 +174,7 @@ class B3BdiEtfsOchl(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(f"B3BdiEtfsOchl: page {int_page} fetched ({int_rows} rows)"),
+			message=(f"B3BdiIndexesOchl: page {int_page} fetched ({int_rows} rows)"),
 			log_level="info",
 		)
 

@@ -91,3 +91,13 @@ Branch naming: `<purpose>/<description>` (e.g., `feat/user-auth`, `fix/rounding-
 - Use `make test_feat MODULE=<name>` when developing a feature end-to-end
 - Write tests before implementation (TDD encouraged per CONTRIBUTING.md)
 - Test normal operations, edge cases, error conditions, and type validation
+
+## Mandatory Verification After Every Change
+
+**After every implementation, refactor, bugfix, or feature addition — no exceptions:**
+
+1. Run `make test_feat MODULE=<module_name>` for **each** module that was created or modified.
+2. After all modules pass, run `make lint` once globally.
+3. Fix every error before declaring the task complete. Do not skip or defer.
+
+This applies to Claude-generated code too — never trust that a subagent ran these. Always run them yourself and show the output.

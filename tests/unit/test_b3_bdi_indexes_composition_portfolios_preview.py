@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiEtfsCompositionPortfolios class."""
+"""Unit tests for B3BdiIndexesCompositionPortfoliosPreview class."""
 
 from datetime import date
 from logging import Logger
@@ -10,8 +10,8 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_etfs_composition_portfolios import (
-	B3BdiEtfsCompositionPortfolios,
+from stpstone.ingestion.countries.br.exchange.b3_bdi_indexes_composition_portfolios_preview import (  # noqa: E501
+	B3BdiIndexesCompositionPortfoliosPreview,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -34,8 +34,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(sample_date: date) -> B3BdiEtfsCompositionPortfolios:
-	"""Fixture providing a B3BdiEtfsCompositionPortfolios instance.
+def instance(sample_date: date) -> B3BdiIndexesCompositionPortfoliosPreview:
+	"""Fixture providing a B3BdiIndexesCompositionPortfoliosPreview instance.
 
 	Parameters
 	----------
@@ -44,10 +44,10 @@ def instance(sample_date: date) -> B3BdiEtfsCompositionPortfolios:
 
 	Returns
 	-------
-	B3BdiEtfsCompositionPortfolios
+	B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	"""
-	return B3BdiEtfsCompositionPortfolios(date_ref=sample_date)
+	return B3BdiIndexesCompositionPortfoliosPreview(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -162,7 +162,7 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsCompositionPortfolios(date_ref=sample_date, int_page_size=50)
+	inst = B3BdiIndexesCompositionPortfoliosPreview(date_ref=sample_date, int_page_size=50)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 50
 	assert "PreviaQuadrimestral" in inst.url
@@ -186,7 +186,7 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsCompositionPortfolios(date_ref=sample_date)
+	inst = B3BdiIndexesCompositionPortfoliosPreview(date_ref=sample_date)
 	assert inst.int_page_size == 100
 
 
@@ -203,7 +203,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiEtfsCompositionPortfolios()
+	inst = B3BdiIndexesCompositionPortfoliosPreview()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -215,7 +215,7 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiEtfsCompositionPortfolios(date_ref=date(2026, 4, 17), logger=mock_logger)
+	inst = B3BdiIndexesCompositionPortfoliosPreview(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
@@ -231,20 +231,20 @@ def test_init_url_contains_date_and_endpoint(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiEtfsCompositionPortfolios(date_ref=sample_date)
+	inst = B3BdiIndexesCompositionPortfoliosPreview(date_ref=sample_date)
 	assert "PreviaQuadrimestral" in inst.url
 	assert "2026-04-17" in inst.url
 
 
 def test_get_response_success(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response posts to self.url and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -266,14 +266,14 @@ def test_get_response_success(
 
 
 def test_get_response_http_error(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -292,14 +292,14 @@ def test_get_response_http_error(
 
 
 def test_get_response_timeout_error(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises Timeout when the server does not respond.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -318,14 +318,14 @@ def test_get_response_timeout_error(
 
 
 def test_get_response_connection_error(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises ConnectionError when the host is unreachable.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -348,7 +348,7 @@ def test_get_response_connection_error(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -356,7 +356,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -379,14 +379,14 @@ def test_get_response_timeout_variants(
 
 
 def test_parse_raw_file_returns_children(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	sample_children: list[dict],
 ) -> None:
 	"""Test parse_raw_file extracts the children list from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	sample_children : list[dict]
 		Expected children list.
@@ -402,13 +402,13 @@ def test_parse_raw_file_returns_children(
 
 
 def test_parse_raw_file_missing_table_key(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 ) -> None:
 	"""Test parse_raw_file raises KeyError when 'table' key is absent.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 
 	Returns
@@ -422,14 +422,14 @@ def test_parse_raw_file_missing_table_key(
 
 
 def test_transform_data_two_children(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	sample_children: list[dict],
 ) -> None:
 	"""Test transform_data concatenates rows from two index children.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	sample_children : list[dict]
 		Two children, each with 2 rows.
@@ -452,14 +452,14 @@ def test_transform_data_two_children(
 
 
 def test_transform_data_empty_list(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	empty_children: list[dict],
 ) -> None:
 	"""Test transform_data returns an empty DataFrame for an empty children list.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	empty_children : list[dict]
 		Empty list.
@@ -474,13 +474,13 @@ def test_transform_data_empty_list(
 
 
 def test_transform_data_skips_child_with_empty_values(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 ) -> None:
 	"""Test transform_data skips children whose values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 
 	Returns
@@ -514,14 +514,14 @@ def test_transform_data_skips_child_with_empty_values(
 
 
 def test_transform_data_index_nm_populated(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	sample_children: list[dict],
 ) -> None:
 	"""Test transform_data populates INDEX_NM from friendlyNameEn.
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	sample_children : list[dict]
 		Two children with friendlyNameEn set.
@@ -537,7 +537,7 @@ def test_transform_data_index_nm_populated(
 
 
 def test_run_without_db_returns_dataframe(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mock_response: Response,
 	sample_children: list[dict],
 	mocker: MockerFixture,
@@ -546,7 +546,7 @@ def test_run_without_db_returns_dataframe(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with two indices.
@@ -577,7 +577,7 @@ def test_run_without_db_returns_dataframe(
 
 
 def test_run_with_db_inserts_and_returns_none(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mock_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -585,7 +585,7 @@ def test_run_with_db_inserts_and_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with two indices.
@@ -609,7 +609,7 @@ def test_run_with_db_inserts_and_returns_none(
 
 
 def test_run_empty_children_returns_none(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -617,7 +617,7 @@ def test_run_empty_children_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty children.
@@ -637,7 +637,7 @@ def test_run_empty_children_returns_none(
 
 
 def test_transform_data_truncates_extra_values(
-	instance: B3BdiEtfsCompositionPortfolios,
+	instance: B3BdiIndexesCompositionPortfoliosPreview,
 ) -> None:
 	"""Test transform_data drops trailing values that have no matching column.
 
@@ -647,7 +647,7 @@ def test_transform_data_truncates_extra_values(
 
 	Parameters
 	----------
-	instance : B3BdiEtfsCompositionPortfolios
+	instance : B3BdiIndexesCompositionPortfoliosPreview
 		Initialized instance.
 
 	Returns
@@ -698,9 +698,9 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.exchange.b3_bdi_etfs_composition_portfolios as mod
+	import stpstone.ingestion.countries.br.exchange.b3_bdi_indexes_composition_portfolios_preview as mod  # noqa: E501
 
 	importlib.reload(mod)
-	inst = mod.B3BdiEtfsCompositionPortfolios(date_ref=sample_date)
+	inst = mod.B3BdiIndexesCompositionPortfoliosPreview(date_ref=sample_date)
 	assert inst.date_ref == sample_date
 	assert "PreviaQuadrimestral" in inst.url

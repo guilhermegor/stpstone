@@ -1,4 +1,4 @@
-"""B3 BDI index portfolio composition (PreviaQuadrimestral) ingestion."""
+"""B3 BDI index portfolio composition preview (PreviaQuadrimestral) ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -23,8 +23,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
-	"""B3 BDI index portfolio composition ingestion class.
+class B3BdiIndexesCompositionPortfoliosPreview(ABCIngestionOperations):
+	"""B3 BDI index portfolio composition preview ingestion class.
 
 	Fetches the composition of index portfolios (e.g. IBOVESPA members) from
 	B3's BDI PreviaQuadrimestral endpoint. This endpoint is non-paginated: a
@@ -84,7 +84,7 @@ class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_etfs_composition_portfolios",
+		str_table_name: str = "br_b3_bdi_indexes_composition_portfolios_preview",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -100,7 +100,8 @@ class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_etfs_composition_portfolios".
+			The name of the table, by default
+			"br_b3_bdi_indexes_composition_portfolios_preview".
 
 		Returns
 		-------
@@ -116,7 +117,7 @@ class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
 		self.cls_create_log.log_message(
 			logger=self.logger,
 			message=(
-				f"B3BdiEtfsCompositionPortfolios: fetched {len(df_)} rows"
+				f"B3BdiIndexesCompositionPortfoliosPreview: fetched {len(df_)} rows"
 				f" across {int_non_empty} indices"
 			),
 			log_level="info",
