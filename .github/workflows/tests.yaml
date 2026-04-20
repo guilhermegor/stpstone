@@ -19,11 +19,15 @@ on:
 
 jobs:
   test:
-    name: Run Automated Tests
-    runs-on: ubuntu-24.04
+    name: Run Automated Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
-        python-version: ["3.9.22", "3.10.17", "3.11.12", "3.12.8"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -52,13 +56,13 @@ jobs:
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          # Temporary pyproject without Windows platform-specific dependencies
           cp pyproject.toml pyproject.original.toml
           cat pyproject.original.toml | python -c '
-          import sys, re
+          import sys, re, os as _os
           content = sys.stdin.read()
-          content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
-          content = re.sub(r"pywin32\s*=.*\n", "", content)
+          if _os.name != "nt":
+              content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
+              content = re.sub(r"pywin32\s*=.*\n", "", content)
           print(content)
           ' > pyproject.toml
 
@@ -298,5 +302,5 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-badge-${{ matrix.python-version }}
+          name: coverage-badge-${{ matrix.os }}-${{ matrix.python-version }}
           path: coverage.svg

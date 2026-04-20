@@ -50,8 +50,6 @@ exclude = [
 
     # example/utility scripts — not production code, not linted
     "examples",
-    "run_dist.py",
-    "pkg_version.py",
     "check_import.py",
 ]
 

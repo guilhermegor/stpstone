@@ -29,13 +29,13 @@ jobs:
   release:
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tests_passed == 'true') || (github.event_name == 'push' && needs.check_tests.outputs.ready_for_release == 'true') }}
     needs: [check_tests]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check Test Status
         run: echo "Tests passed, proceeding with release"
 
   details:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.release.outputs.new_version }}
       suffix: ${{ steps.release.outputs.suffix }}
@@ -75,7 +75,7 @@ jobs:
 
   check_test_pypi:
     needs: details
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Fetch Information from Test PyPI
         run: |
@@ -102,7 +102,7 @@ jobs:
 
   setup_and_build:
     needs: [details, check_test_pypi]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.12.8"]
@@ -192,7 +192,7 @@ jobs:
   test_pypi:
     name: test_pypi
     needs: setup_and_build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: release
     permissions:
