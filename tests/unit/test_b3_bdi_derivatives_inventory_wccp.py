@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiDerivativesInventoryCcp class."""
+"""Unit tests for B3BdiDerivativesInventoryWccp class."""
 
 from datetime import date
 from decimal import Decimal
@@ -12,8 +12,8 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.otc.b3_bdi_derivatives_inventory_ccp import (
-	B3BdiDerivativesInventoryCcp,
+from stpstone.ingestion.countries.br.otc.b3_bdi_derivatives_inventory_wccp import (
+	B3BdiDerivativesInventoryWccp,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -36,8 +36,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(sample_date: date) -> B3BdiDerivativesInventoryCcp:
-	"""Fixture providing a B3BdiDerivativesInventoryCcp instance.
+def instance(sample_date: date) -> B3BdiDerivativesInventoryWccp:
+	"""Fixture providing a B3BdiDerivativesInventoryWccp instance.
 
 	Parameters
 	----------
@@ -46,10 +46,10 @@ def instance(sample_date: date) -> B3BdiDerivativesInventoryCcp:
 
 	Returns
 	-------
-	B3BdiDerivativesInventoryCcp
+	B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	"""
-	return B3BdiDerivativesInventoryCcp(date_ref=sample_date)
+	return B3BdiDerivativesInventoryWccp(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def sample_table_dict() -> dict:
 	Returns
 	-------
 	dict
-		Sample table dict mimicking the BDI OTCInventoryCCP API response.
+		Sample table dict mimicking the BDI OTCInventoryWCCP API response.
 	"""
 	return {
 		"columns": [
@@ -69,7 +69,7 @@ def sample_table_dict() -> dict:
 		],
 		# Each row has one extra trailing-null element that transform_data drops
 		"values": [
-			["Opção", 506105, 91603180637.66, None],
+			["BOX", 208, 3640842373.43, None],
 		],
 	}
 
@@ -150,13 +150,13 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesInventoryCcp(date_ref=sample_date, int_page_size=500)
+	inst = B3BdiDerivativesInventoryWccp(date_ref=sample_date, int_page_size=500)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
 	assert "{page}" in inst.url_tpl
 	assert "500" in inst.url_tpl
-	assert "OTCInventoryCCP" in inst.url_tpl
+	assert "OTCInventoryWCCP" in inst.url_tpl
 	assert inst.logger is None
 	assert isinstance(inst.cls_dir_files_management, DirFilesManagement)
 	assert isinstance(inst.cls_dates_br, DatesBRAnbima)
@@ -175,7 +175,7 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesInventoryCcp(date_ref=sample_date)
+	inst = B3BdiDerivativesInventoryWccp(date_ref=sample_date)
 	assert inst.int_page_size == 1_000
 
 
@@ -191,7 +191,7 @@ def test_init_default_page_max(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesInventoryCcp(date_ref=sample_date)
+	inst = B3BdiDerivativesInventoryWccp(date_ref=sample_date)
 	assert inst.int_page_max == 1
 
 
@@ -208,7 +208,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiDerivativesInventoryCcp()
+	inst = B3BdiDerivativesInventoryWccp()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -220,19 +220,19 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiDerivativesInventoryCcp(date_ref=date(2026, 4, 17), logger=mock_logger)
+	inst = B3BdiDerivativesInventoryWccp(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
 def test_get_response_success(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -255,14 +255,14 @@ def test_get_response_success(
 
 
 def test_get_response_http_error(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -278,14 +278,14 @@ def test_get_response_http_error(
 
 
 def test_get_response_timeout_error(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises Timeout when the server does not respond.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -301,14 +301,14 @@ def test_get_response_timeout_error(
 
 
 def test_get_response_connection_error(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises ConnectionError when the host is unreachable.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -327,14 +327,14 @@ def test_get_response_connection_error(
 
 
 def test_parse_raw_file_returns_table(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test parse_raw_file extracts the table dict from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	sample_table_dict : dict
 		Expected table dict.
@@ -349,12 +349,12 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_parse_raw_file_missing_table_key(instance: B3BdiDerivativesInventoryCcp) -> None:
+def test_parse_raw_file_missing_table_key(instance: B3BdiDerivativesInventoryWccp) -> None:
 	"""Test parse_raw_file raises KeyError when 'table' key is absent.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 
 	Returns
@@ -368,14 +368,14 @@ def test_parse_raw_file_missing_table_key(instance: B3BdiDerivativesInventoryCcp
 
 
 def test_transform_data_normal(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns, drops trailing null.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	sample_table_dict : dict
 		Sample table dict with one row (4 values, 3 columns).
@@ -388,17 +388,17 @@ def test_transform_data_normal(
 	assert isinstance(df_, pd.DataFrame)
 	assert len(df_) == 1
 	assert list(df_.columns) == ["TCKR_SYMB", "TRAD_QTY", "FINANCIAL_VOL"]
-	assert df_["TCKR_SYMB"].iloc[0] == "Opção"
-	assert df_["TRAD_QTY"].iloc[0] == 506105
-	assert df_["FINANCIAL_VOL"].iloc[0] == 91603180637.66
+	assert df_["TCKR_SYMB"].iloc[0] == "BOX"
+	assert df_["TRAD_QTY"].iloc[0] == 208
+	assert df_["FINANCIAL_VOL"].iloc[0] == 3640842373.43
 
 
-def test_transform_data_multiple_rows(instance: B3BdiDerivativesInventoryCcp) -> None:
+def test_transform_data_multiple_rows(instance: B3BdiDerivativesInventoryWccp) -> None:
 	"""Test transform_data handles multiple rows correctly.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 
 	Returns
@@ -412,25 +412,26 @@ def test_transform_data_multiple_rows(instance: B3BdiDerivativesInventoryCcp) ->
 			{"name": "FinancialVol"},
 		],
 		"values": [
-			["Opção", 506105, 91603180637.66, None],
+			["BOX", 208, 3640842373.43, None],
+			["Opção Flexível", 100, 500000000.00, None],
 			["Swap", 16730, 57428601893.84, None],
 			["Termo", 185, 1363249405.39, None],
 		],
 	}
 	df_ = instance.transform_data(table)
-	assert len(df_) == 3
-	assert set(df_["TCKR_SYMB"].tolist()) == {"Opção", "Swap", "Termo"}
+	assert len(df_) == 4
+	assert set(df_["TCKR_SYMB"].tolist()) == {"BOX", "Opção Flexível", "Swap", "Termo"}
 
 
 def test_transform_data_empty_values(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	empty_table_dict: dict,
 ) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -445,7 +446,7 @@ def test_transform_data_empty_values(
 
 
 def test_run_without_db(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mock_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -453,7 +454,7 @@ def test_run_without_db(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -476,11 +477,11 @@ def test_run_without_db(
 	assert "TCKR_SYMB" in result.columns
 	assert "URL" in result.columns
 	assert isinstance(result["FINANCIAL_VOL"].iloc[0], Decimal)
-	assert result["FINANCIAL_VOL"].iloc[0] == Decimal("91603180637.66")
+	assert result["FINANCIAL_VOL"].iloc[0] == Decimal("3640842373.43")
 
 
 def test_run_with_db(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mock_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -488,7 +489,7 @@ def test_run_with_db(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -513,7 +514,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -521,7 +522,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -545,7 +546,7 @@ def test_run_no_data_returns_none(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiDerivativesInventoryCcp,
+	instance: B3BdiDerivativesInventoryWccp,
 	mocker: MockerFixture,
 	timeout: Union[int, float, tuple[float, float], tuple[int, int]],
 ) -> None:
@@ -553,7 +554,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesInventoryCcp
+	instance : B3BdiDerivativesInventoryWccp
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -589,9 +590,9 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.otc.b3_bdi_derivatives_inventory_ccp as mod
+	import stpstone.ingestion.countries.br.otc.b3_bdi_derivatives_inventory_wccp as mod
 
 	importlib.reload(mod)
-	inst = mod.B3BdiDerivativesInventoryCcp(date_ref=sample_date)
+	inst = mod.B3BdiDerivativesInventoryWccp(date_ref=sample_date)
 	assert inst.date_ref == sample_date
-	assert "OTCInventoryCCP" in inst.url_tpl
+	assert "OTCInventoryWCCP" in inst.url_tpl
