@@ -1,4 +1,4 @@
-"""B3 BDI most traded call options ingestion."""
+"""B3 BDI most traded stocks (cash market) ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -24,8 +24,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
-	"""B3 BDI most traded call options ingestion class."""
+class B3BdiStocksMostTraded(ABCIngestionOperations):
+	"""B3 BDI most traded stocks (cash market) ingestion class."""
 
 	def __init__(
 		self,
@@ -52,7 +52,8 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 			First page to fetch (1-based), by default 1.
 		int_page_max : int, optional
 			Last page to fetch inclusive; defaults to 1 because this endpoint
-			typically returns all call options rows on a single page.
+			typically returns all most traded stocks in the cash market rows on a
+			single page.
 
 		Returns
 		-------
@@ -76,7 +77,7 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/OptionsPurshase/"
+			f"https://arquivos.b3.com.br/bdi/table/InCash/"
 			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
 		)
 
@@ -88,7 +89,7 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_derivatives_options_most_traded",
+		str_table_name: str = "br_b3_bdi_stocks_most_traded",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -104,8 +105,7 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default
-			"br_b3_bdi_derivatives_options_most_traded".
+			The name of the table, by default "br_b3_bdi_stocks_most_traded".
 
 		Returns
 		-------
@@ -134,10 +134,9 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		df_ = pd.concat(list_dfs, ignore_index=True)
 		dict_dtypes = {
 			"TCKR_SYMB": str,
-			"DUE_DATE": str,
-			"EXER_PRIC": float,
+			"COD": str,
 			"VLM_TRADED_DAY": float,
-			"PART": float,
+			"PARTICIPATION": float,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -173,9 +172,7 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(
-				f"B3BdiDerivativesOptionsMostTraded: page {int_page} fetched ({int_rows} rows)"
-			),
+			message=(f"B3BdiStocksMostTraded: page {int_page} fetched ({int_rows} rows)"),
 			log_level="info",
 		)
 
@@ -242,7 +239,7 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		"""Build a DataFrame from the API table dict, dropping the trailing null column.
 
 		Column names are converted from PascalCase to UPPER_SNAKE_CASE. Each values
-		row has 6 elements but only 5 column definitions — the 6th element is always
+		row has 5 elements but only 4 column definitions — the 5th element is always
 		null and is dropped by selecting only the named columns.
 
 		Parameters
@@ -253,7 +250,7 @@ class B3BdiDerivativesOptionsMostTraded(ABCIngestionOperations):
 		Returns
 		-------
 		pd.DataFrame
-			DataFrame with UPPER_SNAKE_CASE column names (5 columns), or empty
+			DataFrame with UPPER_SNAKE_CASE column names (4 columns), or empty
 			DataFrame when values is an empty list.
 		"""
 		values = data.get("values", [])

@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiDerivativesOptionsMostTraded class."""
+"""Unit tests for B3BdiEquitiesGreatestDownsides class."""
 
 from datetime import date
 from logging import Logger
@@ -10,8 +10,8 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_derivatives_options_most_traded import (
-	B3BdiDerivativesOptionsMostTraded,
+from stpstone.ingestion.countries.br.exchange.b3_bdi_equities_greatest_downsides import (
+	B3BdiEquitiesGreatestDownsides,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -34,8 +34,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(sample_date: date) -> B3BdiDerivativesOptionsMostTraded:
-	"""Fixture providing a B3BdiDerivativesOptionsMostTraded instance.
+def instance(sample_date: date) -> B3BdiEquitiesGreatestDownsides:
+	"""Fixture providing a B3BdiEquitiesGreatestDownsides instance.
 
 	Parameters
 	----------
@@ -44,10 +44,10 @@ def instance(sample_date: date) -> B3BdiDerivativesOptionsMostTraded:
 
 	Returns
 	-------
-	B3BdiDerivativesOptionsMostTraded
+	B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	"""
-	return B3BdiDerivativesOptionsMostTraded(date_ref=sample_date)
+	return B3BdiEquitiesGreatestDownsides(date_ref=sample_date)
 
 
 @pytest.fixture
@@ -57,18 +57,17 @@ def sample_table_dict() -> dict:
 	Returns
 	-------
 	dict
-		Sample table dict mimicking the BDI OptionsPurshase API response.
+		Sample table dict mimicking the BDI InCashMarketBiggestLow API response.
 	"""
 	return {
 		"columns": [
 			{"name": "TckrSymb"},
-			{"name": "DueDate"},
-			{"name": "ExerPric"},
-			{"name": "VlmTradedDay"},
-			{"name": "Part"},
+			{"name": "Cod"},
+			{"name": "Price"},
+			{"name": "OscillationDesc"},
 		],
 		"values": [
-			["CSMGB449", "2027-02-19T20:59:59", 43.33, 29504.02, 1.807, None],
+			["BLUE11", "CI", 143.01, -19.65, None],
 		],
 	}
 
@@ -85,10 +84,9 @@ def empty_table_dict() -> dict:
 	return {
 		"columns": [
 			{"name": "TckrSymb"},
-			{"name": "DueDate"},
-			{"name": "ExerPric"},
-			{"name": "VlmTradedDay"},
-			{"name": "Part"},
+			{"name": "Cod"},
+			{"name": "Price"},
+			{"name": "OscillationDesc"},
 		],
 		"values": [],
 	}
@@ -151,13 +149,13 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesOptionsMostTraded(date_ref=sample_date, int_page_size=500)
+	inst = B3BdiEquitiesGreatestDownsides(date_ref=sample_date, int_page_size=500)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
 	assert "{page}" in inst.url_tpl
 	assert "500" in inst.url_tpl
-	assert "OptionsPurshase" in inst.url_tpl
+	assert "InCashMarketBiggestLow" in inst.url_tpl
 	assert inst.logger is None
 	assert isinstance(inst.cls_dir_files_management, DirFilesManagement)
 	assert isinstance(inst.cls_dates_br, DatesBRAnbima)
@@ -176,7 +174,7 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesOptionsMostTraded(date_ref=sample_date)
+	inst = B3BdiEquitiesGreatestDownsides(date_ref=sample_date)
 	assert inst.int_page_size == 1_000
 
 
@@ -193,7 +191,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiDerivativesOptionsMostTraded()
+	inst = B3BdiEquitiesGreatestDownsides()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -205,19 +203,19 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiDerivativesOptionsMostTraded(date_ref=date(2026, 4, 17), logger=mock_logger)
+	inst = B3BdiEquitiesGreatestDownsides(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
 def test_get_response_success(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -240,14 +238,14 @@ def test_get_response_success(
 
 
 def test_get_response_http_error(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -263,14 +261,14 @@ def test_get_response_http_error(
 
 
 def test_get_response_timeout_error(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises Timeout when the server does not respond.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -286,14 +284,14 @@ def test_get_response_timeout_error(
 
 
 def test_get_response_connection_error(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises ConnectionError when the host is unreachable.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -312,14 +310,14 @@ def test_get_response_connection_error(
 
 
 def test_parse_raw_file_returns_table(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test parse_raw_file extracts the table dict from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	sample_table_dict : dict
 		Expected table dict.
@@ -334,12 +332,12 @@ def test_parse_raw_file_returns_table(
 	assert result == sample_table_dict
 
 
-def test_parse_raw_file_missing_table_key(instance: B3BdiDerivativesOptionsMostTraded) -> None:
+def test_parse_raw_file_missing_table_key(instance: B3BdiEquitiesGreatestDownsides) -> None:
 	"""Test parse_raw_file raises KeyError when 'table' key is absent.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 
 	Returns
@@ -353,17 +351,17 @@ def test_parse_raw_file_missing_table_key(instance: B3BdiDerivativesOptionsMostT
 
 
 def test_transform_data_normal(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns and drops trailing null.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	sample_table_dict : dict
-		Sample table dict with one row (6 values, 5 columns).
+		Sample table dict with one row (5 values, 4 columns).
 
 	Returns
 	-------
@@ -372,18 +370,19 @@ def test_transform_data_normal(
 	df_ = instance.transform_data(sample_table_dict)
 	assert isinstance(df_, pd.DataFrame)
 	assert len(df_) == 1
-	assert list(df_.columns) == ["TCKR_SYMB", "DUE_DATE", "EXER_PRIC", "VLM_TRADED_DAY", "PART"]
-	assert df_["TCKR_SYMB"].iloc[0] == "CSMGB449"
-	assert df_["DUE_DATE"].iloc[0] == "2027-02-19T20:59:59"
-	assert df_["EXER_PRIC"].iloc[0] == 43.33
+	assert list(df_.columns) == ["TCKR_SYMB", "COD", "PRICE", "OSCILLATION_DESC"]
+	assert df_["TCKR_SYMB"].iloc[0] == "BLUE11"
+	assert df_["COD"].iloc[0] == "CI"
+	assert df_["PRICE"].iloc[0] == 143.01
+	assert df_["OSCILLATION_DESC"].iloc[0] == -19.65
 
 
-def test_transform_data_multiple_rows(instance: B3BdiDerivativesOptionsMostTraded) -> None:
+def test_transform_data_multiple_rows(instance: B3BdiEquitiesGreatestDownsides) -> None:
 	"""Test transform_data handles multiple rows correctly.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 
 	Returns
@@ -393,31 +392,30 @@ def test_transform_data_multiple_rows(instance: B3BdiDerivativesOptionsMostTrade
 	table = {
 		"columns": [
 			{"name": "TckrSymb"},
-			{"name": "DueDate"},
-			{"name": "ExerPric"},
-			{"name": "VlmTradedDay"},
-			{"name": "Part"},
+			{"name": "Cod"},
+			{"name": "Price"},
+			{"name": "OscillationDesc"},
 		],
 		"values": [
-			["CSMGB449", "2027-02-19T20:59:59", 43.33, 29504.02, 1.807, None],
-			["CSMGA449", "2027-01-15T20:59:59", 43.33, 28689.7, 1.757, None],
-			["PETRE482", "2026-05-15T20:59:59", 48.25, 13343.9, 0.817, None],
+			["BLUE11", "CI", 143.01, -19.65, None],
+			["MGLU3", "ON", 8.55, -15.32, None],
+			["MRVE3", "ON", 4.21, -12.87, None],
 		],
 	}
 	df_ = instance.transform_data(table)
 	assert len(df_) == 3
-	assert set(df_["TCKR_SYMB"].tolist()) == {"CSMGB449", "CSMGA449", "PETRE482"}
+	assert set(df_["TCKR_SYMB"].tolist()) == {"BLUE11", "MGLU3", "MRVE3"}
 
 
 def test_transform_data_empty_values(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	empty_table_dict: dict,
 ) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -432,7 +430,7 @@ def test_transform_data_empty_values(
 
 
 def test_run_without_db_paginates(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -441,7 +439,7 @@ def test_run_without_db_paginates(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -472,7 +470,7 @@ def test_run_without_db_paginates(
 
 
 def test_run_with_db(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -481,7 +479,7 @@ def test_run_with_db(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -512,7 +510,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -520,7 +518,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -544,7 +542,7 @@ def test_run_no_data_returns_none(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiDerivativesOptionsMostTraded,
+	instance: B3BdiEquitiesGreatestDownsides,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -552,7 +550,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesOptionsMostTraded
+	instance : B3BdiEquitiesGreatestDownsides
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -588,9 +586,9 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.exchange.b3_bdi_derivatives_options_most_traded as mod
+	import stpstone.ingestion.countries.br.exchange.b3_bdi_equities_greatest_downsides as mod
 
 	importlib.reload(mod)
-	inst = mod.B3BdiDerivativesOptionsMostTraded(date_ref=sample_date)
+	inst = mod.B3BdiEquitiesGreatestDownsides(date_ref=sample_date)
 	assert inst.date_ref == sample_date
-	assert "OptionsPurshase" in inst.url_tpl
+	assert "InCashMarketBiggestLow" in inst.url_tpl
