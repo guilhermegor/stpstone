@@ -326,6 +326,7 @@ class DFStandardization(metaclass=TypeChecker):
 							and val.replace(",", "").replace(".", "").isdigit()
 							or "." in val
 							and val.count(".") > 1
+							and val.replace(".", "").replace(",", "").isdigit()
 						)
 						for val in sample_data
 						if pd.notna(val)
