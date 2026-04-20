@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiDerivativesProductionBatchFormation45Coffee class."""
+"""Unit tests for B3BdiIndexesStocksBehavior class."""
 
 from datetime import date
 from logging import Logger
@@ -10,8 +10,8 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_derivatives_production_batch_formation_45_coffee import (  # noqa: E501
-	B3BdiDerivativesProductionBatchFormation45Coffee,
+from stpstone.ingestion.countries.br.exchange.b3_bdi_indexes_stocks_behavior import (
+	B3BdiIndexesStocksBehavior,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -34,10 +34,8 @@ def sample_date() -> date:
 
 
 @pytest.fixture
-def instance(
-	sample_date: date,
-) -> B3BdiDerivativesProductionBatchFormation45Coffee:
-	"""Fixture providing a B3BdiDerivativesProductionBatchFormation45Coffee instance.
+def instance(sample_date: date) -> B3BdiIndexesStocksBehavior:
+	"""Fixture providing a B3BdiIndexesStocksBehavior instance for IBOVESPA.
 
 	Parameters
 	----------
@@ -46,43 +44,35 @@ def instance(
 
 	Returns
 	-------
-	B3BdiDerivativesProductionBatchFormation45Coffee
+	B3BdiIndexesStocksBehavior
 		Initialized instance.
 	"""
-	return B3BdiDerivativesProductionBatchFormation45Coffee(date_ref=sample_date)
+	return B3BdiIndexesStocksBehavior(str_index_name="IBOVESPA", date_ref=sample_date)
 
 
 @pytest.fixture
 def sample_table_dict() -> dict:
-	"""Fixture providing a sample API table dict with one data row.
+	"""Fixture providing an StocksBehavior child table dict with one data row.
 
 	Returns
 	-------
 	dict
-		Sample table dict mimicking the BDI DistrionCoffeLocation API response structure.
+		Sample child table dict mimicking the BDI INDEXES API response.
 	"""
 	return {
+		"name": "IbovespaActionsBehavior",
 		"columns": [
 			{"name": "TckrSymb"},
-			{"name": "Agio"},
-			{"name": "Base"},
-			{"name": "DesAgio"},
-			{"name": "NonStandard"},
+			{"name": "ActNmbrHigh"},
+			{"name": "ActNmbrLow"},
+			{"name": "ActNmbrStbl"},
+			{"name": "NoNgttns"},
 			{"name": "Total"},
-			{"name": "Perce"},
-			{"name": "BatchQuant"},
+			{"name": "MnmValueYear"},
+			{"name": "MxmValueYear"},
 		],
 		"values": [
-			[
-				"MG - GUAXUPE - 30028 - COOP. REG. DE C",
-				0,
-				0,
-				106,
-				0,
-				106,
-				28.000000000000004,
-				None,
-			],
+			["IBOVESPA", 48, 34, 1, None, "83", "160538 - 02 JAN", "198657 - 14 ABR", None],
 		],
 	}
 
@@ -97,15 +87,16 @@ def empty_table_dict() -> dict:
 		Sample table dict with empty values list.
 	"""
 	return {
+		"name": "IbovespaActionsBehavior",
 		"columns": [
 			{"name": "TckrSymb"},
-			{"name": "Agio"},
-			{"name": "Base"},
-			{"name": "DesAgio"},
-			{"name": "NonStandard"},
+			{"name": "ActNmbrHigh"},
+			{"name": "ActNmbrLow"},
+			{"name": "ActNmbrStbl"},
+			{"name": "NoNgttns"},
 			{"name": "Total"},
-			{"name": "Perce"},
-			{"name": "BatchQuant"},
+			{"name": "MnmValueYear"},
+			{"name": "MxmValueYear"},
 		],
 		"values": [],
 	}
@@ -113,12 +104,12 @@ def empty_table_dict() -> dict:
 
 @pytest.fixture
 def mock_response(sample_table_dict: dict) -> Response:
-	"""Mock Response with one-row table payload.
+	"""Mock Response with full nested INDEXES structure for IBOVESPA.
 
 	Parameters
 	----------
 	sample_table_dict : dict
-		Sample table dict fixture.
+		Sample child table dict fixture.
 
 	Returns
 	-------
@@ -127,14 +118,20 @@ def mock_response(sample_table_dict: dict) -> Response:
 	"""
 	response = MagicMock(spec=Response)
 	response.status_code = 200
-	response.json.return_value = {"table": sample_table_dict}
+	response.json.return_value = {
+		"table": {
+			"children": [
+				{"name": "IBOVESPA", "children": [sample_table_dict]},
+			]
+		}
+	}
 	response.raise_for_status = MagicMock()
 	return response
 
 
 @pytest.fixture
 def mock_empty_response(empty_table_dict: dict) -> Response:
-	"""Mock Response with empty-values table payload.
+	"""Mock Response with empty-values nested INDEXES structure.
 
 	Parameters
 	----------
@@ -148,7 +145,13 @@ def mock_empty_response(empty_table_dict: dict) -> Response:
 	"""
 	response = MagicMock(spec=Response)
 	response.status_code = 200
-	response.json.return_value = {"table": empty_table_dict}
+	response.json.return_value = {
+		"table": {
+			"children": [
+				{"name": "IBOVESPA", "children": [empty_table_dict]},
+			]
+		}
+	}
 	response.raise_for_status = MagicMock()
 	return response
 
@@ -156,13 +159,8 @@ def mock_empty_response(empty_table_dict: dict) -> Response:
 # --------------------------
 # Tests
 # --------------------------
-def test_init_with_valid_inputs(sample_date: date) -> None:
-	"""Test initialization with all parameters provided.
-
-	Verifies
-	--------
-	- date_ref, int_page_size, url_tpl are set correctly.
-	- Standard helpers are initialized.
+def test_init_stores_index_name(sample_date: date) -> None:
+	"""Test that str_index_name is stored on the instance.
 
 	Parameters
 	----------
@@ -173,51 +171,33 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(
-		date_ref=sample_date, int_page_size=500
+	inst = B3BdiIndexesStocksBehavior(str_index_name="IFIX", date_ref=sample_date)
+	assert inst.str_index_name == "IFIX"
+
+
+def test_init_with_valid_inputs(sample_date: date) -> None:
+	"""Test initialization with all parameters provided.
+
+	Parameters
+	----------
+	sample_date : date
+		Sample date for initialization.
+
+	Returns
+	-------
+	None
+	"""
+	inst = B3BdiIndexesStocksBehavior(
+		str_index_name="IBOVESPA", date_ref=sample_date, int_page_size=500
 	)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
-	assert "{page}" in inst.url_tpl
-	assert "500" in inst.url_tpl
-	assert "DistrionCoffeLocation" in inst.url_tpl
+	assert "INDEXES" in inst.url_tpl
 	assert inst.logger is None
 	assert isinstance(inst.cls_dir_files_management, DirFilesManagement)
 	assert isinstance(inst.cls_dates_br, DatesBRAnbima)
 	assert isinstance(inst.cls_create_log, CreateLog)
-
-
-def test_init_default_page_size(sample_date: date) -> None:
-	"""Test that default int_page_size is 1_000.
-
-	Parameters
-	----------
-	sample_date : date
-		Sample date for initialization.
-
-	Returns
-	-------
-	None
-	"""
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(date_ref=sample_date)
-	assert inst.int_page_size == 1_000
-
-
-def test_init_default_page_max(sample_date: date) -> None:
-	"""Test that default int_page_max is 1 (single-page endpoint).
-
-	Parameters
-	----------
-	sample_date : date
-		Sample date for initialization.
-
-	Returns
-	-------
-	None
-	"""
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(date_ref=sample_date)
-	assert inst.int_page_max == 1
 
 
 def test_init_without_date_ref(mocker: MockerFixture) -> None:
@@ -233,33 +213,38 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee()
+	inst = B3BdiIndexesStocksBehavior(str_index_name="IBOVESPA")
 	assert inst.date_ref == date(2026, 4, 16)
 
 
-def test_init_logger_propagated() -> None:
+def test_init_logger_propagated(sample_date: date) -> None:
 	"""Test that logger is stored on the instance.
+
+	Parameters
+	----------
+	sample_date : date
+		Sample date for initialization.
 
 	Returns
 	-------
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(
-		date_ref=date(2026, 4, 17), logger=mock_logger
+	inst = B3BdiIndexesStocksBehavior(
+		str_index_name="IBOVESPA", date_ref=sample_date, logger=mock_logger
 	)
 	assert inst.logger is mock_logger
 
 
 def test_get_response_success(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	mocker: MockerFixture,
 ) -> None:
-	"""Test get_response posts to the correct URL and returns the response.
+	"""Test get_response posts to the correct URL.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -278,18 +263,17 @@ def test_get_response_success(
 	expected_url = instance.url_tpl.format(page=3)
 	mock_post.assert_called_once_with(expected_url, json={}, timeout=(12.0, 21.0), verify=True)
 	assert result is mock_resp
-	mock_resp.raise_for_status.assert_called_once()
 
 
 def test_get_response_http_error(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -299,20 +283,20 @@ def test_get_response_http_error(
 	None
 	"""
 	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
-	mocker.patch("requests.post", side_effect=requests.exceptions.HTTPError("500 Server Error"))
+	mocker.patch("requests.post", side_effect=requests.exceptions.HTTPError("500"))
 	with pytest.raises(requests.exceptions.HTTPError):
 		instance.get_response()
 
 
 def test_get_response_timeout_error(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises Timeout when the request times out.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -327,38 +311,92 @@ def test_get_response_timeout_error(
 		instance.get_response()
 
 
-def test_parse_raw_file_returns_table(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+def test_parse_raw_file_returns_matching_group(
+	instance: B3BdiIndexesStocksBehavior,
 	sample_table_dict: dict,
 ) -> None:
-	"""Test parse_raw_file extracts the table dict from the JSON response.
+	"""Test parse_raw_file extracts the StocksBehavior child for str_index_name.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	sample_table_dict : dict
-		Expected table dict.
+		Expected child table dict.
 
 	Returns
 	-------
 	None
 	"""
 	mock_resp = MagicMock(spec=Response)
-	mock_resp.json.return_value = {"table": sample_table_dict}
+	mock_resp.json.return_value = {
+		"table": {
+			"children": [
+				{"name": "IBOVESPA", "children": [sample_table_dict]},
+				{
+					"name": "IBRX50",
+					"children": [{"name": "IBRX50ActionsBehavior", "columns": [], "values": []}],
+				},
+			]
+		}
+	}
 	result = instance.parse_raw_file(mock_resp)
-	assert result == sample_table_dict
+	assert result["name"] == "IbovespaActionsBehavior"
+
+
+def test_parse_raw_file_inconsistent_naming(sample_date: date) -> None:
+	"""Test parse_raw_file matches suffix even when group and child names differ (e.g. AGFS).
+
+	Parameters
+	----------
+	sample_date : date
+		Sample date for initialization.
+
+	Returns
+	-------
+	None
+	"""
+	inst = B3BdiIndexesStocksBehavior(str_index_name="AGFS", date_ref=sample_date)
+	agro_child = {
+		"name": "IagroActionsBehavior",
+		"columns": [{"name": "TckrSymb"}],
+		"values": [["AGFS"]],
+	}
+	mock_resp = MagicMock(spec=Response)
+	mock_resp.json.return_value = {
+		"table": {"children": [{"name": "AGFS", "children": [agro_child]}]}
+	}
+	result = inst.parse_raw_file(mock_resp)
+	assert result["name"] == "IagroActionsBehavior"
+
+
+def test_parse_raw_file_unknown_group(instance: B3BdiIndexesStocksBehavior) -> None:
+	"""Test parse_raw_file returns empty dict when str_index_name is not found.
+
+	Parameters
+	----------
+	instance : B3BdiIndexesStocksBehavior
+		Initialized instance.
+
+	Returns
+	-------
+	None
+	"""
+	mock_resp = MagicMock(spec=Response)
+	mock_resp.json.return_value = {"table": {"children": []}}
+	result = instance.parse_raw_file(mock_resp)
+	assert result == {"columns": [], "values": []}
 
 
 def test_transform_data_normal(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	sample_table_dict : dict
 		Sample table dict with one row.
@@ -372,68 +410,27 @@ def test_transform_data_normal(
 	assert len(df_) == 1
 	assert list(df_.columns) == [
 		"TCKR_SYMB",
-		"AGIO",
-		"BASE",
-		"DES_AGIO",
-		"NON_STANDARD",
+		"ACT_NMBR_HIGH",
+		"ACT_NMBR_LOW",
+		"ACT_NMBR_STBL",
+		"NO_NGTTNS",
 		"TOTAL",
-		"PERCE",
-		"BATCH_QUANT",
+		"MNM_VALUE_YEAR",
+		"MXM_VALUE_YEAR",
 	]
-	assert df_["TCKR_SYMB"].iloc[0] == "MG - GUAXUPE - 30028 - COOP. REG. DE C"
-	assert df_["DES_AGIO"].iloc[0] == 106
-	assert df_["BATCH_QUANT"].iloc[0] is None
-
-
-def test_transform_data_multiple_rows(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
-) -> None:
-	"""Test transform_data handles multiple rows correctly.
-
-	Parameters
-	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
-		Initialized instance.
-
-	Returns
-	-------
-	None
-	"""
-	table = {
-		"columns": [
-			{"name": "TckrSymb"},
-			{"name": "Agio"},
-			{"name": "Base"},
-			{"name": "DesAgio"},
-			{"name": "NonStandard"},
-			{"name": "Total"},
-			{"name": "Perce"},
-			{"name": "BatchQuant"},
-		],
-		"values": [
-			["MG - GUAXUPE - 30028 - COOP. REG. DE C", 0, 0, 106, 0, 106, 28.0, None],
-			["SP - SANTOS - 10001 - BOLSA CAFE", 10, 5, 90, 2, 107, 30.0, None],
-			["TOTAL", None, None, None, None, None, None, 213],
-		],
-	}
-	df_ = instance.transform_data(table)
-	assert len(df_) == 3
-	assert set(df_["TCKR_SYMB"].tolist()) == {
-		"MG - GUAXUPE - 30028 - COOP. REG. DE C",
-		"SP - SANTOS - 10001 - BOLSA CAFE",
-		"TOTAL",
-	}
+	assert df_["TCKR_SYMB"].iloc[0] == "IBOVESPA"
+	assert df_["ACT_NMBR_HIGH"].iloc[0] == 48
 
 
 def test_transform_data_empty_values(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	empty_table_dict: dict,
 ) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -447,61 +444,17 @@ def test_transform_data_empty_values(
 	assert df_.empty
 
 
-def test_run_without_db_returns_dataframe(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+def test_run_derives_table_name_from_index(
+	instance: B3BdiIndexesStocksBehavior,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
-	"""Test run fetches pages until empty, then returns a DataFrame.
+	"""Test run derives str_table_name from str_index_name when not provided.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
-		Initialized instance.
-	mock_response : Response
-		Mocked Response with one data row.
-	mock_empty_response : Response
-		Mocked Response with empty values.
-	mocker : MockerFixture
-		Pytest-mock fixture.
-
-	Returns
-	-------
-	None
-	"""
-	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
-	mocker.patch("time.sleep")
-	mocker.patch.object(
-		instance,
-		"get_response",
-		side_effect=[mock_response, mock_empty_response],
-	)
-	mocker.patch.object(
-		instance,
-		"standardize_dataframe",
-		side_effect=lambda df_, **kw: df_,
-	)
-
-	result = instance.run()
-
-	assert isinstance(result, pd.DataFrame)
-	assert len(result) == 1
-	assert "TCKR_SYMB" in result.columns
-	assert "URL" in result.columns
-
-
-def test_run_with_db(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
-	mock_response: Response,
-	mock_empty_response: Response,
-	mocker: MockerFixture,
-) -> None:
-	"""Test run inserts into DB and returns None when cls_db is set.
-
-	Parameters
-	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -517,11 +470,79 @@ def test_run_with_db(
 	instance.cls_db = MagicMock()
 	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
 	mocker.patch("time.sleep")
-	mocker.patch.object(
-		instance,
-		"get_response",
-		side_effect=[mock_response, mock_empty_response],
-	)
+	mocker.patch.object(instance, "get_response", side_effect=[mock_response, mock_empty_response])
+	mocker.patch.object(instance, "standardize_dataframe", side_effect=lambda df_, **kw: df_)
+	mock_insert = mocker.patch.object(instance, "insert_table_db")
+
+	instance.run()
+
+	_, kwargs = mock_insert.call_args
+	assert kwargs["str_table_name"] == "br_b3_bdi_indexes_ibovespa_stocks_behavior"
+
+
+def test_run_without_db_returns_dataframe(
+	instance: B3BdiIndexesStocksBehavior,
+	mock_response: Response,
+	mock_empty_response: Response,
+	mocker: MockerFixture,
+) -> None:
+	"""Test run returns a DataFrame when cls_db is not set.
+
+	Parameters
+	----------
+	instance : B3BdiIndexesStocksBehavior
+		Initialized instance.
+	mock_response : Response
+		Mocked Response with one data row.
+	mock_empty_response : Response
+		Mocked Response with empty values.
+	mocker : MockerFixture
+		Pytest-mock fixture.
+
+	Returns
+	-------
+	None
+	"""
+	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
+	mocker.patch("time.sleep")
+	mocker.patch.object(instance, "get_response", side_effect=[mock_response, mock_empty_response])
+	mocker.patch.object(instance, "standardize_dataframe", side_effect=lambda df_, **kw: df_)
+
+	result = instance.run()
+
+	assert isinstance(result, pd.DataFrame)
+	assert len(result) == 1
+	assert "TCKR_SYMB" in result.columns
+	assert "URL" in result.columns
+
+
+def test_run_with_db(
+	instance: B3BdiIndexesStocksBehavior,
+	mock_response: Response,
+	mock_empty_response: Response,
+	mocker: MockerFixture,
+) -> None:
+	"""Test run inserts into DB and returns None when cls_db is set.
+
+	Parameters
+	----------
+	instance : B3BdiIndexesStocksBehavior
+		Initialized instance.
+	mock_response : Response
+		Mocked Response with one data row.
+	mock_empty_response : Response
+		Mocked Response with empty values.
+	mocker : MockerFixture
+		Pytest-mock fixture.
+
+	Returns
+	-------
+	None
+	"""
+	instance.cls_db = MagicMock()
+	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
+	mocker.patch("time.sleep")
+	mocker.patch.object(instance, "get_response", side_effect=[mock_response, mock_empty_response])
 	mocker.patch.object(instance, "standardize_dataframe", side_effect=lambda df_, **kw: df_)
 	mock_insert = mocker.patch.object(instance, "insert_table_db")
 
@@ -532,7 +553,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -540,7 +561,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -559,12 +580,9 @@ def test_run_no_data_returns_none(
 	assert result is None
 
 
-@pytest.mark.parametrize(
-	"timeout",
-	[10, 10.5, (10.0, 20.0), (10, 20)],
-)
+@pytest.mark.parametrize("timeout", [10, 10.5, (10.0, 20.0), (10, 20)])
 def test_get_response_timeout_variants(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiIndexesStocksBehavior,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -572,7 +590,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiIndexesStocksBehavior
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.

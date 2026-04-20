@@ -260,9 +260,7 @@ def test_get_response_success(
 
 	result = instance.get_response()
 
-	mock_post.assert_called_once_with(
-		instance.url, json={}, timeout=(12.0, 21.0), verify=True
-	)
+	mock_post.assert_called_once_with(instance.url, json={}, timeout=(12.0, 21.0), verify=True)
 	assert result is mock_resp
 	mock_resp.raise_for_status.assert_called_once()
 
@@ -398,9 +396,7 @@ def test_parse_raw_file_returns_children(
 	None
 	"""
 	mock_resp = MagicMock(spec=Response)
-	mock_resp.json.return_value = {
-		"table": {"values": [], "children": sample_children}
-	}
+	mock_resp.json.return_value = {"table": {"values": [], "children": sample_children}}
 	result = instance.parse_raw_file(mock_resp)
 	assert result == sample_children
 

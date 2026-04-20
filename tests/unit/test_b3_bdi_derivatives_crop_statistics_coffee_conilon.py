@@ -1,4 +1,4 @@
-"""Unit tests for B3BdiDerivativesProductionBatchFormation45Coffee class."""
+"""Unit tests for B3BdiDerivativesCropStatisticsCoffeeConilon class."""
 
 from datetime import date
 from logging import Logger
@@ -10,8 +10,8 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange.b3_bdi_derivatives_production_batch_formation_45_coffee import (  # noqa: E501
-	B3BdiDerivativesProductionBatchFormation45Coffee,
+from stpstone.ingestion.countries.br.exchange.b3_bdi_derivatives_crop_statistics_coffee_conilon import (  # noqa: E501
+	B3BdiDerivativesCropStatisticsCoffeeConilon,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -36,8 +36,8 @@ def sample_date() -> date:
 @pytest.fixture
 def instance(
 	sample_date: date,
-) -> B3BdiDerivativesProductionBatchFormation45Coffee:
-	"""Fixture providing a B3BdiDerivativesProductionBatchFormation45Coffee instance.
+) -> B3BdiDerivativesCropStatisticsCoffeeConilon:
+	"""Fixture providing a B3BdiDerivativesCropStatisticsCoffeeConilon instance.
 
 	Parameters
 	----------
@@ -46,43 +46,34 @@ def instance(
 
 	Returns
 	-------
-	B3BdiDerivativesProductionBatchFormation45Coffee
+	B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	"""
-	return B3BdiDerivativesProductionBatchFormation45Coffee(date_ref=sample_date)
+	return B3BdiDerivativesCropStatisticsCoffeeConilon(date_ref=sample_date)
 
 
 @pytest.fixture
 def sample_table_dict() -> dict:
-	"""Fixture providing a sample API table dict with one data row.
+	"""Fixture providing a sample API table dict with one row.
 
 	Returns
 	-------
 	dict
-		Sample table dict mimicking the BDI DistrionCoffeLocation API response structure.
+		Sample table dict mimicking the BDI CNLHarvestCoffeApprov API response structure.
 	"""
 	return {
 		"columns": [
 			{"name": "TckrSymb"},
+			{"name": "Tota"},
 			{"name": "Agio"},
 			{"name": "Base"},
 			{"name": "DesAgio"},
 			{"name": "NonStandard"},
 			{"name": "Total"},
 			{"name": "Perce"},
-			{"name": "BatchQuant"},
 		],
 		"values": [
-			[
-				"MG - GUAXUPE - 30028 - COOP. REG. DE C",
-				0,
-				0,
-				106,
-				0,
-				106,
-				28.000000000000004,
-				None,
-			],
+			["2025/2026", 0, 5, 10, 2, 0, 17, 25.5, None],
 		],
 	}
 
@@ -99,13 +90,13 @@ def empty_table_dict() -> dict:
 	return {
 		"columns": [
 			{"name": "TckrSymb"},
+			{"name": "Tota"},
 			{"name": "Agio"},
 			{"name": "Base"},
 			{"name": "DesAgio"},
 			{"name": "NonStandard"},
 			{"name": "Total"},
 			{"name": "Perce"},
-			{"name": "BatchQuant"},
 		],
 		"values": [],
 	}
@@ -173,15 +164,13 @@ def test_init_with_valid_inputs(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(
-		date_ref=sample_date, int_page_size=500
-	)
+	inst = B3BdiDerivativesCropStatisticsCoffeeConilon(date_ref=sample_date, int_page_size=500)
 	assert inst.date_ref == sample_date
 	assert inst.int_page_size == 500
 	assert "2026-04-17" in inst.url_tpl
 	assert "{page}" in inst.url_tpl
 	assert "500" in inst.url_tpl
-	assert "DistrionCoffeLocation" in inst.url_tpl
+	assert "CNLHarvestCoffeApprov" in inst.url_tpl
 	assert inst.logger is None
 	assert isinstance(inst.cls_dir_files_management, DirFilesManagement)
 	assert isinstance(inst.cls_dates_br, DatesBRAnbima)
@@ -200,12 +189,12 @@ def test_init_default_page_size(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(date_ref=sample_date)
+	inst = B3BdiDerivativesCropStatisticsCoffeeConilon(date_ref=sample_date)
 	assert inst.int_page_size == 1_000
 
 
-def test_init_default_page_max(sample_date: date) -> None:
-	"""Test that default int_page_max is 1 (single-page endpoint).
+def test_init_default_page_max_is_none(sample_date: date) -> None:
+	"""Test that default int_page_max is None (paginate until empty).
 
 	Parameters
 	----------
@@ -216,8 +205,8 @@ def test_init_default_page_max(sample_date: date) -> None:
 	-------
 	None
 	"""
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(date_ref=sample_date)
-	assert inst.int_page_max == 1
+	inst = B3BdiDerivativesCropStatisticsCoffeeConilon(date_ref=sample_date)
+	assert inst.int_page_max is None
 
 
 def test_init_without_date_ref(mocker: MockerFixture) -> None:
@@ -233,7 +222,7 @@ def test_init_without_date_ref(mocker: MockerFixture) -> None:
 	None
 	"""
 	mocker.patch.object(DatesBRAnbima, "add_working_days", return_value=date(2026, 4, 16))
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee()
+	inst = B3BdiDerivativesCropStatisticsCoffeeConilon()
 	assert inst.date_ref == date(2026, 4, 16)
 
 
@@ -245,21 +234,21 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiDerivativesProductionBatchFormation45Coffee(
+	inst = B3BdiDerivativesCropStatisticsCoffeeConilon(
 		date_ref=date(2026, 4, 17), logger=mock_logger
 	)
 	assert inst.logger is mock_logger
 
 
 def test_get_response_success(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response posts to the correct URL and returns the response.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -282,14 +271,14 @@ def test_get_response_success(
 
 
 def test_get_response_http_error(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	mocker: MockerFixture,
 ) -> None:
 	"""Test get_response raises HTTPError on bad status.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
@@ -304,38 +293,15 @@ def test_get_response_http_error(
 		instance.get_response()
 
 
-def test_get_response_timeout_error(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
-	mocker: MockerFixture,
-) -> None:
-	"""Test get_response raises Timeout when the request times out.
-
-	Parameters
-	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
-		Initialized instance.
-	mocker : MockerFixture
-		Pytest-mock fixture.
-
-	Returns
-	-------
-	None
-	"""
-	mocker.patch("backoff.on_exception", lambda *a, **kw: lambda fn: fn)
-	mocker.patch("requests.post", side_effect=requests.exceptions.Timeout("timed out"))
-	with pytest.raises(requests.exceptions.Timeout):
-		instance.get_response()
-
-
 def test_parse_raw_file_returns_table(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test parse_raw_file extracts the table dict from the JSON response.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	sample_table_dict : dict
 		Expected table dict.
@@ -351,14 +317,14 @@ def test_parse_raw_file_returns_table(
 
 
 def test_transform_data_normal(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	sample_table_dict: dict,
 ) -> None:
 	"""Test transform_data builds a DataFrame with UPPER_SNAKE columns.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	sample_table_dict : dict
 		Sample table dict with one row.
@@ -372,27 +338,29 @@ def test_transform_data_normal(
 	assert len(df_) == 1
 	assert list(df_.columns) == [
 		"TCKR_SYMB",
+		"TOTA",
 		"AGIO",
 		"BASE",
 		"DES_AGIO",
 		"NON_STANDARD",
 		"TOTAL",
 		"PERCE",
-		"BATCH_QUANT",
 	]
-	assert df_["TCKR_SYMB"].iloc[0] == "MG - GUAXUPE - 30028 - COOP. REG. DE C"
-	assert df_["DES_AGIO"].iloc[0] == 106
-	assert df_["BATCH_QUANT"].iloc[0] is None
+	assert df_["TCKR_SYMB"].iloc[0] == "2025/2026"
+	assert df_["TOTA"].iloc[0] == 0
+	assert df_["AGIO"].iloc[0] == 5
+	assert df_["TOTAL"].iloc[0] == 17
+	assert df_["PERCE"].iloc[0] == 25.5
 
 
 def test_transform_data_multiple_rows(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 ) -> None:
 	"""Test transform_data handles multiple rows correctly.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 
 	Returns
@@ -402,38 +370,34 @@ def test_transform_data_multiple_rows(
 	table = {
 		"columns": [
 			{"name": "TckrSymb"},
+			{"name": "Tota"},
 			{"name": "Agio"},
 			{"name": "Base"},
 			{"name": "DesAgio"},
 			{"name": "NonStandard"},
 			{"name": "Total"},
 			{"name": "Perce"},
-			{"name": "BatchQuant"},
 		],
 		"values": [
-			["MG - GUAXUPE - 30028 - COOP. REG. DE C", 0, 0, 106, 0, 106, 28.0, None],
-			["SP - SANTOS - 10001 - BOLSA CAFE", 10, 5, 90, 2, 107, 30.0, None],
-			["TOTAL", None, None, None, None, None, None, 213],
+			["2024/2025", 1, 3, 7, 1, 0, 12, 15.0, None],
+			["2025/2026", 0, 5, 10, 2, 0, 17, 25.5, None],
+			["TOTAL", 1, 8, 17, 3, 0, 29, 100.0, None],
 		],
 	}
 	df_ = instance.transform_data(table)
 	assert len(df_) == 3
-	assert set(df_["TCKR_SYMB"].tolist()) == {
-		"MG - GUAXUPE - 30028 - COOP. REG. DE C",
-		"SP - SANTOS - 10001 - BOLSA CAFE",
-		"TOTAL",
-	}
+	assert set(df_["TCKR_SYMB"].tolist()) == {"2024/2025", "2025/2026", "TOTAL"}
 
 
 def test_transform_data_empty_values(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	empty_table_dict: dict,
 ) -> None:
 	"""Test transform_data returns empty DataFrame when values list is empty.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	empty_table_dict : dict
 		Table dict with empty values.
@@ -447,17 +411,17 @@ def test_transform_data_empty_values(
 	assert df_.empty
 
 
-def test_run_without_db_returns_dataframe(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+def test_run_without_db_paginates(
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
-	"""Test run fetches pages until empty, then returns a DataFrame.
+	"""Test run fetches pages until an empty response, then returns a DataFrame.
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -492,7 +456,7 @@ def test_run_without_db_returns_dataframe(
 
 
 def test_run_with_db(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	mock_response: Response,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
@@ -501,7 +465,7 @@ def test_run_with_db(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	mock_response : Response
 		Mocked Response with one data row.
@@ -532,7 +496,7 @@ def test_run_with_db(
 
 
 def test_run_no_data_returns_none(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	mock_empty_response: Response,
 	mocker: MockerFixture,
 ) -> None:
@@ -540,7 +504,7 @@ def test_run_no_data_returns_none(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	mock_empty_response : Response
 		Mocked Response with empty values.
@@ -564,7 +528,7 @@ def test_run_no_data_returns_none(
 	[10, 10.5, (10.0, 20.0), (10, 20)],
 )
 def test_get_response_timeout_variants(
-	instance: B3BdiDerivativesProductionBatchFormation45Coffee,
+	instance: B3BdiDerivativesCropStatisticsCoffeeConilon,
 	mocker: MockerFixture,
 	timeout: int | float | tuple,
 ) -> None:
@@ -572,7 +536,7 @@ def test_get_response_timeout_variants(
 
 	Parameters
 	----------
-	instance : B3BdiDerivativesProductionBatchFormation45Coffee
+	instance : B3BdiDerivativesCropStatisticsCoffeeConilon
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.

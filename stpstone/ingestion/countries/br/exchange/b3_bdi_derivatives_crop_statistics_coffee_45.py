@@ -1,4 +1,4 @@
-"""B3 BDI Consolidated Session Trades for equities ingestion."""
+"""B3 BDI Derivatives - Arabica 4/5 coffee certified lots crop statistics ingestion."""
 
 from datetime import date
 from logging import Logger
@@ -24,8 +24,8 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
-	"""B3 BDI Consolidated Session Trades for equities ingestion class."""
+class B3BdiDerivativesCropStatisticsCoffee45(ABCIngestionOperations):
+	"""B3 BDI Derivatives - Arabica 4/5 coffee certified lots crop statistics ingestion class."""
 
 	def __init__(
 		self,
@@ -51,8 +51,8 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		int_page_min : int, optional
 			First page to fetch (1-based), by default 1.
 		int_page_max : int, optional
-			Last page to fetch inclusive; defaults to 1 because this endpoint
-			typically returns all consolidated trade rows on a single page.
+			Last page to fetch inclusive; defaults to 1 because this endpoint has
+			showPagination false and returns all data in a single page.
 
 		Returns
 		-------
@@ -76,7 +76,7 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/ConsolidatedTradesEquities/"
+			f"https://arquivos.b3.com.br/bdi/table/HarvestCoffeApprov/"
 			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
 		)
 
@@ -88,7 +88,7 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_stocks_consolidated_trades",
+		str_table_name: str = "br_b3_bdi_derivatives_crop_statistics_coffee_45",
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -104,7 +104,8 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
 		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_stocks_consolidated_trades".
+			The name of the table, by default
+			"br_b3_bdi_derivatives_crop_statistics_coffee_45".
 
 		Returns
 		-------
@@ -132,28 +133,14 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 			return None
 		df_ = pd.concat(list_dfs, ignore_index=True)
 		dict_dtypes = {
-			"RPT_DT": str,
 			"TCKR_SYMB": str,
-			"ISIN": str,
-			"SGMT_NM": str,
-			"MKT": str,
-			"OPEN_PRIC": float,
-			"MIN_PRIC": float,
-			"MAX_PRIC": float,
-			"TRAD_AVRG_PRIC": float,
-			"LAST_PRIC": float,
-			"OSC": float,
-			"ADJSTD_QT": float,
-			"ADJSTD_QT_TAX": float,
-			"PRVS_ADJSTD_QT": float,
-			"REF_PRIC": float,
-			"VARTN_PTS": float,
-			"ADJSTD_VAL_CTRCT": float,
-			"BEST_BID_PRIC": float,
-			"BEST_ASK_PRIC": float,
-			"TRAD_QTY": int,
-			"FIN_INSTRM_QTY": int,
-			"NTL_FIN_VOL": float,
+			"TOTA": int,
+			"AGIO": int,
+			"BASE": int,
+			"DES_AGIO": int,
+			"NON_STANDARD": int,
+			"TOTAL": int,
+			"PERCE": float,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -189,7 +176,10 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(f"B3BdiStocksConsolidatedTrades: page {int_page} fetched ({int_rows} rows)"),
+			message=(
+				f"B3BdiDerivativesCropStatisticsCoffee45: "
+				f"page {int_page} fetched ({int_rows} rows)"
+			),
 			log_level="info",
 		)
 
@@ -256,6 +246,8 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		"""Build a DataFrame from the API table dict.
 
 		Column names are converted from PascalCase to UPPER_SNAKE_CASE.
+		The trailing None per row is a B3 API artifact and maps to an integer
+		positional column that is excluded from dict_dtypes.
 
 		Parameters
 		----------

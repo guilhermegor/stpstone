@@ -87,9 +87,7 @@ class B3BdiDerivativesProductionBatchFormationConilonCoffee(ABCIngestionOperatio
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = (
-			"br_b3_bdi_derivatives_production_batch_formation_conilon_coffee"
-		),
+		str_table_name: str = ("br_b3_bdi_derivatives_production_batch_formation_conilon_coffee"),
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 

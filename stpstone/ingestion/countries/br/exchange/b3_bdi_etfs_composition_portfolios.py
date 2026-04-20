@@ -112,9 +112,7 @@ class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
 		df_ = self.transform_data(data)
 		if df_.empty:
 			return None
-		int_non_empty = sum(
-			1 for child in data if child.get("values")
-		)
+		int_non_empty = sum(1 for child in data if child.get("values"))
 		self.cls_create_log.log_message(
 			logger=self.logger,
 			message=(
@@ -241,9 +239,7 @@ class B3BdiEtfsCompositionPortfolios(ABCIngestionOperations):
 				for col in child.get("columns", [])
 			]
 			n_cols = len(col_names)
-			df_child = pd.DataFrame(
-				[row[:n_cols] for row in values], columns=col_names
-			)
+			df_child = pd.DataFrame([row[:n_cols] for row in values], columns=col_names)
 			df_child["INDEX_NM"] = child.get("friendlyNameEn") or child.get("name")
 			list_dfs.append(df_child)
 		if not list_dfs:

@@ -30,9 +30,7 @@ _SAMPLE_CSV_HEADER = (
 	"CodigoParticipanteVendedor;TipoDoCanal"
 )
 
-_SAMPLE_CSV_ROW = (
-	"2026-04-17;PETR4;0;38,50;100;100000003;10;1;2026-04-17;308;72;1"
-)
+_SAMPLE_CSV_ROW = "2026-04-17;PETR4;0;38,50;100;100000003;10;1;2026-04-17;308;72;1"
 
 _SAMPLE_CSV_CONTENT = f"{_SAMPLE_CSV_HEADER}\n{_SAMPLE_CSV_ROW}\n"
 
@@ -251,9 +249,7 @@ def test_get_response_success(instance: B3BdiStocksTradeByTrade, mocker: MockerF
 	mock_resp.raise_for_status.assert_called_once()
 
 
-def test_get_response_http_error(
-	instance: B3BdiStocksTradeByTrade, mocker: MockerFixture
-) -> None:
+def test_get_response_http_error(instance: B3BdiStocksTradeByTrade, mocker: MockerFixture) -> None:
 	"""Test get_response raises HTTPError on a bad HTTP status.
 
 	Parameters

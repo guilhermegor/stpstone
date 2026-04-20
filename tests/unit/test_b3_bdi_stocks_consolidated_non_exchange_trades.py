@@ -10,8 +10,7 @@ from pytest_mock import MockerFixture
 import requests
 from requests import Response
 
-from stpstone.ingestion.countries.br.exchange \
-	.b3_bdi_stocks_consolidated_non_exchange_trades import (
+from stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_consolidated_non_exchange_trades import (
 	B3BdiStocksConsolidatedNonExchangeTrades,
 )
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
@@ -73,12 +72,24 @@ def sample_table_dict() -> dict:
 		],
 		"values": [
 			[
-				"2026-04-17T00:00:00", "FIXA11", "BRFIXACTF002",
-				"FORWARD", "FIXED INCOME", 19.2, 1, 19.2,
+				"2026-04-17T00:00:00",
+				"FIXA11",
+				"BRFIXACTF002",
+				"FORWARD",
+				"FIXED INCOME",
+				19.2,
+				1,
+				19.2,
 			],
 			[
-				"2026-04-17T00:00:00", "PETR4", "BRPETRACNPR6",
-				"EQUITY", "EQUITIES", 38.5, 500, 19250.0,
+				"2026-04-17T00:00:00",
+				"PETR4",
+				"BRPETRACNPR6",
+				"EQUITY",
+				"EQUITIES",
+				38.5,
+				500,
+				19250.0,
 			],
 		],
 	}
@@ -224,9 +235,7 @@ def test_init_logger_propagated() -> None:
 	None
 	"""
 	mock_logger = MagicMock(spec=Logger)
-	inst = B3BdiStocksConsolidatedNonExchangeTrades(
-		date_ref=date(2026, 4, 17), logger=mock_logger
-	)
+	inst = B3BdiStocksConsolidatedNonExchangeTrades(date_ref=date(2026, 4, 17), logger=mock_logger)
 	assert inst.logger is mock_logger
 
 
@@ -596,8 +605,7 @@ def test_module_reload(sample_date: date) -> None:
 	"""
 	import importlib
 
-	import stpstone.ingestion.countries.br.exchange \
-		.b3_bdi_stocks_consolidated_non_exchange_trades as mod
+	import stpstone.ingestion.countries.br.exchange.b3_bdi_stocks_consolidated_non_exchange_trades as mod
 
 	importlib.reload(mod)
 	inst = mod.B3BdiStocksConsolidatedNonExchangeTrades(date_ref=sample_date)

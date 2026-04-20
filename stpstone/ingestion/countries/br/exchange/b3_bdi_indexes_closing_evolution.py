@@ -1,9 +1,9 @@
-"""B3 BDI Consolidated Session Trades for equities ingestion."""
+"""B3 BDI Indexes - any index closing evolution (day, week, month, year returns) ingestion."""
 
 from datetime import date
 from logging import Logger
 import time
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import backoff
 import pandas as pd
@@ -24,11 +24,50 @@ from stpstone.utils.parsers.folders import DirFilesManagement
 from stpstone.utils.parsers.str import StrHandler
 
 
-class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
-	"""B3 BDI Consolidated Session Trades for equities ingestion class."""
+IndexName = Literal[
+	"AGFS",
+	"BDRX",
+	"GPTW",
+	"I DIVIDENDOS",
+	"IBHB",
+	"IBBR",
+	"IBEE",
+	"IBEP",
+	"IBEW",
+	"IBLV",
+	"IBOV SD TR",
+	"IBOVESPA",
+	"IBRASIL",
+	"IBRX100",
+	"IBRX50",
+	"ICO2",
+	"ICONSUMO",
+	"IDIVERSA B3",
+	"IEE",
+	"IFIL",
+	"IFINANCEIRO",
+	"IFIX",
+	"IGC",
+	"IGC TRADE",
+	"IGNM",
+	"IMATBASICOS",
+	"IMOBILIARIO",
+	"INDX",
+	"ISE",
+	"ITAG",
+	"IVBX2",
+	"MIDLARGE CAP",
+	"SMALL CAP",
+	"UTILITIES",
+]
+
+
+class B3BdiIndexesClosingEvolution(ABCIngestionOperations):
+	"""B3 BDI Indexes - closing evolution (day, week, month, year returns) for any B3 index."""
 
 	def __init__(
 		self,
+		str_index_name: IndexName,
 		date_ref: Optional[date] = None,
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,
@@ -40,6 +79,8 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 
 		Parameters
 		----------
+		str_index_name : IndexName
+			The index group name as returned by the B3 INDEXES API.
 		date_ref : Optional[date], optional
 			The date of reference, by default None.
 		logger : Optional[Logger], optional
@@ -51,8 +92,8 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		int_page_min : int, optional
 			First page to fetch (1-based), by default 1.
 		int_page_max : int, optional
-			Last page to fetch inclusive; defaults to 1 because this endpoint
-			typically returns all consolidated trade rows on a single page.
+			Last page to fetch inclusive; defaults to 1 because the INDEXES endpoint has
+			showPagination false.
 
 		Returns
 		-------
@@ -62,6 +103,7 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		CoreIngestion.__init__(self)
 		ContentParser.__init__(self)
 
+		self.str_index_name = str_index_name
 		self.logger = logger
 		self.cls_db = cls_db
 		self.cls_dir_files_management = DirFilesManagement()
@@ -76,7 +118,7 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		self.int_page_max = int_page_max
 		str_date = self.date_ref.strftime("%Y-%m-%d")
 		self.url_tpl = (
-			f"https://arquivos.b3.com.br/bdi/table/ConsolidatedTradesEquities/"
+			f"https://arquivos.b3.com.br/bdi/table/INDEXES/"
 			f"{str_date}/{str_date}/{{page}}/{self.int_page_size}"
 		)
 
@@ -88,7 +130,7 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		),
 		bool_verify: bool = True,
 		bool_insert_or_ignore: bool = False,
-		str_table_name: str = "br_b3_bdi_stocks_consolidated_trades",
+		str_table_name: Optional[str] = None,
 	) -> Optional[pd.DataFrame]:
 		"""Run the ingestion process.
 
@@ -103,14 +145,18 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 			Whether to verify the SSL certificate, by default True.
 		bool_insert_or_ignore : bool, optional
 			Whether to insert or ignore the data, by default False.
-		str_table_name : str, optional
-			The name of the table, by default "br_b3_bdi_stocks_consolidated_trades".
+		str_table_name : Optional[str], optional
+			The name of the table; if None, derived from str_index_name as
+			"br_b3_bdi_indexes_<sanitised_index_name>_closing_evolution".
 
 		Returns
 		-------
 		Optional[pd.DataFrame]
 			The transformed DataFrame, or None when writing to database.
 		"""
+		if str_table_name is None:
+			slug = self.str_index_name.lower().replace(" ", "_")
+			str_table_name = f"br_b3_bdi_indexes_{slug}_closing_evolution"
 		int_page = self.int_page_min
 		list_dfs: list[pd.DataFrame] = []
 		while True:
@@ -132,28 +178,15 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 			return None
 		df_ = pd.concat(list_dfs, ignore_index=True)
 		dict_dtypes = {
-			"RPT_DT": str,
 			"TCKR_SYMB": str,
-			"ISIN": str,
-			"SGMT_NM": str,
-			"MKT": str,
-			"OPEN_PRIC": float,
-			"MIN_PRIC": float,
-			"MAX_PRIC": float,
-			"TRAD_AVRG_PRIC": float,
-			"LAST_PRIC": float,
-			"OSC": float,
-			"ADJSTD_QT": float,
-			"ADJSTD_QT_TAX": float,
-			"PRVS_ADJSTD_QT": float,
-			"REF_PRIC": float,
-			"VARTN_PTS": float,
-			"ADJSTD_VAL_CTRCT": float,
-			"BEST_BID_PRIC": float,
-			"BEST_ASK_PRIC": float,
-			"TRAD_QTY": int,
-			"FIN_INSTRM_QTY": int,
-			"NTL_FIN_VOL": float,
+			"IN_DAY": float,
+			"YESTERDAY": float,
+			"IN_THE_WEEK": float,
+			"IN_WEEK": float,
+			"IN_THE_MONTH": float,
+			"IN_MONTH": float,
+			"IN_THE_YEAR": float,
+			"IN_YEAR": float,
 			"URL": str,
 		}
 		df_ = self.standardize_dataframe(
@@ -189,7 +222,10 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		"""
 		self.cls_create_log.log_message(
 			logger=self.logger,
-			message=(f"B3BdiStocksConsolidatedTrades: page {int_page} fetched ({int_rows} rows)"),
+			message=(
+				f"B3BdiIndexesClosingEvolution({self.str_index_name}): "
+				f"page {int_page} fetched ({int_rows} rows)"
+			),
 			log_level="info",
 		)
 
@@ -238,7 +274,11 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		self,
 		resp_req: Union[Response, PlaywrightPage, SeleniumWebDriver],
 	) -> dict:
-		"""Parse the JSON response into the table metadata dict.
+		"""Navigate the INDEXES response to extract the ClosingEvolution child for str_index_name.
+
+		Walks: table -> children[name=str_index_name] -> children[name ends with
+		"ClosingEvolution"]. The suffix match handles inconsistent B3 API naming
+		(e.g., AGFS -> IagroClosingEvolution, IFINANCEIRO -> IFINANCEIROSClosingEvolution).
 
 		Parameters
 		----------
@@ -248,14 +288,23 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		Returns
 		-------
 		dict
-			The table object containing columns and values from the API response.
+			The ClosingEvolution table dict containing columns and values,
+			or an empty dict with empty lists when the group or child is not found.
 		"""
-		return resp_req.json()["table"]
+		root = resp_req.json()["table"]
+		for group in root.get("children", []):
+			if group.get("name") == self.str_index_name:
+				for child in group.get("children", []):
+					if child.get("name", "").endswith("ClosingEvolution"):
+						return child
+		return {"columns": [], "values": []}
 
 	def transform_data(self, data: dict) -> pd.DataFrame:
 		"""Build a DataFrame from the API table dict.
 
 		Column names are converted from PascalCase to UPPER_SNAKE_CASE.
+		The trailing None in each values row (B3 API artifact) is dropped via
+		column selection after renaming.
 
 		Parameters
 		----------
@@ -278,4 +327,5 @@ class B3BdiStocksConsolidatedTrades(ABCIngestionOperations):
 		]
 		df_ = pd.DataFrame(values)
 		rename_map = {i: name for i, name in enumerate(col_names)}
-		return df_.rename(columns=rename_map)
+		df_ = df_.rename(columns=rename_map)
+		return df_[col_names]
