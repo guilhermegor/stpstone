@@ -92,6 +92,15 @@ Branch naming: `<purpose>/<description>` (e.g., `feat/user-auth`, `fix/rounding-
 - Write tests before implementation (TDD encouraged per CONTRIBUTING.md)
 - Test normal operations, edge cases, error conditions, and type validation
 
+### Core module imports
+
+`stpstone/transformations/validation/metaclass_type_checker.py` is imported transitively by
+**every** ingestion class. Never add a top-level import of a library that requires a system
+C extension or native binary (e.g. `psycopg`, `pycurl`, `pyodbc`) to this file — it will
+break `import TypeChecker` on any machine where that library is not installed, crashing the
+entire integration test suite. Keep the import list in this module limited to pure-Python
+stdlib and PyPI packages that carry no native-library requirement.
+
 ## Mandatory Verification After Every Change
 
 **After every implementation, refactor, bugfix, or feature addition — no exceptions:**
