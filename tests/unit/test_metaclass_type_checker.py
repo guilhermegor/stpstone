@@ -18,9 +18,12 @@ from unittest.mock import Mock
 import numpy as np
 from numpy import ndarray
 import pandas as pd
-from psycopg.sql import Composable
 import pytest
 from pytest_mock import MockerFixture
+
+
+pytest.importorskip("psycopg")
+from psycopg.sql import Composable
 
 from stpstone.transformations.validation.metaclass_type_checker import (
 	AdvancedTypeChecker,

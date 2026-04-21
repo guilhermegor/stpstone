@@ -13,10 +13,13 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pandas as pd
+import pytest
+
+
+pytest.importorskip("psycopg")
 from psycopg import Connection, Cursor
 from psycopg.errors import OperationalError
 from psycopg.sql import Composable
-import pytest
 
 from stpstone.utils.connections.databases.sql.postgresql_db import PostgreSQLDB
 

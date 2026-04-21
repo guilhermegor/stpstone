@@ -228,7 +228,9 @@ def test_validate_db_path_valid(temp_db_path: str) -> None:
 	db.close()
 
 
-def test_validate_db_path_empty() -> None:
+def test_validate_db_path_empty(
+	tmp_path: Any,  # noqa ANN401: typing.Any is not allowed
+) -> None:
 	"""Test database path validation with empty path.
 
 	Verifies
@@ -236,18 +238,26 @@ def test_validate_db_path_empty() -> None:
 	- Raises ValueError for empty path
 	- Error message is correct
 
+	Parameters
+	----------
+	tmp_path : Any
+		Temporary directory provided by pytest (unique per worker).
+
 	Returns
 	-------
 	None
 	"""
-	db = SQLiteDB("temp.db")
+	db = SQLiteDB(str(tmp_path / "temp.db"))
 	db.db_path = ""
 	with pytest.raises(ValueError, match="Database path cannot be empty"):
 		db._validate_db_path()
 	db.close()
 
 
-def test_validate_db_path_non_string(mocker: MockerFixture) -> None:
+def test_validate_db_path_non_string(
+	mocker: MockerFixture,
+	tmp_path: Any,  # noqa ANN401: typing.Any is not allowed
+) -> None:
 	"""Test database path validation with non-string path.
 
 	Verifies
@@ -259,13 +269,15 @@ def test_validate_db_path_non_string(mocker: MockerFixture) -> None:
 	----------
 	mocker : MockerFixture
 		Pytest-mock fixture for creating mocks
+	tmp_path : Any
+		Temporary directory provided by pytest (unique per worker).
 
 	Returns
 	-------
 	None
 	"""
 	mocker.patch("stpstone.transformations.validation.metaclass_type_checker.validate_type")
-	db = SQLiteDB("temp.db")
+	db = SQLiteDB(str(tmp_path / "temp.db"))
 	db.db_path = 123
 	with pytest.raises(ValueError, match="Database path must be a string"):
 		db._validate_db_path()
