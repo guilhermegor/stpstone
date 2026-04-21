@@ -90,7 +90,7 @@ jobs:
 
       - name: Run Docstring Type Consistency Check
         run: |
-          poetry run pydocstyle --select=D412,D417 --match="(stpstone|tests).*\\.py" stpstone/ tests/
+          poetry run python -m pydocstyle --select=D412,D417 --match="(stpstone|tests).*\\.py" stpstone/ tests/
           poetry run python bin/check_consistency.py
 
       - name: Run Ruff Linting
