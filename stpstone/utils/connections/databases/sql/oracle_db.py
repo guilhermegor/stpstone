@@ -16,7 +16,7 @@ import oracledb
 from oracledb import Connection, Cursor
 import pandas as pd
 
-from stpstone.transformations.validation.metaclass_type_checker import Composable
+from stpstone.transformations.validation.metaclass_type_checker import SQLComposable
 from stpstone.utils.calendars.calendar_abc import ABCCalendarOperations
 from stpstone.utils.connections.databases.sql.database_abc import ABCDatabase, TypeDateFormatInput
 from stpstone.utils.loggs.create_logs import CreateLog
@@ -113,12 +113,12 @@ class OracleDB(ABCDatabase):
 		if not self.str_schema:
 			raise ValueError("Database schema cannot be empty")
 
-	def execute(self, str_query: Union[str, Composable]) -> None:
+	def execute(self, str_query: Union[str, SQLComposable]) -> None:
 		"""Execute a SQL query.
 
 		Parameters
 		----------
-		str_query : Union[str, Composable]
+		str_query : Union[str, SQLComposable]
 			SQL query to execute
 
 		Returns
@@ -130,7 +130,7 @@ class OracleDB(ABCDatabase):
 
 	def read(
 		self,
-		str_query: Union[str, Composable],
+		str_query: Union[str, SQLComposable],
 		dict_type_cols: Optional[dict[str, Any]] = None,
 		list_cols_dt: Optional[list[str]] = None,
 		str_fmt_dt: Optional[TypeDateFormatInput] = None,
@@ -139,7 +139,7 @@ class OracleDB(ABCDatabase):
 
 		Parameters
 		----------
-		str_query : Union[str, Composable]
+		str_query : Union[str, SQLComposable]
 			SQL query to execute
 		dict_type_cols : Optional[dict[str, Any]]
 			Dictionary for column type conversion (default: None)
