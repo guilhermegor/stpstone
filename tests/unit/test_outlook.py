@@ -474,14 +474,17 @@ class TestDownloadAttachment:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message_mock = MagicMock()
 		attachment_mock = MagicMock()
 		attachment_mock.FileName = "test.txt"
 		message_mock.Attachments = [attachment_mock]
 		message_mock.Subject = "Test Subject"
-		folder_mock.Items = [message_mock]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message_mock
 
 		with (
 			patch.object(DirFilesManagement, "object_exists", return_value=True),
@@ -527,14 +530,17 @@ class TestDownloadAttachment:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message_mock = MagicMock()
 		attachment_mock = MagicMock()
 		attachment_mock.FileName = "test.txt"
 		message_mock.Attachments = [attachment_mock]
 		message_mock.Subject = "Test Subject"
-		folder_mock.Items = [message_mock]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message_mock
 
 		with (
 			patch.object(DirFilesManagement, "object_exists", return_value=True),
@@ -580,14 +586,17 @@ class TestDownloadAttachment:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message_mock = MagicMock()
 		attachment_mock = MagicMock()
 		attachment_mock.FileName = "test.txt"
 		message_mock.Attachments = [attachment_mock]
 		message_mock.Subject = "Test Subject"
-		folder_mock.Items = [message_mock]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message_mock
 
 		with (
 			patch.object(DirFilesManagement, "get_file_format_from_file_name", return_value="txt"),
@@ -646,13 +655,17 @@ class TestEmailRetrieval:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message1 = MagicMock()
 		message1.Subject = "Test Message 1"
 		message2 = MagicMock()
 		message2.Subject = "Other Message"
-		folder_mock.Items = [message1, message2]
+		messages = [message1, message2]
+		folder_mock.Items.Count = 2
+		folder_mock.Items.__getitem__.side_effect = lambda i: messages[i]
 
 		# Mock string matching
 		with patch.object(StrHandler, "find_substr_str", side_effect=lambda s, p: p in s):
@@ -693,13 +706,16 @@ class TestEmailRetrieval:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message = MagicMock()
 		message.Subject = "Test Message"
 		message.LastModificationTime = "2023-01-01"
 		message.CreationTime = "2023-01-01"
-		folder_mock.Items = [message]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message
 
 		# Mock string matching
 		with patch.object(StrHandler, "find_substr_str", return_value=True):
@@ -742,14 +758,17 @@ class TestEmailRetrieval:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message = MagicMock()
 		message.Subject = "Test Message"
 		message.LastModificationTime = "2023-01-01"
 		message.CreationTime = "2023-01-01"
 		message.body = "Test body content"
-		folder_mock.Items = [message]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message
 
 		# Mock string matching
 		with patch.object(StrHandler, "find_substr_str", return_value=True):
@@ -797,13 +816,16 @@ class TestReplyEmail:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message = MagicMock()
 		message.Subject = "Test Message"
 		reply_mock = MagicMock()
 		message.Reply.return_value = reply_mock
-		folder_mock.Items = [message]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message
 
 		dealing_outlook.reply_email("test@example.com", "Inbox", "Test Message", "Reply content")
 
@@ -840,13 +862,16 @@ class TestReplyEmail:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message = MagicMock()
 		message.Subject = "Test Message"
 		reply_mock = MagicMock()
 		message.Reply.return_value = reply_mock
-		folder_mock.Items = [message]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message
 
 		dealing_outlook.reply_email(
 			"test@example.com",
@@ -891,13 +916,16 @@ class TestReplyEmail:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message = MagicMock()
 		message.Subject = "Test Message"
 		reply_mock = MagicMock()
 		message.Reply.return_value = reply_mock
-		folder_mock.Items = [message]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message
 
 		dealing_outlook.reply_email(
 			"test@example.com", "Inbox", "Test Message", "Reply content", auto_send_email=True
@@ -937,11 +965,14 @@ class TestReplyEmail:
 		"""
 		# Setup mocks
 		outlook_mock.GetNamespace.return_value = namespace_mock
-		namespace_mock.Folders["test@example.com"].Folders["Inbox"] = folder_mock
+		account_folder = MagicMock()
+		namespace_mock.Folders.__getitem__.return_value = account_folder
+		account_folder.Folders.__getitem__.return_value = folder_mock
 
 		message = MagicMock()
 		message.Subject = "Other Message"
-		folder_mock.Items = [message]
+		folder_mock.Items.Count = 1
+		folder_mock.Items.__getitem__.return_value = message
 
 		dealing_outlook.reply_email("test@example.com", "Inbox", "Test Message", "Reply content")
 

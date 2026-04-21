@@ -155,8 +155,10 @@ class TestMT5Initialization:
 
 		mt5_instance.package_info()
 
-		mock_logger.info.assert_any_call("MetaTrader5 package author: MetaQuotes")
-		mock_logger.info.assert_any_call("MetaTrader5 package version: 5.0")
+		mock_logger.info.assert_any_call(
+			"[MT5.package_info] MetaTrader5 package author: MetaQuotes"
+		)
+		mock_logger.info.assert_any_call("[MT5.package_info] MetaTrader5 package version: 5.0")
 
 
 class TestCredentialValidation:
@@ -279,7 +281,9 @@ class TestConnectionManagement:
 		result = mt5_instance.initialize("path", 123, "server", "password")
 
 		assert result is False
-		mock_logger.warning.assert_called_with("initialize() failed, error code =123")
+		mock_logger.warning.assert_called_with(
+			"[MT5.initialize] initialize() failed, error code =123"
+		)
 		mt5.shutdown.assert_called_once()
 
 	def test_shutdown_calls_mt5_shutdown(
@@ -369,7 +373,7 @@ class TestSymbolInfoRetrieval:
 		mocker.patch("MetaTrader5.symbols_total", return_value=10)
 		result = mt5_instance.symbols_total()
 		assert result == 10
-		mock_logger.info.assert_called_with("Total symbols ={symbols}")
+		mock_logger.info.assert_called_with("[MT5.symbols_total] Total symbols ={symbols}")
 
 	def test_symbols_total_logs_and_returns_none_on_empty(
 		self,
@@ -400,7 +404,7 @@ class TestSymbolInfoRetrieval:
 		mocker.patch("MetaTrader5.symbols_total", return_value=0)
 		result = mt5_instance.symbols_total()
 		assert result is None
-		mock_logger.info.assert_called_with("Symbols not found")
+		mock_logger.info.assert_called_with("[MT5.symbols_total] Symbols not found")
 
 
 class TestGetSymbolsInfo:
@@ -459,10 +463,12 @@ class TestGetSymbolsInfo:
 		# Verify results
 		assert isinstance(result, pd.DataFrame)
 		assert not result.empty
-		mock_logger.info.assert_any_call("Lower bound: {lim_inf}")
-		mock_logger.info.assert_any_call("Upper bound: {lim_sup}")
-		mock_logger.info.assert_any_call("Loading")
-		mock_logger.info.assert_any_call(f"Number of symbols = {result.shape[0]}")
+		mock_logger.info.assert_any_call("[MT5.get_symbols_info] Lower bound: {lim_inf}")
+		mock_logger.info.assert_any_call("[MT5.get_symbols_info] Upper bound: {lim_sup}")
+		mock_logger.info.assert_any_call("[MT5.get_symbols_info] Loading")
+		mock_logger.info.assert_any_call(
+			f"[MT5.get_symbols_info] Number of symbols = {result.shape[0]}"
+		)
 
 	def test_get_symbols_info_without_market_data(
 		self,
@@ -534,7 +540,7 @@ class TestGetSymbolsInfo:
 		mocker.patch("MetaTrader5.symbols_get", return_value=[])
 		result = mt5_instance.get_symbols_info()
 		assert result is None
-		mock_logger.critical.assert_called_with("Symbols not found")
+		mock_logger.critical.assert_called_with("[MT5.get_symbols_info] Symbols not found")
 
 
 class TestTickDataRetrieval:
@@ -595,7 +601,9 @@ class TestTickDataRetrieval:
 		assert not result.empty
 		assert "time" in result.columns
 		assert "time_msc" in result.columns
-		mock_logger.info.assert_called_with(f"Ticks recebidos: {result.shape[0]}")
+		mock_logger.info.assert_called_with(
+			f"[MT5.get_ticks_from] Ticks recebidos: {result.shape[0]}"
+		)
 
 	def test_get_ticks_from_empty(
 		self,
@@ -629,7 +637,7 @@ class TestTickDataRetrieval:
 		)
 
 		assert result is None
-		mock_logger.info.assert_called_with("Ticks recebidos: 0")
+		mock_logger.info.assert_called_with("[MT5.get_ticks_from] Ticks recebidos: 0")
 
 	def test_get_ticks_range_success(
 		self,
@@ -686,7 +694,9 @@ class TestTickDataRetrieval:
 		assert not result.empty
 		assert "time" in result.columns
 		assert "time_msc" in result.columns
-		mock_logger.info.assert_called_with(f"Ticks recebidos: {result.shape[0]}")
+		mock_logger.info.assert_called_with(
+			f"[MT5.get_ticks_range] Ticks recebidos: {result.shape[0]}"
+		)
 
 	def test_get_last_tick_success(
 		self,
@@ -753,7 +763,7 @@ class TestTickDataRetrieval:
 		result = mt5_instance.get_last_tick("EURUSD")
 		assert result is None
 		mock_logger.error.assert_called_with(
-			"mt5.symbol_info_tick(EURUSD) failed, error code = 123"
+			"[MT5.get_last_tick] mt5.symbol_info_tick(EURUSD) failed, error code = 123"
 		)
 
 
@@ -836,7 +846,9 @@ class TestMarketDepth:
 
 		result = mt5_instance.get_market_depth("EURUSD")
 		assert result is None
-		mock_logger.info.assert_called_with("mt5.market_book_add(EURUSD) failed, error code = 123")
+		mock_logger.info.assert_called_with(
+			"[MT5.get_market_depth] mt5.market_book_add(EURUSD) failed, error code = 123"
+		)
 		mt5.market_book_get.assert_not_called()
 
 
@@ -878,10 +890,12 @@ class TestSymbolProperties:
 		assert isinstance(result, dict)
 		assert "bid" in result
 		assert "ask" in result
-		mock_logger.info.assert_any_call(f"lasttick = {mock_tick}")
-		mock_logger.info.assert_any_call("Show symbol_info_tick(EURUSD)._asdict():")
-		mock_logger.info.assert_any_call("  bid=1.12")
-		mock_logger.info.assert_any_call("  ask=1.13")
+		mock_logger.info.assert_any_call(f"[MT5.get_symbol_info_tick] lasttick = {mock_tick}")
+		mock_logger.info.assert_any_call(
+			"[MT5.get_symbol_info_tick] Show symbol_info_tick(EURUSD)._asdict():"
+		)
+		mock_logger.info.assert_any_call("[MT5.get_symbol_info_tick]   bid=1.12")
+		mock_logger.info.assert_any_call("[MT5.get_symbol_info_tick]   ask=1.13")
 
 	def test_get_symbol_properties_success(
 		self,
@@ -923,7 +937,13 @@ class TestSymbolProperties:
 
 		assert isinstance(result, dict)
 		assert result == sample_symbol_info
-		mock_logger.info.assert_any_call(mock_info)
-		mock_logger.info.assert_any_call("EURUSD: spread = 10 digits = 5")
-		mock_logger.info.assert_any_call("Show symbol_info(EURUSD)._asdict():")
-		mock_logger.info.assert_any_call(f"  name={sample_symbol_info['name']}")
+		mock_logger.info.assert_any_call(f"[MT5.get_symbol_properties] {mock_info}")
+		mock_logger.info.assert_any_call(
+			"[MT5.get_symbol_properties] EURUSD: spread = 10 digits = 5"
+		)
+		mock_logger.info.assert_any_call(
+			"[MT5.get_symbol_properties] Show symbol_info(EURUSD)._asdict():"
+		)
+		mock_logger.info.assert_any_call(
+			f"[MT5.get_symbol_properties]   name={sample_symbol_info['name']}"
+		)

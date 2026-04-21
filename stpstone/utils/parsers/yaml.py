@@ -42,7 +42,7 @@ def reading_yaml(file_path: str) -> Any:  # noqa ANN401: typing.Any is not allow
 		raise TypeError("file_path must be a string")
 
 	try:
-		with open(file_path) as f:
+		with open(file_path, encoding="utf-8") as f:
 			return safe_load(f)
 	except FileNotFoundError as err:
 		raise FileNotFoundError(f"YAML file not found: {file_path}") from err

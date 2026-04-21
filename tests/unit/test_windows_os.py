@@ -131,10 +131,10 @@ class TestDealingWindows:
 		with pytest.raises(ValueError, match="Window handle must be a positive integer"):
 			dealing_windows._validate_hwnd(0)
 
-	@patch("ctypes.windll.user32.IsWindowVisible", return_value=True)
-	@patch("ctypes.windll.user32.GetWindowTextLengthW", return_value=10)
-	@patch("ctypes.windll.user32.GetClassNameW")
-	@patch("ctypes.windll.user32.GetWindowTextW")
+	@patch("stpstone.utils.microsoft_apps.windows_os.IsWindowVisible", return_value=True)
+	@patch("stpstone.utils.microsoft_apps.windows_os.GetWindowTextLength", return_value=10)
+	@patch("stpstone.utils.microsoft_apps.windows_os.GetClassName")
+	@patch("stpstone.utils.microsoft_apps.windows_os.GetWindowText")
 	@patch("ctypes.windll.user32.IsIconic", return_value=False)
 	def test_foreach_window(
 		self,
