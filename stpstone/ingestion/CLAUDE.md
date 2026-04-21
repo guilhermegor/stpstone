@@ -281,6 +281,49 @@ Dunder methods (`__init__`, `__repr__`, `__eq__`, etc.) go first as the class pr
 - Section headers in test files: `# --------------------------` comment blocks separating `Fixtures` from `Tests`
 - Use `pytest.fixture` for reusable instances; use `@pytest.mark.parametrize` for input variations
 
+## B3 BDI API Conventions
+
+### Date fields include a time component
+
+B3 BDI endpoints (`https://arquivos.b3.com.br/bdi/table/…`) return date fields as ISO 8601
+datetime strings — e.g. `"2026-04-17T00:00:00"` — even when the time is always midnight.
+
+Use `str_fmt_dt="YYYY-MM-DDTHH:MM:SS"` **only when the API actually returns datetime
+strings** (e.g. `"2026-04-17T00:00:00"`). If the endpoint returns plain dates (`"2026-04-17"`),
+keep `str_fmt_dt="YYYY-MM-DD"`. Mixing the two will raise
+`RuntimeError: Invalid date string … for format …`.
+
+```python
+df_ = self.standardize_dataframe(
+    df_=df_,
+    date_ref=self.date_ref,
+    dict_dtypes={
+        "DT_REF": "date",   # BDI returns "2026-04-17T00:00:00"
+        "TCKR_SYMB": str,
+    },
+    str_fmt_dt="YYYY-MM-DDTHH:MM:SS",   # required for BDI — NOT "YYYY-MM-DD"
+    url=None,
+)
+```
+
+### `StrHandler.convert_case` and all-caps prefixes
+
+`StrHandler.convert_case(name, "pascal", "upper_constant")` splits only on
+**lowercase → uppercase** character transitions (`re.sub(r"([a-z])([A-Z])", …)`).
+
+Column names whose PascalCase prefix is all-caps (e.g. `BRL`, `BTB`, `ADR`) produce **no
+underscore separator** between the acronym and the following word:
+
+| API column name | `convert_case` result |
+|---|---|
+| `BRLValue` | `BRLVALUE` (**not** `BRL_VALUE`) |
+| `BTBContractQuantity` | `BTBCONTRACT_QUANTITY` (**not** `BTB_CONTRACT_QUANTITY`) |
+| `BTBTrade` | `BTBTRADE` (**not** `BTB_TRADE`) |
+
+**Always verify the actual converted name** before writing `dict_dtypes` keys or DataFrame
+column references. The safest approach is to call `transform_data` against a real or mocked
+API response and inspect `df_.columns`.
+
 ## Final Verification
 
 After implementing or refactoring any ingestion module, run:
