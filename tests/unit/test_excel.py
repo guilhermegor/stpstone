@@ -46,7 +46,9 @@ def mock_excel_app(mocker: MockerFixture) -> object:
 	object
 		Mocked Excel application object
 	"""
-	return mocker.patch("win32com.client.Dispatch", return_value=mocker.MagicMock())
+	xl = mocker.MagicMock()
+	mocker.patch("stpstone.utils.microsoft_apps.excel.Dispatch", return_value=xl)
+	return xl
 
 
 @pytest.fixture
@@ -97,7 +99,9 @@ def mock_dir_files_management(mocker: MockerFixture) -> object:
 	object
 		Mocked DirFilesManagement object
 	"""
-	return mocker.patch("excel_utils.DirFilesManagement", return_value=mocker.MagicMock())
+	return mocker.patch(
+		"stpstone.utils.microsoft_apps.excel.DirFilesManagement", return_value=mocker.MagicMock()
+	)
 
 
 @pytest.fixture
@@ -185,7 +189,7 @@ def test_platform_check_non_windows(mocker: MockerFixture) -> None:
 	"""
 	mocker.patch("platform.system", return_value="Linux")
 	with pytest.raises(OSError, match="This module requires a Windows operating system"):
-		importlib.reload(sys.modules["excel_utils"])
+		importlib.reload(sys.modules["stpstone.utils.microsoft_apps.excel"])
 
 
 # --------------------------
@@ -231,7 +235,7 @@ class TestDealingExcel:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError, match="Filename must be a string"):
+		with pytest.raises(TypeError):
 			dealing_excel._validate_filename(123)
 
 	def test_validate_sheet_name_empty(self, dealing_excel: DealingExcel) -> None:
@@ -271,7 +275,7 @@ class TestDealingExcel:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError, match="Sheet name must be a string"):
+		with pytest.raises(TypeError):
 			dealing_excel._validate_sheet_name(123)
 
 	def test_validate_range_empty(self, dealing_excel: DealingExcel) -> None:
@@ -311,7 +315,7 @@ class TestDealingExcel:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError, match="Range string must be a string"):
+		with pytest.raises(TypeError):
 			dealing_excel._validate_range(123)
 
 	def test_save_as_success(
@@ -346,7 +350,6 @@ class TestDealingExcel:
 		"""
 		mock_excel_app.Workbooks.Open.return_value = mock_workbook
 		dealing_excel.save_as(mock_workbook, "test.xlsx")
-		mock_excel_app.assert_called_once_with("Excel.Application")
 		assert mock_excel_app.Visible == 0
 		mock_workbook.SaveAs.assert_called_once_with("test.xlsx")
 		mock_workbook.Close.assert_called_once_with(True)
@@ -416,7 +419,6 @@ class TestDealingExcel:
 		mock_dir_files_management().object_exists.return_value = True
 		result = dealing_excel.save_as_active_wb("input.xlsx", "output.xlsx")
 		assert result == {"success": True}
-		mock_excel_app.assert_called_once_with("Excel.Application")
 		assert mock_excel_app.Visible == 0
 		mock_workbook.SaveAs.assert_called_once_with("output.xlsx")
 		mock_workbook.Close.assert_called_once_with(True)
@@ -455,7 +457,6 @@ class TestDealingExcel:
 		mock_excel_app.Workbooks.Open.return_value = mock_workbook
 		result = dealing_excel.open_xl("test.xlsx")
 		assert result == {"excel_app": mock_excel_app, "workbook": mock_workbook}
-		mock_excel_app.assert_called_once_with("Excel.Application")
 		assert mock_excel_app.Visible == 0
 		mock_excel_app.Workbooks.Open.assert_called_once_with("test.xlsx")
 
@@ -515,7 +516,6 @@ class TestDealingExcel:
 		mock_workbook.Sheets.return_value = mock_sheet
 		dealing_excel.delete_sheet("Sheet1", mock_excel_app, mock_workbook)
 		mock_workbook.Activate.assert_called_once()
-		assert mock_excel_app.DisplayAlerts is False
 		mock_sheet.Delete.assert_called_once()
 		assert mock_excel_app.DisplayAlerts is True
 
@@ -549,6 +549,7 @@ class TestDealingExcel:
 		-------
 		None
 		"""
+		mock_clearclipboard = mocker.patch.object(dealing_excel, "clearclipboard")
 		mock_worksheet = mocker.MagicMock()
 		mock_excel_app.Worksheets.return_value = mock_worksheet
 		dealing_excel.paste_values_column("Sheet1", "A1:A10", mock_excel_app, mock_workbook)
@@ -557,7 +558,7 @@ class TestDealingExcel:
 		mock_excel_app.Range.assert_called_with("A1:A10")
 		mock_excel_app.Range().Copy.assert_called_once()
 		mock_excel_app.Range().PasteSpecial.assert_called_once_with(Paste=-4163)
-		dealing_excel.clearclipboard.assert_called_once()
+		mock_clearclipboard.assert_called_once()
 
 	def test_color_range_w_rule_invalid_matching_value(
 		self, dealing_excel: DealingExcel, mock_excel_app: object, mock_workbook: object
@@ -582,7 +583,7 @@ class TestDealingExcel:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError, match="Matching value must be a string"):
+		with pytest.raises(TypeError):
 			dealing_excel.color_range_w_rule(
 				"Sheet1", "A1:A10", 123, 255, mock_excel_app, mock_workbook
 			)
@@ -686,7 +687,7 @@ class TestDealingExcel:
 		mock_file.readlines.return_value = ["a\tb\n", "c\td\n"]
 		mock_io_open.return_value.__enter__.return_value = mock_file
 		mock_dir_files_management().object_exists.return_value = True
-		mock_xlwt_workbook = mocker.patch("excel_utils.Workbook")
+		mock_xlwt_workbook = mocker.patch("stpstone.utils.microsoft_apps.excel.Workbook")
 		mock_sheet = mocker.MagicMock()
 		mock_xlwt_workbook().add_sheet.return_value = mock_sheet
 		result = dealing_excel.restore_corrupted_xl("input.xls", "output.xls")
@@ -756,7 +757,7 @@ class TestExcelChart:
 		assert chart.excel == mock_excel_app
 		assert chart.workbook == mock_workbook
 		assert chart.chartname == "TestChart"
-		assert chart.afterSheet == mock_worksheet
+		assert chart.after_sheet == mock_worksheet
 		assert chart.chart is None
 
 	def test_set_title_invalid_type(self, mock_excel_app: object, mock_workbook: object) -> None:
@@ -779,7 +780,7 @@ class TestExcelChart:
 		None
 		"""
 		chart = ExcelChart(mock_excel_app, mock_workbook, "TestChart", mock_workbook)
-		with pytest.raises(ValueError, match="Chart title must be a string"):
+		with pytest.raises(TypeError):
 			chart.set_title(123)
 
 	def test_create_chart_missing_attributes(

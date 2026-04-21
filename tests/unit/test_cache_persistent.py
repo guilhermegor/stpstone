@@ -10,7 +10,8 @@ Tests the caching functionality with various scenarios including:
 
 from logging import Logger
 from pathlib import Path
-import pickle
+import pickle  # noqa: S301 (test intentionally uses pickle)
+import re
 import sys
 from typing import Any
 from unittest.mock import Mock
@@ -380,7 +381,7 @@ def test_load_cache_pickle_error(
 	mocker.patch.object(PickleFiles, "load_message", side_effect=exception("pickle error"))
 	mocker.patch("pathlib.Path.exists", return_value=True)
 	mocker.patch.object(CreateLog, "log_message")
-	with pytest.raises(ValueError, match=f"Failed to load cache from {cache_path}: pickle error"):
+	with pytest.raises(ValueError, match=re.escape(f"Failed to load cache from {cache_path}: pickle error")):
 		PersistentCacheDecorator(
 			path_cache=str(temp_cache_dir / "cache"), cache_key="test_key", logger=mock_logger
 		)
@@ -530,7 +531,7 @@ def test_save_cache_pickle_error(
 		bool_persist_cache=True,
 		logger=mock_logger,
 	)
-	with pytest.raises(ValueError, match=f"Failed to save cache to {cache_path}: pickle error"):
+	with pytest.raises(ValueError, match=re.escape(f"Failed to save cache to {cache_path}: pickle error")):
 		decorator._save_cache({"test_key": "test_value"})
 	CreateLog.log_message.assert_called_once_with(
 		mock_logger, f"Warning: Failed to save cache to {cache_path}: pickle error", "error"
@@ -617,7 +618,7 @@ def test_clear_cache_file_deletion_error(
 	)
 	decorator.cache = {"test_key": "test_value"}
 	with pytest.raises(
-		ValueError, match=f"Failed to delete cache file {cache_path}: deletion error"
+		ValueError, match=re.escape(f"Failed to delete cache file {cache_path}: deletion error")
 	):
 		decorator.clear_cache()
 	assert decorator.cache == {}

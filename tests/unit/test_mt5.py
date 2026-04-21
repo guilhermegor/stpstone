@@ -12,7 +12,7 @@ from datetime import datetime
 from logging import Logger
 import platform
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pandas as pd
@@ -57,8 +57,7 @@ def mt5_instance(mock_logger: Logger) -> Any:  # noqa ANN401: typing.Any is disa
 	Any
 		MT5 instance with mocked dependencies
 	"""
-	with patch("MetaTrader5.mt5"), patch("pandas.DataFrame"):
-		return MT5(logger=mock_logger)
+	return MT5(logger=mock_logger)
 
 
 @pytest.fixture
@@ -241,7 +240,7 @@ class TestConnectionManagement:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.initialize", return_value=True)
+		mocker.patch("MetaTrader5.initialize", return_value=True)
 		result = mt5_instance.initialize("path", 123, "server", "password")
 		assert result is True
 		mock_logger.warning.assert_not_called()
@@ -273,9 +272,9 @@ class TestConnectionManagement:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.initialize", return_value=False)
-		mocker.patch("MetaTrader5.mt5.last_error", return_value=123)
-		mocker.patch("MetaTrader5.mt5.shutdown")
+		mocker.patch("MetaTrader5.initialize", return_value=False)
+		mocker.patch("MetaTrader5.last_error", return_value=123)
+		mocker.patch("MetaTrader5.shutdown")
 
 		result = mt5_instance.initialize("path", 123, "server", "password")
 
@@ -305,7 +304,7 @@ class TestConnectionManagement:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.shutdown")
+		mocker.patch("MetaTrader5.shutdown")
 		mt5_instance.shutdown()
 		mt5.shutdown.assert_called_once()
 
@@ -337,7 +336,7 @@ class TestSymbolInfoRetrieval:
 		None
 		"""
 		mock_result = ("EURUSD", "GBPUSD")
-		mocker.patch("MetaTrader5.mt5.symbols_get", return_value=mock_result)
+		mocker.patch("MetaTrader5.symbols_get", return_value=mock_result)
 		result = mt5_instance.symbols_get()
 		assert result == mock_result
 
@@ -367,7 +366,7 @@ class TestSymbolInfoRetrieval:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.symbols_total", return_value=10)
+		mocker.patch("MetaTrader5.symbols_total", return_value=10)
 		result = mt5_instance.symbols_total()
 		assert result == 10
 		mock_logger.info.assert_called_with("Total symbols ={symbols}")
@@ -398,7 +397,7 @@ class TestSymbolInfoRetrieval:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.symbols_total", return_value=0)
+		mocker.patch("MetaTrader5.symbols_total", return_value=0)
 		result = mt5_instance.symbols_total()
 		assert result is None
 		mock_logger.info.assert_called_with("Symbols not found")
@@ -444,10 +443,10 @@ class TestGetSymbolsInfo:
 		mock_symbols[1].name = "SYM2"
 
 		# Mock MT5 functions
-		mocker.patch("MetaTrader5.mt5.symbols_get", return_value=mock_symbols)
-		mocker.patch("MetaTrader5.mt5.symbol_select")
+		mocker.patch("MetaTrader5.symbols_get", return_value=mock_symbols)
+		mocker.patch("MetaTrader5.symbol_select")
 		mocker.patch(
-			"MetaTrader5.mt5.symbol_info",
+			"MetaTrader5.symbol_info",
 			return_value=MagicMock(_asdict=lambda: sample_symbol_info),
 		)
 
@@ -496,7 +495,7 @@ class TestGetSymbolsInfo:
 		"""
 		mock_symbol = MagicMock()
 		mock_symbol._asdict.return_value = sample_symbol_info
-		mocker.patch("MetaTrader5.mt5.symbols_get", return_value=[mock_symbol])
+		mocker.patch("MetaTrader5.symbols_get", return_value=[mock_symbol])
 
 		result = mt5_instance.get_symbols_info(market_data=False)
 
@@ -532,7 +531,7 @@ class TestGetSymbolsInfo:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.symbols_get", return_value=[])
+		mocker.patch("MetaTrader5.symbols_get", return_value=[])
 		result = mt5_instance.get_symbols_info()
 		assert result is None
 		mock_logger.critical.assert_called_with("Symbols not found")
@@ -586,7 +585,7 @@ class TestTickDataRetrieval:
 			],
 		)
 
-		mocker.patch("MetaTrader5.mt5.copy_ticks_from", return_value=mock_ticks)
+		mocker.patch("MetaTrader5.copy_ticks_from", return_value=mock_ticks)
 
 		result = mt5_instance.get_ticks_from(
 			symbol="EURUSD", date_ref=datetime.now(), ticks_qty=10
@@ -624,7 +623,7 @@ class TestTickDataRetrieval:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.copy_ticks_from", return_value=None)
+		mocker.patch("MetaTrader5.copy_ticks_from", return_value=None)
 		result = mt5_instance.get_ticks_from(
 			symbol="EURUSD", date_ref=datetime.now(), ticks_qty=10
 		)
@@ -677,7 +676,7 @@ class TestTickDataRetrieval:
 			],
 		)
 
-		mocker.patch("MetaTrader5.mt5.copy_ticks_range", return_value=mock_ticks)
+		mocker.patch("MetaTrader5.copy_ticks_range", return_value=mock_ticks)
 
 		result = mt5_instance.get_ticks_range(
 			symbol="EURUSD", date_ref=datetime.now(), datetime_to=datetime.now()
@@ -716,7 +715,7 @@ class TestTickDataRetrieval:
 		None
 		"""
 		mock_tick = MagicMock()
-		mocker.patch("MetaTrader5.mt5.symbol_info_tick", return_value=mock_tick)
+		mocker.patch("MetaTrader5.symbol_info_tick", return_value=mock_tick)
 
 		result = mt5_instance.get_last_tick("EURUSD")
 		assert result is mock_tick
@@ -748,8 +747,8 @@ class TestTickDataRetrieval:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.symbol_info_tick", return_value=None)
-		mocker.patch("MetaTrader5.mt5.last_error", return_value=123)
+		mocker.patch("MetaTrader5.symbol_info_tick", return_value=None)
+		mocker.patch("MetaTrader5.last_error", return_value=123)
 
 		result = mt5_instance.get_last_tick("EURUSD")
 		assert result is None
@@ -792,9 +791,9 @@ class TestMarketDepth:
 		mock_items[0]._asdict.return_value = {"price": 1.12, "volume": 1000}
 		mock_items[1]._asdict.return_value = {"price": 1.13, "volume": 2000}
 
-		mocker.patch("MetaTrader5.mt5.market_book_add", return_value=True)
-		mocker.patch("MetaTrader5.mt5.market_book_get", return_value=mock_items)
-		mocker.patch("MetaTrader5.mt5.market_book_release")
+		mocker.patch("MetaTrader5.market_book_add", return_value=True)
+		mocker.patch("MetaTrader5.market_book_get", return_value=mock_items)
+		mocker.patch("MetaTrader5.market_book_release")
 		mocker.patch("time.sleep")
 
 		result = mt5_instance.get_market_depth("EURUSD", n_times=2)
@@ -832,8 +831,8 @@ class TestMarketDepth:
 		-------
 		None
 		"""
-		mocker.patch("MetaTrader5.mt5.market_book_add", return_value=False)
-		mocker.patch("MetaTrader5.mt5.last_error", return_value=123)
+		mocker.patch("MetaTrader5.market_book_add", return_value=False)
+		mocker.patch("MetaTrader5.last_error", return_value=123)
 
 		result = mt5_instance.get_market_depth("EURUSD")
 		assert result is None
@@ -872,7 +871,7 @@ class TestSymbolProperties:
 		"""
 		mock_tick = MagicMock()
 		mock_tick._asdict.return_value = {"bid": 1.12, "ask": 1.13}
-		mocker.patch("MetaTrader5.mt5.symbol_info_tick", return_value=mock_tick)
+		mocker.patch("MetaTrader5.symbol_info_tick", return_value=mock_tick)
 
 		result = mt5_instance.get_symbol_info_tick("EURUSD")
 
@@ -918,7 +917,7 @@ class TestSymbolProperties:
 		mock_info._asdict.return_value = sample_symbol_info
 		mock_info.spread = 10
 		mock_info.digits = 5
-		mocker.patch("MetaTrader5.mt5.symbol_info", return_value=mock_info)
+		mocker.patch("MetaTrader5.symbol_info", return_value=mock_info)
 
 		result = mt5_instance.get_symbol_properties("EURUSD")
 

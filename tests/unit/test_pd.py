@@ -309,7 +309,9 @@ def test_append_df_to_excel_sensitivity_label_windows(
 	None
 	"""
 	filename = tmp_path / "test.xlsx"
-	mock_label = mocker.patch.object(dealing_pd.cls_dealing_xl, "xlsx_sensitivity_label")
+	mock_label = mocker.patch.object(
+		dealing_pd.cls_dealing_xl, "xlsx_sensitivity_label", create=True
+	)
 	dealing_pd.append_df_to_Excel(
 		str(filename),
 		[(sample_dataframe, "Sheet1")],

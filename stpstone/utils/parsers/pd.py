@@ -205,7 +205,9 @@ class DealingPd(metaclass=TypeChecker):
 
 		if bool_adjust_layout and os.name == "nt":
 			for _, sheet_name in list_tup_df_sheet_name:
-				xl_app, wb = self.cls_dealing_xl.open_xl(path_xlsx)
+				result = self.cls_dealing_xl.open_xl(path_xlsx)
+				xl_app = result["excel_app"]
+				wb = result["workbook"]
 				self.cls_dealing_xl.autofit_range_columns(sheet_name, range_columns, xl_app, wb)
 				self.cls_dealing_xl.close_wb(wb)
 

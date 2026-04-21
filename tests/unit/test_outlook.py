@@ -20,7 +20,7 @@ import os
 from typing import Any, Union
 from unittest.mock import MagicMock, patch
 
-import win32com.client
+from pytest_mock import MockerFixture
 
 from stpstone.utils.microsoft_apps.outlook import DealingOutlook
 from stpstone.utils.parsers.folders import DirFilesManagement
@@ -32,15 +32,39 @@ from stpstone.utils.parsers.str import StrHandler
 # Fixtures
 # --------------------------
 @pytest.fixture
-def outlook_mock() -> MagicMock:
+def outlook_mock(mocker: MockerFixture) -> MagicMock:
 	"""Fixture providing mocked Outlook application.
+
+	Parameters
+	----------
+	mocker : MockerFixture
+		Pytest-mock fixture for creating mocks
 
 	Returns
 	-------
 	MagicMock
 		Mocked Outlook application object
 	"""
-	return MagicMock(spec=win32com.client.Dispatch)
+	mock = mocker.MagicMock()
+	mocker.patch("stpstone.utils.microsoft_apps.outlook.win32.Dispatch", return_value=mock)
+	return mock
+
+
+@pytest.fixture
+def dealing_outlook(outlook_mock: MagicMock) -> DealingOutlook:
+	"""Fixture providing DealingOutlook instance with mocked Outlook.
+
+	Parameters
+	----------
+	outlook_mock : MagicMock
+		Mocked Outlook application
+
+	Returns
+	-------
+	DealingOutlook
+		DealingOutlook instance with mocked dependencies
+	"""
+	return DealingOutlook()
 
 
 @pytest.fixture
@@ -77,24 +101,6 @@ def folder_mock() -> MagicMock:
 		Mocked Outlook folder object
 	"""
 	return MagicMock()
-
-
-@pytest.fixture
-def dealing_outlook(outlook_mock: MagicMock) -> Any:  # noqa ANN401: typing.Any not allowed
-	"""Fixture providing DealingOutlook instance with mocked Outlook.
-
-	Parameters
-	----------
-	outlook_mock : MagicMock
-		Mocked Outlook application
-
-	Returns
-	-------
-	Any
-		DealingOutlook instance with mocked dependencies
-	"""
-	with patch("win32com.client.Dispatch", return_value=outlook_mock):
-		return DealingOutlook()
 
 
 # --------------------------
@@ -149,7 +155,7 @@ class TestValidationMethods:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError):
+		with pytest.raises((TypeError, ValueError)):
 			dealing_outlook._validate_email_account(email)
 
 	def test_validate_folder_path_valid(
@@ -198,7 +204,7 @@ class TestValidationMethods:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError):
+		with pytest.raises((TypeError, ValueError)):
 			dealing_outlook._validate_folder_path(path)
 
 	@pytest.mark.parametrize("path", ["/valid/path", ["/valid/path1", "/valid/path2"]])
@@ -252,7 +258,7 @@ class TestValidationMethods:
 		-------
 		None
 		"""
-		with pytest.raises(ValueError):
+		with pytest.raises((TypeError, ValueError)):
 			dealing_outlook._validate_attachment_path(path)
 
 

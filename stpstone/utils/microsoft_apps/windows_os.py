@@ -70,13 +70,15 @@ class DealingWindows(metaclass=TypeChecker):
 		if not isinstance(hwnd, int) or hwnd <= 0:
 			raise ValueError("Window handle must be a positive integer")
 
-	def foreach_window(self, hwnd: int) -> bool:
+	def foreach_window(self, hwnd: int, lparam: int) -> bool:
 		"""Enumerate windows.
 
 		Parameters
 		----------
 		hwnd : int
 			Window handle
+		lparam : int
+			Application-defined value (unused, required by WINFUNCTYPE callback signature)
 
 		Returns
 		-------
