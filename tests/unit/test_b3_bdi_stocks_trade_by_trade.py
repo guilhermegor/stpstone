@@ -45,7 +45,7 @@ def _build_zip_bytes(
 	----------
 	csv_content : str
 		The CSV text to embed in the archive.
-	txt_filename : str, optional
+	txt_filename : str
 		The filename for the embedded entry, by default "trades.txt".
 
 	Returns

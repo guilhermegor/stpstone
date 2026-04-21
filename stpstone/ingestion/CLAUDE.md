@@ -116,11 +116,11 @@ class IngestionConcreteClass(ABCIngestionOperations):
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 			The date of reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 			The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 			The database session, by default None.
 
 		Returns
@@ -156,13 +156,13 @@ class IngestionConcreteClass(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Whether to verify the SSL certificate, by default True.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 			Whether to insert or ignore the data, by default False.
-		str_table_name : str, optional
+		str_table_name : str
 			The name of the table, by default '<COUNTRY>_<SOURCE>_<TABLE_NAME>'.
 
 		Returns
@@ -205,9 +205,9 @@ class IngestionConcreteClass(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Verify the SSL certificate, by default True.
 
 		Returns
@@ -264,6 +264,7 @@ Dunder methods (`__init__`, `__repr__`, `__eq__`, etc.) go first as the class pr
 - Line length: 99 characters; indentation: tabs (not spaces) — enforced by `ruff.toml` (`indent-style = "tab"`)
 - Double quotes everywhere; single quotes only inside docstrings
 - Docstrings: NumPy style, 79-char line limit, imperative mood, period at end of first line
+- **Docstring parameter types must exactly match the Python type annotation** — never append `, optional`; write `int`, not `int, optional`; write `Optional[date]`, not `Optional[date], optional`. The `, optional` NumPy convention is not supported by this project's type-consistency checker.
 - Type hints mandatory on all signatures; use `Optional[X]` not `X | None` (Python 3.9 compat)
 - Use primitive collection types (`list`, `dict`, `tuple`) — no `typing.List/Dict/Tuple`
 - Use `TypedDict` subclass named `Return<MethodName>` for dict return types
@@ -339,7 +340,7 @@ Common issues caught by this recipe:
 
 - Unused imports (`F401`)
 - `.values` instead of `.to_numpy()` (`PD011`)
-- Docstring type not matching type hint exactly (quote style, `, optional` suffix)
+- Docstring type not matching type hint exactly (quote style) — **never append `, optional`** to a parameter's type field; the type string must be the literal Python annotation (`int`, `Optional[date]`, etc.) and nothing more
 - `Literal` types in docstrings must use single quotes to match Python's repr
 
 **When refactoring a module that was split into multiple files**, run `make test_feat` for **each** new module name to verify every file passes independently. Do not skip this step — ruff and type-check errors are only caught per-module, not globally.

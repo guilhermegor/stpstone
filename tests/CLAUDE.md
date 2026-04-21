@@ -44,6 +44,23 @@ Two blank lines after all imports before the first fixture or test.
 Double quotes everywhere (`quote-style = "double"` in `ruff.toml`).
 Single quotes only inside docstrings where needed for literals.
 
+## Docstring parameter types
+
+The same type-consistency checker that runs on source files also runs on test files.
+**Never append `, optional` to a parameter's type field** — even for helper functions inside
+test files. Write the type exactly as it appears in the Python annotation:
+
+```python
+# Wrong
+txt_filename : str, optional
+
+# Correct
+txt_filename : str
+```
+
+This applies to every function with a docstring in `tests/`, including module-level helpers
+like `_build_zip_bytes`.
+
 ## Verification
 
 `make test_feat` runs `ruff check` only — it catches lint and isort issues but **not**
