@@ -40,17 +40,17 @@ class B3BdiEquitiesGreatestUpsides(ABCIngestionOperations):
 
 		Parameters
 		----------
-		date_ref : Optional[date], optional
+		date_ref : Optional[date]
 			The date of reference, by default None.
-		logger : Optional[Logger], optional
+		logger : Optional[Logger]
 			The logger, by default None.
-		cls_db : Optional[Session], optional
+		cls_db : Optional[Session]
 			The database session, by default None.
-		int_page_size : int, optional
+		int_page_size : int
 			Number of records per page, by default 1_000.
-		int_page_min : int, optional
+		int_page_min : int
 			First page to fetch (1-based), by default 1.
-		int_page_max : int, optional
+		int_page_max : int
 			Last page to fetch inclusive; defaults to 1 because this endpoint
 			typically returns all equities with the largest gains in the cash
 			market on a single page.
@@ -98,13 +98,13 @@ class B3BdiEquitiesGreatestUpsides(ABCIngestionOperations):
 
 		Parameters
 		----------
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Whether to verify the SSL certificate, by default True.
-		bool_insert_or_ignore : bool, optional
+		bool_insert_or_ignore : bool
 			Whether to insert or ignore the data, by default False.
-		str_table_name : str, optional
+		str_table_name : str
 			The name of the table, by default
 			"br_b3_bdi_equities_greatest_upsides".
 
@@ -201,11 +201,11 @@ class B3BdiEquitiesGreatestUpsides(ABCIngestionOperations):
 
 		Parameters
 		----------
-		int_page : int, optional
+		int_page : int
 			The page number to fetch, by default 1.
-		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]], optional
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
 			The timeout, by default (12.0, 21.0).
-		bool_verify : bool, optional
+		bool_verify : bool
 			Verify the SSL certificate, by default True.
 
 		Returns
