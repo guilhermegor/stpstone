@@ -790,10 +790,12 @@ class TestBackupMethod:
 
 	@patch("os.makedirs")
 	@patch("subprocess.run")
+	@patch("shutil.which", return_value="/usr/bin/pg_dump")
 	@patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
 	def test_backup_success(
 		self,
 		mock_connect: Mock,
+		mock_which: Mock,
 		mock_run: Mock,
 		mock_makedirs: Mock,
 		postgresql_db_config: dict[str, Any],
@@ -811,6 +813,8 @@ class TestBackupMethod:
 		----------
 		mock_connect : Mock
 			Mock psycopg.connect function
+		mock_which : Mock
+			Mock shutil.which
 		mock_run : Mock
 			Mock subprocess.run
 		mock_makedirs : Mock
@@ -831,10 +835,12 @@ class TestBackupMethod:
 
 	@patch("os.makedirs")
 	@patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "pg_dump"))
+	@patch("shutil.which", return_value="/usr/bin/pg_dump")
 	@patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
 	def test_backup_process_error(
 		self,
 		mock_connect: Mock,
+		mock_which: Mock,
 		mock_run: Mock,
 		mock_makedirs: Mock,
 		postgresql_db_config: dict[str, Any],
@@ -851,6 +857,8 @@ class TestBackupMethod:
 		----------
 		mock_connect : Mock
 			Mock psycopg.connect function
+		mock_which : Mock
+			Mock shutil.which
 		mock_run : Mock
 			Mock subprocess.run
 		mock_makedirs : Mock
@@ -869,10 +877,12 @@ class TestBackupMethod:
 
 	@patch("os.makedirs")
 	@patch("subprocess.run", side_effect=Exception("Unexpected error"))
+	@patch("shutil.which", return_value="/usr/bin/pg_dump")
 	@patch("stpstone.utils.connections.databases.sql.postgresql_db.connect")
 	def test_backup_general_error(
 		self,
 		mock_connect: Mock,
+		mock_which: Mock,
 		mock_run: Mock,
 		mock_makedirs: Mock,
 		postgresql_db_config: dict[str, Any],
@@ -889,6 +899,8 @@ class TestBackupMethod:
 		----------
 		mock_connect : Mock
 			Mock psycopg.connect function
+		mock_which : Mock
+			Mock shutil.which
 		mock_run : Mock
 			Mock subprocess.run
 		mock_makedirs : Mock
