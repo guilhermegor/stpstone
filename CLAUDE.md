@@ -92,6 +92,30 @@ Branch naming: `<purpose>/<description>` (e.g., `feat/user-auth`, `fix/rounding-
 - Write tests before implementation (TDD encouraged per CONTRIBUTING.md)
 - Test normal operations, edge cases, error conditions, and type validation
 
+### TypeVar vs Literal type aliases
+
+`TypeVar` is only for **generic type parameters** — when the same type variable appears in
+both input and output positions of a function/class, binding them together. Never use it
+merely to name an annotation.
+
+**Single positional constraint crashes at import (`TypeError: A single constraint is not allowed`):**
+```python
+# WRONG — raises TypeError on Python 3.9+
+TypeStyleXLObject = TypeVar("TypeStyleXLObject", Literal["a", "b"])
+```
+
+**Use a plain Literal alias instead (Python 3.9-compatible, zero runtime cost):**
+```python
+# CORRECT
+TypeStyleXLObject = Literal["a", "b"]
+```
+
+`TypeVar(..., bound=Literal[...])` is syntactically valid but still usually wrong: it
+creates a generic variable constrained to a Literal union, which adds indirection with no
+benefit when the variable is only used as a parameter annotation. Prefer the bare `Literal`
+alias in those cases too. Only keep `bound=` when the TypeVar is genuinely used to link
+input ↔ output types in a generic function or class.
+
 ### Core module imports
 
 `stpstone/transformations/validation/metaclass_type_checker.py` is imported transitively by

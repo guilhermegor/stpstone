@@ -13,7 +13,7 @@ if platform.system() != "Windows":
 
 from ctypes import windll
 import os
-from typing import Literal, Optional, TypedDict, TypeVar, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from win32com.client import Dispatch, constants
 from xlwt import Workbook
@@ -40,17 +40,14 @@ RGB_PALE_GREY: int = 15132390
 RGB_PALE_YELLOW: int = 13565951
 
 
-TypeStyleXLObject = TypeVar(
-	"TypeVarStyle",
-	Literal[
-		"style_heading1",
-		"style_heading2",
-		"style_border_bottom",
-		"style_grey_cell",
-		"style_pale_yellow_cell",
-		"style_italics",
-	],
-)
+TypeStyleXLObject = Literal[
+	"style_heading1",
+	"style_heading2",
+	"style_border_bottom",
+	"style_grey_cell",
+	"style_pale_yellow_cell",
+	"style_italics",
+]
 
 
 class SaveAsReturn(TypedDict):
