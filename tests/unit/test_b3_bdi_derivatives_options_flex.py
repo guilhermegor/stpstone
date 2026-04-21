@@ -1,9 +1,10 @@
 """Unit tests for B3BdiDerivativesOptionsFlex class."""
 
+from __future__ import annotations
+
 from datetime import date
 from decimal import Decimal
 from logging import Logger
-from typing import Union
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -618,7 +619,7 @@ def test_run_no_data_returns_none(
 def test_get_response_timeout_variants(
 	instance: B3BdiDerivativesOptionsFlex,
 	mocker: MockerFixture,
-	timeout: Union[int, float, tuple[float, float], tuple[int, int]],
+	timeout: int | float | tuple[float, float] | tuple[int, int],
 ) -> None:
 	"""Test get_response accepts various timeout types.
 
@@ -628,7 +629,7 @@ def test_get_response_timeout_variants(
 		Initialized instance.
 	mocker : MockerFixture
 		Pytest-mock fixture.
-	timeout : Union[int, float, tuple[float, float], tuple[int, int]]
+	timeout : int | float | tuple[float, float] | tuple[int, int]
 		Various timeout values.
 
 	Returns

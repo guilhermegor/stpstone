@@ -1,5 +1,7 @@
 """Unit tests for B3BdiDerivativesMarkToMarket class."""
 
+from __future__ import annotations
+
 from datetime import date
 from logging import Logger
 from unittest.mock import MagicMock

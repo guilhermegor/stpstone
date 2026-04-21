@@ -1,5 +1,7 @@
 """Unit tests for B3BdiStocksTradeByTrade class."""
 
+from __future__ import annotations
+
 from datetime import date
 from io import BytesIO, StringIO
 from logging import Logger
