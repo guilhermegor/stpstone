@@ -4,10 +4,37 @@ import ast
 import pathlib
 import re
 import sys
-from typing import Any, Dict, Set
+from typing import Any
 
 
-def compare_types(hint: Any, doc: str) -> bool:
+_SECTION_RE = re.compile(
+	r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples"
+	r"|Attributes|See Also|References|Raises)(:)?$",
+	re.IGNORECASE,
+)
+
+_NON_RAISES_SECTIONS_RE = re.compile(
+	r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples"
+	r"|Attributes|See Also|References)(:)?$",
+	re.IGNORECASE,
+)
+
+
+def compare_types(hint: object, doc: str) -> bool:
+	"""Check if a type hint matches a docstring type description.
+
+	Parameters
+	----------
+	hint : object
+		Parsed type annotation object from AST.
+	doc : str
+		Type string from docstring.
+
+	Returns
+	-------
+	bool
+		True if types are considered equivalent.
+	"""
 	if hint is Any or doc.lower() == "any":
 		return True
 	hint_str = str(hint).replace("typing.", "").lower()
@@ -24,8 +51,20 @@ def compare_types(hint: Any, doc: str) -> bool:
 	return hint_str == doc
 
 
-def parse_raises_section(docstring: str) -> Dict[str, str]:
-	raises: Dict[str, str] = {}
+def parse_raises_section(docstring: str) -> dict[str, str]:
+	"""Parse the Raises section of a NumPy-style docstring.
+
+	Parameters
+	----------
+	docstring : str
+		Full docstring text.
+
+	Returns
+	-------
+	dict[str, str]
+		Mapping of exception name to description.
+	"""
+	raises: dict[str, str] = {}
 	if not docstring:
 		return raises
 	lines = [line.rstrip() for line in docstring.splitlines()]
@@ -39,11 +78,7 @@ def parse_raises_section(docstring: str) -> Dict[str, str]:
 			continue
 		if not stripped:
 			continue
-		if re.match(
-			r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References)(:)?$",
-			stripped,
-			re.IGNORECASE,
-		):
+		if _NON_RAISES_SECTIONS_RE.match(stripped):
 			break
 		match = re.match(r"^([\w.]+)\s*:\s*(.*)", stripped)
 		if match:
@@ -56,8 +91,20 @@ def parse_raises_section(docstring: str) -> Dict[str, str]:
 	return raises
 
 
-def get_actual_raises(node: ast.AST) -> Set[str]:
-	raises: Set[str] = set()
+def get_actual_raises(node: ast.AST) -> set[str]:
+	"""Collect all exception names raised within an AST node.
+
+	Parameters
+	----------
+	node : ast.AST
+		AST node representing a function definition.
+
+	Returns
+	-------
+	set[str]
+		Set of exception class names raised.
+	"""
+	raises: set[str] = set()
 	for n in ast.walk(node):
 		if not isinstance(n, ast.Raise) or n.exc is None:
 			continue
@@ -73,18 +120,36 @@ def get_actual_raises(node: ast.AST) -> Set[str]:
 
 
 def normalize_exception_name(name: str) -> str:
+	"""Strip module prefix from a qualified exception name.
+
+	Parameters
+	----------
+	name : str
+		Possibly qualified exception name (e.g., ``builtins.ValueError``).
+
+	Returns
+	-------
+	str
+		Unqualified exception name.
+	"""
 	return name.split(".")[-1]
 
 
-_SECTION_RE = re.compile(
-	r"^(Args|Arguments|Parameters|Returns|Yields|Notes|Examples|Attributes|See Also|References|Raises)(:)?$",
-	re.IGNORECASE,
-)
-
-
 def check_file(filepath: str) -> int:
+	"""Check type and raises consistency for all functions in a Python file.
+
+	Parameters
+	----------
+	filepath : str
+		Path to the Python source file.
+
+	Returns
+	-------
+	int
+		Number of inconsistencies found.
+	"""
 	errors = 0
-	with open(filepath, "r", encoding="utf-8") as fh:
+	with open(filepath, encoding="utf-8") as fh:
 		tree = ast.parse(fh.read(), filename=filepath)
 	for node in ast.walk(tree):
 		if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -103,7 +168,7 @@ def check_file(filepath: str) -> int:
 			continue
 		if has_return_annotation:
 			returns = ast.unparse(node.returns)
-			doc_lines = [l.rstrip() for l in docstring.split("\n")]
+			doc_lines = [ln.rstrip() for ln in docstring.split("\n")]
 			has_returns_section = any(line.strip().lower() == "returns" for line in doc_lines)
 			if has_returns_section:
 				found_return = False
@@ -133,9 +198,11 @@ def check_file(filepath: str) -> int:
 								k += 1
 							doc_type = " ".join(type_lines)
 							if not compare_types(returns, doc_type):
-								print(
-									f"❌ Return type mismatch in {node.name}() at line {lineno} ({filepath}):"
+								msg = (
+									f"❌ Return type mismatch in {node.name}()"
+									f" at line {lineno} ({filepath}):"
 								)
+								print(msg)
 								print(f"   Type hint: {returns}")
 								print(f"   Docstring: {doc_type}")
 								errors += 1
@@ -144,9 +211,11 @@ def check_file(filepath: str) -> int:
 						j += 1
 					break
 				if not found_return:
-					print(
-						f"⚠️  Return type documented but no type found in {node.name}() at line {lineno} ({filepath})"
+					msg = (
+						f"⚠️  Return type documented but no type found in"
+						f" {node.name}() at line {lineno} ({filepath})"
 					)
+					print(msg)
 					errors += 1
 		for arg in node.args.args:
 			if arg.arg == "self" or not arg.annotation:
@@ -175,18 +244,22 @@ def check_file(filepath: str) -> int:
 					type_part += " " + nxt_strip
 					k += 1
 				if not compare_types(hint, type_part):
-					print(
-						f"❌ Parameter type mismatch in {node.name}({arg.arg}) at line {lineno} ({filepath}):"
+					msg = (
+						f"❌ Parameter type mismatch in {node.name}({arg.arg})"
+						f" at line {lineno} ({filepath}):"
 					)
+					print(msg)
 					print(f"   Type hint: {hint}")
 					print(f"   Docstring: {type_part}")
 					errors += 1
 				arg_doc_found = True
 				break
 			if not arg_doc_found:
-				print(
-					f"⚠️  Missing docstring for parameter {arg.arg} in {node.name}() at line {lineno} ({filepath})"
+				msg = (
+					f"⚠️  Missing docstring for parameter {arg.arg}"
+					f" in {node.name}() at line {lineno} ({filepath})"
 				)
+				print(msg)
 				errors += 1
 		doc_raises = parse_raises_section(docstring)
 		actual_raises = get_actual_raises(node)
@@ -194,15 +267,19 @@ def check_file(filepath: str) -> int:
 		actual_exceptions = {normalize_exception_name(e) for e in actual_raises}
 		for exc in doc_exceptions:
 			if exc not in actual_exceptions:
-				print(
-					f"⚠️  Documented but not raised exception {exc} in {node.name}() at line {lineno} ({filepath})"
+				msg = (
+					f"⚠️  Documented but not raised exception {exc}"
+					f" in {node.name}() at line {lineno} ({filepath})"
 				)
+				print(msg)
 				errors += 1
 		for exc in actual_exceptions:
 			if exc not in doc_exceptions:
-				print(
-					f"⚠️  Raised but not documented exception {exc} in {node.name}() at line {lineno} ({filepath})"
+				msg = (
+					f"⚠️  Raised but not documented exception {exc}"
+					f" in {node.name}() at line {lineno} ({filepath})"
 				)
+				print(msg)
 				errors += 1
 	return errors
 
