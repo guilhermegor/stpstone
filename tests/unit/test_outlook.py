@@ -827,9 +827,14 @@ class TestReplyEmail:
 		folder_mock.Items.Count = 1
 		folder_mock.Items.__getitem__.return_value = message
 
+		# Capture original HTMLBody mock before call — augmented assignment (+=)
+		# replaces reply_mock.HTMLBody with the __iadd__ return value, so assertions
+		# must be made on the original object, not the re-bound attribute.
+		original_html_body = reply_mock.HTMLBody
+
 		dealing_outlook.reply_email("test@example.com", "Inbox", "Test Message", "Reply content")
 
-		reply_mock.HTMLBody.__iadd__.assert_called_once_with("Reply content")
+		original_html_body.__iadd__.assert_called_once_with("Reply content")
 		reply_mock.Display.assert_called_once()
 
 	def test_reply_email_with_cc_bcc(

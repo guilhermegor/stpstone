@@ -843,13 +843,14 @@ class TestMarketDepth:
 		"""
 		mocker.patch("MetaTrader5.market_book_add", return_value=False)
 		mocker.patch("MetaTrader5.last_error", return_value=123)
+		mock_market_book_get = mocker.patch("MetaTrader5.market_book_get")
 
 		result = mt5_instance.get_market_depth("EURUSD")
 		assert result is None
 		mock_logger.info.assert_called_with(
 			"[MT5.get_market_depth] mt5.market_book_add(EURUSD) failed, error code = 123"
 		)
-		mt5.market_book_get.assert_not_called()
+		mock_market_book_get.assert_not_called()
 
 
 class TestSymbolProperties:
