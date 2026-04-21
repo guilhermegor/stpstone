@@ -81,6 +81,7 @@ jobs:
           poetry env activate
 
       - name: Run Spell Check (codespell)
+        if: runner.os == 'Linux'
         run: |
           poetry run codespell .
           if [ $? -ne 0 ]; then
@@ -89,11 +90,13 @@ jobs:
           fi
 
       - name: Run Docstring Type Consistency Check
+        if: runner.os == 'Linux'
         run: |
           poetry run python -m pydocstyle --select=D412,D417 --match="(stpstone|tests).*\\.py" stpstone/ tests/
           poetry run python bin/check_consistency.py
 
       - name: Run Ruff Linting
+        if: runner.os == 'Linux'
         run: |
           poetry run ruff check stpstone/ tests/ --config=ruff.toml
           if [ $? -ne 0 ]; then
