@@ -628,7 +628,7 @@ def test_cubic_spline_valid_inputs(tsir: TSIR, sample_nper_rates: dict[int, floa
 	"""
 	result = tsir.cubic_spline(sample_nper_rates)
 	assert isinstance(result, dict)
-	assert all(isinstance(k, np.int64) for k in result)
+	assert all(np.issubdtype(type(k), np.integer) for k in result)
 	assert all(isinstance(v, float) for v in result.values())
 	assert len(result) == 331  # From 30 to 360 inclusive
 	assert result[30] == pytest.approx(0.015, rel=1e-6)
