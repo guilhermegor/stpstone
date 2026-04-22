@@ -995,8 +995,8 @@ def test_backup_large_db(
 	mocker.patch("shutil.which", return_value="/usr/bin/sqlite3")
 	mocker.patch("subprocess.run", return_value=Mock(returncode=0))
 	mocker.patch("os.path.exists", return_value=True)
-	for i in range(1000):
-		sqlite_db.insert([{"id": i, "name": f"User{i}", "age": 20}], "test_table")
+	bulk_data = [{"id": i, "name": f"User{i}", "age": 20} for i in range(1000)]
+	sqlite_db.insert(bulk_data, "test_table")
 	backup_dir = str(tmp_path / "backup")
 	result = sqlite_db.backup(backup_dir)
 	assert "Backup successful" in result
