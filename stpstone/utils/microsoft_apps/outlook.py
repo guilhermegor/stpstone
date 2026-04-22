@@ -537,7 +537,7 @@ class DealingOutlook(metaclass=TypeChecker):
 			message = out_iter_folder.Items[i]
 			if message.Subject == subj_sub_string:
 				reply = message.Reply()
-				reply.HTMLBody = msg_body + reply.HTMLBody
+				reply.HTMLBody += msg_body
 				break
 
 		if not reply:

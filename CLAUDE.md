@@ -91,3 +91,46 @@ Branch naming: `<purpose>/<description>` (e.g., `feat/user-auth`, `fix/rounding-
 - Use `make test_feat MODULE=<name>` when developing a feature end-to-end
 - Write tests before implementation (TDD encouraged per CONTRIBUTING.md)
 - Test normal operations, edge cases, error conditions, and type validation
+
+### TypeVar vs Literal type aliases
+
+`TypeVar` is only for **generic type parameters** — when the same type variable appears in
+both input and output positions of a function/class, binding them together. Never use it
+merely to name an annotation.
+
+**Single positional constraint crashes at import (`TypeError: A single constraint is not allowed`):**
+```python
+# WRONG — raises TypeError on Python 3.9+
+TypeStyleXLObject = TypeVar("TypeStyleXLObject", Literal["a", "b"])
+```
+
+**Use a plain Literal alias instead (Python 3.9-compatible, zero runtime cost):**
+```python
+# CORRECT
+TypeStyleXLObject = Literal["a", "b"]
+```
+
+`TypeVar(..., bound=Literal[...])` is syntactically valid but still usually wrong: it
+creates a generic variable constrained to a Literal union, which adds indirection with no
+benefit when the variable is only used as a parameter annotation. Prefer the bare `Literal`
+alias in those cases too. Only keep `bound=` when the TypeVar is genuinely used to link
+input ↔ output types in a generic function or class.
+
+### Core module imports
+
+`stpstone/transformations/validation/metaclass_type_checker.py` is imported transitively by
+**every** ingestion class. Never add a top-level import of a library that requires a system
+C extension or native binary (e.g. `psycopg`, `pycurl`, `pyodbc`) to this file — it will
+break `import TypeChecker` on any machine where that library is not installed, crashing the
+entire integration test suite. Keep the import list in this module limited to pure-Python
+stdlib and PyPI packages that carry no native-library requirement.
+
+## Mandatory Verification After Every Change
+
+**After every implementation, refactor, bugfix, or feature addition — no exceptions:**
+
+1. Run `make test_feat MODULE=<module_name>` for **each** module that was created or modified.
+2. After all modules pass, run `make lint` once globally.
+3. Fix every error before declaring the task complete. Do not skip or defer.
+
+This applies to Claude-generated code too — never trust that a subagent ran these. Always run them yourself and show the output.

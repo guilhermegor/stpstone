@@ -521,7 +521,7 @@ def test_federal_transform_holidays_valid(sample_federal_df: pd.DataFrame) -> No
 	assert pd.api.types.is_string_dtype(result["DATE"])
 	assert pd.api.types.is_string_dtype(result["WEEKDAY"])
 	assert pd.api.types.is_string_dtype(result["NAME"])
-	assert result["YEAR"].dtype == "int64"
+	assert pd.api.types.is_integer_dtype(result["YEAR"])
 
 
 def test_federal_parse_dates_valid() -> None:

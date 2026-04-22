@@ -1187,6 +1187,7 @@ class TestDateManipulation:
 		[
 			("25/12/2023", "DD/MM/YYYY", date(2023, 12, 25)),
 			("2023-12-25", "YYYY-MM-DD", date(2023, 12, 25)),
+			("2023-12-25T00:00:00", "YYYY-MM-DDTHH:MM:SS", date(2023, 12, 25)),
 			("231225", "YYMMDD", date(2023, 12, 25)),
 			("251223", "DDMMYY", date(2023, 12, 25)),
 			("25122023", "DDMMYYYY", date(2023, 12, 25)),

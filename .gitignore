@@ -179,4 +179,9 @@ pyrightconfig.json
 ### Precommit Recipes ###
 .url_check_cache
 
+# claude
+claude_login_*.log
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
 # End of https://www.toptal.com/developers/gitignore/api/python

@@ -550,7 +550,7 @@ def test_backup_valid(
 	mocker.patch("subprocess.run")
 	db = OracleDB(**valid_db_params)
 	result = db.backup("/backups")
-	assert result.startswith("Backup successful! File saved at: /backups/orcl_backup.dmp")
+	assert result.startswith("Backup successful! File saved at: ") and "orcl_backup.dmp" in result
 
 
 def test_backup_tool_unavailable(

@@ -508,6 +508,6 @@ def test_standardize_dataframe_types(
 		url=bmf_instance.url,
 		list_cols_drop_dupl=["DIAS_CORRIDOS"],
 	)
-	assert result["DIAS_CORRIDOS"].dtype == "int"
-	assert result["DI_PRE_252"].dtype == "float"
-	assert result["DI_PRE_360"].dtype == "float"
+	assert pd.api.types.is_integer_dtype(result["DIAS_CORRIDOS"])
+	assert pd.api.types.is_float_dtype(result["DI_PRE_252"])
+	assert pd.api.types.is_float_dtype(result["DI_PRE_360"])

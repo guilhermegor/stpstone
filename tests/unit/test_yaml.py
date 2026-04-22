@@ -232,7 +232,7 @@ def test_special_characters(tmp_path: Path) -> None:
     special: "üñîçø∂é"
     emoji: "😊"
     """
-	special_path.write_text(special_content)
+	special_path.write_text(special_content, encoding="utf-8")
 
 	result = reading_yaml(str(special_path))
 

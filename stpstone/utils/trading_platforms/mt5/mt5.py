@@ -395,6 +395,9 @@ class MT5(metaclass=TypeChecker):
 			DataFrame containing ticks if successful, None otherwise.
 		"""
 		ticks = mt5.copy_ticks_from(symbol, date_ref, ticks_qty, type_ticks)
+		if ticks is None:
+			CreateLog().log_message(self.logger, "Ticks recebidos: 0", "info")
+			return None
 		ticks_frame = pd.DataFrame(ticks)
 
 		CreateLog().log_message(self.logger, f"Ticks recebidos: {ticks_frame.shape[0]}", "info")
@@ -491,11 +494,11 @@ class MT5(metaclass=TypeChecker):
 		items = None
 		for _ in range(n_times):
 			items = mt5.market_book_get(ticker)
-			CreateLog().log_message(self.logger, items, "info")
+			CreateLog().log_message(self.logger, str(items), "info")
 
 			if items:
 				for it in items:
-					CreateLog().log_message(self.logger, it._asdict(), "info")
+					CreateLog().log_message(self.logger, str(it._asdict()), "info")
 
 			time.sleep(5)
 
@@ -540,7 +543,7 @@ class MT5(metaclass=TypeChecker):
 			return None
 
 		CreateLog().log_message(self.logger, f"lasttick = {lasttick}", "info")
-		CreateLog().log_message(self.logger, f"Show symbol_info_tick({ticker})._asdict():")
+		CreateLog().log_message(self.logger, f"Show symbol_info_tick({ticker})._asdict():", "info")
 
 		symbol_info_tick_dict = lasttick._asdict()
 		for prop in symbol_info_tick_dict:
@@ -570,7 +573,7 @@ class MT5(metaclass=TypeChecker):
 			)
 			return None
 
-		CreateLog().log_message(self.logger, symbol_info, "info")
+		CreateLog().log_message(self.logger, str(symbol_info), "info")
 		CreateLog().log_message(
 			self.logger,
 			f"{ticker}: spread = {symbol_info.spread} digits = {symbol_info.digits}",

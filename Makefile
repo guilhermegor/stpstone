@@ -72,7 +72,7 @@ lint:
 # -------------------
 # PACKAGE MANAGEMENT
 # -------------------
-.PHONY: package_tree bump_version clean_builds install_dist_locally test_dist
+.PHONY: package_tree bump_version clean_builds install_dist_locally
 
 package_tree:
 	@poetry run python -c "import os; from stpstone.utils.parsers.folders import FoldersTree; \
@@ -93,9 +93,6 @@ install_dist_locally:
 	@poetry install
 	@poetry run python -c "from stpstone.utils.parsers.folders import FoldersTree; print(\"Package import works\")"
 	@poetry run python -c "import stpstone; print(stpstone.__version__)"
-
-test_dist:
-	@bash bin/test_dist.sh
 
 # -------------------
 # HELP
@@ -129,4 +126,3 @@ help:
 	@echo "  bump_version         - Bump package version"
 	@echo "  clean_builds         - Clean build artifacts"
 	@echo "  install_dist_locally - Install local distribution"
-	@echo "  test_dist            - Test distribution"

@@ -46,7 +46,6 @@ from unittest.mock import Mock
 
 import numpy as np
 import pandas as pd
-from psycopg.sql import Composable
 from pydantic_core import core_schema
 
 
@@ -505,7 +504,6 @@ class TypeChecker(type):
 			BufferedIOBase,
 			BytesIO,
 			SQLComposable,
-			Composable,
 		)
 
 		# process all methods in the class

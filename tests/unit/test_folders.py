@@ -217,7 +217,7 @@ class TestDirFilesManagement:
 		original_dir = dir_manager.get_curr_dir()
 
 		dir_manager.change_dir(temp_dir)
-		assert dir_manager.get_curr_dir() == temp_dir
+		assert os.path.realpath(dir_manager.get_curr_dir()) == os.path.realpath(temp_dir)
 
 		dir_manager.change_dir(original_dir)
 

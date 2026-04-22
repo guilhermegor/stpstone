@@ -103,14 +103,14 @@ class TestDealingWindows:
 
 		Verifies
 		--------
-		- Non-integer handles raise ValueError
+		- Non-integer handles raise TypeError (from TypeChecker metaclass)
 
 		Parameters
 		----------
 		dealing_windows : Any
 			Instance of DealingWindows from fixture
 		"""
-		with pytest.raises(ValueError, match="Window handle must be a positive integer"):
+		with pytest.raises(TypeError):
 			dealing_windows._validate_hwnd("not_an_int")
 
 	def test_validate_hwnd_invalid_value(
@@ -131,10 +131,10 @@ class TestDealingWindows:
 		with pytest.raises(ValueError, match="Window handle must be a positive integer"):
 			dealing_windows._validate_hwnd(0)
 
-	@patch("ctypes.windll.user32.IsWindowVisible", return_value=True)
-	@patch("ctypes.windll.user32.GetWindowTextLengthW", return_value=10)
-	@patch("ctypes.windll.user32.GetClassNameW")
-	@patch("ctypes.windll.user32.GetWindowTextW")
+	@patch("stpstone.utils.microsoft_apps.windows_os.IsWindowVisible", return_value=True)
+	@patch("stpstone.utils.microsoft_apps.windows_os.GetWindowTextLength", return_value=10)
+	@patch("stpstone.utils.microsoft_apps.windows_os.GetClassName")
+	@patch("stpstone.utils.microsoft_apps.windows_os.GetWindowText")
 	@patch("ctypes.windll.user32.IsIconic", return_value=False)
 	def test_foreach_window(
 		self,
@@ -182,7 +182,7 @@ class TestDealingWindows:
 		assert dealing_windows.titles[0][0] == 123
 		assert dealing_windows.titles[0][3] is False
 
-	@patch("ctypes.windll.user32.EnumWindows")
+	@patch("stpstone.utils.microsoft_apps.windows_os.EnumWindows")
 	def test_refresh_wins(
 		self,
 		mock_enum: Any,  # noqa ANN401: typing.Any not allowed
@@ -230,9 +230,11 @@ class TestDealingWindows:
 		mock_windows : Any
 			Mock window data from fixture
 		"""
-		dealing_windows.titles = mock_windows
-		assert dealing_windows.find_window("another") == 456
-		assert dealing_windows.find_window("FINAL") == 789
+		with patch.object(dealing_windows, "refresh_wins"):
+			dealing_windows.titles = mock_windows
+			assert dealing_windows.find_window("another") == 456
+			dealing_windows.titles = mock_windows
+			assert dealing_windows.find_window("FINAL") == 789
 
 	def test_find_window_failure(
 		self,
@@ -263,14 +265,14 @@ class TestDealingWindows:
 
 		Verifies
 		--------
-		- Non-string input raises ValueError
+		- Non-string input raises TypeError (from TypeChecker metaclass)
 
 		Parameters
 		----------
 		dealing_windows : Any
 			Instance of DealingWindows from fixture
 		"""
-		with pytest.raises(ValueError, match="Title substring must be a string"):
+		with pytest.raises(TypeError):
 			dealing_windows.find_window(123)
 
 	@patch("win32gui.PostMessage")

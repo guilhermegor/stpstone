@@ -835,6 +835,47 @@ run_pytest() {
     print_status "success" "pytest passed"
 }
 
+run_example() {
+    local module="$1"
+    local example_path="examples/${module}.py"
+
+    if [ ! -f "$example_path" ]; then
+        print_status "warning" "No example file found for ${module}, skipping example run"
+        return 0
+    fi
+
+    print_status "info" "Running example: ${example_path}"
+
+    if check_command_exists "poetry"; then
+        if poetry run python "$example_path"; then
+            print_status "success" "Example ran successfully: ${example_path}"
+            return 0
+        else
+            print_status "error" "Example failed: ${example_path}"
+            return 1
+        fi
+    elif check_command_exists "python"; then
+        if python "$example_path"; then
+            print_status "success" "Example ran successfully: ${example_path}"
+            return 0
+        else
+            print_status "error" "Example failed: ${example_path}"
+            return 1
+        fi
+    elif check_command_exists "py"; then
+        if py "$example_path"; then
+            print_status "success" "Example ran successfully: ${example_path}"
+            return 0
+        else
+            print_status "error" "Example failed: ${example_path}"
+            return 1
+        fi
+    else
+        print_status "error" "No Python interpreter found (tried: poetry run python, python, py)"
+        return 1
+    fi
+}
+
 main() {
     if [ -z "$1" ]; then
         print_status "error" "Usage: $0 <module_name>"
@@ -872,6 +913,9 @@ main() {
     else
         print_status "warning" "No test file found for ${module}, skipping test-related checks"
     fi
+
+    # run example file
+    run_example "$module" || return 1
 
     print_status "success" "=== All checks passed for ${module} ==="
 }

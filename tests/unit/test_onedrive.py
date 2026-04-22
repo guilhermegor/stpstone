@@ -43,7 +43,7 @@ def mock_dir_files_management() -> MagicMock:
 	MagicMock
 		Mocked DirFilesManagement class
 	"""
-	with patch("stpstone.transformations.onedrive.DirFilesManagement", autospec=True) as mock:
+	with patch("stpstone.utils.microsoft_apps.onedrive.DirFilesManagement", autospec=True) as mock:
 		yield mock
 
 

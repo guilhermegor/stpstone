@@ -3,6 +3,7 @@
 from collections.abc import Callable
 from datetime import date
 from io import StringIO
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, mock_open, patch
 
@@ -274,7 +275,7 @@ class TestB3InstrumentsFile:
 
 		instance = B3InstrumentsFile()
 
-		assert str(instance.temp_dir) == temp_path
+		assert Path(str(instance.temp_dir)) == Path(temp_path)
 		assert "pesquisapregao/download?filelist=IN" in instance.url
 		mock_fast_operations["tempfile_mkdtemp"].assert_called_once()
 
