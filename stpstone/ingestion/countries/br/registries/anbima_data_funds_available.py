@@ -421,9 +421,7 @@ class AnbimaDataFundsAvailable(ABCIngestionOperations):
 
 		return data
 
-	def parse_raw_file(
-		self, _: Union[Response, PlaywrightPage, SeleniumWebDriver]
-	) -> StringIO:
+	def parse_raw_file(self, _: Union[Response, PlaywrightPage, SeleniumWebDriver]) -> StringIO:
 		"""Parse the raw file content.
 
 		This method is kept for compatibility but not used in web scraping.
