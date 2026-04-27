@@ -168,7 +168,7 @@ class AnbimaDataFundsHistoric(ABCIngestionOperations):
 			return list_historic_data
 
 		with sync_playwright() as p:
-			browser = p.chromium.launch(headless=False)
+			browser = p.chromium.launch(headless=True)
 			page = browser.new_page()
 
 			self.cls_create_log.log_message(
