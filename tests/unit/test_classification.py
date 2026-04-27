@@ -6,6 +6,7 @@ with normal operations, edge cases, error conditions, and type validation.
 
 from pathlib import Path
 import tempfile
+from unittest.mock import MagicMock, patch
 
 import matplotlib
 
@@ -127,32 +128,47 @@ def temp_image_path(sample_image_data: NDArray[np.float64]) -> Path:
 # --------------------------
 # InputsClassification Tests
 # --------------------------
-def test_fetch_sklearn_database_default(inputs_class: InputsClassification) -> None:
+@patch("stpstone.analytics.quant.classification.fetch_openml")
+def test_fetch_sklearn_database_default(
+	mock_fetch_openml: MagicMock, inputs_class: InputsClassification
+) -> None:
 	"""Test fetching default sklearn database.
 
 	Parameters
 	----------
+	mock_fetch_openml : MagicMock
+		Mocked fetch_openml to avoid real network calls.
 	inputs_class : InputsClassification
 		InputsClassification instance
 	"""
+	mock_result = MagicMock()
+	mock_result.__contains__ = lambda self, key: key in ("data", "target")
+	mock_result.__iter__ = lambda self: iter(["data", "target"])
+	mock_fetch_openml.return_value = mock_result
 	result = inputs_class.fetch_sklearn_database()
-	assert isinstance(result, dict)
-	assert "data" in result
-	assert "target" in result
+	mock_fetch_openml.assert_called_once_with("mnist_784", version=1, as_frame=False)
+	assert result is mock_result
 
 
-def test_fetch_sklearn_database_custom(inputs_class: InputsClassification) -> None:
+@patch("stpstone.analytics.quant.classification.fetch_openml")
+def test_fetch_sklearn_database_custom(
+	mock_fetch_openml: MagicMock, inputs_class: InputsClassification
+) -> None:
 	"""Test fetching custom sklearn database.
 
 	Parameters
 	----------
+	mock_fetch_openml : MagicMock
+		Mocked fetch_openml to avoid real network calls.
 	inputs_class : InputsClassification
 		InputsClassification instance
 	"""
+	mock_result = MagicMock()
+	mock_result.__contains__ = lambda self, key: key in ("data", "target")
+	mock_fetch_openml.return_value = mock_result
 	result = inputs_class.fetch_sklearn_database(database_name="iris", version=1)
-	assert isinstance(result, dict)
-	assert "data" in result
-	assert "target" in result
+	mock_fetch_openml.assert_called_once_with("iris", version=1, as_frame=False)
+	assert result is mock_result
 
 
 def test_show_image_from_dataset(
