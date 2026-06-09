@@ -490,6 +490,7 @@ class CvmMonthlyReport:
 		list[str]
 			XML lines for stress-scenario and DV01-style sensitivity fields.
 		"""
+		# Per PadrãoXMLPerfil739 every sensitivity field uses two decimal places.
 		pairs: list[tuple[str, Optional[Decimal], int]] = [
 			(
 				"VAR_DIAR_PERC_COTA_FDO_PIOR_CEN_ESTRESS",
@@ -499,14 +500,14 @@ class CvmMonthlyReport:
 			(
 				"VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL",
 				row.var_diar_perc_patrim_fdo_var_n_taxa_anual,
-				4,
+				2,
 			),
 			(
 				"VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_CAMBIO",
 				row.var_diar_perc_patrim_fdo_var_n_taxa_cambio,
-				4,
+				2,
 			),
-			("VAR_PATRIM_FDO_N_PRECO_ACOES", row.var_patrim_fdo_n_preco_acoes, 4),
+			("VAR_PATRIM_FDO_N_PRECO_ACOES", row.var_patrim_fdo_n_preco_acoes, 2),
 		]
 		return [
 			f"{ind}    <{tag}>{self._fmt_decimal(val, places)}</{tag}>"
@@ -535,7 +536,7 @@ class CvmMonthlyReport:
 			f"{saxutils.escape(vo.fator_risco_outros[:400])}"
 			f"</FATOR_RISCO_OUTROS>",
 			f"{ind}        <VAL_PERCENT_OUTROS>"
-			f"{self._fmt_decimal(vo.val_percent_outros, 4)}"
+			f"{self._fmt_decimal(vo.val_percent_outros, 2)}"
 			f"</VAL_PERCENT_OUTROS>",
 			f"{ind}    </VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS>",
 		]
