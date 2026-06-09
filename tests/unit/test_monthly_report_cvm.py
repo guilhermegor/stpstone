@@ -975,3 +975,122 @@ def test_to_xml_includes_otc_block(
 	assert "<LISTA_OPER_CURS_MERC_BALCAO>" in xml
 	assert "<TP_PESSOA>PJ</TP_PESSOA>" in xml
 	assert "<VALOR_PARTE>10,5</VALOR_PARTE>" in xml
+
+
+# --------------------------
+# Tests — decimal scale pinning (PadrãoXMLPerfil739)
+# --------------------------
+
+
+def test_val_cota_fundo_truncates_to_five_places() -> None:
+	"""Verify VAL_COTA_FUNDO truncates excess precision down to 5 decimal places.
+
+	Returns
+	-------
+	None
+		No return value.
+	"""
+	pfd = PerformanceFeeDetails(data_cota_fundo="01/04/2025", val_cota_fundo=Decimal("1.9999999"))
+	assert pfd.val_cota_fundo == Decimal("1.99999")
+
+
+def test_two_decimal_field_truncates_toward_zero(minimal_client_count: ClientCount) -> None:
+	"""Verify a 2-decimal-place field truncates toward zero, never rounding up.
+
+	Parameters
+	----------
+	minimal_client_count : ClientCount
+		Fixture providing a minimal ClientCount instance.
+
+	Returns
+	-------
+	None
+		No return value.
+	"""
+	row = PerfilMensalRow(
+		cnpj_fdo="12345678000195",
+		nr_client=minimal_client_count,
+		total_recurs_exter=Decimal("10.999"),
+		total_recurs_br=Decimal("0"),
+		tot_ativos_p_relac=Decimal("0"),
+		tot_ativos_cred_priv=Decimal("0"),
+	)
+	assert row.total_recurs_exter == Decimal("10.99")
+
+
+def test_var_perc_pl_rejects_excess_digits(minimal_client_count: ClientCount) -> None:
+	"""Verify VAR_PERC_PL rejects values exceeding 14 significant digits (max_digits=14).
+
+	Parameters
+	----------
+	minimal_client_count : ClientCount
+		Fixture providing a minimal ClientCount instance.
+
+	Returns
+	-------
+	None
+		No return value.
+	"""
+	with pytest.raises(ValidationError):
+		PerfilMensalRow(
+			cnpj_fdo="12345678000195",
+			nr_client=minimal_client_count,
+			total_recurs_exter=Decimal("0"),
+			total_recurs_br=Decimal("0"),
+			tot_ativos_p_relac=Decimal("0"),
+			tot_ativos_cred_priv=Decimal("0"),
+			var_perc_pl=Decimal("123456789012345"),
+		)
+
+
+def test_percent_field_truncates_then_caps_at_100() -> None:
+	"""Verify PR_* fields truncate (round down) to 1 decimal place before the 100 cap.
+
+	Returns
+	-------
+	None
+		No return value.
+	"""
+	dp = PatrimonyDistribution(pr_pf_priv_bank=Decimal("12.349"))
+	assert dp.pr_pf_priv_bank == Decimal("12.3")
+	# Truncation runs before the cap, so 100.05 rounds down to 100.0 and is accepted.
+	capped = PatrimonyDistribution(pr_pf_priv_bank=Decimal("100.05"))
+	assert capped.pr_pf_priv_bank == Decimal("100.0")
+	# A value still above 100 after truncation is rejected.
+	with pytest.raises(ValidationError):
+		PatrimonyDistribution(pr_pf_priv_bank=Decimal("100.6"))
+
+
+def test_to_xml_var_diar_uses_two_decimals(
+	reporter: CvmMonthlyReport,
+	minimal_client_count: ClientCount,
+	minimal_header: DocumentHeader,
+) -> None:
+	"""Verify VAR_DIAR_* sensitivity fields serialize with 2 decimals per Perfil739.
+
+	Parameters
+	----------
+	reporter : CvmMonthlyReport
+		CvmMonthlyReport instance under test.
+	minimal_client_count : ClientCount
+		Fixture providing a minimal ClientCount instance.
+	minimal_header : DocumentHeader
+		Fixture providing a minimal DocumentHeader instance.
+
+	Returns
+	-------
+	None
+		No return value.
+	"""
+	row = PerfilMensalRow(
+		cnpj_fdo="12345678000195",
+		nr_client=minimal_client_count,
+		total_recurs_exter=Decimal("0"),
+		total_recurs_br=Decimal("0"),
+		tot_ativos_p_relac=Decimal("0"),
+		tot_ativos_cred_priv=Decimal("0"),
+		var_diar_perc_patrim_fdo_var_n_taxa_anual=Decimal("1.23"),
+	)
+	xml = reporter.to_xml(PerfilMensalDocument(header=minimal_header, rows=[row]))
+	tag = "VAR_DIAR_PERC_PATRIM_FDO_VAR_N_TAXA_ANUAL"
+	assert f"<{tag}>1,23</{tag}>" in xml

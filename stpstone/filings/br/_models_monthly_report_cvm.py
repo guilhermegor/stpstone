@@ -1,13 +1,98 @@
-"""Pydantic models for the CVM Monthly Profile (Perfil Mensal) regulatory report."""
+"""Pydantic models for the CVM Monthly Profile (Perfil Mensal) regulatory report.
 
-from decimal import Decimal
+Per-field decimal scales mirror the CVM XML standard ``PadrãoXMLPerfil739``
+(https://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/PadroesXML/PadraoXMLPerfil739.asp).
+Values carrying more decimal places than the standard permits are truncated
+toward zero (``ROUND_DOWN``) instead of rounded, so a reported value is never
+inflated past what the standard allows.
+"""
+
+from collections.abc import Callable
+from decimal import ROUND_DOWN, Decimal, InvalidOperation
 import re
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Literal, Optional, Union
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, BeforeValidator, Field, field_validator
 
 
-PercentField = Annotated[Decimal, Field(ge=Decimal("0"), le=Decimal("100"))]
+# Raw values a decimal before-validator may receive, before coercion to Decimal.
+DecimalInput = Union[Decimal, str, int, float, None]
+
+
+def _truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Optional[Decimal]]:
+	"""Build a before-validator that truncates a value to ``decimal_places`` (ROUND_DOWN).
+
+	Truncation (never rounding) is used so a value is never inflated past the scale
+	the CVM standard permits; any excess precision is discarded toward zero.
+
+	Parameters
+	----------
+	decimal_places : int
+		Number of decimal places mandated by ``PadrãoXMLPerfil739`` for the field.
+
+	Returns
+	-------
+	Callable[[Any], Optional[Decimal]]
+		A validator callable returning the truncated ``Decimal`` (or ``None``).
+	"""
+	quantum = Decimal(1).scaleb(-decimal_places)
+
+	def _truncate(value: DecimalInput) -> Optional[Decimal]:
+		"""Truncate a single incoming value to the bound scale.
+
+		Parameters
+		----------
+		value : DecimalInput
+			Raw value from XML parsing, CSV reload, or direct construction.
+
+		Returns
+		-------
+		Optional[Decimal]
+			Truncated value, or ``None`` when the input is ``None``.
+
+		Raises
+		------
+		ValueError
+			If the value cannot be interpreted as a decimal number.
+		"""
+		if value is None:
+			return None
+		try:
+			as_decimal = value if isinstance(value, Decimal) else Decimal(str(value))
+		except (InvalidOperation, ValueError) as exc:
+			raise ValueError(f"invalid decimal value: {value!r}") from exc
+		return as_decimal.quantize(quantum, rounding=ROUND_DOWN)
+
+	return _truncate
+
+
+# Decimal field types with the scale pinned to PadrãoXMLPerfil739.
+# Fields where the standard states only the number of decimal places.
+OneDecimalField = Annotated[
+	Decimal, BeforeValidator(_truncate_to_scale(1)), Field(decimal_places=1)
+]
+TwoDecimalField = Annotated[
+	Decimal, BeforeValidator(_truncate_to_scale(2)), Field(decimal_places=2)
+]
+FiveDecimalField = Annotated[
+	Decimal, BeforeValidator(_truncate_to_scale(5)), Field(decimal_places=5)
+]
+
+# Fields where the standard also bounds the integer-digit count.
+# VAR_PERC_PL: "valor com até 10 casas inteiras e 4 decimais".
+VarPercentPlField = Annotated[
+	Decimal, BeforeValidator(_truncate_to_scale(4)), Field(max_digits=14, decimal_places=4)
+]
+# PRAZ_MED_CART_TIT: "valor com até 4 casas inteiras e 4 decimais".
+AvgTermField = Annotated[
+	Decimal, BeforeValidator(_truncate_to_scale(4)), Field(max_digits=8, decimal_places=4)
+]
+# PR_* patrimony distribution: "até 3 casas inteiras e 1 decimal. Valor máximo 100".
+PercentField = Annotated[
+	Decimal,
+	BeforeValidator(_truncate_to_scale(1)),
+	Field(ge=Decimal("0"), le=Decimal("100"), max_digits=4, decimal_places=1),
+]
 
 
 class DocumentHeader(BaseModel):
@@ -119,7 +204,7 @@ class PrimitiveRiskFactor(BaseModel):
 class VarPercValCota(BaseModel):
 	"""VARIACAO_PERC_VAL_COTA - stress scenario block with primitive risk factors."""
 
-	val_percent: Decimal
+	val_percent: TwoDecimalField
 	lista_fator_primit_risco: list[PrimitiveRiskFactor] = Field(max_length=5)
 
 
@@ -127,7 +212,7 @@ class VarOutros(BaseModel):
 	"""VARIACAO_DIAR_PERC_PATRIM_FDO_VAR_N_OUTROS - sensitivity to a non-standard risk factor."""
 
 	fator_risco_outros: str = Field(max_length=400)
-	val_percent_outros: Decimal
+	val_percent_outros: TwoDecimalField
 
 
 class NominalRiskFactor(BaseModel):
@@ -141,7 +226,7 @@ class NominalRiskFactor(BaseModel):
 class NominalRiskBlock(BaseModel):
 	"""VALOR_NOC_TOT_CONTRAT_DERIV_MANT_FDO - OTC derivatives notional exposure block."""
 
-	val_colateral: Decimal
+	val_colateral: TwoDecimalField
 	lista_fator_risco_noc: list[NominalRiskFactor] = Field(max_length=5)
 
 
@@ -151,7 +236,7 @@ class OtcOperation(BaseModel):
 	tp_pessoa: Literal["PF", "PJ"]
 	nr_pf_pj_comitente: str
 	parte_relacionada: Literal["S", "N"]
-	valor_parte: Decimal
+	valor_parte: OneDecimalField
 
 	@field_validator("nr_pf_pj_comitente")
 	@classmethod
@@ -186,7 +271,7 @@ class PrivateCreditIssuer(BaseModel):
 	tp_pessoa_emissor: Literal["PF", "PJ"]
 	nr_pf_pj_emissor: str
 	parte_relacionada: Literal["S", "N"]
-	valor_parte: Decimal
+	valor_parte: OneDecimalField
 
 	@field_validator("nr_pf_pj_emissor")
 	@classmethod
@@ -219,7 +304,7 @@ class PerformanceFeeDetails(BaseModel):
 	"""RESP_VED_REGUL_COBR_TAXA_PERFORM - date and NAV of the last performance fee charge."""
 
 	data_cota_fundo: str
-	val_cota_fundo: Decimal
+	val_cota_fundo: FiveDecimalField
 
 	@field_validator("data_cota_fundo")
 	@classmethod
@@ -254,28 +339,30 @@ class PerfilMensalRow(BaseModel):
 	distr_patrim: Optional[PatrimonyDistribution] = None
 	resm_teor_vt_profrd: Optional[str] = Field(default=None, max_length=4000)
 	just_sum_vt_profrd: Optional[str] = Field(default=None, max_length=4000)
-	var_perc_pl: Optional[Decimal] = None
+	var_perc_pl: Optional[VarPercentPlField] = None
 	mod_var_utiliz: Optional[Literal["1", "2", "3"]] = None
-	praz_med_cart_tit: Optional[Decimal] = None
+	praz_med_cart_tit: Optional[AvgTermField] = None
 	res_delib: Optional[str] = Field(default=None, max_length=4000)
-	total_recurs_exter: Decimal
-	total_recurs_br: Decimal
+	total_recurs_exter: TwoDecimalField
+	total_recurs_br: TwoDecimalField
 	variacao_perc_val_cota: Optional[VarPercValCota] = None
-	var_diar_perc_cota_fdo_pior_cen_estress: Optional[Decimal] = None
-	var_diar_perc_patrim_fdo_var_n_taxa_anual: Optional[Decimal] = None
-	var_diar_perc_patrim_fdo_var_n_taxa_cambio: Optional[Decimal] = None
-	var_patrim_fdo_n_preco_acoes: Optional[Decimal] = None
+	var_diar_perc_cota_fdo_pior_cen_estress: Optional[TwoDecimalField] = None
+	var_diar_perc_patrim_fdo_var_n_taxa_anual: Optional[TwoDecimalField] = None
+	var_diar_perc_patrim_fdo_var_n_taxa_cambio: Optional[TwoDecimalField] = None
+	var_patrim_fdo_n_preco_acoes: Optional[TwoDecimalField] = None
 	variacao_diar_perc_patrim_fdo_var_n_outros: Optional[VarOutros] = None
 	valor_noc_tot_contrat_deriv_mant_fdo: Optional[NominalRiskBlock] = None
 	lista_oper_curs_merc_balcao: Optional[list[OtcOperation]] = Field(default=None, max_length=3)
-	tot_ativos_p_relac: Decimal
+	tot_ativos_p_relac: OneDecimalField
 	lista_emissores_tit_cred_priv: Optional[list[PrivateCreditIssuer]] = Field(
 		default=None, max_length=3
 	)
-	tot_ativos_cred_priv: Decimal
+	tot_ativos_cred_priv: OneDecimalField
 	ved_regul_cobr_taxa_perform: Optional[Literal["S", "N"]] = None
 	resp_ved_regul_cobr_taxa_perform: Optional[PerformanceFeeDetails] = None
-	montante_distrib: Optional[Decimal] = None
+	# MONTANTE_DISTRIB is absent from PadrãoXMLPerfil739; 2dp is inferred from its
+	# monetary nature and the serializer default, pending confirmation against the spec.
+	montante_distrib: Optional[TwoDecimalField] = None
 	inf_compl_perfil: Optional[str] = Field(default=None, max_length=500)
 
 	@field_validator("cnpj_fdo")
