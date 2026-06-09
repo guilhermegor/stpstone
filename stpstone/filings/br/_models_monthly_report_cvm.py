@@ -32,8 +32,14 @@ def _truncate_to_scale(decimal_places: int) -> Callable[[DecimalInput], Optional
 
 	Returns
 	-------
-	Callable[[Any], Optional[Decimal]]
+	Callable[[DecimalInput], Optional[Decimal]]
 		A validator callable returning the truncated ``Decimal`` (or ``None``).
+
+	Raises
+	------
+	ValueError
+		Raised by the returned validator when a value cannot be interpreted as a
+		decimal number.
 	"""
 	quantum = Decimal(1).scaleb(-decimal_places)
 
