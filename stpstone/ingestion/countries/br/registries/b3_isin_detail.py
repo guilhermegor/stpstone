@@ -148,8 +148,8 @@ def decode_isin_country(isin: str) -> tuple[str, str]:
 def decode_cfi(cfi: Optional[str]) -> ReturnDecodeCFI:
 	"""Decode an ISO 10962 CFI code into category/group labels + raw attributes.
 
-	Degrades gracefully: a missing or malformed cfi yields "UNKNOWN" labels and
-	never raises (enrichment must not break ingestion).
+	Degrades gracefully — a missing or malformed code yields "UNKNOWN" labels
+	and never raises, so enrichment never breaks ingestion.
 
 	Parameters
 	----------
