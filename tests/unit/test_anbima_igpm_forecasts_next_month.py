@@ -40,7 +40,7 @@ def mock_logger(mocker: MockerFixture) -> Logger:
 	Logger
 		Mocked logger object.
 	"""
-	return mocker.patch("logging.Logger")
+	return mocker.MagicMock(spec=Logger)
 
 
 @pytest.fixture
