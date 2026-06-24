@@ -315,9 +315,36 @@ def test_get_response_success(
 	response.json.return_value = sample_record
 	response.raise_for_status = MagicMock()
 	mock_get = mocker.patch("requests.get", return_value=response)
+	mock_sleep = mocker.patch("time.sleep")
 	result = instance.get_response()
 	assert len(result) == 3
 	assert mock_get.call_count == 3
+	assert mock_sleep.call_count == 2
+	mock_sleep.assert_called_with(2)
+
+
+def test_get_response_custom_seconds_between_requests(
+	sample_record: dict, mocker: MockerFixture
+) -> None:
+	"""get_response honors a custom int_seconds_between_requests.
+
+	Parameters
+	----------
+	sample_record : dict
+		Sample JSON record fixture.
+	mocker : MockerFixture
+		Pytest-mock fixture.
+	"""
+	cls_ = B3IsinDetail(
+		list_isins=["BRBCXPC00294", "BRBCXPC00906"], int_seconds_between_requests=5
+	)
+	response = MagicMock(spec=Response)
+	response.json.return_value = sample_record
+	response.raise_for_status = MagicMock()
+	mocker.patch("requests.get", return_value=response)
+	mock_sleep = mocker.patch("time.sleep")
+	cls_.get_response()
+	mock_sleep.assert_called_once_with(5)
 
 
 def test_get_response_http_error_raises(mocker: MockerFixture) -> None:
@@ -361,6 +388,7 @@ def test_run_returns_dataframe_without_db(
 	response.json.return_value = sample_record
 	response.raise_for_status = MagicMock()
 	mocker.patch("requests.get", return_value=response)
+	mocker.patch("time.sleep")
 	df_ = instance.run()
 	assert isinstance(df_, pd.DataFrame)
 	assert len(df_) == 3

@@ -4,6 +4,7 @@ import base64
 from decimal import ROUND_DOWN, Decimal
 import json
 from logging import Logger
+import time
 from typing import Optional, TypedDict, Union
 
 import backoff
@@ -257,6 +258,7 @@ class B3IsinDetail(ABCIngestionOperations):
 		list_isins: Optional[list[str]] = None,
 		logger: Optional[Logger] = None,
 		cls_db: Optional[Session] = None,
+		int_seconds_between_requests: int = 2,
 	) -> None:
 		"""Initialize the B3 ISIN detail ingestion class.
 
@@ -268,6 +270,8 @@ class B3IsinDetail(ABCIngestionOperations):
 			The logger, by default None.
 		cls_db : Optional[Session]
 			The database session, by default None.
+		int_seconds_between_requests : int
+			Pause in seconds between sequential per-ISIN requests, by default 2.
 
 		Returns
 		-------
@@ -283,6 +287,7 @@ class B3IsinDetail(ABCIngestionOperations):
 		self.cls_dates_current = DatesCurrent()
 		self.cls_create_log = CreateLog()
 		self.cls_dates_br = DatesBRAnbima()
+		self.int_seconds_between_requests = int_seconds_between_requests
 		self.list_isins = list_isins or []
 		self._validate_isins()
 		self.list_urls = [BASE_URL + isin_to_token(str_isin) for str_isin in self.list_isins]
@@ -397,13 +402,16 @@ class B3IsinDetail(ABCIngestionOperations):
 		else:
 			return df_
 
-	@backoff.on_exception(backoff.expo, requests.exceptions.HTTPError, max_time=60)
 	def get_response(
 		self,
 		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
 		bool_verify: bool = True,
 	) -> list[Response]:
 		"""Return one response object per queried ISIN.
+
+		Requests are issued sequentially with a fixed pause between them to avoid
+		hammering the endpoint; each individual request is retried via backoff in
+		`_fetch_one`.
 
 		Parameters
 		----------
@@ -417,6 +425,36 @@ class B3IsinDetail(ABCIngestionOperations):
 		list[Response]
 			One response object per ISIN URL.
 		"""
+		list_resp = []
+		for int_idx, str_url in enumerate(self.list_urls):
+			if int_idx > 0:
+				time.sleep(self.int_seconds_between_requests)
+			list_resp.append(self._fetch_one(str_url, timeout=timeout, bool_verify=bool_verify))
+		return list_resp
+
+	@backoff.on_exception(backoff.expo, requests.exceptions.HTTPError, max_time=60)
+	def _fetch_one(
+		self,
+		str_url: str,
+		timeout: Optional[Union[int, float, tuple[float, float], tuple[int, int]]] = (12.0, 21.0),
+		bool_verify: bool = True,
+	) -> Response:
+		"""Fetch a single ISIN detail URL, retrying on HTTP errors.
+
+		Parameters
+		----------
+		str_url : str
+			The fully-built GetDetail URL for one ISIN.
+		timeout : Optional[Union[int, float, tuple[float, float], tuple[int, int]]]
+			The timeout, by default (12.0, 21.0).
+		bool_verify : bool
+			Verify the SSL certificate, by default True.
+
+		Returns
+		-------
+		Response
+			The response object for the requested URL.
+		"""
 		dict_headers = {
 			"accept": "application/json, text/plain, */*",
 			"referer": "https://sistemaswebb3-listados.b3.com.br/",
@@ -425,14 +463,9 @@ class B3IsinDetail(ABCIngestionOperations):
 				"(KHTML, like Gecko) Chrome/149.0.0.0 Mobile Safari/537.36"
 			),
 		}
-		list_resp = []
-		for str_url in self.list_urls:
-			resp_req = requests.get(
-				str_url, headers=dict_headers, timeout=timeout, verify=bool_verify
-			)
-			resp_req.raise_for_status()
-			list_resp.append(resp_req)
-		return list_resp
+		resp_req = requests.get(str_url, headers=dict_headers, timeout=timeout, verify=bool_verify)
+		resp_req.raise_for_status()
+		return resp_req
 
 	def parse_raw_file(self, list_resp: list[Response]) -> list[dict]:
 		"""Parse each response body into its JSON record.
