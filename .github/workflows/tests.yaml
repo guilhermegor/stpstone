@@ -56,29 +56,15 @@ jobs:
       - name: Install Dependencies
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: |
-          cp pyproject.toml pyproject.original.toml
-          cat pyproject.original.toml | python -c '
-          import sys, re, os as _os
-          content = sys.stdin.read()
-          if _os.name != "nt":
-              content = re.sub(r".*platform\s*=\s*\"win32\".*", "", content)
-              content = re.sub(r"pywin32\s*=.*\n", "", content)
-          print(content)
-          ' > pyproject.toml
-
-          # Regenerate lock file, if needed
-          if ! poetry check --lock; then
-            echo "Lock file is outdated, regenerating..."
-            rm -f poetry.lock
-            poetry lock --no-cache
-          fi
-
-          echo "No groups to exclude, installing all dependencies"
+          # Install from the committed, tested poetry.lock so every run uses the
+          # exact pinned dependency set (reproducible builds). Platform markers
+          # (e.g. pywin32's `platform = "win32"`) make Poetry skip win32-only
+          # packages off Windows automatically, so no pyproject stripping or lock
+          # regeneration is needed. Regenerating the lock here would silently
+          # resolve every dependency to its latest release, so an unrelated
+          # upstream release could break unchanged code with no commit to this
+          # repo.
           poetry install --no-interaction --no-root
-
-          # Restore original pyproject.toml
-          mv pyproject.original.toml pyproject.toml
-          poetry env activate
 
       - name: Run Spell Check (codespell)
         if: runner.os == 'Linux'
