@@ -404,6 +404,31 @@ def test_get_response_wrong_type_raises(instance: B3IsinDetail) -> None:
 		instance.get_response(bool_verify="yes")
 
 
+def test_run_missing_optional_fields_no_spurious_bool(mocker: MockerFixture) -> None:
+	"""Absent boolean fields standardize to the sentinel, never spurious True.
+
+	Parameters
+	----------
+	mocker : MockerFixture
+		Pytest-mock fixture for patching network I/O.
+	"""
+	record = {
+		"isin": "BRBCXPC00294",
+		"cfi": "ESVUFR",
+		"emissor": {"id": 1, "codigo": "X"},
+	}
+	cls_ = B3IsinDetail(list_isins=["BRBCXPC00294"])
+	response = MagicMock(spec=Response)
+	response.json.return_value = record
+	response.raise_for_status = MagicMock()
+	mocker.patch("requests.get", return_value=response)
+	df_ = cls_.run()
+	for col_ in ["EMISSOR_SITUACAO_ATIVA", "SITUACAO_ATIVA", "PATROCINADO"]:
+		val = df_[col_].iloc[0]
+		assert val is not True
+		assert isinstance(val, str)
+
+
 def test_module_reload() -> None:
 	"""The module reloads cleanly (no import-time side effects)."""
 	importlib.reload(b3_isin_detail)
