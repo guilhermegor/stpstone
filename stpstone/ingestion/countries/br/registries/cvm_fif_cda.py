@@ -20,6 +20,7 @@ from stpstone.ingestion.abc.ingestion_abc import (
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.cvm_csv import read_cvm_csv
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -347,7 +348,7 @@ class CvmFIFCDA(ABCIngestionOperations):
 
 		for file_io, filename in files_list:
 			try:
-				df_temp = pd.read_csv(file_io, sep=";")
+				df_temp = read_cvm_csv(file_io)
 				df_temp["FILE_NAME"] = filename
 				dataframes.append(df_temp)
 				total_rows += len(df_temp)

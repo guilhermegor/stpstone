@@ -20,6 +20,7 @@ from stpstone.ingestion.abc.ingestion_abc import (
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.cvm_csv import read_cvm_csv
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -266,7 +267,7 @@ class CvmFIFDailyInfos(ABCIngestionOperations):
 			"info",
 		)
 
-		df_ = pd.read_csv(file, sep=";")
+		df_ = read_cvm_csv(file)
 
 		self.cls_create_log.log_message(
 			self.logger,

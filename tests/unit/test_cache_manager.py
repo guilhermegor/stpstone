@@ -593,8 +593,8 @@ def test_load_cache_invalid_file(
 
 	Verifies
 	--------
-	- Invalid file raises ValueError
-	- File is deleted
+	- An unreadable cache file is treated as a miss (returns None), not a crash
+	- The unreadable file is discarded
 
 	Parameters
 	----------
@@ -611,8 +611,8 @@ def test_load_cache_invalid_file(
 	with open(cache_file, "wb") as f:
 		f.write(b"invalid pickle data")
 
-	with pytest.raises(ValueError, match="Failed to load pickle file"):
-		cache_manager_custom._load_cache("test_key")
+	assert cache_manager_custom._load_cache("test_key") is None
+	assert not cache_file.exists()
 
 
 # --------------------------

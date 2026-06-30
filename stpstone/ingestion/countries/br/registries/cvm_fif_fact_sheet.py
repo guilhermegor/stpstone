@@ -20,6 +20,7 @@ from stpstone.ingestion.abc.ingestion_abc import (
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.cvm_csv import read_cvm_csv
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -412,29 +413,7 @@ class CvmFIFFactSheet(ABCIngestionOperations):
 			"info",
 		)
 
-		try:
-			df_ = pd.read_csv(file, sep=";")
-		except pd.errors.ParserError as e:
-			self.cls_create_log.log_message(
-				self.logger,
-				f"Parser error encountered: {str(e)}. Trying with error handling.",
-				"warning",
-			)
-			file.seek(0)
-			try:
-				df_ = pd.read_csv(file, sep=";", on_bad_lines="skip")
-				self.cls_create_log.log_message(
-					self.logger,
-					"Successfully loaded CSV with error handling (skipping bad lines)",
-					"info",
-				)
-			except Exception as exc:
-				self.cls_create_log.log_message(
-					self.logger,
-					f"Failed to load CSV even with error handling: {str(exc)}",
-					"error",
-				)
-				raise
+		df_ = read_cvm_csv(file)
 
 		self.cls_create_log.log_message(
 			self.logger,
