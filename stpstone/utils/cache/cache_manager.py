@@ -361,12 +361,8 @@ class CacheManager(metaclass=TypeChecker):
 		Returns
 		-------
 		Optional[pd.DataFrame]
-			DataFrame loaded from the cache file
-
-		Raises
-		------
-		ValueError
-			If there is an error loading the cache
+			DataFrame loaded from the cache file, or None on a cache miss or an
+			unreadable cache file
 		"""
 		if self.bool_reuse_cache:
 			df_cached = self._cache.get(key)
@@ -386,11 +382,13 @@ class CacheManager(metaclass=TypeChecker):
 						return df_
 				else:
 					path_cache_file.unlink()
-			except (pickle.PickleError, EOFError, FileNotFoundError) as err:
+			except (pickle.PickleError, EOFError, FileNotFoundError, ValueError, TypeError) as err:
+				self.cls_create_log.log_message(
+					self.logger,
+					f"Discarding unreadable cache file {path_cache_file}: {err}",
+					"warning",
+				)
 				path_cache_file.unlink(missing_ok=True)
-				raise ValueError(
-					f"Warning: Failed to load cache from {path_cache_file}: {err}"
-				) from err
 
 		return None
 
