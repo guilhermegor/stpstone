@@ -493,6 +493,49 @@ def test_transform_data_empty_file(cvm_instance: CvmFundsMonthlyProfile) -> None
 	assert df_.empty
 
 
+def test_transform_data_unescaped_quote_in_source(
+	cvm_instance: CvmFundsMonthlyProfile,
+) -> None:
+	"""Test transform_data on a CVM file with an unescaped quote.
+
+	Reproduces the JIVE row (CNPJ 44.674.282/0001-88) from the official
+	perfil_mensal_fi_202605.csv, whose free-text DELIB_ASSEMB field starts
+	with an unescaped double quote. With pandas' default quoting that stray
+	quote wraps the following ``;``-separated rows into one field, silently
+	dropping funds and shifting risk-factor names into the numeric
+	PRAZO_CARTEIRA_TITULO column.
+
+	Verifies
+	--------
+	- The read does not raise.
+	- No fund is swallowed (all three rows survive).
+	- PRAZO_CARTEIRA_TITULO is fully numeric.
+	- The malformed fund parses to its real value; "IPCA" never lands in it.
+
+	Parameters
+	----------
+	cvm_instance : CvmFundsMonthlyProfile
+		Instance of CvmFundsMonthlyProfile.
+
+	Returns
+	-------
+	None
+	"""
+	content = (
+		"CNPJ_FUNDO_CLASSE;PRAZO_CARTEIRA_TITULO;NOME_FATOR_PRIMIT_RISCO;DELIB_ASSEMB\n"
+		"00.000.000/0001-00;10.5;CDI;regular deliberation text\n"
+		'44.674.282/0001-88;12.17;IPCA;"04.05.2026 - os cotistas APROVARAM algo\n'
+		'11.111.111/0001-11;20.0;SELIC;ordinary text that closes the quote"\n'
+	)
+	df_ = cvm_instance.transform_data(StringIO(content))
+	assert len(df_) == 3
+	prazo = pd.to_numeric(df_["PRAZO_CARTEIRA_TITULO"], errors="coerce")
+	assert prazo.notna().all()
+	assert "IPCA" not in df_["PRAZO_CARTEIRA_TITULO"].astype(str).tolist()
+	jive = df_.loc[df_["CNPJ_FUNDO_CLASSE"] == "44.674.282/0001-88", "PRAZO_CARTEIRA_TITULO"]
+	assert float(jive.iloc[0]) == 12.17
+
+
 def test_reload_module() -> None:
 	"""Test module reloading behavior.
 
