@@ -1,6 +1,5 @@
 """CVM Funds Monthly Profile ingestion module."""
 
-import csv
 from datetime import date, timedelta
 from io import StringIO
 from logging import Logger
@@ -21,6 +20,7 @@ from stpstone.ingestion.abc.ingestion_abc import (
 from stpstone.utils.calendars.calendar_abc import DatesCurrent
 from stpstone.utils.calendars.calendar_br import DatesBRAnbima
 from stpstone.utils.loggs.create_logs import CreateLog
+from stpstone.utils.parsers.cvm_csv import read_cvm_csv
 from stpstone.utils.parsers.folders import DirFilesManagement
 
 
@@ -294,11 +294,7 @@ class CvmFundsMonthlyProfile(ABCIngestionOperations):
 		pd.DataFrame
 			The transformed DataFrame.
 		"""
-		# CVM open data never wraps fields in double quotes, so QUOTE_NONE keeps a
-		# stray unescaped double quote in a free-text field as literal text rather
-		# than a field wrapper. Default quoting would otherwise swallow rows and
-		# shift risk-factor names into numeric columns.
 		try:
-			return pd.read_csv(file, sep=";", encoding="latin-1", quoting=csv.QUOTE_NONE)
+			return read_cvm_csv(file, encoding="latin-1")
 		except pd.errors.EmptyDataError:
 			return pd.DataFrame()
