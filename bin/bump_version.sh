@@ -100,10 +100,11 @@ main() {
     if ! update_init_version "$new_version"; then
         exit 1
     fi
-    
-    print_status "info" "Updating dependencies..."
-    poetry update
-    
+
+    # Intentionally no `poetry update` here: a version bump must not re-resolve
+    # dependencies. The CI venv cache keys on pyproject.toml, so bumping forces a
+    # fresh install — re-resolving the lock at bump time silently ships dependency
+    # changes (and broke the test suite on a release bump). Update deps separately.
     print_status "success" "Version update complete!"
 }
 
